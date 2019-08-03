@@ -1,0 +1,15 @@
+description = "Spring JMS"
+
+dependencies {
+	provided("javax.jms:javax.jms-api:2.0.1")
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compile(project(":spring-messaging"))
+	compile(project(":spring-tx"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("javax.resource:javax.resource-api:1.7.1")
+	optional("javax.transaction:javax.transaction-api:1.3")
+	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+}

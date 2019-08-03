@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,11 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.money.CurrencyUnitFormatter;
 import org.springframework.format.number.money.Jsr354NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.money.MonetaryAmountFormatter;
-import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -46,14 +47,15 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr354Present = ClassUtils.isPresent(
-			"javax.money.MonetaryAmount", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jsr354Present;
 
-	private static final boolean jsr310Present = ClassUtils.isPresent(
-			"java.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jodaTimePresent;
 
-	private static final boolean jodaTimePresent = ClassUtils.isPresent(
-			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+	static {
+		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
+		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
+		jodaTimePresent = ClassUtils.isPresent("org.joda.time.LocalDate", classLoader);
+	}
 
 
 	/**
@@ -80,13 +82,17 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * Create a new {@code DefaultFormattingConversionService} with the set of
 	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
 	 * based on the value of {@code registerDefaultFormatters}, the set of
-	 * {@linkplain #addDefaultFormatters default formatters}
+	 * {@linkplain #addDefaultFormatters default formatters}.
 	 * @param embeddedValueResolver delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
 	 * prior to calling {@link #addDefaultFormatters}.
 	 * @param registerDefaultFormatters whether to register default formatters
 	 */
-	public DefaultFormattingConversionService(StringValueResolver embeddedValueResolver, boolean registerDefaultFormatters) {
-		setEmbeddedValueResolver(embeddedValueResolver);
+	public DefaultFormattingConversionService(
+			@Nullable StringValueResolver embeddedValueResolver, boolean registerDefaultFormatters) {
+
+		if (embeddedValueResolver != null) {
+			setEmbeddedValueResolver(embeddedValueResolver);
+		}
 		DefaultConversionService.addDefaultConverters(this);
 		if (registerDefaultFormatters) {
 			addDefaultFormatters(this);
@@ -112,10 +118,10 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		}
 
 		// Default handling of date-time values
-		if (jsr310Present) {
-			// just handling JSR-310 specific date and time types
-			new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
+
+		// just handling JSR-310 specific date and time types
+		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
+
 		if (jodaTimePresent) {
 			// handles Joda-specific types as well as Date, Calendar, Long
 			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);

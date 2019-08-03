@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,91 +17,96 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ */
 public class StringHttpMessageConverterTests {
+
+	public static final MediaType TEXT_PLAIN_UTF_8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	private StringHttpMessageConverter converter;
 
+	private MockHttpOutputMessage outputMessage;
+
+
 	@Before
 	public void setUp() {
-		converter = new StringHttpMessageConverter();
+		this.converter = new StringHttpMessageConverter();
+		this.outputMessage = new MockHttpOutputMessage();
 	}
+
 
 	@Test
 	public void canRead() {
-		assertTrue(converter.canRead(String.class, new MediaType("text", "plain")));
+		assertThat(this.converter.canRead(String.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(converter.canWrite(String.class, new MediaType("text", "plain")));
-		assertTrue(converter.canWrite(String.class, MediaType.ALL));
+		assertThat(this.converter.canWrite(String.class, MediaType.TEXT_PLAIN)).isTrue();
+		assertThat(this.converter.canWrite(String.class, MediaType.ALL)).isTrue();
 	}
 
 	@Test
 	public void read() throws IOException {
 		String body = "Hello World";
-		Charset charset = Charset.forName("UTF-8");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(charset));
-		inputMessage.getHeaders().setContentType(new MediaType("text", "plain", charset));
-		String result = converter.read(String.class, inputMessage);
-		assertEquals("Invalid result", body, result);
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(TEXT_PLAIN_UTF_8);
+		String result = this.converter.read(String.class, inputMessage);
+
+		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
 	@Test
 	public void writeDefaultCharset() throws IOException {
-		Charset iso88591 = Charset.forName("ISO-8859-1");
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, null, outputMessage);
-		assertEquals("Invalid result", body, outputMessage.getBodyAsString(iso88591));
-		assertEquals("Invalid content-type", new MediaType("text", "plain", iso88591),
-				outputMessage.getHeaders().getContentType());
-		assertEquals("Invalid content-length", body.getBytes(iso88591).length,
-				outputMessage.getHeaders().getContentLength());
-		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());
+		this.converter.write(body, null, this.outputMessage);
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.ISO_8859_1).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
 	@Test
 	public void writeUTF8() throws IOException {
-		Charset utf8 = Charset.forName("UTF-8");
-		MediaType contentType = new MediaType("text", "plain", utf8);
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, contentType, outputMessage);
-		assertEquals("Invalid result", body, outputMessage.getBodyAsString(utf8));
-		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
-		assertEquals("Invalid content-length", body.getBytes(utf8).length,
-				outputMessage.getHeaders().getContentLength());
-		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());
+		this.converter.write(body, TEXT_PLAIN_UTF_8, this.outputMessage);
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(TEXT_PLAIN_UTF_8);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
-	// SPR-8867
-
-	@Test
+	@Test  // SPR-8867
 	public void writeOverrideRequestedContentType() throws IOException {
-		Charset utf8 = Charset.forName("UTF-8");
-		MediaType requestedContentType = new MediaType("text", "html");
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		MediaType contentType = new MediaType("text", "plain", utf8);
-		outputMessage.getHeaders().setContentType(contentType);
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, requestedContentType, outputMessage);
-		assertEquals("Invalid result", body, outputMessage.getBodyAsString(utf8));
-		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
-		assertEquals("Invalid content-length", body.getBytes(utf8).length,
-				outputMessage.getHeaders().getContentLength());
-		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());
+		MediaType requestedContentType = new MediaType("text", "html");
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		headers.setContentType(TEXT_PLAIN_UTF_8);
+		this.converter.write(body, requestedContentType, this.outputMessage);
+
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(TEXT_PLAIN_UTF_8);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
+
 }

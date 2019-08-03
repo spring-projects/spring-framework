@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.jms.annotation;
 import javax.jms.JMSException;
 import javax.jms.MessageListener;
 
-import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -28,6 +27,8 @@ import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Stephane Nicoll
@@ -87,9 +88,9 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-handler-method-factory.xml", getClass());
 
-		thrown.expect(ListenerExecutionFailedException.class);
-		thrown.expectCause(Is.<MethodArgumentNotValidException>isA(MethodArgumentNotValidException.class));
-		testJmsHandlerMethodFactoryConfiguration(context);
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				testJmsHandlerMethodFactoryConfiguration(context))
+			.withCauseInstanceOf(MethodArgumentNotValidException.class);
 	}
 
 	@Override

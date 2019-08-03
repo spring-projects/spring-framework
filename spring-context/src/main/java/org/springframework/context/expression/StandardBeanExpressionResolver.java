@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -48,10 +49,10 @@ import org.springframework.util.StringUtils;
  */
 public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
-	/** Default expression prefix: "#{" */
+	/** Default expression prefix: "#{". */
 	public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
 
-	/** Default expression suffix: "}" */
+	/** Default expression suffix: "}". */
 	public static final String DEFAULT_EXPRESSION_SUFFIX = "}";
 
 
@@ -61,10 +62,9 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	private ExpressionParser expressionParser;
 
-	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<String, Expression>(256);
+	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
-	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache =
-			new ConcurrentHashMap<BeanExpressionContext, StandardEvaluationContext>(8);
+	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache = new ConcurrentHashMap<>(8);
 
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
 		@Override
@@ -94,7 +94,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 	 * using it as the basis for expression compilation.
 	 * @param beanClassLoader the factory's bean class loader
 	 */
-	public StandardBeanExpressionResolver(ClassLoader beanClassLoader) {
+	public StandardBeanExpressionResolver(@Nullable ClassLoader beanClassLoader) {
 		this.expressionParser = new SpelExpressionParser(new SpelParserConfiguration(null, beanClassLoader));
 	}
 
@@ -131,7 +131,8 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 
 	@Override
-	public Object evaluate(String value, BeanExpressionContext evalContext) throws BeansException {
+	@Nullable
+	public Object evaluate(@Nullable String value, BeanExpressionContext evalContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;
 		}
@@ -143,8 +144,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			}
 			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
 			if (sec == null) {
-				sec = new StandardEvaluationContext();
-				sec.setRootObject(evalContext);
+				sec = new StandardEvaluationContext(evalContext);
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());
@@ -160,7 +160,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			}
 			return expr.getValue(sec);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new BeanExpressionException("Expression parsing failed", ex);
 		}
 	}

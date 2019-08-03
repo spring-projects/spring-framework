@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.web.servlet;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 
@@ -36,6 +38,7 @@ import org.springframework.util.CollectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rossen Stoyanchev
  * @see DispatcherServlet
  * @see ViewResolver
  * @see HandlerAdapter#handle
@@ -43,13 +46,19 @@ import org.springframework.util.CollectionUtils;
  */
 public class ModelAndView {
 
-	/** View instance or view name String */
+	/** View instance or view name String. */
+	@Nullable
 	private Object view;
 
-	/** Model Map */
+	/** Model Map. */
+	@Nullable
 	private ModelMap model;
 
-	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()} */
+	/** Optional HTTP status for the response. */
+	@Nullable
+	private HttpStatus status;
+
+	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()}. */
 	private boolean cleared = false;
 
 
@@ -76,7 +85,7 @@ public class ModelAndView {
 	/**
 	 * Convenient constructor when there is no model data to expose.
 	 * Can also be used in conjunction with {@code addObject}.
-	 * @param view View object to render
+	 * @param view the View object to render
 	 * @see #addObject
 	 */
 	public ModelAndView(View view) {
@@ -84,14 +93,14 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a view name and a model.
+	 * Create a new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet's ViewResolver
-	 * @param model Map of model names (Strings) to model objects
+	 * @param model a Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
 	 */
-	public ModelAndView(String viewName, Map<String, ?> model) {
+	public ModelAndView(String viewName, @Nullable Map<String, ?> model) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -99,20 +108,52 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a View object and a model.
-	 * <emphasis>Note: the supplied model data is copied into the internal
+	 * Create a new ModelAndView given a View object and a model.
+	 * <em>Note: the supplied model data is copied into the internal
 	 * storage of this class. You should not consider to modify the supplied
-	 * Map after supplying it to this class</emphasis>
-	 * @param view View object to render
-	 * @param model Map of model names (Strings) to model objects
+	 * Map after supplying it to this class</em>
+	 * @param view the View object to render
+	 * @param model a Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
 	 */
-	public ModelAndView(View view, Map<String, ?> model) {
+	public ModelAndView(View view, @Nullable Map<String, ?> model) {
 		this.view = view;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
 		}
+	}
+
+	/**
+	 * Create a new ModelAndView given a view name and HTTP status.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherServlet's ViewResolver
+	 * @param status an HTTP status code to use for the response
+	 * (to be set just prior to View rendering)
+	 * @since 4.3.8
+	 */
+	public ModelAndView(String viewName, HttpStatus status) {
+		this.view = viewName;
+		this.status = status;
+	}
+
+	/**
+	 * Create a new ModelAndView given a view name, model, and HTTP status.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherServlet's ViewResolver
+	 * @param model a Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be {@code null}, but the
+	 * model Map may be {@code null} if there is no model data.
+	 * @param status an HTTP status code to use for the response
+	 * (to be set just prior to View rendering)
+	 * @since 4.3
+	 */
+	public ModelAndView(@Nullable String viewName, @Nullable Map<String, ?> model, @Nullable HttpStatus status) {
+		this.view = viewName;
+		if (model != null) {
+			getModelMap().addAllAttributes(model);
+		}
+		this.status = status;
 	}
 
 	/**
@@ -129,7 +170,7 @@ public class ModelAndView {
 
 	/**
 	 * Convenient constructor to take a single model object.
-	 * @param view View object to render
+	 * @param view the View object to render
 	 * @param modelName name of the single entry in the model
 	 * @param modelObject the single model object
 	 */
@@ -144,7 +185,7 @@ public class ModelAndView {
 	 * DispatcherServlet via a ViewResolver. Will override any
 	 * pre-existing view name or View.
 	 */
-	public void setViewName(String viewName) {
+	public void setViewName(@Nullable String viewName) {
 		this.view = viewName;
 	}
 
@@ -152,6 +193,7 @@ public class ModelAndView {
 	 * Return the view name to be resolved by the DispatcherServlet
 	 * via a ViewResolver, or {@code null} if we are using a View object.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -160,7 +202,7 @@ public class ModelAndView {
 	 * Set a View object for this ModelAndView. Will override any
 	 * pre-existing view name or View.
 	 */
-	public void setView(View view) {
+	public void setView(@Nullable View view) {
 		this.view = view;
 	}
 
@@ -168,6 +210,7 @@ public class ModelAndView {
 	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
+	@Nullable
 	public View getView() {
 		return (this.view instanceof View ? (View) this.view : null);
 	}
@@ -193,6 +236,7 @@ public class ModelAndView {
 	 * Return the model map. May return {@code null}.
 	 * Called by DispatcherServlet for evaluation of the model.
 	 */
+	@Nullable
 	protected Map<String, Object> getModelInternal() {
 		return this.model;
 	}
@@ -215,15 +259,33 @@ public class ModelAndView {
 		return getModelMap();
 	}
 
+	/**
+	 * Set the HTTP status to use for the response.
+	 * <p>The response status is set just prior to View rendering.
+	 * @since 4.3
+	 */
+	public void setStatus(@Nullable HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured HTTP status for the response, if any.
+	 * @since 4.3
+	 */
+	@Nullable
+	public HttpStatus getStatus() {
+		return this.status;
+	}
+
 
 	/**
 	 * Add an attribute to the model.
-	 * @param attributeName name of the object to add to the model
-	 * @param attributeValue object to add to the model (never {@code null})
+	 * @param attributeName name of the object to add to the model (never {@code null})
+	 * @param attributeValue object to add to the model (can be {@code null})
 	 * @see ModelMap#addAttribute(String, Object)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(String attributeName, Object attributeValue) {
+	public ModelAndView addObject(String attributeName, @Nullable Object attributeValue) {
 		getModelMap().addAttribute(attributeName, attributeValue);
 		return this;
 	}
@@ -245,7 +307,7 @@ public class ModelAndView {
 	 * @see ModelMap#addAllAttributes(Map)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addAllObjects(Map<String, ?> modelMap) {
+	public ModelAndView addAllObjects(@Nullable Map<String, ?> modelMap) {
 		getModelMap().addAllAttributes(modelMap);
 		return this;
 	}
@@ -290,15 +352,11 @@ public class ModelAndView {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("ModelAndView: ");
-		if (isReference()) {
-			sb.append("reference to view with name '").append(this.view).append("'");
-		}
-		else {
-			sb.append("materialized View is [").append(this.view).append(']');
-		}
-		sb.append("; model is ").append(this.model);
-		return sb.toString();
+		return "ModelAndView [view=" + formatView() + "; model=" + this.model + "]";
+	}
+
+	private String formatView() {
+		return isReference() ? "\"" + this.view + "\"" : "[" + this.view + "]";
 	}
 
 }

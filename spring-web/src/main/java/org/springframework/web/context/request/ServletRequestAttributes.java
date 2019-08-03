@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -49,7 +50,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
-	protected static final Set<Class<?>> immutableValueTypes = new HashSet<Class<?>>(16);
+	protected static final Set<Class<?>> immutableValueTypes = new HashSet<>(16);
 
 	static {
 		immutableValueTypes.addAll(NumberUtils.STANDARD_NUMBER_TYPES);
@@ -61,11 +62,13 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final HttpServletRequest request;
 
+	@Nullable
 	private HttpServletResponse response;
 
+	@Nullable
 	private volatile HttpSession session;
 
-	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
+	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<>(1);
 
 
 	/**
@@ -82,7 +85,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param request current HTTP request
 	 * @param response current HTTP response (for optional exposure)
 	 */
-	public ServletRequestAttributes(HttpServletRequest request, HttpServletResponse response) {
+	public ServletRequestAttributes(HttpServletRequest request, @Nullable HttpServletResponse response) {
 		this(request);
 		this.response = response;
 	}
@@ -98,6 +101,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	/**
 	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
 	 */
+	@Nullable
 	public final HttpServletResponse getResponse() {
 		return this.response;
 	}
@@ -106,18 +110,34 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * Exposes the {@link HttpSession} that we're wrapping.
 	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
+	@Nullable
 	protected final HttpSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
-			return this.request.getSession(allowCreate);
+			HttpSession session = this.request.getSession(allowCreate);
+			this.session = session;
+			return session;
 		}
 		else {
 			// Access through stored session reference, if any...
-			if (this.session == null && allowCreate) {
-				throw new IllegalStateException(
-						"No session found and request already completed - cannot create new session!");
+			HttpSession session = this.session;
+			if (session == null) {
+				if (allowCreate) {
+					throw new IllegalStateException(
+							"No session found and request already completed - cannot create new session!");
+				}
+				else {
+					session = this.request.getSession(false);
+					this.session = session;
+				}
 			}
-			return this.session;
+			return session;
 		}
+	}
+
+	private HttpSession obtainSession() {
+		HttpSession session = getSession(true);
+		Assert.state(session != null, "No HttpSession");
+		return session;
 	}
 
 
@@ -158,7 +178,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
-			HttpSession session = getSession(true);
+			HttpSession session = obtainSession();
 			this.sessionAttributesToUpdate.remove(name);
 			session.setAttribute(name, value);
 		}
@@ -168,8 +188,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (isRequestActive()) {
-				this.request.removeAttribute(name);
 				removeRequestDestructionCallback(name);
+				this.request.removeAttribute(name);
 			}
 		}
 		else {
@@ -177,9 +197,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			if (session != null) {
 				this.sessionAttributesToUpdate.remove(name);
 				try {
-					session.removeAttribute(name);
-					// Remove any registered destruction callback as well.
 					session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+					session.removeAttribute(name);
 				}
 				catch (IllegalStateException ex) {
 					// Session invalidated - shouldn't usually happen.
@@ -236,12 +255,12 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	@Override
 	public String getSessionId() {
-		return getSession(true).getId();
+		return obtainSession().getId();
 	}
 
 	@Override
 	public Object getSessionMutex() {
-		return WebUtils.getSessionMutex(getSession(true));
+		return WebUtils.getSessionMutex(obtainSession());
 	}
 
 
@@ -251,25 +270,26 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	@Override
 	protected void updateAccessedSessionAttributes() {
-		// Store session reference for access after request completion.
-		this.session = this.request.getSession(false);
-		// Update all affected session attributes.
-		if (this.session != null) {
-			try {
-				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-					String name = entry.getKey();
-					Object newValue = entry.getValue();
-					Object oldValue = this.session.getAttribute(name);
-					if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
-						this.session.setAttribute(name, newValue);
+		if (!this.sessionAttributesToUpdate.isEmpty()) {
+			// Update all affected session attributes.
+			HttpSession session = getSession(false);
+			if (session != null) {
+				try {
+					for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+						String name = entry.getKey();
+						Object newValue = entry.getValue();
+						Object oldValue = session.getAttribute(name);
+						if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
+							session.setAttribute(name, newValue);
+						}
 					}
 				}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
-			catch (IllegalStateException ex) {
-				// Session invalidated - shouldn't usually happen.
-			}
+			this.sessionAttributesToUpdate.clear();
 		}
-		this.sessionAttributesToUpdate.clear();
 	}
 
 	/**
@@ -284,7 +304,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * purposes of session attribute management; {@code false} otherwise
 	 * @see #updateAccessedSessionAttributes()
 	 */
-	protected boolean isImmutableSessionAttribute(String name, Object value) {
+	protected boolean isImmutableSessionAttribute(String name, @Nullable Object value) {
 		return (value == null || immutableValueTypes.contains(value.getClass()));
 	}
 
@@ -296,7 +316,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param callback the callback to be executed for destruction
 	 */
 	protected void registerSessionDestructionCallback(String name, Runnable callback) {
-		HttpSession session = getSession(true);
+		HttpSession session = obtainSession();
 		session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
 				new DestructionCallbackBindingListener(callback));
 	}

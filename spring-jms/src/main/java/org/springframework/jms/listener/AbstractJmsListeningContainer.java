@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -60,14 +61,17 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractJmsListeningContainer extends JmsDestinationAccessor
 		implements BeanNameAware, DisposableBean, SmartLifecycle {
 
+	@Nullable
 	private String clientId;
 
 	private boolean autoStartup = true;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Connection sharedConnection;
 
 	private boolean sharedConnectionStarted = false;
@@ -76,9 +80,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean active = false;
 
-	private boolean running = false;
+	private volatile boolean running = false;
 
-	private final List<Object> pausedTasks = new LinkedList<Object>();
+	private final List<Object> pausedTasks = new LinkedList<>();
 
 	protected final Object lifecycleMonitor = new Object();
 
@@ -92,7 +96,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setConnectionFactory
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -100,6 +104,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the JMS client ID for the shared Connection created and used
 	 * by this container, if any.
 	 */
+	@Nullable
 	public String getClientId() {
 		return this.clientId;
 	}
@@ -138,7 +143,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	@Override
-	public void setBeanName(String beanName) {
+	public void setBeanName(@Nullable String beanName) {
 		this.beanName = beanName;
 	}
 
@@ -146,6 +151,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the bean name that this listener container has been assigned
 	 * in its containing bean factory, if any.
 	 */
+	@Nullable
 	protected final String getBeanName() {
 		return this.beanName;
 	}
@@ -313,12 +319,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
-	@Override
-	public void stop(Runnable callback) {
-		this.stop();
-		callback.run();
-	}
-
 	/**
 	 * Notify all invoker tasks and stop the shared Connection, if any.
 	 * @throws JMSException if thrown by JMS API methods
@@ -344,9 +344,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return (this.running && runningAllowed());
-		}
+		return (this.running && runningAllowed());
 	}
 
 	/**

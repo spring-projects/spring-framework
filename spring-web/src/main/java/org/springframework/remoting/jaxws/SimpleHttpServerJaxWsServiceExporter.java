@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,8 @@ import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.lang.UsesSunHttpServer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Simple exporter for JAX-WS services, autodetecting annotated service beans
@@ -47,16 +48,20 @@ import org.springframework.lang.UsesSunHttpServer;
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint#publish(Object)
  * @see SimpleJaxWsServiceExporter
+ * @deprecated as of Spring Framework 5.1, in favor of {@link SimpleJaxWsServiceExporter}
  */
-@UsesSunHttpServer
+@Deprecated
+@org.springframework.lang.UsesSunHttpServer
 public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private HttpServer server;
 
 	private int port = 8080;
 
+	@Nullable
 	private String hostname;
 
 	private int backlog = -1;
@@ -65,8 +70,10 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 
 	private String basePath = "/";
 
+	@Nullable
 	private List<Filter> filters;
 
+	@Nullable
 	private Authenticator authenticator;
 
 	private boolean localServer = false;
@@ -157,11 +164,12 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		if (this.server == null) {
 			InetSocketAddress address = (this.hostname != null ?
 					new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
-			this.server = HttpServer.create(address, this.backlog);
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Starting HttpServer at address " + address);
+			HttpServer server = HttpServer.create(address, this.backlog);
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting HttpServer at address " + address);
 			}
-			this.server.start();
+			server.start();
+			this.server = server;
 			this.localServer = true;
 		}
 		super.afterPropertiesSet();
@@ -184,6 +192,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	 * @return the fully populated HttpContext
 	 */
 	protected HttpContext buildHttpContext(Endpoint endpoint, String serviceName) {
+		Assert.state(this.server != null, "No HttpServer available");
 		String fullPath = calculateEndpointPath(endpoint, serviceName);
 		HttpContext httpContext = this.server.createContext(fullPath);
 		if (this.filters != null) {
@@ -209,7 +218,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	@Override
 	public void destroy() {
 		super.destroy();
-		if (this.localServer) {
+		if (this.server != null && this.localServer) {
 			logger.info("Stopping HttpServer");
 			this.server.stop(this.shutdownDelay);
 		}

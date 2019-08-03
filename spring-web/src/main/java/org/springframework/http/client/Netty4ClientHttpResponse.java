@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,15 +25,18 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * Netty 4 to execute requests.
+ * {@link ClientHttpResponse} implementation based on Netty 4.
  *
  * @author Arjen Poutsma
  * @since 4.1.2
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
+@Deprecated
 class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ChannelHandlerContext context;
@@ -42,6 +45,7 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ByteBufInputStream body;
 
+	@Nullable
 	private volatile HttpHeaders headers;
 
 
@@ -67,14 +71,15 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			HttpHeaders headers = new HttpHeaders();
+		HttpHeaders headers = this.headers;
+		if (headers == null) {
+			headers = new HttpHeaders();
 			for (Map.Entry<String, String> entry : this.nettyResponse.headers()) {
 				headers.add(entry.getKey(), entry.getValue());
 			}
 			this.headers = headers;
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

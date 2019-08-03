@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 
@@ -44,7 +45,8 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * Evaluate the supplied value for the supplied attribute name.
 	 * <p>The default implementation simply returns the given value as-is.
 	 */
-	protected Object evaluate(String attributeName, Object value) throws JspException {
+	@Nullable
+	protected Object evaluate(String attributeName, @Nullable Object value) throws JspException {
 		return value;
 	}
 
@@ -56,7 +58,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * or empty, no attribute is written.
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
-	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value)
+	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, @Nullable String value)
 			throws JspException {
 
 		if (value != null) {
@@ -88,7 +90,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * Get the display value of the supplied {@code Object}, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
-	protected String getDisplayString(Object value) {
+	protected String getDisplayString(@Nullable Object value) {
 		return ValueFormatter.getDisplayString(value, isHtmlEscape());
 	}
 
@@ -98,7 +100,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
 	 */
-	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
+	protected String getDisplayString(@Nullable Object value, @Nullable PropertyEditor propertyEditor) {
 		return ValueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
 	}
 

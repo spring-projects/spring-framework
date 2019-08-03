@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represent a map in an expression, e.g. '{name:'foo',age:12}'
@@ -34,17 +36,18 @@ import org.springframework.expression.spel.SpelNode;
 public class InlineMap extends SpelNodeImpl {
 
 	// If the map is purely literals, it is a constant value and can be computed and cached
-	private TypedValue constant = null;
+	@Nullable
+	private TypedValue constant;
 
 
-	public InlineMap(int pos, SpelNodeImpl... args) {
-		super(pos, args);
+	public InlineMap(int startPos, int endPos, SpelNodeImpl... args) {
+		super(startPos, endPos, args);
 		checkIfConstant();
 	}
 
 
 	/**
-	 * If all the components of the list are constants, or lists/maps that themselves
+	 * If all the components of the map are constants, or lists/maps that themselves
 	 * contain constants, then a constant list can be built to represent this node.
 	 * This will speed up later getValue calls and reduce the amount of garbage created.
 	 */
@@ -67,14 +70,14 @@ public class InlineMap extends SpelNodeImpl {
 						break;
 					}
 				}
-				else if (!((c%2)==0 && (child instanceof PropertyOrFieldReference))) {					
+				else if (!(c % 2 == 0 && child instanceof PropertyOrFieldReference)) {
 					isConstant = false;
 					break;
 				}
 			}
 		}
 		if (isConstant) {
-			Map<Object,Object> constantMap = new LinkedHashMap<Object,Object>();			
+			Map<Object, Object> constantMap = new LinkedHashMap<>();
 			int childCount = getChildCount();
 			for (int c = 0; c < childCount; c++) {
 				SpelNode keyChild = getChild(c++);
@@ -111,7 +114,7 @@ public class InlineMap extends SpelNodeImpl {
 			return this.constant;
 		}
 		else {
-			Map<Object, Object> returnValue = new LinkedHashMap<Object, Object>();
+			Map<Object, Object> returnValue = new LinkedHashMap<>();
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
 				// TODO allow for key being PropertyOrFieldReference like Indexer on maps
@@ -148,15 +151,17 @@ public class InlineMap extends SpelNodeImpl {
 	}
 
 	/**
-	 * @return whether this list is a constant value
+	 * Return whether this list is a constant value.
 	 */
 	public boolean isConstant() {
 		return this.constant != null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<Object,Object> getConstantValue() {
-		return (Map<Object,Object>) this.constant.getValue();
+	@Nullable
+	public Map<Object, Object> getConstantValue() {
+		Assert.state(this.constant != null, "No constant");
+		return (Map<Object, Object>) this.constant.getValue();
 	}
 
 }

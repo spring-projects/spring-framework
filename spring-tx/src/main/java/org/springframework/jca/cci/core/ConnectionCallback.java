@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a CCI Connection.
@@ -36,29 +37,28 @@ import org.springframework.dao.DataAccessException;
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2
+ * @param <T> the result type
  * @see CciTemplate#execute(ConnectionCallback)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
  */
+@FunctionalInterface
 public interface ConnectionCallback<T> {
 
 	/**
 	 * Gets called by {@code CciTemplate.execute} with an active CCI Connection.
 	 * Does not need to care about activating or closing the Connection, or handling
 	 * transactions.
-	 *
 	 * <p>If called without a thread-bound CCI transaction (initiated by
 	 * CciLocalTransactionManager), the code will simply get executed on the CCI
 	 * Connection with its transactional semantics. If CciTemplate is configured
 	 * to use a JTA-aware ConnectionFactory, the CCI Connection and thus the callback
 	 * code will be transactional if a JTA transaction is active.
-	 *
 	 * <p>Allows for returning a result object created within the callback, i.e.
 	 * a domain object or a collection of domain objects. Note that there's special
 	 * support for single step actions: see the {@code CciTemplate.execute}
 	 * variants. A thrown RuntimeException is treated as application exception:
 	 * it gets propagated to the caller of the template.
-	 *
 	 * @param connection active CCI Connection
 	 * @param connectionFactory the CCI ConnectionFactory that the Connection was
 	 * created with (gives access to RecordFactory and ResourceAdapterMetaData)
@@ -72,6 +72,7 @@ public interface ConnectionCallback<T> {
 	 * @see javax.resource.cci.ConnectionFactory#getMetaData()
 	 * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
 	 */
+	@Nullable
 	T doInConnection(Connection connection, ConnectionFactory connectionFactory)
 			throws ResourceException, SQLException, DataAccessException;
 

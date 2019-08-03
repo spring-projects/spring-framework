@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,9 +33,9 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -64,47 +64,47 @@ public class StaxSourceTests {
 	public void streamReaderSourceToStreamResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
-		assertEquals("Invalid streamReader returned", streamReader, source.getXMLStreamReader());
-		assertNull("EventReader returned", source.getXMLEventReader());
+		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
+		assertThat((Object) source.getXMLEventReader()).as("EventReader returned").isNull();
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
-		assertXMLEqual("Invalid result", XML, writer.toString());
+		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
 	}
 
 	@Test
 	public void streamReaderSourceToDOMResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
-		assertEquals("Invalid streamReader returned", streamReader, source.getXMLStreamReader());
-		assertNull("EventReader returned", source.getXMLEventReader());
+		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
+		assertThat((Object) source.getXMLEventReader()).as("EventReader returned").isNull();
 
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();
 		transformer.transform(source, new DOMResult(result));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
 	public void eventReaderSourceToStreamResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
-		assertEquals("Invalid eventReader returned", eventReader, source.getXMLEventReader());
-		assertNull("StreamReader returned", source.getXMLStreamReader());
+		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);
+		assertThat(source.getXMLStreamReader()).as("StreamReader returned").isNull();
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
-		assertXMLEqual("Invalid result", XML, writer.toString());
+		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
 	}
 
 	@Test
 	public void eventReaderSourceToDOMResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
-		assertEquals("Invalid eventReader returned", eventReader, source.getXMLEventReader());
-		assertNull("StreamReader returned", source.getXMLStreamReader());
+		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);
+		assertThat(source.getXMLStreamReader()).as("StreamReader returned").isNull();
 
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();
 		transformer.transform(source, new DOMResult(result));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 }

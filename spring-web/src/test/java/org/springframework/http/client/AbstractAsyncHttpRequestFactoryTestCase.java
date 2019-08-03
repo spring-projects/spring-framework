@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,6 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -29,6 +25,7 @@ import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
@@ -39,7 +36,12 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+
+@SuppressWarnings("deprecation")
+public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
 
 	protected AsyncClientHttpRequestFactory factory;
 
@@ -66,12 +68,12 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 	public void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(uri, HttpMethod.GET);
-		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
-		assertEquals("Invalid HTTP URI", uri, request.getURI());
+		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
+		assertThat(request.getURI()).as("Invalid HTTP URI").isEqualTo(uri);
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
 		}
 		finally {
 			response.close();
@@ -82,27 +84,27 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 	public void statusCallback() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(uri, HttpMethod.GET);
-		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
-		assertEquals("Invalid HTTP URI", uri, request.getURI());
+		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
+		assertThat(request.getURI()).as("Invalid HTTP URI").isEqualTo(uri);
 		ListenableFuture<ClientHttpResponse> listenableFuture = request.executeAsync();
 		listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>() {
 			@Override
 			public void onSuccess(ClientHttpResponse result) {
 				try {
-					assertEquals("Invalid status code", HttpStatus.NOT_FOUND, result.getStatusCode());
+					assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
 				}
 				catch (IOException ex) {
-					fail(ex.getMessage());
+					throw new AssertionError(ex.getMessage(), ex);
 				}
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail(ex.getMessage());
+				throw new AssertionError(ex.getMessage(), ex);
 			}
 		});
 		ClientHttpResponse response = listenableFuture.get();
 		try {
-			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
 		}
 		finally {
 			response.close();
@@ -112,7 +114,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 	@Test
 	public void echo() throws Exception {
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
-		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
+		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.PUT);
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
 		request.getHeaders().add(headerName, headerValue1);
@@ -132,12 +134,11 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
-			assertTrue("Header not found", response.getHeaders().containsKey(headerName));
-			assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
-					response.getHeaders().get(headerName));
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+			assertThat(response.getHeaders().containsKey(headerName)).as("Header not found").isTrue();
+			assertThat(response.getHeaders().get(headerName)).as("Header value not found").isEqualTo(Arrays.asList(headerValue1, headerValue2));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
-			assertTrue("Invalid body", Arrays.equals(body, result));
+			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
 		}
 		finally {
 			response.close();
@@ -160,11 +161,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			FileCopyUtils.copy(body, request.getBody());
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
+			assertThatIllegalStateException().isThrownBy(() ->
+					FileCopyUtils.copy(body, request.getBody()));
 		}
 		finally {
 			response.close();
@@ -181,11 +179,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			request.getHeaders().add("MyHeader", "value");
-			fail("UnsupportedOperationException expected");
-		}
-		catch (UnsupportedOperationException ex) {
-			// expected
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+					request.getHeaders().add("MyHeader", "value"));
 		}
 		finally {
 			response.close();
@@ -212,8 +207,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 			}
 			Future<ClientHttpResponse> futureResponse = request.executeAsync();
 			response = futureResponse.get();
-			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
-			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(request.getMethod().name()).as("Invalid method").isEqualTo(path.toUpperCase(Locale.ENGLISH));
 		}
 		finally {
 			if (response != null) {
@@ -221,5 +216,15 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 			}
 		}
 	}
+
+	@Test
+	public void cancel() throws Exception {
+		URI uri = new URI(baseUrl + "/status/notfound");
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(uri, HttpMethod.GET);
+		Future<ClientHttpResponse> futureResponse = request.executeAsync();
+		futureResponse.cancel(true);
+		assertThat(futureResponse.isCancelled()).isTrue();
+	}
+
 
 }

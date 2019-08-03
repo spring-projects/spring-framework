@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.support;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the message payload type
  * @see GenericMessage
  * @see ErrorMessage
  */
@@ -38,6 +40,7 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
+	@Nullable
 	private final Message<T> originalMessage;
 
 	private MessageHeaderAccessor headerAccessor;
@@ -73,7 +76,7 @@ public final class MessageBuilder<T> {
 	 * Set the value for the given header name. If the provided value is {@code null},
 	 * the header will be removed.
 	 */
-	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
+	public MessageBuilder<T> setHeader(String headerName, @Nullable Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
@@ -109,7 +112,7 @@ public final class MessageBuilder<T> {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	public MessageBuilder<T> copyHeaders(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeaders(headersToCopy);
 		return this;
 	}
@@ -118,7 +121,7 @@ public final class MessageBuilder<T> {
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	public MessageBuilder<T> copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
 		return this;
 	}
@@ -153,7 +156,7 @@ public final class MessageBuilder<T> {
 			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
 		}
 		else {
-			return new GenericMessage<T>(this.payload, headersToUse);
+			return new GenericMessage<>(this.payload, headersToUse);
 		}
 	}
 
@@ -165,7 +168,7 @@ public final class MessageBuilder<T> {
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
-		return new MessageBuilder<T>(message);
+		return new MessageBuilder<>(message);
 	}
 
 	/**
@@ -173,7 +176,7 @@ public final class MessageBuilder<T> {
 	 * @param payload the payload
 	 */
 	public static <T> MessageBuilder<T> withPayload(T payload) {
-		return new MessageBuilder<T>(payload, new MessageHeaderAccessor());
+		return new MessageBuilder<>(payload, new MessageHeaderAccessor());
 	}
 
 	/**
@@ -187,14 +190,14 @@ public final class MessageBuilder<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
+	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
 		if (payload instanceof Throwable) {
 			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
 		}
 		else {
-			return new GenericMessage<T>(payload, messageHeaders);
+			return new GenericMessage<>(payload, messageHeaders);
 		}
 	}
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	Tests for independent prototype behaviour.
@@ -25,7 +25,7 @@
 		in a BeanFactory. If for some strange reason you want to, use Type 3 IoC.
 	-->
 	<bean id="targetSource" class="org.springframework.aop.target.SingletonTargetSource">
-		<constructor-arg><ref local="target"/></constructor-arg>
+		<constructor-arg><ref bean="target"/></constructor-arg>
 	</bean>
 
 	<bean id="directTarget"

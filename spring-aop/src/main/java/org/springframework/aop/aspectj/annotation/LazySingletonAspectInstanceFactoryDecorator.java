@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
+
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -25,10 +28,12 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory {
+@SuppressWarnings("serial")
+public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory, Serializable {
 
 	private final MetadataAwareAspectInstanceFactory maaif;
 
+	@Nullable
 	private volatile Object materialized;
 
 
@@ -43,15 +48,25 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 
 	@Override
-	public synchronized Object getAspectInstance() {
-		if (this.materialized == null) {
-			synchronized (this) {
-				if (this.materialized == null) {
-					this.materialized = this.maaif.getAspectInstance();
+	public Object getAspectInstance() {
+		Object aspectInstance = this.materialized;
+		if (aspectInstance == null) {
+			Object mutex = this.maaif.getAspectCreationMutex();
+			if (mutex == null) {
+				aspectInstance = this.maaif.getAspectInstance();
+				this.materialized = aspectInstance;
+			}
+			else {
+				synchronized (mutex) {
+					aspectInstance = this.materialized;
+					if (aspectInstance == null) {
+						aspectInstance = this.maaif.getAspectInstance();
+						this.materialized = aspectInstance;
+					}
 				}
 			}
 		}
-		return this.materialized;
+		return aspectInstance;
 	}
 
 	public boolean isMaterialized() {
@@ -59,6 +74,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		return this.maaif.getAspectClassLoader();
 	}
@@ -66,6 +82,12 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.maaif.getAspectMetadata();
+	}
+
+	@Override
+	@Nullable
+	public Object getAspectCreationMutex() {
+		return this.maaif.getAspectCreationMutex();
 	}
 
 	@Override

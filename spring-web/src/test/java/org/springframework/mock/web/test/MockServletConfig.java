@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,13 +23,11 @@ import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.ServletConfig} interface.
- *
- * <p>Used for testing the web framework; typically not necessary for
- * testing application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -41,7 +39,7 @@ public class MockServletConfig implements ServletConfig {
 
 	private final String servletName;
 
-	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> initParameters = new LinkedHashMap<>();
 
 
 	/**
@@ -63,7 +61,7 @@ public class MockServletConfig implements ServletConfig {
 	 * Create a new MockServletConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
-	public MockServletConfig(ServletContext servletContext) {
+	public MockServletConfig(@Nullable ServletContext servletContext) {
 		this(servletContext, "");
 	}
 
@@ -72,7 +70,7 @@ public class MockServletConfig implements ServletConfig {
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param servletName the name of the servlet
 	 */
-	public MockServletConfig(ServletContext servletContext, String servletName) {
+	public MockServletConfig(@Nullable ServletContext servletContext, String servletName) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.servletName = servletName;
 	}

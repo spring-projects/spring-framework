@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,10 +47,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
 	public void refresh() throws BeansException {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("commandClass", "org.springframework.tests.sample.beans.TestBean");
-		pvs.add("formView", "form");
-
 		registerSingleton("/locale.do", LocaleChecker.class);
 
 		addMessage("test", Locale.ENGLISH, "test message");
@@ -63,7 +59,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("handlerMapping", BeanNameUrlHandlerMapping.class);
 		registerSingleton("viewResolver", InternalResourceViewResolver.class);
 
-		pvs = new MutablePropertyValues();
+		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
 		registerSingleton("viewResolver2", XmlViewResolver.class, pvs);
 
@@ -74,10 +70,10 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 	public static class LocaleChecker implements Controller, LastModified {
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
+
+			if (!(RequestContextUtils.findWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
 				throw new ServletException("Incorrect WebApplicationContext");
 			}
 			if (!(RequestContextUtils.getLocaleResolver(request) instanceof AcceptHeaderLocaleResolver)) {

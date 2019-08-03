@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,11 @@
 
 package org.springframework.web.bind.support;
 
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.util.ClassUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -76,7 +74,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public WebRequestDataBinder(Object target) {
+	public WebRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -86,7 +84,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebRequestDataBinder(Object target, String objectName) {
+	public WebRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 
@@ -116,9 +114,11 @@ public class WebRequestDataBinder extends WebDataBinder {
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
-			else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
-				HttpServletRequest serlvetRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
-				new Servlet3MultipartHelper(isBindEmptyMultipartFiles()).bindParts(serlvetRequest, mpvs);
+			else {
+				HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
+				if (servletRequest != null) {
+					bindParts(servletRequest, mpvs);
+				}
 			}
 		}
 		doBind(mpvs);
@@ -133,6 +133,29 @@ public class WebRequestDataBinder extends WebDataBinder {
 		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
 	}
 
+	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
+		try {
+			MultiValueMap<String, Part> map = new LinkedMultiValueMap<>();
+			for (Part part : request.getParts()) {
+				map.add(part.getName(), part);
+			}
+			map.forEach((key, values) -> {
+				if (values.size() == 1) {
+					Part part = values.get(0);
+					if (isBindEmptyMultipartFiles() || part.getSize() > 0) {
+						mpvs.add(key, part);
+					}
+				}
+				else {
+					mpvs.add(key, values);
+				}
+			});
+		}
+		catch (Exception ex) {
+			throw new MultipartException("Failed to get request parts", ex);
+		}
+	}
+
 	/**
 	 * Treats errors as fatal.
 	 * <p>Use this method only if it's an error if the input isn't valid.
@@ -142,43 +165,6 @@ public class WebRequestDataBinder extends WebDataBinder {
 	public void closeNoCatch() throws BindException {
 		if (getBindingResult().hasErrors()) {
 			throw new BindException(getBindingResult());
-		}
-	}
-
-
-	/**
-	 * Encapsulate Part binding code for Servlet 3.0+ only containers.
-	 * @see javax.servlet.http.Part
-	 */
-	private static class Servlet3MultipartHelper {
-
-		private final boolean bindEmptyMultipartFiles;
-
-		public Servlet3MultipartHelper(boolean bindEmptyMultipartFiles) {
-			this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
-		}
-
-		public void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
-			try {
-				MultiValueMap<String, Part> map = new LinkedMultiValueMap<String, Part>();
-				for (Part part : request.getParts()) {
-					map.add(part.getName(), part);
-				}
-				for (Map.Entry<String, List<Part>> entry: map.entrySet()) {
-					if (entry.getValue().size() == 1) {
-						Part part = entry.getValue().get(0);
-						if (this.bindEmptyMultipartFiles || part.getSize() > 0) {
-							mpvs.add(entry.getKey(), part);
-						}
-					}
-					else {
-						mpvs.add(entry.getKey(), entry.getValue());
-					}
-				}
-			}
-			catch (Exception ex) {
-				throw new MultipartException("Failed to get request parts", ex);
-			}
 		}
 	}
 

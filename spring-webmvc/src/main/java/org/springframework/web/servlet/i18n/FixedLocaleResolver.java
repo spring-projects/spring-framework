@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.servlet.LocaleResolver} implementation
@@ -81,6 +82,7 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	public LocaleContext resolveLocaleContext(HttpServletRequest request) {
 		return new TimeZoneAwareLocaleContext() {
 			@Override
+			@Nullable
 			public Locale getLocale() {
 				return getDefaultLocale();
 			}
@@ -92,7 +94,9 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
+	public void setLocaleContext( HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext) {
+
 		throw new UnsupportedOperationException("Cannot change fixed locale - use a different locale resolution strategy");
 	}
 

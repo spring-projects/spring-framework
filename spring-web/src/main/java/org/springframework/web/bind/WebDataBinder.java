@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,14 @@
 package org.springframework.web.bind;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.core.CollectionFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Juergen Hoeller
  * @author Scott Andrews
+ * @author Brian Clozel
  * @since 1.2
  * @see #registerCustomEditor
  * @see #setAllowedFields
@@ -71,8 +75,10 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public static final String DEFAULT_FIELD_DEFAULT_PREFIX = "!";
 
+	@Nullable
 	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
 
+	@Nullable
 	private String fieldDefaultPrefix = DEFAULT_FIELD_DEFAULT_PREFIX;
 
 	private boolean bindEmptyMultipartFiles = true;
@@ -84,7 +90,7 @@ public class WebDataBinder extends DataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public WebDataBinder(Object target) {
+	public WebDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -94,7 +100,7 @@ public class WebDataBinder extends DataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebDataBinder(Object target, String objectName) {
+	public WebDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 
@@ -120,13 +126,14 @@ public class WebDataBinder extends DataBinder {
 	 * detect an empty field and automatically reset its value.
 	 * @see #DEFAULT_FIELD_MARKER_PREFIX
 	 */
-	public void setFieldMarkerPrefix(String fieldMarkerPrefix) {
+	public void setFieldMarkerPrefix(@Nullable String fieldMarkerPrefix) {
 		this.fieldMarkerPrefix = fieldMarkerPrefix;
 	}
 
 	/**
 	 * Return the prefix for parameters that mark potentially empty fields.
 	 */
+	@Nullable
 	public String getFieldMarkerPrefix() {
 		return this.fieldMarkerPrefix;
 	}
@@ -145,13 +152,14 @@ public class WebDataBinder extends DataBinder {
 	 * marker for the given field.
 	 * @see #DEFAULT_FIELD_DEFAULT_PREFIX
 	 */
-	public void setFieldDefaultPrefix(String fieldDefaultPrefix) {
+	public void setFieldDefaultPrefix(@Nullable String fieldDefaultPrefix) {
 		this.fieldDefaultPrefix = fieldDefaultPrefix;
 	}
 
 	/**
 	 * Return the prefix for parameters that mark default fields.
 	 */
+	@Nullable
 	public String getFieldDefaultPrefix() {
 		return this.fieldDefaultPrefix;
 	}
@@ -198,8 +206,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getFieldDefaultPrefix
 	 */
 	protected void checkFieldDefaults(MutablePropertyValues mpvs) {
-		if (getFieldDefaultPrefix() != null) {
-			String fieldDefaultPrefix = getFieldDefaultPrefix();
+		String fieldDefaultPrefix = getFieldDefaultPrefix();
+		if (fieldDefaultPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldDefaultPrefix)) {
@@ -225,8 +233,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getEmptyValue(String, Class)
 	 */
 	protected void checkFieldMarkers(MutablePropertyValues mpvs) {
-		if (getFieldMarkerPrefix() != null) {
-			String fieldMarkerPrefix = getFieldMarkerPrefix();
+		String fieldMarkerPrefix = getFieldMarkerPrefix();
+		if (fieldMarkerPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldMarkerPrefix)) {
@@ -243,42 +251,71 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Determine an empty value for the specified field.
-	 * <p>Default implementation returns {@code Boolean.FALSE}
-	 * for boolean fields and an empty array of array types.
-	 * Else, {@code null} is used as default.
+	 * <p>The default implementation delegates to {@link #getEmptyValue(Class)}
+	 * if the field type is known, otherwise falls back to {@code null}.
 	 * @param field the name of the field
 	 * @param fieldType the type of the field
-	 * @return the empty value (for most fields: null)
+	 * @return the empty value (for most fields: {@code null})
 	 */
-	protected Object getEmptyValue(String field, Class<?> fieldType) {
-		if (fieldType != null && boolean.class == fieldType || Boolean.class == fieldType) {
-			// Special handling of boolean property.
-			return Boolean.FALSE;
-		}
-		else if (fieldType != null && fieldType.isArray()) {
-			// Special handling of array property.
-			return Array.newInstance(fieldType.getComponentType(), 0);
-		}
-		else {
-			// Default value: try null.
-			return null;
-		}
+	@Nullable
+	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
+		return (fieldType != null ? getEmptyValue(fieldType) : null);
 	}
 
 	/**
+	 * Determine an empty value for the specified field.
+	 * <p>The default implementation returns:
+	 * <ul>
+	 * <li>{@code Boolean.FALSE} for boolean fields
+	 * <li>an empty array for array types
+	 * <li>Collection implementations for Collection types
+	 * <li>Map implementations for Map types
+	 * <li>else, {@code null} is used as default
+	 * </ul>
+	 * @param fieldType the type of the field
+	 * @return the empty value (for most fields: {@code null})
+	 * @since 5.0
+	 */
+	@Nullable
+	public Object getEmptyValue(Class<?> fieldType) {
+		try {
+			if (boolean.class == fieldType || Boolean.class == fieldType) {
+				// Special handling of boolean property.
+				return Boolean.FALSE;
+			}
+			else if (fieldType.isArray()) {
+				// Special handling of array property.
+				return Array.newInstance(fieldType.getComponentType(), 0);
+			}
+			else if (Collection.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createCollection(fieldType, 0);
+			}
+			else if (Map.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createMap(fieldType, 0);
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to create default value - falling back to null: " + ex.getMessage());
+			}
+		}
+		// Default value: null.
+		return null;
+	}
+
+
+	/**
 	 * Bind all multipart files contained in the given request, if any
-	 * (in case of a multipart request).
+	 * (in case of a multipart request). To be called by subclasses.
 	 * <p>Multipart files will only be added to the property values if they
 	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param multipartFiles Map of field name String to MultipartFile object
+	 * @param multipartFiles a Map of field name String to MultipartFile object
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #setBindEmptyMultipartFiles
 	 */
 	protected void bindMultipart(Map<String, List<MultipartFile>> multipartFiles, MutablePropertyValues mpvs) {
-		for (Map.Entry<String, List<MultipartFile>> entry : multipartFiles.entrySet()) {
-			String key = entry.getKey();
-			List<MultipartFile> values = entry.getValue();
+		multipartFiles.forEach((key, values) -> {
 			if (values.size() == 1) {
 				MultipartFile value = values.get(0);
 				if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
@@ -288,7 +325,7 @@ public class WebDataBinder extends DataBinder {
 			else {
 				mpvs.add(key, values);
 			}
-		}
+		});
 	}
 
 }

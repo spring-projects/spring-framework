@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Callback interface for extracting a result object from a CCI Record instance.
@@ -38,10 +39,12 @@ import org.springframework.dao.DataAccessException;
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2
+ * @param <T> the result type
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, Record, RecordExtractor)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
  * @see javax.resource.cci.ResultSet
  */
+@FunctionalInterface
 public interface RecordExtractor<T> {
 
 	/**
@@ -57,6 +60,7 @@ public interface RecordExtractor<T> {
 	 * @throws DataAccessException in case of custom exceptions
 	 * @see javax.resource.cci.ResultSet
 	 */
+	@Nullable
 	T extractData(Record record) throws ResourceException, SQLException, DataAccessException;
 
 }

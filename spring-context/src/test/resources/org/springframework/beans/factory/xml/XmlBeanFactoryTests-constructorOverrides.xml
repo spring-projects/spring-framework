@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -28,7 +28,7 @@
 		class="org.springframework.beans.factory.xml.FactoryMethods"
 		factory-method="newInstance"
 		scope="prototype">
-		<constructor-arg index="0"><ref local="jenny"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="jenny"/></constructor-arg>
 	</bean>
 
 </beans>

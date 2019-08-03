@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
@@ -39,11 +40,11 @@ import org.springframework.util.StringValueResolver;
  * within bean definition property values and {@code @Value} annotations against the current
  * Spring {@link Environment} and its set of {@link PropertySources}.
  *
- * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}
- * in Spring 3.1 applications. It is used by default to support the {@code property-placeholder}
- * element in working against the spring-context-3.1 XSD, whereas spring-context versions
- * &lt;= 3.0 default to {@code PropertyPlaceholderConfigurer} to ensure backward compatibility.
- * See the spring-context XSD documentation for complete details.
+ * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}.
+ * It is used by default to support the {@code property-placeholder} element in working against
+ * the spring-context-3.1 or higher XSD; whereas, spring-context versions &lt;= 3.0 default to
+ * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See the spring-context
+ * XSD documentation for complete details.
  *
  * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
  * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
@@ -51,10 +52,11 @@ import org.springframework.util.StringValueResolver;
  * default {@code false} meaning that local properties are to be searched last, after all
  * environment property sources.
  *
- * <p>See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
- * and related javadocs for details on manipulating environment property sources.
+ * <p>See {@link org.springframework.core.env.ConfigurableEnvironment} and related javadocs
+ * for details on manipulating environment property sources.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see org.springframework.core.env.ConfigurableEnvironment
  * @see org.springframework.beans.factory.config.PlaceholderConfigurerSupport
@@ -75,17 +77,20 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	public static final String ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME = "environmentProperties";
 
 
+	@Nullable
 	private MutablePropertySources propertySources;
 
+	@Nullable
 	private PropertySources appliedPropertySources;
 
+	@Nullable
 	private Environment environment;
 
 
 	/**
 	 * Customize the set of {@link PropertySources} to be used by this configurer.
-	 * Setting this property indicates that environment property sources and local
-	 * properties should be ignored.
+	 * <p>Setting this property indicates that environment property sources and
+	 * local properties should be ignored.
 	 * @see #postProcessBeanFactory
 	 */
 	public void setPropertySources(PropertySources propertySources) {
@@ -93,8 +98,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>{@code PropertySources} from this environment will be searched when replacing ${...} placeholders.
+	 * {@code PropertySources} from the given {@link Environment}
+	 * will be searched when replacing ${...} placeholders.
 	 * @see #setPropertySources
 	 * @see #postProcessBeanFactory
 	 */
@@ -105,8 +110,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
+	 * Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
 	 * against this configurer's set of {@link PropertySources}, which includes:
 	 * <ul>
 	 * <li>all {@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources
@@ -128,6 +132,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				this.propertySources.addLast(
 					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
+						@Nullable
 						public String getProperty(String key) {
 							return this.source.getProperty(key);
 						}
@@ -164,23 +169,25 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
 		propertyResolver.setValueSeparator(this.valueSeparator);
 
-		StringValueResolver valueResolver = new StringValueResolver() {
-			@Override
-			public String resolveStringValue(String strVal) {
-				String resolved = ignoreUnresolvablePlaceholders ?
-						propertyResolver.resolvePlaceholders(strVal) :
-						propertyResolver.resolveRequiredPlaceholders(strVal);
-				return (resolved.equals(nullValue) ? null : resolved);
+		StringValueResolver valueResolver = strVal -> {
+			String resolved = (this.ignoreUnresolvablePlaceholders ?
+					propertyResolver.resolvePlaceholders(strVal) :
+					propertyResolver.resolveRequiredPlaceholders(strVal));
+			if (this.trimValues) {
+				resolved = resolved.trim();
 			}
+			return (resolved.equals(this.nullValue) ? null : resolved);
 		};
 
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
 	/**
-	 * Implemented for compatibility with {@link org.springframework.beans.factory.config.PlaceholderConfigurerSupport}.
-	 * @deprecated in favor of {@link #processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)}
-	 * @throws UnsupportedOperationException
+	 * Implemented for compatibility with
+	 * {@link org.springframework.beans.factory.config.PlaceholderConfigurerSupport}.
+	 * @deprecated in favor of
+	 * {@link #processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)}
+	 * @throws UnsupportedOperationException in this implementation
 	 */
 	@Override
 	@Deprecated
@@ -190,14 +197,14 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	}
 
 	/**
-	 * Returns the property sources that were actually applied during
+	 * Return the property sources that were actually applied during
 	 * {@link #postProcessBeanFactory(ConfigurableListableBeanFactory) post-processing}.
 	 * @return the property sources that were applied
 	 * @throws IllegalStateException if the property sources have not yet been applied
 	 * @since 4.0
 	 */
 	public PropertySources getAppliedPropertySources() throws IllegalStateException {
-		Assert.state(this.appliedPropertySources != null, "PropertySources have not get been applied");
+		Assert.state(this.appliedPropertySources != null, "PropertySources have not yet been applied");
 		return this.appliedPropertySources;
 	}
 

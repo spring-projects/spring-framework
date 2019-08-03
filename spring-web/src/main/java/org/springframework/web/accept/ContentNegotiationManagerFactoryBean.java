@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,74 +21,79 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
 
 /**
  * Factory to create a {@code ContentNegotiationManager} and configure it with
- * one or more {@link ContentNegotiationStrategy} instances via simple setters.
- * The following table shows setters, resulting strategy instances, and if in
- * use by default:
+ * one or more {@link ContentNegotiationStrategy} instances.
+ *
+ * <p>As of 5.0 you can set the exact strategies to use via
+ * {@link #setStrategies(List)}.
+ *
+ * <p>As an alternative you can also rely on the set of defaults described below
+ * which can be turned on or off or customized through the methods of this
+ * builder:
  *
  * <table>
  * <tr>
- *     <th>Property Setter</th>
- *     <th>Underlying Strategy</th>
- *     <th>Default Setting</th>
+ * <th>Property Setter</th>
+ * <th>Underlying Strategy</th>
+ * <th>Default Setting</th>
  * </tr>
  * <tr>
- *     <td>{@link #setFavorPathExtension}</td>
- *     <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
- *     <td>On</td>
+ * <td>{@link #setFavorPathExtension}</td>
+ * <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #setFavorParameter favorParameter}</td>
- *     <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
- *     <td>Off</td>
+ * <td>{@link #setFavorParameter favorParameter}</td>
+ * <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ * <td>Off</td>
  * </tr>
  * <tr>
- *     <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
- *     <td>On</td>
+ * <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
+ * <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #setDefaultContentType defaultContentType}</td>
- *     <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #setDefaultContentType defaultContentType}</td>
+ * <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
+ * <td>Not set</td>
  * </tr>
  * <tr>
- *     <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
- *     <td>{@link ContentNegotiationStrategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
+ * <td>{@link ContentNegotiationStrategy}</td>
+ * <td>Not set</td>
  * </tr>
  * </table>
  *
- * <p>The order in which strategies are configured is fixed. Setters may only
- * turn individual strategies on or off. If you need a custom order for any
- * reason simply instantiate {@code ContentNegotiationManager} directly.
- *
- * <p>For the path extension and parameter strategies you may explicitly add
- * {@link #setMediaTypes MediaType mappings}. This will be used to resolve path
- * extensions or a parameter value such as "json" to a media type such as
- * "application/json".
- *
- * <p>The path extension strategy will also use {@link ServletContext#getMimeType}
- * and the Java Activation framework (JAF), if available, to resolve a path
- * extension to a MediaType. You may {@link #setUseJaf suppress} the use of JAF.
+ * <strong>Note:</strong> if you must use URL-based content type resolution,
+ * the use of a query parameter is simpler and preferable to the use of a path
+ * extension since the latter can cause issues with URI variables, path
+ * parameters, and URI decoding. Consider setting {@link #setFavorPathExtension}
+ * to {@literal false} or otherwise set the strategies to use explicitly via
+ * {@link #setStrategies(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public class ContentNegotiationManagerFactoryBean
 		implements FactoryBean<ContentNegotiationManager>, ServletContextAware, InitializingBean {
+
+	@Nullable
+	private List<ContentNegotiationStrategy> strategies;
+
 
 	private boolean favorPathExtension = true;
 
@@ -96,20 +101,36 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreAcceptHeader = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
 
-	private Boolean useJaf;
+	@Nullable
+	private Boolean useRegisteredExtensionsOnly;
 
 	private String parameterName = "format";
 
+	@Nullable
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private ServletContext servletContext;
 
+
+	/**
+	 * Set the exact list of strategies to use.
+	 * <p><strong>Note:</strong> use of this method is mutually exclusive with
+	 * use of all other setters in this class which customize a default, fixed
+	 * set of strategies. See class level doc for more details.
+	 * @param strategies the strategies to use
+	 * @since 5.0
+	 */
+	public void setStrategies(@Nullable List<ContentNegotiationStrategy> strategies) {
+		this.strategies = (strategies != null ? new ArrayList<>(strategies) : null);
+	}
 
 	/**
 	 * Whether the path extension in the URL path should be used to determine
@@ -130,19 +151,19 @@ public class ContentNegotiationManagerFactoryBean
 	 * (see Spring Framework reference documentation for more details on RFD
 	 * attack protection).
 	 * <p>The path extension strategy will also try to use
-	 * {@link ServletContext#getMimeType} and JAF (if present) to resolve path
-	 * extensions. To change this behavior see the {@link #useJaf} property.
+	 * {@link ServletContext#getMimeType} and
+	 * {@link org.springframework.http.MediaTypeFactory} to resolve path extensions.
 	 * @param mediaTypes media type mappings
 	 * @see #addMediaType(String, MediaType)
 	 * @see #addMediaTypes(Map)
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Entry<Object, Object> entry : mediaTypes.entrySet()) {
-				String extension = ((String)entry.getKey()).toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.valueOf((String) entry.getValue());
+			mediaTypes.forEach((key, value) -> {
+				String extension = ((String) key).toLowerCase(Locale.ENGLISH);
+				MediaType mediaType = MediaType.valueOf((String) value);
 				this.mediaTypes.put(extension, mediaType);
-			}
+			});
 		}
 	}
 
@@ -160,7 +181,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * @see #setMediaTypes
 	 * @see #addMediaType
 	 */
-	public void addMediaTypes(Map<String, MediaType> mediaTypes) {
+	public void addMediaTypes(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
 			this.mediaTypes.putAll(mediaTypes);
 		}
@@ -177,18 +198,29 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * When {@link #setFavorPathExtension favorPathExtension} is set, this
-	 * property determines whether to allow use of JAF (Java Activation Framework)
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use JAF if available.
+	 * Indicate whether to use the Java Activation Framework as a fallback option
+	 * to map from file extensions to media types.
+	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}, which
+	 * has reverse behavior.
 	 */
+	@Deprecated
 	public void setUseJaf(boolean useJaf) {
-		this.useJaf = useJaf;
+		setUseRegisteredExtensionsOnly(!useJaf);
 	}
 
-	private boolean isUseJafTurnedOff() {
-		return (this.useJaf != null && !this.useJaf);
+	/**
+	 * When {@link #setFavorPathExtension favorPathExtension} or
+	 * {@link #setFavorParameter(boolean)} is set, this property determines
+	 * whether to use only registered {@code MediaType} mappings or to allow
+	 * dynamic resolution, e.g. via {@link MediaTypeFactory}.
+	 * <p>By default this is not set in which case dynamic resolution is on.
+	 */
+	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
+		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
+	}
+
+	private boolean useRegisteredExtensionsOnly() {
+		return (this.useRegisteredExtensionsOnly != null && this.useRegisteredExtensionsOnly);
 	}
 
 	/**
@@ -229,11 +261,21 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
+	 * Set the default content types to use when no content type is requested.
+	 * <p>By default this is not set.
+	 * @since 5.0
+	 * @see #setDefaultContentTypeStrategy
+	 */
+	public void setDefaultContentTypes(List<MediaType> contentTypes) {
+		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(contentTypes);
+	}
+
+	/**
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #setDefaultContentType
 	 * @since 4.1.2
+	 * @see #setDefaultContentType
 	 */
 	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy strategy) {
 		this.defaultNegotiationStrategy = strategy;
@@ -250,43 +292,63 @@ public class ContentNegotiationManagerFactoryBean
 
 	@Override
 	public void afterPropertiesSet() {
-		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
+		build();
+	}
 
-		if (this.favorPathExtension) {
-			PathExtensionContentNegotiationStrategy strategy;
-			if (this.servletContext != null && !isUseJafTurnedOff()) {
-				strategy = new ServletPathExtensionContentNegotiationStrategy(
-						this.servletContext, this.mediaTypes);
-			}
-			else {
-				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
-			}
-			strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
-			if (this.useJaf != null) {
-				strategy.setUseJaf(this.useJaf);
-			}
-			strategies.add(strategy);
+	/**
+	 * Actually build the {@link ContentNegotiationManager}.
+	 * @since 5.0
+	 */
+	public ContentNegotiationManager build() {
+		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
+
+		if (this.strategies != null) {
+			strategies.addAll(this.strategies);
 		}
+		else {
+			if (this.favorPathExtension) {
+				PathExtensionContentNegotiationStrategy strategy;
+				if (this.servletContext != null && !useRegisteredExtensionsOnly()) {
+					strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
+				}
+				else {
+					strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
+				}
+				strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
+				if (this.useRegisteredExtensionsOnly != null) {
+					strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
+				}
+				strategies.add(strategy);
+			}
 
-		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy =
-					new ParameterContentNegotiationStrategy(this.mediaTypes);
-			strategy.setParameterName(this.parameterName);
-			strategies.add(strategy);
-		}
+			if (this.favorParameter) {
+				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
+				strategy.setParameterName(this.parameterName);
+				if (this.useRegisteredExtensionsOnly != null) {
+					strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
+				}
+				else {
+					strategy.setUseRegisteredExtensionsOnly(true);  // backwards compatibility
+				}
+				strategies.add(strategy);
+			}
 
-		if (!this.ignoreAcceptHeader) {
-			strategies.add(new HeaderContentNegotiationStrategy());
-		}
+			if (!this.ignoreAcceptHeader) {
+				strategies.add(new HeaderContentNegotiationStrategy());
+			}
 
-		if (this.defaultNegotiationStrategy != null) {
-			strategies.add(this.defaultNegotiationStrategy);
+			if (this.defaultNegotiationStrategy != null) {
+				strategies.add(this.defaultNegotiationStrategy);
+			}
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
+		return this.contentNegotiationManager;
 	}
 
+
 	@Override
+	@Nullable
 	public ContentNegotiationManager getObject() {
 		return this.contentNegotiationManager;
 	}

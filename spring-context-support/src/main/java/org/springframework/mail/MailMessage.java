@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,26 +35,26 @@ import java.util.Date;
  */
 public interface MailMessage {
 
-	public void setFrom(String from) throws MailParseException;
+	void setFrom(String from) throws MailParseException;
 
-	public void setReplyTo(String replyTo) throws MailParseException;
+	void setReplyTo(String replyTo) throws MailParseException;
 
-	public void setTo(String to) throws MailParseException;
+	void setTo(String to) throws MailParseException;
 
-	public void setTo(String[] to) throws MailParseException;
+	void setTo(String... to) throws MailParseException;
 
-	public void setCc(String cc) throws MailParseException;
+	void setCc(String cc) throws MailParseException;
 
-	public void setCc(String[] cc) throws MailParseException;
+	void setCc(String... cc) throws MailParseException;
 
-	public void setBcc(String bcc) throws MailParseException;
+	void setBcc(String bcc) throws MailParseException;
 
-	public void setBcc(String[] bcc) throws MailParseException;
+	void setBcc(String... bcc) throws MailParseException;
 
-	public void setSentDate(Date sentDate) throws MailParseException;
+	void setSentDate(Date sentDate) throws MailParseException;
 
-	public void setSubject(String subject) throws MailParseException;
+	void setSubject(String subject) throws MailParseException;
 
-	public void setText(String text) throws MailParseException;
+	void setText(String text) throws MailParseException;
 
 }

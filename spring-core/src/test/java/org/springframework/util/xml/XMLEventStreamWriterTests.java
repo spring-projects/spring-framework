@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,12 @@ import javax.xml.stream.XMLOutputFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.util.Predicate;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLEventStreamWriterTests {
 
@@ -57,7 +61,8 @@ public class XMLEventStreamWriterTests {
 		streamWriter.writeEndElement();
 		streamWriter.writeEndDocument();
 
-		assertXMLEqual(XML, stringWriter.toString());
+		Predicate<Node> nodeFilter = n -> n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
+		assertThat(XmlContent.from(stringWriter)).isSimilarTo(XML, nodeFilter);
 	}
 
 

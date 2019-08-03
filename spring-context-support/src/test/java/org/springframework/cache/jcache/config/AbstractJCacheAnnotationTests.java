@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,10 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 /**
  * @author Stephane Nicoll
@@ -64,7 +67,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object first = service.cache(keyItem);
 		Object second = service.cache(keyItem);
-		assertSame(first, second);
+		assertThat(second).isSameAs(first);
 	}
 
 	@Test
@@ -72,16 +75,16 @@ public abstract class AbstractJCacheAnnotationTests {
 		Cache cache = getCache(DEFAULT_CACHE);
 
 		String keyItem = name.getMethodName();
-		assertNull(cache.get(keyItem));
+		assertThat(cache.get(keyItem)).isNull();
 
 		Object first = service.cacheNull(keyItem);
 		Object second = service.cacheNull(keyItem);
-		assertSame(first, second);
+		assertThat(second).isSameAs(first);
 
 		Cache.ValueWrapper wrapper = cache.get(keyItem);
-		assertNotNull(wrapper);
-		assertSame(first, wrapper.get());
-		assertNull("Cached value should be null", wrapper.get());
+		assertThat(wrapper).isNotNull();
+		assertThat(wrapper.get()).isSameAs(first);
+		assertThat(wrapper.get()).as("Cached value should be null").isNull();
 	}
 
 	@Test
@@ -90,19 +93,14 @@ public abstract class AbstractJCacheAnnotationTests {
 		Cache cache = getCache(EXCEPTION_CACHE);
 
 		Object key = createKey(keyItem);
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
-		try {
-			service.cacheWithException(keyItem, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.cacheWithException(keyItem, true));
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(UnsupportedOperationException.class, result.get().getClass());
+		assertThat(result).isNotNull();
+		assertThat(result.get().getClass()).isEqualTo(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -111,16 +109,11 @@ public abstract class AbstractJCacheAnnotationTests {
 		Cache cache = getCache(EXCEPTION_CACHE);
 
 		Object key = createKey(keyItem);
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
-		try {
-			service.cacheWithException(keyItem, false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
-		assertNull(cache.get(key));
+		assertThatNullPointerException().isThrownBy(() ->
+				service.cacheWithException(keyItem, false));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -129,49 +122,39 @@ public abstract class AbstractJCacheAnnotationTests {
 		Cache cache = getCache(EXCEPTION_CACHE);
 
 		Object key = createKey(keyItem);
-		assertNull(cache.get(key));
-
-		try {
-			service.cacheWithCheckedException(keyItem, true);
-			fail("Should have thrown an exception");
-		}
-		catch (IOException e) {
-			// This is what we expect
-		}
+		assertThat(cache.get(key)).isNull();
+		assertThatIOException().isThrownBy(() ->
+				service.cacheWithCheckedException(keyItem, true));
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(IOException.class, result.get().getClass());
+		assertThat(result).isNotNull();
+		assertThat(result.get().getClass()).isEqualTo(IOException.class);
 	}
 
 
 	@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 	@Test
 	public void cacheExceptionRewriteCallStack() {
-		final String keyItem = name.getMethodName();
-
-		UnsupportedOperationException first = null;
+		String keyItem = name.getMethodName();
 		long ref = service.exceptionInvocations();
-		try {
-			service.cacheWithException(keyItem, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			first = e;
-		}
-		// Sanity check, this particular call has called the service
-		assertEquals("First call should not have been cached", ref + 1, service.exceptionInvocations());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.cacheWithException(keyItem, true))
+			.satisfies(first -> {
+				// Sanity check, this particular call has called the service
+				// First call should not have been cached
+				assertThat(service.exceptionInvocations()).isEqualTo(ref + 1);
 
-		UnsupportedOperationException second = methodInCallStack(keyItem);
-		// Sanity check, this particular call has *not* called the service
-		assertEquals("Second call should have been cached", ref + 1, service.exceptionInvocations());
+				UnsupportedOperationException second = methodInCallStack(keyItem);
+				// Sanity check, this particular call has *not* called the service
+				// Second call should have been cached
+				assertThat(service.exceptionInvocations()).isEqualTo(ref + 1);
 
-		assertEquals(first.getCause(), second.getCause());
-		assertEquals(first.getMessage(), second.getMessage());
-		assertFalse("Original stack must not contain any reference to methodInCallStack",
-				contain(first, AbstractJCacheAnnotationTests.class.getName(), "methodInCallStack"));
-		assertTrue("Cached stack should have been rewritten with a reference to  methodInCallStack",
-				contain(second, AbstractJCacheAnnotationTests.class.getName(), "methodInCallStack"));
+				assertThat(first).hasCause(second.getCause());
+				assertThat(first).hasMessage(second.getMessage());
+				// Original stack must not contain any reference to methodInCallStack
+				assertThat(contain(first, AbstractJCacheAnnotationTests.class.getName(), "methodInCallStack")).isFalse();
+				assertThat(contain(second, AbstractJCacheAnnotationTests.class.getName(), "methodInCallStack")).isTrue();
+			});
 	}
 
 	@Test
@@ -180,7 +163,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object first = service.cacheAlwaysInvoke(keyItem);
 		Object second = service.cacheAlwaysInvoke(keyItem);
-		assertNotSame(first, second);
+		assertThat(second).isNotSameAs(first);
 	}
 
 	@Test
@@ -189,7 +172,8 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object first = service.cacheWithPartialKey(keyItem, true);
 		Object second = service.cacheWithPartialKey(keyItem, false);
-		assertSame(first, second); // second argument not used, see config
+		// second argument not used, see config
+		assertThat(second).isSameAs(first);
 	}
 
 	@Test
@@ -200,7 +184,8 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(keyItem);
 		service.cacheWithCustomCacheResolver(keyItem);
 
-		assertNull(cache.get(key)); // Cache in mock cache
+		// Cache in mock cache
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -211,7 +196,7 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(keyItem);
 		service.cacheWithCustomKeyGenerator(keyItem, "ignored");
 
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -221,13 +206,13 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
 		service.put(keyItem, value);
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(value, result.get());
+		assertThat(result).isNotNull();
+		assertThat(result.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -237,19 +222,14 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
-		try {
-			service.putWithException(keyItem, value, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.putWithException(keyItem, value, true));
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(value, result.get());
+		assertThat(result).isNotNull();
+		assertThat(result.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -259,16 +239,11 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
-		try {
-			service.putWithException(keyItem, value, false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
-		assertNull(cache.get(key));
+		assertThatNullPointerException().isThrownBy(() ->
+				service.putWithException(keyItem, value, false));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -278,13 +253,13 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
 		service.earlyPut(keyItem, value);
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(value, result.get());
+		assertThat(result).isNotNull();
+		assertThat(result.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -294,19 +269,14 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 
-		try {
-			service.earlyPutWithException(keyItem, value, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.earlyPutWithException(keyItem, value, true));
 
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(value, result.get());
+		assertThat(result).isNotNull();
+		assertThat(result.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -316,19 +286,13 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		Object key = createKey(keyItem);
 		Object value = new Object();
-		assertNull(cache.get(key));
-
-		try {
-			service.earlyPutWithException(keyItem, value, false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
+		assertThat(cache.get(key)).isNull();
+		assertThatNullPointerException().isThrownBy(() ->
+				service.earlyPutWithException(keyItem, value, false));
 		// This will be cached anyway as the earlyPut has updated the cache before
 		Cache.ValueWrapper result = cache.get(key);
-		assertNotNull(result);
-		assertEquals(value, result.get());
+		assertThat(result).isNotNull();
+		assertThat(result.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -342,7 +306,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		service.remove(keyItem);
 
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -354,15 +318,10 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object value = new Object();
 		cache.put(key, value);
 
-		try {
-			service.removeWithException(keyItem, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.removeWithException(keyItem, true));
 
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -374,16 +333,11 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object value = new Object();
 		cache.put(key, value);
 
-		try {
-			service.removeWithException(keyItem, false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
+		assertThatNullPointerException().isThrownBy(() ->
+				service.removeWithException(keyItem, false));
 		Cache.ValueWrapper wrapper = cache.get(key);
-		assertNotNull(wrapper);
-		assertEquals(value, wrapper.get());
+		assertThat(wrapper).isNotNull();
+		assertThat(wrapper.get()).isEqualTo(value);
 	}
 
 	@Test
@@ -397,7 +351,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		service.earlyRemove(keyItem);
 
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -409,14 +363,9 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object value = new Object();
 		cache.put(key, value);
 
-		try {
-			service.earlyRemoveWithException(keyItem, true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
-		assertNull(cache.get(key));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.earlyRemoveWithException(keyItem, true));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -428,15 +377,10 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object value = new Object();
 		cache.put(key, value);
 
-		try {
-			service.earlyRemoveWithException(keyItem, false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
+		assertThatNullPointerException().isThrownBy(() ->
+				service.earlyRemoveWithException(keyItem, false));
 		// This will be remove anyway as the earlyRemove has removed the cache before
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
@@ -448,7 +392,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		service.removeAll();
 
-		assertTrue(isEmpty(cache));
+		assertThat(isEmpty(cache)).isTrue();
 	}
 
 	@Test
@@ -458,15 +402,10 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(name.getMethodName());
 		cache.put(key, new Object());
 
-		try {
-			service.removeAllWithException(true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.removeAllWithException(true));
 
-		assertTrue(isEmpty(cache));
+		assertThat(isEmpty(cache)).isTrue();
 	}
 
 	@Test
@@ -476,14 +415,9 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(name.getMethodName());
 		cache.put(key, new Object());
 
-		try {
-			service.removeAllWithException(false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
-		assertNotNull(cache.get(key));
+		assertThatNullPointerException().isThrownBy(() ->
+				service.removeAllWithException(false));
+		assertThat(cache.get(key)).isNotNull();
 	}
 
 	@Test
@@ -495,7 +429,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		service.earlyRemoveAll();
 
-		assertTrue(isEmpty(cache));
+		assertThat(isEmpty(cache)).isTrue();
 	}
 
 	@Test
@@ -505,14 +439,9 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(name.getMethodName());
 		cache.put(key, new Object());
 
-		try {
-			service.earlyRemoveAllWithException(true);
-			fail("Should have thrown an exception");
-		}
-		catch (UnsupportedOperationException e) {
-			// This is what we expect
-		}
-		assertTrue(isEmpty(cache));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.earlyRemoveAllWithException(true));
+		assertThat(isEmpty(cache)).isTrue();
 	}
 
 	@Test
@@ -522,15 +451,10 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object key = createKey(name.getMethodName());
 		cache.put(key, new Object());
 
-		try {
-			service.earlyRemoveAllWithException(false);
-			fail("Should have thrown an exception");
-		}
-		catch (NullPointerException e) {
-			// This is what we expect
-		}
+		assertThatNullPointerException().isThrownBy(() ->
+				service.earlyRemoveAllWithException(false));
 		// This will be remove anyway as the earlyRemove has removed the cache before
-		assertTrue(isEmpty(cache));
+		assertThat(isEmpty(cache)).isTrue();
 	}
 
 	protected boolean isEmpty(Cache cache) {
@@ -545,7 +469,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	private Cache getCache(String name) {
 		Cache cache = cacheManager.getCache(name);
-		assertNotNull("required cache " + name + " does not exist", cache);
+		assertThat(cache).as("required cache " + name + " does not exist").isNotNull();
 		return cache;
 	}
 

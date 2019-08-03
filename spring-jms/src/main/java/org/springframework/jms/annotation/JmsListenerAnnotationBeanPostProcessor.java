@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,9 @@
 package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -34,21 +38,27 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Bean post-processor that registers methods annotated with {@link JmsListener}
@@ -79,7 +89,7 @@ import org.springframework.util.StringUtils;
  * @see MethodJmsListenerEndpoint
  */
 public class JmsListenerAnnotationBeanPostProcessor
-		implements BeanPostProcessor, Ordered, BeanFactoryAware, SmartInitializingSingleton {
+		implements MergedBeanDefinitionPostProcessor, Ordered, BeanFactoryAware, SmartInitializingSingleton {
 
 	/**
 	 * The bean name of the default {@link JmsListenerContainerFactory}.
@@ -89,20 +99,26 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private JmsListenerEndpointRegistry endpointRegistry;
-
+	@Nullable
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
+	@Nullable
+	private JmsListenerEndpointRegistry endpointRegistry;
+
+	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
+			new MessageHandlerMethodFactoryAdapter();
+
+	@Nullable
 	private BeanFactory beanFactory;
 
-	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory = new MessageHandlerMethodFactoryAdapter();
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
 	private final AtomicInteger counter = new AtomicInteger();
 
-	private final Set<Class<?>> nonAnnotatedClasses =
-			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 
 	@Override
@@ -111,19 +127,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set the {@link JmsListenerEndpointRegistry} that will hold the created
-	 * endpoint and manage the lifecycle of the related listener container.
-	 */
-	public void setEndpointRegistry(JmsListenerEndpointRegistry endpointRegistry) {
-		this.endpointRegistry = endpointRegistry;
-	}
-
-	/**
 	 * Set the name of the {@link JmsListenerContainerFactory} to use by default.
 	 * <p>If none is specified, "jmsListenerContainerFactory" is assumed to be defined.
 	 */
 	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
 		this.containerFactoryBeanName = containerFactoryBeanName;
+	}
+
+	/**
+	 * Set the {@link JmsListenerEndpointRegistry} that will hold the created
+	 * endpoint and manage the lifecycle of the related listener container.
+	 */
+	public void setEndpointRegistry(JmsListenerEndpointRegistry endpointRegistry) {
+		this.endpointRegistry = endpointRegistry;
 	}
 
 	/**
@@ -146,22 +162,35 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		}
+		this.registrar.setBeanFactory(beanFactory);
 	}
 
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		this.registrar.setBeanFactory(this.beanFactory);
+		// Remove resolved singleton classes from cache
+		this.nonAnnotatedClasses.clear();
 
 		if (this.beanFactory instanceof ListableBeanFactory) {
-			Map<String, JmsListenerConfigurer> instances =
+			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
+			Map<String, JmsListenerConfigurer> beans =
 					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
-			for (JmsListenerConfigurer configurer : instances.values()) {
+			List<JmsListenerConfigurer> configurers = new ArrayList<>(beans.values());
+			AnnotationAwareOrderComparator.sort(configurers);
+			for (JmsListenerConfigurer configurer : configurers) {
 				configurer.configureJmsListeners(this.registrar);
 			}
 		}
 
+		if (this.containerFactoryBeanName != null) {
+			this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
+		}
+
 		if (this.registrar.getEndpointRegistry() == null) {
+			// Determine JmsListenerEndpointRegistry bean from the BeanFactory
 			if (this.endpointRegistry == null) {
 				Assert.state(this.beanFactory != null, "BeanFactory must be set to find endpoint registry by bean name");
 				this.endpointRegistry = this.beanFactory.getBean(
@@ -170,9 +199,6 @@ public class JmsListenerAnnotationBeanPostProcessor
 			this.registrar.setEndpointRegistry(this.endpointRegistry);
 		}
 
-		if (this.containerFactoryBeanName != null) {
-			this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
-		}
 
 		// Set the custom handler method factory once resolved by the configurer
 		MessageHandlerMethodFactory handlerMethodFactory = this.registrar.getMessageHandlerMethodFactory();
@@ -186,37 +212,41 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 
 	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+	}
+
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
 	@Override
-	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
-		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		if (bean instanceof AopInfrastructureBean || bean instanceof JmsListenerContainerFactory ||
+				bean instanceof JmsListenerEndpointRegistry) {
+			// Ignore AOP infrastructure such as scoped proxies.
+			return bean;
+		}
+
+		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+		if (!this.nonAnnotatedClasses.contains(targetClass) &&
+				AnnotationUtils.isCandidateClass(targetClass, JmsListener.class)) {
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
-						@Override
-						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods =
-									AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
-							return (!listenerMethods.isEmpty() ? listenerMethods : null);
-						}
+					(MethodIntrospector.MetadataLookup<Set<JmsListener>>) method -> {
+						Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+								method, JmsListener.class, JmsListeners.class);
+						return (!listenerMethods.isEmpty() ? listenerMethods : null);
 					});
 			if (annotatedMethods.isEmpty()) {
-				this.nonAnnotatedClasses.add(bean.getClass());
+				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isTraceEnabled()) {
-					logger.trace("No @JmsListener annotations found on bean type: " + bean.getClass());
+					logger.trace("No @JmsListener annotations found on bean type: " + targetClass);
 				}
 			}
 			else {
 				// Non-empty set of methods
-				for (Map.Entry<Method, Set<JmsListener>> entry : annotatedMethods.entrySet()) {
-					Method method = entry.getKey();
-					for (JmsListener listener : entry.getValue()) {
-						processJmsListener(listener, method, bean);
-					}
-				}
+				annotatedMethods.forEach((method, listeners) ->
+						listeners.forEach(listener -> processJmsListener(listener, method, bean)));
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @JmsListener methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -226,14 +256,24 @@ public class JmsListenerAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	/**
+	 * Process the given {@link JmsListener} annotation on the given method,
+	 * registering a corresponding endpoint for the given bean instance.
+	 * @param jmsListener the annotation to process
+	 * @param mostSpecificMethod the annotated method
+	 * @param bean the instance to invoke the method on
+	 * @see #createMethodJmsListenerEndpoint()
+	 * @see JmsListenerEndpointRegistrar#registerEndpoint
+	 */
 	protected void processJmsListener(JmsListener jmsListener, Method mostSpecificMethod, Object bean) {
-		Method invocableMethod = MethodIntrospector.selectInvocableMethod(mostSpecificMethod, bean.getClass());
+		Method invocableMethod = AopUtils.selectInvocableMethod(mostSpecificMethod, bean.getClass());
 
-		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
+		MethodJmsListenerEndpoint endpoint = createMethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
 		endpoint.setMethod(invocableMethod);
 		endpoint.setMostSpecificMethod(mostSpecificMethod);
 		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
+		endpoint.setEmbeddedValueResolver(this.embeddedValueResolver);
 		endpoint.setBeanFactory(this.beanFactory);
 		endpoint.setId(getEndpointId(jmsListener));
 		endpoint.setDestination(resolve(jmsListener.destination()));
@@ -264,24 +304,30 @@ public class JmsListenerAnnotationBeanPostProcessor
 		this.registrar.registerEndpoint(endpoint, factory);
 	}
 
+	/**
+	 * Instantiate an empty {@link MethodJmsListenerEndpoint} for further
+	 * configuration with provided parameters in {@link #processJmsListener}.
+	 * @return a new {@code MethodJmsListenerEndpoint} or subclass thereof
+	 * @since 4.1.9
+	 * @see MethodJmsListenerEndpoint#createMessageListenerInstance()
+	 */
+	protected MethodJmsListenerEndpoint createMethodJmsListenerEndpoint() {
+		return new MethodJmsListenerEndpoint();
+	}
+
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
-			return resolve(jmsListener.id());
+			String id = resolve(jmsListener.id());
+			return (id != null ? id : "");
 		}
 		else {
 			return "org.springframework.jms.JmsListenerEndpointContainer#" + this.counter.getAndIncrement();
 		}
 	}
 
-	/**
-	 * Resolve the specified value if possible.
-	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
-	 */
+	@Nullable
 	private String resolve(String value) {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
-		}
-		return value;
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 
@@ -293,6 +339,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	 */
 	private class MessageHandlerMethodFactoryAdapter implements MessageHandlerMethodFactory {
 
+		@Nullable
 		private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 		public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
@@ -313,7 +360,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		private MessageHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {
 			DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
-			defaultFactory.setBeanFactory(beanFactory);
+			if (beanFactory != null) {
+				defaultFactory.setBeanFactory(beanFactory);
+			}
 			defaultFactory.afterPropertiesSet();
 			return defaultFactory;
 		}

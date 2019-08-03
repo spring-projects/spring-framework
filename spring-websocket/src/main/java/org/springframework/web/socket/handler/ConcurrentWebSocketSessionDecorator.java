@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,15 +31,16 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * Wraps a {@link org.springframework.web.socket.WebSocketSession} and guarantees
- * only one thread can send messages at a time.
+ * Wrap a {@link org.springframework.web.socket.WebSocketSession WebSocketSession}
+ * to guarantee only one thread can send messages at a time.
  *
- * <p>If a send is slow, subsequent attempts to send more messages from a different
- * thread will fail to acquire the flushLock and the messages will be buffered instead --
- * at that time the specified buffer size limit and send time limit will be checked
- * and the session closed if the limits are exceeded.
+ * <p>If a send is slow, subsequent attempts to send more messages from other threads
+ * will not be able to acquire the flush lock and messages will be buffered instead.
+ * At that time, the specified buffer-size limit and send-time limit will be checked
+ * and the session will be closed if the limits are exceeded.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0.3
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
@@ -47,47 +48,92 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	private static final Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
 
 
-	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();
-
-	private final AtomicInteger bufferSize = new AtomicInteger();
+	private final int sendTimeLimit;
 
 	private final int bufferSizeLimit;
 
+	private final OverflowStrategy overflowStrategy;
+
+	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<>();
+
+	private final AtomicInteger bufferSize = new AtomicInteger();
 
 	private volatile long sendStartTime;
 
-	private final int sendTimeLimit;
-
-
 	private volatile boolean limitExceeded;
 
-	private volatile boolean shutdownInProgress;
-
+	private volatile boolean closeInProgress;
 
 	private final Lock flushLock = new ReentrantLock();
 
 	private final Lock closeLock = new ReentrantLock();
 
 
+	/**
+	 * Basic constructor.
+	 * @param delegate the {@code WebSocketSession} to delegate to
+	 * @param sendTimeLimit the send-time limit (milliseconds)
+	 * @param bufferSizeLimit the buffer-size limit (number of bytes)
+	 */
 	public ConcurrentWebSocketSessionDecorator(WebSocketSession delegate, int sendTimeLimit, int bufferSizeLimit) {
+		this(delegate, sendTimeLimit, bufferSizeLimit, OverflowStrategy.TERMINATE);
+	}
+
+	/**
+	 * Constructor that also specifies the overflow strategy to use.
+	 * @param delegate the {@code WebSocketSession} to delegate to
+	 * @param sendTimeLimit the send-time limit (milliseconds)
+	 * @param bufferSizeLimit the buffer-size limit (number of bytes)
+	 * @param overflowStrategy the overflow strategy to use; by default the
+	 * session is terminated.
+	 * @since 5.1
+	 */
+	public ConcurrentWebSocketSessionDecorator(
+			WebSocketSession delegate, int sendTimeLimit, int bufferSizeLimit, OverflowStrategy overflowStrategy) {
+
 		super(delegate);
 		this.sendTimeLimit = sendTimeLimit;
 		this.bufferSizeLimit = bufferSizeLimit;
+		this.overflowStrategy = overflowStrategy;
 	}
 
 
+	/**
+	 * Return the configured send-time limit (milliseconds).
+	 * @since 4.3.13
+	 */
+	public int getSendTimeLimit() {
+		return this.sendTimeLimit;
+	}
+
+	/**
+	 * Return the configured buffer-size limit (number of bytes).
+	 * @since 4.3.13
+	 */
+	public int getBufferSizeLimit() {
+		return this.bufferSizeLimit;
+	}
+
+	/**
+	 * Return the current buffer size (number of bytes).
+	 */
 	public int getBufferSize() {
 		return this.bufferSize.get();
 	}
 
+	/**
+	 * Return the time (milliseconds) since the current send started,
+	 * or 0 if no send is currently in progress.
+	 */
 	public long getTimeSinceSendStarted() {
 		long start = this.sendStartTime;
 		return (start > 0 ? (System.currentTimeMillis() - start) : 0);
 	}
 
 
+	@Override
 	public void sendMessage(WebSocketMessage<?> message) throws IOException {
-		if (isDisabled()) {
+		if (shouldNotSend()) {
 			return;
 		}
 
@@ -97,57 +143,77 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		do {
 			if (!tryFlushMessageBuffer()) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Another send already in progress, session id '" +
-							getId() + "'" + ", in-progress send time " + getTimeSinceSendStarted() +
-							" (ms)" + ", buffer size " + this.bufferSize + " bytes");
+					logger.trace(String.format("Another send already in progress: " +
+							"session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",
+							getId(), getTimeSinceSendStarted(), getBufferSize()));
 				}
 				checkSessionLimits();
 				break;
 			}
 		}
-		while (!this.buffer.isEmpty() && !isDisabled());
+		while (!this.buffer.isEmpty() && !shouldNotSend());
 	}
 
-	private boolean isDisabled() {
-		return (this.limitExceeded || this.shutdownInProgress);
+	private boolean shouldNotSend() {
+		return (this.limitExceeded || this.closeInProgress);
 	}
 
 	private boolean tryFlushMessageBuffer() throws IOException {
 		if (this.flushLock.tryLock()) {
 			try {
 				while (true) {
-					WebSocketMessage<?> messageToSend = this.buffer.poll();
-					if (messageToSend == null || isDisabled()) {
+					WebSocketMessage<?> message = this.buffer.poll();
+					if (message == null || shouldNotSend()) {
 						break;
 					}
-					this.bufferSize.addAndGet(messageToSend.getPayloadLength() * -1);
+					this.bufferSize.addAndGet(-message.getPayloadLength());
 					this.sendStartTime = System.currentTimeMillis();
-					getDelegate().sendMessage(messageToSend);
+					getDelegate().sendMessage(message);
 					this.sendStartTime = 0;
 				}
 			}
 			finally {
 				this.sendStartTime = 0;
-				flushLock.unlock();
+				this.flushLock.unlock();
 			}
 			return true;
 		}
 		return false;
 	}
 
-	private void checkSessionLimits() throws IOException {
-		if (!isDisabled() && this.closeLock.tryLock()) {
+	private void checkSessionLimits() {
+		if (!shouldNotSend() && this.closeLock.tryLock()) {
 			try {
-				if (getTimeSinceSendStarted() > this.sendTimeLimit) {
-					String errorMessage = "Message send time " + getTimeSinceSendStarted() +
-							" (ms) exceeded the allowed limit " + this.sendTimeLimit;
-					sessionLimitReached(errorMessage, CloseStatus.SESSION_NOT_RELIABLE);
+				if (getTimeSinceSendStarted() > getSendTimeLimit()) {
+					String format = "Send time %d (ms) for session '%s' exceeded the allowed limit %d";
+					String reason = String.format(format, getTimeSinceSendStarted(), getId(), getSendTimeLimit());
+					limitExceeded(reason);
 				}
-				else if (this.bufferSize.get() > this.bufferSizeLimit) {
-					String errorMessage = "The send buffer size " + this.bufferSize.get() + " bytes for " +
-							"session '" + getId() + " exceeded the allowed limit " + this.bufferSizeLimit;
-					sessionLimitReached(errorMessage,
-							(getTimeSinceSendStarted() >= 10000 ? CloseStatus.SESSION_NOT_RELIABLE : null));
+				else if (getBufferSize() > getBufferSizeLimit()) {
+					switch (this.overflowStrategy) {
+						case TERMINATE:
+							String format = "Buffer size %d bytes for session '%s' exceeds the allowed limit %d";
+							String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
+							limitExceeded(reason);
+							break;
+						case DROP:
+							int i = 0;
+							while (getBufferSize() > getBufferSizeLimit()) {
+								WebSocketMessage<?> message = this.buffer.poll();
+								if (message == null) {
+									break;
+								}
+								this.bufferSize.addAndGet(-message.getPayloadLength());
+								i++;
+							}
+							if (logger.isDebugEnabled()) {
+								logger.debug("Dropped " + i + " messages, buffer size: " + getBufferSize());
+							}
+							break;
+						default:
+							// Should never happen..
+							throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
+					}
 				}
 			}
 			finally {
@@ -156,21 +222,63 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		}
 	}
 
-	private void sessionLimitReached(String reason, CloseStatus status) {
+	private void limitExceeded(String reason) {
 		this.limitExceeded = true;
-		throw new SessionLimitExceededException(reason, status);
+		throw new SessionLimitExceededException(reason, CloseStatus.SESSION_NOT_RELIABLE);
 	}
 
 	@Override
 	public void close(CloseStatus status) throws IOException {
-		this.shutdownInProgress = true;
-		super.close(status);
+		this.closeLock.lock();
+		try {
+			if (this.closeInProgress) {
+				return;
+			}
+			if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
+				try {
+					checkSessionLimits();
+				}
+				catch (SessionLimitExceededException ex) {
+					// Ignore
+				}
+				if (this.limitExceeded) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
+					}
+					status = CloseStatus.SESSION_NOT_RELIABLE;
+				}
+			}
+			this.closeInProgress = true;
+			super.close(status);
+		}
+		finally {
+			this.closeLock.unlock();
+		}
 	}
 
 
 	@Override
 	public String toString() {
 		return getDelegate().toString();
+	}
+
+
+	/**
+	 * Enum for options of what to do when the buffer fills up.
+	 * @since 5.1
+	 */
+	public enum OverflowStrategy {
+
+		/**
+		 * Throw {@link SessionLimitExceededException} that would will result
+		 * in the session being terminated.
+		 */
+		TERMINATE,
+
+		/**
+		 * Drop the oldest messages from the buffer.
+		 */
+		DROP
 	}
 
 }

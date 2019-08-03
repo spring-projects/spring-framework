@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,12 +24,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test utility to collect and assert events.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 @Component
 public class EventCollector {
@@ -56,8 +57,8 @@ public class EventCollector {
 	 * Assert that the listener identified by the specified id has not received any event.
 	 */
 	public void assertNoEventReceived(String listenerId) {
-		List<Object> events = content.getOrDefault(listenerId, Collections.emptyList());
-		assertEquals("Expected no events but got " + events, 0, events.size());
+		List<Object> events = this.content.getOrDefault(listenerId, Collections.emptyList());
+		assertThat(events.size()).as("Expected no events but got " + events).isEqualTo(0);
 	}
 
 	/**
@@ -72,10 +73,10 @@ public class EventCollector {
 	 * specified events, in that specific order.
 	 */
 	public void assertEvent(String listenerId, Object... events) {
-		List<Object> actual = content.getOrDefault(listenerId, Collections.emptyList());
-		assertEquals("wrong number of events", events.length, actual.size());
+		List<Object> actual = this.content.getOrDefault(listenerId, Collections.emptyList());
+		assertThat(actual.size()).as("Wrong number of events").isEqualTo(events.length);
 		for (int i = 0; i < events.length; i++) {
-			assertEquals("Wrong event at index " + i, events[i], actual.get(i));
+			assertThat(actual.get(i)).as("Wrong event at index " + i).isEqualTo(events[i]);
 		}
 	}
 
@@ -97,8 +98,15 @@ public class EventCollector {
 		for (Map.Entry<String, List<Object>> entry : this.content.entrySet()) {
 			actual += entry.getValue().size();
 		}
-		assertEquals("Wrong number of total events (" + this.content.size() + ") " +
-				"registered listener(s)", number, actual);
+		assertThat(actual).as("Wrong number of total events (" + this.content.size() +
+				") registered listener(s)").isEqualTo(number);
+	}
+
+	/**
+	 * Clear the collected events, allowing for reuse of the collector.
+	 */
+	public void clear() {
+		this.content.clear();
 	}
 
 }

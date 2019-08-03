@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
+	@Nullable
 	private List<String> beanNames;
 
 
@@ -62,7 +64,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 */
 	public void setBeanNames(String... beanNames) {
 		Assert.notEmpty(beanNames, "'beanNames' must not be empty");
-		this.beanNames = new ArrayList<String>(beanNames.length);
+		this.beanNames = new ArrayList<>(beanNames.length);
 		for (String mappedName : beanNames) {
 			this.beanNames.add(StringUtils.trimWhitespace(mappedName));
 		}
@@ -73,7 +75,10 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * Identify as bean to proxy if the bean name is in the configured list of names.
 	 */
 	@Override
-	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource) {
+	@Nullable
+	protected Object[] getAdvicesAndAdvisorsForBean(
+			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
+
 		if (this.beanNames != null) {
 			for (String mappedName : this.beanNames) {
 				if (FactoryBean.class.isAssignableFrom(beanClass)) {

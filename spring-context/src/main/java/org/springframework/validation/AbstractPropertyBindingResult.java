@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,7 +43,8 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
-	private ConversionService conversionService;
+	@Nullable
+	private transient ConversionService conversionService;
 
 
 	/**
@@ -69,7 +71,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
-		return getPropertyAccessor();
+		return (getTarget() != null ? getPropertyAccessor() : null);
 	}
 
 	/**
@@ -86,8 +88,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
-	public Class<?> getFieldType(String field) {
-		return getPropertyAccessor().getPropertyType(fixedField(field));
+	@Nullable
+	public Class<?> getFieldType(@Nullable String field) {
+		return (getTarget() != null ? getPropertyAccessor().getPropertyType(fixedField(field)) :
+				super.getFieldType(field));
 	}
 
 	/**
@@ -95,6 +99,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
+	@Nullable
 	protected Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
@@ -104,7 +109,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getCustomEditor
 	 */
 	@Override
-	protected Object formatFieldValue(String field, Object value) {
+	protected Object formatFieldValue(String field, @Nullable Object value) {
 		String fixedField = fixedField(field);
 		// Try custom editor...
 		PropertyEditor customEditor = getCustomEditor(fixedField);
@@ -133,6 +138,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @param fixedField the fully qualified field name
 	 * @return the custom PropertyEditor, or {@code null}
 	 */
+	@Nullable
 	protected PropertyEditor getCustomEditor(String fixedField) {
 		Class<?> targetType = getPropertyAccessor().getPropertyType(fixedField);
 		PropertyEditor editor = getPropertyAccessor().findCustomEditor(targetType, fixedField);
@@ -147,7 +153,8 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * if applicable.
 	 */
 	@Override
-	public PropertyEditor findEditor(String field, Class<?> valueType) {
+	@Nullable
+	public PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType) {
 		Class<?> valueTypeForLookup = valueType;
 		if (valueTypeForLookup == null) {
 			valueTypeForLookup = getFieldType(field);
@@ -155,9 +162,9 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 		PropertyEditor editor = super.findEditor(field, valueTypeForLookup);
 		if (editor == null && this.conversionService != null) {
 			TypeDescriptor td = null;
-			if (field != null) {
+			if (field != null && getTarget() != null) {
 				TypeDescriptor ptd = getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field));
-				if (valueType == null || valueType.isAssignableFrom(ptd.getType())) {
+				if (ptd != null && (valueType == null || valueType.isAssignableFrom(ptd.getType()))) {
 					td = ptd;
 				}
 			}

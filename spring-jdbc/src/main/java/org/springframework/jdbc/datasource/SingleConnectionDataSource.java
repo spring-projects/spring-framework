@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -39,9 +40,6 @@ import org.springframework.util.ObjectUtils;
  * <p>If client code will call {@code close()} in the assumption of a pooled
  * Connection, like when using persistence tools, set "suppressClose" to "true".
  * This will return a close-suppressing proxy instead of the physical Connection.
- * Be aware that you will not be able to cast this to a native
- * {@code OracleConnection} or the like anymore; you need to use a
- * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor} then.
  *
  * <p>This is primarily intended for testing. For example, it enables easy testing
  * outside an application server, for code that expects to work on a DataSource.
@@ -53,24 +51,25 @@ import org.springframework.util.ObjectUtils;
  * @see #getConnection()
  * @see java.sql.Connection#close()
  * @see DataSourceUtils#releaseConnection
- * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
-public class SingleConnectionDataSource extends DriverManagerDataSource
-		implements SmartDataSource, DisposableBean {
+public class SingleConnectionDataSource extends DriverManagerDataSource implements SmartDataSource, DisposableBean {
 
-	/** Create a close-suppressing proxy? */
+	/** Create a close-suppressing proxy?. */
 	private boolean suppressClose;
 
-	/** Override auto-commit state? */
+	/** Override auto-commit state?. */
+	@Nullable
 	private Boolean autoCommit;
 
-	/** Wrapped Connection */
+	/** Wrapped Connection. */
+	@Nullable
 	private Connection target;
 
-	/** Proxy Connection */
+	/** Proxy Connection. */
+	@Nullable
 	private Connection connection;
 
-	/** Synchronization monitor for the shared Connection */
+	/** Synchronization monitor for the shared Connection. */
 	private final Object connectionMonitor = new Object();
 
 
@@ -151,6 +150,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
+	@Nullable
 	protected Boolean getAutoCommitValue() {
 		return this.autoCommit;
 	}
@@ -223,8 +223,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			closeConnection();
 			this.target = getConnectionFromDriver(getUsername(), getPassword());
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JDBC Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared JDBC Connection: " + this.target);
 			}
 			this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(this.target) : this.target);
 		}
@@ -264,7 +264,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 				this.target.close();
 			}
 			catch (Throwable ex) {
-				logger.warn("Could not close shared JDBC Connection", ex);
+				logger.info("Could not close shared JDBC Connection", ex);
 			}
 		}
 	}
@@ -295,6 +295,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

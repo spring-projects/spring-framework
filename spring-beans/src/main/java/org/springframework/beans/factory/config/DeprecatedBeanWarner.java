@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,6 @@ public class DeprecatedBeanWarner implements BeanFactoryPostProcessor {
 	 * <p>This can be specified to not log into the category of this warner class but rather
 	 * into a specific named category.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
-	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setLoggerName(String loggerName) {
@@ -61,10 +60,13 @@ public class DeprecatedBeanWarner implements BeanFactoryPostProcessor {
 				if (beanFactory.isFactoryBean(beanName)) {
 					nameToLookup = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
 				}
-				Class<?> beanType = ClassUtils.getUserClass(beanFactory.getType(nameToLookup));
-				if (beanType != null && beanType.isAnnotationPresent(Deprecated.class)) {
-					BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-					logDeprecatedBean(beanName, beanType, beanDefinition);
+				Class<?> beanType = beanFactory.getType(nameToLookup);
+				if (beanType != null) {
+					Class<?> userClass = ClassUtils.getUserClass(beanType);
+					if (userClass.isAnnotationPresent(Deprecated.class)) {
+						BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+						logDeprecatedBean(beanName, beanType, beanDefinition);
+					}
 				}
 			}
 		}

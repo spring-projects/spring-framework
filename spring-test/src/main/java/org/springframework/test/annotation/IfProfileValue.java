@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test annotation to indicate whether a test is enabled or disabled for a
- * specific testing profile.
+ * Test annotation for use with JUnit 4 to indicate whether a test is enabled or
+ * disabled for a specific testing profile.
  *
  * <p>In the context of this annotation, the term <em>profile</em> refers to
  * a Java system property by default; however, the semantics can be changed
@@ -95,10 +95,10 @@ import java.lang.annotation.Target;
  * @see org.springframework.context.annotation.Profile
  * @see org.springframework.test.context.ActiveProfiles
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface IfProfileValue {
 
 	/**
@@ -109,8 +109,7 @@ public @interface IfProfileValue {
 	/**
 	 * A single, permissible {@code value} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 *
-	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
+	 * <p>Note: Assigning values to both {@code #value} and {@link #values}
 	 * will lead to a configuration conflict.
 	 */
 	String value() default "";
@@ -118,8 +117,7 @@ public @interface IfProfileValue {
 	/**
 	 * A list of all permissible {@code values} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 *
-	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
+	 * <p>Note: Assigning values to both {@link #value} and {@code #values}
 	 * will lead to a configuration conflict.
 	 */
 	String[] values() default {};

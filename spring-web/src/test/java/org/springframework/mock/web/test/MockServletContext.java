@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,12 +25,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.activation.FileTypeMap;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -48,45 +46,34 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
- * <p>Compatible with Servlet 3.0 but can be configured to expose a specific version
- * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.0.
- * Note that Servlet 3.0 support is limited: servlet, filter and listener
+ * <p>Compatible with Servlet 3.1 but can be configured to expose a specific version
+ * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.1.
+ * Note that Servlet 3.1 support is limited: servlet, filter and listener
  * registration methods are not supported; neither is JSP configuration.
  * We generally do not recommend to unit test your ServletContainerInitializers and
  * WebApplicationInitializers which is where those registration methods would be used.
  *
- * <p>Used for testing the Spring web framework; only rarely necessary for testing
- * application controllers. As long as application components don't explicitly
- * access the {@code ServletContext}, {@code ClassPathXmlApplicationContext} or
- * {@code FileSystemXmlApplicationContext} can be used to load the context files
- * for testing, even for {@code DispatcherServlet} context definitions.
- *
- * <p>For setting up a full {@code WebApplicationContext} in a test environment,
- * you can use {@code AnnotationConfigWebApplicationContext},
- * {@code XmlWebApplicationContext}, or {@code GenericWebApplicationContext},
- * passing in an appropriate {@code MockServletContext} instance. You might want
- * to configure your {@code MockServletContext} with a {@code FileSystemResourceLoader}
- * in that case to ensure that resource paths are interpreted as relative filesystem
- * locations.
- *
- * <p>A common setup is to point your JVM working directory to the root of your
- * web application directory, in combination with filesystem-based resource loading.
- * This allows to load the context files as used in the web application, with
- * relative paths getting interpreted correctly. Such a setup will work with both
- * {@code FileSystemXmlApplicationContext} (which will load straight from the
- * filesystem) and {@code XmlWebApplicationContext} with an underlying
- * {@code MockServletContext} (as long as the {@code MockServletContext} has been
- * configured with a {@code FileSystemResourceLoader}).
+ * <p>For setting up a full {@code WebApplicationContext} in a test environment, you can
+ * use {@code AnnotationConfigWebApplicationContext}, {@code XmlWebApplicationContext},
+ * or {@code GenericWebApplicationContext}, passing in a corresponding
+ * {@code MockServletContext} instance. Consider configuring your
+ * {@code MockServletContext} with a {@code FileSystemResourceLoader} in order to
+ * interpret resource paths as relative filesystem locations.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -96,8 +83,6 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.support.AnnotationConfigWebApplicationContext
  * @see org.springframework.web.context.support.XmlWebApplicationContext
  * @see org.springframework.web.context.support.GenericWebApplicationContext
- * @see org.springframework.context.support.ClassPathXmlApplicationContext
- * @see org.springframework.context.support.FileSystemXmlApplicationContext
  */
 public class MockServletContext implements ServletContext {
 
@@ -106,8 +91,7 @@ public class MockServletContext implements ServletContext {
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
-	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES =
-			new LinkedHashSet<SessionTrackingMode>(3);
+	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES = new LinkedHashSet<>(4);
 
 	static {
 		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.COOKIE);
@@ -124,31 +108,42 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
-	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
+	private final Map<String, ServletContext> contexts = new HashMap<>();
 
 	private int majorVersion = 3;
 
-	private int minorVersion = 0;
+	private int minorVersion = 1;
 
 	private int effectiveMajorVersion = 3;
 
-	private int effectiveMinorVersion = 0;
+	private int effectiveMinorVersion = 1;
 
-	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<String, RequestDispatcher>();
+	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<>();
 
 	private String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
 
-	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> initParameters = new LinkedHashMap<>();
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private String servletContextName = "MockServletContext";
 
-	private final Set<String> declaredRoles = new HashSet<String>();
+	private final Set<String> declaredRoles = new LinkedHashSet<>();
 
+	@Nullable
 	private Set<SessionTrackingMode> sessionTrackingModes;
 
 	private final SessionCookieConfig sessionCookieConfig = new MockSessionCookieConfig();
+
+	private int sessionTimeout;
+
+	@Nullable
+	private String requestCharacterEncoding;
+
+	@Nullable
+	private String responseCharacterEncoding;
+
+	private final Map<String, MediaType> mimeTypes = new LinkedHashMap<>();
 
 
 	/**
@@ -174,7 +169,7 @@ public class MockServletContext implements ServletContext {
 	 * and no base path.
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
-	public MockServletContext(ResourceLoader resourceLoader) {
+	public MockServletContext(@Nullable ResourceLoader resourceLoader) {
 		this("", resourceLoader);
 	}
 
@@ -187,9 +182,9 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
-	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
+	public MockServletContext(String resourceBasePath, @Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
-		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
+		this.resourceBasePath = resourceBasePath;
 
 		// Use JVM temp dir as ServletContext temp dir.
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
@@ -214,7 +209,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public void setContextPath(String contextPath) {
-		this.contextPath = (contextPath != null ? contextPath : "");
+		this.contextPath = contextPath;
 	}
 
 	@Override
@@ -270,32 +265,32 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
-	/**
-	 * This method uses the default
-	 * {@link javax.activation.FileTypeMap#getDefaultFileTypeMap() FileTypeMap}
-	 * from the Java Activation Framework to resolve MIME types.
-	 * <p>The Java Activation Framework returns {@code "application/octet-stream"}
-	 * if the MIME type is unknown (i.e., it never returns {@code null}). Thus, in
-	 * order to honor the {@link ServletContext#getMimeType(String)} contract,
-	 * this method returns {@code null} if the MIME type is
-	 * {@code "application/octet-stream"}.
-	 * <p>{@code MockServletContext} does not provide a direct mechanism for
-	 * setting a custom MIME type; however, if the default {@code FileTypeMap}
-	 * is an instance of {@code javax.activation.MimetypesFileTypeMap}, a custom
-	 * MIME type named {@code text/enigma} can be registered for a custom
-	 * {@code .puzzle} file extension in the following manner:
-	 * <pre style="code">
-	 * MimetypesFileTypeMap mimetypesFileTypeMap = (MimetypesFileTypeMap) FileTypeMap.getDefaultFileTypeMap();
-	 * mimetypesFileTypeMap.addMimeTypes("text/enigma    puzzle");
-	 * </pre>
-	 */
 	@Override
+	@Nullable
 	public String getMimeType(String filePath) {
-		String mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
-		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
+		String extension = StringUtils.getFilenameExtension(filePath);
+		if (this.mimeTypes.containsKey(extension)) {
+			return this.mimeTypes.get(extension).toString();
+		}
+		else {
+			return MediaTypeFactory.getMediaType(filePath).
+					map(MimeType::toString)
+					.orElse(null);
+		}
+	}
+
+	/**
+	 * Adds a mime type mapping for use by {@link #getMimeType(String)}.
+	 * @param fileExtension a file extension, such as {@code txt}, {@code gif}
+	 * @param mimeType the mime type
+	 */
+	public void addMimeType(String fileExtension, MediaType mimeType) {
+		Assert.notNull(fileExtension, "'fileExtension' must not be null");
+		this.mimeTypes.put(fileExtension, mimeType);
 	}
 
 	@Override
+	@Nullable
 	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
@@ -305,7 +300,7 @@ public class MockServletContext implements ServletContext {
 			if (ObjectUtils.isEmpty(fileList)) {
 				return null;
 			}
-			Set<String> resourcePaths = new LinkedHashSet<String>(fileList.length);
+			Set<String> resourcePaths = new LinkedHashSet<>(fileList.length);
 			for (String fileEntry : fileList) {
 				String resultPath = actualPath + fileEntry;
 				if (resource.createRelative(fileEntry).getFile().isDirectory()) {
@@ -316,12 +311,15 @@ public class MockServletContext implements ServletContext {
 			return resourcePaths;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get resource paths for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get resource paths for " + resource, ex);
+			}
 			return null;
 		}
 	}
 
 	@Override
+	@Nullable
 	public URL getResource(String path) throws MalformedURLException {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -334,12 +332,15 @@ public class MockServletContext implements ServletContext {
 			throw ex;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get URL for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get URL for " + resource, ex);
+			}
 			return null;
 		}
 	}
 
 	@Override
+	@Nullable
 	public InputStream getResourceAsStream(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -349,16 +350,17 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't open InputStream for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not open InputStream for " + resource, ex);
+			}
 			return null;
 		}
 	}
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		if (!path.startsWith("/")) {
-			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
-		}
+		Assert.isTrue(path.startsWith("/"),
+				() -> "RequestDispatcher path [" + path + "] at ServletContext level must start with '/'");
 		return new MockRequestDispatcher(path);
 	}
 
@@ -370,7 +372,6 @@ public class MockServletContext implements ServletContext {
 	/**
 	 * Register a {@link RequestDispatcher} (typically a {@link MockRequestDispatcher})
 	 * that acts as a wrapper for the named Servlet.
-	 *
 	 * @param name the name of the wrapped Servlet
 	 * @param requestDispatcher the dispatcher that wraps the named Servlet
 	 * @see #getNamedDispatcher
@@ -384,7 +385,6 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * Unregister the {@link RequestDispatcher} with the given name.
-	 *
 	 * @param name the name of the dispatcher to unregister
 	 * @see #getNamedDispatcher
 	 * @see #registerNamedDispatcher
@@ -420,8 +420,9 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Override
 	@Deprecated
+	@Override
+	@Nullable
 	public Servlet getServlet(String name) {
 		return null;
 	}
@@ -429,13 +430,13 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Deprecated
 	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(new HashSet<Servlet>());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override
 	@Deprecated
 	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(new HashSet<String>());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override
@@ -455,13 +456,16 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getRealPath(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
 			return resource.getFile().getAbsolutePath();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't determine real path of resource " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not determine real path of resource " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -498,6 +502,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
@@ -505,11 +510,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -535,6 +540,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -574,6 +580,38 @@ public class MockServletContext implements ServletContext {
 		return this.sessionCookieConfig;
 	}
 
+	@Override  // on Servlet 4.0
+	public void setSessionTimeout(int sessionTimeout) {
+		this.sessionTimeout = sessionTimeout;
+	}
+
+	@Override  // on Servlet 4.0
+	public int getSessionTimeout() {
+		return this.sessionTimeout;
+	}
+
+	@Override  // on Servlet 4.0
+	public void setRequestCharacterEncoding(@Nullable String requestCharacterEncoding) {
+		this.requestCharacterEncoding = requestCharacterEncoding;
+	}
+
+	@Override  // on Servlet 4.0
+	@Nullable
+	public String getRequestCharacterEncoding() {
+		return this.requestCharacterEncoding;
+	}
+
+	@Override  // on Servlet 4.0
+	public void setResponseCharacterEncoding(@Nullable String responseCharacterEncoding) {
+		this.responseCharacterEncoding = responseCharacterEncoding;
+	}
+
+	@Override  // on Servlet 4.0
+	@Nullable
+	public String getResponseCharacterEncoding() {
+		return this.responseCharacterEncoding;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Unsupported Servlet 3.0 registration methods
@@ -581,6 +619,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override  // on Servlet 4.0
+	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -609,6 +652,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public ServletRegistration getServletRegistration(String servletName) {
 		return null;
 	}
@@ -647,6 +691,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public FilterRegistration getFilterRegistration(String filterName) {
 		return null;
 	}
@@ -677,6 +722,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getVirtualServerName() {
 		throw new UnsupportedOperationException();
 	}
 

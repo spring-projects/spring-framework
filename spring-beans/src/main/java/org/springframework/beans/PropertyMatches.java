@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +29,8 @@ import org.springframework.util.StringUtils;
  * Helper class for calculating property matches, according to a configurable
  * distance. Provide the list of potential matches and an easy way to generate
  * an error message. Works for both java bean properties and fields.
- * <p>
- * Mainly for use within the framework and in particular the binding facility
+ *
+ * <p>Mainly for use within the framework and in particular the binding facility.
  *
  * @author Alef Arendsen
  * @author Arjen Poutsma
@@ -43,13 +42,11 @@ import org.springframework.util.StringUtils;
  */
 public abstract class PropertyMatches {
 
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
-
-	/** Default maximum property distance: 2 */
+	/** Default maximum property distance: 2. */
 	public static final int DEFAULT_MAX_DISTANCE = 2;
 
+
+	// Static factory methods
 
 	/**
 	 * Create PropertyMatches for the given bean property.
@@ -90,13 +87,11 @@ public abstract class PropertyMatches {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
+	// Instance state
 
 	private final String propertyName;
 
-	private String[] possibleMatches;
+	private final String[] possibleMatches;
 
 
 	/**
@@ -107,18 +102,19 @@ public abstract class PropertyMatches {
 		this.possibleMatches = possibleMatches;
 	}
 
+
 	/**
 	 * Return the name of the requested property.
 	 */
 	public String getPropertyName() {
-		return propertyName;
+		return this.propertyName;
 	}
 
 	/**
 	 * Return the calculated possible matches.
 	 */
 	public String[] getPossibleMatches() {
-		return possibleMatches;
+		return this.possibleMatches;
 	}
 
 	/**
@@ -126,6 +122,9 @@ public abstract class PropertyMatches {
 	 * indicating the possible property matches.
 	 */
 	public abstract String buildErrorMessage();
+
+
+	// Implementation support for subclasses
 
 	protected void appendHintMessage(StringBuilder msg) {
 		msg.append("Did you mean ");
@@ -150,14 +149,14 @@ public abstract class PropertyMatches {
 	 * @return the distance value
 	 */
 	private static int calculateStringDistance(String s1, String s2) {
-		if (s1.length() == 0) {
+		if (s1.isEmpty()) {
 			return s2.length();
 		}
-		if (s2.length() == 0) {
+		if (s2.isEmpty()) {
 			return s1.length();
 		}
-		int d[][] = new int[s1.length() + 1][s2.length() + 1];
 
+		int[][] d = new int[s1.length() + 1][s2.length() + 1];
 		for (int i = 0; i <= s1.length(); i++) {
 			d[i][0] = i;
 		}
@@ -166,45 +165,46 @@ public abstract class PropertyMatches {
 		}
 
 		for (int i = 1; i <= s1.length(); i++) {
-			char s_i = s1.charAt(i - 1);
+			char c1 = s1.charAt(i - 1);
 			for (int j = 1; j <= s2.length(); j++) {
 				int cost;
-				char t_j = s2.charAt(j - 1);
-				if (s_i == t_j) {
+				char c2 = s2.charAt(j - 1);
+				if (c1 == c2) {
 					cost = 0;
 				}
 				else {
 					cost = 1;
 				}
-				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
-						d[i - 1][j - 1] + cost);
+				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1), d[i - 1][j - 1] + cost);
 			}
 		}
 
 		return d[s1.length()][s2.length()];
 	}
 
+
+	// Concrete subclasses
+
 	private static class BeanPropertyMatches extends PropertyMatches {
 
-		private BeanPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
-			super(propertyName, calculateMatches(propertyName,
-					BeanUtils.getPropertyDescriptors(beanClass), maxDistance));
+		public BeanPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
+			super(propertyName,
+					calculateMatches(propertyName, BeanUtils.getPropertyDescriptors(beanClass), maxDistance));
 		}
 
 		/**
-		 * Generate possible property alternatives for the given property and
-		 * class. Internally uses the {@code getStringDistance} method, which
-		 * in turn uses the Levenshtein algorithm to determine the distance between
-		 * two Strings.
-		 * @param propertyDescriptors the JavaBeans property descriptors to search
+		 * Generate possible property alternatives for the given property and class.
+		 * Internally uses the {@code getStringDistance} method, which in turn uses
+		 * the Levenshtein algorithm to determine the distance between two Strings.
+		 * @param descriptors the JavaBeans property descriptors to search
 		 * @param maxDistance the maximum distance to accept
 		 */
-		private static String[] calculateMatches(String propertyName, PropertyDescriptor[] propertyDescriptors, int maxDistance) {
-			List<String> candidates = new ArrayList<String>();
-			for (PropertyDescriptor pd : propertyDescriptors) {
+		private static String[] calculateMatches(String name, PropertyDescriptor[] descriptors, int maxDistance) {
+			List<String> candidates = new ArrayList<>();
+			for (PropertyDescriptor pd : descriptors) {
 				if (pd.getWriteMethod() != null) {
 					String possibleAlternative = pd.getName();
-					if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
+					if (calculateStringDistance(name, possibleAlternative) <= maxDistance) {
 						candidates.add(possibleAlternative);
 					}
 				}
@@ -213,64 +213,50 @@ public abstract class PropertyMatches {
 			return StringUtils.toStringArray(candidates);
 		}
 
-
 		@Override
 		public String buildErrorMessage() {
-			String propertyName = getPropertyName();
-			String[] possibleMatches = getPossibleMatches();
-			StringBuilder msg = new StringBuilder();
-			msg.append("Bean property '");
-			msg.append(propertyName);
-			msg.append("' is not writable or has an invalid setter method. ");
-
-			if (ObjectUtils.isEmpty(possibleMatches)) {
-				msg.append("Does the parameter type of the setter match the return type of the getter?");
+			StringBuilder msg = new StringBuilder(160);
+			msg.append("Bean property '").append(getPropertyName()).append(
+					"' is not writable or has an invalid setter method. ");
+			if (!ObjectUtils.isEmpty(getPossibleMatches())) {
+				appendHintMessage(msg);
 			}
 			else {
-				appendHintMessage(msg);
+				msg.append("Does the parameter type of the setter match the return type of the getter?");
 			}
 			return msg.toString();
 		}
-
 	}
+
 
 	private static class FieldPropertyMatches extends PropertyMatches {
 
-		private FieldPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
+		public FieldPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
 			super(propertyName, calculateMatches(propertyName, beanClass, maxDistance));
 		}
 
-		private static String[] calculateMatches(final String propertyName, Class<?> beanClass, final int maxDistance) {
-			final List<String> candidates = new ArrayList<String>();
-			ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
-				@Override
-				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-					String possibleAlternative = field.getName();
-					if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
-						candidates.add(possibleAlternative);
-					}
+		private static String[] calculateMatches(final String name, Class<?> clazz, final int maxDistance) {
+			final List<String> candidates = new ArrayList<>();
+			ReflectionUtils.doWithFields(clazz, field -> {
+				String possibleAlternative = field.getName();
+				if (calculateStringDistance(name, possibleAlternative) <= maxDistance) {
+					candidates.add(possibleAlternative);
 				}
 			});
 			Collections.sort(candidates);
 			return StringUtils.toStringArray(candidates);
 		}
 
-
 		@Override
 		public String buildErrorMessage() {
-			String propertyName = getPropertyName();
-			String[] possibleMatches = getPossibleMatches();
-			StringBuilder msg = new StringBuilder();
-			msg.append("Bean property '");
-			msg.append(propertyName);
-			msg.append("' has no matching field. ");
-
-			if (!ObjectUtils.isEmpty(possibleMatches)) {
+			StringBuilder msg = new StringBuilder(80);
+			msg.append("Bean property '").append(getPropertyName()).append("' has no matching field.");
+			if (!ObjectUtils.isEmpty(getPossibleMatches())) {
+				msg.append(' ');
 				appendHintMessage(msg);
 			}
 			return msg.toString();
 		}
-
 	}
 
 }

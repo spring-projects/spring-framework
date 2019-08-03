@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * beans, provide stub implementations of your lookup methods to be able to declare
  * them as concrete classes. And please remember that lookup methods won't work on
  * beans returned from {@code @Bean} methods in configuration classes; you'll have
- * to resort to {@code @Inject Provider&lt;TargetBean&gt;} or the like instead.
+ * to resort to {@code @Inject Provider<TargetBean>} or the like instead.
  *
  * @author Juergen Hoeller
  * @since 4.1

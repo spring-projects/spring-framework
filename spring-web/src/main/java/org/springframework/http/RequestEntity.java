@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,31 +16,36 @@
 
 package org.springframework.http;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@linkplain HttpMethod method} and
- * {@linkplain URI uri}.
- * Used in {@code RestTemplate} and {@code @Controller} methods.
+ * {@linkplain URI uri}. Used in {@code RestTemplate} and {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is used as parameter in
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
  * <pre class="code">
  * MyRequest body = ...
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;)).accept(MediaType.APPLICATION_JSON).body(body);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity
+ *     .post(new URI(&quot;https://example.com/bar&quot;))
+ *     .accept(MediaType.APPLICATION_JSON)
+ *     .body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
  * </pre>
  *
  * <p>If you would like to provide a URI template with variables, consider using
  * {@link org.springframework.web.util.UriTemplate}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;).expand(&quot;bar&quot;);
+ * URI uri = new UriTemplate(&quot;https://example.com/{foo}&quot;).expand(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -55,15 +60,21 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.1
+ * @param <T> the body type
  * @see #getMethod()
  * @see #getUrl()
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 
+	@Nullable
 	private final HttpMethod method;
 
 	private final URI url;
+
+	@Nullable
+	private final Type type;
 
 
 	/**
@@ -72,7 +83,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(HttpMethod method, URI url) {
-		this(null, null, method, url);
+		this(null, null, method, url, null);
 	}
 
 	/**
@@ -81,8 +92,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(T body, HttpMethod method, URI url) {
-		this(body, null, method, url);
+	public RequestEntity(@Nullable T body, HttpMethod method, URI url) {
+		this(body, null, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, body and type but without headers.
+	 * @param body the body
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(@Nullable T body, HttpMethod method, URI url, Type type) {
+		this(body, null, method, url, type);
 	}
 
 	/**
@@ -92,7 +115,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
-		this(null, headers, method, url);
+		this(null, headers, method, url, null);
 	}
 
 	/**
@@ -102,12 +125,28 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
+	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			@Nullable HttpMethod method, URI url) {
+
+		this(body, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers, body and type.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			@Nullable HttpMethod method, URI url, @Nullable Type type) {
+
 		super(body, headers);
-		Assert.notNull(method, "'method' is required");
-		Assert.notNull(url, "'url' is required");
 		this.method = method;
 		this.url = url;
+		this.type = type;
 	}
 
 
@@ -115,6 +154,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP method of the request.
 	 * @return the HTTP method as an {@code HttpMethod} enum value
 	 */
+	@Nullable
 	public HttpMethod getMethod() {
 		return this.method;
 	}
@@ -127,9 +167,25 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		return this.url;
 	}
 
+	/**
+	 * Return the type of the request's body.
+	 * @return the request's body type, or {@code null} if not known
+	 * @since 4.3
+	 */
+	@Nullable
+	public Type getType() {
+		if (this.type == null) {
+			T body = getBody();
+			if (body != null) {
+				return body.getClass();
+			}
+		}
+		return this.type;
+	}
+
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -137,8 +193,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
-		return (ObjectUtils.nullSafeEquals(this.method, otherEntity.method) &&
-				ObjectUtils.nullSafeEquals(this.url, otherEntity.url));
+		return (ObjectUtils.nullSafeEquals(getMethod(), otherEntity.getMethod()) &&
+				ObjectUtils.nullSafeEquals(getUrl(), otherEntity.getUrl()));
 	}
 
 	@Override
@@ -152,21 +208,17 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.method);
+		builder.append(getMethod());
 		builder.append(' ');
-		builder.append(this.url);
+		builder.append(getUrl());
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();
 		if (body != null) {
 			builder.append(body);
-			if (headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (headers != null) {
-			builder.append(headers);
-		}
+		builder.append(headers);
 		builder.append('>');
 		return builder.toString();
 	}
@@ -279,6 +331,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(ZonedDateTime ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(Instant ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
@@ -330,6 +396,16 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);
+
+		/**
+		 * Set the body and type of the request entity and build the RequestEntity.
+		 * @param <T> the type of the body
+		 * @param body the body of the request entity
+		 * @param type the type of the body, useful for generic type resolution
+		 * @return the built request entity
+		 * @since 4.3
+		 */
+		<T> RequestEntity<T> body(T body, Type type);
 	}
 
 
@@ -379,6 +455,18 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
+		public BodyBuilder ifModifiedSince(ZonedDateTime ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(Instant ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder ifModifiedSince(long ifModifiedSince) {
 			this.headers.setIfModifiedSince(ifModifiedSince);
 			return this;
@@ -392,12 +480,17 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public RequestEntity<Void> build() {
-			return new RequestEntity<Void>(this.headers, this.method, this.url);
+			return new RequestEntity<>(this.headers, this.method, this.url);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body) {
-			return new RequestEntity<T>(body, this.headers, this.method, this.url);
+			return new RequestEntity<>(body, this.headers, this.method, this.url);
+		}
+
+		@Override
+		public <T> RequestEntity<T> body(T body, Type type) {
+			return new RequestEntity<>(body, this.headers, this.method, this.url, type);
 		}
 	}
 

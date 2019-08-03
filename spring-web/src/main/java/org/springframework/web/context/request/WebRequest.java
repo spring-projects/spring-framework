@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,8 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Generic interface for a web request. Mainly intended for generic web
@@ -39,6 +41,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
 	 */
+	@Nullable
 	String getHeader(String headerName);
 
 	/**
@@ -48,6 +51,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
+	@Nullable
 	String[] getHeaderValues(String headerName);
 
 	/**
@@ -62,6 +66,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
+	@Nullable
 	String getParameter(String paramName);
 
 	/**
@@ -70,12 +75,13 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
+	@Nullable
 	String[] getParameterValues(String paramName);
 
 	/**
 	 * Return a Iterator over request parameter names.
-	 * @see javax.servlet.http.HttpServletRequest#getParameterNames()
 	 * @since 3.0
+	 * @see javax.servlet.http.HttpServletRequest#getParameterNames()
 	 */
 	Iterator<String> getParameterNames();
 
@@ -104,12 +110,14 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the remote user for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
 	 */
+	@Nullable
 	String getRemoteUser();
 
 	/**
 	 * Return the user principal for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
+	@Nullable
 	Principal getUserPrincipal();
 
 	/**
@@ -126,10 +134,10 @@ public interface WebRequest extends RequestAttributes {
 	boolean isSecure();
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied last-modified timestamp (as determined by the application).
-	 * <p>This will also transparently set the appropriate response headers,
-	 * for both the modified case and the not-modified case.
+	 * <p>This will also transparently set the "Last-Modified" response header
+	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -142,6 +150,8 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(long)} method; or
 	 * {@link #checkNotModified(String)}. If you want enforce both
@@ -151,8 +161,9 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>If the "If-Modified-Since" header is set but cannot be parsed
 	 * to a date value, this method will ignore the header and proceed
 	 * with setting the last-modified timestamp on the response.
-	 * @param lastModifiedTimestamp the last-modified timestamp that
-	 * the application determined for the underlying resource
+	 * @param lastModifiedTimestamp the last-modified timestamp in
+	 * milliseconds that the application determined for the underlying
+	 * resource
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified
@@ -160,10 +171,10 @@ public interface WebRequest extends RequestAttributes {
 	boolean checkNotModified(long lastModifiedTimestamp);
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied {@code ETag} (entity tag), as determined by the application.
-	 * <p>This will also transparently set the appropriate response headers,
-	 * for both the modified case and the not-modified case.
+	 * <p>This will also transparently set the "ETag" response header
+	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -185,18 +196,16 @@ public interface WebRequest extends RequestAttributes {
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
-	 * @return whether the request qualifies as not modified,
-	 * allowing to abort request processing and relying on the response
-	 * telling the client that the content has not been modified
+	 * @return true if the request does not require further processing.
 	 */
 	boolean checkNotModified(String etag);
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
 	 * as determined by the application.
 	 * <p>This will also transparently set the "ETag" and "Last-Modified"
-	 * response headers, for both the modified case and the not-modified case.
+	 * response headers, and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -210,6 +219,8 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> The HTTP specification recommends
 	 * setting both ETag and Last-Modified values, but you can also
 	 * use {@code #checkNotModified(String)} or
@@ -217,14 +228,13 @@ public interface WebRequest extends RequestAttributes {
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
-	 * @param lastModifiedTimestamp the last-modified timestamp that
-	 * the application determined for the underlying resource
-	 * @return whether the request qualifies as not modified,
-	 * allowing to abort request processing and relying on the response
-	 * telling the client that the content has not been modified
+	 * @param lastModifiedTimestamp the last-modified timestamp in
+	 * milliseconds that the application determined for the underlying
+	 * resource
+	 * @return true if the request does not require further processing.
 	 * @since 4.2
 	 */
-	boolean checkNotModified(String etag, long lastModifiedTimestamp);
+	boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp);
 
 	/**
 	 * Get a short description of this request,

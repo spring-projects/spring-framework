@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,21 +26,21 @@ import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  * @since 14.03.2003
  */
-public final class MethodInvocationTests {
+public class MethodInvocationTests {
 
 	@Test
 	public void testValidInvocation() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		final Object returnValue = new Object();
-		List<Object> is = new LinkedList<Object>();
+		List<Object> is = new LinkedList<>();
 		is.add(new MethodInterceptor() {
 			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -51,7 +51,7 @@ public final class MethodInvocationTests {
 		m, null, null, is // list
 	);
 		Object rv = invocation.proceed();
-		assertTrue("correct response", rv == returnValue);
+		assertThat(rv == returnValue).as("correct response").isTrue();
 	}
 
 	/**
@@ -65,9 +65,9 @@ public final class MethodInvocationTests {
 				throw new UnsupportedOperationException("toString");
 			}
 		};
-		List<Object> is = new LinkedList<Object>();
+		List<Object> is = new LinkedList<>();
 
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		ReflectiveMethodInvocation invocation =
 			new ReflectiveMethodInvocation(proxy, target, m, null, null, is);

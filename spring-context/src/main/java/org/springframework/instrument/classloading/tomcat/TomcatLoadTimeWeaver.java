@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,13 +20,15 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.instrument.classloading.LoadTimeWeaver} implementation for Tomcat's
- * new {@link org.apache.tomcat.InstrumentableClassLoader InstrumentableClassLoader}.
+ * {@link org.springframework.instrument.classloading.LoadTimeWeaver} implementation
+ * for Tomcat's new {@code org.apache.tomcat.InstrumentableClassLoader}.
  * Also capable of handling Spring's TomcatInstrumentableClassLoader when encountered.
  *
  * @author Juergen Hoeller
@@ -44,11 +46,21 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 	private final Method copyMethod;
 
 
+	/**
+	 * Create a new instance of the {@link TomcatLoadTimeWeaver} class using
+	 * the default {@link ClassLoader class loader}.
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
+	 */
 	public TomcatLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
-	public TomcatLoadTimeWeaver(ClassLoader classLoader) {
+	/**
+	 * Create a new instance of the {@link TomcatLoadTimeWeaver} class using
+	 * the supplied {@link ClassLoader}.
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
+	 */
+	public TomcatLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
 
@@ -75,7 +87,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 			}
 			this.copyMethod = copyMethod;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Could not initialize TomcatLoadTimeWeaver because Tomcat API classes are not available", ex);
 		}
@@ -90,7 +102,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("Tomcat addTransformer method threw exception", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not invoke Tomcat addTransformer method", ex);
 		}
 	}
@@ -103,12 +115,12 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		try {
-			return (ClassLoader) this.copyMethod.invoke(this.classLoader);
+			return new OverridingClassLoader(this.classLoader, (ClassLoader) this.copyMethod.invoke(this.classLoader));
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("Tomcat copy method threw exception", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not invoke Tomcat copy method", ex);
 		}
 	}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,11 +67,22 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport implements
 
 		CacheOperationInvoker aspectJInvoker = new CacheOperationInvoker() {
 			public Object invoke() {
-				return proceed(cachedObject);
+				try {
+					return proceed(cachedObject);
+				}
+				catch (Throwable ex) {
+					throw new ThrowableWrapper(ex);
+				}
 			}
 		};
 
-		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		try {
+			return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		}
+		catch (CacheOperationInvoker.ThrowableWrapper th) {
+			AnyThrow.throwUnchecked(th.getOriginal());
+			return null; // never reached
+		}
 	}
 
 	/**

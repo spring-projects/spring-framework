@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that exposes an EhCache {@link net.sf.ehcache.CacheManager}
@@ -41,7 +42,7 @@ import org.springframework.core.io.Resource;
  * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
  * also necessary for loading EhCache configuration from a non-default config location.
  *
- * <p>Note: As of Spring 4.1, Spring's EhCache support requires EhCache 2.5 or higher.
+ * <p>Note: As of Spring 5.0, Spring's EhCache support requires EhCache 2.10 or higher.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -55,14 +56,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private String cacheManagerName;
 
 	private boolean acceptExisting = false;
 
 	private boolean shared = false;
 
+	@Nullable
 	private CacheManager cacheManager;
 
 	private boolean locallyManaged = true;
@@ -81,7 +85,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	/**
 	 * Set the name of the EhCache CacheManager (if a specific name is desired).
-	 * @see net.sf.ehcache.CacheManager#setName(String)
+	 * @see net.sf.ehcache.config.Configuration#setName(String)
 	 */
 	public void setCacheManagerName(String cacheManagerName) {
 		this.cacheManagerName = cacheManagerName;
@@ -126,12 +130,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	@Override
 	public void afterPropertiesSet() throws CacheException {
-		logger.info("Initializing EhCache CacheManager");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing EhCache CacheManager" +
+					(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
+		}
+
 		Configuration configuration = (this.configLocation != null ?
 				EhCacheManagerUtils.parseConfiguration(this.configLocation) : ConfigurationFactory.parseConfiguration());
 		if (this.cacheManagerName != null) {
 			configuration.setName(this.cacheManagerName);
 		}
+
 		if (this.shared) {
 			// Old-school EhCache singleton sharing...
 			// No way to find out whether we actually created a new CacheManager
@@ -160,6 +169,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	@Override
+	@Nullable
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}
@@ -177,8 +187,11 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	@Override
 	public void destroy() {
-		if (this.locallyManaged) {
-			logger.info("Shutting down EhCache CacheManager");
+		if (this.cacheManager != null && this.locallyManaged) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Shutting down EhCache CacheManager" +
+						(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
+			}
 			this.cacheManager.shutdown();
 		}
 	}

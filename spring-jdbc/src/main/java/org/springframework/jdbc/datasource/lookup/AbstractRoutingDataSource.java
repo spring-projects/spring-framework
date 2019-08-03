@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,16 +40,20 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {
 
+	@Nullable
 	private Map<Object, Object> targetDataSources;
 
+	@Nullable
 	private Object defaultTargetDataSource;
 
 	private boolean lenientFallback = true;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
+	@Nullable
 	private Map<Object, DataSource> resolvedDataSources;
 
+	@Nullable
 	private DataSource resolvedDefaultDataSource;
 
 
@@ -102,7 +107,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * <p>Default is a {@link JndiDataSourceLookup}, allowing the JNDI names
 	 * of application server DataSources to be specified directly.
 	 */
-	public void setDataSourceLookup(DataSourceLookup dataSourceLookup) {
+	public void setDataSourceLookup(@Nullable DataSourceLookup dataSourceLookup) {
 		this.dataSourceLookup = (dataSourceLookup != null ? dataSourceLookup : new JndiDataSourceLookup());
 	}
 
@@ -112,12 +117,12 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
-		this.resolvedDataSources = new HashMap<Object, DataSource>(this.targetDataSources.size());
-		for (Map.Entry<Object, Object> entry : this.targetDataSources.entrySet()) {
-			Object lookupKey = resolveSpecifiedLookupKey(entry.getKey());
-			DataSource dataSource = resolveSpecifiedDataSource(entry.getValue());
+		this.resolvedDataSources = new HashMap<>(this.targetDataSources.size());
+		this.targetDataSources.forEach((key, value) -> {
+			Object lookupKey = resolveSpecifiedLookupKey(key);
+			DataSource dataSource = resolveSpecifiedDataSource(value);
 			this.resolvedDataSources.put(lookupKey, dataSource);
-		}
+		});
 		if (this.defaultTargetDataSource != null) {
 			this.resolvedDefaultDataSource = resolveSpecifiedDataSource(this.defaultTargetDataSource);
 		}
@@ -211,6 +216,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * to match the stored lookup key type, as resolved by the
 	 * {@link #resolveSpecifiedLookupKey} method.
 	 */
+	@Nullable
 	protected abstract Object determineCurrentLookupKey();
 
 }

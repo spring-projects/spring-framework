@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,10 @@ package org.springframework.test.context.junit4;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.runners.model.ReflectiveCallable;
@@ -35,17 +35,21 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks;
+import org.springframework.test.context.junit4.statements.RunAfterTestExecutionCallbacks;
 import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks;
+import org.springframework.test.context.junit4.statements.RunBeforeTestExecutionCallbacks;
 import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -54,6 +58,9 @@ import org.springframework.util.ReflectionUtils;
  * {@link BlockJUnit4ClassRunner} which provides functionality of the
  * <em>Spring TestContext Framework</em> to standard JUnit tests by means of the
  * {@link TestContextManager} and associated support classes and annotations.
+ *
+ * <p>To use this class, simply annotate a JUnit 4 based test class with
+ * {@code @RunWith(SpringJUnit4ClassRunner.class)} or {@code @RunWith(SpringRunner.class)}.
  *
  * <p>The following list constitutes all annotations currently supported directly
  * or indirectly by {@code SpringJUnit4ClassRunner}. <em>(Note that additional
@@ -75,11 +82,12 @@ import org.springframework.util.ReflectionUtils;
  * <p>If you would like to use the Spring TestContext Framework with a runner
  * other than this one, use {@link SpringClassRule} and {@link SpringMethodRule}.
  *
- * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see SpringRunner
  * @see TestContextManager
  * @see AbstractJUnit4SpringContextTests
  * @see AbstractTransactionalJUnit4SpringContextTests
@@ -92,40 +100,29 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Method withRulesMethod;
 
-	// Used by RunAfterTestClassCallbacks and RunAfterTestMethodCallbacks
-	private static final String MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME = "org.junit.runners.model.MultipleFailureException";
-
 	static {
-		boolean junit4dot9Present = ClassUtils.isPresent(MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME,
-			SpringJUnit4ClassRunner.class.getClassLoader());
-		if (!junit4dot9Present) {
-			throw new IllegalStateException(String.format(
-				"Failed to find class [%s]: SpringJUnit4ClassRunner requires JUnit 4.9 or higher.",
-				MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME));
-		}
+		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringJUnit4ClassRunner.class.getClassLoader()),
+				"SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
 
-		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
+		Method method = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
 				FrameworkMethod.class, Object.class, Statement.class);
-		if (withRulesMethod == null) {
-			throw new IllegalStateException(
-				"Failed to find withRules() method: SpringJUnit4ClassRunner requires JUnit 4.9 or higher.");
-		}
-		ReflectionUtils.makeAccessible(withRulesMethod);
+		Assert.state(method != null, "SpringJUnit4ClassRunner requires JUnit 4.12 or higher");
+		ReflectionUtils.makeAccessible(method);
+		withRulesMethod = method;
 	}
+
 
 	private final TestContextManager testContextManager;
 
 
 	private static void ensureSpringRulesAreNotPresent(Class<?> testClass) {
 		for (Field field : testClass.getFields()) {
-			if (SpringClassRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringClassRule field in test class [%s], " +
-						"but SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
-			}
-			if (SpringMethodRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringMethodRule field in test class [%s], " +
-						"but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
-			}
+			Assert.state(!SpringClassRule.class.isAssignableFrom(field.getType()), () -> String.format(
+					"Detected SpringClassRule field in test class [%s], " +
+					"but SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+			Assert.state(!SpringMethodRule.class.isAssignableFrom(field.getType()), () -> String.format(
+					"Detected SpringMethodRule field in test class [%s], " +
+					"but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
 		}
 	}
 
@@ -272,6 +269,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * Spring-specific timeouts in that the former execute in a separate
 	 * thread while the latter simply execute in the main thread (like regular
 	 * tests).
+	 * @see #methodInvoker(FrameworkMethod, Object)
+	 * @see #withBeforeTestExecutionCallbacks(FrameworkMethod, Object, Statement)
+	 * @see #withAfterTestExecutionCallbacks(FrameworkMethod, Object, Statement)
 	 * @see #possiblyExpectingExceptions(FrameworkMethod, Object, Statement)
 	 * @see #withBefores(FrameworkMethod, Object, Statement)
 	 * @see #withAfters(FrameworkMethod, Object, Statement)
@@ -295,6 +295,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		}
 
 		Statement statement = methodInvoker(frameworkMethod, testInstance);
+		statement = withBeforeTestExecutionCallbacks(frameworkMethod, testInstance, statement);
+		statement = withAfterTestExecutionCallbacks(frameworkMethod, testInstance, statement);
 		statement = possiblyExpectingExceptions(frameworkMethod, testInstance, statement);
 		statement = withBefores(frameworkMethod, testInstance, statement);
 		statement = withAfters(frameworkMethod, testInstance, statement);
@@ -308,7 +310,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * Invoke JUnit's private {@code withRules()} method using reflection.
 	 */
 	private Statement withRulesReflectively(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
-		return (Statement) ReflectionUtils.invokeMethod(withRulesMethod, this, frameworkMethod, testInstance, statement);
+		Object result = ReflectionUtils.invokeMethod(withRulesMethod, this, frameworkMethod, testInstance, statement);
+		Assert.state(result instanceof Statement, "withRules mismatch");
+		return (Statement) result;
 	}
 
 	/**
@@ -342,6 +346,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * <p>Can be overridden by subclasses.
 	 * @return the expected exception, or {@code null} if none was specified
 	 */
+	@Nullable
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
 		return (test != null && test.expected() != Test.None.class ? test.expected() : null);
@@ -360,6 +365,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see #getJUnitTimeout(FrameworkMethod)
 	 */
 	@Override
+	// Retain the following warning suppression for deprecation (even if Eclipse
+	// states it is unnecessary) since withPotentialTimeout(FrameworkMethod,Object,Statement)
+	// in BlockJUnit4ClassRunner has been deprecated.
 	@SuppressWarnings("deprecation")
 	protected Statement withPotentialTimeout(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
 		Statement statement = null;
@@ -376,8 +384,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 			statement = new SpringFailOnTimeout(next, springTimeout);
 		}
 		else if (junitTimeout > 0) {
-			// TODO Use FailOnTimeout.builder() once JUnit 4.12 is the minimum supported version.
-			statement = new FailOnTimeout(next, junitTimeout);
+			statement = FailOnTimeout.builder().withTimeout(junitTimeout, TimeUnit.MILLISECONDS).build(next);
 		}
 		else {
 			statement = next;
@@ -393,7 +400,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected long getJUnitTimeout(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
-		return (test != null && test.timeout() > 0 ? test.timeout() : 0);
+		return (test == null ? 0 : Math.max(0, test.timeout()));
 	}
 
 	/**
@@ -408,6 +415,26 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
+	 * Wrap the supplied {@link Statement} with a {@code RunBeforeTestExecutionCallbacks}
+	 * statement, thus preserving the default functionality while adding support for the
+	 * Spring TestContext Framework.
+	 * @see RunBeforeTestExecutionCallbacks
+	 */
+	protected Statement withBeforeTestExecutionCallbacks(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
+		return new RunBeforeTestExecutionCallbacks(statement, testInstance, frameworkMethod.getMethod(), getTestContextManager());
+	}
+
+	/**
+	 * Wrap the supplied {@link Statement} with a {@code RunAfterTestExecutionCallbacks}
+	 * statement, thus preserving the default functionality while adding support for the
+	 * Spring TestContext Framework.
+	 * @see RunAfterTestExecutionCallbacks
+	 */
+	protected Statement withAfterTestExecutionCallbacks(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
+		return new RunAfterTestExecutionCallbacks(statement, testInstance, frameworkMethod.getMethod(), getTestContextManager());
+	}
+
+	/**
 	 * Wrap the {@link Statement} returned by the parent implementation with a
 	 * {@code RunBeforeTestMethodCallbacks} statement, thus preserving the
 	 * default functionality while adding support for the Spring TestContext
@@ -417,8 +444,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Statement withBefores(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitBefores = super.withBefores(frameworkMethod, testInstance, statement);
-		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(),
-				getTestContextManager());
+		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(), getTestContextManager());
 	}
 
 	/**
@@ -431,8 +457,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Statement withAfters(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitAfters = super.withAfters(frameworkMethod, testInstance, statement);
-		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(),
-				getTestContextManager());
+		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(), getTestContextManager());
 	}
 
 	/**

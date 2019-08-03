@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,11 +35,11 @@ import org.springframework.util.FileCopyUtils;
 @SuppressWarnings("serial")
 public class CommAreaRecord implements Record, Streamable {
 
-	private byte[] bytes;
+	private byte[] bytes = new byte[0];
 
-	private String recordName;
+	private String recordName = "";
 
-	private String recordShortDescription;
+	private String recordShortDescription = "";
 
 
 	/**
@@ -60,22 +60,22 @@ public class CommAreaRecord implements Record, Streamable {
 
 	@Override
 	public void setRecordName(String recordName) {
-		this.recordName=recordName;
+		this.recordName = recordName;
 	}
 
 	@Override
 	public String getRecordName() {
-		return recordName;
+		return this.recordName;
 	}
 
 	@Override
 	public void setRecordShortDescription(String recordShortDescription) {
-		this.recordShortDescription=recordShortDescription;
+		this.recordShortDescription = recordShortDescription;
 	}
 
 	@Override
 	public String getRecordShortDescription() {
-		return recordShortDescription;
+		return this.recordShortDescription;
 	}
 
 

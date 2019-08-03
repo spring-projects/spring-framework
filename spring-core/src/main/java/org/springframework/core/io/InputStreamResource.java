@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,9 @@ package org.springframework.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link Resource} implementation for a given {@link InputStream}.
@@ -61,10 +64,8 @@ public class InputStreamResource extends AbstractResource {
 	 * @param inputStream the InputStream to use
 	 * @param description where the InputStream comes from
 	 */
-	public InputStreamResource(InputStream inputStream, String description) {
-		if (inputStream == null) {
-			throw new IllegalArgumentException("InputStream must not be null");
-		}
+	public InputStreamResource(InputStream inputStream, @Nullable String description) {
+		Assert.notNull(inputStream, "InputStream must not be null");
 		this.inputStream = inputStream;
 		this.description = (description != null ? description : "");
 	}
@@ -114,9 +115,9 @@ public class InputStreamResource extends AbstractResource {
 	 * This implementation compares the underlying InputStream.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof InputStreamResource &&
+				((InputStreamResource) other).inputStream.equals(this.inputStream)));
 	}
 
 	/**

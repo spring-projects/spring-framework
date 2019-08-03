@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,9 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.Session;
 
 import org.springframework.core.Constants;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
@@ -38,24 +40,32 @@ import org.springframework.jms.support.converter.MessageConverter;
  */
 public class JmsActivationSpecConfig {
 
-	/** Constants instance for javax.jms.Session */
+	/** Constants instance for {@code javax.jms.Session}. */
 	private static final Constants sessionConstants = new Constants(Session.class);
 
 
+	@Nullable
 	private String destinationName;
 
 	private boolean pubSubDomain = false;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
+
+	@Nullable
+	private QosSettings replyQosSettings;
 
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
 
+	@Nullable
 	private String subscriptionName;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private String messageSelector;
 
 	private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -64,13 +74,15 @@ public class JmsActivationSpecConfig {
 
 	private int prefetchSize = -1;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
 
-	public void setDestinationName(String destinationName) {
+	public void setDestinationName(@Nullable String destinationName) {
 		this.destinationName = destinationName;
 	}
 
+	@Nullable
 	public String getDestinationName() {
 		return this.destinationName;
 	}
@@ -96,6 +108,15 @@ public class JmsActivationSpecConfig {
 		}
 	}
 
+	public void setReplyQosSettings(@Nullable QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
+	}
+
+	@Nullable
+	public QosSettings getReplyQosSettings() {
+		return this.replyQosSettings;
+	}
+
 	public void setSubscriptionDurable(boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
 		if (subscriptionDurable) {
@@ -118,35 +139,39 @@ public class JmsActivationSpecConfig {
 		return this.subscriptionShared;
 	}
 
-	public void setSubscriptionName(String subscriptionName) {
+	public void setSubscriptionName(@Nullable String subscriptionName) {
 		this.subscriptionName = subscriptionName;
 	}
 
+	@Nullable
 	public String getSubscriptionName() {
 		return this.subscriptionName;
 	}
 
-	public void setDurableSubscriptionName(String durableSubscriptionName) {
+	public void setDurableSubscriptionName(@Nullable String durableSubscriptionName) {
 		this.subscriptionName = durableSubscriptionName;
-		this.subscriptionDurable = true;
+		this.subscriptionDurable = (durableSubscriptionName != null);
 	}
 
+	@Nullable
 	public String getDurableSubscriptionName() {
 		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
+	@Nullable
 	public String getClientId() {
 		return this.clientId;
 	}
 
-	public void setMessageSelector(String messageSelector) {
+	public void setMessageSelector(@Nullable String messageSelector) {
 		this.messageSelector = messageSelector;
 	}
 
+	@Nullable
 	public String getMessageSelector() {
 		return this.messageSelector;
 	}
@@ -249,13 +274,14 @@ public class JmsActivationSpecConfig {
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
 	 * @param messageConverter the message converter to use
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the {@link MessageConverter} to use, if any.
 	 */
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}

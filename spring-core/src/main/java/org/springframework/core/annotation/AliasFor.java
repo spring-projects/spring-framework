@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,15 +51,7 @@ import java.lang.annotation.Target;
  * <h3>Usage Requirements</h3>
  * <p>Like with any annotation in Java, the mere presence of {@code @AliasFor}
  * on its own will not enforce alias semantics. For alias semantics to be
- * enforced, annotations must be <em>loaded</em> via the utility methods in
- * {@link AnnotationUtils}. Behind the scenes, Spring will <em>synthesize</em>
- * an annotation by wrapping it in a dynamic proxy that transparently enforces
- * <em>attribute alias</em> semantics for annotation attributes that are
- * annotated with {@code @AliasFor}. Similarly, {@link AnnotatedElementUtils}
- * supports explicit meta-annotation attribute overrides when {@code @AliasFor}
- * is used within an annotation hierarchy. Typically you will not need to
- * manually synthesize annotations on your own since Spring will do that for
- * you transparently when looking up annotations on Spring-managed components.
+ * enforced, annotations must be <em>loaded</em> via {@link MergedAnnotations}.
  *
  * <h3>Implementation Requirements</h3>
  * <ul>
@@ -176,9 +168,7 @@ import java.lang.annotation.Target;
  *
  * @author Sam Brannen
  * @since 4.2
- * @see AnnotatedElementUtils
- * @see AnnotationUtils
- * @see AnnotationUtils#synthesizeAnnotation(Annotation, java.lang.reflect.AnnotatedElement)
+ * @see MergedAnnotations
  * @see SynthesizedAnnotation
  */
 @Retention(RetentionPolicy.RUNTIME)

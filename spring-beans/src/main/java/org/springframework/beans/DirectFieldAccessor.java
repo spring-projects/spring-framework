@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -46,7 +47,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
-	private final Map<String, FieldPropertyHandler> fieldMap = new HashMap<String, FieldPropertyHandler>();
+	private final Map<String, FieldPropertyHandler> fieldMap = new HashMap<>();
 
 
 	/**
@@ -70,14 +71,15 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
 
 	@Override
+	@Nullable
 	protected FieldPropertyHandler getLocalPropertyHandler(String propertyName) {
 		FieldPropertyHandler propertyHandler = this.fieldMap.get(propertyName);
 		if (propertyHandler == null) {
 			Field field = ReflectionUtils.findField(getWrappedClass(), propertyName);
 			if (field != null) {
 				propertyHandler = new FieldPropertyHandler(field);
+				this.fieldMap.put(propertyName, propertyHandler);
 			}
-			this.fieldMap.put(propertyName, propertyHandler);
 		}
 		return propertyHandler;
 	}
@@ -116,11 +118,13 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
+		@Nullable
 		public TypeDescriptor nested(int level) {
 			return TypeDescriptor.nested(this.field, level);
 		}
 
 		@Override
+		@Nullable
 		public Object getValue() throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);
@@ -134,10 +138,10 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
-		public void setValue(Object object, Object value) throws Exception {
+		public void setValue(@Nullable Object value) throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);
-				this.field.set(object, value);
+				this.field.set(getWrappedInstance(), value);
 			}
 			catch (IllegalAccessException ex) {
 				throw new InvalidPropertyException(getWrappedClass(), this.field.getName(),

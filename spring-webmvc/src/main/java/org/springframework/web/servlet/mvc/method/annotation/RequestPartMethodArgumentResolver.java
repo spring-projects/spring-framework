@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,19 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.UsesJava8;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,17 +35,15 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Resolves the following method arguments:
  * <ul>
- * <li>Annotated with {@code @RequestPart}
+ * <li>Annotated with @{@link RequestPart}
  * <li>Of type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver} abstraction
  * <li>Of type {@code javax.servlet.http.Part} in conjunction with Servlet 3.0 multipart requests
  * </ul>
@@ -65,12 +57,13 @@ import org.springframework.web.util.WebUtils;
  * it is derived from the name of the method argument.
  *
  * <p>Automatic validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}. In case of validation failure, a
- * {@link MethodArgumentNotValidException} is raised and a 400 response status
- * code returned if {@link DefaultHandlerExceptionResolver} is configured.
+ * {@code @javax.validation.Valid}. In case of validation failure, a {@link MethodArgumentNotValidException}
+ * is raised and a 400 response status code returned if
+ * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver} is configured.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver {
@@ -94,11 +87,13 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 
 	/**
-	 * Supports the following:
+	 * Whether the given {@linkplain MethodParameter method parameter} is a multi-part
+	 * supported. Supports the following:
 	 * <ul>
 	 * <li>annotated with {@code @RequestPart}
 	 * <li>of type {@link MultipartFile} unless annotated with {@code @RequestParam}
-	 * <li>of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}
+	 * <li>of type {@code javax.servlet.http.Part} unless annotated with
+	 * {@code @RequestParam}
 	 * </ul>
 	 */
 	@Override
@@ -107,110 +102,70 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			return true;
 		}
 		else {
-			if (parameter.hasParameterAnnotation(RequestParam.class)){
+			if (parameter.hasParameterAnnotation(RequestParam.class)) {
 				return false;
 			}
-			else if (MultipartFile.class == parameter.getParameterType()) {
-				return true;
-			}
-			else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return MultipartResolutionDelegate.isMultipartArgument(parameter.nestedIfOptional());
 		}
 	}
 
 	@Override
-	@UsesJava8
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-		assertIsMultipartRequest(servletRequest);
+		Assert.state(servletRequest != null, "No HttpServletRequest");
 
-		MultipartHttpServletRequest multipartRequest =
-				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
+		boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional());
 
-		Class<?> paramType = parameter.getParameterType();
-		boolean optional = paramType.getName().equals("java.util.Optional");
-		if (optional) {
-			parameter.increaseNestingLevel();
-			paramType = parameter.getNestedParameterType();
-		}
+		String name = getPartName(parameter, requestPart);
+		parameter = parameter.nestedIfOptional();
+		Object arg = null;
 
-		String partName = getPartName(parameter);
-		Object arg;
-
-		if (MultipartFile.class == paramType) {
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFile(partName);
-		}
-		else if (isMultipartFileCollection(parameter)) {
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFiles(partName);
-		}
-		else if (isMultipartFileArray(parameter)) {
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			List<MultipartFile> files = multipartRequest.getFiles(partName);
-			arg = files.toArray(new MultipartFile[files.size()]);
-		}
-		else if ("javax.servlet.http.Part".equals(paramType.getName())) {
-			assertIsMultipartRequest(servletRequest);
-			arg = servletRequest.getPart(partName);
-		}
-		else if (isPartCollection(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			arg = new ArrayList<Object>(servletRequest.getParts());
-		}
-		else if (isPartArray(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			arg = RequestPartResolver.resolvePart(servletRequest);
+		Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
+		if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
+			arg = mpArg;
 		}
 		else {
 			try {
-				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
+				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, name);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getNestedGenericParameterType());
-				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
-				if (arg != null) {
-					validateIfApplicable(binder, parameter);
-					if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-						throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+				if (binderFactory != null) {
+					WebDataBinder binder = binderFactory.createBinder(request, arg, name);
+					if (arg != null) {
+						validateIfApplicable(binder, parameter);
+						if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+							throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+						}
+					}
+					if (mavContainer != null) {
+						mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
 					}
 				}
-				mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName, binder.getBindingResult());
 			}
-			catch (MissingServletRequestPartException ex) {
-				// handled below
-				arg = null;
+			catch (MissingServletRequestPartException | MultipartException ex) {
+				if (isRequired) {
+					throw ex;
+				}
 			}
 		}
-
-		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = ((requestPart == null || requestPart.required()) && !optional);
 
 		if (arg == null && isRequired) {
-			throw new MissingServletRequestPartException(partName);
+			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
+				throw new MultipartException("Current request is not a multipart request");
+			}
+			else {
+				throw new MissingServletRequestPartException(name);
+			}
 		}
-		if (optional) {
-			arg = Optional.ofNullable(arg);
-		}
-
-		return arg;
+		return adaptArgumentIfNecessary(arg, parameter);
 	}
 
-	private static void assertIsMultipartRequest(HttpServletRequest request) {
-		String contentType = request.getContentType();
-		if (contentType == null || !contentType.toLowerCase().startsWith("multipart/")) {
-			throw new MultipartException("The current request is not a multipart request");
-		}
-	}
-
-	private String getPartName(MethodParameter methodParam) {
-		RequestPart requestPart = methodParam.getParameterAnnotation(RequestPart.class);
+	private String getPartName(MethodParameter methodParam, @Nullable RequestPart requestPart) {
 		String partName = (requestPart != null ? requestPart.name() : "");
-		if (partName.length() == 0) {
+		if (partName.isEmpty()) {
 			partName = methodParam.getParameterName();
 			if (partName == null) {
 				throw new IllegalArgumentException("Request part name for argument type [" +
@@ -219,49 +174,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return partName;
-	}
-
-	private boolean isMultipartFileCollection(MethodParameter methodParam) {
-		Class<?> collectionType = getCollectionParameterType(methodParam);
-		return MultipartFile.class == collectionType;
-	}
-
-	private boolean isMultipartFileArray(MethodParameter methodParam) {
-		Class<?> paramType = methodParam.getNestedParameterType().getComponentType();
-		return MultipartFile.class == paramType;
-	}
-
-	private boolean isPartCollection(MethodParameter methodParam) {
-		Class<?> collectionType = getCollectionParameterType(methodParam);
-		return (collectionType != null && "javax.servlet.http.Part".equals(collectionType.getName()));
-	}
-
-	private boolean isPartArray(MethodParameter methodParam) {
-		Class<?> paramType = methodParam.getNestedParameterType().getComponentType();
-		return (paramType != null && "javax.servlet.http.Part".equals(paramType.getName()));
-	}
-
-	private Class<?> getCollectionParameterType(MethodParameter methodParam) {
-		Class<?> paramType = methodParam.getNestedParameterType();
-		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
-			if (valueType != null) {
-				return valueType;
-			}
-		}
-		return null;
-	}
-
-
-	/**
-	 * Inner class to avoid hard-coded dependency on Servlet 3.0 Part type...
-	 */
-	private static class RequestPartResolver {
-
-		public static Object resolvePart(HttpServletRequest servletRequest) throws Exception {
-			Collection<Part> parts = servletRequest.getParts();
-			return parts.toArray(new Part[parts.size()]);
-		}
 	}
 
 }

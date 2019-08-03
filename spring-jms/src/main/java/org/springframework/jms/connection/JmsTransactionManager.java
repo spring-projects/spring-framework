@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import javax.jms.Session;
 import javax.jms.TransactionRolledBackException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -33,6 +34,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -50,12 +52,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Application code is required to retrieve the transactional JMS Session via
  * {@link ConnectionFactoryUtils#getTransactionalSession} instead of a standard
- * J2EE-style {@link ConnectionFactory#createConnection()} call with subsequent
+ * Java EE-style {@link ConnectionFactory#createConnection()} call with subsequent
  * Session creation. Spring's {@link org.springframework.jms.core.JmsTemplate}
  * will autodetect a thread-bound Session and automatically participate in it.
  *
  * <p>Alternatively, you can allow application code to work with the standard
- * J2EE-style lookup pattern on a ConnectionFactory, for example for legacy code
+ * Java EE-style lookup pattern on a ConnectionFactory, for example for legacy code
  * that is not aware of Spring at all. In that case, define a
  * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
  * which will automatically participate in Spring-managed transactions.
@@ -91,7 +93,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
+
+	private boolean lazyResourceRetrieval = false;
 
 
 	/**
@@ -124,7 +129,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Set the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
-	public void setConnectionFactory(ConnectionFactory cf) {
+	public void setConnectionFactory(@Nullable ConnectionFactory cf) {
 		if (cf instanceof TransactionAwareConnectionFactoryProxy) {
 			// If we got a TransactionAwareConnectionFactoryProxy, we need to perform transactions
 			// for its underlying target ConnectionFactory, else JMS access code won't see
@@ -139,8 +144,34 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
+	@Nullable
 	public ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
+	}
+
+	/**
+	 * Obtain the ConnectionFactory for actual use.
+	 * @return the ConnectionFactory (never {@code null})
+	 * @throws IllegalStateException in case of no ConnectionFactory set
+	 * @since 5.0
+	 */
+	protected final ConnectionFactory obtainConnectionFactory() {
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		Assert.state(connectionFactory != null, "No ConnectionFactory set");
+		return connectionFactory;
+	}
+
+	/**
+	 * Specify whether this transaction manager should lazily retrieve a JMS
+	 * Connection and Session on access within a transaction ({@code true}).
+	 * By default, it will eagerly create a JMS Connection and Session at
+	 * transaction begin ({@code false}).
+	 * @since 5.1.6
+	 * @see JmsResourceHolder#getConnection()
+	 * @see JmsResourceHolder#getSession()
+	 */
+	public void setLazyResourceRetrieval(boolean lazyResourceRetrieval) {
+		this.lazyResourceRetrieval = lazyResourceRetrieval;
 	}
 
 	/**
@@ -156,21 +187,21 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 	@Override
 	public Object getResourceFactory() {
-		return getConnectionFactory();
+		return obtainConnectionFactory();
 	}
 
 	@Override
 	protected Object doGetTransaction() {
 		JmsTransactionObject txObject = new JmsTransactionObject();
 		txObject.setResourceHolder(
-				(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory()));
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(obtainConnectionFactory()));
 		return txObject;
 	}
 
 	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		return (txObject.getResourceHolder() != null);
+		return txObject.hasResourceHolder();
 	}
 
 	@Override
@@ -179,22 +210,30 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 			throw new InvalidIsolationLevelException("JMS does not support an isolation level concept");
 		}
 
+		ConnectionFactory connectionFactory = obtainConnectionFactory();
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		Connection con = null;
 		Session session = null;
 		try {
-			con = createConnection();
-			session = createSession(con);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
+			JmsResourceHolder resourceHolder;
+			if (this.lazyResourceRetrieval) {
+				resourceHolder = new LazyJmsResourceHolder(connectionFactory);
 			}
-			txObject.setResourceHolder(new JmsResourceHolder(getConnectionFactory(), con, session));
-			txObject.getResourceHolder().setSynchronizedWithTransaction(true);
+			else {
+				con = createConnection();
+				session = createSession(con);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
+				}
+				resourceHolder = new JmsResourceHolder(connectionFactory, con, session);
+			}
+			resourceHolder.setSynchronizedWithTransaction(true);
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getResourceHolder().setTimeoutInSeconds(timeout);
+				resourceHolder.setTimeoutInSeconds(timeout);
 			}
-			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getResourceHolder());
+			txObject.setResourceHolder(resourceHolder);
+			TransactionSynchronizationManager.bindResource(connectionFactory, resourceHolder);
 		}
 		catch (Throwable ex) {
 			if (session != null) {
@@ -221,45 +260,48 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	protected Object doSuspend(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		txObject.setResourceHolder(null);
-		return TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+		return TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 	}
 
 	@Override
-	protected void doResume(Object transaction, Object suspendedResources) {
-		JmsResourceHolder conHolder = (JmsResourceHolder) suspendedResources;
-		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
+	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
+		TransactionSynchronizationManager.bindResource(obtainConnectionFactory(), suspendedResources);
 	}
 
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getResourceHolder().getSession();
-		try {
-			if (status.isDebug()) {
-				logger.debug("Committing JMS transaction on Session [" + session + "]");
+		Session session = txObject.getResourceHolder().getOriginalSession();
+		if (session != null) {
+			try {
+				if (status.isDebug()) {
+					logger.debug("Committing JMS transaction on Session [" + session + "]");
+				}
+				session.commit();
 			}
-			session.commit();
-		}
-		catch (TransactionRolledBackException ex) {
-			throw new UnexpectedRollbackException("JMS transaction rolled back", ex);
-		}
-		catch (JMSException ex) {
-			throw new TransactionSystemException("Could not commit JMS transaction", ex);
+			catch (TransactionRolledBackException ex) {
+				throw new UnexpectedRollbackException("JMS transaction rolled back", ex);
+			}
+			catch (JMSException ex) {
+				throw new TransactionSystemException("Could not commit JMS transaction", ex);
+			}
 		}
 	}
 
 	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getResourceHolder().getSession();
-		try {
-			if (status.isDebug()) {
-				logger.debug("Rolling back JMS transaction on Session [" + session + "]");
+		Session session = txObject.getResourceHolder().getOriginalSession();
+		if (session != null) {
+			try {
+				if (status.isDebug()) {
+					logger.debug("Rolling back JMS transaction on Session [" + session + "]");
+				}
+				session.rollback();
 			}
-			session.rollback();
-		}
-		catch (JMSException ex) {
-			throw new TransactionSystemException("Could not roll back JMS transaction", ex);
+			catch (JMSException ex) {
+				throw new TransactionSystemException("Could not roll back JMS transaction", ex);
+			}
 		}
 	}
 
@@ -272,7 +314,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+		TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 		txObject.getResourceHolder().closeAll();
 		txObject.getResourceHolder().clear();
 	}
@@ -285,7 +327,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
+		return obtainConnectionFactory().createConnection();
 	}
 
 	/**
@@ -301,25 +343,110 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 
 	/**
+	 * Lazily initializing variant of {@link JmsResourceHolder},
+	 * initializing a JMS Connection and Session on user access.
+	 */
+	private class LazyJmsResourceHolder extends JmsResourceHolder {
+
+		private boolean connectionInitialized = false;
+
+		private boolean sessionInitialized = false;
+
+		public LazyJmsResourceHolder(@Nullable ConnectionFactory connectionFactory) {
+			super(connectionFactory);
+		}
+
+		@Override
+		@Nullable
+		public Connection getConnection() {
+			initializeConnection();
+			return super.getConnection();
+		}
+
+		@Override
+		@Nullable
+		public <C extends Connection> C getConnection(Class<C> connectionType) {
+			initializeConnection();
+			return super.getConnection(connectionType);
+		}
+
+		@Override
+		@Nullable
+		public Session getSession() {
+			initializeSession();
+			return super.getSession();
+		}
+
+		@Override
+		@Nullable
+		public <S extends Session> S getSession(Class<S> sessionType) {
+			initializeSession();
+			return super.getSession(sessionType);
+		}
+
+		@Override
+		@Nullable
+		public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
+			initializeSession();
+			return super.getSession(sessionType, connection);
+		}
+
+		private void initializeConnection() {
+			if (!this.connectionInitialized) {
+				try {
+					addConnection(createConnection());
+				}
+				catch (JMSException ex) {
+					throw new CannotCreateTransactionException(
+							"Failed to lazily initialize JMS Connection for transaction", ex);
+				}
+				this.connectionInitialized = true;
+			}
+		}
+
+		private void initializeSession() {
+			if (!this.sessionInitialized) {
+				Connection con = getConnection();
+				Assert.state(con != null, "No transactional JMS Connection");
+				try {
+					addSession(createSession(con), con);
+				}
+				catch (JMSException ex) {
+					throw new CannotCreateTransactionException(
+							"Failed to lazily initialize JMS Session for transaction", ex);
+				}
+				this.sessionInitialized = true;
+			}
+		}
+	}
+
+
+	/**
 	 * JMS transaction object, representing a JmsResourceHolder.
 	 * Used as transaction object by JmsTransactionManager.
 	 * @see JmsResourceHolder
 	 */
 	private static class JmsTransactionObject implements SmartTransactionObject {
 
+		@Nullable
 		private JmsResourceHolder resourceHolder;
 
-		public void setResourceHolder(JmsResourceHolder resourceHolder) {
+		public void setResourceHolder(@Nullable JmsResourceHolder resourceHolder) {
 			this.resourceHolder = resourceHolder;
 		}
 
 		public JmsResourceHolder getResourceHolder() {
+			Assert.state(this.resourceHolder != null, "No JmsResourceHolder available");
 			return this.resourceHolder;
+		}
+
+		public boolean hasResourceHolder() {
+			return (this.resourceHolder != null);
 		}
 
 		@Override
 		public boolean isRollbackOnly() {
-			return this.resourceHolder.isRollbackOnly();
+			return (this.resourceHolder != null && this.resourceHolder.isRollbackOnly());
 		}
 
 		@Override

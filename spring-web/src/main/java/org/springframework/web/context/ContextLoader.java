@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,19 +28,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.access.BeanFactoryLocator;
-import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -49,19 +46,18 @@ import org.springframework.util.StringUtils;
  * Performs the actual initialization work for the root application context.
  * Called by {@link ContextLoaderListener}.
  *
- * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter
- * at the {@code web.xml} context-param level to specify the context
- * class type, falling back to the default of
- * {@link org.springframework.web.context.support.XmlWebApplicationContext}
+ * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter at the
+ * {@code web.xml} context-param level to specify the context class type, falling
+ * back to {@link org.springframework.web.context.support.XmlWebApplicationContext}
  * if not found. With the default ContextLoader implementation, any context class
- * specified needs to implement the ConfigurableWebApplicationContext interface.
+ * specified needs to implement the {@link ConfigurableWebApplicationContext} interface.
  *
- * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"}
- * context-param and passes its value to the context instance, parsing it into
- * potentially multiple file paths which can be separated by any number of
- * commas and spaces, e.g. "WEB-INF/applicationContext1.xml,
- * WEB-INF/applicationContext2.xml". Ant-style path patterns are supported as well,
- * e.g. "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
+ * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"} context-param
+ * and passes its value to the context instance, parsing it into potentially multiple
+ * file paths which can be separated by any number of commas and spaces, e.g.
+ * "WEB-INF/applicationContext1.xml, WEB-INF/applicationContext2.xml".
+ * Ant-style path patterns are supported as well, e.g.
+ * "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
  * If not explicitly specified, the context implementation is supposed to use a
  * default location (with XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
  *
@@ -70,10 +66,9 @@ import org.springframework.util.StringUtils;
  * Spring's default ApplicationContext implementations. This can be leveraged
  * to deliberately override certain bean definitions via an extra XML file.
  *
- * <p>Above and beyond loading the root application context, this class
- * can optionally load or obtain and hook up a shared parent context to
- * the root application context. See the
- * {@link #loadParentContext(ServletContext)} method for more information.
+ * <p>Above and beyond loading the root application context, this class can optionally
+ * load or obtain and hook up a shared parent context to the root application context.
+ * See the {@link #loadParentContext(ServletContext)} method for more information.
  *
  * <p>As of Spring 3.1, {@code ContextLoader} supports injecting the root web
  * application context via the {@link #ContextLoader(WebApplicationContext)}
@@ -92,7 +87,7 @@ public class ContextLoader {
 
 	/**
 	 * Config param for the root WebApplicationContext id,
-	 * to be used as serialization id for the underlying BeanFactory: {@value}
+	 * to be used as serialization id for the underlying BeanFactory: {@value}.
 	 */
 	public static final String CONTEXT_ID_PARAM = "contextId";
 
@@ -105,52 +100,24 @@ public class ContextLoader {
 	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
 	/**
-	 * Config param for the root WebApplicationContext implementation class to use: {@value}
+	 * Config param for the root WebApplicationContext implementation class to use: {@value}.
 	 * @see #determineContextClass(ServletContext)
 	 */
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
 
 	/**
 	 * Config param for {@link ApplicationContextInitializer} classes to use
-	 * for initializing the root web application context: {@value}
+	 * for initializing the root web application context: {@value}.
 	 * @see #customizeContext(ServletContext, ConfigurableWebApplicationContext)
 	 */
 	public static final String CONTEXT_INITIALIZER_CLASSES_PARAM = "contextInitializerClasses";
 
 	/**
 	 * Config param for global {@link ApplicationContextInitializer} classes to use
-	 * for initializing all web application contexts in the current application: {@value}
+	 * for initializing all web application contexts in the current application: {@value}.
 	 * @see #customizeContext(ServletContext, ConfigurableWebApplicationContext)
 	 */
 	public static final String GLOBAL_INITIALIZER_CLASSES_PARAM = "globalInitializerClasses";
-
-	/**
-	 * Optional servlet context parameter (i.e., "{@code locatorFactorySelector}")
-	 * used only when obtaining a parent context using the default implementation
-	 * of {@link #loadParentContext(ServletContext servletContext)}.
-	 * Specifies the 'selector' used in the
-	 * {@link ContextSingletonBeanFactoryLocator#getInstance(String selector)}
-	 * method call, which is used to obtain the BeanFactoryLocator instance from
-	 * which the parent context is obtained.
-	 * <p>The default is {@code classpath*:beanRefContext.xml},
-	 * matching the default applied for the
-	 * {@link ContextSingletonBeanFactoryLocator#getInstance()} method.
-	 * Supplying the "parentContextKey" parameter is sufficient in this case.
-	 */
-	public static final String LOCATOR_FACTORY_SELECTOR_PARAM = "locatorFactorySelector";
-
-	/**
-	 * Optional servlet context parameter (i.e., "{@code parentContextKey}")
-	 * used only when obtaining a parent context using the default implementation
-	 * of {@link #loadParentContext(ServletContext servletContext)}.
-	 * Specifies the 'factoryKey' used in the
-	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)} method call,
-	 * obtaining the parent application context from the BeanFactoryLocator instance.
-	 * <p>Supplying this "parentContextKey" parameter is sufficient when relying
-	 * on the default {@code classpath*:beanRefContext.xml} selector for
-	 * candidate factory references.
-	 */
-	public static final String LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
 
 	/**
 	 * Any number of these characters are considered delimiters between
@@ -185,29 +152,25 @@ public class ContextLoader {
 	 * Map from (thread context) ClassLoader to corresponding 'current' WebApplicationContext.
 	 */
 	private static final Map<ClassLoader, WebApplicationContext> currentContextPerThread =
-			new ConcurrentHashMap<ClassLoader, WebApplicationContext>(1);
+			new ConcurrentHashMap<>(1);
 
 	/**
 	 * The 'current' WebApplicationContext, if the ContextLoader class is
 	 * deployed in the web app ClassLoader itself.
 	 */
+	@Nullable
 	private static volatile WebApplicationContext currentContext;
 
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
 	 */
+	@Nullable
 	private WebApplicationContext context;
 
-	/**
-	 * Holds BeanFactoryReference when loading parent factory via
-	 * ContextSingletonBeanFactoryLocator.
-	 */
-	private BeanFactoryReference parentContextRef;
-
-	/** Actual ApplicationContextInitializer instances to apply to the context */
+	/** Actual ApplicationContextInitializer instances to apply to the context. */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+			new ArrayList<>();
 
 
 	/**
@@ -243,7 +206,7 @@ public class ContextLoader {
 	 * <li>{@code ServletContext} and {@code ServletConfig} objects will be delegated to
 	 * the application context</li>
 	 * <li>{@link #customizeContext} will be called</li>
-	 * <li>Any {@link ApplicationContextInitializer}s specified through the
+	 * <li>Any {@link ApplicationContextInitializer ApplicationContextInitializers} specified through the
 	 * "contextInitializerClasses" init-param will be applied.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh refresh()} will be called</li>
 	 * </ul>
@@ -274,7 +237,7 @@ public class ContextLoader {
 	 * @see #customizeContext
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+	public void setContextInitializers(@Nullable ApplicationContextInitializer<?>... initializers) {
 		if (initializers != null) {
 			for (ApplicationContextInitializer<?> initializer : initializers) {
 				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
@@ -301,8 +264,8 @@ public class ContextLoader {
 					"check whether you have multiple ContextLoader* definitions in your web.xml!");
 		}
 
-		Log logger = LogFactory.getLog(ContextLoader.class);
 		servletContext.log("Initializing Spring root WebApplicationContext");
+		Log logger = LogFactory.getLog(ContextLoader.class);
 		if (logger.isInfoEnabled()) {
 			logger.info("Root WebApplicationContext: initialization started");
 		}
@@ -338,26 +301,17 @@ public class ContextLoader {
 				currentContextPerThread.put(ccl, this.context);
 			}
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
-						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
-			}
 			if (logger.isInfoEnabled()) {
 				long elapsedTime = System.currentTimeMillis() - startTime;
-				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
+				logger.info("Root WebApplicationContext initialized in " + elapsedTime + " ms");
 			}
 
 			return this.context;
 		}
-		catch (RuntimeException ex) {
+		catch (RuntimeException | Error ex) {
 			logger.error("Context initialization failed", ex);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);
 			throw ex;
-		}
-		catch (Error err) {
-			logger.error("Context initialization failed", err);
-			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, err);
-			throw err;
 		}
 	}
 
@@ -470,11 +424,11 @@ public class ContextLoader {
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			if (initializerContextClass != null) {
-				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
-						"Could not add context initializer [%s] since its generic parameter [%s] " +
+			if (initializerContextClass != null && !initializerContextClass.isInstance(wac)) {
+				throw new ApplicationContextException(String.format(
+						"Could not apply context initializer [%s] since its generic parameter [%s] " +
 						"is not assignable from the type of application context used by this " +
-						"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						"context loader: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
 			this.contextInitializers.add(BeanUtils.instantiateClass(initializerClass));
@@ -496,7 +450,7 @@ public class ContextLoader {
 			determineContextInitializerClasses(ServletContext servletContext) {
 
 		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> classes =
-				new ArrayList<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>>();
+				new ArrayList<>();
 
 		String globalClassNames = servletContext.getInitParameter(GLOBAL_INITIALIZER_CLASSES_PARAM);
 		if (globalClassNames != null) {
@@ -519,7 +473,10 @@ public class ContextLoader {
 	private Class<ApplicationContextInitializer<ConfigurableApplicationContext>> loadInitializerClass(String className) {
 		try {
 			Class<?> clazz = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
-			Assert.isAssignable(ApplicationContextInitializer.class, clazz);
+			if (!ApplicationContextInitializer.class.isAssignableFrom(clazz)) {
+				throw new ApplicationContextException(
+						"Initializer class does not implement ApplicationContextInitializer interface: " + clazz);
+			}
 			return (Class<ApplicationContextInitializer<ConfigurableApplicationContext>>) clazz;
 		}
 		catch (ClassNotFoundException ex) {
@@ -537,41 +494,17 @@ public class ContextLoader {
 	 * alternately to also share the same parent context that is visible to
 	 * EJBs. For pure web applications, there is usually no need to worry about
 	 * having a parent context to the root web application context.
-	 * <p>The default implementation uses
-	 * {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator},
-	 * configured via {@link #LOCATOR_FACTORY_SELECTOR_PARAM} and
-	 * {@link #LOCATOR_FACTORY_KEY_PARAM}, to load a parent context
-	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
-	 * which also use the same configuration parameters.
+	 * <p>The default implementation simply returns {@code null}, as of 5.0.
 	 * @param servletContext current servlet context
 	 * @return the parent application context, or {@code null} if none
-	 * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
 	 */
+	@Nullable
 	protected ApplicationContext loadParentContext(ServletContext servletContext) {
-		ApplicationContext parentContext = null;
-		String locatorFactorySelector = servletContext.getInitParameter(LOCATOR_FACTORY_SELECTOR_PARAM);
-		String parentContextKey = servletContext.getInitParameter(LOCATOR_FACTORY_KEY_PARAM);
-
-		if (parentContextKey != null) {
-			// locatorFactorySelector may be null, indicating the default "classpath*:beanRefContext.xml"
-			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
-			Log logger = LogFactory.getLog(ContextLoader.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Getting parent context definition: using parent context key of '" +
-						parentContextKey + "' with BeanFactoryLocator");
-			}
-			this.parentContextRef = locator.useBeanFactory(parentContextKey);
-			parentContext = (ApplicationContext) this.parentContextRef.getFactory();
-		}
-
-		return parentContext;
+		return null;
 	}
 
 	/**
-	 * Close Spring's web application context for the given servlet context. If
-	 * the default {@link #loadParentContext(ServletContext)} implementation,
-	 * which uses ContextSingletonBeanFactoryLocator, has loaded any shared
-	 * parent context, release one reference to that shared parent context.
+	 * Close Spring's web application context for the given servlet context.
 	 * <p>If overriding {@link #loadParentContext(ServletContext)}, you may have
 	 * to override this method as well.
 	 * @param servletContext the ServletContext that the WebApplicationContext runs in
@@ -592,9 +525,6 @@ public class ContextLoader {
 				currentContextPerThread.remove(ccl);
 			}
 			servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-			if (this.parentContextRef != null) {
-				this.parentContextRef.release();
-			}
 		}
 	}
 
@@ -607,6 +537,7 @@ public class ContextLoader {
 	 * if none found
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
+	@Nullable
 	public static WebApplicationContext getCurrentWebApplicationContext() {
 		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 		if (ccl != null) {

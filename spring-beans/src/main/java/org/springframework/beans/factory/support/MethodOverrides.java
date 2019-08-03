@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,11 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Set of method overrides, determining which, if any, methods on a
@@ -35,7 +37,9 @@ import java.util.Set;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides = new LinkedHashSet<MethodOverride>(0);
+	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(2));
+
+	private volatile boolean modified = false;
 
 
 	/**
@@ -55,9 +59,10 @@ public class MethodOverrides {
 	/**
 	 * Copy all given method overrides into this object.
 	 */
-	public void addOverrides(MethodOverrides other) {
+	public void addOverrides(@Nullable MethodOverrides other) {
 		if (other != null) {
-			this.overrides.addAll(other.getOverrides());
+			this.modified = true;
+			this.overrides.addAll(other.overrides);
 		}
 	}
 
@@ -65,15 +70,17 @@ public class MethodOverrides {
 	 * Add the given method override.
 	 */
 	public void addOverride(MethodOverride override) {
+		this.modified = true;
 		this.overrides.add(override);
 	}
 
 	/**
 	 * Return all method overrides contained by this object.
-	 * @return Set of MethodOverride objects
+	 * @return a Set of MethodOverride objects
 	 * @see MethodOverride
 	 */
 	public Set<MethodOverride> getOverrides() {
+		this.modified = true;
 		return this.overrides;
 	}
 
@@ -81,7 +88,7 @@ public class MethodOverrides {
 	 * Return whether the set of method overrides is empty.
 	 */
 	public boolean isEmpty() {
-		return this.overrides.isEmpty();
+		return (!this.modified || this.overrides.isEmpty());
 	}
 
 	/**
@@ -89,19 +96,25 @@ public class MethodOverrides {
 	 * @param method method to check for overrides for
 	 * @return the method override, or {@code null} if none
 	 */
+	@Nullable
 	public MethodOverride getOverride(Method method) {
-		MethodOverride match = null;
-		for (MethodOverride candidate : this.overrides) {
-			if (candidate.matches(method)) {
-				match = candidate;
-			}
+		if (!this.modified) {
+			return null;
 		}
-		return match;
+		synchronized (this.overrides) {
+			MethodOverride match = null;
+			for (MethodOverride candidate : this.overrides) {
+				if (candidate.matches(method)) {
+					match = candidate;
+				}
+			}
+			return match;
+		}
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

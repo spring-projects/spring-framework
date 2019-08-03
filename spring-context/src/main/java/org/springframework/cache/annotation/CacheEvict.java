@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,11 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation indicating that a method (or all methods on a class) triggers
- * a cache eviction operation.
+ * Annotation indicating that a method (or all methods on a class) triggers a
+ * {@link org.springframework.cache.Cache#evict(Object) cache evict} operation.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Costin Leau
  * @author Stephane Nicoll
@@ -35,7 +38,7 @@ import org.springframework.core.annotation.AliasFor;
  * @since 3.1
  * @see CacheConfig
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
@@ -60,13 +63,30 @@ public @interface CacheEvict {
 
 	/**
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
-	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key, unless
-	 * a custom {@link #keyGenerator} has been set.
+	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key,
+	 * unless a custom {@link #keyGenerator} has been set.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation, which
+	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
+	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
+	 * not the wrapper</li>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String key() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator}
+	 * to use.
 	 * <p>Mutually exclusive with the {@link #key} attribute.
 	 * @see CacheConfig#keyGenerator
 	 */
@@ -83,7 +103,8 @@ public @interface CacheEvict {
 	String cacheManager() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver}
+	 * to use.
 	 * @see CacheConfig#cacheResolver
 	 */
 	String cacheResolver() default "";
@@ -92,6 +113,18 @@ public @interface CacheEvict {
 	 * Spring Expression Language (SpEL) expression used for making the cache
 	 * eviction operation conditional.
 	 * <p>Default is {@code ""}, meaning the cache eviction is always performed.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String condition() default "";
 
@@ -109,7 +142,7 @@ public @interface CacheEvict {
 	 * occur irrespective of the method outcome (i.e., whether it threw an
 	 * exception or not).
 	 * <p>Defaults to {@code false}, meaning that the cache eviction operation
-	 * will occur <em>after</em> the advised method is invoked successfully (i.e.,
+	 * will occur <em>after</em> the advised method is invoked successfully (i.e.
 	 * only if the invocation did not throw an exception).
 	 */
 	boolean beforeInvocation() default false;

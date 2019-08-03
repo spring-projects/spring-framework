@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class implementing the common {@link CacheManager} methods.
@@ -38,7 +39,7 @@ import org.springframework.cache.CacheManager;
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private volatile Set<String> cacheNames = Collections.emptySet();
 
@@ -63,7 +64,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		synchronized (this.cacheMap) {
 			this.cacheNames = Collections.emptySet();
 			this.cacheMap.clear();
-			Set<String> cacheNames = new LinkedHashSet<String>(caches.size());
+			Set<String> cacheNames = new LinkedHashSet<>(caches.size());
 			for (Cache cache : caches) {
 				String name = cache.getName();
 				this.cacheMap.put(name, decorateCache(cache));
@@ -84,6 +85,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	// Lazy cache initialization on access
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache != null) {
@@ -124,6 +126,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @see #getCache(String)
 	 * @see #getMissingCache(String)
 	 */
+	@Nullable
 	protected final Cache lookupCache(String name) {
 		return this.cacheMap.get(name);
 	}
@@ -131,7 +134,9 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	/**
 	 * Dynamically register an additional Cache with this manager.
 	 * @param cache the Cache to register
+	 * @deprecated as of Spring 4.3, in favor of {@link #getMissingCache(String)}
 	 */
+	@Deprecated
 	protected final void addCache(Cache cache) {
 		String name = cache.getName();
 		synchronized (this.cacheMap) {
@@ -149,7 +154,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @param name the name of the cache to be added
 	 */
 	private void updateCacheNames(String name) {
-		Set<String> cacheNames = new LinkedHashSet<String>(this.cacheNames.size() + 1);
+		Set<String> cacheNames = new LinkedHashSet<>(this.cacheNames.size() + 1);
 		cacheNames.addAll(this.cacheNames);
 		cacheNames.add(name);
 		this.cacheNames = Collections.unmodifiableSet(cacheNames);
@@ -169,18 +174,19 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	}
 
 	/**
-	 * Return a missing cache with the specified {@code name} or {@code null} if
-	 * such cache does not exist or could not be created on the fly.
-	 * <p>Some caches may be created at runtime in the native provided. If a lookup
-	 * by name does not yield any result, a subclass gets a chance to register
-	 * such a cache at runtime. The returned cache will be automatically added to
-	 * this instance.
+	 * Return a missing cache with the specified {@code name}, or {@code null} if
+	 * such a cache does not exist or could not be created on demand.
+	 * <p>Caches may be lazily created at runtime if the native provider supports it.
+	 * If a lookup by name does not yield any result, an {@code AbstractCacheManager}
+	 * subclass gets a chance to register such a cache at runtime. The returned cache
+	 * will be automatically added to this cache manager.
 	 * @param name the name of the cache to retrieve
-	 * @return the missing cache or {@code null} if no such cache exists or could be
-	 * created
+	 * @return the missing cache, or {@code null} if no such cache exists or could be
+	 * created on demand
 	 * @since 4.1
 	 * @see #getCache(String)
 	 */
+	@Nullable
 	protected Cache getMissingCache(String name) {
 		return null;
 	}

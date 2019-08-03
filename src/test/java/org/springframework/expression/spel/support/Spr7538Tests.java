@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.MethodExecutor;
@@ -36,17 +37,17 @@ public class Spr7538Tests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setTypeConverter(converter);
 
-		List<Foo> arguments = new ArrayList<Foo>();
+		List<Foo> arguments = new ArrayList<>();
 
 		// !!!! With the below line commented you'll get NPE. Uncomment and everything is OK!
 		//arguments.add(new Foo());
 
-		List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> paramDescriptors = new ArrayList<>();
 		Method method = AlwaysTrueReleaseStrategy.class.getMethod("checkCompleteness", List.class);
 		paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, 0)));
 
 
-		List<TypeDescriptor> argumentTypes = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> argumentTypes = new ArrayList<>();
 		argumentTypes.add(TypeDescriptor.forObject(arguments));
 		ReflectiveMethodResolver resolver = new ReflectiveMethodResolver();
 		MethodExecutor executor = resolver.resolve(context, target, "checkCompleteness", argumentTypes);

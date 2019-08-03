@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,6 @@ package org.springframework.util.xml;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.Socket;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
@@ -27,16 +25,17 @@ import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
+import org.xmlunit.util.Predicate;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -46,7 +45,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	private static final String COMPLEX_XML =
 			"<?xml version='1.0' encoding='UTF-8'?>" +
-					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"http://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
+					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"https://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
 					"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2' prefix:attr='value'>characters <![CDATA[cdata]]></prefix:child>" +
 					"<!-- comment -->" +
 					"</root>";
@@ -55,18 +54,23 @@ public abstract class AbstractStaxHandlerTestCase {
 					"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2' prefix:attr='value'>content</prefix:child>" +
 					"</root>";
 
+	private static final Predicate<Node> nodeFilter = (n -> n.getNodeType() != Node.COMMENT_NODE &&
+			n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE);
+
 
 	private XMLReader xmlReader;
 
+
 	@Before
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public void createXMLReader() throws Exception {
-		xmlReader = XMLReaderFactory.createXMLReader();
+		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+		xmlReader.setEntityResolver((publicId, systemId) -> new InputSource(new StringReader("")));
 	}
+
 
 	@Test
 	public void noNamespacePrefixes() throws Exception {
-		Assume.assumeTrue(wwwSpringframeworkOrgIsAccessible());
-
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);
@@ -77,23 +81,11 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
-		assertXMLEqual(COMPLEX_XML, stringWriter.toString());
-	}
-
-	private static boolean wwwSpringframeworkOrgIsAccessible() {
-		try {
-			new Socket("www.springframework.org", 80);
-		}
-		catch (Exception e) {
-			return false;
-		}
-		return true;
+		assertThat(XmlContent.from(stringWriter)).isSimilarTo(COMPLEX_XML, nodeFilter);
 	}
 
 	@Test
 	public void namespacePrefixes() throws Exception {
-		Assume.assumeTrue(wwwSpringframeworkOrgIsAccessible());
-
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);
@@ -104,13 +96,12 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
-		assertXMLEqual(COMPLEX_XML, stringWriter.toString());
+		assertThat(XmlContent.from(stringWriter)).isSimilarTo(COMPLEX_XML, nodeFilter);
 	}
 
 	@Test
 	public void noNamespacePrefixesDom() throws Exception {
-		DocumentBuilderFactory documentBuilderFactory =
-				DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -126,13 +117,12 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 
-		assertXMLEqual(expected, result);
+		assertThat(XmlContent.of(result)).isSimilarTo(expected, nodeFilter);
 	}
 
 	@Test
 	public void namespacePrefixesDom() throws Exception {
-		DocumentBuilderFactory documentBuilderFactory =
-				DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -148,9 +138,8 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 
-		assertXMLEqual(expected, result);
+		assertThat(XmlContent.of(result)).isSimilarTo(expected, nodeFilter);
 	}
-
 
 	protected abstract AbstractStaxHandler createStaxHandler(Result result) throws XMLStreamException;
 

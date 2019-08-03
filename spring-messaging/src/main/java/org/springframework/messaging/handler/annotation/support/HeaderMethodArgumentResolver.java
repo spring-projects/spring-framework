@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,24 +25,33 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+import org.springframework.util.Assert;
 
 /**
- * Resolves method parameters annotated with {@link Header @Header}.
+ * Resolver for {@link Header @Header} arguments. Headers are resolved from
+ * either the top-level header map or the nested
+ * {@link NativeMessageHeaderAccessor native} header map.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see HeadersMethodArgumentResolver
+ * @see NativeMessageHeaderAccessor
  */
 public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	private static final Log logger = LogFactory.getLog(HeaderMethodArgumentResolver.class);
 
 
-	public HeaderMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		super(cs, beanFactory);
+	public HeaderMethodArgumentResolver(
+			ConversionService conversionService, @Nullable ConfigurableBeanFactory beanFactory) {
+
+		super(conversionService, beanFactory);
 	}
 
 
@@ -53,11 +62,13 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		Header annotation = parameter.getParameterAnnotation(Header.class);
-		return new HeaderNamedValueInfo(annotation);
+		Header annot = parameter.getParameterAnnotation(Header.class);
+		Assert.state(annot != null, "No Header annotation");
+		return new HeaderNamedValueInfo(annot);
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception {
 
@@ -65,17 +76,17 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 		Object nativeHeaderValue = getNativeHeaderValue(message, name);
 
 		if (headerValue != null && nativeHeaderValue != null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Message headers contain two values for the same header '" + name + "', " +
-						"one in the top level header map and a second in the nested map with native headers. " +
-						"Using the value from top level map. " +
-						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map." );
+			if (logger.isDebugEnabled()) {
+				logger.debug("A value was found for '" + name + "', in both the top level header map " +
+						"and also in the nested map for native headers. Using the value from top level map. " +
+						"Use 'nativeHeader.myHeader' to resolve the native header.");
 			}
 		}
 
 		return (headerValue != null ? headerValue : nativeHeaderValue);
 	}
 
+	@Nullable
 	private Object getNativeHeaderValue(Message<?> message, String name) {
 		Map<String, List<String>> nativeHeaders = getNativeHeaders(message);
 		if (name.startsWith("nativeHeaders.")) {
@@ -89,9 +100,9 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private Map<String, List<String>> getNativeHeaders(Message<?> message) {
-		return (Map<String, List<String>>) message.getHeaders().get(
-				NativeMessageHeaderAccessor.NATIVE_HEADERS);
+		return (Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 	}
 
 	@Override
@@ -101,7 +112,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 
-	private static class HeaderNamedValueInfo extends NamedValueInfo {
+	private static final class HeaderNamedValueInfo extends NamedValueInfo {
 
 		private HeaderNamedValueInfo(Header annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

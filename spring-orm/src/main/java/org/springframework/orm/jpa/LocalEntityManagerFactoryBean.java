@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,8 +52,8 @@ import javax.persistence.spi.PersistenceProvider;
  * to the JPA provider, consider using Spring's more powerful
  * {@link LocalContainerEntityManagerFactoryBean} instead.
  *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
- * JPA 1.0 based applications are still supported; however, a JPA 2.0/2.1 compliant
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
+ * JPA 1.0/2.0 based applications are still supported; however, a JPA 2.1 compliant
  * persistence provider is needed at runtime.
  *
  * @author Juergen Hoeller
@@ -77,8 +77,8 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider != null) {

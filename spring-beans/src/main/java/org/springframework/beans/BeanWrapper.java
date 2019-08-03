@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,15 +49,25 @@ import java.beans.PropertyDescriptor;
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
-	 * Return the bean instance wrapped by this object, if any.
-	 * @return the bean instance, or {@code null} if none set
+	 * Specify a limit for array and collection auto-growing.
+	 * <p>Default is unlimited on a plain BeanWrapper.
+	 * @since 4.1
+	 */
+	void setAutoGrowCollectionLimit(int autoGrowCollectionLimit);
+
+	/**
+	 * Return the limit for array and collection auto-growing.
+	 * @since 4.1
+	 */
+	int getAutoGrowCollectionLimit();
+
+	/**
+	 * Return the bean instance wrapped by this object.
 	 */
 	Object getWrappedInstance();
 
 	/**
-	 * Return the type of the wrapped JavaBean object.
-	 * @return the type of the wrapped bean instance,
-	 * or {@code null} if no wrapped object has been set
+	 * Return the type of the wrapped bean instance.
 	 */
 	Class<?> getWrappedClass();
 
@@ -77,16 +87,5 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws InvalidPropertyException;
-
-	/**
-	 * Specify a limit for array and collection auto-growing.
-	 * <p>Default is unlimited on a plain BeanWrapper.
-	 */
-	void setAutoGrowCollectionLimit(int autoGrowCollectionLimit);
-
-	/**
-	 * Return the limit for array and collection auto-growing.
-	 */
-	int getAutoGrowCollectionLimit();
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
 import org.w3c.dom.Document;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Abstraction for handling XML fields in specific databases. Its main purpose
@@ -61,6 +63,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getString
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
+	@Nullable
 	String getXmlAsString(ResultSet rs, String columnName) throws SQLException;
 
 	/**
@@ -75,6 +78,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getString
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
+	@Nullable
 	String getXmlAsString(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**
@@ -89,6 +93,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getBinaryStream
 	 */
+	@Nullable
 	InputStream getXmlAsBinaryStream(ResultSet rs, String columnName) throws SQLException;
 
 	/**
@@ -103,6 +108,7 @@ public interface SqlXmlHandler {
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getBinaryStream
 	 */
+	@Nullable
 	InputStream getXmlAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**
@@ -112,11 +118,12 @@ public interface SqlXmlHandler {
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getCharacterStream
 	 */
+	@Nullable
 	Reader getXmlAsCharacterStream(ResultSet rs, String columnName) throws SQLException;
 
 	/**
@@ -126,11 +133,12 @@ public interface SqlXmlHandler {
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getCharacterStream
 	 */
+	@Nullable
 	Reader getXmlAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**
@@ -141,12 +149,13 @@ public interface SqlXmlHandler {
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
 	 * @param sourceClass the implementation class to be used
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
 	 */
-	Source getXmlAsSource(ResultSet rs, String columnName, Class<? extends Source> sourceClass) throws SQLException;
+	@Nullable
+	Source getXmlAsSource(ResultSet rs, String columnName, @Nullable Class<? extends Source> sourceClass) throws SQLException;
 
 	/**
 	 * Retrieve the given column as Source implemented using the specified source class
@@ -156,12 +165,13 @@ public interface SqlXmlHandler {
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
 	 * @param sourceClass the implementation class to be used
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
 	 */
-	Source getXmlAsSource(ResultSet rs, int columnIndex, Class<? extends Source> sourceClass) throws SQLException;
+	@Nullable
+	Source getXmlAsSource(ResultSet rs, int columnIndex, @Nullable Class<? extends Source> sourceClass) throws SQLException;
 
 
 	//-------------------------------------------------------------------------

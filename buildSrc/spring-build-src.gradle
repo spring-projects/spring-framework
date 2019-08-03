@@ -1,0 +1,10 @@
+description = "Exposes gradle buildSrc for IDE support"
+
+apply plugin: "groovy"
+
+dependencies {
+	compile gradleApi()
+	compile localGroovy()
+}
+
+configurations.archives.artifacts.clear()

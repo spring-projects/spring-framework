@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
@@ -78,13 +78,11 @@ public class DefaultSockJsService extends TransportHandlingSockJsService impleme
 	}
 
 
-	private static Set<TransportHandler> getDefaultTransportHandlers(Collection<TransportHandler> overrides) {
-		Set<TransportHandler> result = new LinkedHashSet<TransportHandler>(8);
+	private static Set<TransportHandler> getDefaultTransportHandlers(@Nullable Collection<TransportHandler> overrides) {
+		Set<TransportHandler> result = new LinkedHashSet<>(8);
 		result.add(new XhrPollingTransportHandler());
 		result.add(new XhrReceivingTransportHandler());
 		result.add(new XhrStreamingTransportHandler());
-		result.add(new JsonpPollingTransportHandler());
-		result.add(new JsonpReceivingTransportHandler());
 		result.add(new EventSourceTransportHandler());
 		result.add(new HtmlFileTransportHandler());
 		try {

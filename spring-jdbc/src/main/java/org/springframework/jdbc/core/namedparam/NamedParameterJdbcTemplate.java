@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,17 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,6 +41,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -62,16 +67,16 @@ import org.springframework.util.Assert;
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
-	/** Default maximum number of entries for this template's SQL cache: 256 */
+	/** Default maximum number of entries for this template's SQL cache: 256. */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
 
-	/** The JdbcTemplate we are wrapping */
+	/** The JdbcTemplate we are wrapping. */
 	private final JdbcOperations classicJdbcTemplate;
 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
-	/** Cache of original SQL String to ParsedSql representation */
+	/** Cache of original SQL String to ParsedSql representation. */
 	@SuppressWarnings("serial")
 	private final Map<String, ParsedSql> parsedSqlCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
@@ -104,12 +109,24 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	/**
-	 * Expose the classic Spring JdbcTemplate to allow invocation of
-	 * less commonly used methods.
+	 * Expose the classic Spring JdbcTemplate operations to allow invocation
+	 * of less commonly used methods.
 	 */
 	@Override
 	public JdbcOperations getJdbcOperations() {
 		return this.classicJdbcTemplate;
+	}
+
+	/**
+	 * Expose the classic Spring {@link JdbcTemplate} itself, if available,
+	 * in particular for passing it on to other {@code JdbcTemplate} consumers.
+	 * <p>If sufficient for the purposes at hand, {@link #getJdbcOperations()}
+	 * is recommended over this variant.
+	 * @since 5.0.3
+	 */
+	public JdbcTemplate getJdbcTemplate() {
+		Assert.state(this.classicJdbcTemplate instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.classicJdbcTemplate;
 	}
 
 	/**
@@ -129,6 +146,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -136,6 +154,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -143,11 +162,13 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(sql, EmptySqlParameterSource.INSTANCE, action);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -155,6 +176,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -162,6 +184,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rse);
 	}
@@ -205,14 +228,16 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
@@ -220,34 +245,40 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
-		return queryForObject(sql, paramSource, new SingleColumnRowMapper<T>(requiredType));
+		return queryForObject(sql, paramSource, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
-		return queryForObject(sql, paramMap, new SingleColumnRowMapper<T>(requiredType));
+		return queryForObject(sql, paramMap, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
+		Map<String, Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
+		Assert.state(result != null, "No result map");
+		return result;
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
+		Map<String, Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
+		Assert.state(result != null, "No result map");
+		return result;
 	}
 
 	@Override
 	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
-		return query(sql, paramSource, new SingleColumnRowMapper<T>(elementType));
+		return query(sql, paramSource, new SingleColumnRowMapper<>(elementType));
 	}
 
 	@Override
@@ -273,8 +304,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		return getJdbcOperations().query(
+		SqlRowSet result = getJdbcOperations().query(
 				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 	@Override
@@ -301,61 +334,94 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int update(
-			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
+			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, @Nullable String[] keyColumnNames)
 			throws DataAccessException {
 
-		ParsedSql parsedSql = getParsedSql(sql);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
-		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
-		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
-		if (keyColumnNames != null) {
-			pscf.setGeneratedKeysColumnNames(keyColumnNames);
-		}
-		else {
-			pscf.setReturnGeneratedKeys(true);
-		}
-		return getJdbcOperations().update(pscf.newPreparedStatementCreator(params), generatedKeyHolder);
+		PreparedStatementCreator psc = getPreparedStatementCreator(sql, paramSource, pscf -> {
+			if (keyColumnNames != null) {
+				pscf.setGeneratedKeysColumnNames(keyColumnNames);
+			}
+			else {
+				pscf.setReturnGeneratedKeys(true);
+			}
+		});
+		return getJdbcOperations().update(psc, generatedKeyHolder);
 	}
 
 	@Override
 	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
-		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
-		int i = 0;
-		for (Map<String, ?> values : batchValues) {
-			batchArgs[i] = new MapSqlParameterSource(values);
-			i++;
-		}
-		return batchUpdate(sql, batchArgs);
+		return batchUpdate(sql, SqlParameterSourceUtils.createBatch(batchValues));
 	}
 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
+		if (batchArgs.length == 0) {
+			return new int[0];
+		}
+
 		ParsedSql parsedSql = getParsedSql(sql);
-		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(parsedSql, batchArgs, getJdbcOperations());
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, batchArgs[0]);
+
+		return getJdbcOperations().batchUpdate(
+				pscf.getSql(),
+				new BatchPreparedStatementSetter() {
+					@Override
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+						pscf.newPreparedStatementSetter(values).setValues(ps);
+					}
+					@Override
+					public int getBatchSize() {
+						return batchArgs.length;
+					}
+				});
+	}
+
+
+	/**
+	 * Build a {@link PreparedStatementCreator} based on the given SQL and named parameters.
+	 * <p>Note: Directly called from all {@code query} variants. Delegates to the common
+	 * {@link #getPreparedStatementCreator(String, SqlParameterSource, Consumer)} method.
+	 * @param sql the SQL statement to execute
+	 * @param paramSource container of arguments to bind
+	 * @return the corresponding {@link PreparedStatementCreator}
+	 * @see #getPreparedStatementCreator(String, SqlParameterSource, Consumer)
+	 */
+	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource) {
+		return getPreparedStatementCreator(sql, paramSource, null);
 	}
 
 	/**
-	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
-	 * <p>Note: Not used for the {@code update} variant with generated key handling.
-	 * @param sql SQL to execute
+	 * Build a {@link PreparedStatementCreator} based on the given SQL and named parameters.
+	 * <p>Note: Used for the {@code update} variant with generated key handling, and also
+	 * delegated from {@link #getPreparedStatementCreator(String, SqlParameterSource)}.
+	 * @param sql the SQL statement to execute
 	 * @param paramSource container of arguments to bind
-	 * @return the corresponding PreparedStatementCreator
+	 * @param customizer callback for setting further properties on the
+	 * {@link PreparedStatementCreatorFactory} in use), applied before the
+	 * actual {@code newPreparedStatementCreator} call
+	 * @return the corresponding {@link PreparedStatementCreator}
+	 * @since 5.0.5
+	 * @see #getParsedSql(String)
+	 * @see PreparedStatementCreatorFactory#PreparedStatementCreatorFactory(String, List)
+	 * @see PreparedStatementCreatorFactory#newPreparedStatementCreator(Object[])
 	 */
-	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource) {
+	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource,
+			@Nullable Consumer<PreparedStatementCreatorFactory> customizer) {
+
 		ParsedSql parsedSql = getParsedSql(sql);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource);
+		if (customizer != null) {
+			customizer.accept(pscf);
+		}
 		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
-		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
-		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
 		return pscf.newPreparedStatementCreator(params);
 	}
 
 	/**
 	 * Obtain a parsed representation of the given SQL statement.
-	 * <p>The default implementation uses an LRU cache with an upper limit
-	 * of 256 entries.
-	 * @param sql the original SQL
+	 * <p>The default implementation uses an LRU cache with an upper limit of 256 entries.
+	 * @param sql the original SQL statement
 	 * @return a representation of the parsed SQL statement
 	 */
 	protected ParsedSql getParsedSql(String sql) {
@@ -370,6 +436,23 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			}
 			return parsedSql;
 		}
+	}
+
+	/**
+	 * Build a {@link PreparedStatementCreatorFactory} based on the given SQL and named parameters.
+	 * @param parsedSql parsed representation of the given SQL statement
+	 * @param paramSource container of arguments to bind
+	 * @return the corresponding {@link PreparedStatementCreatorFactory}
+	 * @since 5.1.3
+	 * @see #getPreparedStatementCreator(String, SqlParameterSource, Consumer)
+	 * @see #getParsedSql(String)
+	 */
+	protected PreparedStatementCreatorFactory getPreparedStatementCreatorFactory(
+			ParsedSql parsedSql, SqlParameterSource paramSource) {
+
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+		return new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
 	}
 
 }

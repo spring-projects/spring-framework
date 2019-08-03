@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,173 +17,259 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.Resource;
+import javax.annotation.meta.When;
 
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.internal.ArrayComparisonFailure;
 
+import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClassWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
+import org.springframework.stereotype.Indexed;
 import org.springframework.util.MultiValueMap;
 
-import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.core.annotation.AnnotatedElementUtils.findAllMergedAnnotations;
+import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getAllAnnotationAttributes;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getAllMergedAnnotations;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedAnnotation;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedAnnotationAttributes;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getMetaAnnotationTypes;
+import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
+import static org.springframework.core.annotation.AnnotatedElementUtils.hasMetaAnnotationTypes;
+import static org.springframework.core.annotation.AnnotatedElementUtils.isAnnotated;
+import static org.springframework.core.annotation.AnnotationUtilsTests.asArray;
 
 /**
  * Unit tests for {@link AnnotatedElementUtils}.
  *
  * @author Sam Brannen
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0.3
+ * @see AnnotationUtilsTests
+ * @see MultipleComposedAnnotationsOnSingleAnnotatedElementTests
+ * @see ComposedRepeatableAnnotationsTests
  */
 public class AnnotatedElementUtilsTests {
 
 	private static final String TX_NAME = Transactional.class.getName();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
+		assertThat(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class).isEmpty()).isTrue();
+		assertThat(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()).isEmpty()).isTrue();
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
 		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertThat(names).isEqualTo(names(Transactional.class, Component.class, Indexed.class));
+
+		names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName());
+		assertThat(names).isEqualTo(names(Transactional.class, Component.class, Indexed.class));
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
 		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertThat(names).isEqualTo(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
+
+		names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName());
+		assertThat(names).isEqualTo(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
+	}
+
+	private Set<String> names(Class<?>... classes) {
+		return stream(classes).map(Class::getName).collect(toSet());
 	}
 
 	@Test
 	public void hasMetaAnnotationTypesOnNonAnnotatedClass() {
-		assertFalse(hasMetaAnnotationTypes(NonAnnotatedClass.class, TX_NAME));
+		assertThat(hasMetaAnnotationTypes(NonAnnotatedClass.class, TX_NAME)).isFalse();
 	}
 
 	@Test
 	public void hasMetaAnnotationTypesOnClassWithMetaDepth0() {
-		assertFalse(hasMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName()));
+		assertThat(hasMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName())).isFalse();
 	}
 
 	@Test
 	public void hasMetaAnnotationTypesOnClassWithMetaDepth1() {
-		assertTrue(hasMetaAnnotationTypes(TransactionalComponentClass.class, TX_NAME));
-		assertTrue(hasMetaAnnotationTypes(TransactionalComponentClass.class, Component.class.getName()));
+		assertThat(hasMetaAnnotationTypes(TransactionalComponentClass.class, TX_NAME)).isTrue();
+		assertThat(hasMetaAnnotationTypes(TransactionalComponentClass.class, Component.class.getName())).isTrue();
 	}
 
 	@Test
 	public void hasMetaAnnotationTypesOnClassWithMetaDepth2() {
-		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, TX_NAME));
-		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, Component.class.getName()));
-		assertFalse(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
+		assertThat(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, TX_NAME)).isTrue();
+		assertThat(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, Component.class.getName())).isTrue();
+		assertThat(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName())).isFalse();
 	}
 
 	@Test
 	public void isAnnotatedOnNonAnnotatedClass() {
-		assertFalse(isAnnotated(NonAnnotatedClass.class, TX_NAME));
+		assertThat(isAnnotated(NonAnnotatedClass.class, Transactional.class)).isFalse();
 	}
 
 	@Test
-	public void isAnnotatedOnClassWithMetaDepth0() {
-		assertTrue(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class.getName()));
+	public void isAnnotatedOnClassWithMetaDepth() {
+		assertThat(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class)).isTrue();
+		assertThat(isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class)).as("isAnnotated() does not search the class hierarchy.").isFalse();
+		assertThat(isAnnotated(TransactionalComponentClass.class, Transactional.class)).isTrue();
+		assertThat(isAnnotated(TransactionalComponentClass.class, Component.class)).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, Transactional.class)).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, Component.class)).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class)).isTrue();
 	}
 
 	@Test
-	public void isAnnotatedOnSubclassWithMetaDepth0() {
-		assertFalse("isAnnotated() does not search the class hierarchy.",
-				isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName()));
+	public void isAnnotatedForPlainTypes() {
+		assertThat(isAnnotated(Order.class, Documented.class)).isTrue();
+		assertThat(isAnnotated(NonNullApi.class, Documented.class)).isTrue();
+		assertThat(isAnnotated(NonNullApi.class, Nonnull.class)).isTrue();
+		assertThat(isAnnotated(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
 	}
 
 	@Test
-	public void isAnnotatedOnClassWithMetaDepth1() {
-		assertTrue(isAnnotated(TransactionalComponentClass.class, TX_NAME));
-		assertTrue(isAnnotated(TransactionalComponentClass.class, Component.class.getName()));
+	public void isAnnotatedWithNameOnNonAnnotatedClass() {
+		assertThat(isAnnotated(NonAnnotatedClass.class, TX_NAME)).isFalse();
 	}
 
 	@Test
-	public void isAnnotatedOnClassWithMetaDepth2() {
-		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, TX_NAME));
-		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Component.class.getName()));
-		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
+	public void isAnnotatedWithNameOnClassWithMetaDepth() {
+		assertThat(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class.getName())).isTrue();
+		assertThat(isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName())).as("isAnnotated() does not search the class hierarchy.").isFalse();
+		assertThat(isAnnotated(TransactionalComponentClass.class, TX_NAME)).isTrue();
+		assertThat(isAnnotated(TransactionalComponentClass.class, Component.class.getName())).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, TX_NAME)).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, Component.class.getName())).isTrue();
+		assertThat(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName())).isTrue();
+	}
+
+	@Test
+	public void hasAnnotationOnNonAnnotatedClass() {
+		assertThat(hasAnnotation(NonAnnotatedClass.class, Transactional.class)).isFalse();
+	}
+
+	@Test
+	public void hasAnnotationOnClassWithMetaDepth() {
+		assertThat(hasAnnotation(TransactionalComponentClass.class, TransactionalComponent.class)).isTrue();
+		assertThat(hasAnnotation(SubTransactionalComponentClass.class, TransactionalComponent.class)).isTrue();
+		assertThat(hasAnnotation(TransactionalComponentClass.class, Transactional.class)).isTrue();
+		assertThat(hasAnnotation(TransactionalComponentClass.class, Component.class)).isTrue();
+		assertThat(hasAnnotation(ComposedTransactionalComponentClass.class, Transactional.class)).isTrue();
+		assertThat(hasAnnotation(ComposedTransactionalComponentClass.class, Component.class)).isTrue();
+		assertThat(hasAnnotation(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class)).isTrue();
+	}
+
+	@Test
+	public void hasAnnotationForPlainTypes() {
+		assertThat(hasAnnotation(Order.class, Documented.class)).isTrue();
+		assertThat(hasAnnotation(NonNullApi.class, Documented.class)).isTrue();
+		assertThat(hasAnnotation(NonNullApi.class, Nonnull.class)).isTrue();
+		assertThat(hasAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
 	}
 
 	@Test
 	public void getAllAnnotationAttributesOnNonAnnotatedClass() {
-		assertNull(getAllAnnotationAttributes(NonAnnotatedClass.class, TX_NAME));
+		assertThat(getAllAnnotationAttributes(NonAnnotatedClass.class, TX_NAME)).isNull();
 	}
 
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on TxConfig", attributes);
-		assertEquals("value for TxConfig.", asList("TxConfig"), attributes.get("value"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on TxConfig").isNotNull();
+		assertThat(attributes.get("value")).as("value for TxConfig").isEqualTo(asList("TxConfig"));
 	}
 
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalComposedAnnotationAndInheritedAnnotation() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(SubClassWithInheritedAnnotation.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on SubClassWithInheritedAnnotation", attributes);
-		assertEquals(asList("composed2", "transactionManager"), attributes.get("qualifier"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on SubClassWithInheritedAnnotation").isNotNull();
+		assertThat(attributes.get("qualifier")).isEqualTo(asList("composed2", "transactionManager"));
 	}
 
 	@Test
 	public void getAllAnnotationAttributesFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(SubSubClassWithInheritedAnnotation.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on SubSubClassWithInheritedAnnotation", attributes);
-		assertEquals(asList("transactionManager"), attributes.get("qualifier"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on SubSubClassWithInheritedAnnotation").isNotNull();
+		assertThat(attributes.get("qualifier")).isEqualTo(asList("transactionManager"));
 	}
 
 	@Test
 	public void getAllAnnotationAttributesFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes( SubSubClassWithInheritedComposedAnnotation.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on SubSubClassWithInheritedComposedAnnotation", attributes);
-		assertEquals(asList("composed1"), attributes.get("qualifier"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on SubSubClassWithInheritedComposedAnnotation").isNotNull();
+		assertThat(attributes.get("qualifier")).isEqualTo(asList("composed1"));
 	}
 
 	/**
 	 * If the "value" entry contains both "DerivedTxConfig" AND "TxConfig", then
 	 * the algorithm is accidentally picking up shadowed annotations of the same
 	 * type within the class hierarchy. Such undesirable behavior would cause the
-	 * logic in {@link org.springframework.context.annotation.ProfileCondition}
+	 * logic in {@code org.springframework.context.annotation.ProfileCondition}
 	 * to fail.
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
+		// See org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on DerivedTxConfig", attributes);
-		assertEquals("value for DerivedTxConfig.", asList("DerivedTxConfig"), attributes.get("value"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on DerivedTxConfig").isNotNull();
+		assertThat(attributes.get("value")).as("value for DerivedTxConfig").isEqualTo(asList("DerivedTxConfig"));
 	}
 
 	/**
-	 * Note: this functionality is required by {@link org.springframework.context.annotation.ProfileCondition}.
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
+	 * Note: this functionality is required by {@code org.springframework.context.annotation.ProfileCondition}.
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithMultipleComposedAnnotations() {
+		// See org.springframework.core.env.EnvironmentSystemIntegrationTests
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxFromMultipleComposedAnnotations.class, TX_NAME);
-		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
-		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxInheritedComposed", "TxComposed"),
-				attributes.get("value"));
+		assertThat(attributes).as("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations").isNotNull();
+		assertThat(attributes.get("value")).as("value for TxFromMultipleComposedAnnotations.").isEqualTo(asList("TxInheritedComposed", "TxComposed"));
+	}
+
+	@Test
+	public void getAllAnnotationAttributesOnLangType() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
+				NonNullApi.class, Nonnull.class.getName());
+		assertThat(attributes).as("Annotation attributes map for @Nonnull on NonNullApi").isNotNull();
+		assertThat(attributes.get("when")).as("value for NonNullApi").isEqualTo(asList(When.ALWAYS));
+	}
+
+	@Test
+	public void getAllAnnotationAttributesOnJavaxType() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
+				ParametersAreNonnullByDefault.class, Nonnull.class.getName());
+		assertThat(attributes).as("Annotation attributes map for @Nonnull on NonNullApi").isNotNull();
+		assertThat(attributes.get("when")).as("value for NonNullApi").isEqualTo(asList(When.ALWAYS));
 	}
 
 	@Test
@@ -191,10 +277,10 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = TxConfig.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("Annotation attributes for @Transactional on TxConfig", attributes);
-		assertEquals("value for TxConfig.", "TxConfig", attributes.getString("value"));
+		assertThat(attributes).as("Annotation attributes for @Transactional on TxConfig").isNotNull();
+		assertThat(attributes.getString("value")).as("value for TxConfig").isEqualTo("TxConfig");
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -202,16 +288,16 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = DerivedTxConfig.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("Annotation attributes for @Transactional on DerivedTxConfig", attributes);
-		assertEquals("value for DerivedTxConfig.", "DerivedTxConfig", attributes.getString("value"));
+		assertThat(attributes).as("Annotation attributes for @Transactional on DerivedTxConfig").isNotNull();
+		assertThat(attributes.getString("value")).as("value for DerivedTxConfig").isEqualTo("DerivedTxConfig");
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
 	public void getMergedAnnotationAttributesOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(MetaCycleAnnotatedClass.class, TX_NAME);
-		assertNull("Should not find annotation attributes for @Transactional on MetaCycleAnnotatedClass", attributes);
+		assertThat(attributes).as("Should not find annotation attributes for @Transactional on MetaCycleAnnotatedClass").isNull();
 	}
 
 	@Test
@@ -219,10 +305,10 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = SubClassWithInheritedAnnotation.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("AnnotationAttributes for @Transactional on SubClassWithInheritedAnnotation", attributes);
+		assertThat(attributes).as("AnnotationAttributes for @Transactional on SubClassWithInheritedAnnotation").isNotNull();
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
-		assertTrue("readOnly flag for SubClassWithInheritedAnnotation.", attributes.getBoolean("readOnly"));
+		assertThat(isAnnotated(element, name)).isTrue();
+		assertThat(attributes.getBoolean("readOnly")).as("readOnly flag for SubClassWithInheritedAnnotation.").isTrue();
 	}
 
 	@Test
@@ -230,10 +316,10 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = SubSubClassWithInheritedAnnotation.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("AnnotationAttributes for @Transactional on SubSubClassWithInheritedAnnotation", attributes);
+		assertThat(attributes).as("AnnotationAttributes for @Transactional on SubSubClassWithInheritedAnnotation").isNotNull();
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
-		assertFalse("readOnly flag for SubSubClassWithInheritedAnnotation.", attributes.getBoolean("readOnly"));
+		assertThat(isAnnotated(element, name)).isTrue();
+		assertThat(attributes.getBoolean("readOnly")).as("readOnly flag for SubSubClassWithInheritedAnnotation.").isFalse();
 	}
 
 	@Test
@@ -241,10 +327,10 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = SubSubClassWithInheritedComposedAnnotation.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.", attributes);
+		assertThat(attributes).as("AnnotationAttributes for @Transactional on SubSubClassWithInheritedComposedAnnotation.").isNotNull();
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
-		assertFalse("readOnly flag for SubSubClassWithInheritedComposedAnnotation.", attributes.getBoolean("readOnly"));
+		assertThat(isAnnotated(element, name)).isTrue();
+		assertThat(attributes.getBoolean("readOnly")).as("readOnly flag for SubSubClassWithInheritedComposedAnnotation.").isFalse();
 	}
 
 	@Test
@@ -252,9 +338,9 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = ConcreteClassWithInheritedAnnotation.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNull("Should not find @Transactional on ConcreteClassWithInheritedAnnotation", attributes);
+		assertThat(attributes).as("Should not find @Transactional on ConcreteClassWithInheritedAnnotation").isNull();
 		// Verify contracts between utility methods:
-		assertFalse(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isFalse();
 	}
 
 	@Test
@@ -262,9 +348,9 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = InheritedAnnotationInterface.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Transactional on InheritedAnnotationInterface").isNotNull();
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -272,9 +358,9 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = NonInheritedAnnotationInterface.class;
 		String name = Order.class.getName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Order on NonInheritedAnnotationInterface").isNotNull();
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -283,15 +369,23 @@ public class AnnotatedElementUtilsTests {
 		String name = ContextConfig.class.getName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
-		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("locations", asArray("explicitDeclaration"), attributes.getStringArray("locations"));
-		assertArrayEquals("value", asArray("explicitDeclaration"), attributes.getStringArray("value"));
+		assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(asArray("explicitDeclaration"));
+		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(asArray("explicitDeclaration"));
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
-	@Ignore("Disabled until SPR-13554 is addressed")
+	/**
+	 * This test should never pass, simply because Spring does not support a hybrid
+	 * approach for annotation attribute overrides with transitive implicit aliases.
+	 * See SPR-13554 for details.
+	 * <p>Furthermore, if you choose to execute this test, it can fail for either
+	 * the first test class or the second one (with different exceptions), depending
+	 * on the order in which the JVM returns the attribute methods via reflection.
+	 */
+	@Ignore("Permanently disabled but left in place for illustrative purposes")
 	@Test
 	public void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
 		for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
@@ -306,12 +400,12 @@ public class AnnotatedElementUtilsTests {
 		String simpleName = clazz.getSimpleName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
 
-		assertNotNull("Should find @ContextConfig on " + simpleName, attributes);
-		assertArrayEquals("locations for class [" + clazz.getSimpleName() + "]", expected, attributes.getStringArray("locations"));
-		assertArrayEquals("value for class [" + clazz.getSimpleName() + "]", expected, attributes.getStringArray("value"));
+		assertThat(attributes).as("Should find @ContextConfig on " + simpleName).isNotNull();
+		assertThat(attributes.getStringArray("locations")).as("locations for class [" + clazz.getSimpleName() + "]").isEqualTo(expected);
+		assertThat(attributes.getStringArray("value")).as("value for class [" + clazz.getSimpleName() + "]").isEqualTo(expected);
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(clazz, name));
+		assertThat(isAnnotated(clazz, name)).isTrue();
 	}
 
 	@Test
@@ -320,12 +414,12 @@ public class AnnotatedElementUtilsTests {
 		String name = ContextConfig.class.getName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
-		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("value", asArray("test.xml"), attributes.getStringArray("value"));
-		assertArrayEquals("locations", asArray("test.xml"), attributes.getStringArray("locations"));
+		assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(asArray("test.xml"));
+		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(asArray("test.xml"));
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -334,12 +428,12 @@ public class AnnotatedElementUtilsTests {
 		String name = ContextConfig.class.getName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
-		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("locations", asArray("test.xml"), attributes.getStringArray("locations"));
-		assertArrayEquals("value", asArray("test.xml"), attributes.getStringArray("value"));
+		assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(asArray("test.xml"));
+		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(asArray("test.xml"));
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -349,14 +443,14 @@ public class AnnotatedElementUtilsTests {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 		String[] expected = asArray("A.xml", "B.xml");
 
-		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("groovyScripts", expected, attributes.getStringArray("groovyScripts"));
-		assertArrayEquals("xmlFiles", expected, attributes.getStringArray("xmlFiles"));
-		assertArrayEquals("locations", expected, attributes.getStringArray("locations"));
-		assertArrayEquals("value", expected, attributes.getStringArray("value"));
+		assertThat(attributes).as("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(attributes.getStringArray("groovyScripts")).as("groovyScripts").isEqualTo(expected);
+		assertThat(attributes.getStringArray("xmlFiles")).as("xmlFiles").isEqualTo(expected);
+		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(expected);
+		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(expected);
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -377,21 +471,32 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getMergedAnnotationWithTransitiveImplicitAliasesWithSingleElementOverridingAnArrayViaAliasFor() {
+		assertGetMergedAnnotation(SingleLocationTransitiveImplicitAliasesContextConfigClass.class, "test.groovy");
+	}
+
+	@Test
 	public void getMergedAnnotationWithTransitiveImplicitAliasesWithSkippedLevel() {
 		assertGetMergedAnnotation(TransitiveImplicitAliasesWithSkippedLevelContextConfigClass.class, "test.xml");
+	}
+
+	@Test
+	public void getMergedAnnotationWithTransitiveImplicitAliasesWithSkippedLevelWithSingleElementOverridingAnArrayViaAliasFor() {
+		assertGetMergedAnnotation(SingleLocationTransitiveImplicitAliasesWithSkippedLevelContextConfigClass.class, "test.xml");
 	}
 
 	private void assertGetMergedAnnotation(Class<?> element, String... expected) {
 		String name = ContextConfig.class.getName();
 		ContextConfig contextConfig = getMergedAnnotation(element, ContextConfig.class);
 
-		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
-		assertArrayEquals("locations", expected, contextConfig.locations());
-		assertArrayEquals("value", expected, contextConfig.value());
-		assertArrayEquals("classes", new Class<?>[0], contextConfig.classes());
+		assertThat(contextConfig).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(contextConfig.locations()).as("locations").isEqualTo(expected);
+		assertThat(contextConfig.value()).as("value").isEqualTo(expected);
+		Object[] expecteds = new Class<?>[0];
+		assertThat(contextConfig.classes()).as("classes").isEqualTo(expecteds);
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
@@ -401,104 +506,93 @@ public class AnnotatedElementUtilsTests {
 		ImplicitAliasesContextConfig config = getMergedAnnotation(element, ImplicitAliasesContextConfig.class);
 		String[] expected = asArray("A.xml", "B.xml");
 
-		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), config);
-		assertArrayEquals("groovyScripts", expected, config.groovyScripts());
-		assertArrayEquals("xmlFiles", expected, config.xmlFiles());
-		assertArrayEquals("locations", expected, config.locations());
-		assertArrayEquals("value", expected, config.value());
+		assertThat(config).as("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(config.groovyScripts()).as("groovyScripts").isEqualTo(expected);
+		assertThat(config.xmlFiles()).as("xmlFiles").isEqualTo(expected);
+		assertThat(config.locations()).as("locations").isEqualTo(expected);
+		assertThat(config.value()).as("value").isEqualTo(expected);
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, name));
+		assertThat(isAnnotated(element, name)).isTrue();
 	}
 
 	@Test
 	public void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
-				containsString("attribute 'locations' and its alias 'value'")));
-		exception.expectMessage(either(
-				containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
-				containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(containsString("but only one is permitted"));
-		getMergedAnnotationAttributes(element, ContextConfig.class);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				getMergedAnnotationAttributes(element, ContextConfig.class))
+				.withMessageContaining("Different @AliasFor mirror values for annotation")
+				.withMessageContaining("attribute 'locations' and its alias 'value'")
+				.withMessageContaining("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]");
 	}
 
 	@Test
-	public void getMergedAnnotationAttributesWithInvalidAliasedComposedAnnotation() {
-		Class<?> element = InvalidAliasedComposedContextConfigClass.class;
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
-				containsString("attribute 'locations' and its alias 'value'")));
-		exception.expectMessage(either(containsString("values of [{duplicateDeclaration}] and [{test.xml}]")).or(
-				containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(containsString("but only one is permitted"));
-		getMergedAnnotationAttributes(element, ContextConfig.class);
+	public void getMergedAnnotationAttributesWithShadowedAliasComposedAnnotation() {
+		Class<?> element = ShadowedAliasComposedContextConfigClass.class;
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, ContextConfig.class);
+
+		String[] expected = asArray("test.xml");
+
+		assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(expected);
+		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(expected);
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(InheritedAnnotationInterface.class, Transactional.class);
-		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Transactional on InheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnSubInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(SubInheritedAnnotationInterface.class, Transactional.class);
-		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Transactional on SubInheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnSubSubInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(SubSubInheritedAnnotationInterface.class, Transactional.class);
-		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Transactional on SubSubInheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class);
-		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Order on NonInheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnSubNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(SubNonInheritedAnnotationInterface.class, Order.class);
-		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Order on SubNonInheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnSubSubNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(SubSubNonInheritedAnnotationInterface.class, Order.class);
-		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", attributes);
+		assertThat(attributes).as("Should find @Order on SubSubNonInheritedAnnotationInterface").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesInheritedFromInterfaceMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, Order.class);
-		assertNotNull("Should find @Order on ConcreteClassWithInheritedAnnotation.handleFromInterface() method", attributes);
+		assertThat(attributes).as("Should find @Order on ConcreteClassWithInheritedAnnotation.handleFromInterface() method").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, Transactional.class);
-		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handle() method", attributes);
+		assertThat(attributes).as("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handle() method").isNotNull();
 	}
 
-	/**
-	 * <p>{@code AbstractClassWithInheritedAnnotation} declares {@code handleParameterized(T)}; whereas,
-	 * {@code ConcreteClassWithInheritedAnnotation} declares {@code handleParameterized(String)}.
-	 * <p>As of Spring 4.2, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
-	 * <em>equivalent</em> method in {@code AbstractClassWithInheritedAnnotation} for the <em>bridged</em>
-	 * {@code handleParameterized(String)} method.
-	 * @since 4.2
-	 */
 	@Test
 	public void findMergedAnnotationAttributesInheritedFromBridgedMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, Transactional.class);
-		assertNull("Should not find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized()", attributes);
+		assertThat(attributes).as("Should find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized()").isNotNull();
 	}
 
 	/**
@@ -507,7 +601,7 @@ public class AnnotatedElementUtilsTests {
 	 * @since 4.2
 	 */
 	@Test
-	public void findMergedAnnotationAttributesFromBridgeMethod() throws NoSuchMethodException {
+	public void findMergedAnnotationAttributesFromBridgeMethod() {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
 		Method bridgedMethod = null;
@@ -522,18 +616,19 @@ public class AnnotatedElementUtilsTests {
 				}
 			}
 		}
-		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
-		assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
+		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
+		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
+		assertThat(condition).isTrue();
 
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(bridgeMethod, Order.class);
-		assertNotNull("Should find @Order on StringGenericParameter.getFor() bridge method", attributes);
+		assertThat(attributes).as("Should find @Order on StringGenericParameter.getFor() bridge method").isNotNull();
 	}
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithMetaAndLocalTxConfig() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(MetaAndLocalTxConfigClass.class, Transactional.class);
-		assertNotNull("Should find @Transactional on MetaAndLocalTxConfigClass", attributes);
-		assertEquals("TX qualifier for MetaAndLocalTxConfigClass.", "localTxMgr", attributes.getString("qualifier"));
+		assertThat(attributes).as("Should find @Transactional on MetaAndLocalTxConfigClass").isNotNull();
+		assertThat(attributes.getString("qualifier")).as("TX qualifier for MetaAndLocalTxConfigClass.").isEqualTo("localTxMgr");
 	}
 
 	@Test
@@ -543,27 +638,72 @@ public class AnnotatedElementUtilsTests {
 		// 1) Find and merge AnnotationAttributes from the annotation hierarchy
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(
 				AliasedTransactionalComponentClass.class, AliasedTransactional.class);
-		assertNotNull("@AliasedTransactional on AliasedTransactionalComponentClass.", attributes);
+		assertThat(attributes).as("@AliasedTransactional on AliasedTransactionalComponentClass.").isNotNull();
 
 		// 2) Synthesize the AnnotationAttributes back into the target annotation
 		AliasedTransactional annotation = AnnotationUtils.synthesizeAnnotation(attributes,
 				AliasedTransactional.class, AliasedTransactionalComponentClass.class);
-		assertNotNull(annotation);
+		assertThat(annotation).isNotNull();
 
 		// 3) Verify that the AnnotationAttributes and synthesized annotation are equivalent
-		assertEquals("TX value via attributes.", qualifier, attributes.getString("value"));
-		assertEquals("TX value via synthesized annotation.", qualifier, annotation.value());
-		assertEquals("TX qualifier via attributes.", qualifier, attributes.getString("qualifier"));
-		assertEquals("TX qualifier via synthesized annotation.", qualifier, annotation.qualifier());
+		assertThat(attributes.getString("value")).as("TX value via attributes.").isEqualTo(qualifier);
+		assertThat(annotation.value()).as("TX value via synthesized annotation.").isEqualTo(qualifier);
+		assertThat(attributes.getString("qualifier")).as("TX qualifier via attributes.").isEqualTo(qualifier);
+		assertThat(annotation.qualifier()).as("TX qualifier via synthesized annotation.").isEqualTo(qualifier);
+	}
+
+	@Test
+	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
+		AnnotationAttributes attributes = assertComponentScanAttributes(TestComponentScanClass.class, "com.example.app.test");
+
+		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
+		assertThat(excludeFilters).isNotNull();
+
+		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
+		assertThat(patterns).isEqualTo(asList("*Test", "*Tests"));
+	}
+
+	/**
+	 * This test ensures that {@link AnnotationUtils#postProcessAnnotationAttributes}
+	 * uses {@code ObjectUtils.nullSafeEquals()} to check for equality between annotation
+	 * attributes since attributes may be arrays.
+	 */
+	@Test
+	public void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
+		assertComponentScanAttributes(ComponentScanWithBasePackagesAndValueAliasClass.class, "com.example.app.test");
+	}
+
+	@Test
+	public void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaConvention() {
+		assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+	}
+
+	@Test
+	public void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaAliasFor() {
+		assertComponentScanAttributes(AliasForBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+	}
+
+	private AnnotationAttributes assertComponentScanAttributes(Class<?> element, String... expected) {
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
+
+		assertThat(attributes).as("Should find @ComponentScan on " + element).isNotNull();
+		assertThat(attributes.getStringArray("value")).as("value: ").isEqualTo(expected);
+		assertThat(attributes.getStringArray("basePackages")).as("basePackages: ").isEqualTo(expected);
+
+		return attributes;
+	}
+
+	private AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+		return AnnotatedElementUtils.findMergedAnnotationAttributes(element, annotationType.getName(), false, false);
 	}
 
 	@Test
 	public void findMergedAnnotationWithAttributeAliasesInTargetAnnotation() {
 		Class<?> element = AliasedTransactionalComponentClass.class;
 		AliasedTransactional annotation = findMergedAnnotation(element, AliasedTransactional.class);
-		assertNotNull("@AliasedTransactional on " + element, annotation);
-		assertEquals("TX value via synthesized annotation.", "aliasForQualifier", annotation.value());
-		assertEquals("TX qualifier via synthesized annotation.", "aliasForQualifier", annotation.qualifier());
+		assertThat(annotation).as("@AliasedTransactional on " + element).isNotNull();
+		assertThat(annotation.value()).as("TX value via synthesized annotation.").isEqualTo("aliasForQualifier");
+		assertThat(annotation.qualifier()).as("TX qualifier via synthesized annotation.").isEqualTo("aliasForQualifier");
 	}
 
 	@Test
@@ -574,52 +714,20 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = AliasedComposedContextConfigAndTestPropSourceClass.class;
 
 		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
-		assertNotNull("@ContextConfig on " + element, contextConfig);
-		assertArrayEquals("locations", xmlLocations, contextConfig.locations());
-		assertArrayEquals("value", xmlLocations, contextConfig.value());
+		assertThat(contextConfig).as("@ContextConfig on " + element).isNotNull();
+		assertThat(contextConfig.locations()).as("locations").isEqualTo(xmlLocations);
+		assertThat(contextConfig.value()).as("value").isEqualTo(xmlLocations);
 
 		// Synthesized annotation
 		TestPropSource testPropSource = AnnotationUtils.findAnnotation(element, TestPropSource.class);
-		assertArrayEquals("locations", propFiles, testPropSource.locations());
-		assertArrayEquals("value", propFiles, testPropSource.value());
+		assertThat(testPropSource.locations()).as("locations").isEqualTo(propFiles);
+		assertThat(testPropSource.value()).as("value").isEqualTo(propFiles);
 
 		// Merged annotation
 		testPropSource = findMergedAnnotation(element, TestPropSource.class);
-		assertNotNull("@TestPropSource on " + element, testPropSource);
-		assertArrayEquals("locations", propFiles, testPropSource.locations());
-		assertArrayEquals("value", propFiles, testPropSource.value());
-	}
-
-	@Test
-	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
-		String[] expected = asArray("com.example.app.test");
-		Class<?> element = TestComponentScanClass.class;
-		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
-
-		assertNotNull("Should find @ComponentScan on " + element, attributes);
-		assertArrayEquals("basePackages for " + element, expected, attributes.getStringArray("basePackages"));
-
-		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
-		assertNotNull(excludeFilters);
-
-		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
-		assertEquals(asList("*Test", "*Tests"), patterns);
-	}
-
-	/**
-	 * This test ensures that {@link AnnotationUtils#postProcessAnnotationAttributes}
-	 * uses {@code ObjectUtils.nullSafeEquals()} to check for equality between annotation
-	 * attributes since attributes may be arrays.
-	 */
-	@Test
-	public void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
-		String[] expected = asArray("com.example.app.test");
-		Class<?> element = ComponentScanWithBasePackagesAndValueAliasClass.class;
-		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
-
-		assertNotNull("Should find @ComponentScan on " + element, attributes);
-		assertArrayEquals("value: ", expected, attributes.getStringArray("value"));
-		assertArrayEquals("basePackages: ", expected, attributes.getStringArray("basePackages"));
+		assertThat(testPropSource).as("@TestPropSource on " + element).isNotNull();
+		assertThat(testPropSource.locations()).as("locations").isEqualTo(propFiles);
+		assertThat(testPropSource.value()).as("value").isEqualTo(propFiles);
 	}
 
 	@Test
@@ -628,33 +736,99 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = SpringAppConfigClass.class;
 		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
 
-		assertNotNull("Should find @ContextConfig on " + element, contextConfig);
-		assertArrayEquals("locations for " + element, EMPTY, contextConfig.locations());
+		assertThat(contextConfig).as("Should find @ContextConfig on " + element).isNotNull();
+		assertThat(contextConfig.locations()).as("locations for " + element).isEqualTo(EMPTY);
 		// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
-		assertArrayEquals("value for " + element, EMPTY, contextConfig.value());
-		assertArrayEquals("classes for " + element, new Class<?>[] { Number.class }, contextConfig.classes());
+		assertThat(contextConfig.value()).as("value for " + element).isEqualTo(EMPTY);
+		assertThat(contextConfig.classes()).as("classes for " + element).isEqualTo(new Class<?>[] {Number.class});
 	}
 
-
-	private Set<String> names(Class<?>... classes) {
-		return stream(classes).map(Class::getName).collect(toSet());
+	@Test
+	public void findMergedAnnotationWithSingleElementOverridingAnArrayViaConvention() throws Exception {
+		assertWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
 	}
 
-	@SafeVarargs
-	// The following "varargs" suppression is necessary for javac from OpenJDK
-	// (1.8.0_60-b27); however, Eclipse warns that it's unnecessary. See the following
-	// Eclipse issues for details.
-	//
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=344783
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=349669#c10
-	// @SuppressWarnings("varargs")
-	private static <T> T[] asArray(T... arr) {
-		return arr;
+	@Test
+	public void findMergedAnnotationWithSingleElementOverridingAnArrayViaAliasFor() throws Exception {
+		assertWebMapping(WebController.class.getMethod("getMappedWithValueAttribute"));
+		assertWebMapping(WebController.class.getMethod("getMappedWithPathAttribute"));
 	}
 
-	private static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
-		return AnnotatedElementUtils.findMergedAnnotationAttributes(element, annotationType.getName(), false, false);
+	private void assertWebMapping(AnnotatedElement element) throws ArrayComparisonFailure {
+		WebMapping webMapping = findMergedAnnotation(element, WebMapping.class);
+		assertThat(webMapping).isNotNull();
+		assertThat(webMapping.value()).as("value attribute: ").isEqualTo(asArray("/test"));
+		assertThat(webMapping.path()).as("path attribute: ").isEqualTo(asArray("/test"));
+	}
+
+	@Test
+	public void javaLangAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		Constructor<?> deprecatedCtor = Date.class.getConstructor(String.class);
+		assertThat(findMergedAnnotation(deprecatedCtor, Deprecated.class)).isEqualTo(deprecatedCtor.getAnnotation(Deprecated.class));
+		assertThat(findMergedAnnotation(Date.class, Deprecated.class)).isEqualTo(Date.class.getAnnotation(Deprecated.class));
+	}
+
+	@Test
+	public void javaxAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		assertThat(findMergedAnnotation(ResourceHolder.class, Resource.class)).isEqualTo(ResourceHolder.class.getAnnotation(Resource.class));
+		assertThat(findMergedAnnotation(SpringAppConfigClass.class, Resource.class)).isEqualTo(SpringAppConfigClass.class.getAnnotation(Resource.class));
+	}
+
+	@Test
+	public void javaxMetaAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		assertThat(findMergedAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class)).isEqualTo(ParametersAreNonnullByDefault.class.getAnnotation(Nonnull.class));
+		assertThat(findMergedAnnotation(ResourceHolder.class, Nonnull.class)).isEqualTo(ParametersAreNonnullByDefault.class.getAnnotation(Nonnull.class));
+	}
+
+	@Test
+	public void nullableAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		assertThat(findMergedAnnotation(method, Resource.class)).isEqualTo(method.getAnnotation(Resource.class));
+	}
+
+	@Test
+	public void getAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = getAllMergedAnnotations(method, Transactional.class);
+		assertThat(allMergedAnnotations.isEmpty()).isTrue();
+	}
+
+	@Test
+	public void findAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(method, Transactional.class);
+		assertThat(allMergedAnnotations.size()).isEqualTo(1);
+	}
+
+	@Test  // SPR-16060
+	public void findMethodAnnotationFromGenericInterface() throws Exception {
+		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findMergedAnnotation(method, Order.class);
+		assertThat(order).isNotNull();
+	}
+
+	@Test  // SPR-17146
+	public void findMethodAnnotationFromGenericSuperclass() throws Exception {
+		Method method = ExtendsBaseClassWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findMergedAnnotation(method, Order.class);
+		assertThat(order).isNotNull();
+	}
+
+	@Test // gh-22655
+	public void forAnnotationsCreatesCopyOfArrayOnEachCall() {
+		AnnotatedElement element = AnnotatedElementUtils.forAnnotations(ForAnnotationsClass.class.getDeclaredAnnotations());
+		// Trigger the NPE as originally reported in the bug
+		AnnotationsScanner.getDeclaredAnnotations(element, false);
+		AnnotationsScanner.getDeclaredAnnotations(element, false);
+		// Also specifically test we get different instances
+		assertThat(element.getDeclaredAnnotations()).isNotSameAs(element.getDeclaredAnnotations());
+	}
+
+	@Test // gh-22703
+	public void getMergedAnnotationOnThreeDeepMetaWithValue() {
+		ValueAttribute annotation = AnnotatedElementUtils.getMergedAnnotation(
+				ValueAttributeMetaMetaClass.class, ValueAttribute.class);
+		assertThat(annotation.value()).containsExactly("FromValueAttributeMeta");
 	}
 
 
@@ -685,7 +859,7 @@ public class AnnotatedElementUtilsTests {
 	// -------------------------------------------------------------------------
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Inherited
 	@interface Transactional {
 
@@ -697,7 +871,7 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Inherited
 	@interface AliasedTransactional {
 
@@ -805,6 +979,10 @@ public class AnnotatedElementUtilsTests {
 		String[] locations();
 	}
 
+	/**
+	 * This hybrid approach for annotation attribute overrides with transitive implicit
+	 * aliases is unsupported. See SPR-13554 for details.
+	 */
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface HalfConventionBasedAndHalfAliasedComposedContextConfig {
@@ -842,14 +1020,16 @@ public class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlFiles() default {};
 
-		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		// intentionally omitted: attribute = "locations"
+		@AliasFor(annotation = ContextConfig.class)
 		String[] locations() default {};
 
-		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		// intentionally omitted: attribute = "locations" (SPR-14069)
+		@AliasFor(annotation = ContextConfig.class)
 		String[] value() default {};
 	}
 
-	@ImplicitAliasesContextConfig(xmlFiles = { "A.xml", "B.xml" })
+	@ImplicitAliasesContextConfig(xmlFiles = {"A.xml", "B.xml"})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedImplicitAliasesContextConfig {
 	}
@@ -867,6 +1047,17 @@ public class AnnotatedElementUtilsTests {
 
 	@ImplicitAliasesContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface SingleLocationTransitiveImplicitAliasesContextConfig {
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "xmlFiles")
+		String xml() default "";
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "groovyScripts")
+		String groovy() default "";
+	}
+
+	@ImplicitAliasesContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface TransitiveImplicitAliasesWithSkippedLevelContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
@@ -876,15 +1067,28 @@ public class AnnotatedElementUtilsTests {
 		String[] groovy() default {};
 	}
 
+	@ImplicitAliasesContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface SingleLocationTransitiveImplicitAliasesWithSkippedLevelContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String xml() default "";
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "groovyScripts")
+		String groovy() default "";
+	}
+
 	/**
-	 * Invalid because the configuration declares a value for 'value' and
-	 * requires a value for the aliased 'locations'. So we likely end up with
-	 * both 'value' and 'locations' being present in {@link AnnotationAttributes}
-	 * but with different values, which violates the contract of {@code @AliasFor}.
+	 * Although the configuration declares an explicit value for 'value' and
+	 * requires a value for the aliased 'locations', this does not result in
+	 * an error since 'locations' effectively <em>shadows</em> the 'value'
+	 * attribute (which cannot be set via the composed annotation anyway).
+	 *
+	 * If 'value' were not shadowed, such a declaration would not make sense.
 	 */
 	@ContextConfig(value = "duplicateDeclaration")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface InvalidAliasedComposedContextConfig {
+	@interface ShadowedAliasComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles();
@@ -938,12 +1142,27 @@ public class AnnotatedElementUtilsTests {
 		String pattern();
 	}
 
-	@ComponentScan(excludeFilters = { @Filter(pattern = "*Test"), @Filter(pattern = "*Tests") })
+	@ComponentScan(excludeFilters = {@Filter(pattern = "*Test"), @Filter(pattern = "*Tests")})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TestComponentScan {
 
 		@AliasFor(attribute = "basePackages", annotation = ComponentScan.class)
 		String[] packages();
+	}
+
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ConventionBasedSinglePackageComponentScan {
+
+		String basePackages();
+	}
+
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasForBasedSinglePackageComponentScan {
+
+		@AliasFor(attribute = "basePackages", annotation = ComponentScan.class)
+		String pkg();
 	}
 
 	// -------------------------------------------------------------------------
@@ -1037,7 +1256,7 @@ public class AnnotatedElementUtilsTests {
 		}
 	}
 
-	public static interface GenericParameter<T> {
+	public interface GenericParameter<T> {
 
 		T getFor(Class<T> cls);
 	}
@@ -1057,23 +1276,23 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Transactional
-	public static interface InheritedAnnotationInterface {
+	public interface InheritedAnnotationInterface {
 	}
 
-	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	public interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
 	}
 
-	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	public interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
 	}
 
 	@Order
-	public static interface NonInheritedAnnotationInterface {
+	public interface NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	public interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
+	public interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 	@ConventionBasedComposedContextConfig(locations = "explicitDeclaration")
@@ -1116,16 +1335,24 @@ public class AnnotatedElementUtilsTests {
 	static class TransitiveImplicitAliasesContextConfigClass {
 	}
 
+	@SingleLocationTransitiveImplicitAliasesContextConfig(groovy = "test.groovy")
+	static class SingleLocationTransitiveImplicitAliasesContextConfigClass {
+	}
+
 	@TransitiveImplicitAliasesWithSkippedLevelContextConfig(xml = "test.xml")
 	static class TransitiveImplicitAliasesWithSkippedLevelContextConfigClass {
+	}
+
+	@SingleLocationTransitiveImplicitAliasesWithSkippedLevelContextConfig(xml = "test.xml")
+	static class SingleLocationTransitiveImplicitAliasesWithSkippedLevelContextConfigClass {
 	}
 
 	@ComposedImplicitAliasesContextConfig
 	static class ComposedImplicitAliasesContextConfigClass {
 	}
 
-	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
-	static class InvalidAliasedComposedContextConfigClass {
+	@ShadowedAliasComposedContextConfig(xmlConfigFiles = "test.xml")
+	static class ShadowedAliasComposedContextConfigClass {
 	}
 
 	@AliasedComposedContextConfigAndTestPropSource(xmlConfigFiles = "test.xml")
@@ -1140,8 +1367,70 @@ public class AnnotatedElementUtilsTests {
 	static class TestComponentScanClass {
 	}
 
+	@ConventionBasedSinglePackageComponentScan(basePackages = "com.example.app.test")
+	static class ConventionBasedSinglePackageComponentScanClass {
+	}
+
+	@AliasForBasedSinglePackageComponentScan(pkg = "com.example.app.test")
+	static class AliasForBasedSinglePackageComponentScanClass {
+	}
+
 	@SpringAppConfig(Number.class)
 	static class SpringAppConfigClass {
+	}
+
+	@Resource(name = "x")
+	@ParametersAreNonnullByDefault
+	static class ResourceHolder {
+	}
+
+	interface TransactionalService {
+
+		@Transactional
+		@Nullable
+		Object doIt();
+	}
+
+	class TransactionalServiceImpl implements TransactionalService {
+
+		@Override
+		@Nullable
+		public Object doIt() {
+			return null;
+		}
+	}
+
+	@Deprecated
+	@ComponentScan
+	class ForAnnotationsClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ValueAttribute {
+
+		String[] value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttribute("FromValueAttributeMeta")
+	static @interface ValueAttributeMeta {
+
+		@AliasFor("alias")
+		String[] value() default {};
+
+		@AliasFor("value")
+		String[] alias() default {};
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttributeMeta("FromValueAttributeMetaMeta")
+	static @interface ValueAttributeMetaMeta {
+	}
+
+	@ValueAttributeMetaMeta
+	static class ValueAttributeMetaMetaClass {
 	}
 
 }

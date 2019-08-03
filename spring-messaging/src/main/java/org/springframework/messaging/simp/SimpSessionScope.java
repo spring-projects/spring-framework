@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link Scope} implementation exposing the attributes of a SiMP session
@@ -34,21 +35,22 @@ public class SimpSessionScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-		Object value = simpAttributes.getAttribute(name);
-		if (value != null) {
-			return value;
+		Object scopedObject = simpAttributes.getAttribute(name);
+		if (scopedObject != null) {
+			return scopedObject;
 		}
 		synchronized (simpAttributes.getSessionMutex()) {
-			value = simpAttributes.getAttribute(name);
-			if (value == null) {
-				value = objectFactory.getObject();
-				simpAttributes.setAttribute(name, value);
+			scopedObject = simpAttributes.getAttribute(name);
+			if (scopedObject == null) {
+				scopedObject = objectFactory.getObject();
+				simpAttributes.setAttribute(name, scopedObject);
 			}
-			return value;
+			return scopedObject;
 		}
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
 		synchronized (simpAttributes.getSessionMutex()) {
@@ -69,6 +71,7 @@ public class SimpSessionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}

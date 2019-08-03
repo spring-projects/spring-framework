@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +17,16 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * Sends a 503 (SERVICE_UNAVAILABLE) in case of a timeout if the response is not
- * already committed. Registered at the end, after all other interceptors and
+ * already committed. As of 4.2.8 this is done indirectly by setting the result
+ * to an {@link AsyncRequestTimeoutException} which is then handled by
+ * Spring MVC's default exception handling as a 503 error.
+ *
+ * <p>Registered at the end, after all other interceptors and
  * therefore invoked only if no other interceptor handles the timeout.
  *
  * <p>Note that according to RFC 7231, a 503 without a 'Retry-After' header is
@@ -35,15 +37,11 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class TimeoutCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+public class TimeoutCallableProcessingInterceptor implements CallableProcessingInterceptor {
 
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-		HttpServletResponse servletResponse = request.getNativeResponse(HttpServletResponse.class);
-		if (!servletResponse.isCommitted()) {
-			servletResponse.sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
-		}
-		return CallableProcessingInterceptor.RESPONSE_HANDLED;
+		return new AsyncRequestTimeoutException();
 	}
 
 }

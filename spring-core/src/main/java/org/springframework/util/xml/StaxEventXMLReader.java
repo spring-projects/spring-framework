@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,18 +65,18 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
+	@Nullable
 	private String encoding;
 
 
 	/**
-	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from the given
-	 * {@code XMLEventReader}. The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
-	 * {@code XMLStreamConstants.START_ELEMENT} state.
+	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from
+	 * the given {@code XMLEventReader}. The supplied event reader must be in
+	 * {@code XMLStreamConstants.START_DOCUMENT} or {@code XMLStreamConstants.START_ELEMENT} state.
 	 * @param reader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxEventXMLReader(XMLEventReader reader) {
-		Assert.notNull(reader, "'reader' must not be null");
 		try {
 			XMLEvent event = reader.peek();
 			if (event != null && !(event.isStartDocument() || event.isStartElement())) {
@@ -174,10 +174,12 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return (location != null ? location.getLineNumber() : -1);
 				}
 				@Override
+				@Nullable
 				public String getPublicId() {
 					return (location != null ? location.getPublicId() : null);
 				}
 				@Override
+				@Nullable
 				public String getSystemId() {
 					return (location != null ? location.getSystemId() : null);
 				}
@@ -186,6 +188,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return xmlVersion;
 				}
 				@Override
+				@Nullable
 				public String getEncoding() {
 					return encoding;
 				}

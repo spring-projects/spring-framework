@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,17 +17,18 @@
 package org.springframework.util.concurrent;
 
 /**
- * Defines the contract for failure callbacks that accept the result of a
- * {@link ListenableFuture}.
+ * Failure callback for a {@link ListenableFuture}.
  *
  * @author Sebastien Deleuze
  * @since 4.1
  */
+@FunctionalInterface
 public interface FailureCallback {
 
 	/**
-	 * Called when the {@link ListenableFuture} fails to complete.
-	 * @param ex the exception that triggered the failure
+	 * Called when the {@link ListenableFuture} completes with failure.
+	 * <p>Note that Exceptions raised by this method are ignored.
+	 * @param ex the failure
 	 */
 	void onFailure(Throwable ex);
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,9 @@ import freemarker.template.TemplateException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -46,7 +48,7 @@ import org.springframework.web.context.ServletContextAware;
  * using Spring's FreeMarkerView for web MVC. It exists purely to configure FreeMarker.
  * It is not meant to be referenced by application components but just internally
  * by FreeMarkerView. Implements FreeMarkerConfig to be found by FreeMarkerView without
- * depending on the bean name the configurer. Each DispatcherServlet can define its
+ * depending on the bean name of the configurer. Each DispatcherServlet can define its
  * own FreeMarkerConfigurer if desired.
  *
  * <p>Note that you can also refer to a preconfigured FreeMarker Configuration
@@ -55,8 +57,7 @@ import org.springframework.web.context.ServletContextAware;
  * for web and email usage, for example.
  *
  * <p>This configurer registers a template loader for this package, allowing to
- * reference the "spring.ftl" macro library (contained in this package and thus
- * in spring.jar) like this:
+ * reference the "spring.ftl" macro library contained in this package:
  *
  * <pre class="code">
  * &lt;#import "/spring.ftl" as spring/&gt;
@@ -78,8 +79,10 @@ import org.springframework.web.context.ServletContextAware;
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private TaglibFactory taglibFactory;
 
 
@@ -105,7 +108,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
-	 * if not overridden by a preconfigured FreeMarker Configuation.
+	 * if not overridden by a preconfigured FreeMarker Configuration.
 	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
@@ -124,7 +127,6 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	@Override
 	protected void postProcessTemplateLoaders(List<TemplateLoader> templateLoaders) {
 		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
-		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}
 
 
@@ -133,6 +135,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	@Override
 	public Configuration getConfiguration() {
+		Assert.state(this.configuration != null, "No Configuration available");
 		return this.configuration;
 	}
 
@@ -141,6 +144,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	@Override
 	public TaglibFactory getTaglibFactory() {
+		Assert.state(this.taglibFactory != null, "No TaglibFactory available");
 		return this.taglibFactory;
 	}
 

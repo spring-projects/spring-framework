@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,101 +16,192 @@
 
 package org.springframework.util.xml;
 
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.xml.XMLConstants;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+
+/**
+ * @author Arjen Poutsma
+ * @author Leo Arnold
+ */
 public class SimpleNamespaceContextTests {
 
-	private final SimpleNamespaceContext context = new SimpleNamespaceContext() {{
-		bindNamespaceUri("prefix", "namespaceURI");
-	}};
+	private final String unboundPrefix = "unbound";
+	private final String prefix = "prefix";
+	private final String namespaceUri = "https://Namespace-name-URI";
+	private final String additionalNamespaceUri = "https://Additional-namespace-name-URI";
+	private final String unboundNamespaceUri = "https://Unbound-namespace-name-URI";
+	private final String defaultNamespaceUri = "https://Default-namespace-name-URI";
+
+	private final SimpleNamespaceContext context = new SimpleNamespaceContext();
 
 
 	@Test
+	public void getNamespaceURI_withNull() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getNamespaceURI(null));
+	}
+
+	@Test
 	public void getNamespaceURI() {
-		assertEquals("Invalid namespaceURI for default namespace", "",
-				context.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX));
-		String defaultNamespaceUri = "defaultNamespace";
-		context.bindNamespaceUri(XMLConstants.DEFAULT_NS_PREFIX, defaultNamespaceUri);
-		assertEquals("Invalid namespaceURI for default namespace", defaultNamespaceUri,
-				context.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX));
-		assertEquals("Invalid namespaceURI for bound prefix", "namespaceURI", context.getNamespaceURI("prefix"));
-		assertEquals("Invalid namespaceURI for unbound prefix", "", context.getNamespaceURI("unbound"));
-		assertEquals("Invalid namespaceURI for namespace prefix", XMLConstants.XML_NS_URI,
-				context.getNamespaceURI(XMLConstants.XML_NS_PREFIX));
-		assertEquals("Invalid namespaceURI for attribute prefix", XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
-				context.getNamespaceURI(XMLConstants.XMLNS_ATTRIBUTE));
+		context.bindNamespaceUri(XMLConstants.XMLNS_ATTRIBUTE, additionalNamespaceUri);
+		assertThat(context.getNamespaceURI(XMLConstants.XMLNS_ATTRIBUTE))
+				.as("Always returns \"http://www.w3.org/2000/xmlns/\" for \"xmlns\"")
+				.isEqualTo(XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
+		context.bindNamespaceUri(XMLConstants.XML_NS_PREFIX, additionalNamespaceUri);
+		assertThat(context.getNamespaceURI(XMLConstants.XML_NS_PREFIX))
+				.as("Always returns \"http://www.w3.org/XML/1998/namespace\" for \"xml\"")
+				.isEqualTo(XMLConstants.XML_NS_URI);
+
+		assertThat(context.getNamespaceURI(unboundPrefix))
+				.as("Returns \"\" for an unbound prefix")
+				.isEqualTo(XMLConstants.NULL_NS_URI);
+		context.bindNamespaceUri(prefix, namespaceUri);
+		assertThat(context.getNamespaceURI(prefix))
+				.as("Returns the bound namespace URI for a bound prefix")
+				.isEqualTo(namespaceUri);
+
+		assertThat(context.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX))
+				.as("By default returns URI \"\" for the default namespace prefix")
+				.isEqualTo(XMLConstants.NULL_NS_URI);
+		context.bindDefaultNamespaceUri(defaultNamespaceUri);
+		assertThat(context.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX))
+				.as("Returns the set URI for the default namespace prefix")
+				.isEqualTo(defaultNamespaceUri);
+	}
+
+	@Test
+	public void getPrefix_withNull() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getPrefix(null));
 	}
 
 	@Test
 	public void getPrefix() {
-		assertEquals("Invalid prefix for default namespace", XMLConstants.DEFAULT_NS_PREFIX, context.getPrefix(""));
-		assertEquals("Invalid prefix for bound namespace", "prefix", context.getPrefix("namespaceURI"));
-		assertNull("Invalid prefix for unbound namespace", context.getPrefix("unbound"));
-		assertEquals("Invalid prefix for namespace", XMLConstants.XML_NS_PREFIX,
-				context.getPrefix(XMLConstants.XML_NS_URI));
-		assertEquals("Invalid prefix for attribute namespace", XMLConstants.XMLNS_ATTRIBUTE,
-				context.getPrefix(XMLConstants.XMLNS_ATTRIBUTE_NS_URI));
+		assertThat(context.getPrefix(XMLConstants.XMLNS_ATTRIBUTE_NS_URI))
+				.as("Always returns \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"")
+				.isEqualTo(XMLConstants.XMLNS_ATTRIBUTE);
+		assertThat(context.getPrefix(XMLConstants.XML_NS_URI))
+				.as("Always returns \"xml\" for \"http://www.w3.org/XML/1998/namespace\"")
+				.isEqualTo(XMLConstants.XML_NS_PREFIX);
+
+		assertThat(context.getPrefix(unboundNamespaceUri)).as("Returns null for an unbound namespace URI").isNull();
+		context.bindNamespaceUri("prefix1", namespaceUri);
+		context.bindNamespaceUri("prefix2", namespaceUri);
+		assertThat(context.getPrefix(namespaceUri))
+				.as("Returns a prefix for a bound namespace URI")
+				.matches(prefix -> "prefix1".equals(prefix) || "prefix2".equals(prefix));
+	}
+
+	@Test
+	public void getPrefixes_withNull() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getPrefixes(null));
+	}
+
+	@Test
+	public void getPrefixes_IteratorIsNotModifiable() throws Exception {
+		context.bindNamespaceUri(prefix, namespaceUri);
+		Iterator<String> iterator = context.getPrefixes(namespaceUri);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				iterator::remove);
 	}
 
 	@Test
 	public void getPrefixes() {
-		assertPrefixes("", XMLConstants.DEFAULT_NS_PREFIX);
-		assertPrefixes("namespaceURI", "prefix");
-		assertFalse("Invalid prefix for unbound namespace", context.getPrefixes("unbound").hasNext());
-		assertPrefixes(XMLConstants.XML_NS_URI, XMLConstants.XML_NS_PREFIX);
-		assertPrefixes(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, XMLConstants.XMLNS_ATTRIBUTE);
+		assertThat(getItemSet(context.getPrefixes(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)))
+				.as("Returns only \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"")
+				.containsExactly(XMLConstants.XMLNS_ATTRIBUTE);
+		assertThat(getItemSet(context.getPrefixes(XMLConstants.XML_NS_URI)))
+				.as("Returns only \"xml\" for \"http://www.w3.org/XML/1998/namespace\"")
+				.containsExactly(XMLConstants.XML_NS_PREFIX);
+
+		assertThat(context.getPrefixes("unbound Namespace URI").hasNext())
+				.as("Returns empty iterator for unbound prefix")
+				.isFalse();
+		context.bindNamespaceUri("prefix1", namespaceUri);
+		context.bindNamespaceUri("prefix2", namespaceUri);
+		assertThat(getItemSet(context.getPrefixes(namespaceUri)))
+				.as("Returns all prefixes (and only those) bound to the namespace URI")
+				.containsExactlyInAnyOrder("prefix1", "prefix2");
 	}
 
 	@Test
-	public void multiplePrefixes() {
-		context.bindNamespaceUri("prefix1", "namespace");
-		context.bindNamespaceUri("prefix2", "namespace");
-		Iterator<String> iterator = context.getPrefixes("namespace");
-		assertNotNull("getPrefixes returns null", iterator);
-		assertTrue("iterator is empty", iterator.hasNext());
-		String result = iterator.next();
-		assertTrue("Invalid prefix", result.equals("prefix1") || result.equals("prefix2"));
-		assertTrue("iterator is empty", iterator.hasNext());
-		result = iterator.next();
-		assertTrue("Invalid prefix", result.equals("prefix1") || result.equals("prefix2"));
-		assertFalse("iterator contains more than two values", iterator.hasNext());
-	}
-
-	private void assertPrefixes(String namespaceUri, String prefix) {
-		Iterator<String> iterator = context.getPrefixes(namespaceUri);
-		assertNotNull("getPrefixes returns null", iterator);
-		assertTrue("iterator is empty", iterator.hasNext());
-		String result = iterator.next();
-		assertEquals("Invalid prefix", prefix, result);
-		assertFalse("iterator contains multiple values", iterator.hasNext());
+	public void bindNamespaceUri_withNullNamespaceUri() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.bindNamespaceUri("prefix", null));
 	}
 
 	@Test
-	public void getBoundPrefixes() throws Exception {
-		Iterator<String> iterator = context.getBoundPrefixes();
-		assertNotNull("getPrefixes returns null", iterator);
-		assertTrue("iterator is empty", iterator.hasNext());
-		String result = iterator.next();
-		assertEquals("Invalid prefix", "prefix", result);
-		assertFalse("iterator contains multiple values", iterator.hasNext());
+	public void bindNamespaceUri_withNullPrefix() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.bindNamespaceUri(null, namespaceUri));
 	}
 
 	@Test
-	public void setBindings() throws Exception {
-		context.setBindings(Collections.singletonMap("prefix", "namespace"));
-		assertEquals("Invalid namespace uri", "namespace", context.getNamespaceURI("prefix"));
+	public void bindNamespaceUri() {
+		context.bindNamespaceUri(prefix, namespaceUri);
+		assertThat(context.getNamespaceURI(prefix))
+				.as("The Namespace URI was bound to the prefix")
+				.isEqualTo(namespaceUri);
+		assertThat(getItemSet(context.getPrefixes(namespaceUri)))
+				.as("The prefix was bound to the namespace URI")
+				.contains(prefix);
 	}
 
 	@Test
-	public void removeBinding() throws Exception {
-		context.removeBinding("prefix");
-		assertNull("Invalid prefix for unbound namespace", context.getPrefix("prefix"));
+	public void getBoundPrefixes() {
+		context.bindNamespaceUri("prefix1", namespaceUri);
+		context.bindNamespaceUri("prefix2", namespaceUri);
+		context.bindNamespaceUri("prefix3", additionalNamespaceUri);
+		assertThat(getItemSet(context.getBoundPrefixes()))
+				.as("Returns all bound prefixes")
+				.containsExactlyInAnyOrder("prefix1", "prefix2", "prefix3");
+	}
+
+	@Test
+	public void clear() {
+		context.bindNamespaceUri("prefix1", namespaceUri);
+		context.bindNamespaceUri("prefix2", namespaceUri);
+		context.bindNamespaceUri("prefix3", additionalNamespaceUri);
+		context.clear();
+		assertThat(context.getBoundPrefixes().hasNext()).as("All bound prefixes were removed").isFalse();
+		assertThat(context.getPrefixes(namespaceUri).hasNext()).as("All bound namespace URIs were removed").isFalse();
+	}
+
+	@Test
+	public void removeBinding() {
+		context.removeBinding(unboundPrefix);
+
+		context.bindNamespaceUri(prefix, namespaceUri);
+		context.removeBinding(prefix);
+		assertThat(context.getNamespaceURI(prefix)).as("Returns default namespace URI for removed prefix").isEqualTo(XMLConstants.NULL_NS_URI);
+		assertThat(context.getPrefix(namespaceUri)).as("#getPrefix returns null when all prefixes for a namespace URI were removed").isNull();
+		assertThat(context.getPrefixes(namespaceUri).hasNext()).as("#getPrefixes returns an empty iterator when all prefixes for a namespace URI were removed").isFalse();
+
+		context.bindNamespaceUri("prefix1", additionalNamespaceUri);
+		context.bindNamespaceUri("prefix2", additionalNamespaceUri);
+		context.removeBinding("prefix1");
+		assertThat(context.getNamespaceURI("prefix1")).as("Prefix was unbound").isEqualTo(XMLConstants.NULL_NS_URI);
+		assertThat(context.getPrefix(additionalNamespaceUri)).as("#getPrefix returns a bound prefix after removal of another prefix for the same namespace URI").isEqualTo("prefix2");
+		assertThat(getItemSet(context.getPrefixes(additionalNamespaceUri)))
+				.as("Prefix was removed from namespace URI")
+				.containsExactly("prefix2");
+	}
+
+
+	private Set<String> getItemSet(Iterator<String> iterator) {
+		Set<String> itemSet = new LinkedHashSet<>();
+		iterator.forEachRemaining(itemSet::add);
+		return itemSet;
 	}
 
 }

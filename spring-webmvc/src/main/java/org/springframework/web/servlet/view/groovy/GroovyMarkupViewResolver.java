@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,9 +38,27 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
  */
 public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 
+	/**
+	 * Sets the default {@link #setViewClass view class} to {@link #requiredViewClass}:
+	 * by default {@link GroovyMarkupView}.
+	 */
 	public GroovyMarkupViewResolver() {
 		setViewClass(requiredViewClass());
 	}
+
+	/**
+	 * A convenience constructor that allows for specifying {@link #setPrefix prefix}
+	 * and {@link #setSuffix suffix} as constructor arguments.
+	 * @param prefix the prefix that gets prepended to view names when building a URL
+	 * @param suffix the suffix that gets appended to view names when building a URL
+	 * @since 4.3
+	 */
+	public GroovyMarkupViewResolver(String prefix, String suffix) {
+		this();
+		setPrefix(prefix);
+		setSuffix(suffix);
+	}
+
 
 	@Override
 	protected Class<?> requiredViewClass() {
@@ -52,7 +70,7 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	 */
 	@Override
 	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+		return viewName + '_' + locale;
 	}
 
 }

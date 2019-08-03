@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.lang.reflect.Method;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link BeanInfoFactory} implementation that evaluates whether bean classes have
@@ -42,6 +43,7 @@ public class ExtendedBeanInfoFactory implements BeanInfoFactory, Ordered {
 	 * Return an {@link ExtendedBeanInfo} for the given bean class, if applicable.
 	 */
 	@Override
+	@Nullable
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		return (supports(beanClass) ? new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null);
 	}

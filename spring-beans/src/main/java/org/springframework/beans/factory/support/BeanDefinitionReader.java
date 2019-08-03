@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple interface for bean definition readers.
@@ -49,8 +50,8 @@ public interface BeanDefinitionReader {
 	 * Return the resource loader to use for resource locations.
 	 * Can be checked for the <b>ResourcePatternResolver</b> interface and cast
 	 * accordingly, for loading multiple resources for a given resource pattern.
-	 * <p>Null suggests that absolute resource loading is not available
-	 * for this bean definition reader.
+	 * <p>A {@code null} return value suggests that absolute resource loading
+	 * is not available for this bean definition reader.
 	 * <p>This is mainly meant to be used for importing further resources
 	 * from within a bean definition resource, for example via the "import"
 	 * tag in XML bean definitions. It is recommended, however, to apply
@@ -62,6 +63,7 @@ public interface BeanDefinitionReader {
 	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
+	@Nullable
 	ResourceLoader getResourceLoader();
 
 	/**
@@ -70,6 +72,7 @@ public interface BeanDefinitionReader {
 	 * but rather to just register bean definitions with class names,
 	 * with the corresponding Classes to be resolved later (or never).
 	 */
+	@Nullable
 	ClassLoader getBeanClassLoader();
 
 	/**

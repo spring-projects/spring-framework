@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,11 +25,11 @@ import org.junit.runners.JUnit4;
 
 import org.springframework.test.context.TestExecutionListeners;
 
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
- * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected=...)}
- * support in conjunction with the {@link SpringJUnit4ClassRunner}.
+ * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected = ...)}
+ * support in conjunction with the {@link SpringRunner}.
  *
  * @author Sam Brannen
  * @since 3.0
@@ -39,7 +39,7 @@ public class ExpectedExceptionSpringRunnerTests {
 
 	@Test
 	public void expectedExceptions() throws Exception {
-		runTestsAndAssertCounters(SpringJUnit4ClassRunner.class, ExpectedExceptionSpringRunnerTestCase.class, 1, 0, 1, 0, 0);
+		runTestsAndAssertCounters(SpringRunner.class, ExpectedExceptionSpringRunnerTestCase.class, 1, 0, 1, 0, 0);
 	}
 
 
@@ -50,7 +50,7 @@ public class ExpectedExceptionSpringRunnerTests {
 		// Should Pass.
 		@Test(expected = IndexOutOfBoundsException.class)
 		public void verifyJUnitExpectedException() {
-			new ArrayList<Object>().get(1);
+			new ArrayList<>().get(1);
 		}
 	}
 

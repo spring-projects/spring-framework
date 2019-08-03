@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,24 +38,24 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
-import static org.testng.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
 
 /**
  * Integration tests that verify support for
  * {@link org.springframework.context.annotation.Configuration @Configuration} classes
- * with TestNG-based tests.
+ * with transactional TestNG-based tests.
  *
- * <p>
- * Configuration will be loaded from
+ * <p>Configuration will be loaded from
  * {@link AnnotationConfigTransactionalTestNGSpringContextTests.ContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 3.1
  */
 @ContextConfiguration
-public class AnnotationConfigTransactionalTestNGSpringContextTests extends
-		AbstractTransactionalTestNGSpringContextTests {
+public class AnnotationConfigTransactionalTestNGSpringContextTests
+		extends AbstractTransactionalTestNGSpringContextTests {
 
 	private static final String JANE = "jane";
 	private static final String SUE = "sue";
@@ -85,16 +85,17 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-		assertEquals(countRowsInTable("person"), expectedNumRows, "the number of rows in the person table ("
-				+ testState + ").");
+		assertThat(countRowsInTable("person"))
+			.as("the number of rows in the person table (" + testState + ").")
+			.isEqualTo(expectedNumRows);
 	}
 
-	private void assertAddPerson(final String name) {
-		assertEquals(createPerson(name), 1, "Adding '" + name + "'");
+	private void assertAddPerson(String name) {
+		assertThat(createPerson(name)).as("Adding '%s'", name).isEqualTo(1);
 	}
 
 	@BeforeClass
-	public void beforeClass() {
+	void beforeClass() {
 		numSetUpCalls = 0;
 		numSetUpCallsInTransaction = 0;
 		numTearDownCalls = 0;
@@ -102,58 +103,58 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@AfterClass
-	public void afterClass() {
-		assertEquals(numSetUpCalls, NUM_TESTS, "number of calls to setUp().");
-		assertEquals(numSetUpCallsInTransaction, NUM_TX_TESTS, "number of calls to setUp() within a transaction.");
-		assertEquals(numTearDownCalls, NUM_TESTS, "number of calls to tearDown().");
-		assertEquals(numTearDownCallsInTransaction, NUM_TX_TESTS, "number of calls to tearDown() within a transaction.");
+	void afterClass() {
+		assertThat(numSetUpCalls).as("number of calls to setUp().").isEqualTo(NUM_TESTS);
+		assertThat(numSetUpCallsInTransaction).as("number of calls to setUp() within a transaction.").isEqualTo(NUM_TX_TESTS);
+		assertThat(numTearDownCalls).as("number of calls to tearDown().").isEqualTo(NUM_TESTS);
+		assertThat(numTearDownCallsInTransaction).as("number of calls to tearDown() within a transaction.").isEqualTo(NUM_TX_TESTS);
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void autowiringFromConfigClass() {
-		assertNotNull(employee, "The employee should have been autowired.");
-		assertEquals(employee.getName(), "John Smith");
+	void autowiringFromConfigClass() {
+		assertThat(employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(employee.getName()).isEqualTo("John Smith");
 
-		assertNotNull(pet, "The pet should have been autowired.");
-		assertEquals(pet.getName(), "Fido");
+		assertThat(pet).as("The pet should have been autowired.").isNotNull();
+		assertThat(pet.getName()).isEqualTo("Fido");
 	}
 
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		assertNumRowsInPersonTable(1, "before a transactional test method");
 		assertAddPerson(YODA);
 	}
 
 	@BeforeMethod
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		numSetUpCalls++;
-		if (inTransaction()) {
+		if (isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 2 : 1), "before a test method");
 	}
 
 	@Test
-	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
+	void modifyTestDataWithinTransaction() {
+		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
 		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
 	}
 
 	@AfterMethod
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		numTearDownCalls++;
-		if (inTransaction()) {
+		if (isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 4 : 1), "after a test method");
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
-		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
+	void afterTransaction() {
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
 		assertNumRowsInPersonTable(1, "after a transactional test method");
 	}
 
@@ -162,7 +163,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	static class ContextConfiguration {
 
 		@Bean
-		public Employee employee() {
+		Employee employee() {
 			Employee employee = new Employee();
 			employee.setName("John Smith");
 			employee.setAge(42);
@@ -171,17 +172,17 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		}
 
 		@Bean
-		public Pet pet() {
+		Pet pet() {
 			return new Pet("Fido");
 		}
 
 		@Bean
-		public PlatformTransactionManager transactionManager() {
+		PlatformTransactionManager transactionManager() {
 			return new DataSourceTransactionManager(dataSource());
 		}
 
 		@Bean
-		public DataSource dataSource() {
+		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
 			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
 			.addScript("classpath:/org/springframework/test/jdbc/data.sql")//

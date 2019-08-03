@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,68 +18,77 @@ package org.springframework.tests;
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 
 /**
  * Tests for {@link TestGroup}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class TestGroupTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
-	public void parseNull() throws Exception {
-		assertThat(TestGroup.parse(null), equalTo(Collections.<TestGroup> emptySet()));
+	public void parseNull() {
+		assertThat(TestGroup.parse(null)).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseEmptyString() throws Exception {
-		assertThat(TestGroup.parse(""), equalTo(Collections.<TestGroup> emptySet()));
+	public void parseEmptyString() {
+		assertThat(TestGroup.parse("")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseWithSpaces() throws Exception {
-		assertThat(TestGroup.parse("PERFORMANCE,  PERFORMANCE"),
-				equalTo((Set<TestGroup>) EnumSet.of(TestGroup.PERFORMANCE)));
+	public void parseBlankString() {
+		assertThat(TestGroup.parse("     ")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseInMixedCase() throws Exception {
-		assertThat(TestGroup.parse("performance,  PERFormaNCE"),
-				equalTo((Set<TestGroup>) EnumSet.of(TestGroup.PERFORMANCE)));
+	public void parseWithSpaces() {
+		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE ")).containsOnly(
+				TestGroup.PERFORMANCE);
 	}
 
 	@Test
-	public void parseMissing() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
-				"testGroups value: 'performance, missing'. Available groups include: " +
-				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI,CUSTOM_COMPILATION]");
-		TestGroup.parse("performance, missing");
+	public void parseInMixedCase() {
+		assertThat(TestGroup.parse("performance,  PERFormaNCE")).containsOnly(
+				TestGroup.PERFORMANCE);
 	}
 
 	@Test
-	public void parseAll() throws Exception {
-		assertThat(TestGroup.parse("all"), equalTo((Set<TestGroup>)EnumSet.allOf(TestGroup.class)));
+	public void parseMissing() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TestGroup.parse("performance, missing"))
+			.withMessageContaining("Unable to find test group 'missing' when parsing " +
+					"testGroups value: 'performance, missing'. Available groups include: " +
+					"[LONG_RUNNING,PERFORMANCE,CI]");
 	}
 
 	@Test
-	public void parseAllExcept() throws Exception {
-		Set<TestGroup> expected = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
-		expected.remove(TestGroup.CUSTOM_COMPILATION);
+	public void parseAll() {
+		assertThat(TestGroup.parse("all")).isEqualTo(EnumSet.allOf(TestGroup.class));
+	}
+
+	@Test
+	public void parseAllExceptPerformance() {
+		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
 		expected.remove(TestGroup.PERFORMANCE);
-		assertThat(TestGroup.parse("all-custom_compilation,performance"), equalTo(expected));
+		assertThat(TestGroup.parse("all-performance")).isEqualTo(expected);
+	}
+
+	@Test
+	public void parseAllExceptMissing() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TestGroup.parse("all-missing"))
+			.withMessageContaining("Unable to find test group 'missing' when parsing " +
+					"testGroups value: 'all-missing'. Available groups include: " +
+					"[LONG_RUNNING,PERFORMANCE,CI]");
 	}
 
 }

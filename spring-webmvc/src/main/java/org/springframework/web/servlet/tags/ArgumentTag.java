@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,11 +19,33 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
+import org.springframework.lang.Nullable;
+
 /**
- * JSP tag for collecting arguments and passing them to an {@link ArgumentAware}
- * ancestor in the tag hierarchy.
+ * The {@code <argument>} tag is based on the JSTL {@code fmt:param} tag.
+ * The purpose is to support arguments inside the message and theme tags.
  *
  * <p>This tag must be nested under an argument aware tag.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>value</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The value of the argument.</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Nicholas Williams
  * @since 4.0
@@ -33,6 +55,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 @SuppressWarnings("serial")
 public class ArgumentTag extends BodyTagSupport {
 
+	@Nullable
 	private Object value;
 
 	private boolean valueSet;
@@ -40,7 +63,7 @@ public class ArgumentTag extends BodyTagSupport {
 
 	/**
 	 * Set the value of the argument (optional).
-	 * <pIf not set, the tag's body content will get evaluated.
+	 * If not set, the tag's body content will get evaluated.
 	 * @param value the parameter value
 	 */
 	public void setValue(Object value) {

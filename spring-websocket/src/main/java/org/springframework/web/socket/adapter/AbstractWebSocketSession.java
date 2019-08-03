@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
@@ -37,24 +40,27 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the native session type
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
+
+	protected static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
 	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
 
 
-	private T nativeSession;
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+	@Nullable
+	private T nativeSession;
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
-	public AbstractWebSocketSession(Map<String, Object> attributes) {
+	public AbstractWebSocketSession(@Nullable Map<String, Object> attributes) {
 		if (attributes != null) {
 			this.attributes.putAll(attributes);
 		}
@@ -68,22 +74,19 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public T getNativeSession() {
+		Assert.state(this.nativeSession != null, "WebSocket session not yet initialized");
 		return this.nativeSession;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R> R getNativeSession(Class<R> requiredType) {
-		if (requiredType != null) {
-			if (requiredType.isInstance(this.nativeSession)) {
-				return (R) this.nativeSession;
-			}
-		}
-		return null;
+	@Nullable
+	public <R> R getNativeSession(@Nullable Class<R> requiredType) {
+		return (requiredType == null || requiredType.isInstance(this.nativeSession) ? (R) this.nativeSession : null);
 	}
 
 	public void initializeNativeSession(T session) {
-		Assert.notNull(session, "session must not be null");
+		Assert.notNull(session, "WebSocket session must not be null");
 		this.nativeSession = session;
 	}
 
@@ -93,9 +96,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-
 		checkNativeSessionInitialized();
-		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Sending " + message + ", " + this);
@@ -125,6 +126,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	protected abstract void sendPingMessage(PingMessage message) throws IOException;
 
 	protected abstract void sendPongMessage(PongMessage message) throws IOException;
+
 
 	@Override
 	public final void close() throws IOException {

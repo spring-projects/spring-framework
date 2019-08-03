@@ -3,15 +3,18 @@
 	   xmlns:aop="http://www.springframework.org/schema/aop"
 	   xmlns:cache="http://www.springframework.org/schema/cache"
 	   xmlns:p="http://www.springframework.org/schema/p"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-       		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       		http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+       		http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<cache:advice id="cacheAdviceInterface" cache-manager="cacheManager">
 		<cache:caching cache="testCache">
 			<cache:cacheable method="cache"/>
 			<cache:cacheable method="cacheNull"/>
+			<cache:cacheable method="cacheSync" sync="true"/>
+			<cache:cacheable method="cacheSyncNull" sync="true"/>
 			<cache:cacheable method="conditional" condition="#classField == 3"/>
+			<cache:cacheable method="conditionalSync" sync="true" condition="#classField == 3"/>
 			<cache:cacheable method="unless" unless="#result > 10"/>
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="varArgsKey"/>
@@ -24,12 +27,11 @@
 			<cache:cacheable method="nullValue" cache="testCache"/>
 		</cache:caching>
 		<cache:caching>
-			<cache:cache-evict method="invalidate" cache="testCache"/>
 			<cache:cache-evict method="evict" key="#p0" cache="testCache"/>
 			<cache:cache-evict method="evictWithException" cache="testCache"/>
 			<cache:cache-evict method="evictEarly" cache="testCache" before-invocation="true"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="testCache" before-invocation="true"/>
 			<cache:cache-evict method="evictAll" cache="testCache" all-entries="true"/>
+			<cache:cache-evict method="evictAllEarly" cache="testCache" all-entries="true" before-invocation="true"/>
 		</cache:caching>
 		<cache:caching cache="testCache">
 			<cache:cache-put method="update"/>

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,14 @@ import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Costin Leau
  * @author Chris Beams
  * @author Stephane Nicoll
  */
-public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
+public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
 
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
@@ -40,9 +40,9 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 
 	@Test
 	public void testKeyStrategy() {
-		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
-				CacheInterceptor.class);
-		assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+		CacheInterceptor ci = this.ctx.getBean(
+				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
+		assertThat(ci.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
 
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 		context.close();
 	}
 
@@ -61,14 +61,15 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
 
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 		context.close();
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
-		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
-				CacheInterceptor.class);
-		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		CacheInterceptor ci = this.ctx.getBean(
+				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
+		assertThat(ci.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
 	}
+
 }

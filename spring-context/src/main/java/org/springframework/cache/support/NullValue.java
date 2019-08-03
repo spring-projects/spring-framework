@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.cache.support;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple serializable class that serves as a {@code null} replacement
  * for cache stores which otherwise do not support {@code null} values.
@@ -28,7 +30,13 @@ import java.io.Serializable;
  */
 public final class NullValue implements Serializable {
 
-	static final Object INSTANCE = new NullValue();
+	/**
+	 * The canonical representation of a {@code null} replacement, as used by the
+	 * default implementation of {@link AbstractValueAdaptingCache#toStoreValue}/
+	 * {@link AbstractValueAdaptingCache#fromStoreValue}.
+	 * @since 4.3.10
+	 */
+	public static final Object INSTANCE = new NullValue();
 
 	private static final long serialVersionUID = 1L;
 
@@ -38,6 +46,22 @@ public final class NullValue implements Serializable {
 
 	private Object readResolve() {
 		return INSTANCE;
+	}
+
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || obj == null);
+	}
+
+	@Override
+	public int hashCode() {
+		return NullValue.class.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "null";
 	}
 
 }

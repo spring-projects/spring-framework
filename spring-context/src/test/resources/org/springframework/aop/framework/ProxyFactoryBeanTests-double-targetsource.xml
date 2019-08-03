@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	Tests for misconfiguring the proxy factory bean using a target source in the
@@ -22,7 +22,7 @@
 
 	<bean id="adamTargetSource" class="org.springframework.aop.target.SingletonTargetSource">
 		<constructor-arg>
-			<ref local="adam"/>
+			<ref bean="adam"/>
 		</constructor-arg>
 	</bean>
 
@@ -45,7 +45,7 @@
 		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
 		<!-- this is the one used and NOT the one set by targetSource -->
 		<property name="interceptorNames"><value>adam</value></property>
-		<property name="targetSource"><ref local="eveTargetSource"/></property>
+		<property name="targetSource"><ref bean="eveTargetSource"/></property>
 	</bean>
 
 	

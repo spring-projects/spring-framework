@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,12 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.lang.UsesJava7;
 
 /**
  * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
- * {@link java.sql.ResultSet}, catching any {@link SQLException}s and translating
- * them to a corresponding Spring {@link InvalidResultSetAccessException}.
+ * {@link java.sql.ResultSet}, catching any {@link SQLException SQLExceptions} and
+ * translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
  * <p>The passed-in ResultSet should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a
@@ -64,7 +63,7 @@ import org.springframework.lang.UsesJava7;
  */
 public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability */
+	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -4688694393146734764L;
 
 
@@ -97,7 +96,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			ResultSetMetaData rsmd = resultSet.getMetaData();
 			if (rsmd != null) {
 				int columnCount = rsmd.getColumnCount();
-				this.columnLabelMap = new HashMap<String, Integer>(columnCount);
+				this.columnLabelMap = new HashMap<>(columnCount);
 				for (int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					// Make sure to preserve first matching column for any given name,
@@ -412,7 +411,6 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getObject(int, Class)
 	 */
-	@UsesJava7
 	@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws InvalidResultSetAccessException {
 		try {

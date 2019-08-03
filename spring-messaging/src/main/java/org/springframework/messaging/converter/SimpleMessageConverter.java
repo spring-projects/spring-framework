@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -35,19 +36,14 @@ import org.springframework.util.ClassUtils;
 public class SimpleMessageConverter implements MessageConverter {
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
-		if (targetClass == null) {
-			return payload;
-		}
 		return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
 	}
 
 	@Override
-	public Message<?> toMessage(Object payload, MessageHeaders headers) {
-		if (payload == null) {
-			return null;
-		}
+	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		if (headers != null) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
 			if (accessor != null && accessor.isMutable()) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -33,14 +35,15 @@ import org.springframework.util.StringUtils;
  *
  * <p>Typically used for retrieving public static final constants. Usage example:
  *
- * <pre class="code">// standard definition for exposing a static field, specifying the "staticField" property
+ * <pre class="code">
+ * // standard definition for exposing a static field, specifying the "staticField" property
  * &lt;bean id="myField" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"&gt;
  *   &lt;property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;
  * &lt;/bean&gt;
  *
  * // convenience version that specifies a static field pattern as bean name
  * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
- *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
+ *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;
  * </pre>
  *
  * <p>If you are using Spring 2.0, you can also use the following style of configuration for
@@ -55,19 +58,26 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Class<?> targetClass;
 
+	@Nullable
 	private Object targetObject;
 
+	@Nullable
 	private String targetField;
 
+	@Nullable
 	private String staticField;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	// the field we will retrieve
+	@Nullable
 	private Field fieldObject;
 
 
@@ -78,15 +88,16 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 * @see #setTargetField
 	 */
-	public void setTargetClass(Class<?> targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which the field is defined.
 	 */
+	@Nullable
 	public Class<?> getTargetClass() {
-		return targetClass;
+		return this.targetClass;
 	}
 
 	/**
@@ -96,13 +107,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetField
 	 */
-	public void setTargetObject(Object targetObject) {
+	public void setTargetObject(@Nullable Object targetObject) {
 		this.targetObject = targetObject;
 	}
 
 	/**
 	 * Return the target object on which the field is defined.
 	 */
+	@Nullable
 	public Object getTargetObject() {
 		return this.targetObject;
 	}
@@ -114,13 +126,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetObject
 	 */
-	public void setTargetField(String targetField) {
-		this.targetField = StringUtils.trimAllWhitespace(targetField);
+	public void setTargetField(@Nullable String targetField) {
+		this.targetField = (targetField != null ? StringUtils.trimAllWhitespace(targetField) : null);
 	}
 
 	/**
 	 * Return the name of the field to be retrieved.
 	 */
+	@Nullable
 	public String getTargetField() {
 		return this.targetField;
 	}
@@ -168,6 +181,7 @@ public class FieldRetrievingFactoryBean
 			// If no other property specified, consider bean name as static field expression.
 			if (this.staticField == null) {
 				this.staticField = this.beanName;
+				Assert.state(this.staticField != null, "No target field specified");
 			}
 
 			// Try to parse static field into class and field.
@@ -189,12 +203,13 @@ public class FieldRetrievingFactoryBean
 		}
 
 		// Try to get the exact method first.
-		Class<?> targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
+		Class<?> targetClass = (this.targetObject != null ? this.targetObject.getClass() : this.targetClass);
 		this.fieldObject = targetClass.getField(this.targetField);
 	}
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -204,7 +219,7 @@ public class FieldRetrievingFactoryBean
 			// instance field
 			return this.fieldObject.get(this.targetObject);
 		}
-		else{
+		else {
 			// class field
 			return this.fieldObject.get(null);
 		}

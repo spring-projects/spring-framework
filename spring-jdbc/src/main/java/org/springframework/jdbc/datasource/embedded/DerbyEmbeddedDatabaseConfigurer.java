@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,11 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import org.springframework.lang.Nullable;
+
 /**
- * {@link EmbeddedDatabaseConfigurer} for the Apache Derby database 10.6+.
+ * {@link EmbeddedDatabaseConfigurer} for the Apache Derby database.
+ *
  * <p>Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Oliver Gierke
@@ -35,15 +38,15 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
 
+	@Nullable
 	private static DerbyEmbeddedDatabaseConfigurer instance;
 
 
 	/**
 	 * Get the singleton {@link DerbyEmbeddedDatabaseConfigurer} instance.
-	 * @return the configurer
-	 * @throws ClassNotFoundException if Derby is not on the classpath
+	 * @return the configurer instance
 	 */
-	public static synchronized DerbyEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
+	public static synchronized DerbyEmbeddedDatabaseConfigurer getInstance() {
 		if (instance == null) {
 			// disable log file
 			System.setProperty("derby.stream.error.method",

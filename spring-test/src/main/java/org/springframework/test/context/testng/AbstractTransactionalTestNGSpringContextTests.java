@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,12 +24,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  * Abstract {@linkplain Transactional transactional} extension of
@@ -67,7 +69,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
- * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
@@ -84,8 +85,9 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
 	 * @since 3.2
 	 */
-	protected JdbcTemplate jdbcTemplate;
+	protected final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
+	@Nullable
 	private String sqlScriptEncoding;
 
 
@@ -95,7 +97,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate.setDataSource(dataSource);
 	}
 
 	/**
@@ -159,7 +161,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * @see JdbcTestUtils#deleteFromTableWhere
 	 */
 	protected int deleteFromTableWhere(String tableName, String whereClause, Object... args) {
-		return JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, tableName, whereClause, args);
+		return JdbcTestUtils.deleteFromTableWhere(this.jdbcTemplate, tableName, whereClause, args);
 	}
 
 	/**
@@ -186,8 +188,11 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+		DataSource ds = this.jdbcTemplate.getDataSource();
+		Assert.state(ds != null, "No DataSource set");
+		Assert.state(this.applicationContext != null, "No ApplicationContext available");
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(jdbcTemplate.getDataSource());
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(ds);
 	}
 
 }

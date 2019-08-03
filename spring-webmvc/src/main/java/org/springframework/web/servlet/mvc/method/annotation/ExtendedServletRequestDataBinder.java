@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,10 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -39,7 +39,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(Object target) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -50,9 +50,10 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * @param objectName the name of the target object
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(Object target, String objectName) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
+
 
 	/**
 	 * Merge URI variables into the property values to use for data binding.
@@ -63,15 +64,17 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(attr);
 		if (uriVars != null) {
-			for (Entry<String, String> entry : uriVars.entrySet()) {
-				if (mpvs.contains(entry.getKey())) {
-					logger.warn("Skipping URI variable '" + entry.getKey()
-							+ "' since the request contains a bind value with the same name.");
+			uriVars.forEach((name, value) -> {
+				if (mpvs.contains(name)) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Skipping URI variable '" + name +
+								"' because request contains bind value with same name.");
+					}
 				}
 				else {
-					mpvs.addPropertyValue(entry.getKey(), entry.getValue());
+					mpvs.addPropertyValue(name, value);
 				}
-			}
+			});
 		}
 	}
 

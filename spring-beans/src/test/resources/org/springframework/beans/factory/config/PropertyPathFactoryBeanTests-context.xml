@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -57,6 +57,16 @@
 		<property name="friends">
 			<bean name="otb.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</property>
-  </bean>
+	</bean>
+
+	<bean id="tbWithNullReference" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="spouse" ref="tb.spouse.spouse"/>
+	</bean>
+
+	<bean id="tbWithInnerNull" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="spouse">
+			<bean name="tb.spouse.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</property>
+	</bean>
 
 </beans>

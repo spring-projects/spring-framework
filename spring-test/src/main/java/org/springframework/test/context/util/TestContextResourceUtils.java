@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,10 @@
 
 package org.springframework.test.context.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -45,10 +47,6 @@ public abstract class TestContextResourceUtils {
 	private static final String SLASH = "/";
 
 
-	private TestContextResourceUtils() {
-		/* prevent instantiation */
-	}
-
 	/**
 	 * Convert the supplied paths to classpath resource paths.
 	 *
@@ -63,7 +61,7 @@ public abstract class TestContextResourceUtils {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
 	 * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.
-	 *
+	 * </ul>
 	 * @param clazz the class with which the paths are associated
 	 * @param paths the paths to be converted
 	 * @return a new array of converted resource paths
@@ -77,8 +75,8 @@ public abstract class TestContextResourceUtils {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
 			else if (!ResourcePatternUtils.isUrl(path)) {
-				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
-						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
+				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +
+						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
 			}
 			else {
 				convertedPaths[i] = StringUtils.cleanPath(path);
@@ -90,7 +88,6 @@ public abstract class TestContextResourceUtils {
 	/**
 	 * Convert the supplied paths to an array of {@link Resource} handles using
 	 * the given {@link ResourceLoader}.
-	 *
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
 	 * @return a new array of resources
@@ -98,14 +95,12 @@ public abstract class TestContextResourceUtils {
 	 * @see #convertToClasspathResourcePaths
 	 */
 	public static Resource[] convertToResources(ResourceLoader resourceLoader, String... paths) {
-		List<Resource> list = convertToResourceList(resourceLoader, paths);
-		return list.toArray(new Resource[list.size()]);
+		return stream(resourceLoader, paths).toArray(Resource[]::new);
 	}
 
 	/**
 	 * Convert the supplied paths to a list of {@link Resource} handles using
 	 * the given {@link ResourceLoader}.
-	 *
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
 	 * @return a new list of resources
@@ -114,11 +109,11 @@ public abstract class TestContextResourceUtils {
 	 * @see #convertToClasspathResourcePaths
 	 */
 	public static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {
-		List<Resource> list = new ArrayList<Resource>();
-		for (String path : paths) {
-			list.add(resourceLoader.getResource(path));
-		}
-		return list;
+		return stream(resourceLoader, paths).collect(Collectors.toList());
+	}
+
+	private static Stream<Resource> stream(ResourceLoader resourceLoader, String... paths) {
+		return Arrays.stream(paths).map(resourceLoader::getResource);
 	}
 
 }

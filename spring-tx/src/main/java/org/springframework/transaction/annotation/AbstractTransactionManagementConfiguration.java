@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,8 @@ import org.springframework.context.annotation.ImportAware;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.lang.Nullable;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.util.CollectionUtils;
@@ -43,12 +44,14 @@ import org.springframework.util.CollectionUtils;
 @Configuration
 public abstract class AbstractTransactionManagementConfiguration implements ImportAware {
 
+	@Nullable
 	protected AnnotationAttributes enableTx;
 
 	/**
 	 * Default transaction manager, as configured through a {@link TransactionManagementConfigurer}.
 	 */
-	protected PlatformTransactionManager txManager;
+	@Nullable
+	protected TransactionManager txManager;
 
 
 	@Override
@@ -76,7 +79,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public TransactionalEventListenerFactory transactionalEventListenerFactory() {
+	public static TransactionalEventListenerFactory transactionalEventListenerFactory() {
 		return new TransactionalEventListenerFactory();
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,9 +47,6 @@ public abstract class GsonBuilderUtils {
 	 * {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)} which
 	 * serializes a {@code byte[]} property to and from a Base64-encoded String
 	 * instead of a JSON array.
-	 * <p><strong>NOTE:</strong> Use of this option requires the presence of the
-	 * Apache Commons Codec library on the classpath when running on Java 6 or 7.
-	 * On Java 8, the standard {@link java.util.Base64} facility is used instead.
 	 */
 	public static GsonBuilder gsonBuilderWithBase64EncodedByteArrays() {
 		GsonBuilder builder = new GsonBuilder();

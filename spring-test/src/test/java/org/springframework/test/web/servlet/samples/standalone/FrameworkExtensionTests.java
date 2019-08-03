@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,18 +33,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Demonstrates use of SPI extension points:
  * <ul>
- * 	<li> {@link org.springframework.test.web.servlet.request.RequestPostProcessor}
- * 	for extending request building with custom methods.
- * 	<li> {@link org.springframework.test.web.servlet.setup.MockMvcConfigurer
- * 	MockMvcConfigurer} for extending MockMvc building with some automatic setup.
+ * <li> {@link org.springframework.test.web.servlet.request.RequestPostProcessor}
+ * for extending request building with custom methods.
+ * <li> {@link org.springframework.test.web.servlet.setup.MockMvcConfigurer
+ * MockMvcConfigurer} for extending MockMvc building with some automatic setup.
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -106,6 +107,7 @@ public class FrameworkExtensionTests {
 		}
 	}
 
+
 	/**
 	 * Test {@code MockMvcConfigurer}.
 	 */
@@ -126,6 +128,7 @@ public class FrameworkExtensionTests {
 		}
 	}
 
+
 	@Controller
 	@RequestMapping("/")
 	private static class SampleController {
@@ -133,14 +136,14 @@ public class FrameworkExtensionTests {
 		@RequestMapping(headers = "Foo")
 		@ResponseBody
 		public String handleFoo(Principal principal) {
-			Assert.isTrue(principal != null);
+			Assert.notNull(principal, "Principal must not be null");
 			return "Foo";
 		}
 
 		@RequestMapping(headers = "Bar")
 		@ResponseBody
 		public String handleBar(Principal principal) {
-			Assert.isTrue(principal != null);
+			Assert.notNull(principal, "Principal must not be null");
 			return "Bar";
 		}
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,8 @@ import org.springframework.aop.TargetClassAware;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.core.DecoratingProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -43,6 +45,26 @@ import org.springframework.util.ObjectUtils;
 public abstract class AopProxyUtils {
 
 	/**
+	 * Obtain the singleton target object behind the given proxy, if any.
+	 * @param candidate the (potential) proxy to check
+	 * @return the singleton target object managed in a {@link SingletonTargetSource},
+	 * or {@code null} in any other case (not a proxy, not an existing singleton target)
+	 * @since 4.3.8
+	 * @see Advised#getTargetSource()
+	 * @see SingletonTargetSource#getTarget()
+	 */
+	@Nullable
+	public static Object getSingletonTarget(Object candidate) {
+		if (candidate instanceof Advised) {
+			TargetSource targetSource = ((Advised) candidate).getTargetSource();
+			if (targetSource instanceof SingletonTargetSource) {
+				return ((SingletonTargetSource) targetSource).getTarget();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
@@ -58,14 +80,7 @@ public abstract class AopProxyUtils {
 		Class<?> result = null;
 		while (current instanceof TargetClassAware) {
 			result = ((TargetClassAware) current).getTargetClass();
-			Object nested = null;
-			if (current instanceof Advised) {
-				TargetSource targetSource = ((Advised) current).getTargetSource();
-				if (targetSource instanceof SingletonTargetSource) {
-					nested = ((SingletonTargetSource) targetSource).getTarget();
-				}
-			}
-			current = nested;
+			current = getSingletonTarget(current);
 		}
 		if (result == null) {
 			result = (AopUtils.isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
@@ -78,11 +93,29 @@ public abstract class AopProxyUtils {
 	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
 	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
 	 * {@link org.springframework.aop.SpringProxy} marker interface.
+	 * @param advised the proxy config
 	 * @return the complete set of interfaces to proxy
+	 * @see SpringProxy
 	 * @see Advised
-	 * @see org.springframework.aop.SpringProxy
 	 */
 	public static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised) {
+		return completeProxiedInterfaces(advised, false);
+	}
+
+	/**
+	 * Determine the complete set of interfaces to proxy for the given AOP configuration.
+	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
+	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
+	 * {@link org.springframework.aop.SpringProxy} marker interface.
+	 * @param advised the proxy config
+	 * @param decoratingProxy whether to expose the {@link DecoratingProxy} interface
+	 * @return the complete set of interfaces to proxy
+	 * @since 4.3
+	 * @see SpringProxy
+	 * @see Advised
+	 * @see DecoratingProxy
+	 */
+	static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised, boolean decoratingProxy) {
 		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
@@ -99,6 +132,7 @@ public abstract class AopProxyUtils {
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));
 		int nonUserIfcCount = 0;
 		if (addSpringProxy) {
 			nonUserIfcCount++;
@@ -106,13 +140,22 @@ public abstract class AopProxyUtils {
 		if (addAdvised) {
 			nonUserIfcCount++;
 		}
+		if (addDecoratingProxy) {
+			nonUserIfcCount++;
+		}
 		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
+		int index = specifiedInterfaces.length;
 		if (addSpringProxy) {
-			proxiedInterfaces[specifiedInterfaces.length] = SpringProxy.class;
+			proxiedInterfaces[index] = SpringProxy.class;
+			index++;
 		}
 		if (addAdvised) {
-			proxiedInterfaces[proxiedInterfaces.length - 1] = Advised.class;
+			proxiedInterfaces[index] = Advised.class;
+			index++;
+		}
+		if (addDecoratingProxy) {
+			proxiedInterfaces[index] = DecoratingProxy.class;
 		}
 		return proxiedInterfaces;
 	}
@@ -132,6 +175,9 @@ public abstract class AopProxyUtils {
 			nonUserIfcCount++;
 		}
 		if (proxy instanceof Advised) {
+			nonUserIfcCount++;
+		}
+		if (proxy instanceof DecoratingProxy) {
 			nonUserIfcCount++;
 		}
 		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];
@@ -174,8 +220,11 @@ public abstract class AopProxyUtils {
 	 * @return a cloned argument array, or the original if no adaptation is needed
 	 * @since 4.2.3
 	 */
-	static Object[] adaptArgumentsIfNecessary(Method method, Object... arguments) {
-		if (method.isVarArgs() && !ObjectUtils.isEmpty(arguments)) {
+	static Object[] adaptArgumentsIfNecessary(Method method, @Nullable Object[] arguments) {
+		if (ObjectUtils.isEmpty(arguments)) {
+			return new Object[0];
+		}
+		if (method.isVarArgs()) {
 			Class<?>[] paramTypes = method.getParameterTypes();
 			if (paramTypes.length == arguments.length) {
 				int varargIndex = paramTypes.length - 1;

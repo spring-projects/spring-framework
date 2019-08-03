@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Builds on the {@link AbstractMBeanInfoAssembler} superclass to
@@ -171,6 +172,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Default value for the JMX field "currencyTimeLimit".
 	 */
+	@Nullable
 	private Integer defaultCurrencyTimeLimit;
 
 	/**
@@ -180,6 +182,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	private boolean exposeClassDescriptor = false;
 
+	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 
@@ -203,13 +206,14 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @see org.springframework.jmx.export.metadata.AbstractJmxAttribute#setCurrencyTimeLimit
 	 * @see #applyCurrencyTimeLimit(javax.management.Descriptor, int)
 	 */
-	public void setDefaultCurrencyTimeLimit(Integer defaultCurrencyTimeLimit) {
+	public void setDefaultCurrencyTimeLimit(@Nullable Integer defaultCurrencyTimeLimit) {
 		this.defaultCurrencyTimeLimit = defaultCurrencyTimeLimit;
 	}
 
 	/**
 	 * Return default value for the JMX field "currencyTimeLimit", if any.
 	 */
+	@Nullable
 	protected Integer getDefaultCurrencyTimeLimit() {
 		return this.defaultCurrencyTimeLimit;
 	}
@@ -264,7 +268,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * names if needed (e.g. for parameter names of MBean operation methods).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
-	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+	public void setParameterNameDiscoverer(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
@@ -272,6 +276,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Return the ParameterNameDiscoverer to use for resolving method parameter
 	 * names if needed (may be {@code null} in order to skip parameter detection).
 	 */
+	@Nullable
 	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
 		return this.parameterNameDiscoverer;
 	}
@@ -292,7 +297,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	@Override
 	protected ModelMBeanAttributeInfo[] getAttributeInfo(Object managedBean, String beanKey) throws JMException {
 		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(getClassToExpose(managedBean));
-		List<ModelMBeanAttributeInfo> infos = new ArrayList<ModelMBeanAttributeInfo>();
+		List<ModelMBeanAttributeInfo> infos = new ArrayList<>();
 
 		for (PropertyDescriptor prop : props) {
 			Method getter = prop.getReadMethod();
@@ -328,13 +333,13 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanAttributeInfo[0]);
 	}
 
 	/**
 	 * Iterate through all methods on the MBean class and gives subclasses the chance
 	 * to vote on their inclusion. If a particular method corresponds to the accessor
-	 * or mutator of an attribute that is inclued in the managment interface, then
+	 * or mutator of an attribute that is included in the management interface, then
 	 * the corresponding operation is exposed with the &quot;role&quot; descriptor
 	 * field set to the appropriate value.
 	 * @param managedBean the bean instance (might be an AOP proxy)
@@ -346,7 +351,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	@Override
 	protected ModelMBeanOperationInfo[] getOperationInfo(Object managedBean, String beanKey) {
 		Method[] methods = getClassToExpose(managedBean).getMethods();
-		List<ModelMBeanOperationInfo> infos = new ArrayList<ModelMBeanOperationInfo>();
+		List<ModelMBeanOperationInfo> infos = new ArrayList<>();
 
 		for (Method method : methods) {
 			if (method.isSynthetic()) {
@@ -358,25 +363,23 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			ModelMBeanOperationInfo info = null;
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-			if (pd != null) {
-				if ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey)) ||
-						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey))) {
-					// Attributes need to have their methods exposed as
-					// operations to the JMX server as well.
-					info = createModelMBeanOperationInfo(method, pd.getName(), beanKey);
-					Descriptor desc = info.getDescriptor();
-					if (method.equals(pd.getReadMethod())) {
-						desc.setField(FIELD_ROLE, ROLE_GETTER);
-					}
-					else {
-						desc.setField(FIELD_ROLE, ROLE_SETTER);
-					}
-					desc.setField(FIELD_VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
-					if (isExposeClassDescriptor()) {
-						desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
-					}
-					info.setDescriptor(desc);
+			if (pd != null && ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey)) ||
+						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey)))) {
+				// Attributes need to have their methods exposed as
+				// operations to the JMX server as well.
+				info = createModelMBeanOperationInfo(method, pd.getName(), beanKey);
+				Descriptor desc = info.getDescriptor();
+				if (method.equals(pd.getReadMethod())) {
+					desc.setField(FIELD_ROLE, ROLE_GETTER);
 				}
+				else {
+					desc.setField(FIELD_ROLE, ROLE_SETTER);
+				}
+				desc.setField(FIELD_VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
+				if (isExposeClassDescriptor()) {
+					desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
+				}
+				info.setDescriptor(desc);
 			}
 
 			// allow getters and setters to be marked as operations directly
@@ -396,7 +399,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return infos.toArray(new ModelMBeanOperationInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanOperationInfo[0]);
 	}
 
 	/**
@@ -550,7 +553,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @see #setDefaultCurrencyTimeLimit(Integer)
 	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
 	 */
-	protected void populateAttributeDescriptor(Descriptor desc, Method getter, Method setter, String beanKey) {
+	protected void populateAttributeDescriptor(
+			Descriptor desc, @Nullable Method getter, @Nullable Method setter, String beanKey) {
+
 		applyDefaultCurrencyTimeLimit(desc);
 	}
 

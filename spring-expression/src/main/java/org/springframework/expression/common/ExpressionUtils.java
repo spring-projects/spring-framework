@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -44,7 +45,10 @@ public abstract class ExpressionUtils {
 	 * of the value to the specified type is not supported
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
+	@Nullable
+	public static <T> T convertTypedValue(
+			@Nullable EvaluationContext context, TypedValue typedValue, @Nullable Class<T> targetType) {
+
 		Object value = typedValue.getValue();
 		if (targetType == null) {
 			return (T) value;
@@ -63,64 +67,66 @@ public abstract class ExpressionUtils {
 	 * Attempt to convert a typed value to an int using the supplied type converter.
 	 */
 	public static int toInt(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Integer) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Integer.class));
+		return convertValue(typeConverter, typedValue, Integer.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a boolean using the supplied type converter.
 	 */
 	public static boolean toBoolean(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Boolean) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Boolean.class));
+		return convertValue(typeConverter, typedValue, Boolean.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a double using the supplied type converter.
 	 */
 	public static double toDouble(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Double) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Double.class));
+		return convertValue(typeConverter, typedValue, Double.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a long using the supplied type converter.
 	 */
 	public static long toLong(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Long) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Long.class));
+		return convertValue(typeConverter, typedValue, Long.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a char using the supplied type converter.
 	 */
 	public static char toChar(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Character) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Character.class));
+		return convertValue(typeConverter, typedValue, Character.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a short using the supplied type converter.
 	 */
 	public static short toShort(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Short) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Short.class));
+		return convertValue(typeConverter, typedValue, Short.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a float using the supplied type converter.
 	 */
 	public static float toFloat(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Float) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Float.class));
+		return convertValue(typeConverter, typedValue, Float.class);
 	}
 
 	/**
 	 * Attempt to convert a typed value to a byte using the supplied type converter.
 	 */
 	public static byte toByte(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Byte) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
-				TypeDescriptor.valueOf(Byte.class));
+		return convertValue(typeConverter, typedValue, Byte.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T convertValue(TypeConverter typeConverter, TypedValue typedValue, Class<T> targetType) {
+		Object result = typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
+				TypeDescriptor.valueOf(targetType));
+		if (result == null) {
+			throw new IllegalStateException("Null conversion result for value [" + typedValue.getValue() + "]");
+		}
+		return (T) result;
 	}
 
 }

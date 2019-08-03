@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.server.standard;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
@@ -54,7 +54,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
+			@Nullable String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
 			throws HandshakeFailureException {
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
@@ -65,7 +65,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		Map<String, String> pathParams = Collections.<String, String> emptyMap();
 
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
-		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
+		endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));
 		endpointConfig.setExtensions(selectedExtensions);
 
 		try {
@@ -81,6 +81,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		}
 	}
 
+	@Override
 	public WsServerContainer getContainer(HttpServletRequest request) {
 		return (WsServerContainer) super.getContainer(request);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,15 +21,17 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * Interface to be implemented by any object that wishes to be notified of a
- * <b>StringValueResolver</b> for the <b> resolution of embedded definition values.
+ * {@code StringValueResolver} for the resolution of embedded definition values.
  *
  * <p>This is an alternative to a full ConfigurableBeanFactory dependency via the
- * ApplicationContextAware/BeanFactoryAware interfaces.
+ * {@code ApplicationContextAware}/{@code BeanFactoryAware} interfaces.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.0.3
- * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#resolveEmbeddedValue
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#resolveEmbeddedValue(String)
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getBeanExpressionResolver()
+ * @see org.springframework.beans.factory.config.EmbeddedValueResolver
  */
 public interface EmbeddedValueResolverAware extends Aware {
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="rod1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
 		<constructor-arg><ref bean="kerry2"/></constructor-arg>
@@ -81,7 +81,7 @@
 	</bean>
 
 	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
-		<constructor-arg index="0"><ref local="kerry2"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod12" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
@@ -225,6 +225,14 @@
 		<constructor-arg>
 			<array value-type="java.lang.String"/>
 		</constructor-arg>
+	</bean>
+
+	<bean id="constructorUnresolvableName" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg name="initialValue" value="1"/>
+	</bean>
+
+	<bean id="constructorUnresolvableNameWithIndex" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg index="0" name="initialValue" value="1"/>
 	</bean>
 
 </beans>

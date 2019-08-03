@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -48,6 +49,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	private final List<MimeType> supportedMimeTypes;
 
+	@Nullable
 	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
 	private boolean strictContentTypeMatch = false;
@@ -70,7 +72,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
 		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
-		this.supportedMimeTypes = new ArrayList<MimeType>(supportedMimeTypes);
+		this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
 	}
 
 
@@ -90,13 +92,14 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * ignore all messages.
 	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
-	public void setContentTypeResolver(ContentTypeResolver resolver) {
+	public void setContentTypeResolver(@Nullable ContentTypeResolver resolver) {
 		this.contentTypeResolver = resolver;
 	}
 
 	/**
 	 * Return the configured {@link ContentTypeResolver}.
 	 */
+	@Nullable
 	public ContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;
 	}
@@ -136,7 +139,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	public void setSerializedPayloadClass(Class<?> payloadClass) {
 		Assert.isTrue(byte[].class == payloadClass || String.class == payloadClass,
-				"Payload class must be byte[] or String: " + payloadClass);
+				() -> "Payload class must be byte[] or String: " + payloadClass);
 		this.serializedPayloadClass = payloadClass;
 	}
 
@@ -157,18 +160,21 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @param payload the payload being converted to message
 	 * @return the content type, or {@code null} if not known
 	 */
+	@Nullable
 	protected MimeType getDefaultContentType(Object payload) {
 		List<MimeType> mimeTypes = getSupportedMimeTypes();
 		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
 	}
 
 	@Override
+	@Nullable
 	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
 		return fromMessage(message, targetClass, null);
 	}
 
 	@Override
-	public final Object fromMessage(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	@Nullable
+	public final Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		if (!canConvertFrom(message, targetClass)) {
 			return null;
 		}
@@ -180,44 +186,49 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 	@Override
-	public final Message<?> toMessage(Object payload, MessageHeaders headers) {
+	@Nullable
+	public final Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		return toMessage(payload, headers, null);
 	}
 
 	@Override
-	public final Message<?> toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	@Nullable
+	public final Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		if (!canConvertTo(payload, headers)) {
 			return null;
 		}
 
-		payload = convertToInternal(payload, headers, conversionHint);
-		if (payload == null) {
+		Object payloadToUse = convertToInternal(payload, headers, conversionHint);
+		if (payloadToUse == null) {
 			return null;
 		}
 
-		MimeType mimeType = getDefaultContentType(payload);
+		MimeType mimeType = getDefaultContentType(payloadToUse);
 		if (headers != null) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
 			if (accessor != null && accessor.isMutable()) {
-				accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-				return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());
+				if (mimeType != null) {
+					accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+				}
+				return MessageBuilder.createMessage(payloadToUse, accessor.getMessageHeaders());
 			}
 		}
 
-		MessageBuilder<?> builder = MessageBuilder.withPayload(payload);
+		MessageBuilder<?> builder = MessageBuilder.withPayload(payloadToUse);
 		if (headers != null) {
 			builder.copyHeaders(headers);
 		}
-		builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		if (mimeType != null) {
+			builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		}
 		return builder.build();
 	}
 
-	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		Class<?> clazz = (payload != null ? payload.getClass() : null);
-		return (supports(clazz) && supportsMimeType(headers));
+	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
+		return (supports(payload.getClass()) && supportsMimeType(headers));
 	}
 
-	protected boolean supportsMimeType(MessageHeaders headers) {
+	protected boolean supportsMimeType(@Nullable MessageHeaders headers) {
 		if (getSupportedMimeTypes().isEmpty()) {
 			return true;
 		}
@@ -233,8 +244,9 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 		return false;
 	}
 
-	protected MimeType getMimeType(MessageHeaders headers) {
-		return (this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
+	@Nullable
+	protected MimeType getMimeType(@Nullable MessageHeaders headers) {
+		return (headers != null && this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
 	}
 
 
@@ -255,9 +267,11 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * perform the conversion
 	 * @since 4.2
 	 */
-	@SuppressWarnings("deprecation")
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
-		return convertFromInternal(message, targetClass);
+	@Nullable
+	protected Object convertFromInternal(
+			Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+
+		return null;
 	}
 
 	/**
@@ -270,28 +284,10 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * cannot perform the conversion
 	 * @since 4.2
 	 */
-	@SuppressWarnings("deprecation")
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
-		return convertToInternal(payload, headers);
-	}
+	@Nullable
+	protected Object convertToInternal(
+			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
-	/**
-	 * Convert the message payload from serialized form to an Object.
-	 * @deprecated as of Spring 4.2, in favor of {@link #convertFromInternal(Message, Class, Object)}
-	 * (which is also protected instead of public)
-	 */
-	@Deprecated
-	public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
-		return null;
-	}
-
-	/**
-	 * Convert the payload object to serialized form.
-	 * @deprecated as of Spring 4.2, in favor of {@link #convertFromInternal(Message, Class, Object)}
-	 * (which is also protected instead of public)
-	 */
-	@Deprecated
-	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		return null;
 	}
 

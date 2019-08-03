@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -43,60 +43,56 @@ import org.springframework.web.context.request.WebRequest;
  * {@link SessionStatus#setComplete()}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class SessionAttributesHandler {
 
-	private final Set<String> attributeNames = new HashSet<String>();
+	private final Set<String> attributeNames = new HashSet<>();
 
-	private final Set<Class<?>> attributeTypes = new HashSet<Class<?>>();
+	private final Set<Class<?>> attributeTypes = new HashSet<>();
 
-	private final Set<String> knownAttributeNames =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
+	private final Set<String> knownAttributeNames = Collections.newSetFromMap(new ConcurrentHashMap<>(4));
 
 	private final SessionAttributeStore sessionAttributeStore;
 
 
 	/**
-	 * Create a new instance for a controller type. Session attribute names and
-	 * types are extracted from the {@code @SessionAttributes} annotation, if
-	 * present, on the given type.
+	 * Create a new session attributes handler. Session attribute names and types
+	 * are extracted from the {@code @SessionAttributes} annotation, if present,
+	 * on the given type.
 	 * @param handlerType the controller type
 	 * @param sessionAttributeStore used for session access
 	 */
 	public SessionAttributesHandler(Class<?> handlerType, SessionAttributeStore sessionAttributeStore) {
-		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null.");
+		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
 
-		SessionAttributes annotation = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
-		if (annotation != null) {
-			this.attributeNames.addAll(Arrays.asList(annotation.names()));
-			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
+		SessionAttributes ann = AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
+		if (ann != null) {
+			Collections.addAll(this.attributeNames, ann.names());
+			Collections.addAll(this.attributeTypes, ann.types());
 		}
-
-		for (String attributeName : this.attributeNames) {
-			this.knownAttributeNames.add(attributeName);
-		}
+		this.knownAttributeNames.addAll(this.attributeNames);
 	}
+
 
 	/**
 	 * Whether the controller represented by this instance has declared any
 	 * session attributes through an {@link SessionAttributes} annotation.
 	 */
 	public boolean hasSessionAttributes() {
-		return ((this.attributeNames.size() > 0) || (this.attributeTypes.size() > 0));
+		return (!this.attributeNames.isEmpty() || !this.attributeTypes.isEmpty());
 	}
 
 	/**
 	 * Whether the attribute name or type match the names and types specified
-	 * via {@code @SessionAttributes} in underlying controller.
-	 *
+	 * via {@code @SessionAttributes} on the underlying controller.
 	 * <p>Attributes successfully resolved through this method are "remembered"
 	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
 	 * {@link #cleanupAttributes(WebRequest)}.
-	 *
-	 * @param attributeName the attribute name to check, never {@code null}
-	 * @param attributeType the type for the attribute, possibly {@code null}
+	 * @param attributeName the attribute name to check
+	 * @param attributeType the type for the attribute
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -116,14 +112,11 @@ public class SessionAttributesHandler {
 	 * @param attributes candidate attributes for session storage
 	 */
 	public void storeAttributes(WebRequest request, Map<String, ?> attributes) {
-		for (String name : attributes.keySet()) {
-			Object value = attributes.get(name);
-			Class<?> attrType = (value != null) ? value.getClass() : null;
-
-			if (isHandlerSessionAttribute(name, attrType)) {
+		attributes.forEach((name, value) -> {
+			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
-		}
+		});
 	}
 
 	/**
@@ -134,7 +127,7 @@ public class SessionAttributesHandler {
 	 * @return a map with handler session attributes, possibly empty
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);
 			if (value != null) {
@@ -160,8 +153,9 @@ public class SessionAttributesHandler {
 	 * A pass-through call to the underlying {@link SessionAttributeStore}.
 	 * @param request the current request
 	 * @param attributeName the name of the attribute of interest
-	 * @return the attribute value or {@code null}
+	 * @return the attribute value, or {@code null} if none
 	 */
+	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName) {
 		return this.sessionAttributeStore.retrieveAttribute(request, attributeName);
 	}

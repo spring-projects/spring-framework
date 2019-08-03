@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test class that verifies proper support for mixing XML
@@ -54,14 +54,14 @@ public class MixedXmlAndGroovySpringContextTests {
 
 	@Test
 	public final void verifyAnnotationAutowiredFields() {
-		assertNotNull("The employee field should have been autowired.", this.employee);
-		assertEquals("Dilbert", this.employee.getName());
+		assertThat(this.employee).as("The employee field should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).isEqualTo("Dilbert");
 
-		assertNotNull("The pet field should have been autowired.", this.pet);
-		assertEquals("Dogbert", this.pet.getName());
+		assertThat(this.pet).as("The pet field should have been autowired.").isNotNull();
+		assertThat(this.pet.getName()).isEqualTo("Dogbert");
 
-		assertEquals("The foo field should have been autowired.", "Groovy Foo", this.foo);
-		assertEquals("The bar field should have been autowired.", "XML Bar", this.bar);
+		assertThat(this.foo).as("The foo field should have been autowired.").isEqualTo("Groovy Foo");
+		assertThat(this.bar).as("The bar field should have been autowired.").isEqualTo("XML Bar");
 	}
 
 }

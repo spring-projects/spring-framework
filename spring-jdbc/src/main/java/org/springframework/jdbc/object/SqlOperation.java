@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,8 @@ import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Operation object representing a SQL-based operation such as a query or update,
@@ -38,12 +40,14 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * Object enabling us to create PreparedStatementCreators efficiently,
 	 * based on this class's declared parameters.
 	 */
+	@Nullable
 	private PreparedStatementCreatorFactory preparedStatementFactory;
 
-	/** Parsed representation of the SQL statement */
+	/** Parsed representation of the SQL statement. */
+	@Nullable
 	private ParsedSql cachedSql;
 
-	/** Monitor for locking the cached representation of the parsed SQL statement */
+	/** Monitor for locking the cached representation of the parsed SQL statement. */
 	private final Object parsedSqlMonitor = new Object();
 
 
@@ -53,14 +57,13 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	@Override
 	protected final void compileInternal() {
-		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
+		this.preparedStatementFactory = new PreparedStatementCreatorFactory(resolveSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
 		this.preparedStatementFactory.setReturnGeneratedKeys(isReturnGeneratedKeys());
 		if (getGeneratedKeysColumnNames() != null) {
 			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
 		}
-		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
 
 		onCompileInternal();
 	}
@@ -80,7 +83,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected ParsedSql getParsedSql() {
 		synchronized (this.parsedSqlMonitor) {
 			if (this.cachedSql == null) {
-				this.cachedSql = NamedParameterUtils.parseSqlStatement(getSql());
+				this.cachedSql = NamedParameterUtils.parseSqlStatement(resolveSql());
 			}
 			return this.cachedSql;
 		}
@@ -92,7 +95,8 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+	protected final PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
 
@@ -101,7 +105,8 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 
@@ -112,7 +117,8 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,12 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * the JMS listener container. If not set, a <em>default</em> container factory is
  * assumed to be available with a bean name of {@code jmsListenerContainerFactory}
  * unless an explicit default has been provided through configuration.
+ *
+ * <p><b>Consider setting up a custom
+ * {@link org.springframework.jms.config.DefaultJmsListenerContainerFactory} bean.</b>
+ * For production purposes, you'll typically fine-tune timeouts and recovery settings.
+ * Most importantly, the default 'AUTO_ACKNOWLEDGE' mode does not provide reliability
+ * guarantees, so make sure to use transacted sessions in case of reliability needs.
  *
  * <p>Processing of {@code @JmsListener} annotations is performed by registering a
  * {@link JmsListenerAnnotationBeanPostProcessor}. This can be done manually or,
@@ -65,6 +71,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * is not set, a default destination can be provided by adding
  * {@link org.springframework.messaging.handler.annotation.SendTo @SendTo} to the
  * method declaration.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -111,7 +120,8 @@ public @interface JmsListener {
 	String selector() default "";
 
 	/**
-	 * The concurrency limits for the listener, if any.
+	 * The concurrency limits for the listener, if any. Overrides the value defined
+	 * by the container factory used to create the listener container.
 	 * <p>The concurrency limits can be a "lower-upper" String &mdash; for example,
 	 * "5-10" &mdash; or a simple upper limit String &mdash; for example, "10", in
 	 * which case the lower limit will be 1.

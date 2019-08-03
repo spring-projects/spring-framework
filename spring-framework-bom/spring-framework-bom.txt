@@ -1,4 +1,4 @@
 This meta-project is used to generate a bill-of-materials POM that contains the other
 projects in a dependencyManagement section.
 
-<http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/overview.html#overview-maven-bom>
+<https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/overview.html#overview-getting-started>

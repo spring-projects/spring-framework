@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,12 @@
 
 package org.springframework.web.method.support;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -26,8 +30,8 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
 
 /**
  * Records model and view related decisions made by
- * {@link HandlerMethodArgumentResolver}s and
- * {@link HandlerMethodReturnValueHandler}s during the course of invocation of
+ * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
+ * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} during the course of invocation of
  * a controller method.
  *
  * <p>The {@link #setRequestHandled} flag can be used to indicate the request
@@ -40,19 +44,29 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  * returns the redirect model instead of the default model.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ModelAndViewContainer {
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
+	@Nullable
 	private Object view;
 
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
+	@Nullable
 	private ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
+
+	@Nullable
+	private HttpStatus status;
+
+	private final Set<String> noBinding = new HashSet<>(4);
+
+	private final Set<String> bindingDisabled = new HashSet<>(4);
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -79,7 +93,7 @@ public class ModelAndViewContainer {
 	 * Set a view name to be resolved by the DispatcherServlet via a ViewResolver.
 	 * Will override any pre-existing view name or View.
 	 */
-	public void setViewName(String viewName) {
+	public void setViewName(@Nullable String viewName) {
 		this.view = viewName;
 	}
 
@@ -87,6 +101,7 @@ public class ModelAndViewContainer {
 	 * Return the view name to be resolved by the DispatcherServlet via a
 	 * ViewResolver, or {@code null} if a View object is set.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -95,7 +110,7 @@ public class ModelAndViewContainer {
 	 * Set a View object to be used by the DispatcherServlet.
 	 * Will override any pre-existing view name or View.
 	 */
-	public void setView(Object view) {
+	public void setView(@Nullable Object view) {
 		this.view = view;
 	}
 
@@ -103,6 +118,7 @@ public class ModelAndViewContainer {
 	 * Return the View object, or {@code null} if we using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
+	@Nullable
 	public Object getView() {
 		return this.view;
 	}
@@ -126,7 +142,10 @@ public class ModelAndViewContainer {
 			return this.defaultModel;
 		}
 		else {
-			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
+			if (this.redirectModel == null) {
+				this.redirectModel = new ModelMap();
+			}
+			return this.redirectModel;
 		}
 	}
 
@@ -144,7 +163,8 @@ public class ModelAndViewContainer {
 	 * model (redirect URL preparation). Use of this method may be needed for
 	 * advanced cases when access to the "default" model is needed regardless,
 	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
-	 * @return the default model, never {@code null}
+	 * @return the default model (never {@code null})
+	 * @since 4.1.4
 	 */
 	public ModelMap getDefaultModel() {
 		return this.defaultModel;
@@ -152,9 +172,9 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Provide a separate model instance to use in a redirect scenario.
-	 * The provided additional model however is not used used unless
-	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
-	 * a redirect scenario.
+	 * <p>The provided additional model however is not used unless
+	 * {@link #setRedirectModelScenario} gets set to {@code true}
+	 * to signal an actual redirect scenario.
 	 */
 	public void setRedirectModel(ModelMap redirectModel) {
 		this.redirectModel = redirectModel;
@@ -166,6 +186,59 @@ public class ModelAndViewContainer {
 	 */
 	public void setRedirectModelScenario(boolean redirectModelScenario) {
 		this.redirectModelScenario = redirectModelScenario;
+	}
+
+	/**
+	 * Provide an HTTP status that will be passed on to with the
+	 * {@code ModelAndView} used for view rendering purposes.
+	 * @since 4.3
+	 */
+	public void setStatus(@Nullable HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured HTTP status, if any.
+	 * @since 4.3
+	 */
+	@Nullable
+	public HttpStatus getStatus() {
+		return this.status;
+	}
+
+	/**
+	 * Programmatically register an attribute for which data binding should not occur,
+	 * not even for a subsequent {@code @ModelAttribute} declaration.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3
+	 */
+	public void setBindingDisabled(String attributeName) {
+		this.bindingDisabled.add(attributeName);
+	}
+
+	/**
+	 * Whether binding is disabled for the given model attribute.
+	 * @since 4.3
+	 */
+	public boolean isBindingDisabled(String name) {
+		return (this.bindingDisabled.contains(name) || this.noBinding.contains(name));
+	}
+
+	/**
+	 * Register whether data binding should occur for a corresponding model attribute,
+	 * corresponding to an {@code @ModelAttribute(binding=true/false)} declaration.
+	 * <p>Note: While this flag will be taken into account by {@link #isBindingDisabled},
+	 * a hard {@link #setBindingDisabled} declaration will always override it.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3.13
+	 */
+	public void setBinding(String attributeName, boolean enabled) {
+		if (!enabled) {
+			this.noBinding.add(attributeName);
+		}
+		else {
+			this.noBinding.remove(attributeName);
+		}
 	}
 
 	/**
@@ -198,7 +271,7 @@ public class ModelAndViewContainer {
 	 * Add the supplied attribute to the underlying model.
 	 * A shortcut for {@code getModel().addAttribute(String, Object)}.
 	 */
-	public ModelAndViewContainer addAttribute(String name, Object value) {
+	public ModelAndViewContainer addAttribute(String name, @Nullable Object value) {
 		getModel().addAttribute(name, value);
 		return this;
 	}
@@ -216,7 +289,7 @@ public class ModelAndViewContainer {
 	 * Copy all attributes to the underlying model.
 	 * A shortcut for {@code getModel().addAllAttributes(Map)}.
 	 */
-	public ModelAndViewContainer addAllAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer addAllAttributes(@Nullable Map<String, ?> attributes) {
 		getModel().addAllAttributes(attributes);
 		return this;
 	}
@@ -226,7 +299,7 @@ public class ModelAndViewContainer {
 	 * the same name taking precedence (i.e. not getting replaced).
 	 * A shortcut for {@code getModel().mergeAttributes(Map<String, ?>)}.
 	 */
-	public ModelAndViewContainer mergeAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer mergeAttributes(@Nullable Map<String, ?> attributes) {
 		getModel().mergeAttributes(attributes);
 		return this;
 	}
@@ -234,7 +307,7 @@ public class ModelAndViewContainer {
 	/**
 	 * Remove the given attributes from the model.
 	 */
-	public ModelAndViewContainer removeAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer removeAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
 				getModel().remove(key);

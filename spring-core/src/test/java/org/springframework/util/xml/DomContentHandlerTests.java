@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,9 +26,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link DomContentHandler}.
@@ -47,6 +48,7 @@ public class DomContentHandlerTests {
 	private static final String XML_2_SNIPPET =
 			"<?xml version='1.0' encoding='UTF-8'?>" + "<child xmlns='namespace2' />";
 
+
 	private Document expected;
 
 	private DomContentHandler handler;
@@ -57,14 +59,17 @@ public class DomContentHandlerTests {
 
 	private DocumentBuilder documentBuilder;
 
+
 	@Before
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public void setUp() throws Exception {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		result = documentBuilder.newDocument();
-		xmlReader = XMLReaderFactory.createXMLReader();
+		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 	}
+
 
 	@Test
 	public void contentHandlerDocumentNamespacePrefixes() throws Exception {
@@ -73,7 +78,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
@@ -82,7 +87,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
@@ -93,8 +98,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_2_EXPECTED)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_2_SNIPPET)));
-		assertXMLEqual("Invalid result", expected, result);
-
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.cache.interceptor.CacheOperationInvocationContext;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <A> the annotation type
  */
 class DefaultCacheInvocationContext<A extends Annotation>
 		implements CacheInvocationContext<A>, CacheOperationInvocationContext<JCacheOperation<A>> {
@@ -44,13 +45,14 @@ class DefaultCacheInvocationContext<A extends Annotation>
 
 	private final CacheInvocationParameter[] allParameters;
 
-	public DefaultCacheInvocationContext(JCacheOperation<A> operation,
-			Object target, Object[] args) {
+
+	public DefaultCacheInvocationContext(JCacheOperation<A> operation, Object target, Object[] args) {
 		this.operation = operation;
 		this.target = target;
 		this.args = args;
 		this.allParameters = operation.getAllParameters(args);
 	}
+
 
 	@Override
 	public JCacheOperation<A> getOperation() {
@@ -94,17 +96,19 @@ class DefaultCacheInvocationContext<A extends Annotation>
 
 	@Override
 	public <T> T unwrap(Class<T> cls) {
-		throw new IllegalArgumentException("Could not unwrap to '" + cls.getName() + "'");
+		throw new IllegalArgumentException("Cannot unwrap to " + cls);
 	}
+
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("CacheInvocationContext{");
-		sb.append("operation=").append(operation);
-		sb.append(", target=").append(target);
-		sb.append(", args=").append(Arrays.toString(args));
-		sb.append(", allParameters=").append(Arrays.toString(allParameters));
+		StringBuilder sb = new StringBuilder("CacheInvocationContext{");
+		sb.append("operation=").append(this.operation);
+		sb.append(", target=").append(this.target);
+		sb.append(", args=").append(Arrays.toString(this.args));
+		sb.append(", allParameters=").append(Arrays.toString(this.allParameters));
 		sb.append('}');
 		return sb.toString();
 	}
+
 }

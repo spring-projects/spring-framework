@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,17 @@
 
 package org.springframework.util.xml;
 
+import java.util.List;
+import java.util.function.Supplier;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stax.StAXResult;
@@ -30,18 +35,50 @@ import javax.xml.transform.stax.StAXSource;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
+
 /**
- * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3 compatibility;
- * as of Spring 4.0, relying on JAXP 1.4 as included in JDK 1.6 and higher.
+ * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3
+ * compatibility; as of Spring 4.0, relying on JAXP 1.4 as included in JDK 1.6 and higher.
  *
- * <p>In particular, methods for using StAX ({@code javax.xml.stream}) in combination with the TrAX API
- * ({@code javax.xml.transform}), and converting StAX readers/writers into SAX readers/handlers and vice-versa.
+ * <p>In particular, methods for using StAX ({@code javax.xml.stream}) in combination with
+ * the TrAX API ({@code javax.xml.transform}), and converting StAX readers/writers into SAX
+ * readers/handlers and vice-versa.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class StaxUtils {
+
+	private static final XMLResolver NO_OP_XML_RESOLVER =
+			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+
+
+	/**
+	 * Create an {@link XMLInputFactory} with Spring's defensive setup,
+	 * i.e. no support for the resolution of DTDs and external entities.
+	 * @return a new defensively initialized input factory instance to use
+	 * @since 5.0
+	 */
+	public static XMLInputFactory createDefensiveInputFactory() {
+		return createDefensiveInputFactory(XMLInputFactory::newInstance);
+	}
+
+	/**
+	 * Variant of {@link #createDefensiveInputFactory()} with a custom instance.
+	 * @param instanceSupplier supplier for the input factory instance
+	 * @return a new defensively initialized input factory instance to use
+	 * @since 5.0.12
+	 */
+	public static <T extends XMLInputFactory> T createDefensiveInputFactory(Supplier<T> instanceSupplier) {
+		T inputFactory = instanceSupplier.get();
+		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
+		return inputFactory;
+	}
 
 	/**
 	 * Create a JAXP 1.4 {@link StAXSource} for the given {@link XMLStreamReader}.
@@ -53,7 +90,7 @@ public abstract class StaxUtils {
 	}
 
 	/**
-	 * Create a JAXP 1.4 a {@link StAXSource} for the given {@link XMLEventReader}.
+	 * Create a JAXP 1.4 {@link StAXSource} for the given {@link XMLEventReader}.
 	 * @param eventReader the StAX event reader
 	 * @return a source wrapping the {@code eventReader}
 	 */
@@ -96,6 +133,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
+	@Nullable
 	public static XMLStreamReader getXMLStreamReader(Source source) {
 		if (source instanceof StAXSource) {
 			return ((StAXSource) source).getXMLStreamReader();
@@ -115,6 +153,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
+	@Nullable
 	public static XMLEventReader getXMLEventReader(Source source) {
 		if (source instanceof StAXSource) {
 			return ((StAXSource) source).getXMLEventReader();
@@ -180,6 +219,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
+	@Nullable
 	public static XMLStreamWriter getXMLStreamWriter(Result result) {
 		if (result instanceof StAXResult) {
 			return ((StAXResult) result).getXMLStreamWriter();
@@ -199,6 +239,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
+	@Nullable
 	public static XMLEventWriter getXMLEventWriter(Result result) {
 		if (result instanceof StAXResult) {
 			return ((StAXResult) result).getXMLEventWriter();
@@ -209,6 +250,16 @@ public abstract class StaxUtils {
 		else {
 			throw new IllegalArgumentException("Result '" + result + "' is neither StaxResult nor StAXResult");
 		}
+	}
+
+	/**
+	 * Create a {@link XMLEventReader} from the given list of {@link XMLEvent}.
+	 * @param events the list of {@link XMLEvent XMLEvents}.
+	 * @return an {@code XMLEventReader} that reads from the given events
+	 * @since 5.0
+	 */
+	public static XMLEventReader createXMLEventReader(List<XMLEvent> events) {
+		return new ListBasedXMLEventReader(events);
 	}
 
 	/**

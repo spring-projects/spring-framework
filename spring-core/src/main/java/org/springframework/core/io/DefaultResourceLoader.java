@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,16 @@ package org.springframework.core.io;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,7 +47,12 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
+	@Nullable
 	private ClassLoader classLoader;
+
+	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
+
+	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
 
 
 	/**
@@ -58,7 +70,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @param classLoader the ClassLoader to load class path resources with, or {@code null}
 	 * for using the thread context class loader at the time of actual resource access
 	 */
-	public DefaultResourceLoader(ClassLoader classLoader) {
+	public DefaultResourceLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -69,7 +81,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default is that ClassLoader access will happen using the thread context
 	 * class loader at the time of this ResourceLoader's initialization.
 	 */
-	public void setClassLoader(ClassLoader classLoader) {
+	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -80,14 +92,65 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @see ClassPathResource
 	 */
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
+	}
+
+	/**
+	 * Register the given resolver with this resource loader, allowing for
+	 * additional protocols to be handled.
+	 * <p>Any such resolver will be invoked ahead of this loader's standard
+	 * resolution rules. It may therefore also override any default rules.
+	 * @since 4.3
+	 * @see #getProtocolResolvers()
+	 */
+	public void addProtocolResolver(ProtocolResolver resolver) {
+		Assert.notNull(resolver, "ProtocolResolver must not be null");
+		this.protocolResolvers.add(resolver);
+	}
+
+	/**
+	 * Return the collection of currently registered protocol resolvers,
+	 * allowing for introspection as well as modification.
+	 * @since 4.3
+	 */
+	public Collection<ProtocolResolver> getProtocolResolvers() {
+		return this.protocolResolvers;
+	}
+
+	/**
+	 * Obtain a cache for the given value type, keyed by {@link Resource}.
+	 * @param valueType the value type, e.g. an ASM {@code MetadataReader}
+	 * @return the cache {@link Map}, shared at the {@code ResourceLoader} level
+	 * @since 5.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Map<Resource, T> getResourceCache(Class<T> valueType) {
+		return (Map<Resource, T>) this.resourceCaches.computeIfAbsent(valueType, key -> new ConcurrentHashMap<>());
+	}
+
+	/**
+	 * Clear all resource caches in this resource loader.
+	 * @since 5.0
+	 * @see #getResourceCache
+	 */
+	public void clearResourceCaches() {
+		this.resourceCaches.clear();
 	}
 
 
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
+
+		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
+			Resource resource = protocolResolver.resolve(location, this);
+			if (resource != null) {
+				return resource;
+			}
+		}
+
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
 		}
@@ -98,7 +161,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 			try {
 				// Try to parse the location as a URL...
 				URL url = new URL(location);
-				return new UrlResource(url);
+				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
 			catch (MalformedURLException ex) {
 				// No URL -> resolve as resource path.
@@ -129,7 +192,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
 
-		public ClassPathContextResource(String path, ClassLoader classLoader) {
+		public ClassPathContextResource(String path, @Nullable ClassLoader classLoader) {
 			super(path, classLoader);
 		}
 

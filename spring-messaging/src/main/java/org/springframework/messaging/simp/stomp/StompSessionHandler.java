@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.messaging.simp.stomp;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A contract for client STOMP session lifecycle events including a callback
@@ -52,8 +54,8 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * @param payload the raw payload
 	 * @param exception the exception
 	 */
-	void handleException(StompSession session, StompCommand command, StompHeaders headers,
-			byte[] payload, Throwable exception);
+	void handleException(StompSession session, @Nullable StompCommand command,
+			StompHeaders headers, byte[] payload, Throwable exception);
 
 	/**
 	 * Handle a low level transport error which could be an I/O error or a

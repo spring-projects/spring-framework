@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,12 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * Custom JSP tag to escape its enclosed body content,
+ * The {@code <escapeBody>} tag is used to escape its enclosed body content,
  * applying HTML escaping and/or JavaScript escaping.
  *
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
@@ -34,6 +36,34 @@ import org.springframework.web.util.JavaScriptUtils;
  *
  * <p>Provides a "javaScriptEscape" property for specifying whether to apply
  * JavaScript escaping. Can be combined with HTML escaping or used standalone.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set HTML escaping for this tag, as boolean value.
+ * Overrides the default HTML escaping setting for the current page.</td>
+ * </tr>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set JavaScript escaping for this tag, as boolean value.
+ * Default is false.</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Juergen Hoeller
  * @since 1.1.1
@@ -45,6 +75,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 
 	private boolean javaScriptEscape = false;
 
+	@Nullable
 	private BodyContent bodyContent;
 
 
@@ -79,7 +110,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 			String content = readBodyContent();
 			// HTML and/or JavaScript escape, if demanded
 			content = htmlEscape(content);
-			content = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content;
+			content = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content);
 			writeBodyContent(content);
 		}
 		catch (IOException ex) {
@@ -94,6 +125,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 	 * @throws IOException if reading failed
 	 */
 	protected String readBodyContent() throws IOException {
+		Assert.state(this.bodyContent != null, "No BodyContent set");
 		return this.bodyContent.getString();
 	}
 
@@ -104,6 +136,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeBodyContent(String content) throws IOException {
+		Assert.state(this.bodyContent != null, "No BodyContent set");
 		this.bodyContent.getEnclosingWriter().print(content);
 	}
 

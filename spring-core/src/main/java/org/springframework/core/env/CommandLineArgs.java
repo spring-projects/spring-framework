@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A simple representation of command line arguments, broken into "option arguments" and
  * "non-option arguments".
@@ -33,8 +35,8 @@ import java.util.Set;
  */
 class CommandLineArgs {
 
-	private final Map<String, List<String>> optionArgs = new HashMap<String, List<String>>();
-	private final List<String> nonOptionArgs = new ArrayList<String>();
+	private final Map<String, List<String>> optionArgs = new HashMap<>();
+	private final List<String> nonOptionArgs = new ArrayList<>();
 
 	/**
 	 * Add an option argument for the given option name and add the given value to the
@@ -42,9 +44,9 @@ class CommandLineArgs {
 	 * The given value may be {@code null}, indicating that the option was specified
 	 * without an associated value (e.g. "--foo" vs. "--foo=bar").
 	 */
-	public void addOptionArg(String optionName, String optionValue) {
+	public void addOptionArg(String optionName, @Nullable String optionValue) {
 		if (!this.optionArgs.containsKey(optionName)) {
-			this.optionArgs.put(optionName, new ArrayList<String>());
+			this.optionArgs.put(optionName, new ArrayList<>());
 		}
 		if (optionValue != null) {
 			this.optionArgs.get(optionName).add(optionValue);
@@ -70,6 +72,7 @@ class CommandLineArgs {
 	 * that the option was not present; empty list signifies that no values were associated
 	 * with this option.
 	 */
+	@Nullable
 	public List<String> getOptionValues(String optionName) {
 		return this.optionArgs.get(optionName);
 	}

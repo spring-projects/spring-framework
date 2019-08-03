@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,16 +28,14 @@ import org.springframework.jdbc.core.SqlParameter;
 
 /**
  * Superclass for object abstractions of RDBMS stored procedures.
- * This class is abstract and it is intended that subclasses will provide
- * a typed method for invocation that delegates to the supplied
- * {@link #execute} method.
+ * This class is abstract and it is intended that subclasses will provide a typed
+ * method for invocation that delegates to the supplied {@link #execute} method.
  *
- * <p>The inherited {@code sql} property is the name of the stored
- * procedure in the RDBMS.
+ * <p>The inherited {@link #setSql sql} property is the name of the stored procedure
+ * in the RDBMS.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @see #setSql
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -49,7 +47,7 @@ public abstract class StoredProcedure extends SqlCall {
 
 	/**
 	 * Create a new object wrapper for a stored procedure.
-	 * @param ds DataSource to use throughout the lifetime
+	 * @param ds the DataSource to use throughout the lifetime
 	 * of this object to obtain connections
 	 * @param name name of the stored procedure in the database
 	 */
@@ -60,7 +58,7 @@ public abstract class StoredProcedure extends SqlCall {
 
 	/**
 	 * Create a new object wrapper for a stored procedure.
-	 * @param jdbcTemplate JdbcTemplate which wraps DataSource
+	 * @param jdbcTemplate the JdbcTemplate which wraps DataSource
 	 * @param name name of the stored procedure in the database
 	 */
 	protected StoredProcedure(JdbcTemplate jdbcTemplate, String name) {
@@ -102,22 +100,19 @@ public abstract class StoredProcedure extends SqlCall {
 	 * a convenience method where the order of the passed in parameter values
 	 * must match the order that the parameters where declared in.
 	 * @param inParams variable number of input parameters. Output parameters should
-	 * not be included in this map.
-	 * It is legal for values to be {@code null}, and this will produce the
-	 * correct behavior using a NULL argument to the stored procedure.
+	 * not be included in this map. It is legal for values to be {@code null}, and this
+	 * will produce the correct behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
-	 * Output parameters will appear here, with their values after the
-	 * stored procedure has been called.
+	 * Output parameters will appear here, with their values after the stored procedure
+	 * has been called.
 	 */
 	public Map<String, Object> execute(Object... inParams) {
-		Map<String, Object> paramsToUse = new HashMap<String, Object>();
+		Map<String, Object> paramsToUse = new HashMap<>();
 		validateParameters(inParams);
 		int i = 0;
 		for (SqlParameter sqlParameter : getDeclaredParameters()) {
-			if (sqlParameter.isInputValueProvided()) {
-				if (i < inParams.length) {
-					paramsToUse.put(sqlParameter.getName(), inParams[i++]);
-				}
+			if (sqlParameter.isInputValueProvided() && i < inParams.length) {
+				paramsToUse.put(sqlParameter.getName(), inParams[i++]);
 			}
 		}
 		return getJdbcTemplate().call(newCallableStatementCreator(paramsToUse), getDeclaredParameters());

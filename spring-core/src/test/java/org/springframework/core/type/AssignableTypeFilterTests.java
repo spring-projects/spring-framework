@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Ramnivas Laddad
@@ -39,8 +39,8 @@ public class AssignableTypeFilterTests {
 
 		AssignableTypeFilter matchingFilter = new AssignableTypeFilter(TestNonInheritingClass.class);
 		AssignableTypeFilter notMatchingFilter = new AssignableTypeFilter(TestInterface.class);
-		assertFalse(notMatchingFilter.match(metadataReader, metadataReaderFactory));
-		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
+		assertThat(notMatchingFilter.match(metadataReader, metadataReaderFactory)).isFalse();
+		assertThat(matchingFilter.match(metadataReader, metadataReaderFactory)).isTrue();
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class AssignableTypeFilterTests {
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
 		AssignableTypeFilter filter = new AssignableTypeFilter(TestInterface.class);
-		assertTrue(filter.match(metadataReader, metadataReaderFactory));
+		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
@@ -61,7 +61,7 @@ public class AssignableTypeFilterTests {
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
 		AssignableTypeFilter filter = new AssignableTypeFilter(SimpleJdbcDaoSupport.class);
-		assertTrue(filter.match(metadataReader, metadataReaderFactory));
+		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
@@ -72,7 +72,7 @@ public class AssignableTypeFilterTests {
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
 		AssignableTypeFilter filter = new AssignableTypeFilter(JdbcDaoSupport.class);
-		assertTrue(filter.match(metadataReader, metadataReaderFactory));
+		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 

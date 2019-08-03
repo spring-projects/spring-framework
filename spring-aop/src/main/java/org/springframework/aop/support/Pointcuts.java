@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,10 +34,10 @@ import org.springframework.util.Assert;
  */
 public abstract class Pointcuts {
 
-	/** Pointcut matching all bean property setters, in any class */
+	/** Pointcut matching all bean property setters, in any class. */
 	public static final Pointcut SETTERS = SetterPointcut.INSTANCE;
 
-	/** Pointcut matching all bean property getters, in any class */
+	/** Pointcut matching all bean property getters, in any class. */
 	public static final Pointcut GETTERS = GetterPointcut.INSTANCE;
 
 
@@ -71,7 +71,7 @@ public abstract class Pointcuts {
 	 * @param args arguments to the method
 	 * @return whether there's a runtime match
 	 */
-	public static boolean matches(Pointcut pointcut, Method method, Class<?> targetClass, Object[] args) {
+	public static boolean matches(Pointcut pointcut, Method method, Class<?> targetClass, Object... args) {
 		Assert.notNull(pointcut, "Pointcut must not be null");
 		if (pointcut == Pointcut.TRUE) {
 			return true;
@@ -94,13 +94,13 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static SetterPointcut INSTANCE = new SetterPointcut();
+		public static final SetterPointcut INSTANCE = new SetterPointcut();
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
-			return method.getName().startsWith("set") &&
-				method.getParameterTypes().length == 1 &&
-				method.getReturnType() == Void.TYPE;
+			return (method.getName().startsWith("set") &&
+					method.getParameterCount() == 1 &&
+					method.getReturnType() == Void.TYPE);
 		}
 
 		private Object readResolve() {
@@ -115,12 +115,12 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static GetterPointcut INSTANCE = new GetterPointcut();
+		public static final GetterPointcut INSTANCE = new GetterPointcut();
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
-			return method.getName().startsWith("get") &&
-				method.getParameterTypes().length == 0;
+			return (method.getName().startsWith("get") &&
+					method.getParameterCount() == 0);
 		}
 
 		private Object readResolve() {

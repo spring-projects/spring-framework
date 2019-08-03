@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -86,8 +88,10 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 
 	private String resourceLoaderPath = "classpath:";
 
+	@Nullable
 	private MarkupTemplateEngine templateEngine;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -118,7 +122,8 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	public MarkupTemplateEngine getTemplateEngine() {
-		return templateEngine;
+		Assert.state(this.templateEngine != null, "No MarkupTemplateEngine set");
+		return this.templateEngine;
 	}
 
 	@Override
@@ -127,6 +132,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	protected ApplicationContext getApplicationContext() {
+		Assert.state(this.applicationContext != null, "No ApplicationContext set");
 		return this.applicationContext;
 	}
 
@@ -161,7 +167,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	 */
 	protected ClassLoader createTemplateClassLoader() throws IOException {
 		String[] paths = StringUtils.commaDelimitedListToStringArray(getResourceLoaderPath());
-		List<URL> urls = new ArrayList<URL>();
+		List<URL> urls = new ArrayList<>();
 		for (String path : paths) {
 			Resource[] resources = getApplicationContext().getResources(path);
 			if (resources.length > 0) {
@@ -173,7 +179,8 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 			}
 		}
 		ClassLoader classLoader = getApplicationContext().getClassLoader();
-		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
+		Assert.state(classLoader != null, "No ClassLoader");
+		return (!urls.isEmpty() ? new URLClassLoader(urls.toArray(new URL[0]), classLoader) : classLoader);
 	}
 
 	/**
@@ -187,7 +194,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	protected URL resolveTemplate(ClassLoader classLoader, String templatePath) throws IOException {
 		MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
 		Locale locale = LocaleContextHolder.getLocale();
-		URL url = classLoader.getResource(resource.withLocale(locale.toString().replace("-", "_")).toString());
+		URL url = classLoader.getResource(resource.withLocale(StringUtils.replace(locale.toString(), "-", "_")).toString());
 		if (url == null) {
 			url = classLoader.getResource(resource.withLocale(locale.getLanguage()).toString());
 		}
@@ -207,6 +214,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	 */
 	private class LocaleTemplateResolver implements TemplateResolver {
 
+		@Nullable
 		private ClassLoader classLoader;
 
 		@Override
@@ -216,6 +224,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 
 		@Override
 		public URL resolveTemplate(String templatePath) throws IOException {
+			Assert.state(this.classLoader != null, "No template ClassLoader available");
 			return GroovyMarkupConfigurer.this.resolveTemplate(this.classLoader, templatePath);
 		}
 	}

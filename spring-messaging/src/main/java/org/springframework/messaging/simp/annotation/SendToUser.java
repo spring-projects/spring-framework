@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,11 +25,18 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation that indicates that the return value of a message-handling method
- * should be sent as a {@link org.springframework.messaging.Message} to the specified
- * destination(s) prepended with <code>"/user/{username}"</code> where the user name
+ * Indicates the return value of a message-handling method should be sent as a
+ * {@link org.springframework.messaging.Message} to the specified destination(s)
+ * further prepended with <code>"/user/{username}"</code> where the user name
  * is extracted from the headers of the input message being handled.
  *
+ * <p>Both {@code @SendTo} and {@code @SendToUser} may be used on the same method
+ * in which case a message is sent to the destinations of both annotations.
+ *
+ * <p>This annotation may be placed class-level in which case it is inherited
+ * by methods of the class. At the same time, method-level {@code @SendTo} or
+ * {@code @SendToUser} annotations override any such at the class level.
+
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.0
@@ -37,7 +44,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
  * @see org.springframework.messaging.simp.SimpMessageHeaderAccessor#getUser()
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SendToUser {
@@ -65,7 +72,7 @@ public @interface SendToUser {
 	 * or only to the session of the input message being handled.
 	 * <p>By default, this is set to {@code true} in which case messages are
 	 * broadcast to all sessions.
-     */
-    boolean broadcast() default true;
+	 */
+	boolean broadcast() default true;
 
 }

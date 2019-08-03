@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.support.LiveBeansView;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Servlet variant of {@link LiveBeansView}'s MBean exposure.
@@ -37,7 +39,9 @@ import org.springframework.context.support.LiveBeansView;
 @SuppressWarnings("serial")
 public class LiveBeansViewServlet extends HttpServlet {
 
+	@Nullable
 	private LiveBeansView liveBeansView;
+
 
 	@Override
 	public void init() throws ServletException {
@@ -48,8 +52,12 @@ public class LiveBeansViewServlet extends HttpServlet {
 		return new ServletContextLiveBeansView(getServletContext());
 	}
 
+
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		Assert.state(this.liveBeansView != null, "No LiveBeansView available");
 		String content = this.liveBeansView.getSnapshotAsJson();
 		response.setContentType("application/json");
 		response.setContentLength(content.length());

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.web.servlet.resource.ResourceResolver}
@@ -37,29 +38,27 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath,
+	@Nullable
+	public Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving resource: requestPath=\"" + requestPath + "\"");
-		}
 		return resolveResourceInternal(request, requestPath, locations, chain);
 	}
 
-	protected abstract Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain);
-
 	@Override
+	@Nullable
 	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving public URL for path=\"" + resourceUrlPath + "\"");
-		}
 
 		return resolveUrlPathInternal(resourceUrlPath, locations, chain);
 	}
 
+
+	@Nullable
+	protected abstract Resource resolveResourceInternal(@Nullable HttpServletRequest request,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain);
+
+	@Nullable
 	protected abstract String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 

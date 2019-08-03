@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -55,18 +56,22 @@ import org.springframework.util.Assert;
  */
 public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, BeanNameAware, InitializingBean {
 
-	/** Constants for the SimpleTrigger class */
+	/** Constants for the SimpleTrigger class. */
 	private static final Constants constants = new Constants(SimpleTrigger.class);
 
 
+	@Nullable
 	private String name;
 
+	@Nullable
 	private String group;
 
+	@Nullable
 	private JobDetail jobDetail;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
+	@Nullable
 	private Date startTime;
 
 	private long startDelay;
@@ -79,10 +84,13 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int misfireInstruction;
 
+	@Nullable
 	private String description;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private SimpleTrigger simpleTrigger;
 
 
@@ -126,7 +134,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	 * Register objects in the JobDataMap via a given Map.
 	 * <p>These objects will be available to this Trigger only,
 	 * in contrast to objects in the JobDetail's data map.
-	 * @param jobDataAsMap Map with String keys and any objects as values
+	 * @param jobDataAsMap a Map with String keys and any objects as values
 	 * (for example Spring-managed beans)
 	 */
 	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
@@ -226,9 +234,11 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		}
 
 		SimpleTriggerImpl sti = new SimpleTriggerImpl();
-		sti.setName(this.name);
+		sti.setName(this.name != null ? this.name : toString());
 		sti.setGroup(this.group);
-		sti.setJobKey(this.jobDetail.getKey());
+		if (this.jobDetail != null) {
+			sti.setJobKey(this.jobDetail.getKey());
+		}
 		sti.setJobDataMap(this.jobDataMap);
 		sti.setStartTime(this.startTime);
 		sti.setRepeatInterval(this.repeatInterval);
@@ -241,6 +251,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 
 	@Override
+	@Nullable
 	public SimpleTrigger getObject() {
 		return this.simpleTrigger;
 	}

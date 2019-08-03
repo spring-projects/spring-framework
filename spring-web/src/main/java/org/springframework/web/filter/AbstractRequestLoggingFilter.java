@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,21 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.function.Predicate;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Base class for {@code Filter}s that perform logging operations before and after a request
@@ -38,14 +44,15 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
  *
  * <p>Subclasses are passed the message to write to the log in the {@code beforeRequest} and
  * {@code afterRequest} methods. By default, only the URI of the request is logged. However,
- * setting the {@code includeQueryString} property to {@code true} will cause the query string
- * of the request to be included also. The payload (body) of the request can be logged via the
- * {@code includePayload} flag. Note that this will only log that which is read, which might
- * not be the entire payload.
+ * setting the {@code includeQueryString} property to {@code true} will cause the query string of
+ * the request to be included also; this can be further extended through {@code includeClientInfo}
+ * and {@code includeHeaders}. The payload (body content) of the request can be logged via the
+ * {@code includePayload} flag: Note that this will only log the part of the payload which has
+ * actually been read, not necessarily the entire body of the request.
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
  * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
- * {@code afterMessageSuffix} properties,
+ * {@code afterMessageSuffix} properties.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -56,12 +63,28 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
  */
 public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default value prepended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_PREFIX = "Before request [";
 
+	/**
+	 * The default value appended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_SUFFIX = "]";
 
+	/**
+	 * The default value prepended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_PREFIX = "After request [";
 
+	/**
+	 * The default value appended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_SUFFIX = "]";
 
 	private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 50;
@@ -71,7 +94,12 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private boolean includeClientInfo = false;
 
+	private boolean includeHeaders = false;
+
 	private boolean includePayload = false;
+
+	@Nullable
+	private Predicate<String> headerPredicate;
 
 	private int maxPayloadLength = DEFAULT_MAX_PAYLOAD_LENGTH;
 
@@ -119,25 +147,65 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
+	 * Set whether the request headers should be included in the log message.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "includeHeaders" in the filter definition in {@code web.xml}.
+	 * @since 4.3
+	 */
+	public void setIncludeHeaders(boolean includeHeaders) {
+		this.includeHeaders = includeHeaders;
+	}
+
+	/**
+	 * Return whether the request headers should be included in the log message.
+	 * @since 4.3
+	 */
+	protected boolean isIncludeHeaders() {
+		return this.includeHeaders;
+	}
+
+	/**
 	 * Set whether the request payload (body) should be included in the log message.
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
+	 * @since 3.0
 	 */
-
 	public void setIncludePayload(boolean includePayload) {
 		this.includePayload = includePayload;
 	}
 
 	/**
 	 * Return whether the request payload (body) should be included in the log message.
+	 * @since 3.0
 	 */
 	protected boolean isIncludePayload() {
 		return this.includePayload;
 	}
 
 	/**
-	 * Sets the maximum length of the payload body to be included in the log message.
+	 * Configure a predicate for selecting which headers should be logged if
+	 * {@link #setIncludeHeaders(boolean)} is set to {@code true}.
+	 * <p>By default this is not set in which case all headers are logged.
+	 * @param headerPredicate the predicate to use
+	 * @since 5.2
+	 */
+	public void setHeaderPredicate(@Nullable Predicate<String> headerPredicate) {
+		this.headerPredicate = headerPredicate;
+	}
+
+	/**
+	 * The configured {@link #setHeaderPredicate(Predicate) headerPredicate}.
+	 * @since 5.2
+	 */
+	@Nullable
+	public Predicate<String> getHeaderPredicate() {
+		return this.headerPredicate;
+	}
+
+	/**
+	 * Set the maximum length of the payload body to be included in the log message.
 	 * Default is 50 characters.
+	 * @since 3.0
 	 */
 	public void setMaxPayloadLength(int maxPayloadLength) {
 		Assert.isTrue(maxPayloadLength >= 0, "'maxPayloadLength' should be larger than or equal to 0");
@@ -146,6 +214,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Return the maximum length of the payload body to be included in the log message.
+	 * @since 3.0
 	 */
 	protected int getMaxPayloadLength() {
 		return this.maxPayloadLength;
@@ -208,7 +277,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		HttpServletRequest requestToUse = request;
 
 		if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
-			requestToUse = new ContentCachingRequestWrapper(request);
+			requestToUse = new ContentCachingRequestWrapper(request, getMaxPayloadLength());
 		}
 
 		boolean shouldLog = shouldLog(requestToUse);
@@ -253,9 +322,14 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
 		msg.append("uri=").append(request.getRequestURI());
+
 		if (isIncludeQueryString()) {
-			msg.append('?').append(request.getQueryString());
+			String queryString = request.getQueryString();
+			if (queryString != null) {
+				msg.append('?').append(queryString);
+			}
 		}
+
 		if (isIncludeClientInfo()) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
@@ -270,24 +344,55 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				msg.append(";user=").append(user);
 			}
 		}
-		if (isIncludePayload() && request instanceof ContentCachingRequestWrapper) {
-			ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
+
+		if (isIncludeHeaders()) {
+			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
+			if (getHeaderPredicate() != null) {
+				Enumeration<String> names = request.getHeaderNames();
+				while (names.hasMoreElements()) {
+					String header = names.nextElement();
+					if (!getHeaderPredicate().test(header)) {
+						headers.set(header, "masked");
+					}
+				}
+			}
+			msg.append(";headers=").append(headers);
+		}
+
+		if (isIncludePayload()) {
+			String payload = getMessagePayload(request);
+			if (payload != null) {
+				msg.append(";payload=").append(payload);
+			}
+		}
+
+		msg.append(suffix);
+		return msg.toString();
+	}
+
+	/**
+	 * Extracts the message payload portion of the message created by
+	 * {@link #createMessage(HttpServletRequest, String, String)} when
+	 * {@link #isIncludePayload()} returns true.
+	 * @since 5.0.3
+	 */
+	@Nullable
+	protected String getMessagePayload(HttpServletRequest request) {
+		ContentCachingRequestWrapper wrapper =
+				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+		if (wrapper != null) {
 			byte[] buf = wrapper.getContentAsByteArray();
 			if (buf.length > 0) {
 				int length = Math.min(buf.length, getMaxPayloadLength());
-				String payload;
 				try {
-					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+					return new String(buf, 0, length, wrapper.getCharacterEncoding());
 				}
-				catch (UnsupportedEncodingException e) {
-					payload = "[unknown]";
+				catch (UnsupportedEncodingException ex) {
+					return "[unknown]";
 				}
-				msg.append(";payload=").append(payload);
 			}
-
 		}
-		msg.append(suffix);
-		return msg.toString();
+		return null;
 	}
 
 

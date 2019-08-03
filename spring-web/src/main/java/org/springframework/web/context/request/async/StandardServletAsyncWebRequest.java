@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -34,7 +35,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
- * {@code <async-support>true</async-support>} element to servlet and filter
+ * <code>&ltasync-supported&gttrue&lt/async-supported&gt</code> element to servlet and filter
  * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev
@@ -48,9 +49,11 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
+	private final List<Runnable> timeoutHandlers = new ArrayList<>();
 
-	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
+	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
+
+	private final List<Runnable> completionHandlers = new ArrayList<>();
 
 
 	/**
@@ -76,6 +79,11 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	@Override
 	public void addTimeoutHandler(Runnable timeoutHandler) {
 		this.timeoutHandlers.add(timeoutHandler);
+	}
+
+	@Override
+	public void addErrorHandler(Consumer<Throwable> exceptionHandler) {
+		this.exceptionHandlers.add(exceptionHandler);
 	}
 
 	@Override
@@ -134,21 +142,17 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
-		onComplete(event);
+		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
 	}
 
 	@Override
 	public void onTimeout(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.timeoutHandlers) {
-			handler.run();
-		}
+		this.timeoutHandlers.forEach(Runnable::run);
 	}
 
 	@Override
 	public void onComplete(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.completionHandlers) {
-			handler.run();
-		}
+		this.completionHandlers.forEach(Runnable::run);
 		this.asyncContext = null;
 		this.asyncCompleted.set(true);
 	}

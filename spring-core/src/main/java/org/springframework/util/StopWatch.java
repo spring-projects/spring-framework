@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks,
@@ -49,22 +51,21 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	private final List<TaskInfo> taskList = new LinkedList<TaskInfo>();
+	private final List<TaskInfo> taskList = new LinkedList<>();
 
-	/** Start time of the current task */
+	/** Start time of the current task. */
 	private long startTimeMillis;
 
-	/** Is the stop watch currently running? */
-	private boolean running;
-
-	/** Name of the current task */
+	/** Name of the current task. */
+	@Nullable
 	private String currentTaskName;
 
+	@Nullable
 	private TaskInfo lastTaskInfo;
 
 	private int taskCount;
 
-	/** Total running time */
+	/** Total running time. */
 	private long totalTimeMillis;
 
 
@@ -123,10 +124,9 @@ public class StopWatch {
 	 * @see #stop()
 	 */
 	public void start(String taskName) throws IllegalStateException {
-		if (this.running) {
+		if (this.currentTaskName != null) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
-		this.running = true;
 		this.currentTaskName = taskName;
 		this.startTimeMillis = System.currentTimeMillis();
 	}
@@ -134,21 +134,20 @@ public class StopWatch {
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@code #start()} / {@code #stop()} methods.
+	 * {@code start()} / {@code stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
-		if (!this.running) {
+		if (this.currentTaskName == null) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
 		}
 		long lastTime = System.currentTimeMillis() - this.startTimeMillis;
 		this.totalTimeMillis += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
 		if (this.keepTaskList) {
-			this.taskList.add(lastTaskInfo);
+			this.taskList.add(this.lastTaskInfo);
 		}
 		++this.taskCount;
-		this.running = false;
 		this.currentTaskName = null;
 	}
 
@@ -157,7 +156,7 @@ public class StopWatch {
 	 * @see #currentTaskName()
 	 */
 	public boolean isRunning() {
-		return this.running;
+		return (this.currentTaskName != null);
 	}
 
 	/**
@@ -165,6 +164,7 @@ public class StopWatch {
 	 * @since 4.2.2
 	 * @see #isRunning()
 	 */
+	@Nullable
 	public String currentTaskName() {
 		return this.currentTaskName;
 	}
@@ -229,7 +229,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
+		return this.taskList.toArray(new TaskInfo[0]);
 	}
 
 

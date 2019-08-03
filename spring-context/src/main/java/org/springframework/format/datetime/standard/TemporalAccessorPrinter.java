@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 
 import org.springframework.format.Printer;
-import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Printer} implementation for a JSR-310 {@link java.time.temporal.TemporalAccessor},
@@ -32,7 +31,6 @@ import org.springframework.lang.UsesJava8;
  * @see DateTimeContextHolder#getFormatter
  * @see java.time.format.DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
  */
-@UsesJava8
 public final class TemporalAccessorPrinter implements Printer<TemporalAccessor> {
 
 	private final DateTimeFormatter formatter;

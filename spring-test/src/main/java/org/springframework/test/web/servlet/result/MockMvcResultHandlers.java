@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.io.Writer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.CollectionUtils;
@@ -41,7 +42,7 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class MockMvcResultHandlers {
 
-	private static final Log logger = LogFactory.getLog(MockMvcResultHandlers.class.getPackage().getName());
+	private static final Log logger = LogFactory.getLog("org.springframework.test.web.servlet.result");
 
 
 	/**
@@ -96,7 +97,7 @@ public abstract class MockMvcResultHandlers {
 	 */
 	private static class PrintWriterPrintingResultHandler extends PrintingResultHandler {
 
-		PrintWriterPrintingResultHandler(final PrintWriter writer) {
+		public PrintWriterPrintingResultHandler(PrintWriter writer) {
 			super(new ResultValuePrinter() {
 				@Override
 				public void printHeading(String heading) {
@@ -104,7 +105,7 @@ public abstract class MockMvcResultHandlers {
 					writer.println(String.format("%s:", heading));
 				}
 				@Override
-				public void printValue(String label, Object value) {
+				public void printValue(String label, @Nullable Object value) {
 					if (value != null && value.getClass().isArray()) {
 						value = CollectionUtils.arrayToList(value);
 					}
@@ -114,12 +115,14 @@ public abstract class MockMvcResultHandlers {
 		}
 	}
 
+
 	/**
 	 * A {@link ResultHandler} that logs {@link MvcResult} details at
 	 * {@code DEBUG} level via Apache Commons Logging.
 	 *
 	 * <p>Delegates to a {@link PrintWriterPrintingResultHandler} for
 	 * building the log message.
+	 *
 	 * @since 4.2
 	 */
 	private static class LoggingResultHandler implements ResultHandler {
@@ -128,8 +131,8 @@ public abstract class MockMvcResultHandlers {
 		public void handle(MvcResult result) throws Exception {
 			if (logger.isDebugEnabled()) {
 				StringWriter stringWriter = new StringWriter();
-				ResultHandler printingResultHandler = new PrintWriterPrintingResultHandler(
-					new PrintWriter(stringWriter));
+				ResultHandler printingResultHandler =
+						new PrintWriterPrintingResultHandler(new PrintWriter(stringWriter));
 				printingResultHandler.handle(result);
 				logger.debug("MvcResult details:\n" + stringWriter);
 			}

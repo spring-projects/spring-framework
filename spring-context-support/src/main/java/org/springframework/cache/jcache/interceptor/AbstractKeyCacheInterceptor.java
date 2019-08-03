@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,8 @@ import org.springframework.cache.interceptor.KeyGenerator;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <O> the operation type
+ * @param <A> the annotation type
  */
 @SuppressWarnings("serial")
 abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<A>, A extends Annotation>
@@ -36,6 +38,7 @@ abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<
 	protected AbstractKeyCacheInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
 	}
+
 
 	/**
 	 * Generate a key for the specified invocation.
@@ -56,9 +59,8 @@ abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<
 	 * @param context the context of the invocation.
 	 * @return the related {@code CacheKeyInvocationContext}
 	 */
-	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(
-			CacheOperationInvocationContext<O> context) {
-		return new DefaultCacheKeyInvocationContext<A>(context.getOperation(), context.getTarget(), context.getArgs());
+	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(CacheOperationInvocationContext<O> context) {
+		return new DefaultCacheKeyInvocationContext<>(context.getOperation(), context.getTarget(), context.getArgs());
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -48,14 +49,12 @@ import org.springframework.validation.annotation.Validated;
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 4.0, this functionality requires either a Bean Validation 1.1 provider
- * (such as Hibernate Validator 5.x) or the Bean Validation 1.0 API with Hibernate Validator
- * 4.3. The actual provider will be autodetected and automatically adapted.
+ * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1 provider.
  *
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationInterceptor
- * @see org.hibernate.validator.method.MethodValidator
+ * @see javax.validation.executable.ExecutableValidator
  */
 @SuppressWarnings("serial")
 public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
@@ -63,6 +62,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
+	@Nullable
 	private Validator validator;
 
 
@@ -84,8 +84,12 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * <p>Default is the default ValidatorFactory's default Validator.
 	 */
 	public void setValidator(Validator validator) {
+		// Unwrap to the native Validator with forExecutables support
 		if (validator instanceof LocalValidatorFactoryBean) {
 			this.validator = ((LocalValidatorFactoryBean) validator).getValidator();
+		}
+		else if (validator instanceof SpringValidatorAdapter) {
+			this.validator = validator.unwrap(Validator.class);
 		}
 		else {
 			this.validator = validator;
@@ -117,7 +121,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * a {@link MethodValidationInterceptor} or subclass thereof)
 	 * @since 4.2
 	 */
-	protected Advice createMethodValidationAdvice(Validator validator) {
+	protected Advice createMethodValidationAdvice(@Nullable Validator validator) {
 		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
 	}
 

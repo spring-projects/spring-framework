@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system
@@ -43,17 +45,19 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	}
 
 	/**
+	 * Returns the value to which the specified key is mapped, or {@code null} if this map
+ 	 * contains no mapping for the key.
 	 * @param key the name of the system attribute to retrieve
 	 * @throws IllegalArgumentException if given key is non-String
 	 */
 	@Override
+	@Nullable
 	public String get(Object key) {
 		if (!(key instanceof String)) {
 			throw new IllegalArgumentException(
-					"Type of key [" + (key != null ? key.getClass().getName() : "null") +
-					"] must be java.lang.String.");
+					"Type of key [" + key.getClass().getName() + "] must be java.lang.String");
 		}
-		return this.getSystemAttribute((String) key);
+		return getSystemAttribute((String) key);
 	}
 
 	@Override
@@ -65,6 +69,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	 * Template method that returns the underlying system attribute.
 	 * <p>Implementations typically call {@link System#getProperty(String)} or {@link System#getenv(String)} here.
 	 */
+	@Nullable
 	protected abstract String getSystemAttribute(String attributeName);
 
 

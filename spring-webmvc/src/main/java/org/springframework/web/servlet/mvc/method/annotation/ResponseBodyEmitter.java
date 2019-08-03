@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,13 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A controller method return value type for asynchronous request processing
@@ -60,17 +63,32 @@ import org.springframework.util.Assert;
  */
 public class ResponseBodyEmitter {
 
+	@Nullable
 	private final Long timeout;
 
-	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<DataWithMediaType>(8);
-
+	@Nullable
 	private Handler handler;
 
+	/** Store send data before handler is initialized. */
+	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
+
+	/** Store complete invocation before handler is initialized. */
 	private boolean complete;
 
+	/** Store completeWithError invocation before handler is initialized. */
+	@Nullable
 	private Throwable failure;
 
+	/**
+	 * After an IOException on send, the servlet container will provide an onError
+	 * callback that we'll handle as completeWithError (on container thread).
+	 * We use this flag to ignore competing attempts to completeWithError by
+	 * the application via try-catch. */
+	private boolean sendFailed;
+
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
+
+	private final ErrorCallback errorCallback = new ErrorCallback();
 
 	private final DefaultCallback completionCallback = new DefaultCallback();
 
@@ -97,6 +115,7 @@ public class ResponseBodyEmitter {
 	/**
 	 * Return the configured timeout value, if any.
 	 */
+	@Nullable
 	public Long getTimeout() {
 		return this.timeout;
 	}
@@ -120,6 +139,7 @@ public class ResponseBodyEmitter {
 		}
 		else {
 			this.handler.onTimeout(this.timeoutCallback);
+			this.handler.onError(this.errorCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
 	}
@@ -137,6 +157,11 @@ public class ResponseBodyEmitter {
 	 * Write the given object to the response.
 	 * <p>If any exception occurs a dispatch is made back to the app server where
 	 * Spring MVC will pass the exception through its exception handling mechanism.
+	 * <p><strong>Note:</strong> if the send fails with an IOException, you do
+	 * not need to call {@link #completeWithError(Throwable)} in order to clean
+	 * up. Instead the Servlet container creates a notification that results in a
+	 * dispatch where Spring MVC invokes exception resolvers and completes
+	 * processing.
 	 * @param object the object to write
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
@@ -146,46 +171,50 @@ public class ResponseBodyEmitter {
 	}
 
 	/**
-	 * Write the given object to the response also using a MediaType hint.
-	 * <p>If any exception occurs a dispatch is made back to the app server where
-	 * Spring MVC will pass the exception through its exception handling mechanism.
+	 * Overloaded variant of {@link #send(Object)} that also accepts a MediaType
+	 * hint for how to serialize the given Object.
 	 * @param object the object to write
 	 * @param mediaType a MediaType hint for selecting an HttpMessageConverter
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
-	public synchronized void send(Object object, MediaType mediaType) throws IOException {
+	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
 		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
 		sendInternal(object, mediaType);
 	}
 
-	private void sendInternal(Object object, MediaType mediaType) throws IOException {
-		if (object != null) {
-			if (this.handler != null) {
-				try {
-					this.handler.send(object, mediaType);
-				}
-				catch (IOException ex) {
-					completeWithError(ex);
-					throw ex;
-				}
-				catch (Throwable ex) {
-					completeWithError(ex);
-					throw new IllegalStateException("Failed to send " + object, ex);
-				}
+	private void sendInternal(Object object, @Nullable MediaType mediaType) throws IOException {
+		if (this.handler != null) {
+			try {
+				this.handler.send(object, mediaType);
 			}
-			else {
-				this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
+			catch (IOException ex) {
+				this.sendFailed = true;
+				throw ex;
 			}
+			catch (Throwable ex) {
+				this.sendFailed = true;
+				throw new IllegalStateException("Failed to send " + object, ex);
+			}
+		}
+		else {
+			this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
 		}
 	}
 
 	/**
-	 * Complete request processing.
-	 * <p>A dispatch is made into the app server where Spring MVC completes
-	 * asynchronous request processing.
+	 * Complete request processing by performing a dispatch into the servlet
+	 * container, where Spring MVC is invoked once more, and completes the
+	 * request processing lifecycle.
+	 * <p><strong>Note:</strong> this method should be called by the application
+	 * to complete request processing. It should not be used after container
+	 * related events such as an error while {@link #send(Object) sending}.
 	 */
 	public synchronized void complete() {
+		// Ignore, after send failure
+		if (this.sendFailed) {
+			return;
+		}
 		this.complete = true;
 		if (this.handler != null) {
 			this.handler.complete();
@@ -195,9 +224,19 @@ public class ResponseBodyEmitter {
 	/**
 	 * Complete request processing with an error.
 	 * <p>A dispatch is made into the app server where Spring MVC will pass the
-	 * exception through its exception handling mechanism.
+	 * exception through its exception handling mechanism. Note however that
+	 * at this stage of request processing, the response is committed and the
+	 * response status can no longer be changed.
+	 * <p><strong>Note:</strong> this method should be called by the application
+	 * to complete request processing with an error. It should not be used after
+	 * container related events such as an error while
+	 * {@link #send(Object) sending}.
 	 */
 	public synchronized void completeWithError(Throwable ex) {
+		// Ignore, after send failure
+		if (this.sendFailed) {
+			return;
+		}
 		this.complete = true;
 		this.failure = ex;
 		if (this.handler != null) {
@@ -214,6 +253,16 @@ public class ResponseBodyEmitter {
 	}
 
 	/**
+	 * Register code to invoke for an error during async request processing.
+	 * This method is called from a container thread when an error occurred
+	 * while processing an async request.
+	 * @since 5.0
+	 */
+	public synchronized void onError(Consumer<Throwable> callback) {
+		this.errorCallback.setDelegate(callback);
+	}
+
+	/**
 	 * Register code to invoke when the async request completes. This method is
 	 * called from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
@@ -224,18 +273,26 @@ public class ResponseBodyEmitter {
 	}
 
 
+	@Override
+	public String toString() {
+		return "ResponseBodyEmitter@" + ObjectUtils.getIdentityHexString(this);
+	}
+
+
 	/**
 	 * Handle sent objects and complete request processing.
 	 */
 	interface Handler {
 
-		void send(Object data, MediaType mediaType) throws IOException;
+		void send(Object data, @Nullable MediaType mediaType) throws IOException;
 
 		void complete();
 
 		void completeWithError(Throwable failure);
 
 		void onTimeout(Runnable callback);
+
+		void onError(Consumer<Throwable> callback);
 
 		void onCompletion(Runnable callback);
 	}
@@ -249,9 +306,10 @@ public class ResponseBodyEmitter {
 
 		private final Object data;
 
+		@Nullable
 		private final MediaType mediaType;
 
-		public DataWithMediaType(Object data, MediaType mediaType) {
+		public DataWithMediaType(Object data, @Nullable MediaType mediaType) {
 			this.data = data;
 			this.mediaType = mediaType;
 		}
@@ -260,6 +318,7 @@ public class ResponseBodyEmitter {
 			return this.data;
 		}
 
+		@Nullable
 		public MediaType getMediaType() {
 			return this.mediaType;
 		}
@@ -268,6 +327,7 @@ public class ResponseBodyEmitter {
 
 	private class DefaultCallback implements Runnable {
 
+		@Nullable
 		private Runnable delegate;
 
 		public void setDelegate(Runnable delegate) {
@@ -279,6 +339,25 @@ public class ResponseBodyEmitter {
 			ResponseBodyEmitter.this.complete = true;
 			if (this.delegate != null) {
 				this.delegate.run();
+			}
+		}
+	}
+
+
+	private class ErrorCallback implements Consumer<Throwable> {
+
+		@Nullable
+		private Consumer<Throwable> delegate;
+
+		public void setDelegate(Consumer<Throwable> callback) {
+			this.delegate = callback;
+		}
+
+		@Override
+		public void accept(Throwable t) {
+			ResponseBodyEmitter.this.complete = true;
+			if (this.delegate != null) {
+				this.delegate.accept(t);
 			}
 		}
 	}

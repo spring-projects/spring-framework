@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,34 +18,20 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
  */
 public class ApplicationListenerMethodTransactionalAdapterTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
-	@Test
-	public void noAnnotation() {
-		Method m = ReflectionUtils.findMethod(SampleEvents.class,
-				"noAnnotation", String.class);
-
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("noAnnotation");
-		ApplicationListenerMethodTransactionalAdapter.findAnnotation(m);
-	}
 
 	@Test
 	public void defaultPhase() {
@@ -77,15 +63,15 @@ public class ApplicationListenerMethodTransactionalAdapterTests {
 	}
 
 	private void assertPhase(Method method, TransactionPhase expected) {
-		assertNotNull("Method must not be null", method);
-		TransactionalEventListener annotation = ApplicationListenerMethodTransactionalAdapter.findAnnotation(method);
-		assertEquals("Wrong phase for '" + method + "'", expected, annotation.phase());
+		assertThat(method).as("Method must not be null").isNotNull();
+		TransactionalEventListener annotation =
+				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		assertThat(annotation.phase()).as("Wrong phase for '" + method + "'").isEqualTo(expected);
 	}
 
 	private void supportsEventType(boolean match, Method method, ResolvableType eventType) {
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertEquals("Wrong match for event '" + eventType + "' on " + method,
-				match, adapter.supportsEventType(eventType));
+		assertThat(adapter.supportsEventType(eventType)).as("Wrong match for event '" + eventType + "' on " + method).isEqualTo(match);
 	}
 
 	private ApplicationListenerMethodTransactionalAdapter createTestInstance(Method m) {
@@ -96,10 +82,8 @@ public class ApplicationListenerMethodTransactionalAdapterTests {
 		return ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class, payloadType);
 	}
 
-	static class SampleEvents {
 
-		public void noAnnotation(String data) {
-		}
+	static class SampleEvents {
 
 		@TransactionalEventListener
 		public void defaultPhase(String data) {
@@ -117,7 +101,6 @@ public class ApplicationListenerMethodTransactionalAdapterTests {
 		@TransactionalEventListener(String.class)
 		public void valueSet() {
 		}
-
 	}
 
 }

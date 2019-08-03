@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.context;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Sub-interface of MessageSource to be implemented by objects that
@@ -32,11 +34,12 @@ public interface HierarchicalMessageSource extends MessageSource {
 	 * resolve messages that this object can't resolve.
 	 * May be {@code null}, in which case no further resolution is possible.
 	 */
-	void setParentMessageSource(MessageSource parent);
+	void setParentMessageSource(@Nullable MessageSource parent);
 
 	/**
 	 * Return the parent of this MessageSource, or {@code null} if none.
 	 */
+	@Nullable
 	MessageSource getParentMessageSource();
 
 }

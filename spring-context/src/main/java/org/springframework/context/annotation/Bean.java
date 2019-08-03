@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Indicates that a method produces a bean to be managed by the Spring container.
@@ -39,45 +40,76 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
  *
  * <h3>Bean Names</h3>
  *
- * <p>While a {@link #name() name} attribute is available, the default strategy for
+ * <p>While a {@link #name} attribute is available, the default strategy for
  * determining the name of a bean is to use the name of the {@code @Bean} method.
  * This is convenient and intuitive, but if explicit naming is desired, the
- * {@code name} attribute may be used. Also note that {@code name} accepts an array
- * of Strings. This is in order to allow for specifying multiple names (i.e., aliases)
- * for a single bean.
+ * {@code name} attribute (or its alias {@code value}) may be used. Also note
+ * that {@code name} accepts an array of Strings, allowing for multiple names
+ * (i.e. a primary bean name plus one or more aliases) for a single bean.
  *
  * <pre class="code">
- *     &#064;Bean(name={"b1","b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
+ *     &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
  *
- * <h3>Scope, DependsOn, Primary, and Lazy</h3>
+ * <h3>Profile, Scope, Lazy, DependsOn, Primary, Order</h3>
  *
- * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
- * depends-on, primary, or lazy. Rather, it should be used in conjunction with
- * {@link Scope @Scope}, {@link DependsOn @DependsOn}, {@link Primary @Primary},
- * and {@link Lazy @Lazy} annotations to achieve those semantics. For example:
+ * <p>Note that the {@code @Bean} annotation does not provide attributes for profile,
+ * scope, lazy, depends-on or primary. Rather, it should be used in conjunction with
+ * {@link Scope @Scope}, {@link Lazy @Lazy}, {@link DependsOn @DependsOn} and
+ * {@link Primary @Primary} annotations to declare those semantics. For example:
  *
  * <pre class="code">
  *     &#064;Bean
+ *     &#064;Profile("production")
  *     &#064;Scope("prototype")
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
+ *
+ * The semantics of the above-mentioned annotations match their use at the component
+ * class level: {@code @Profile} allows for selective inclusion of certain beans.
+ * {@code @Scope} changes the bean's scope from singleton to the specified scope.
+ * {@code @Lazy} only has an actual effect in case of the default singleton scope.
+ * {@code @DependsOn} enforces the creation of specific other beans before this
+ * bean will be created, in addition to any dependencies that the bean expressed
+ * through direct references, which is typically helpful for singleton startup.
+ * {@code @Primary} is a mechanism to resolve ambiguity at the injection point level
+ * if a single target component needs to be injected but several beans match by type.
+ *
+ * <p>Additionally, {@code @Bean} methods may also declare qualifier annotations
+ * and {@link org.springframework.core.annotation.Order @Order} values, to be
+ * taken into account during injection point resolution just like corresponding
+ * annotations on the corresponding component classes but potentially being very
+ * individual per bean definition (in case of multiple definitions with the same
+ * bean class). Qualifiers narrow the set of candidates after the initial type match;
+ * order values determine the order of resolved elements in case of collection
+ * injection points (with several target beans matching by type and qualifier).
+ *
+ * <p><b>NOTE:</b> {@code @Order} values may influence priorities at injection points,
+ * but please be aware that they do not influence singleton startup order which is an
+ * orthogonal concern determined by dependency relationships and {@code @DependsOn}
+ * declarations as mentioned above. Also, {@link javax.annotation.Priority} is not
+ * available at this level since it cannot be declared on methods; its semantics can
+ * be modeled through {@code @Order} values in combination with {@code @Primary} on
+ * a single bean per type.
  *
  * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>
  *
  * <p>Typically, {@code @Bean} methods are declared within {@code @Configuration}
- * classes. In this case, bean methods may reference other {@code @Bean} methods
- * in the same class by calling them <i>directly</i>. This ensures that references between
- * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
+ * classes. In this case, bean methods may reference other {@code @Bean} methods in the
+ * same class by calling them <i>directly</i>. This ensures that references between beans
+ * are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
  * guaranteed to respect scoping and AOP semantics, just like {@code getBean()} lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
@@ -87,14 +119,17 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public FooService fooService() {
  *         return new FooService(fooRepository());
  *     }
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         return new JdbcFooRepository(dataSource());
  *     }
+ *
  *     // ...
  * }</pre>
  *
@@ -136,7 +171,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *
  * <h3>Bootstrapping</h3>
  *
- * <p>See @{@link Configuration} Javadoc for further details including how to bootstrap
+ * <p>See the @{@link Configuration} javadoc for further details including how to bootstrap
  * the container using {@link AnnotationConfigApplicationContext} and friends.
  *
  * <h3>{@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
@@ -150,9 +185,10 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *
  * <pre class="code">
  *     &#064;Bean
- *     public static PropertyPlaceholderConfigurer ppc() {
- *         // instantiate, configure and return ppc ...
- *     }</pre>
+ *     public static PropertySourcesPlaceholderConfigurer pspc() {
+ *         // instantiate, configure and return pspc ...
+ *     }
+ * </pre>
  *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
@@ -183,22 +219,56 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 public @interface Bean {
 
 	/**
-	 * The name of this bean, or if plural, aliases for this bean. If left unspecified
-	 * the name of the bean is the name of the annotated method. If specified, the method
-	 * name is ignored.
+	 * Alias for {@link #name}.
+	 * <p>Intended to be used when no other attributes are needed, for example:
+	 * {@code @Bean("customBeanName")}.
+	 * @since 4.3.3
+	 * @see #name
 	 */
+	@AliasFor("name")
+	String[] value() default {};
+
+	/**
+	 * The name of this bean, or if several names, a primary bean name plus aliases.
+	 * <p>If left unspecified, the name of the bean is the name of the annotated method.
+	 * If specified, the method name is ignored.
+	 * <p>The bean name and aliases may also be configured via the {@link #value}
+	 * attribute if no other attributes are declared.
+	 * @see #value
+	 */
+	@AliasFor("value")
 	String[] name() default {};
 
 	/**
 	 * Are dependencies to be injected via convention-based autowiring by name or type?
+	 * <p>Note that this autowire mode is just about externally driven autowiring based
+	 * on bean property setter methods by convention, analogous to XML bean definitions.
+	 * <p>The default mode does allow for annotation-driven autowiring. "no" refers to
+	 * externally driven autowiring only, not affecting any autowiring demands that the
+	 * bean class itself expresses through annotations.
+	 * @see Autowire#BY_NAME
+	 * @see Autowire#BY_TYPE
+	 * @deprecated as of 5.1, since {@code @Bean} factory method argument resolution and
+	 * {@code @Autowired} processing supersede name/type-based bean property injection
 	 */
+	@Deprecated
 	Autowire autowire() default Autowire.NO;
+
+	/**
+	 * Is this bean a candidate for getting autowired into some other bean?
+	 * <p>Default is {@code true}; set this to {@code false} for internal delegates
+	 * that are not meant to get in the way of beans of the same type in other places.
+	 * @since 5.1
+	 */
+	boolean autowireCandidate() default true;
 
 	/**
 	 * The optional name of a method to call on the bean instance during initialization.
 	 * Not commonly used, given that the method may be called programmatically directly
 	 * within the body of a Bean-annotated method.
 	 * <p>The default value is {@code ""}, indicating no init method to be called.
+	 * @see org.springframework.beans.factory.InitializingBean
+	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
 	 */
 	String initMethod() default "";
 
@@ -219,12 +289,14 @@ public @interface Bean {
 	 * creation time).
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
 	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}. Note that the
-	 * {@link org.springframework.beans.factory.DisposableBean} and the
-	 * {@link java.io.Closeable}/{@link java.lang.AutoCloseable} interfaces will
-	 * nevertheless get detected and the corresponding destroy/close method invoked.
+	 * {@link org.springframework.beans.factory.DisposableBean} callback interface will
+	 * nevertheless get detected and the corresponding destroy method invoked: In other
+	 * words, {@code destroyMethod=""} only affects custom close/shutdown methods and
+	 * {@link java.io.Closeable}/{@link java.lang.AutoCloseable} declared close methods.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory, which is always the case for singletons but not guaranteed for any
 	 * other scope.
+	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;

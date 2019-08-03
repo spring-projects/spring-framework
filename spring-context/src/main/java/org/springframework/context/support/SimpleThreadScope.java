@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 
 /**
  * A simple thread-backed {@link Scope} implementation.
@@ -35,14 +36,13 @@ import org.springframework.core.NamedThreadLocal;
  * or through a {@link org.springframework.beans.factory.config.CustomScopeConfigurer} bean.
  *
  * <p>{@code SimpleThreadScope} <em>does not clean up any objects</em> associated with it.
- * As such, it is typically preferable to use
- * {@link org.springframework.web.context.request.RequestScope RequestScope}
- * in web environments.
+ * It is therefore typically preferable to use a request-bound scope implementation such
+ * as {@code org.springframework.web.context.request.RequestScope} in web environments,
+ * implementing the full lifecycle for scoped attributes (including reliable destruction).
  *
- * <p>For an implementation of a thread-based {@code Scope} with support for
- * destruction callbacks, refer to the
- * <a href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">
-*  Spring by Example Custom Thread Scope Module</a>.
+ * <p>For an implementation of a thread-based {@code Scope} with support for destruction
+ * callbacks, refer to
+ * <a href="https://www.springbyexample.org/examples/custom-thread-scope-module.html">Spring by Example</a>.
  *
  * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!
  *
@@ -59,7 +59,7 @@ public class SimpleThreadScope implements Scope {
 			new NamedThreadLocal<Map<String, Object>>("SimpleThreadScope") {
 				@Override
 				protected Map<String, Object> initialValue() {
-					return new HashMap<String, Object>();
+					return new HashMap<>();
 				}
 			};
 
@@ -67,15 +67,16 @@ public class SimpleThreadScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Map<String, Object> scope = this.threadScope.get();
-		Object object = scope.get(name);
-		if (object == null) {
-			object = objectFactory.getObject();
-			scope.put(name, object);
+		Object scopedObject = scope.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			scope.put(name, scopedObject);
 		}
-		return object;
+		return scopedObject;
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		Map<String, Object> scope = this.threadScope.get();
 		return scope.remove(name);
@@ -88,6 +89,7 @@ public class SimpleThreadScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}

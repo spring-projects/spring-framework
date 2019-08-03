@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -64,7 +65,7 @@ class ClassPathJaxb2TypeScanner {
 	private final String[] packagesToScan;
 
 
-	public ClassPathJaxb2TypeScanner(ClassLoader classLoader, String... packagesToScan) {
+	public ClassPathJaxb2TypeScanner(@Nullable ClassLoader classLoader, String... packagesToScan) {
 		Assert.notEmpty(packagesToScan, "'packagesToScan' must not be empty");
 		this.resourcePatternResolver = new PathMatchingResourcePatternResolver(classLoader);
 		this.packagesToScan = packagesToScan;
@@ -77,7 +78,7 @@ class ClassPathJaxb2TypeScanner {
 	 */
 	public Class<?>[] scanPackages() throws UncategorizedMappingException {
 		try {
-			List<Class<?>> jaxb2Classes = new ArrayList<Class<?>>();
+			List<Class<?>> jaxb2Classes = new ArrayList<>();
 			for (String packageToScan : this.packagesToScan) {
 				String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 						ClassUtils.convertClassNameToResourcePath(packageToScan) + RESOURCE_PATTERN;
@@ -87,12 +88,13 @@ class ClassPathJaxb2TypeScanner {
 					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 					if (isJaxb2Class(metadataReader, metadataReaderFactory)) {
 						String className = metadataReader.getClassMetadata().getClassName();
-						Class<?> jaxb2AnnotatedClass = this.resourcePatternResolver.getClassLoader().loadClass(className);
+						Class<?> jaxb2AnnotatedClass =
+								ClassUtils.forName(className, this.resourcePatternResolver.getClassLoader());
 						jaxb2Classes.add(jaxb2AnnotatedClass);
 					}
 				}
 			}
-			return jaxb2Classes.toArray(new Class<?>[jaxb2Classes.size()]);
+			return ClassUtils.toClassArray(jaxb2Classes);
 		}
 		catch (IOException ex) {
 			throw new UncategorizedMappingException("Failed to scan classpath for unlisted classes", ex);

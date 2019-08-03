@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -53,6 +55,7 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  */
 public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private final List<ModelAndViewResolver> mavResolvers;
 
 	private final ModelAttributeMethodProcessor modelAttributeProcessor = new ModelAttributeMethodProcessor(true);
@@ -61,7 +64,7 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 	/**
 	 * Create a new instance.
 	 */
-	public ModelAndViewResolverMethodReturnValueHandler(List<ModelAndViewResolver> mavResolvers) {
+	public ModelAndViewResolverMethodReturnValueHandler(@Nullable List<ModelAndViewResolver> mavResolvers) {
 		this.mavResolvers = mavResolvers;
 	}
 
@@ -75,13 +78,14 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (this.mavResolvers != null) {
 			for (ModelAndViewResolver mavResolver : this.mavResolvers) {
 				Class<?> handlerType = returnType.getContainingClass();
 				Method method = returnType.getMethod();
+				Assert.state(method != null, "No handler method");
 				ExtendedModelMap model = (ExtendedModelMap) mavContainer.getModel();
 				ModelAndView mav = mavResolver.resolveModelAndView(method, handlerType, returnValue, model, webRequest);
 				if (mav != ModelAndViewResolver.UNRESOLVED) {
