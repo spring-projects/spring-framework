@@ -282,10 +282,10 @@ public abstract class CollectionUtils {
 				candidate = elem;
 			}
 			else if (candidate != elem) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
