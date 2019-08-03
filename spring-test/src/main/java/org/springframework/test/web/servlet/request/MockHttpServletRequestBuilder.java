@@ -715,18 +715,16 @@ public class MockHttpServletRequestBuilder
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
 		if (map.size() > 0) {
-			request.setQueryString(request.getQueryString() == null ? "" : request.getQueryString());
+			request.setQueryString((request.getQueryString() == null) ? "" : request.getQueryString());
 		}
 		map.forEach((key, values) -> {
 			StringBuilder valueString = new StringBuilder();
-			for (String s : values) {
-				valueString.append(key).append((s != null ? "=" + s : "")).append("&");
-			}
-			valueString = new StringBuilder(valueString.substring(0, valueString.length() - 1));
-			values.forEach(value -> {
+			for (String value : values) {
+				valueString.append(key).append(((value != null) ? ("=" + value) : "")).append("&");
 				value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
 				request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
-			});
+			}
+			valueString = new StringBuilder(valueString.substring(0, valueString.length() - 1));
 			if (request.getQueryString() != null && !request.getQueryString().contains(valueString)) {
 				request.setQueryString(request.getQueryString() + valueString);
 			}
