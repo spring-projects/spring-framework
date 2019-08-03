@@ -214,7 +214,6 @@ public class CollectionUtilsTests {
     public void testHasUniqueObject2() {
         List<Integer> list1 = new ArrayList<>();
         list1.add(1);
-        list1.add(1);
         System.out.println(CollectionUtils.hasUniqueObject(list1));
 
         List<Integer> list2 = new ArrayList<>();
