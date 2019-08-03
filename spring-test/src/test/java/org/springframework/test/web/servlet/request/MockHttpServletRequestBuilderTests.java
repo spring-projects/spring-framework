@@ -234,18 +234,28 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterToQueryList() {
+	public void requestParameterToQuery() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.param("foo", "bar");
+		this.builder.param("foo", "baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		System.out.println(request.getParameterMap());
-		System.out.println(request.getRequestURI());
-		System.out.println(request.getQueryString());
+		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
+	}
 
-		assertThat(request.getQueryString()).isEqualTo("foo=bar");
-		assertThat(request.getParameter("foo")).isEqualTo("bar");
+	@Test
+	public void requestParameterToQueryList() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		this.builder.param("foo[0]", "bar");
+		this.builder.param("foo[1]", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getQueryString()).isEqualTo("foo%5B0%5D=bar&foo%5B1%5D=baz");
+		assertThat(request.getParameter("foo[0]")).isEqualTo("bar");
+		assertThat(request.getParameter("foo[1]")).isEqualTo("baz");
 	}
 
 	@Test
@@ -264,8 +274,6 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Map<String, String[]> parameterMap = request.getParameterMap();
-
-		System.out.println(parameterMap.get("foo"));
 
 		assertThat(parameterMap.get("foo")).isEqualTo(new String[] {null});
 		assertThat(request.getQueryString()).isEqualTo("foo");
