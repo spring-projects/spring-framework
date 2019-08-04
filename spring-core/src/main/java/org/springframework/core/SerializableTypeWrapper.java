@@ -91,7 +91,7 @@ final class SerializableTypeWrapper {
 	public static <T extends Type> T unwrap(T type) {
 		Type unwrapped = type;
 		while (unwrapped instanceof SerializableTypeProxy) {
-			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
+			unwrapped = ((SerializableTypeProxy) unwrapped).getTypeProvider().getType();
 		}
 		return (unwrapped != null ? (T) unwrapped : type);
 	}
