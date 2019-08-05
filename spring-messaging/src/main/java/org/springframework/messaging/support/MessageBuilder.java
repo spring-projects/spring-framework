@@ -99,6 +99,7 @@ public final class MessageBuilder<T> {
 		this.headerAccessor.removeHeaders(headerPatterns);
 		return this;
 	}
+
 	/**
 	 * Remove the value for the given header name.
 	 */
@@ -153,7 +154,11 @@ public final class MessageBuilder<T> {
 		}
 		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
 		if (this.payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
+			Message<?> originalMessage = null;
+			if (this.originalMessage != null && this.originalMessage instanceof ErrorMessage) {
+				originalMessage = ((ErrorMessage) this.originalMessage).getOriginalMessage();
+			}
+			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse, originalMessage);
 		}
 		else {
 			return new GenericMessage<>(this.payload, headersToUse);
@@ -165,6 +170,10 @@ public final class MessageBuilder<T> {
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
+	 *
+	 * If the provided message is an {@link ErrorMessage} - the
+	 * {@link ErrorMessage#originalMessage} link will be provided to the new instance.
+	 *
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {

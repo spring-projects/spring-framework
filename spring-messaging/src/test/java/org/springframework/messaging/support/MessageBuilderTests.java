@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.support;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,6 +109,20 @@ public class MessageBuilderTests {
 	}
 
 	@Test
+	public void createErrorMessageFromErrorMessage() {
+		Message<String> originalMessage = MessageBuilder.withPayload("test")
+				.setHeader("foo", "bar").build();
+		RuntimeException errorPayload = new RuntimeException();
+		ErrorMessage errorMessage1 = new ErrorMessage(errorPayload, Collections.singletonMap("baz", "42"), originalMessage);
+		Message<Throwable> errorMessage2 = MessageBuilder.fromMessage(errorMessage1).build();
+		assertThat(errorMessage2).isExactlyInstanceOf(ErrorMessage.class);
+		ErrorMessage actual = (ErrorMessage) errorMessage2;
+		assertThat(actual.getPayload()).isSameAs(errorPayload);
+		assertThat(actual.getHeaders().get("baz")).isEqualTo("42");
+		assertThat(actual.getOriginalMessage()).isSameAs(originalMessage);
+	}
+
+	@Test
 	public void createIdRegenerated() {
 		Message<String> message1 = MessageBuilder.withPayload("test")
 				.setHeader("foo", "bar").build();
@@ -119,20 +134,20 @@ public class MessageBuilderTests {
 	@Test
 	public void testRemove() {
 		Message<Integer> message1 = MessageBuilder.withPayload(1)
-			.setHeader("foo", "bar").build();
+				.setHeader("foo", "bar").build();
 		Message<Integer> message2 = MessageBuilder.fromMessage(message1)
-			.removeHeader("foo")
-			.build();
+				.removeHeader("foo")
+				.build();
 		assertThat(message2.getHeaders().containsKey("foo")).isFalse();
 	}
 
 	@Test
 	public void testSettingToNullRemoves() {
 		Message<Integer> message1 = MessageBuilder.withPayload(1)
-			.setHeader("foo", "bar").build();
+				.setHeader("foo", "bar").build();
 		Message<Integer> message2 = MessageBuilder.fromMessage(message1)
-			.setHeader("foo", null)
-			.build();
+				.setHeader("foo", null)
+				.build();
 		assertThat(message2.getHeaders().containsKey("foo")).isFalse();
 	}
 
@@ -192,7 +207,7 @@ public class MessageBuilderTests {
 
 		assertThatIllegalStateException().isThrownBy(() ->
 				accessor.setHeader("foo", "bar"))
-			.withMessageContaining("Already immutable");
+				.withMessageContaining("Already immutable");
 
 		assertThat(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class)).isSameAs(accessor);
 	}
