@@ -316,6 +316,15 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		B header(String headerName, String... headerValues);
 
 		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing MultiValueMap to copy from
+		 * @return this builder
+		 * @since 5.2.0
+		 * @see HttpHeaders#add(String, String)
+		 */
+		B headers(@Nullable MultiValueMap<String, String> headers);
+
+		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
@@ -426,6 +435,14 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		public BodyBuilder header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
+			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(@Nullable MultiValueMap<String, String> headers) {
+			if (headers != null) {
+				this.headers.putAll(headers);
 			}
 			return this;
 		}

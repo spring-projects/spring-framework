@@ -326,12 +326,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing HttpHeaders to copy from
+		 * @param headers the existing MultiValueMap to copy from
 		 * @return this builder
 		 * @since 4.1.2
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B headers(@Nullable HttpHeaders headers);
+		B headers(@Nullable MultiValueMap<String, String> headers);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -474,7 +474,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder headers(@Nullable HttpHeaders headers) {
+		public BodyBuilder headers(@Nullable MultiValueMap<String, String> headers) {
 			if (headers != null) {
 				this.headers.putAll(headers);
 			}
