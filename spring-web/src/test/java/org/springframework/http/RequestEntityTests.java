@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.util.UriTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -119,6 +120,29 @@ public class RequestEntityTests {
 		assertThat(responseHeaders.getFirst("If-None-Match")).isEqualTo(ifNoneMatch);
 		assertThat(responseHeaders.getFirst("Content-Length")).isEqualTo(String.valueOf(contentLength));
 		assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo(contentType.toString());
+
+		assertThat(responseEntity.getBody()).isNull();
+	}
+
+	@Test
+	public void headersMap() throws URISyntaxException {
+		String key = "key";
+		String value = "value";
+		String key2 = "key2";
+		List<String> values2 = Arrays.asList("value2", "value3");
+		LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add(key, value);
+		map.addAll(key2, values2);
+
+		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("https://example.com")).
+				headers(map).
+				build();
+
+		assertThat(responseEntity).isNotNull();
+		HttpHeaders responseHeaders = responseEntity.getHeaders();
+
+		assertThat(responseHeaders.getFirst(key)).isEqualTo(value);
+		assertThat(responseHeaders.get(key2)).isEqualTo(values2);
 
 		assertThat(responseEntity.getBody()).isNull();
 	}
