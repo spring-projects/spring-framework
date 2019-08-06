@@ -74,17 +74,19 @@ public class AnnotationAttributesTests {
 	@Test
 	public void unresolvableClassWithClassNotFoundException() throws Exception {
 		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getClass("unresolvableClass"))
-			.withMessageContaining("myclass");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
+			.withMessageContaining("myclass")
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
 	public void unresolvableClassWithLinkageError() throws Exception {
 		attributes.put("unresolvableClass", new LinkageError("myclass"));
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString("myclass"));
-		attributes.getClass("unresolvableClass");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
+			.withMessageContaining("myclass")
+			.withCauseInstanceOf(LinkageError.class);
 	}
 
 	@Test
@@ -134,30 +136,30 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getEnumWithNullAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum(null))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum(null))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
 	public void getEnumWithEmptyAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum(""))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum(""))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
 	public void getEnumWithUnknownAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum("bogus"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum("bogus"))
 			.withMessageContaining("Attribute 'bogus' not found");
 	}
 
 	@Test
 	public void getEnumWithTypeMismatch() {
 		attributes.put("color", "RED");
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum("color"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum("color"))
 			.withMessageContaining("Attribute 'color' is of type String, but Enum was expected");
 	}
 
