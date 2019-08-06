@@ -77,8 +77,16 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void unresolvableClass() throws Exception {
+	public void unresolvableClassWithClassNotFoundException() throws Exception {
 		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("myclass"));
+		attributes.getClass("unresolvableClass");
+	}
+
+	@Test
+	public void unresolvableClassWithLinkageError() throws Exception {
+		attributes.put("unresolvableClass", new LinkageError("myclass"));
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(containsString("myclass"));
 		attributes.getClass("unresolvableClass");

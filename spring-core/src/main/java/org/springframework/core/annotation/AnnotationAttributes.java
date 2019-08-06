@@ -353,10 +353,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertNotException(String attributeName, Object attributeValue) {
-		if (attributeValue instanceof Exception) {
+		if (attributeValue instanceof Throwable) {
 			throw new IllegalArgumentException(String.format(
 					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
-					attributeName, this.displayName, attributeValue), (Exception) attributeValue);
+					attributeName, this.displayName, attributeValue), (Throwable) attributeValue);
 		}
 	}
 
