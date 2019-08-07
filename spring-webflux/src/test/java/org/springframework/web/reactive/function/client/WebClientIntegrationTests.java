@@ -62,6 +62,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -92,7 +93,8 @@ class WebClientIntegrationTests {
 		return Stream.of(
 				new ReactorClientHttpConnector(),
 				new JettyClientHttpConnector(),
-				new HttpComponentsClientHttpConnector()
+				new HttpComponentsClientHttpConnector(),
+				new JdkClientHttpConnector()
 		);
 	}
 
