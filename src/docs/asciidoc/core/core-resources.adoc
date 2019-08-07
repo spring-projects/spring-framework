@@ -254,7 +254,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
 
 The following table summarizes the strategy for converting ``String``s to ``Resource``s:
@@ -274,7 +274,7 @@ The following table summarizes the strategy for converting ``String``s to ``Reso
   pass:specialcharacters,macros[<<resources-filesystemresource-caveats>>].]
 
 | http:
-| `http://myserver/logo.png`
+| `https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)
@@ -288,8 +288,8 @@ The following table summarizes the strategy for converting ``String``s to ``Reso
 [[resources-resourceloaderaware]]
 == The ResourceLoaderAware interface
 
-The `ResourceLoaderAware` interface is a special marker interface, identifying objects
-that expect to be provided with a `ResourceLoader` reference.
+The `ResourceLoaderAware` interface is a special callback interface which identifies
+components that expect to be provided with a `ResourceLoader` reference:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -593,7 +593,7 @@ entries in the classpath. When you build JARs with Ant, make sure that you do __
 activate the files-only switch of the JAR task. Also, classpath directories may not
 get exposed based on security policies in some environments, e.g. standalone apps on
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
-http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 Putting resources into a dedicated directory is highly recommendable here as well,

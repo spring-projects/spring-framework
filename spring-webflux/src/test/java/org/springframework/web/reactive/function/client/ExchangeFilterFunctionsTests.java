@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void andThen() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -67,7 +67,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void apply() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -86,7 +86,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void basicAuthenticationUsernamePassword() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 
 		ExchangeFunction exchange = r -> {
@@ -109,7 +109,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void basicAuthenticationAttributes() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com"))
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com"))
 				.attributes(basicAuthenticationCredentials("foo", "bar"))
 				.build();
 		ClientResponse response = mock(ClientResponse.class);
@@ -128,7 +128,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void basicAuthenticationAbsentAttributes() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 
 		ExchangeFunction exchange = r -> {
@@ -144,7 +144,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void statusHandlerMatch() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 
@@ -162,7 +162,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void statusHandlerNoMatch() {
-		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.create(GET, URI.create("https://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 

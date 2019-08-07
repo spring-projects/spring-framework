@@ -9,7 +9,7 @@
 [subs="verbatim,quotes"]
 ----
 	UriComponents uriComponents = UriComponentsBuilder
-			.fromUriString("http://example.com/hotels/{hotel}")  // <1>
+			.fromUriString("https://example.com/hotels/{hotel}")  // <1>
 			.queryParam("q", "{q}")  // <2>
 			.encode() // <3>
 			.build(); // <4>
@@ -28,7 +28,7 @@ The above can be consolidated into one chain and shortened with `buildAndExpand`
 [subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
-			.fromUriString("http://example.com/hotels/{hotel}")
+			.fromUriString("https://example.com/hotels/{hotel}")
 			.queryParam("q", "{q}")
 			.encode()
 			.buildAndExpand("Westin", "123")
@@ -41,7 +41,7 @@ It can be shortened further by going directly to URI (which implies encoding):
 [subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
-			.fromUriString("http://example.com/hotels/{hotel}")
+			.fromUriString("https://example.com/hotels/{hotel}")
 			.queryParam("q", "{q}")
 			.build("Westin", "123");
 ----
@@ -52,7 +52,7 @@ Or shorter further yet, with a full URI template:
 [subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
-			.fromUriString("http://example.com/hotels/{hotel}?q={q}")
+			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
 			.build("Westin", "123");
 ----
 
@@ -78,7 +78,7 @@ exposes shared configuration options.
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
-	String baseUrl = "http://example.org";
+	String baseUrl = "https://example.org";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VARIABLES);
 
@@ -93,7 +93,7 @@ exposes shared configuration options.
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
-	String baseUrl = "http://example.org";
+	String baseUrl = "https://example.org";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VARIABLES);
 
@@ -107,7 +107,7 @@ that holds configuration and preferences:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	String baseUrl = "http://example.com";
+	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
 
 	URI uri = uriBuilderFactory.uriString("/hotels/{hotel}")
@@ -180,7 +180,7 @@ the `UriBuilderFactory` strategy. Both can be configured with a custom strategy:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	String baseUrl = "http://example.com";
+	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
 

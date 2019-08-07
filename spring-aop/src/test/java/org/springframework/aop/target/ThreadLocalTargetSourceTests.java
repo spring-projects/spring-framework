@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.SideEffectBean;
 
@@ -34,25 +33,26 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class ThreadLocalTargetSourceTests {
 
-	private static final Resource CONTEXT = qualifiedResource(ThreadLocalTargetSourceTests.class, "context.xml");
-
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private DefaultListableBeanFactory beanFactory;
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				qualifiedResource(ThreadLocalTargetSourceTests.class, "context.xml"));
 	}
 
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
-	protected void tearDown() {
+	protected void close() {
 		this.beanFactory.destroySingletons();
 	}
+
 
 	/**
 	 * Check we can use two different ThreadLocalTargetSources
@@ -141,7 +141,7 @@ public class ThreadLocalTargetSourceTests {
 	}
 
 	/**
-	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE
+	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE.
 	 */
 	@Test
 	public void testReuseDestroyedTarget() {

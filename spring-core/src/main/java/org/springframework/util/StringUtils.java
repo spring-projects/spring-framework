@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * Miscellaneous {@link String} utility methods.
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
  * for a more comprehensive suite of {@code String} utilities.
  *
  * <p>This class delivers some simple functionality that should really be
@@ -75,15 +75,20 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check whether the given {@code String} is empty.
+	 * Check whether the given object (possibly a {@code String}) is empty.
+	 * This is effectly a shortcut for {@code !hasLength(String)}.
 	 * <p>This method accepts any Object as an argument, comparing it to
 	 * {@code null} and the empty String. As a consequence, this method
 	 * will never return {@code true} for a non-null non-String object.
 	 * <p>The Object signature is useful for general attribute handling code
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
-	 * @param str the candidate String
+	 * <p><b>Note: If the object is typed to {@code String} upfront, prefer
+	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
+	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
+	 * @see #hasLength(String)
+	 * @see #hasText(String)
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
@@ -136,6 +141,8 @@ public abstract class StringUtils {
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null},
 	 * its length is greater than 0, and it does not contain whitespace only
+	 * @see #hasText(String)
+	 * @see #hasLength(CharSequence)
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
@@ -151,6 +158,8 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code String} is not {@code null}, its
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
+	 * @see #hasLength(String)
+	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
 		return (str != null && !str.isEmpty() && containsText(str));
@@ -773,7 +782,9 @@ public abstract class StringUtils {
 		String[] tokens = tokenizeLocaleSource(localeValue);
 		if (tokens.length == 1) {
 			Locale resolved = Locale.forLanguageTag(localeValue);
-			return (resolved.getLanguage().length() > 0 ? resolved : null);
+			if (resolved.getLanguage().length() > 0) {
+				return resolved;
+			}
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
@@ -820,7 +831,7 @@ public abstract class StringUtils {
 			}
 		}
 
-		if ("".equals(variant) && country.startsWith("#")) {
+		if (variant.isEmpty() && country.startsWith("#")) {
 			variant = country;
 			country = "";
 		}
@@ -870,6 +881,28 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 	// Convenience methods for working with String arrays
 	//---------------------------------------------------------------------
+
+	/**
+	 * Copy the given {@link Collection} into a {@code String} array.
+	 * <p>The {@code Collection} must contain {@code String} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Collection<String> collection) {
+		return (collection != null ? collection.toArray(new String[0]) : new String[0]);
+	}
+
+	/**
+	 * Copy the given {@link Enumeration} into a {@code String} array.
+	 * <p>The {@code Enumeration} must contain {@code String} elements only.
+	 * @param enumeration the {@code Enumeration} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Enumeration<String> enumeration) {
+		return (enumeration != null ? toStringArray(Collections.list(enumeration)) : new String[0]);
+	}
 
 	/**
 	 * Append the given {@code String} to the given {@code String} array,
@@ -946,9 +979,9 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Turn given source {@code String} array into sorted array.
-	 * @param array the source array
-	 * @return the sorted array (never {@code null})
+	 * Sort the given {@code String} array if necessary.
+	 * @param array the original array (potentially empty)
+	 * @return the array in sorted form (never {@code null})
 	 */
 	public static String[] sortStringArray(String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
@@ -957,26 +990,6 @@ public abstract class StringUtils {
 
 		Arrays.sort(array);
 		return array;
-	}
-
-	/**
-	 * Copy the given {@code Collection} into a {@code String} array.
-	 * <p>The {@code Collection} must contain {@code String} elements only.
-	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[0]);
-	}
-
-	/**
-	 * Copy the given Enumeration into a {@code String} array.
-	 * The Enumeration must contain {@code String} elements only.
-	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
-		return toStringArray(Collections.list(enumeration));
 	}
 
 	/**
@@ -1191,7 +1204,7 @@ public abstract class StringUtils {
 		}
 
 		List<String> result = new ArrayList<>();
-		if ("".equals(delimiter)) {
+		if (delimiter.isEmpty()) {
 			for (int i = 0; i < str.length(); i++) {
 				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
 			}

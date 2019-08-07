@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for collections that is aware of Java 5, Java 6, and Spring collection types.
+ * Factory for collections that is aware of common Java and Spring collection types.
  *
  * <p>Mainly for internal use within the framework.
  *
@@ -115,7 +115,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})
 	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<>();
@@ -141,7 +141,7 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
 	 * @throws IllegalArgumentException if the supplied {@code collectionType}
@@ -160,7 +160,7 @@ public abstract class CollectionFactory {
 	 * supplied {@code elementType} is an enum type matching type {@code E}.
 	 * As an alternative, the caller may wish to treat the return value as a
 	 * raw collection or collection of {@link Object}.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param elementType the collection's element type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
@@ -174,7 +174,7 @@ public abstract class CollectionFactory {
 	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
 	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({ "unchecked", "cast" })
+	@SuppressWarnings({"unchecked", "cast"})
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
@@ -237,7 +237,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
@@ -276,7 +276,7 @@ public abstract class CollectionFactory {
 	 * may wish to treat the return value as a raw map or map keyed by
 	 * {@link Object}. Similarly, type safety cannot be enforced if the
 	 * desired {@code mapType} is {@link MultiValueMap}.
-	 * @param mapType the desired type of the target map; never {@code null}
+	 * @param mapType the desired type of the target map (never {@code null})
 	 * @param keyType the map's key type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
@@ -290,7 +290,7 @@ public abstract class CollectionFactory {
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {

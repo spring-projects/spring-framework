@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see BeanDefinition#getPropertyValues()
- * @see org.springframework.beans.factory.BeanFactory#getBean
+ * @see org.springframework.beans.factory.BeanFactory#getBean(String)
  */
 public class RuntimeBeanReference implements BeanReference {
 
@@ -39,9 +39,7 @@ public class RuntimeBeanReference implements BeanReference {
 
 
 	/**
-	 * Create a new RuntimeBeanReference to the given bean name,
-	 * without explicitly marking it as reference to a bean in
-	 * the parent factory.
+	 * Create a new RuntimeBeanReference to the given bean name.
 	 * @param beanName name of the target bean
 	 */
 	public RuntimeBeanReference(String beanName) {
@@ -50,11 +48,10 @@ public class RuntimeBeanReference implements BeanReference {
 
 	/**
 	 * Create a new RuntimeBeanReference to the given bean name,
-	 * with the option to mark it as reference to a bean in
-	 * the parent factory.
+	 * with the option to mark it as reference to a bean in the parent factory.
 	 * @param beanName name of the target bean
-	 * @param toParent whether this is an explicit reference to
-	 * a bean in the parent factory
+	 * @param toParent whether this is an explicit reference to a bean in the
+	 * parent factory
 	 */
 	public RuntimeBeanReference(String beanName, boolean toParent) {
 		Assert.hasText(beanName, "'beanName' must not be empty");
@@ -69,8 +66,7 @@ public class RuntimeBeanReference implements BeanReference {
 	}
 
 	/**
-	 * Return whether this is an explicit reference to a bean
-	 * in the parent factory.
+	 * Return whether this is an explicit reference to a bean in the parent factory.
 	 */
 	public boolean isToParent() {
 		return this.toParent;

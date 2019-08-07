@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -110,7 +108,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * @return indicates completion or error
 	 * @since 5.0.2
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter,
 			@Nullable MethodParameter actualParam, ServerWebExchange exchange) {
 
@@ -128,32 +126,30 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = ((bodyClass == null || bodyClass.equals(Object.class)) && body != null ?
+			elementType = ((bodyClass == null || bodyClass == Object.class) && body != null ?
 					ResolvableType.forInstance(body) : bodyType);
 		}
 
-		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
+		if (elementType.getRawClass() == void.class || elementType.getRawClass() == Void.class) {
 			return Mono.from((Publisher<Void>) publisher);
 		}
 
-		ServerHttpRequest request = exchange.getRequest();
-		ServerHttpResponse response = exchange.getResponse();
 		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
 					return writer.write((Publisher) publisher, actualType, elementType,
-							bestMediaType, request, response, Collections.emptyMap());
+							bestMediaType, exchange.getRequest(), exchange.getResponse(),
+							Collections.emptyMap());
 				}
 			}
 		}
-		else {
-			if (getMediaTypesFor(elementType).isEmpty()) {
-				return Mono.error(new IllegalStateException("No writer for : " + elementType));
-			}
-		}
 
-		return Mono.error(new NotAcceptableStatusException(getMediaTypesFor(elementType)));
+		List<MediaType> mediaTypes = getMediaTypesFor(elementType);
+		if (bestMediaType == null && mediaTypes.isEmpty()) {
+			return Mono.error(new IllegalStateException("No HttpMessageWriter for " + elementType));
+		}
+		return Mono.error(new NotAcceptableStatusException(mediaTypes));
 	}
 
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {

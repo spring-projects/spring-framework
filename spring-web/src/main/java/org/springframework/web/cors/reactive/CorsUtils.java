@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Utility class for CORS reactive request handling based on the
- * <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
+ * <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -55,7 +55,7 @@ public abstract class CorsUtils {
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of a cross-origin request
 	 * <p><strong>Note:</strong> this method uses values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a

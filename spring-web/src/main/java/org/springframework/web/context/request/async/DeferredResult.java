@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,6 +48,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Juergen Hoeller
  * @author Rob Winch
  * @since 3.2
+ * @param <T> the result type
  */
 public class DeferredResult<T> {
 
@@ -57,7 +58,7 @@ public class DeferredResult<T> {
 
 
 	@Nullable
-	private final Long timeout;
+	private final Long timeoutValue;
 
 	private final Object timeoutResult;
 
@@ -82,25 +83,25 @@ public class DeferredResult<T> {
 	}
 
 	/**
-	 * Create a DeferredResult with a timeout value.
+	 * Create a DeferredResult with a custom timeout value.
 	 * <p>By default not set in which case the default configured in the MVC
 	 * Java Config or the MVC namespace is used, or if that's not set, then the
 	 * timeout depends on the default of the underlying server.
-	 * @param timeout timeout value in milliseconds
+	 * @param timeoutValue timeout value in milliseconds
 	 */
-	public DeferredResult(Long timeout) {
-		this(timeout, RESULT_NONE);
+	public DeferredResult(Long timeoutValue) {
+		this(timeoutValue, RESULT_NONE);
 	}
 
 	/**
 	 * Create a DeferredResult with a timeout value and a default result to use
 	 * in case of timeout.
-	 * @param timeout timeout value in milliseconds (ignored if {@code null})
+	 * @param timeoutValue timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(@Nullable Long timeout, Object timeoutResult) {
+	public DeferredResult(@Nullable Long timeoutValue, Object timeoutResult) {
+		this.timeoutValue = timeoutValue;
 		this.timeoutResult = timeoutResult;
-		this.timeout = timeout;
 	}
 
 
@@ -141,7 +142,7 @@ public class DeferredResult<T> {
 	 */
 	@Nullable
 	final Long getTimeoutValue() {
-		return this.timeout;
+		return this.timeoutValue;
 	}
 
 	/**

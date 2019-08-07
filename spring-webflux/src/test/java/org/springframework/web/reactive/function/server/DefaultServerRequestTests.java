@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,7 +68,7 @@ public class DefaultServerRequestTests {
 	public void method() throws Exception {
 		HttpMethod method = HttpMethod.HEAD;
 		DefaultServerRequest request = new DefaultServerRequest(
-				MockServerWebExchange.from(MockServerHttpRequest.method(method, "http://example.com")),
+				MockServerWebExchange.from(MockServerHttpRequest.method(method, "https://example.com")),
 				this.messageReaders);
 
 		assertEquals(method, request.method());
@@ -104,7 +104,7 @@ public class DefaultServerRequestTests {
 	@Test
 	public void attribute() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.method(HttpMethod.GET, "http://example.com"));
+				MockServerHttpRequest.method(HttpMethod.GET, "https://example.com"));
 		exchange.getAttributes().put("foo", "bar");
 
 		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
@@ -115,7 +115,7 @@ public class DefaultServerRequestTests {
 	@Test
 	public void queryParams() throws Exception {
 		DefaultServerRequest request = new DefaultServerRequest(
-				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo=bar")),
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo=bar")),
 				this.messageReaders);
 
 		assertEquals(Optional.of("bar"), request.queryParam("foo"));
@@ -124,7 +124,7 @@ public class DefaultServerRequestTests {
 	@Test
 	public void emptyQueryParam() throws Exception {
 		DefaultServerRequest request = new DefaultServerRequest(
-				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo")),
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
 
 		assertEquals(Optional.of(""), request.queryParam("foo"));
@@ -133,7 +133,7 @@ public class DefaultServerRequestTests {
 	@Test
 	public void absentQueryParam() throws Exception {
 		DefaultServerRequest request = new DefaultServerRequest(
-				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo")),
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
 
 		assertEquals(Optional.empty(), request.queryParam("bar"));
@@ -141,7 +141,7 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void pathVariable() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
@@ -153,7 +153,7 @@ public class DefaultServerRequestTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void pathVariableNotFound() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
@@ -164,7 +164,7 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void pathVariables() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
@@ -192,7 +192,7 @@ public class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest
-						.method(HttpMethod.GET, "http://example.com?foo=bar")
+						.method(HttpMethod.GET, "https://example.com?foo=bar")
 						.headers(httpHeaders)),
 				this.messageReaders);
 
@@ -208,7 +208,7 @@ public class DefaultServerRequestTests {
 	public void cookies() {
 		HttpCookie cookie = new HttpCookie("foo", "bar");
 		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.method(HttpMethod.GET, "http://example.com").cookie(cookie));
+				MockServerHttpRequest.method(HttpMethod.GET, "https://example.com").cookie(cookie));
 
 		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
 
@@ -230,7 +230,7 @@ public class DefaultServerRequestTests {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
@@ -249,7 +249,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
@@ -268,7 +268,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
@@ -288,7 +288,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
@@ -307,7 +307,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
@@ -327,7 +327,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.method(HttpMethod.GET, "https://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
@@ -348,7 +348,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com")
+				.method(HttpMethod.GET, "https://example.com")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
@@ -382,7 +382,7 @@ public class DefaultServerRequestTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/form-data; boundary=12345");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://example.com")
+				.method(HttpMethod.GET, "https://example.com")
 				.headers(httpHeaders)
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());

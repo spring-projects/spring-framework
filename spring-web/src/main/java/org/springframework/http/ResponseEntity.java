@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#getForEntity getForEntity()} and
  * {@link org.springframework.web.client.RestTemplate#exchange exchange()}:
  * <pre class="code">
- * ResponseEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * ResponseEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * HttpStatus statusCode = entity.getStatusCode();
@@ -166,7 +166,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	@Override
 	public int hashCode() {
-		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.status));
+		return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.status));
 	}
 
 	@Override

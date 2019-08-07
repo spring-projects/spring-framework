@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="https://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -176,7 +176,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * <p>As of Spring Framework 5.0.7, there is no parameter name configured
 	 * by default.
 	 * @since 4.1
-	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
 	 * @deprecated Will be removed as of Spring Framework 5.1, use
 	 * <a href="https://docs.spring.io/spring/docs/5.0.x/spring-framework-reference/web.html#mvc-cors">CORS</a> instead.
 	 */
@@ -190,7 +190,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		if (this.jsonpParameterNames != null) {
 			for (String name : this.jsonpParameterNames) {
 				String value = request.getParameter(name);
-				if (StringUtils.isEmpty(value)) {
+				if (!StringUtils.hasLength(value)) {
 					continue;
 				}
 				if (!isValidJsonpQueryParam(value)) {

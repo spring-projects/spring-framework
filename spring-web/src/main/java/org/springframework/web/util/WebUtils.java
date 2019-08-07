@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -678,7 +678,7 @@ public abstract class WebUtils {
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
 	 * <p><strong>Note:</strong> this method may use values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
@@ -709,7 +709,7 @@ public abstract class WebUtils {
 	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
 	 * @code X-Forwarded-Port} headers.
 	 * <p><strong>Note:</strong> this method uses values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a

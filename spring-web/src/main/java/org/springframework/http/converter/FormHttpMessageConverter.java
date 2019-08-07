@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,7 +70,7 @@ import org.springframework.util.StringUtils;
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
- * template.postForLocation("http://example.com/myForm", form);
+ * template.postForLocation("https://example.com/myForm", form);
  * </pre>
  *
  * <p>The following snippet shows how to do a file upload:
@@ -78,7 +78,7 @@ import org.springframework.util.StringUtils;
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
- * template.postForLocation("http://example.com/myFileUpload", parts);
+ * template.postForLocation("https://example.com/myFileUpload", parts);
  * </pre>
  *
  * <p>Some methods in this class were inspired by
@@ -196,7 +196,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * its filename parameter) will be encoded based on the setting of
 	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.
 	 * @since 4.1.1
-	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
 	public void setMultipartCharset(Charset charset) {
 		this.multipartCharset = charset;
@@ -279,8 +279,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
 		}
-		for (String name : map.keySet()) {
-			for (Object value : map.get(name)) {
+		for (List<?> values : map.values()) {
+			for (Object value : values) {
 				if (value != null && !(value instanceof String)) {
 					return true;
 				}

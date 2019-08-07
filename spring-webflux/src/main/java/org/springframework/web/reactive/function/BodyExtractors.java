@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -76,7 +76,7 @@ public abstract class BodyExtractors {
 	 * <pre class="code">
 	 * Mono&lt;Map&lt;String, String&gt;&gt; body = this.webClient
 	 *  .get()
-	 *  .uri("http://example.com")
+	 *  .uri("https://example.com")
 	 *  .exchange()
 	 *  .flatMap(r -> r.body(toMono(new ParameterizedTypeReference&lt;Map&lt;String,String&gt;&gt;() {})));
 	 * </pre>
@@ -126,7 +126,7 @@ public abstract class BodyExtractors {
 	 * <pre class="code">
 	 * Flux&lt;ServerSentEvent&lt;String&gt;&gt; body = this.webClient
 	 *  .get()
-	 *  .uri("http://example.com")
+	 *  .uri("https://example.com")
 	 *  .exchange()
 	 *  .flatMap(r -> r.body(toFlux(new ParameterizedTypeReference&lt;ServerSentEvent&lt;String&gt;&gt;() {})));
 	 * </pre>

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @param <T> the type of objects that this RequestCondition can be combined
+ * with and compared to
  */
 public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
 
@@ -42,7 +44,7 @@ public abstract class AbstractRequestCondition<T extends AbstractRequestConditio
 	/**
 	 * Return the discrete items a request condition is composed of.
 	 * <p>For example URL patterns, HTTP request methods, param expressions, etc.
-	 * @return a collection of objects, never {@code null}
+	 * @return a collection of objects (never {@code null})
 	 */
 	protected abstract Collection<?> getContent();
 

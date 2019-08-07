@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.web.method.ControllerAdviceBean;
  * {@link org.springframework.web.method.ControllerAdviceBean ControllerAdviceBean}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.2
  */
 class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyAdvice<Object> {
@@ -49,7 +50,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 
 	/**
 	 * Create an instance from a list of objects that are either of type
-	 * {@code ControllerAdviceBean} or {@code RequestBodyAdvice}.
+	 * {@code RequestBodyAdvice} or {@code ResponseBodyAdvice}.
 	 */
 	public RequestResponseBodyAdviceChain(@Nullable List<Object> requestResponseBodyAdvice) {
 		if (requestResponseBodyAdvice != null) {
@@ -60,7 +61,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 					if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
 						this.requestBodyAdvice.add(advice);
 					}
-					else if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
+					if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 						this.responseBodyAdvice.add(advice);
 					}
 				}

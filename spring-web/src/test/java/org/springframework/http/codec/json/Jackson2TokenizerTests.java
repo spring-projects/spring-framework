@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,9 @@ import static java.util.Collections.*;
  */
 public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase {
 
-	private ObjectMapper objectMapper;
-
 	private JsonFactory jsonFactory;
+
+	private ObjectMapper objectMapper;
 
 
 	@Before
@@ -55,6 +55,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 		this.jsonFactory = new JsonFactory();
 		this.objectMapper = new ObjectMapper(this.jsonFactory);
 	}
+
 
 	@Test
 	public void doNotTokenizeArrayElements() {
@@ -178,7 +179,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
 	}
 
-	@Test(expected = DecodingException.class) // SPR-16521
+	@Test(expected = DecodingException.class)  // SPR-16521
 	public void jsonEOFExceptionIsWrappedAsDecodingError() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, false);
@@ -187,11 +188,9 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 
 
 	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
-
 		Flux<TokenBuffer> tokenBufferFlux = Jackson2Tokenizer.tokenize(
 				Flux.fromIterable(source).map(this::stringBuffer),
-				this.jsonFactory,
-				tokenizeArrayElements);
+				this.jsonFactory, tokenizeArrayElements);
 
 		Flux<String> result = tokenBufferFlux
 				.map(tokenBuffer -> {
@@ -228,4 +227,5 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 			}
 		}
 	}
+
 }

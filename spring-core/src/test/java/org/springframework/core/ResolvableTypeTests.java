@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -135,29 +135,41 @@ public class ResolvableTypeTests {
 		assertTrue(type.isAssignableFrom(String.class));
 	}
 
+	@Test  // gh-23321
+	public void forRawClassAssignableFromTypeVariable() throws Exception {
+		ResolvableType typeVariable = ResolvableType.forClass(ExtendsList.class).as(List.class).getGeneric();
+		ResolvableType raw = ResolvableType.forRawClass(CharSequence.class);
+		assertThat(raw.resolve(), equalTo(CharSequence.class));
+		assertThat(typeVariable.resolve(), equalTo(CharSequence.class));
+		assertTrue(raw.resolve().isAssignableFrom(typeVariable.resolve()));
+		assertTrue(typeVariable.resolve().isAssignableFrom(raw.resolve()));
+		assertTrue(raw.isAssignableFrom(typeVariable));
+		assertTrue(typeVariable.isAssignableFrom(raw));
+	}
+
 	@Test
-	public void forInstanceMustNotBeNull() {
+	public void forInstanceMustNotBeNull() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Instance must not be null");
 		ResolvableType.forInstance(null);
 	}
 
 	@Test
-	public void forInstanceNoProvider() {
+	public void forInstanceNoProvider() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new Object());
 		assertThat(type.getType(), equalTo(Object.class));
 		assertThat(type.resolve(), equalTo(Object.class));
 	}
 
 	@Test
-	public void forInstanceProvider() {
+	public void forInstanceProvider() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<>(String.class));
 		assertThat(type.getRawClass(), equalTo(MyGenericInterfaceType.class));
 		assertThat(type.getGeneric().resolve(), equalTo(String.class));
 	}
 
 	@Test
-	public void forInstanceProviderNull() {
+	public void forInstanceProviderNull() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(null));
 		assertThat(type.getType(), equalTo(MyGenericInterfaceType.class));
 		assertThat(type.resolve(), equalTo(MyGenericInterfaceType.class));
@@ -431,12 +443,8 @@ public class ResolvableTypeTests {
 			interfaces.add(interfaceType.toString());
 		}
 		assertThat(interfaces.toString(), equalTo(
-				  "["
-				+ "java.io.Serializable, "
-				+ "java.lang.Cloneable, "
-				+ "java.util.List<java.lang.CharSequence>, "
-				+ "java.util.RandomAccess"
-				+ "]"));
+				"[java.io.Serializable, java.lang.Cloneable, " +
+				"java.util.List<java.lang.CharSequence>, java.util.RandomAccess]"));
 	}
 
 	@Test

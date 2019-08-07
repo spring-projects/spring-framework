@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ public class RedirectViewTests {
 
 	@Test
 	public void defaultStatusCode() {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		RedirectView view = new RedirectView(url);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
@@ -68,7 +68,7 @@ public class RedirectViewTests {
 
 	@Test
 	public void customStatusCode() {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		RedirectView view = new RedirectView(url, HttpStatus.FOUND);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.FOUND, this.exchange.getResponse().getStatusCode());
@@ -95,44 +95,44 @@ public class RedirectViewTests {
 	public void remoteHost() {
 		RedirectView view = new RedirectView("");
 
-		assertFalse(view.isRemoteHost("http://url.somewhere.com"));
+		assertFalse(view.isRemoteHost("https://url.somewhere.com"));
 		assertFalse(view.isRemoteHost("/path"));
 		assertFalse(view.isRemoteHost("http://url.somewhereelse.com"));
 
 		view.setHosts("url.somewhere.com");
 
-		assertFalse(view.isRemoteHost("http://url.somewhere.com"));
+		assertFalse(view.isRemoteHost("https://url.somewhere.com"));
 		assertFalse(view.isRemoteHost("/path"));
 		assertTrue(view.isRemoteHost("http://url.somewhereelse.com"));
 	}
 
 	@Test
 	public void expandUriTemplateVariablesFromModel() {
-		String url = "http://url.somewhere.com?foo={foo}";
+		String url = "https://url.somewhere.com?foo={foo}";
 		Map<String, String> model = Collections.singletonMap("foo", "bar");
 		RedirectView view = new RedirectView(url);
 		view.render(model, MediaType.TEXT_HTML, this.exchange).block();
-		assertEquals(URI.create("http://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
+		assertEquals(URI.create("https://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
 	@Test
 	public void expandUriTemplateVariablesFromExchangeAttribute() {
-		String url = "http://url.somewhere.com?foo={foo}";
+		String url = "https://url.somewhere.com?foo={foo}";
 		Map<String, String> attributes = Collections.singletonMap("foo", "bar");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, attributes);
 		RedirectView view = new RedirectView(url);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, exchange).block();
-		assertEquals(URI.create("http://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
+		assertEquals(URI.create("https://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
 	@Test
 	public void propagateQueryParams() throws Exception {
-		RedirectView view = new RedirectView("http://url.somewhere.com?foo=bar#bazz");
+		RedirectView view = new RedirectView("https://url.somewhere.com?foo=bar#bazz");
 		view.setPropagateQuery(true);
-		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d"));
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://url.somewhere.com?a=b&c=d"));
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
-		assertEquals(URI.create("http://url.somewhere.com?foo=bar&a=b&c=d#bazz"),
+		assertEquals(URI.create("https://url.somewhere.com?foo=bar&a=b&c=d#bazz"),
 				this.exchange.getResponse().getHeaders().getLocation());
 	}
 

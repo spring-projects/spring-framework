@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,7 +56,7 @@ import org.springframework.web.util.WebUtils;
 public class CookieLocaleResolver extends CookieGenerator implements LocaleContextResolver {
 
 	/**
-	 * The name of the request attribute that holds the Locale.
+	 * The name of the request attribute that holds the {@code Locale}.
 	 * <p>Only used for overriding a cookie value if the locale has been
 	 * changed in the course of the current request!
 	 * <p>Use {@code RequestContext(Utils).getLocale()}
@@ -67,7 +67,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	public static final String LOCALE_REQUEST_ATTRIBUTE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
 	/**
-	 * The name of the request attribute that holds the TimeZone.
+	 * The name of the request attribute that holds the {@code TimeZone}.
 	 * <p>Only used for overriding a cookie value if the locale has been
 	 * changed in the course of the current request!
 	 * <p>Use {@code RequestContext(Utils).getTimeZone()}
@@ -123,14 +123,14 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Set a fixed Locale that this resolver will return if no cookie found.
+	 * Set a fixed locale that this resolver will return if no cookie found.
 	 */
 	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 
 	/**
-	 * Return the fixed Locale that this resolver will return if no cookie found,
+	 * Return the fixed locale that this resolver will return if no cookie found,
 	 * if any.
 	 */
 	@Nullable
@@ -139,7 +139,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Set a fixed TimeZone that this resolver will return if no cookie found.
+	 * Set a fixed time zone that this resolver will return if no cookie found.
 	 * @since 4.0
 	 */
 	public void setDefaultTimeZone(@Nullable TimeZone defaultTimeZone) {
@@ -147,7 +147,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Return the fixed TimeZone that this resolver will return if no cookie found,
+	 * Return the fixed time zone that this resolver will return if no cookie found,
 	 * if any.
 	 * @since 4.0
 	 */
@@ -284,6 +284,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @param locale the locale to stringify
 	 * @return a String representation for the given locale
 	 * @since 4.3
+	 * @see #isLanguageTagCompliant()
 	 */
 	protected String toLocaleValue(Locale locale) {
 		return (isLanguageTagCompliant() ? locale.toLanguageTag() : locale.toString());
@@ -310,7 +311,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Determine the default time zone for the given request,
-	 * Called if no TimeZone cookie has been found.
+	 * Called if no time zone cookie has been found.
 	 * <p>The default implementation returns the specified default time zone,
 	 * if any, or {@code null} otherwise.
 	 * @param request the request to resolve the time zone for

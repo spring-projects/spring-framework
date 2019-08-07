@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ public class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	public void testNonExistentHandlerClass() throws Exception {
+	public void testNonExistentHandlerClass() {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
 			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
@@ -61,29 +61,18 @@ public class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	public void testResolveInvalidHandler() throws Exception {
-		String mappingPath = "org/springframework/beans/factory/xml/support/invalid.properties";
-		try {
-			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
-			fail("Should not be able to map a class that doesn't implement NamespaceHandler");
-		}
-		catch (Throwable expected) {
-		}
-	}
-
-	@Test
-	public void testCtorWithNullClassLoaderArgument() throws Exception {
+	public void testCtorWithNullClassLoaderArgument() {
 		// simply must not bail...
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() throws Exception {
+	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() {
 		new DefaultNamespaceHandlerResolver(null, null);
 	}
 
 	@Test
-	public void testCtorWithNonExistentMappingLocationArgument() throws Exception {
+	public void testCtorWithNonExistentMappingLocationArgument() {
 		// simply must not bail; we don't want non-existent resources to result in an Exception
 		new DefaultNamespaceHandlerResolver(null, "738trbc bobabloobop871");
 	}

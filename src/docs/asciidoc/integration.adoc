@@ -204,7 +204,7 @@ will transparently create an invoker and remotely enable the account service thr
 === Using Hessian to remotely call services via HTTP
 
 Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho and more
-information about Hessian itself can be found at http://www.caucho.com[].
+information about Hessian itself can be found at https://www.caucho.com/[].
 
 
 [[remoting-caucho-protocols-hessian]]
@@ -351,7 +351,7 @@ this application context.
 ====
 Of course, this example doesn't show a flexible kind of security infrastructure. For
 more options as far as security is concerned, have a look at the Spring Security project
-at http://projects.spring.io/spring-security/[].
+at https://projects.spring.io/spring-security/[].
 ====
 
 
@@ -369,7 +369,7 @@ choosing a remoting technology).
 Under the hood, Spring uses either the standard facilities provided by the JDK or
 Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
 advanced and easier-to-use functionality. Refer to
-http://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
+https://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
 for more information.
 
 [WARNING]
@@ -384,7 +384,7 @@ If you are concerned about security vulnerabilities due to Java serialization,
 consider the general-purpose serialization filter mechanism at the core JVM level,
 originally developed for JDK 9 but backported to JDK 8, 7 and 6 in the meantime:
 https://blogs.oracle.com/java-platform-group/entry/incoming_filter_serialization_data_a
-http://openjdk.java.net/jeps/290
+https://openjdk.java.net/jeps/290
 ====
 
 
@@ -764,7 +764,7 @@ the client and server.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
 			<property name="brokerURL" value="tcp://ep-t43:61616"/>
@@ -791,7 +791,7 @@ On the server, you just need to expose the service object using the
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="checkingAccountService"
 				class="org.springframework.jms.remoting.JmsInvokerServiceExporter">
@@ -843,7 +843,7 @@ proxy will take care of forwarding the call to the server-side object via JMS.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="checkingAccountService"
 				class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean">
@@ -1065,7 +1065,7 @@ For example with a `String` vararg:
 [subs="verbatim,quotes"]
 ----
 	String result = restTemplate.getForObject(
-			"http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
+			"https://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
 ----
 
 Or with a `Map<String, String>`:
@@ -1076,7 +1076,7 @@ Or with a `Map<String, String>`:
 	Map<String, String> vars = Collections.singletonMap("hotel", "42");
 
 	String result = restTemplate.getForObject(
-			"http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+			"https://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
 ----
 
 Keep in mind URI templates are automatically encoded. For example:
@@ -1084,9 +1084,9 @@ Keep in mind URI templates are automatically encoded. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	restTemplate.getForObject("http://example.com/hotel list", String.class);
+	restTemplate.getForObject("https://example.com/hotel list", String.class);
 
-	// Results in request to "http://example.com/hotel%20list"
+	// Results in request to "https://example.com/hotel%20list"
 ----
 
 You can use the `uriTemplateHandler` property of `RestTemplate` to customize how URIs are
@@ -1105,7 +1105,7 @@ Use the `exchange()` methods to specify request headers. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	String uriTemplate = "http://example.com/hotels/{hotel}";
+	String uriTemplate = "https://example.com/hotels/{hotel}";
 	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
 	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
@@ -1130,7 +1130,7 @@ content with the help of an `HttpMessageConverter`.
 
 On a POST, an input object is serialized to the request body:
 
-	URI location = template.postForLocation("http://example.com/people", person);
+	URI location = template.postForLocation("https://example.com/people", person);
 
 The "Content-Type" header of the request does not need to be set explicitly. In most cases
 a compatible message converter can be found based on the source Object type, and the chosen
@@ -1140,7 +1140,7 @@ turn will influence what message converter is selected.
 
 On a GET, the body of the response is deserialized to an output Object:
 
-	Person person = restTemplate.getForObject("http://example.com/people/{id}", Person.class, 42);
+	Person person = restTemplate.getForObject("https://example.com/people/{id}", Person.class, 42);
 
 The "Accept" header of the request does not need to be set explicitly. In most cases
 a compatible message converter can be found based on the expected response type, which
@@ -1235,7 +1235,7 @@ and writes the media type supported by the Java I/O API.
 [[rest-template-jsonview]]
 ===== Jackson JSON Views
 
-It is possible to specify a http://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
+It is possible to specify a https://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
 to serialize only a subset of the object properties. For example:
 
 [source,java,indent=0]
@@ -1245,7 +1245,7 @@ to serialize only a subset of the object properties. For example:
 	value.setSerializationView(User.WithoutPasswordView.class);
 
 	RequestEntity<MappingJacksonValue> requestEntity =
-		RequestEntity.post(new URI("http://example.com/user")).body(value);
+		RequestEntity.post(new URI("https://example.com/user")).body(value);
 
 	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 ----
@@ -1281,7 +1281,7 @@ Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`:
 [subs="verbatim,quotes"]
 ----
 	MultipartBodyBuilder builder = ...;
-	template.postForObject("http://example.com/upload", builder.build(), Void.class);
+	template.postForObject("https://example.com/upload", builder.build(), Void.class);
 ----
 
 If the `MultiValueMap` contains at least one non-String value, which could also be
@@ -1743,10 +1743,9 @@ operations that do not refer to a specific destination.
 
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
-that does not tie a user to an EJB container. (See <<jms-asynchronousMessageReception>>
-for detailed coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint
-methods can be simply annotated using `@JmsListener` see <<jms-annotated>> for more
-details.
+that does not tie a user to an EJB container. (See <<jms-receiving-async>> for detailed
+coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint methods can
+be simply annotated using `@JmsListener` see <<jms-annotated>> for more details.
 
 A message listener container is used to receive messages from a JMS message queue and
 drive the `MessageListener` that is injected into it. The listener container is
@@ -2021,7 +2020,7 @@ potentially be blocked indefinitely. The property `receiveTimeout` specifies how
 the receiver should wait before giving up waiting for a message.
 
 
-[[jms-asynchronousMessageReception]]
+[[jms-receiving-async]]
 ==== Asynchronous reception: Message-Driven POJOs
 
 [NOTE]
@@ -2718,8 +2717,8 @@ namespace elements you will need to reference the JMS schema:
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			**xmlns:jms="http://www.springframework.org/schema/jms"**
 			xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				**http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd**">
+				http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+				**http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd**">
 
 		<!-- bean definitions here -->
 
@@ -4420,11 +4419,11 @@ you can accept the coupling to both Spring and JMX, then do so.
 
 This section contains links to further resources about JMX.
 
-* The http://www.oracle.com/technetwork/java/javase/tech/javamanagement-140525.html[JMX
+* The https://www.oracle.com/technetwork/java/javase/tech/javamanagement-140525.html[JMX
 homepage] at Oracle
-* The http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
+* The https://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
   specification] (JSR-000003)
-* The http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
+* The https://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
   specification] (JSR-000160)
 * The http://mx4j.sourceforge.net/[MX4J homepage] (an Open Source implementation of
   various JMX specs)
@@ -5911,7 +5910,7 @@ implementations behind the common interfaces abstracts away the differences betw
 SE 5, Java SE 6 and Java EE environments.
 
 Spring also features integration classes for supporting scheduling with the `Timer`,
-part of the JDK since 1.3, and the Quartz Scheduler ( http://quartz-scheduler.org[]).
+part of the JDK since 1.3, and the Quartz Scheduler ( https://www.quartz-scheduler.org/[]).
 Both of those schedulers are set up using a `FactoryBean` with optional references to
 `Timer` or `Trigger` instances, respectively. Furthermore, a convenience class for both
 the Quartz Scheduler and the `Timer` is available that allows you to invoke a method of
@@ -6502,7 +6501,7 @@ As you can see from that configuration, a 'queue-capacity' value has also been p
 The configuration of the thread pool should also be considered in light of the
 executor's queue capacity. For the full description of the relationship between pool
 size and queue capacity, consult the documentation for
-http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html[ThreadPoolExecutor].
+https://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html[ThreadPoolExecutor].
 The main idea is that when a task is submitted, the executor will first try to use a
 free thread if the number of active threads is currently less than the core size. If the
 core size has been reached, then the task will be added to the queue as long as its
@@ -6612,7 +6611,7 @@ provided instead. Here is an example demonstrating these other options.
 
 Quartz uses `Trigger`, `Job` and `JobDetail` objects to realize scheduling of all kinds
 of jobs. For the basic concepts behind Quartz, have a look at
-http://quartz-scheduler.org[]. For convenience purposes, Spring offers a couple of
+https://www.quartz-scheduler.org/[]. For convenience purposes, Spring offers a couple of
 classes that simplify the usage of Quartz within Spring-based applications.
 
 
@@ -6840,7 +6839,7 @@ caching occurs.It as well improves performance but does that by allowing the sam
 to be read multiple times in a fast fashion.
 
 A further explanation of the differences between two can be found
-http://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_and_cache[here].
+https://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_and_cache[here].
 ****
 
 At its core, the abstraction applies caching to Java methods, reducing thus the number
@@ -6875,7 +6874,7 @@ materialized by the `org.springframework.cache.Cache` and
 
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
-http://ehcache.org/[Ehcache 2.x], Gemfire cache,
+https://www.ehcache.org/[Ehcache 2.x], Gemfire cache,
 https://github.com/ben-manes/caffeine/wiki[Caffeine] and JSR-107 compliant
 caches (e.g. Ehcache 3.x). See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
@@ -7384,8 +7383,8 @@ Alternatively for XML configuration use the `cache:annotation-driven` element:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:cache="http://www.springframework.org/schema/cache"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 			<cache:annotation-driven/>
 	</beans>
@@ -7932,7 +7931,7 @@ Clearly there are plenty of caching products out there that can be used as a bac
 store. To plug them in, one needs to provide a `CacheManager` and `Cache` implementation
 since unfortunately there is no available standard that we can use instead. This may
 sound harder than it is since in practice, the classes tend to be simple
-http://en.wikipedia.org/wiki/Adapter_pattern[adapter]s that map the caching abstraction
+https://en.wikipedia.org/wiki/Adapter_pattern[adapter]s that map the caching abstraction
 framework on top of the storage API as the `ehcache` classes can show. Most
 `CacheManager` classes can use the classes in `org.springframework.cache.support`
 package, such as `AbstractCacheManager` which takes care of the boiler-plate code

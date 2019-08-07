@@ -220,10 +220,10 @@ If an application context hierarchy is not required, applications may configure 
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "special beans" we mean Spring-managed, Object instances that
-implement WebFlux framework contracts. Those usually come with built-in contracts but
-you can customize their properties, extend or replace them.
+implement framework contracts. Those usually come with built-in contracts but you can
+customize their properties, extend or replace them.
 
-The table below lists the special beans detected by the `DispatcherHandler`:
+The table below lists the special beans detected by the `DispatcherServlet`:
 
 [[mvc-webappctx-special-beans-tbl]]
 [cols="1,2", options="header"]
@@ -236,34 +236,34 @@ The table below lists the special beans detected by the `DispatcherHandler`:
   The mapping is based on some criteria the details of which vary by `HandlerMapping`
   implementation.
 
-  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping` which
-  supports `@RequestMapping` annotated methods and `SimpleUrlHandlerMapping` which
-  maintains explicit registrations of URI path patterns to handlers.
+  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`
+  (which supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping`
+  (which maintains explicit registrations of URI path patterns to handlers).
 
 | HandlerAdapter
-| Help the `DispatcherServlet` to invoke a handler mapped to a request regardless of
+| Help the `DispatcherServlet` to invoke a handler mapped to a request, regardless of
   how the handler is actually invoked. For example, invoking an annotated controller
   requires resolving annotations. The main purpose of a `HandlerAdapter` is
   to shield the `DispatcherServlet` from such details.
 
 | <<mvc-exceptionhandlers,HandlerExceptionResolver>>
-| Strategy to resolve exceptions possibly mapping them to handlers, or to HTML error
-  views, or other. See <<mvc-exceptionhandlers>>.
+| Strategy to resolve exceptions, possibly mapping them to handlers, to HTML error
+  views, or other targets. See <<mvc-exceptionhandlers>>.
 
 | <<mvc-viewresolver,ViewResolver>>
-| Resolve logical String-based view names returned from a handler to an actual `View`
-  to render to the response with. See <<mvc-viewresolver>> and <<mvc-view>>.
+| Resolve logical `String`-based view names returned from a handler to an actual `View`
+  with which to render to the response. See <<mvc-viewresolver>> and <<mvc-view>>.
 
 | <<mvc-localeresolver,LocaleResolver>>, <<mvc-timezone,LocaleContextResolver>>
 | Resolve the `Locale` a client is using and possibly their time zone, in order to be able
   to offer internationalized views. See <<mvc-localeresolver>>.
 
 | <<mvc-themeresolver,ThemeResolver>>
-| Resolve themes your web application can use, for example, to offer personalized layouts.
+| Resolve themes your web application can use -- for example, to offer personalized layouts.
   See <<mvc-themeresolver>>.
 
 | <<mvc-multipart,MultipartResolver>>
-| Abstraction for parsing a multi-part request (e.g. browser form file upload) with
+| Abstraction for parsing a multi-part request (for example, browser form file upload) with
   the help of some multipart parsing library. See <<mvc-multipart>>.
 
 | <<mvc-flash-attributes,FlashMapManager>>
@@ -448,7 +448,7 @@ handler that is found implements the __LastModified__ interface. If so, the valu
 the client.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
-initialization parameters ( `init-param` elements) to the Servlet declaration in the
+initialization parameters (`init-param` elements) to the Servlet declaration in the
 `web.xml` file. See the following table for the list of supported parameters.
 
 [[mvc-disp-servlet-init-params-tbl]]
@@ -707,7 +707,7 @@ redirect is needed. The rest of the view name is the redirect URL.
 The net effect is the same as if the controller had returned a `RedirectView`, but now
 the controller itself can simply operate in terms of logical view names. A logical view
 name such as `redirect:/myapp/some/resource` will redirect relative to the current
-Servlet context, while a name such as `redirect:http://myhost.com/some/arbitrary/path`
+Servlet context, while a name such as `redirect:https://myhost.com/some/arbitrary/path`
 will redirect to an absolute URL.
 
 Note that if a controller method is annotated with the `@ResponseStatus`, the annotation
@@ -861,7 +861,7 @@ You can enable changing of locales by adding the `LocaleChangeInterceptor` to on
 accordingly, calling the `setLocale` method on the `LocaleResolver` in the dispatcher's
 application context. The next example shows that calls to all `{asterisk}.view` resources
 that contain a parameter named `siteLanguage` now changes the locale. So, for example,
-a request for the URL, `http://www.sf.net/home.view?siteLanguage=nl`, changes the site
+a request for the URL, `https://www.sf.net/home.view?siteLanguage=nl`, changes the site
 language to Dutch. The following example shows how to intercept the locale:
 
 [source,xml,indent=0]
@@ -987,7 +987,7 @@ request with a simple request parameter.
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
-based on http://jakarta.apache.org/commons/fileupload[__Commons FileUpload__] and another
+based on https://jakarta.apache.org/commons/fileupload[__Commons FileUpload__] and another
 based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need declare a `MultipartResolver` bean in your
@@ -1189,9 +1189,9 @@ The XML configuration equivalent:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:component-scan base-package="org.example.web"/>
 
@@ -1354,7 +1354,7 @@ The default mapping pattern `/{asterisk}{asterisk}` is excluded from scoring and
 sorted last. Also prefix patterns such as `/public/{asterisk}{asterisk}` are considered less
 specific than other pattern that don't have double wildcards.
 
-For the full details see `AntPatternComparator` in `AntPathMatcher` and also keep mind that
+For the full details see `AntPatternComparator` in `AntPathMatcher` and also keep in mind that
 the `PathMatcher` implementation used can be customized. See <<mvc-config-path-matching>>
 in the configuration section.
 
@@ -1413,7 +1413,7 @@ Many common path extensions are whitelisted by default. Applications with custom
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See <<mvc-config-content-negotiation>>.
 
-Check http://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
+Check https://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
 recommendations related to RFD.
 
 
@@ -1836,9 +1836,9 @@ can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by r
 ==== Matrix variables
 [.small]#<<web-reactive.adoc#webflux-ann-matrix-variables,Same in Spring WebFlux>>#
 
-http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring MVC we refer to those as "matrix variables" based on an
-http://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
+https://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
 can be also be referred to as URI path parameters.
 
 Matrix variables can appear in any path segment, each variable separated by semicolon and
@@ -2310,11 +2310,11 @@ Spring MVC has two main abstractions in support of flash attributes. `FlashMap` 
 to hold flash attributes while `FlashMapManager` is used to store, retrieve, and manage
 `FlashMap` instances.
 
-Flash attribute support is always "on" and does not need to enabled explicitly although
-if not used, it never causes HTTP session creation. On each request there is an "input"
-`FlashMap` with attributes passed from a previous request (if any) and an "output"
-`FlashMap` with attributes to save for a subsequent request. Both `FlashMap` instances
-are accessible from anywhere in Spring MVC through static methods in
+Flash attribute support is always "`on`" and does not need to be enabled explicitly.
+However, if not used, it never causes HTTP session creation. On each request, there is an
+"`input`" `FlashMap` with attributes passed from a previous request (if any) and an
+"`output`" `FlashMap` with attributes to save for a subsequent request. Both `FlashMap`
+instances are accessible from anywhere in Spring MVC through static methods in
 `RequestContextUtils`.
 
 Annotated controllers typically do not need to work with `FlashMap` directly. Instead an
@@ -2586,7 +2586,7 @@ types for the body.
 [.small]#<<web-reactive.adoc#webflux-ann-jsonview,Same in Spring WebFlux>>#
 
 Spring MVC provides built-in support for
-http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
+https://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
 which allows rendering only a subset of all fields in an Object. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, use Jackson's
 `@JsonView` annotation to activate a serialization view class:
@@ -2659,7 +2659,7 @@ to the model:
 [[mvc-ann-jsonp]]
 ===== Jackson JSONP
 
-In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
+In order to enable https://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
 and `ResponseEntity` methods, declare a `@ControllerAdvice` bean that extends
 `AbstractJsonpResponseBodyAdvice` as shown below where the constructor argument indicates
 the JSONP query parameter name(s):
@@ -3557,7 +3557,7 @@ invokes the configured exception resolvers and completes the request.
 ==== SSE
 
 `SseEmitter` is a sub-class of `ResponseBodyEmitter` that provides support for
-http://www.w3.org/TR/eventsource/[Server-Sent Events] where events sent from the server
+https://www.w3.org/TR/eventsource/[Server-Sent Events] where events sent from the server
 are formatted according to the W3C SSE specification. In order to produce an SSE
 stream from a controller simply return `SseEmitter`:
 
@@ -3729,7 +3729,7 @@ include::webmvc-cors.adoc[leveloffset=+1]
 == Web Security
 [.small]#<<web-reactive.adoc#webflux-web-security,Same in Spring WebFlux>>#
 
-The http://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://projects.spring.io/spring-security/[Spring Security] project provides support
 for protecting web applications from malicious exploits. Check out the Spring Security
 reference documentation including:
 
@@ -3738,7 +3738,7 @@ reference documentation including:
 * {doc-spring-security}/html5/#csrf[CSRF protection]
 * {doc-spring-security}/html5/#headers[Security Response Headers]
 
-http://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
+https://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
 
 
 
@@ -3925,9 +3925,9 @@ In XML use the `<mvc:annotation-driven>` element:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 		<mvc:annotation-driven/>
 
@@ -3958,7 +3958,7 @@ In Java config implement `WebMvcConfigurer` interface:
 ----
 
 In XML check attributes and sub-elements of `<mvc:annotation-driven/>`. You can
-view the http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
+view the https://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
 the code completion feature of your IDE to discover what attributes and
 sub-elements are available.
 
@@ -3999,9 +3999,9 @@ In XML, the same:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 		<mvc:annotation-driven conversion-service="conversionService"/>
 
@@ -4072,9 +4072,9 @@ In XML, the same:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 		<mvc:annotation-driven validator="globalValidator"/>
 
@@ -4241,8 +4241,8 @@ that adds support for accessing parameter names (feature added in Java 8).
 
 This builder customizes Jackson's default properties with the following ones:
 
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+. https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+. https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
@@ -4254,8 +4254,8 @@ It also automatically registers the following well-known modules if they are det
 [NOTE]
 ====
 Enabling indentation with Jackson XML support requires
-http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.woodstox%22%20AND%20a%3A%22woodstox-core-asl%22[`woodstox-core-asl`]
-dependency in addition to http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jackson-dataformat-xml%22[`jackson-dataformat-xml`] one.
+https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.woodstox%22%20AND%20a%3A%22woodstox-core-asl%22[`woodstox-core-asl`]
+dependency in addition to https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jackson-dataformat-xml%22[`jackson-dataformat-xml`] one.
 ====
 
 Other interesting Jackson modules are available:
@@ -4508,11 +4508,12 @@ bean so it can be injected into others. You can also make the rewrite transparen
 `ResourceUrlEncodingFilter` for Thymeleaf, JSPs, FreeMarker, and others with URL tags that
 rely on `HttpServletResponse#encodeURL`.
 
-http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
-and automatically registered when `"org.webjars:webjars-locator"` is present on the
-classpath. The resolver can re-write URLs to include the version of the jar and can also
-match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
-`"/jquery/1.2.0/jquery.min.js"`.
+https://www.webjars.org/documentation[WebJars] are also supported through the
+`WebJarsResourceResolver` which is automatically registered when the
+`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
+re-write URLs to include the version of the jar and can also match against incoming URLs
+without versions -- for example, from `/jquery/jquery.min.js` to
+`/jquery/1.2.0/jquery.min.js`.
 
 
 

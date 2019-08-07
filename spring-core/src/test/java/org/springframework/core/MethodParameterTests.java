@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import org.junit.Before;
@@ -148,6 +149,44 @@ public class MethodParameterTests {
 				methodParameter.getGenericParameterType());
 	}
 
+	@Test
+	public void multipleResolveParameterTypeCalls() throws Exception {
+		Method method = ArrayList.class.getMethod("get", int.class);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
+		assertEquals(Object.class, methodParameter.getParameterType());
+		GenericTypeResolver.resolveParameterType(methodParameter, StringList.class);
+		assertEquals(String.class, methodParameter.getParameterType());
+		GenericTypeResolver.resolveParameterType(methodParameter, IntegerList.class);
+		assertEquals(Integer.class, methodParameter.getParameterType());
+	}
+
+	@Test
+	public void equalsAndHashCodeConsidersContainingClass() throws Exception {
+		Method method = ArrayList.class.getMethod("get", int.class);
+		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
+		MethodParameter m2 = MethodParameter.forExecutable(method, -1);
+		MethodParameter m3 = MethodParameter.forExecutable(method, -1).nested();
+		assertEquals(m1, m2);
+		assertNotEquals(m1, m3);
+		assertEquals(m1.hashCode(), m2.hashCode());
+	}
+
+	@Test
+	public void equalsAndHashCodeConsidersNesting() throws Exception {
+		Method method = ArrayList.class.getMethod("get", int.class);
+		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
+		GenericTypeResolver.resolveParameterType(m1, StringList.class);
+		MethodParameter m2 = MethodParameter.forExecutable(method, -1);
+		GenericTypeResolver.resolveParameterType(m2, StringList.class);
+		MethodParameter m3 = MethodParameter.forExecutable(method, -1);
+		GenericTypeResolver.resolveParameterType(m3, IntegerList.class);
+		MethodParameter m4 = MethodParameter.forExecutable(method, -1);
+		assertEquals(m1, m2);
+		assertNotEquals(m1, m3);
+		assertNotEquals(m1, m4);
+		assertEquals(m1.hashCode(), m2.hashCode());
+	}
+
 
 	public int method(String p1, long p2) {
 		return 42;
@@ -170,6 +209,14 @@ public class MethodParameterTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.PARAMETER)
 	private @interface Param {
+	}
+
+	@SuppressWarnings("serial")
+	private static class StringList extends ArrayList<String> {
+	}
+
+	@SuppressWarnings("serial")
+	private static class IntegerList extends ArrayList<Integer> {
 	}
 
 }

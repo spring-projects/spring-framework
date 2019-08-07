@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -117,6 +117,7 @@ public class DataSourceTransactionManagerTests  {
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+			given(con.getWarnings()).willThrow(new SQLException());
 		}
 
 		if (!lazyConnection || createStatement) {
@@ -141,6 +142,10 @@ public class DataSourceTransactionManagerTests  {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
+					}
+					else {
+						tCon.getWarnings();
+						tCon.clearWarnings();
 					}
 				}
 				catch (SQLException ex) {
@@ -209,7 +214,7 @@ public class DataSourceTransactionManagerTests  {
 		}
 
 		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
-		 tm = new DataSourceTransactionManager(dsToUse);
+		tm = new DataSourceTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -669,7 +674,6 @@ public class DataSourceTransactionManagerTests  {
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
 
-
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -974,12 +978,12 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).setAutoCommit(true);
 		verify(con).close();
-
 	}
 
 	@Test
 	public void testTransactionAwareDataSourceProxy() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
@@ -990,6 +994,9 @@ public class DataSourceTransactionManagerTests  {
 				assertEquals(con, DataSourceUtils.getConnection(ds));
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
+					Connection tCon = dsProxy.getConnection();
+					tCon.getWarnings();
+					tCon.clearWarnings();
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
 					// should be ignored
 					dsProxy.getConnection().close();
@@ -1242,7 +1249,8 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 	}
 
-	@Test public void testTransactionWithPropagationNotSupported() throws Exception {
+	@Test
+	public void testTransactionWithPropagationNotSupported() throws Exception {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));

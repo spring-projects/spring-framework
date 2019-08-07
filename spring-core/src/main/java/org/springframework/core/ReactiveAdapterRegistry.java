@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>By default, depending on classpath availability, adapters are registered
  * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, and Java 9+
- * Flow.Publisher.
+ * {@code Flow.Publisher}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -54,7 +54,7 @@ public class ReactiveAdapterRegistry {
 
 	private final boolean reactorPresent;
 
-	private final List<ReactiveAdapter> adapters = new ArrayList<>(32);
+	private final List<ReactiveAdapter> adapters = new ArrayList<>();
 
 
 	/**
@@ -112,13 +112,13 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * Register a reactive type along with functions to adapt to and from a
-	 * Reactive Streams {@link Publisher}. The functions can assume their
-	 * input is never be {@code null} nor {@link Optional}.
+	 * Reactive Streams {@link Publisher}. The function arguments assume that
+	 * their input is neither {@code null} nor {@link Optional}.
 	 */
 	public void registerReactiveType(ReactiveTypeDescriptor descriptor,
 			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
 
-		if (reactorPresent) {
+		if (this.reactorPresent) {
 			this.adapters.add(new ReactorAdapter(descriptor, toAdapter, fromAdapter));
 		}
 		else {
@@ -128,6 +128,7 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * Get the adapter for the given reactive type.
+	 * @return the corresponding adapter, or {@code null} if none available
 	 */
 	@Nullable
 	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
@@ -141,6 +142,7 @@ public class ReactiveAdapterRegistry {
 	 * (may be {@code null} if a concrete source object is given)
 	 * @param source an instance of the reactive type
 	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
+	 * @return the corresponding adapter, or {@code null} if none available
 	 */
 	@Nullable
 	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
@@ -162,13 +164,13 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
-	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
-	 * building it once needed.
+	 * Return a shared default {@code ReactiveAdapterRegistry} instance,
+	 * lazily building it once needed.
 	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
 	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
 	 * This accessor is only meant as a fallback for code paths that want to
 	 * fall back on a default instance if one isn't provided.
-	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
+	 * @return the shared {@code ReactiveAdapterRegistry} instance
 	 * @since 5.0.2
 	 */
 	public static ReactiveAdapterRegistry getSharedInstance() {

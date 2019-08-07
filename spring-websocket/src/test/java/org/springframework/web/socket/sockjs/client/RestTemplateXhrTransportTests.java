@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -173,7 +173,7 @@ public class RestTemplateXhrTransportTests {
 		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("h-foo", "h-bar");
 		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,

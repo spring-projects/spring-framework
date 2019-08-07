@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -282,6 +282,40 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
+	 * Resolve a reference to another bean in the factory.
+	 */
+	@Nullable
+	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
+		try {
+			Object bean;
+			String refName = ref.getBeanName();
+			refName = String.valueOf(doEvaluate(refName));
+			if (ref.isToParent()) {
+				if (this.beanFactory.getParentBeanFactory() == null) {
+					throw new BeanCreationException(
+							this.beanDefinition.getResourceDescription(), this.beanName,
+							"Can't resolve reference to bean '" + refName +
+									"' in parent factory: no parent factory available");
+				}
+				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
+			}
+			else {
+				bean = this.beanFactory.getBean(refName);
+				this.beanFactory.registerDependentBean(refName, this.beanName);
+			}
+			if (bean instanceof NullBean) {
+				bean = null;
+			}
+			return bean;
+		}
+		catch (BeansException ex) {
+			throw new BeanCreationException(
+					this.beanDefinition.getResourceDescription(), this.beanName,
+					"Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
+		}
+	}
+
+	/**
 	 * Resolve an inner bean definition.
 	 * @param argName the name of the argument that the inner bean is defined for
 	 * @param innerBeanName the name of the inner bean
@@ -346,47 +380,12 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
-	 * Resolve a reference to another bean in the factory.
-	 */
-	@Nullable
-	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
-		try {
-			Object bean;
-			String refName = ref.getBeanName();
-			refName = String.valueOf(doEvaluate(refName));
-			if (ref.isToParent()) {
-				if (this.beanFactory.getParentBeanFactory() == null) {
-					throw new BeanCreationException(
-							this.beanDefinition.getResourceDescription(), this.beanName,
-							"Can't resolve reference to bean '" + refName +
-							"' in parent factory: no parent factory available");
-				}
-				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
-			}
-			else {
-				bean = this.beanFactory.getBean(refName);
-				this.beanFactory.registerDependentBean(refName, this.beanName);
-			}
-			if (bean instanceof NullBean) {
-				bean = null;
-			}
-			return bean;
-		}
-		catch (BeansException ex) {
-			throw new BeanCreationException(
-					this.beanDefinition.getResourceDescription(), this.beanName,
-					"Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
-		}
-	}
-
-	/**
 	 * For each element in the managed array, resolve reference if necessary.
 	 */
 	private Object resolveManagedArray(Object argName, List<?> ml, Class<?> elementType) {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
-			Array.set(resolved, i,
-					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+			Array.set(resolved, i, resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -397,8 +396,7 @@ class BeanDefinitionValueResolver {
 	private List<?> resolveManagedList(Object argName, List<?> ml) {
 		List<Object> resolved = new ArrayList<>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
-			resolved.add(
-					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+			resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}

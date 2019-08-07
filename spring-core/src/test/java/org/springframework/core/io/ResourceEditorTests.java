@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class ResourceEditorTests {
 
 	@Test
-	public void sunnyDay() throws Exception {
+	public void sunnyDay() {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("classpath:org/springframework/core/io/ResourceEditorTests.class");
 		Resource resource = (Resource) editor.getValue();
@@ -43,19 +43,19 @@ public class ResourceEditorTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void ctorWithNullCtorArgs() throws Exception {
+	public void ctorWithNullCtorArgs() {
 		new ResourceEditor(null, null);
 	}
 
 	@Test
-	public void setAndGetAsTextWithNull() throws Exception {
+	public void setAndGetAsTextWithNull() {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText(null);
 		assertEquals("", editor.getAsText());
 	}
 
 	@Test
-	public void setAndGetAsTextWithWhitespaceResource() throws Exception {
+	public void setAndGetAsTextWithWhitespaceResource() {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("  ");
 		assertEquals("", editor.getAsText());
@@ -81,8 +81,6 @@ public class ResourceEditorTests {
 		System.setProperty("test.prop", "foo");
 		try {
 			editor.setAsText("${test.prop}-${bar}");
-			Resource resolved = (Resource) editor.getValue();
-			assertEquals("foo-${bar}", resolved.getFilename());
 		}
 		finally {
 			System.getProperties().remove("test.prop");

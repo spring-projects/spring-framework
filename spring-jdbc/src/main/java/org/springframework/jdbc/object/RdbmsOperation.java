@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -118,7 +118,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * large result sets: Setting this higher than the default value will increase
 	 * processing speed at the cost of memory consumption; setting this lower can
 	 * avoid transferring row data that will never be read by the application.
-	 * <p>Default is 0, indicating to use the driver's default.
+	 * <p>Default is -1, indicating to use the driver's default.
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
@@ -129,7 +129,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the maximum number of rows for this RDBMS operation. This is important
 	 * for processing subsets of large result sets, avoiding to read and hold
 	 * the entire result set in the database or in the JDBC driver.
-	 * <p>Default is 0, indicating to use the driver's default.
+	 * <p>Default is -1, indicating to use the driver's default.
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
@@ -138,7 +138,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Set the query timeout for statements that this RDBMS operation executes.
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Default is -1, indicating to use the JDBC driver's default.
 	 * <p>Note: Any timeout specified here will be overridden by the remaining
 	 * transaction timeout when executing within a transaction that has a
 	 * timeout specified at the transaction level.
