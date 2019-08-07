@@ -113,7 +113,6 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
-	@SuppressWarnings("deprecation")
 	private static <C, R> R processClass(C context, Class<?> source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor,
 			@Nullable BiPredicate<C, Class<?>> classFilter) {
@@ -125,7 +124,6 @@ abstract class AnnotationsScanner {
 				return processClassInheritedAnnotations(context, source, searchStrategy, processor, classFilter);
 			case SUPERCLASS:
 				return processClassHierarchy(context, source, processor, classFilter, false, false);
-			case EXHAUSTIVE:
 			case TYPE_HIERARCHY:
 				return processClassHierarchy(context, source, processor, classFilter, true, false);
 			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
@@ -244,7 +242,6 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
-	@SuppressWarnings("deprecation")
 	private static <C, R> R processMethod(C context, Method source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor,
 			@Nullable BiPredicate<C, Class<?>> classFilter) {
@@ -256,7 +253,6 @@ abstract class AnnotationsScanner {
 			case SUPERCLASS:
 				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
 						processor, classFilter, source, false);
-			case EXHAUSTIVE:
 			case TYPE_HIERARCHY:
 			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
 				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
