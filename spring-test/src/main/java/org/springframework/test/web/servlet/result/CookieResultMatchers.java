@@ -20,12 +20,12 @@ import javax.servlet.http.Cookie;
 
 import org.hamcrest.Matcher;
 
-import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
@@ -208,9 +208,7 @@ public class CookieResultMatchers {
 
 	private static Cookie getCookie(MvcResult result, String name) {
 		Cookie cookie = result.getResponse().getCookie(name);
-		if (cookie == null) {
-			AssertionErrors.fail("No cookie with name '" + name + "'");
-		}
+		assertNotNull("No cookie with name '" + name + "'", cookie);
 		return cookie;
 	}
 

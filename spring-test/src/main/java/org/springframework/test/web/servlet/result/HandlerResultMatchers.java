@@ -31,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.util.AssertionErrors.fail;
 
@@ -65,7 +66,7 @@ public class HandlerResultMatchers {
 	public ResultMatcher handlerType(Class<?> type) {
 		return result -> {
 			Object handler = result.getHandler();
-			assertTrue("No handler", handler != null);
+			assertNotNull("No handler", handler);
 			if (handler != null) {
 				Class<?> actual = handler.getClass();
 				if (HandlerMethod.class.isInstance(handler)) {
@@ -148,10 +149,7 @@ public class HandlerResultMatchers {
 
 	private static HandlerMethod getHandlerMethod(MvcResult result) {
 		Object handler = result.getHandler();
-		assertTrue("No handler", handler != null);
-		if (!(handler instanceof HandlerMethod)) {
-			fail("Not a HandlerMethod: " + handler);
-		}
+		assertTrue("Not a HandlerMethod: " + handler, handler instanceof HandlerMethod);
 		return (HandlerMethod) handler;
 	}
 

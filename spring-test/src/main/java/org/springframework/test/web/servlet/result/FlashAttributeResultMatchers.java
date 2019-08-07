@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 /**
  * Factory for "output" flash attribute assertions.
@@ -64,7 +64,7 @@ public class FlashAttributeResultMatchers {
 	public <T> ResultMatcher attributeExists(String... names) {
 		return result -> {
 			for (String name : names) {
-				assertTrue("Flash attribute '" + name + "' does not exist", result.getFlashMap().get(name) != null);
+				assertNotNull("Flash attribute '" + name + "' does not exist", result.getFlashMap().get(name));
 			}
 		};
 	}

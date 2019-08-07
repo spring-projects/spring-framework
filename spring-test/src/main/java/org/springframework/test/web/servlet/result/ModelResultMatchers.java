@@ -28,8 +28,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the model.
@@ -38,6 +38,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * {@link MockMvcResultMatchers#model}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class ModelResultMatchers {
@@ -78,7 +79,7 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
-				assertTrue("Model attribute '" + name + "' does not exist", mav.getModel().get(name) != null);
+				assertNotNull("Model attribute '" + name + "' does not exist", mav.getModel().get(name));
 			}
 		};
 	}
@@ -159,11 +160,9 @@ public class ModelResultMatchers {
 			BindingResult result = getBindingResult(mav, name);
 			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
 			FieldError fieldError = result.getFieldError(fieldName);
-			if (fieldError == null) {
-				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
-			}
+			assertNotNull("No errors for field '" + fieldName + "' of attribute '" + name + "'", fieldError);
 			String code = fieldError.getCode();
-			assertTrue("Expected error code '" + error + "' but got '" + code + "'", error.equals(code));
+			assertEquals("Field error code", error, code);
 		};
 	}
 
@@ -177,11 +176,9 @@ public class ModelResultMatchers {
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
-			assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
 			FieldError fieldError = result.getFieldError(fieldName);
-			if (fieldError == null) {
-				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
-			}
+			assertNotNull("No errors for field '" + fieldName + "' of attribute '" + name + "'", fieldError);
 			String code = fieldError.getCode();
 			assertThat("Field name '" + fieldName + "' of attribute '" + name + "'", code, matcher);
 		};
@@ -239,17 +236,13 @@ public class ModelResultMatchers {
 
 	private ModelAndView getModelAndView(MvcResult mvcResult) {
 		ModelAndView mav = mvcResult.getModelAndView();
-		if (mav == null) {
-			fail("No ModelAndView found");
-		}
+		assertNotNull("No ModelAndView found", mav);
 		return mav;
 	}
 
 	private BindingResult getBindingResult(ModelAndView mav, String name) {
 		BindingResult result = (BindingResult) mav.getModel().get(BindingResult.MODEL_KEY_PREFIX + name);
-		if (result == null) {
-			fail("No BindingResult for attribute: " + name);
-		}
+		assertNotNull("No BindingResult for attribute: " + name, result);
 		return result;
 	}
 
