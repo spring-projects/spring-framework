@@ -275,11 +275,6 @@ public class FactoryBeanTests {
 		private final Map<String, AtomicInteger> count = new HashMap<>();
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) {
-			return bean;
-		}
-
-		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			if (bean instanceof FactoryBean) {
 				return bean;

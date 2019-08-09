@@ -361,6 +361,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithProviderImplementation.class.getSimpleName());
 
+		@Override
 		@Bean(name = "customName")
 		public TestBean get() {
 			return testBean;
@@ -373,6 +374,7 @@ public class ConfigurationClassProcessingTests {
 
 		static Set<String> set = Collections.singleton("value");
 
+		@Override
 		@Bean(name = "customName")
 		public Set<String> get() {
 			return set;
@@ -505,11 +507,6 @@ public class ConfigurationClassProcessingTests {
 					if (bean instanceof ITestBean) {
 						((ITestBean) bean).setName(((ITestBean) bean).getName() + nameSuffix);
 					}
-					return bean;
-				}
-
-				@Override
-				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
 				}
 

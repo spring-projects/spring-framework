@@ -202,22 +202,7 @@ public class SessionScopeTests {
 	private static class CustomDestructionAwareBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
-
-		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-		}
-
-		@Override
-		public boolean requiresDestruction(Object bean) {
-			return true;
 		}
 	}
 
@@ -227,25 +212,10 @@ public class SessionScopeTests {
 			implements DestructionAwareBeanPostProcessor, Serializable {
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
-
-		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof BeanNameAware) {
 				((BeanNameAware) bean).setBeanName(null);
 			}
-		}
-
-		@Override
-		public boolean requiresDestruction(Object bean) {
-			return true;
 		}
 	}
 

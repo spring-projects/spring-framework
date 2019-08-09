@@ -318,11 +318,6 @@ final class PostProcessorRegistrationDelegate {
 		}
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) {
-			return bean;
-		}
-
-		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			if (!(bean instanceof BeanPostProcessor) && !isInfrastructureBean(beanName) &&
 					this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {

@@ -1169,6 +1169,7 @@ public class XmlBeanFactoryTests {
 	 * @since 3.2.8 and 4.0.2
 	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	public void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {
 		Class<?> firstClass = null;
 
@@ -1843,11 +1844,6 @@ public class XmlBeanFactoryTests {
 
 
 	public static class WrappingPostProcessor implements BeanPostProcessor {
-
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
 
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {

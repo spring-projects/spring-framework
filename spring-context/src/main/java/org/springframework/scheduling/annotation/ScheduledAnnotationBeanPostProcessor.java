@@ -329,11 +329,6 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof AopInfrastructureBean || bean instanceof TaskScheduler ||
 				bean instanceof ScheduledExecutorService) {

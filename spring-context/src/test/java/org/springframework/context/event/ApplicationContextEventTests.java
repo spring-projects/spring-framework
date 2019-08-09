@@ -633,6 +633,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		private ApplicationContext applicationContext;
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}
@@ -640,11 +641,6 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			this.applicationContext.publishEvent(new MyEvent(this));
-			return bean;
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 	}

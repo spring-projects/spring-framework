@@ -317,16 +317,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		return null;
-	}
-
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 		try {

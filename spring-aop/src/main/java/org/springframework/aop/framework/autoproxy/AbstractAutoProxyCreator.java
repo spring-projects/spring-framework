@@ -272,18 +272,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		return pvs;
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 	/**

@@ -342,16 +342,6 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		return null;
-	}
-
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass(), pvs);
 		try {
@@ -369,16 +359,6 @@ public class PersistenceAnnotationBeanPostProcessor
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
 		return postProcessProperties(pvs, bean, beanName);
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 	@Override

@@ -152,10 +152,6 @@ public class AnnotationConfigApplicationContextTests {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				return bean;
-			}
 		});
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override

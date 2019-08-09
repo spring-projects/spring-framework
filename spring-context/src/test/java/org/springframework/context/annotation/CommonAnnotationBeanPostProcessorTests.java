@@ -32,7 +32,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
@@ -50,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
+@SuppressWarnings("deprecation")
 public class CommonAnnotationBeanPostProcessorTests {
 
 	@Test
@@ -224,7 +224,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 			}
 		});
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean4");
 		ppc.setProperties(props);
@@ -321,7 +322,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean3");
 		ppc.setProperties(props);
@@ -373,7 +375,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean3");
 		ppc.setProperties(props);
@@ -560,11 +563,6 @@ public class CommonAnnotationBeanPostProcessorTests {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertThat(((AnnotatedInitDestroyBean) bean).destroyCalled).isFalse();
 			}
-		}
-
-		@Override
-		public boolean requiresDestruction(Object bean) {
-			return true;
 		}
 	}
 

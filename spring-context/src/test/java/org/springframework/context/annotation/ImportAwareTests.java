@@ -233,16 +233,6 @@ public class ImportAwareTests {
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) {
 		}
-
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) {
-			return bean;
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			return bean;
-		}
 	}
 
 

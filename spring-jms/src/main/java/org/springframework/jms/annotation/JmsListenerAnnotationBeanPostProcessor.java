@@ -216,11 +216,6 @@ public class JmsListenerAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		return bean;
-	}
-
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof AopInfrastructureBean || bean instanceof JmsListenerContainerFactory ||
 				bean instanceof JmsListenerEndpointRegistry) {
