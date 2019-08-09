@@ -76,45 +76,37 @@ public class ReflectUtils {
 		ProtectionDomain protectionDomain;
 		Throwable throwable = null;
 		try {
-			privateLookupIn = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					try {
-						return MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
-					}
-					catch (NoSuchMethodException ex) {
-						return null;
-					}
+			privateLookupIn = (Method) AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				try {
+					return MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
 				}
-			});
-			lookupDefineClass = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					try {
-						return MethodHandles.Lookup.class.getMethod("defineClass", byte[].class);
-					}
-					catch (NoSuchMethodException ex) {
-						return null;
-					}
-				}
-			});
-			classLoaderDefineClass = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					return ClassLoader.class.getDeclaredMethod("defineClass",
-							String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
-				}
-			});
-			protectionDomain = getProtectionDomain(ReflectUtils.class);
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					Method[] methods = Object.class.getDeclaredMethods();
-					for (Method method : methods) {
-						if ("finalize".equals(method.getName())
-								|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
-							continue;
-						}
-						OBJECT_METHODS.add(method);
-					}
+				catch (NoSuchMethodException ex) {
 					return null;
 				}
+			});
+			lookupDefineClass = (Method) AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				try {
+					return MethodHandles.Lookup.class.getMethod("defineClass", byte[].class);
+				}
+				catch (NoSuchMethodException ex) {
+					return null;
+				}
+			});
+			classLoaderDefineClass = (Method) AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				return ClassLoader.class.getDeclaredMethod("defineClass",
+						String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
+			});
+			protectionDomain = getProtectionDomain(ReflectUtils.class);
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Method[] methods = Object.class.getDeclaredMethods();
+				for (Method method : methods) {
+					if ("finalize".equals(method.getName())
+							|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
+						continue;
+					}
+					OBJECT_METHODS.add(method);
+				}
+				return null;
 			});
 		}
 		catch (Throwable t) {
