@@ -4343,8 +4343,8 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 ====
 As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
 no longer necessary if the target bean defines only one constructor to begin with.
-However, if several constructors are available, at least one must be annotated to
-instruct the container which one to use.
+However, if several constructors are available, at least one must be annotated 
+with `@Autowired` in order to instruct the container which one to use.
 ====
 
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,
@@ -4415,9 +4415,9 @@ following example shows:
 ====
 Make sure that your target components (for example, `MovieCatalog` or `CustomerPreferenceDao`)
 are consistently declared by the type that you use for your `@Autowired`-annotated
-injection points. Otherwise, injection may fail due to no type match found at runtime.
+injection points. Otherwise, injection may fail due to a "no type match found" error at runtime.
 
-For XML-defined beans or component classes found through a classpath scan, the container
+For XML-defined beans or component classes found via classpath scanning, the container
 usually knows the concrete type up front. However, for `@Bean` factory methods, you need
 to make sure that the declared return type is sufficiently expressive. For components
 that implement several interfaces or for components potentially referred to by their
@@ -4425,9 +4425,9 @@ implementation type, consider declaring the most specific return type on your fa
 method (at least as specific as required by the injection points referring to your bean).
 ====
 
-You can also provide all beans of a particular type from the `ApplicationContext`
-by adding the annotation to a field or method that expects an array of that type,
-as the following example shows:
+You can also instruct Spring to provide all beans of a particular type from the
+`ApplicationContext` by adding the `@Autowired` annotation to a field or method that
+expects an array of that type, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4467,7 +4467,7 @@ to be sorted in a specific order. Otherwise, their order follows the registratio
 order of the corresponding target bean definitions in the container.
 
 You can declare the `@Order` annotation at the target class level and on `@Bean` methods,
-potentially by individual bean definition (in case of multiple definitions that
+potentially for individual bean definitions (in case of multiple definitions that
 use the same bean class). `@Order` values may influence priorities at injection points,
 but be aware that they do not influence singleton startup order, which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
@@ -4478,7 +4478,7 @@ through `@Order` values in combination with `@Primary` on a single bean for each
 ====
 
 Even typed `Map` instances can be autowired as long as the expected key type is `String`.
-The Map values contain all beans of the expected type, and the keys contain the
+The map values contain all beans of the expected type, and the keys contain the
 corresponding bean names, as the following example shows:
 
 [source,java,indent=0]
@@ -4497,14 +4497,14 @@ corresponding bean names, as the following example shows:
 	}
 ----
 
-By default, autowiring fails when no matching candidate beans are available for
-a given injection point. In the case of a declared array, collection or map,
-at least one matching element is expected.
+By default, autowiring fails when no matching candidate beans are available for a given
+injection point. In the case of a declared array, collection, or map, at least one
+matching element is expected.
 
-The default behavior is to treat annotated methods and fields as indicating
-required dependencies. You can change this behavior as demonstrated in the
-following example, enabling the framework to skip a non-satisfiable injection
-point through marking it as non-required:
+The default behavior is to treat annotated methods and fields as indicating required
+dependencies. You can change this behavior as demonstrated in the following example,
+enabling the framework to skip a non-satisfiable injection point through marking it as
+non-required (i.e., by setting the `required` attribute in `@Autowired` to `false`):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4523,18 +4523,18 @@ point through marking it as non-required:
 ----
 
 A non-required method will not be called at all if its dependency (or one of its
-dependencies in case of multiple arguments) is not available. A non-required field
-will not get populated at all in such case, leaving its default value in place.
+dependencies, in case of multiple arguments) is not available. A non-required field will
+not get populated at all in such case, leaving its default value in place.
 
-Injected constructor and factory method arguments are a special case since the
-'required' flag on `@Autowired` has a somewhat different meaning due to Spring's
-constructor resolution algorithm potentially dealing with multiple constructors.
-Constructor and factory method arguments are effectively required by default but
-with a few special rules in a single-constructor scenario, such as multi-element
-injection points (arrays, collections, maps) resolving to empty instances if no
-matching beans are available. This allows for a common implementation pattern
-where all dependencies can be declared in a unique multi-argument constructor,
-e.g. declared as a single public constructor without an `@Autowired` annotation.
+Injected constructor and factory method arguments are a special case since the `required`
+attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
+resolution algorithm that may potentially deal with multiple constructors. Constructor
+and factory method arguments are effectively required by default but with a few special
+rules in a single-constructor scenario, such as multi-element injection points (arrays,
+collections, maps) resolving to empty instances if no matching beans are available. This
+allows for a common implementation pattern where all dependencies can be declared in a
+unique multi-argument constructor — for example, declared as a single public constructor
+without an `@Autowired` annotation.
 
 [NOTE]
 ====
@@ -4549,11 +4549,12 @@ then a primary/default constructor (if present) will be used. If a class only de
 single constructor to begin with, it will always be used, even if not annotated. An
 annotated constructor does not have to be public.
 
-The `required` attribute of `@Autowired` is recommended over the `@Required` annotation
-on setter methods. The `required` attribute indicates that the property is not required
-for autowiring purposes. The property is ignored if it cannot be autowired. `@Required`,
-on the other hand, is stronger in that it enforces the property to be set by any means
-supported by the container. If no value is defined, a corresponding exception is raised.
+The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
+annotation on setter methods. Setting the `required` attribute to `false` indicates that
+the property is not required for autowiring purposes, and the property is ignored if it
+cannot be autowired. `@Required`, on the other hand, is stronger in that it enforces the
+property to be set by any means supported by the container, and if no value is defined, a
+corresponding exception is raised.
 ====
 
 Alternatively, you can express the non-required nature of a particular dependency
