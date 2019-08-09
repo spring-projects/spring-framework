@@ -1297,7 +1297,7 @@ and `@ContextConfiguration` for further details.
 `@WebAppConfiguration` from the Spring TestContext Framework. You can use it at the class
 level as a drop-in replacement for `@ContextConfiguration` and `@WebAppConfiguration`.
 With regard to configuration options, the only difference between `@ContextConfiguration`
-and `@SpringJUnitWebConfig` is that you can declare annotated classes bu using the
+and `@SpringJUnitWebConfig` is that you can declare annotated classes by using the
 `value` attribute in `@SpringJUnitWebConfig`. In addition, you can override the `value`
 attribute from `@WebAppConfiguration` only by using the `resourcePath` attribute in
 `@SpringJUnitWebConfig`.
