@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	@Override
 	@Nullable
-	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
-
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (!(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
 				bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
 				bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)){
@@ -86,7 +85,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		AccessControlContext acc = null;
 
-		if (System.getSecurityManager() != null ) {
+		if (System.getSecurityManager() != null) {
 			acc = this.applicationContext.getBeanFactory().getAccessControlContext();
 		}
 
@@ -124,11 +123,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 			}
 		}
-	}
-
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 }
