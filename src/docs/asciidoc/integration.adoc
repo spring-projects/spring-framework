@@ -2102,11 +2102,11 @@ Consider the following interface definition:
 	}
 ----
 
-Notice that, although the interface extends
-neither the `MessageListener` nor the `SessionAwareMessageListener` interface, you can still use it
-as a MDP by using the `MessageListenerAdapter` class. Notice also how the
-various message handling methods are strongly typed according to the contents of the
-various `Message` types that they can receive and handle.
+Notice that, although the interface extends neither the `MessageListener` nor the
+`SessionAwareMessageListener` interface, you can still use it as an MDP by using the
+`MessageListenerAdapter` class. Notice also how the various message handling methods are
+strongly typed according to the contents of the various `Message` types that they can
+receive and handle.
 
 Now consider the following implementation of the `MessageDelegate` interface:
 
