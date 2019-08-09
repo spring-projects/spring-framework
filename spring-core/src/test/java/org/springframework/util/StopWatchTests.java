@@ -16,12 +16,11 @@
 
 package org.springframework.util;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 
 import org.springframework.util.StopWatch.TaskInfo;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -141,7 +140,7 @@ public class StopWatchTests {
 	}
 
 	private static long millisToNanos(long duration) {
-		return TimeUnit.NANOSECONDS.convert(duration, TimeUnit.MILLISECONDS);
+		return MILLISECONDS.toNanos(duration);
 	}
 
 }
