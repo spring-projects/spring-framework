@@ -67,7 +67,7 @@ public class EnableTransactionManagementIntegrationTests {
 			fail("expected exception");
 		}
 		catch (AssertionError ex) {
-			assertThat(ex.getMessage(), equalTo("FooRepository is not a TX proxy"));
+			assertThat(ex.getMessage(), equalTo("FooRepository is not a tx proxy"));
 		}
 	}
 
@@ -178,7 +178,7 @@ public class EnableTransactionManagementIntegrationTests {
 				}
 			}
 		}
-		assertTrue("FooRepository is not a TX proxy", isTxProxy);
+		assertTrue("FooRepository is not a tx proxy", isTxProxy);
 
 		// trigger a transaction
 		repo.findAll();

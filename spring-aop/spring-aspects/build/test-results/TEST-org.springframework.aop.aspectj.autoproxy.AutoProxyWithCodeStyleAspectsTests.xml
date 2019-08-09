@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.springframework.aop.aspectj.autoproxy.AutoProxyWithCodeStyleAspectsTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-08-01T13:25:08" hostname="localhost" time="0.07">
+  <properties/>
+  <testcase name="noAutoproxyingOfAjcCompiledAspects" classname="org.springframework.aop.aspectj.autoproxy.AutoProxyWithCodeStyleAspectsTests" time="0.07"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

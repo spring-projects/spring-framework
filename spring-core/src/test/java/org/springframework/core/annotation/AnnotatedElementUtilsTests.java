@@ -601,7 +601,7 @@ public class AnnotatedElementUtilsTests {
 	public void findMergedAnnotationAttributesOnClassWithMetaAndLocalTxConfig() {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(MetaAndLocalTxConfigClass.class, Transactional.class);
 		assertNotNull("Should find @Transactional on MetaAndLocalTxConfigClass", attributes);
-		assertEquals("TX qualifier for MetaAndLocalTxConfigClass.", "localTxMgr", attributes.getString("qualifier"));
+		assertEquals("tx qualifier for MetaAndLocalTxConfigClass.", "localTxMgr", attributes.getString("qualifier"));
 	}
 
 	@Test
@@ -619,10 +619,10 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull(annotation);
 
 		// 3) Verify that the AnnotationAttributes and synthesized annotation are equivalent
-		assertEquals("TX value via attributes.", qualifier, attributes.getString("value"));
-		assertEquals("TX value via synthesized annotation.", qualifier, annotation.value());
-		assertEquals("TX qualifier via attributes.", qualifier, attributes.getString("qualifier"));
-		assertEquals("TX qualifier via synthesized annotation.", qualifier, annotation.qualifier());
+		assertEquals("tx value via attributes.", qualifier, attributes.getString("value"));
+		assertEquals("tx value via synthesized annotation.", qualifier, annotation.value());
+		assertEquals("tx qualifier via attributes.", qualifier, attributes.getString("qualifier"));
+		assertEquals("tx qualifier via synthesized annotation.", qualifier, annotation.qualifier());
 	}
 
 	@Test
@@ -676,8 +676,8 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = AliasedTransactionalComponentClass.class;
 		AliasedTransactional annotation = findMergedAnnotation(element, AliasedTransactional.class);
 		assertNotNull("@AliasedTransactional on " + element, annotation);
-		assertEquals("TX value via synthesized annotation.", "aliasForQualifier", annotation.value());
-		assertEquals("TX qualifier via synthesized annotation.", "aliasForQualifier", annotation.qualifier());
+		assertEquals("tx value via synthesized annotation.", "aliasForQualifier", annotation.value());
+		assertEquals("tx qualifier via synthesized annotation.", "aliasForQualifier", annotation.qualifier());
 	}
 
 	@Test

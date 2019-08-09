@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.2.0.BUILD-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":spring-context")
+    compile project(":spring-core")
+    compile project(":spring-beans")
+    compile project(":spring-aspects")
+    compile project(":spring-aop")
+    compile project(":spring-jdbc")
+    compile project(":spring-tx")
+//    compile project(":spring-orm")
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.38'
+
+    // https://mvnrepository.com/artifact/com.mchange/c3p0
+    compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.2'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

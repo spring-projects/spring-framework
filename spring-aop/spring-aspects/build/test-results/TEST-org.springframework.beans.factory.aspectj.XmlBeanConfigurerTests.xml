@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.springframework.beans.factory.aspectj.XmlBeanConfigurerTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-08-01T13:25:08" hostname="localhost" time="0.013">
+  <properties/>
+  <testcase name="injection" classname="org.springframework.beans.factory.aspectj.XmlBeanConfigurerTests" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

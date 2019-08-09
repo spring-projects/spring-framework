@@ -1,0 +1,17 @@
+1.@EnableAspectJAutoProxy是什么东西？
+    @Import(AspectJAutoProxyRegistrar.class)
+    AspectJAutoProxyRegistrar是什么呢？？
+        AspectJAutoProxyRegistrar实现了ImportBeanDefinitionRegistrar接口，
+2.  AnnotationAwareAspectJAutoProxyCreator
+        extends AspectJAwareAdvisorAutoProxyCreator
+            extends AbstractAdvisorAutoProxyCreator
+                extends AbstractAutoProxyCreator
+                    extends ProxyProcessorSupport
+                    	implements SmartInstantiationAwareBeanPostProcessor, BeanFactoryAware
+                    		关注后置处理器
+3.流程
+    3.1 注册AnnotationAwareAspectJAutoProxyCreator后置处理器
+
+
+
+

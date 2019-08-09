@@ -7,6 +7,8 @@ dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
 	compile(project(":spring-expression"))
+	compile(project(":spring-instrument"))
+
 	optional(project(":spring-instrument"))
 	optional("javax.annotation:javax.annotation-api:1.3.2")
 	optional("javax.ejb:javax.ejb-api:3.2")

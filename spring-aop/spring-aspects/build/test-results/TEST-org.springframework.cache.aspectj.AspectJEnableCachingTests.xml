@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.springframework.cache.aspectj.AspectJEnableCachingTests" tests="59" skipped="0" failures="0" errors="0" timestamp="2019-08-01T13:25:03" hostname="localhost" time="1.852">
+  <properties/>
+  <testcase name="testMultiConditionalCacheAndEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.204"/>
+  <testcase name="testClassCheckedExceptionSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.035"/>
+  <testcase name="testKeyExpression" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.029"/>
+  <testcase name="testConditionalUpdate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.047"/>
+  <testcase name="testClassMultiCacheAndEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.04"/>
+  <testcase name="testCacheableSyncNull" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.034"/>
+  <testcase name="testUnknownCustomKeyGenerator" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.035"/>
+  <testcase name="testClassRootVars" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.042"/>
+  <testcase name="testMethodName" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.033"/>
+  <testcase name="testEvictWithException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.038"/>
+  <testcase name="testClassUpdate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.03"/>
+  <testcase name="testClassEarlyInvalidate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.023"/>
+  <testcase name="testCustomCacheManager" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.032"/>
+  <testcase name="testCheckedExceptionSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.03"/>
+  <testcase name="testClassNullArg" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.024"/>
+  <testcase name="testClassEvictAll" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.028"/>
+  <testcase name="testPutRefersToResult" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.035"/>
+  <testcase name="testClassCacheUnlessExpression" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.035"/>
+  <testcase name="testConditionalExpressionSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.03"/>
+  <testcase name="testClassConditionalUpdate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.032"/>
+  <testcase name="testConditionalExpression" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.021"/>
+  <testcase name="testClassMultiPut" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.027"/>
+  <testcase name="testInvalidateWithKey" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.02"/>
+  <testcase name="testEarlyInvalidate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.026"/>
+  <testcase name="testClassUncheckedException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.029"/>
+  <testcase name="testClassNullValue" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.025"/>
+  <testcase name="testEarlyInvalidateWithKey" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.027"/>
+  <testcase name="testClassEarlyInvalidateWithKey" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.022"/>
+  <testcase name="testUncheckedExceptionSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.017"/>
+  <testcase name="testClassUncheckedExceptionSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.018"/>
+  <testcase name="testClassCacheCacheable" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.023"/>
+  <testcase name="testClassMethodName" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.024"/>
+  <testcase name="testCustomKeyGenerator" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.016"/>
+  <testcase name="testCacheable" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.022"/>
+  <testcase name="testCheckedException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.021"/>
+  <testcase name="testClassPutRefersToResult" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.018"/>
+  <testcase name="testVarArgsKey" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.03"/>
+  <testcase name="testMultiCache" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.025"/>
+  <testcase name="testMultiEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.039"/>
+  <testcase name="testMultiCacheAndEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.033"/>
+  <testcase name="testRootVars" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.031"/>
+  <testcase name="testClassMultiConditionalCacheAndEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.032"/>
+  <testcase name="testClassCacheInvalidateWKey" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.019"/>
+  <testcase name="testClassEvictWithException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.031"/>
+  <testcase name="testClassCheckedException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.02"/>
+  <testcase name="testUnlessExpression" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.027"/>
+  <testcase name="testEvictAll" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.022"/>
+  <testcase name="testCacheableNull" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.032"/>
+  <testcase name="testCacheableSync" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.043"/>
+  <testcase name="testClassCacheInvalidate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.035"/>
+  <testcase name="testMultiPut" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.058"/>
+  <testcase name="testUnknownCustomCacheManager" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.037"/>
+  <testcase name="testUncheckedException" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.016"/>
+  <testcase name="testNullValue" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.015"/>
+  <testcase name="testInvalidate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.022"/>
+  <testcase name="testUpdate" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.015"/>
+  <testcase name="testNullArg" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.018"/>
+  <testcase name="testClassMultiCache" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.028"/>
+  <testcase name="testClassMultiEvict" classname="org.springframework.cache.aspectj.AspectJEnableCachingTests" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[java.io.IOException: 61c5630f-919b-4d77-9aa7-9a06a23cdd03
+	at org.springframework.cache.config.AnnotatedClassCacheableService.throwCheckedSync_aroundBody54(AnnotatedClassCacheableService.java:192)
+	at org.springframework.cache.config.AnnotatedClassCacheableService$AjcClosure55.run(AnnotatedClassCacheableService.java:1)
+	at org.springframework.cache.aspectj.AbstractCacheAspect.ajc$around$org_springframework_cache_aspectj_AbstractCacheAspect$1$2bc714b5proceed(AbstractCacheAspect.aj:64)
+	at org.springframework.cache.aspectj.AbstractCacheAspect$AbstractCacheAspect$1.invoke(AbstractCacheAspect.aj:71)
+	at org.springframework.cache.interceptor.CacheAspectSupport.invokeOperation(CacheAspectSupport.java:336)
+	at org.springframework.cache.interceptor.CacheAspectSupport.lambda$execute$0(CacheAspectSupport.java:352)
+	at org.springframework.cache.concurrent.ConcurrentMapCache.lambda$get$0(ConcurrentMapCache.java:146)
+	at java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1660)
+	at org.springframework.cache.concurrent.ConcurrentMapCache.get(ConcurrentMapCache.java:144)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:352)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:316)
+	at org.springframework.cache.aspectj.AbstractCacheAspect.ajc$around$org_springframework_cache_aspectj_AbstractCacheAspect$1$2bc714b5(AbstractCacheAspect.aj:80)
+	at org.springframework.cache.config.AnnotatedClassCacheableService.throwCheckedSync(AnnotatedClassCacheableService.java:191)
+	at org.springframework.cache.config.AbstractCacheAnnotationTests.testCheckedThrowableSync(AbstractCacheAnnotationTests.java:355)
+	at org.springframework.cache.config.AbstractCacheAnnotationTests.testClassCheckedExceptionSync(AbstractCacheAnnotationTests.java:764)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.runTestClass(JUnitTestClassExecuter.java:114)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.execute(JUnitTestClassExecuter.java:57)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassProcessor.processTestClass(JUnitTestClassProcessor.java:66)
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:51)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:32)
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:93)
+	at com.sun.proxy.$Proxy1.processTestClass(Unknown Source)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.processTestClass(TestWorker.java:108)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:146)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:128)
+	at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:404)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:63)
+	at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:46)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.gradle.internal.concurrent.ThreadFactoryImpl$ManagedThreadRunnable.run(ThreadFactoryImpl.java:55)
+	at java.lang.Thread.run(Thread.java:748)
+java.io.IOException: da791d32-c726-40ad-9294-e0a48f18dd1a
+	at org.springframework.cache.config.DefaultCacheableService.throwCheckedSync_aroundBody52(DefaultCacheableService.java:201)
+	at org.springframework.cache.config.DefaultCacheableService$AjcClosure53.run(DefaultCacheableService.java:1)
+	at org.springframework.cache.aspectj.AbstractCacheAspect.ajc$around$org_springframework_cache_aspectj_AbstractCacheAspect$1$2bc714b5proceed(AbstractCacheAspect.aj:64)
+	at org.springframework.cache.aspectj.AbstractCacheAspect$AbstractCacheAspect$1.invoke(AbstractCacheAspect.aj:71)
+	at org.springframework.cache.interceptor.CacheAspectSupport.invokeOperation(CacheAspectSupport.java:336)
+	at org.springframework.cache.interceptor.CacheAspectSupport.lambda$execute$0(CacheAspectSupport.java:352)
+	at org.springframework.cache.concurrent.ConcurrentMapCache.lambda$get$0(ConcurrentMapCache.java:146)
+	at java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1660)
+	at org.springframework.cache.concurrent.ConcurrentMapCache.get(ConcurrentMapCache.java:144)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:352)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:316)
+	at org.springframework.cache.aspectj.AbstractCacheAspect.ajc$around$org_springframework_cache_aspectj_AbstractCacheAspect$1$2bc714b5(AbstractCacheAspect.aj:80)
+	at org.springframework.cache.config.DefaultCacheableService.throwCheckedSync(DefaultCacheableService.java:200)
+	at org.springframework.cache.config.DefaultCacheableService.throwCheckedSync(DefaultCacheableService.java:1)
+	at org.springframework.cache.config.AbstractCacheAnnotationTests.testCheckedThrowableSync(AbstractCacheAnnotationTests.java:355)
+	at org.springframework.cache.config.AbstractCacheAnnotationTests.testCheckedExceptionSync(AbstractCacheAnnotationTests.java:759)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.runTestClass(JUnitTestClassExecuter.java:114)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.execute(JUnitTestClassExecuter.java:57)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassProcessor.processTestClass(JUnitTestClassProcessor.java:66)
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:51)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:32)
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:93)
+	at com.sun.proxy.$Proxy1.processTestClass(Unknown Source)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.processTestClass(TestWorker.java:108)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:146)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:128)
+	at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:404)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:63)
+	at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:46)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.gradle.internal.concurrent.ThreadFactoryImpl$ManagedThreadRunnable.run(ThreadFactoryImpl.java:55)
+	at java.lang.Thread.run(Thread.java:748)
+]]></system-err>
+</testsuite>

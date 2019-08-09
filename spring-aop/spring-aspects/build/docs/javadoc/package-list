@@ -1,0 +1,5 @@
+org.springframework.beans.factory.aspectj
+org.springframework.cache.aspectj
+org.springframework.context.annotation.aspectj
+org.springframework.scheduling.aspectj
+org.springframework.transaction.aspectj

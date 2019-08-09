@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" tests="8" skipped="8" failures="0" errors="0" timestamp="2019-08-01T13:25:08" hostname="localhost" time="0.007">
+  <properties/>
+  <testcase name="asyncMethodReturningFutureGetsRoutedAsynchronouslyAndReturnsAFuture" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.005">
+    <skipped/>
+  </testcase>
+  <testcase name="exceptionHandlerCalled" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="syncMethodGetsRoutedSynchronously" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="methodReturningFutureInAsyncClassGetsRoutedAsynchronouslyAndReturnsAFuture" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="qualifiedAsyncMethodsAreRoutedToCorrectExecutor" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.001">
+    <skipped/>
+  </testcase>
+  <testcase name="asyncMethodGetsRoutedAsynchronously" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="exceptionHandlerNeverThrowsUnexpectedException" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="voidMethodInAsyncClassGetsRoutedAsynchronously" classname="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspectTests" time="0.0">
+    <skipped/>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
