@@ -1,0 +1,27 @@
+@import 'css/spring.css';
+
+.listingblock .switch {
+    border-width: 1px 1px 0 1px;
+    border-style: solid;
+    border-color: #282c34;
+    display: inline-block;
+}
+
+.listingblock .switch--item {
+    padding: 10px;
+    background-color: #e6e1dc;
+    color: #282c34;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.listingblock .switch--item:not(:first-child) {
+    border-width: 0 0 0 1px;
+    border-style: solid;
+    border-color: #282c34;
+}
+
+.listingblock .switch--item.selected {
+    background-color: #282c34;
+    color: #e6e1dc;
+}
