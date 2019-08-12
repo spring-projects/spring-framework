@@ -18,8 +18,8 @@ package org.springframework.core.convert.support;
 
 import java.nio.ByteBuffer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.converter.Converter;
 
@@ -40,7 +40,7 @@ public class ByteBufferConverterTests {
 	private GenericConversionService conversionService;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.conversionService = new DefaultConversionService();
 		this.conversionService.addConverter(new ByteArrayToOtherTypeConverter());

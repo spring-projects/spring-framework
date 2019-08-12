@@ -16,7 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 /**
  * Abstract base class for unit tests that allocate data buffers via a {@link DataBufferFactory}.
@@ -39,7 +39,7 @@ public abstract class AbstractLeakCheckingTestCase {
 	 * Checks whether any of the data buffers created by {@link #bufferFactory} have not been
 	 * released, throwing an assertion error if so.
 	 */
-	@After
+	@AfterEach
 	public final void checkForLeaks() {
 		this.bufferFactory.checkForLeaks();
 	}

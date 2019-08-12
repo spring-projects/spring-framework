@@ -19,7 +19,7 @@ package org.springframework.core.codec;
 import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;

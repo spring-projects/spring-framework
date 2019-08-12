@@ -18,8 +18,8 @@ package org.springframework.util;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,7 +79,7 @@ public class FileSystemUtilsTests {
 	}
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		File tmp = new File("./tmp");
 		if (tmp.exists()) {

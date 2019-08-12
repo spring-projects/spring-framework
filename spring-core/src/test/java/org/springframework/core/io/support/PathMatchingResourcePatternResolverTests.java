@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -79,7 +79,7 @@ public class PathMatchingResourcePatternResolverTests {
 		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
-	@Ignore  // passes under Eclipse, fails under Ant
+	@Disabled
 	@Test
 	public void classpathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");

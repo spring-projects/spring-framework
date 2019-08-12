@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -46,7 +46,7 @@ public class MapToMapConverterTests {
 	private final GenericConversionService conversionService = new GenericConversionService();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		conversionService.addConverter(new MapToMapConverter(conversionService));
 	}

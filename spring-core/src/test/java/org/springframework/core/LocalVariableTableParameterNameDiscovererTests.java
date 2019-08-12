@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 

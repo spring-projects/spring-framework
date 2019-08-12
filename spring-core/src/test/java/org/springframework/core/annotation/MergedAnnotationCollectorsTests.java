@@ -25,7 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.MultiValueMap;

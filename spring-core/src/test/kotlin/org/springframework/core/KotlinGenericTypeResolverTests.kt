@@ -17,7 +17,7 @@
 package org.springframework.core
 
 import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument
 import java.lang.reflect.Method
 

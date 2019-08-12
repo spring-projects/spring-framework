@@ -18,7 +18,7 @@ package org.springframework.core.env;
 
 import java.util.Iterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.env.MockPropertySource;
 

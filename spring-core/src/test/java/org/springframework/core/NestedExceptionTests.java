@@ -19,7 +19,7 @@ package org.springframework.core;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -136,18 +136,21 @@ configure(allprojects) { project ->
 	}
 
 	dependencies {
+		testCompile("org.junit.jupiter:junit-jupiter-api")
+		testCompile("org.junit.jupiter:junit-jupiter-params")
 		testCompile("junit:junit:4.13-beta-3") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("org.mockito:mockito-core:3.0.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
+		testCompile("org.mockito:mockito-junit-jupiter:3.0.0")
 		testCompile("io.mockk:mockk:1.9.3")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testCompile("org.assertj:assertj-core:3.13.1")
-		// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
-		// so that we can run JUnit 4 tests in IDEs.
+		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntime("org.junit.platform:junit-platform-launcher")
+		testRuntime("org.junit.jupiter:junit-jupiter-engine")
 		testRuntime("org.junit.vintage:junit-vintage-engine")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")

@@ -18,7 +18,7 @@ package org.springframework.core.annotation;
 
 import javax.annotation.Priority;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

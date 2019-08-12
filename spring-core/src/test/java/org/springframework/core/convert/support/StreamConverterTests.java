@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -45,7 +45,7 @@ public class StreamConverterTests {
 	private final StreamConverter streamConverter = new StreamConverter(this.conversionService);
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.conversionService.addConverter(new CollectionToCollectionConverter(this.conversionService));
 		this.conversionService.addConverter(new ArrayToCollectionConverter(this.conversionService));

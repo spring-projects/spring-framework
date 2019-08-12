@@ -25,8 +25,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
@@ -42,7 +42,7 @@ public class XMLEventStreamReaderTests {
 
 	private XMLEventStreamReader streamReader;
 
-	@Before
+	@BeforeEach
 	public void createStreamReader() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));

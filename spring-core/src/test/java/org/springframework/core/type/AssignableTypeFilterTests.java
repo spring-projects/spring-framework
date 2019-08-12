@@ -16,7 +16,7 @@
 
 package org.springframework.core.type;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -28,17 +28,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @see AssignableTypeFilterTestsTypes
  */
 public class AssignableTypeFilterTests {
 
 	@Test
 	public void directMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
-		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestNonInheritingClass";
+		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTestsTypes$TestNonInheritingClass";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		AssignableTypeFilter matchingFilter = new AssignableTypeFilter(TestNonInheritingClass.class);
-		AssignableTypeFilter notMatchingFilter = new AssignableTypeFilter(TestInterface.class);
+		AssignableTypeFilter matchingFilter = new AssignableTypeFilter(AssignableTypeFilterTestsTypes.TestNonInheritingClass.class);
+		AssignableTypeFilter notMatchingFilter = new AssignableTypeFilter(AssignableTypeFilterTestsTypes.TestInterface.class);
 		assertThat(notMatchingFilter.match(metadataReader, metadataReaderFactory)).isFalse();
 		assertThat(matchingFilter.match(metadataReader, metadataReaderFactory)).isTrue();
 	}
@@ -46,10 +47,10 @@ public class AssignableTypeFilterTests {
 	@Test
 	public void interfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
-		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
+		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTestsTypes$TestInterfaceImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		AssignableTypeFilter filter = new AssignableTypeFilter(TestInterface.class);
+		AssignableTypeFilter filter = new AssignableTypeFilter(AssignableTypeFilterTestsTypes.TestInterface.class);
 		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
@@ -57,10 +58,10 @@ public class AssignableTypeFilterTests {
 	@Test
 	public void superClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
-		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
+		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTestsTypes$SomeDaoLikeImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		AssignableTypeFilter filter = new AssignableTypeFilter(SimpleJdbcDaoSupport.class);
+		AssignableTypeFilter filter = new AssignableTypeFilter(AssignableTypeFilterTestsTypes.SimpleJdbcDaoSupport.class);
 		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
@@ -68,38 +69,12 @@ public class AssignableTypeFilterTests {
 	@Test
 	public void interfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
-		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
+		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTestsTypes$SomeDaoLikeImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		AssignableTypeFilter filter = new AssignableTypeFilter(JdbcDaoSupport.class);
+		AssignableTypeFilter filter = new AssignableTypeFilter(AssignableTypeFilterTestsTypes.JdbcDaoSupport.class);
 		assertThat(filter.match(metadataReader, metadataReaderFactory)).isTrue();
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
-	}
-
-
-	// We must use a standalone set of types to ensure that no one else is loading them
-	// and interfere with ClassloadingAssertions.assertClassNotLoaded()
-	private static class TestNonInheritingClass {
-	}
-
-	private interface TestInterface {
-	}
-
-	@SuppressWarnings("unused")
-	private static class TestInterfaceImpl implements TestInterface {
-	}
-
-	private interface SomeDaoLikeInterface {
-	}
-
-	@SuppressWarnings("unused")
-	private static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
-	}
-
-	private interface JdbcDaoSupport {
-	}
-
-	private static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
 	}
 
 }

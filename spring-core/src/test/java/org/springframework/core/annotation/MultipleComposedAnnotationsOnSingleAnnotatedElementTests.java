@@ -26,8 +26,8 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findAllMergedAnnotations;
@@ -105,7 +105,7 @@ public class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	@Ignore("Disabled since some Java 8 updates handle the bridge method differently")
+	@Disabled("Disabled since some Java 8 updates handle the bridge method differently")
 	public void getMultipleComposedAnnotationsOnBridgeMethod() throws Exception {
 		Set<Cacheable> cacheables = getAllMergedAnnotations(getBridgeMethod(), Cacheable.class);
 		assertThat(cacheables).isNotNull();

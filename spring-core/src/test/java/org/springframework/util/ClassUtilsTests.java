@@ -29,8 +29,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.DerivedTestObject;
 import org.springframework.tests.sample.objects.ITestInterface;
@@ -50,7 +50,7 @@ public class ClassUtilsTests {
 	private ClassLoader classLoader = getClass().getClassLoader();
 
 
-	@Before
+	@BeforeEach
 	public void clearStatics() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;

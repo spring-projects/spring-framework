@@ -18,10 +18,10 @@ package org.springframework.tests;
 
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.AssumptionViolatedException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,12 +42,12 @@ public class AssumeTests {
 	private String originalTestGroups;
 
 
-	@Before
+	@BeforeEach
 	public void trackOriginalTestGroups() {
 		this.originalTestGroups = System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY);
 	}
 
-	@After
+	@AfterEach
 	public void restoreOriginalTestGroups() {
 		if (this.originalTestGroups != null) {
 			setTestGroups(this.originalTestGroups);

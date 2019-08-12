@@ -25,8 +25,8 @@ import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -61,7 +61,7 @@ public abstract class AbstractStaxHandlerTestCase {
 	private XMLReader xmlReader;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")  // on JDK 9
 	public void createXMLReader() throws Exception {
 		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();

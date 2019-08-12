@@ -25,8 +25,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +47,7 @@ public class StreamUtilsTests {
 
 	private String string = "";
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		new Random().nextBytes(bytes);
 		while (string.length() < StreamUtils.BUFFER_SIZE + 10) {

@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import kotlinx.coroutines.Deferred;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;

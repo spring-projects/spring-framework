@@ -18,7 +18,7 @@ package org.springframework.core.io.support;
 
 import java.beans.PropertyEditor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;

@@ -32,8 +32,8 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
@@ -74,7 +74,7 @@ import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnno
 @SuppressWarnings("deprecation")
 public class AnnotationUtilsTests {
 
-	@Before
+	@BeforeEach
 	public void clearCacheBeforeTests() {
 		AnnotationUtils.clearCache();
 	}

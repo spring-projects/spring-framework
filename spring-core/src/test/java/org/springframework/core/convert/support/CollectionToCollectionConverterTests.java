@@ -30,8 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -53,7 +53,7 @@ public class CollectionToCollectionConverterTests {
 	private GenericConversionService conversionService = new GenericConversionService();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 	}

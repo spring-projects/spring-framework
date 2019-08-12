@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ObjectUtils;
 
@@ -38,7 +38,7 @@ public class ToStringCreatorTests {
 	private SomeObject s1, s2, s3;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		s1 = new SomeObject() {
 			@Override

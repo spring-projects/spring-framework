@@ -18,7 +18,7 @@ package org.springframework.core.task;
 
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ConcurrencyThrottleSupport;
 

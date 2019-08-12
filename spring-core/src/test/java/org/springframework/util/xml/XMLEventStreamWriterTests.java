@@ -21,8 +21,8 @@ import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
@@ -39,7 +39,7 @@ public class XMLEventStreamWriterTests {
 
 	private StringWriter stringWriter;
 
-	@Before
+	@BeforeEach
 	public void createStreamReader() throws Exception {
 		stringWriter = new StringWriter();
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
