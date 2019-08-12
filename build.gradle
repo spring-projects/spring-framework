@@ -6,6 +6,7 @@ buildscript {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("io.spring.nohttp:nohttp-gradle:0.0.3.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
+		classpath("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
 }
 
@@ -303,6 +304,7 @@ configure(rootProject) {
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
+		asciidoctor("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
 
 	artifacts {

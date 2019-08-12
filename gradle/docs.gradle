@@ -129,7 +129,7 @@ asciidoctor {
 			'highlightjsdir=js/highlight',
 			'highlightjs-theme=atom-one-dark-reasonable',
 			stylesdir: "css/",
-			stylesheet: 'spring.css',
+			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
 
 }
