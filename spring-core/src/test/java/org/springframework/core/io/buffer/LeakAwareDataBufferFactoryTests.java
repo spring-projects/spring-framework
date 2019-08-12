@@ -24,7 +24,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
 /**
  * @author Arjen Poutsma
  */
-public class LeakAwareDataBufferFactoryTests {
+class LeakAwareDataBufferFactoryTests {
 
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 

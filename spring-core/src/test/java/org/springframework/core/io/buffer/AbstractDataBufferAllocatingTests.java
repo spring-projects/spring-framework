@@ -16,27 +16,34 @@
 
 package org.springframework.core.io.buffer;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import org.junit.Rule;
-import org.junit.rules.Verifier;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Base class for tests that read or write data buffers with a rule to check
@@ -44,29 +51,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public abstract class AbstractDataBufferAllocatingTestCase {
+public abstract class AbstractDataBufferAllocatingTests {
 
-	@Parameterized.Parameter
-	public DataBufferFactory bufferFactory;
+	@RegisterExtension
+	AfterEachCallback leakDetector = context -> verifyAllocations();
 
-	@Parameterized.Parameters(name = "{0}")
-	public static Object[][] dataBufferFactories() {
-		return new Object[][] {
-				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
-				// disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 8192, 11, 0, 0, 0, true))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 8192, 11, 0, 0, 0, true))},
-				{new DefaultDataBufferFactory(true)},
-				{new DefaultDataBufferFactory(false)}
-
-		};
-	}
-
-	@Rule
-	public final Verifier leakDetector = new LeakDetector();
+	protected DataBufferFactory bufferFactory;
 
 
 	protected DataBuffer createDataBuffer(int capacity) {
@@ -93,8 +85,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 
 	protected Consumer<DataBuffer> stringConsumer(String expected) {
 		return dataBuffer -> {
-			String value =
-					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+			String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
 			DataBufferUtils.release(dataBuffer);
 			assertThat(value).isEqualTo(expected);
 		};
@@ -150,12 +141,29 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 	}
 
 
-	protected class LeakDetector extends Verifier {
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
+	public @interface ParameterizedDataBufferAllocatingTest {
+	}
 
-		@Override
-		public void verify() {
-			AbstractDataBufferAllocatingTestCase.this.verifyAllocations();
-		}
+	public static Stream<Arguments> dataBufferFactories() {
+		return Stream.of(
+			arguments("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))),
+			arguments("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))),
+			// disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
+			arguments("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 4096, 2, 0, 0, 0, true))),
+			arguments("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 4096, 2, 0, 0, 0, true))),
+			arguments("DefaultDataBufferFactory - preferDirect = true",
+					new DefaultDataBufferFactory(true)),
+			arguments("DefaultDataBufferFactory - preferDirect = false",
+					new DefaultDataBufferFactory(false))
+		);
 	}
 
 }

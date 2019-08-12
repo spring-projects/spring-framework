@@ -23,14 +23,14 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,8 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * WebClient integration tests focusing on data buffer management.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTestCase {
+public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTests {
 
 	private static final Duration DELAY = Duration.ofSeconds(5);
 
@@ -57,9 +58,8 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 	private ReactorResourceFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-
 		this.factory = new ReactorResourceFactory();
 		this.factory.afterPropertiesSet();
 
@@ -82,16 +82,16 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		}
 	}
 
-	@After
+	@AfterEach
 	public void shutDown() throws InterruptedException {
 		waitForDataBufferRelease(Duration.ofSeconds(2));
 		this.factory.destroy();
 	}
 
 
-
-	@Test
-	public void bodyToMonoVoid() {
+	@ParameterizedDataBufferAllocatingTest
+	public void bodyToMonoVoid(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
 
 		this.server.enqueue(new MockResponse()
 				.setResponseCode(201)
@@ -107,8 +107,9 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
-	@Test // SPR-17482
-	public void bodyToMonoVoidWithoutContentType() {
+	@ParameterizedDataBufferAllocatingTest // SPR-17482
+	public void bodyToMonoVoidWithoutContentType(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
 
 		this.server.enqueue(new MockResponse()
 				.setResponseCode(HttpStatus.ACCEPTED.value())
@@ -123,32 +124,42 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
-	@Test
-	public void onStatusWithBodyNotConsumed() {
+	@ParameterizedDataBufferAllocatingTest
+	public void onStatusWithBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> Mono.just(ex));
 	}
 
-	@Test
-	public void onStatusWithBodyConsumed() {
+	@ParameterizedDataBufferAllocatingTest
+	public void onStatusWithBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> response.bodyToMono(Void.class).thenReturn(ex));
 	}
 
-	@Test // SPR-17473
-	public void onStatusWithMonoErrorAndBodyNotConsumed() {
+	@ParameterizedDataBufferAllocatingTest // SPR-17473
+	public void onStatusWithMonoErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> Mono.error(ex));
 	}
 
-	@Test
-	public void onStatusWithMonoErrorAndBodyConsumed() {
+	@ParameterizedDataBufferAllocatingTest
+	public void onStatusWithMonoErrorAndBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> response.bodyToMono(Void.class).then(Mono.error(ex)));
 	}
 
-	@Test // gh-23230
-	public void onStatusWithImmediateErrorAndBodyNotConsumed() {
+	@ParameterizedDataBufferAllocatingTest // gh-23230
+	public void onStatusWithImmediateErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> {
 			throw ex;
