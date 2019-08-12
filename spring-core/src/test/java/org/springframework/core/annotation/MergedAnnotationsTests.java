@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import org.junit.Test;
-import org.junit.internal.ArrayComparisonFailure;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -664,7 +663,7 @@ public class MergedAnnotationsTests {
 				WebController.class.getMethod("getMappedWithPathAttribute"));
 	}
 
-	private void testGetWithTypeHierarchyWebMapping(AnnotatedElement element) throws ArrayComparisonFailure {
+	private void testGetWithTypeHierarchyWebMapping(AnnotatedElement element) {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(element,
 				SearchStrategy.TYPE_HIERARCHY).get(RequestMapping.class);
 		assertThat(annotation.getStringArray("value")).containsExactly("/test");
