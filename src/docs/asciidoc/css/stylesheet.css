@@ -1,10 +1,10 @@
 @import 'css/spring.css';
 
 .listingblock .switch {
-    border-width: 1px 1px 0 1px;
-    border-style: solid;
-    border-color: #282c34;
+    border-style: none;
     display: inline-block;
+    position: relative;
+    bottom: -3px;
 }
 
 .listingblock .switch--item {
@@ -13,12 +13,12 @@
     color: #282c34;
     display: inline-block;
     cursor: pointer;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 .listingblock .switch--item:not(:first-child) {
-    border-width: 0 0 0 1px;
-    border-style: solid;
-    border-color: #282c34;
+    border-style: none;
 }
 
 .listingblock .switch--item.selected {
