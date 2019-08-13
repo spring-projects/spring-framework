@@ -22,7 +22,7 @@ import example.scannable.FooServiceImpl;
 import example.scannable.NamedStubDao;
 import example.scannable.StubFooDao;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.BeanCreationException;

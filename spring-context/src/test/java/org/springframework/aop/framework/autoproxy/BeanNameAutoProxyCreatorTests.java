@@ -16,8 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 import test.mixin.LockedException;
 
@@ -45,7 +45,7 @@ public class BeanNameAutoProxyCreatorTests {
 	private BeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		// Note that we need an ApplicationContext, not just a BeanFactory,
 		// for post-processing and hence auto-proxying to work.

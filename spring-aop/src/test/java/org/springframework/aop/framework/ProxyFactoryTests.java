@@ -24,8 +24,8 @@ import javax.swing.RootPaneContainer;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -325,7 +325,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	@Ignore("Not implemented yet, see https://jira.springframework.org/browse/SPR-5708")
+	@Disabled("Not implemented yet, see https://jira.springframework.org/browse/SPR-5708")
 	public void testExclusionOfNonPublicInterfaces() {
 		JFrame frame = new JFrame();
 		ProxyFactory proxyFactory = new ProxyFactory(frame);

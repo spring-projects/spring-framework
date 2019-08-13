@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

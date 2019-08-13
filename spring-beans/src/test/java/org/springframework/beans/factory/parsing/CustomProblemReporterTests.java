@@ -19,8 +19,8 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -43,7 +43,7 @@ public class CustomProblemReporterTests {
 	private XmlBeanDefinitionReader reader;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();

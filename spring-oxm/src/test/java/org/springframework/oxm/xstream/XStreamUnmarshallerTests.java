@@ -28,8 +28,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -46,7 +46,7 @@ public class XStreamUnmarshallerTests {
 
 	private XStreamMarshaller unmarshaller;
 
-	@Before
+	@BeforeEach
 	public void createUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
 		Map<String, Class<?>> aliases = new HashMap<>();

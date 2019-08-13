@@ -20,8 +20,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.servlet.AsyncEvent;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.mock.web.test.MockAsyncContext;
@@ -56,7 +56,7 @@ public class WebAsyncManagerTimeoutTests {
 	private MockHttpServletResponse servletResponse;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);

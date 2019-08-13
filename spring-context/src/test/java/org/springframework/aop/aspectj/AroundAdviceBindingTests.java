@@ -17,8 +17,8 @@
 package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AroundAdviceBindingTestAspect.AroundAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
@@ -48,7 +48,7 @@ public class AroundAdviceBindingTests {
 
 	protected ApplicationContext ctx;
 
-	@Before
+	@BeforeEach
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 

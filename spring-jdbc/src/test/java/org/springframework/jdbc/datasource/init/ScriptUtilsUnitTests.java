@@ -19,7 +19,7 @@ package org.springframework.jdbc.datasource.init;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;

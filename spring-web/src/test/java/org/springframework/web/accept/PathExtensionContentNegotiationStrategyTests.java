@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -45,7 +45,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	private MockHttpServletRequest servletRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(servletRequest);

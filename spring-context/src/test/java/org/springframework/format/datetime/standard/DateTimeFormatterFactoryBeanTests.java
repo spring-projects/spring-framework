@@ -19,7 +19,7 @@ package org.springframework.format.datetime.standard;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

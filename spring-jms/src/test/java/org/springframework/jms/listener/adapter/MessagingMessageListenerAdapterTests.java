@@ -29,8 +29,8 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
@@ -67,7 +67,7 @@ public class MessagingMessageListenerAdapterTests {
 	private final SampleBean sample = new SampleBean();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		initializeFactory(factory);
 	}

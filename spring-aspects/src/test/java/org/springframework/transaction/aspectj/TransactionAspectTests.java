@@ -16,8 +16,8 @@
 
 package org.springframework.transaction.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
@@ -47,7 +47,7 @@ public class TransactionAspectTests {
 			new MethodAnnotationOnClassWithNoInterface();
 
 
-	@Before
+	@BeforeEach
 	public void initContext() {
 		AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
 	}

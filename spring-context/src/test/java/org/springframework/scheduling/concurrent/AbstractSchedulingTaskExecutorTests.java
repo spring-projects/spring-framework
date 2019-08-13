@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -50,14 +50,14 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	private volatile Object outcome;
 
 
-	@Before
+	@BeforeEach
 	public void initExecutor() {
 		executor = buildExecutor();
 	}
 
 	protected abstract AsyncListenableTaskExecutor buildExecutor();
 
-	@After
+	@AfterEach
 	public void shutdownExecutor() throws Exception {
 		if (executor instanceof DisposableBean) {
 			((DisposableBean) executor).destroy();

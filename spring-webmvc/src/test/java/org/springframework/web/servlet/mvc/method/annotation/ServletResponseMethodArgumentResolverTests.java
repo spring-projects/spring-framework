@@ -21,8 +21,8 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -50,7 +50,7 @@ public class ServletResponseMethodArgumentResolverTests {
 	private Method method;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();

@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;

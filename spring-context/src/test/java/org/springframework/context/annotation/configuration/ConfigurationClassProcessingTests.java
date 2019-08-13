@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import javax.annotation.Resource;
 import javax.inject.Provider;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;

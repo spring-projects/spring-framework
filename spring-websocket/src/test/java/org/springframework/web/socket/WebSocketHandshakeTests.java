@@ -23,14 +23,12 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -47,12 +45,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
+class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
-	@Parameters(name = "server [{0}], client [{1}]")
-	public static Iterable<Object[]> arguments() {
+	static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
 				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
@@ -66,8 +63,11 @@ public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		return new Class<?>[] {TestConfig.class};
 	}
 
-	@Test
-	public void subProtocolNegotiation() throws Exception {
+
+	@ParameterizedWebSocketTest
+	void subProtocolNegotiation(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
 		URI url = new URI(getWsBaseUrl() + "/ws");
@@ -76,8 +76,10 @@ public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		session.close();
 	}
 
-	@Test  // SPR-12727
-	public void unsolicitedPongWithEmptyPayload() throws Exception {
+	@ParameterizedWebSocketTest  // SPR-12727
+	void unsolicitedPongWithEmptyPayload(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		String url = getWsBaseUrl() + "/ws";
 		WebSocketSession session = this.webSocketClient.doHandshake(new AbstractWebSocketHandler() {}, url).get();
 

@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.messaging.Message;
@@ -48,7 +48,7 @@ public class MultiServerUserRegistryTests {
 	private MessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.localRegistry = Mockito.mock(SimpUserRegistry.class);
 		this.registry = new MultiServerUserRegistry(this.localRegistry);

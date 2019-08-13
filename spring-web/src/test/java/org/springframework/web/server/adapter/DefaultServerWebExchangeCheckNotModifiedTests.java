@@ -24,10 +24,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -44,7 +42,6 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  *
  * @author Rossen Stoyanchev
  */
-@RunWith(Parameterized.class)
 public class DefaultServerWebExchangeCheckNotModifiedTests {
 
 	private static final String CURRENT_TIME = "Wed, 09 Apr 2014 09:57:42 GMT";
@@ -66,7 +63,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws URISyntaxException {
 		this.currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);

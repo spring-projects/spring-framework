@@ -24,8 +24,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -70,7 +70,7 @@ public class CrossOriginTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();

@@ -18,8 +18,8 @@ package org.springframework.messaging.simp.user;
 
 import java.security.Principal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -45,7 +45,7 @@ public class DefaultUserDestinationResolverTests {
 	private SimpUserRegistry registry;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));

@@ -23,7 +23,7 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.tests.aop.advice.MethodCounter;

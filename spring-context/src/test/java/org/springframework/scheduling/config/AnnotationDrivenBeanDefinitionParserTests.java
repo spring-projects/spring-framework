@@ -18,8 +18,8 @@ package org.springframework.scheduling.config;
 
 import java.util.function.Supplier;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -37,7 +37,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 			"annotationDrivenContext.xml", AnnotationDrivenBeanDefinitionParserTests.class);
 
 
-	@After
+	@AfterEach
 	public void closeApplicationContext() {
 		context.close();
 	}

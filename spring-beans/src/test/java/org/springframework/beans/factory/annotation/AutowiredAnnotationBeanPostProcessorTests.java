@@ -40,10 +40,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -92,7 +92,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	private AutowiredAnnotationBeanPostProcessor bpp;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -103,7 +103,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		bf.destroySingletons();
 	}
@@ -2052,7 +2052,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	@Ignore  // SPR-11521
+	@Disabled  // SPR-11521
 	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedInjectionIntoTypeVariableSelectingBestMatchAgainstFactoryMethodSignature() {
 		RootBeanDefinition bd = new RootBeanDefinition(GenericInterface1Impl.class);

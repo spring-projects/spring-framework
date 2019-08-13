@@ -20,7 +20,7 @@ import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.tests.sample.beans.TestBean;

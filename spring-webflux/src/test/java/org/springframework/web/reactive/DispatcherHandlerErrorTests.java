@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -67,7 +67,7 @@ public class DispatcherHandlerErrorTests {
 	private DispatcherHandler dispatcherHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestConfig.class);

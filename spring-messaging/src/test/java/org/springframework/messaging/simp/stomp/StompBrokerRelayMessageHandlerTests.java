@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.messaging.Message;
@@ -59,7 +59,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	private StubTcpOperations tcpClient;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.outboundChannel = new StubMessageChannel();

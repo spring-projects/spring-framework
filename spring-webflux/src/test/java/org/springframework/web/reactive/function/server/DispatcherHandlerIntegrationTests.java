@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -53,7 +53,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  *
  * @author Arjen Poutsma
  */
-public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -73,8 +73,10 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	}
 
 
-	@Test
-	public void mono() {
+	@ParameterizedHttpServerTest
+	void mono(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/mono", Person.class);
 
@@ -82,8 +84,10 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
-	@Test
-	public void flux() {
+	@ParameterizedHttpServerTest
+	void flux(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
 				this.restTemplate
@@ -96,8 +100,10 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
 
-	@Test
-	public void controller() {
+	@ParameterizedHttpServerTest
+	void controller(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/controller", Person.class);
 
@@ -105,8 +111,10 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
-	@Test
-	public void attributes() {
+	@ParameterizedHttpServerTest
+	void attributes(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				this.restTemplate
 						.getForEntity("http://localhost:" + this.port + "/attributes/bar", String.class);

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import io.reactivex.Single;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -80,7 +80,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	private HandlerMethod emptyMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		TestController testController = new TestController();
 

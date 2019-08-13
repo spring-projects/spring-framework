@@ -29,8 +29,8 @@ import io.rsocket.DuplexConnection;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.ClientTransport;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -68,7 +68,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	private final TestRSocketFactoryConfigurer rsocketFactoryConfigurer = new TestRSocketFactoryConfigurer();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.transport = mock(ClientTransport.class);
 		given(this.transport.connect(anyInt())).willReturn(Mono.just(this.connection));

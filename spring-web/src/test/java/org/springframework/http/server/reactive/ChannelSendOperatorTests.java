@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -46,13 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ChannelSendOperatorTests {
 
-	private OneByOneAsyncWriter writer;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.writer = new OneByOneAsyncWriter();
-	}
+	private final OneByOneAsyncWriter writer = new OneByOneAsyncWriter();
 
 
 	@Test

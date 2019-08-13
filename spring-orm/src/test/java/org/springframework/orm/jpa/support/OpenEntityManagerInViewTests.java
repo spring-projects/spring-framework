@@ -28,9 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.test.MockAsyncContext;
@@ -75,7 +75,7 @@ public class OpenEntityManagerInViewTests {
 	private ServletWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
@@ -88,7 +88,7 @@ public class OpenEntityManagerInViewTests {
 		this.webRequest = new ServletWebRequest(this.request);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

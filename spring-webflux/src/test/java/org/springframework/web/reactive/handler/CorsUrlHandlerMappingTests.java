@@ -17,8 +17,8 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,7 +45,7 @@ public class CorsUrlHandlerMappingTests {
 	private CorsAwareHandler corsController = new CorsAwareHandler();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.handlerMapping = new AbstractUrlHandlerMapping() {};
 		this.handlerMapping.registerHandler("/welcome.html", this.welcomeController);

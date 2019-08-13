@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -51,7 +51,7 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 	private TestWebSocketSession webSocketSession;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setUp();
 		this.webSocketSession = new TestWebSocketSession();

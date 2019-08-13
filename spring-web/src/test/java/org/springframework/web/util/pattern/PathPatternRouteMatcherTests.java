@@ -18,7 +18,7 @@ package org.springframework.web.util.pattern;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.util.RouteMatcher;

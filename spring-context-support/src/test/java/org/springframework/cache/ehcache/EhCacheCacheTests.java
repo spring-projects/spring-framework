@@ -21,9 +21,9 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.AbstractCacheTests;
 import org.springframework.tests.Assume;
@@ -45,7 +45,7 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 	private EhCacheCache cache;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		cacheManager = new CacheManager(new Configuration().name("EhCacheCacheTests")
 				.defaultCache(new CacheConfiguration("default", 100)));
@@ -55,7 +55,7 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 		cache = new EhCacheCache(nativeCache);
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		cacheManager.shutdown();
 	}

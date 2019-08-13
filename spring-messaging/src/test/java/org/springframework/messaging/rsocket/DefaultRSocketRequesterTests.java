@@ -28,8 +28,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.rsocket.AbstractRSocket;
 import io.rsocket.Payload;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -64,7 +64,7 @@ public class DefaultRSocketRequesterTests {
 	private final DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.rsocket = new TestRSocket();
 		this.requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);

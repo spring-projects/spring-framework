@@ -16,16 +16,22 @@
 
 package org.springframework.context.annotation
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.Assert.*
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException
 
 class KotlinConfigurationClassTests {
 
-	@Test(expected = BeanDefinitionParsingException::class)
+	@Test
 	fun `Final configuration with default proxyBeanMethods value`() {
-		AnnotationConfigApplicationContext(FinalConfigurationWithProxy::class.java)
+		try {
+			AnnotationConfigApplicationContext(FinalConfigurationWithProxy::class.java)
+			fail("should have thrown a BeanDefinitionParsingException")			
+		}
+		catch (e: BeanDefinitionParsingException) {
+			// expected
+		}
 	}
 
 	@Test

@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -77,7 +77,7 @@ public class ScriptFactoryPostProcessorTests {
 			"  }\n" +
 			"}";
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		Assume.group(TestGroup.PERFORMANCE);
 	}

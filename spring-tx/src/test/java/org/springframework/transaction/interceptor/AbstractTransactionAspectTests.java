@@ -18,8 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -65,7 +65,7 @@ public abstract class AbstractTransactionAspectTests {
 	protected Method exceptionalMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		getNameMethod = ITestBean.class.getMethod("getName");
 		setNameMethod = ITestBean.class.getMethod("setName", String.class);

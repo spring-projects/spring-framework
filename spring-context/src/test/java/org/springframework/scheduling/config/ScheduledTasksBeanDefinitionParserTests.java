@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
@@ -46,7 +46,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	private Object testBean;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"scheduledTasksContext.xml", ScheduledTasksBeanDefinitionParserTests.class);

@@ -19,8 +19,8 @@ package org.springframework.cache.interceptor;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -57,7 +57,7 @@ public class CacheErrorHandlerTests {
 
 	private SimpleService simpleService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);

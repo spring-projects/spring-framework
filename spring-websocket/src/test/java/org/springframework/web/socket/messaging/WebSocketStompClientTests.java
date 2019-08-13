@@ -20,12 +20,12 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -64,7 +64,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class WebSocketStompClientTests {
 
 	@Mock
@@ -83,7 +83,7 @@ public class WebSocketStompClientTests {
 	private SettableListenableFuture<WebSocketSession> handshakeFuture;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		WebSocketClient webSocketClient = mock(WebSocketClient.class);
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);

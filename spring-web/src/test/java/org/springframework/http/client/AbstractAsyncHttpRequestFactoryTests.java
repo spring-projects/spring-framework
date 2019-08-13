@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.Future;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,12 +41,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 @SuppressWarnings("deprecation")
-public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
+public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockWebServerTests {
 
 	protected AsyncClientHttpRequestFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public final void createFactory() throws Exception {
 		this.factory = createRequestFactory();
 		if (this.factory instanceof InitializingBean) {
@@ -54,7 +54,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		}
 	}
 
-	@After
+	@AfterEach
 	public final void destroyFactory() throws Exception {
 		if (this.factory instanceof DisposableBean) {
 			((DisposableBean) this.factory).destroy();

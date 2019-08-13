@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;

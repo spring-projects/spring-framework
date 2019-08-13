@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import org.springframework.jdbc.Customer;
@@ -95,7 +95,7 @@ public class NamedParameterJdbcTemplateTests {
 	private NamedParameterJdbcTemplate namedParameterTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);
@@ -150,7 +150,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).close();
 	}
 
-	@Ignore("SPR-16340")
+	@Disabled("SPR-16340")
 	@Test
 	public void testExecuteArray() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);

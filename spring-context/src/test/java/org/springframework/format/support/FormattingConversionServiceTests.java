@@ -27,9 +27,9 @@ import java.util.Properties;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ConfigurablePropertyAccessor;
@@ -68,14 +68,14 @@ public class FormattingConversionServiceTests {
 	private FormattingConversionService formattingService;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		formattingService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(formattingService);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}

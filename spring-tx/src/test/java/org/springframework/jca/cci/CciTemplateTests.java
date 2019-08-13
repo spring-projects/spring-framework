@@ -30,7 +30,7 @@ import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResultSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 import org.springframework.jca.cci.connection.NotSupportedRecordFactory;

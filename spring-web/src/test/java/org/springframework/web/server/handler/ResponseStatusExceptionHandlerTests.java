@@ -18,8 +18,8 @@ package org.springframework.web.server.handler;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -43,7 +43,7 @@ public class ResponseStatusExceptionHandlerTests {
 	protected ResponseStatusExceptionHandler handler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.handler = createResponseStatusExceptionHandler();
 	}

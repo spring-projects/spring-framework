@@ -23,7 +23,7 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;

@@ -18,8 +18,8 @@ package org.springframework.aop.config;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 
@@ -39,7 +39,7 @@ public class MethodLocatingFactoryBeanTests {
 	private MethodLocatingFactoryBean factory;
 	private BeanFactory beanFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		factory = new MethodLocatingFactoryBean();
 		beanFactory = mock(BeanFactory.class);

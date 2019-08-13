@@ -17,7 +17,7 @@
 package org.springframework.transaction.annotation;
 
 import io.vavr.control.Try;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.transaction.CallCountingTransactionManager;

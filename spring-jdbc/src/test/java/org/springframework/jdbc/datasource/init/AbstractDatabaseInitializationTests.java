@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
@@ -46,13 +46,13 @@ public abstract class AbstractDatabaseInitializationTests {
 	JdbcTemplate jdbcTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		db = new EmbeddedDatabaseBuilder().setType(getEmbeddedDatabaseType()).build();
 		jdbcTemplate = new JdbcTemplate(db);
 	}
 
-	@After
+	@AfterEach
 	public void shutDown() {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.clear();

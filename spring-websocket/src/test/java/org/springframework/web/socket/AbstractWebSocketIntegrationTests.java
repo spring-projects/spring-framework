@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
 
 package org.springframework.web.socket;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
-import org.junit.runners.Parameterized.Parameter;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
@@ -56,23 +59,28 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Rule
-	public final TestName testName = new TestName();
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "server [{0}], client [{1}]")
+	@MethodSource("arguments")
+	protected @interface ParameterizedWebSocketTest {
+	}
 
-	@Parameter(0)
-	public WebSocketTestServer server;
-
-	@Parameter(1)
-	public WebSocketClient webSocketClient;
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected WebSocketTestServer server;
+
+	protected WebSocketClient webSocketClient;
 
 	protected AnnotationConfigWebApplicationContext wac;
 
 
-	@Before
-	public void setup() throws Exception {
-		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
+	protected void setup(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		this.server = server;
+		this.webSocketClient = webSocketClient;
+
+		logger.debug("Setting up '" + testInfo.getTestMethod().get().getName() + "', client=" +
 				this.webSocketClient.getClass().getSimpleName() + ", server=" +
 				this.server.getClass().getSimpleName());
 
@@ -94,8 +102,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	protected abstract Class<?>[] getAnnotatedConfigClasses();
 
-	@After
-	public void teardown() throws Exception {
+	@AfterEach
+	void teardown() throws Exception {
 		try {
 			if (this.webSocketClient instanceof Lifecycle) {
 				((Lifecycle) this.webSocketClient).stop();
@@ -147,6 +155,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Configuration
 	static class JettyUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new JettyRequestUpgradeStrategy();
@@ -157,6 +166,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Configuration
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new TomcatRequestUpgradeStrategy();
@@ -167,6 +177,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Configuration
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new UndertowRequestUpgradeStrategy();

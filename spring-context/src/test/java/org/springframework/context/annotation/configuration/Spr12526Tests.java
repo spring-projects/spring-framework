@@ -18,7 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import javax.annotation.Resource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;

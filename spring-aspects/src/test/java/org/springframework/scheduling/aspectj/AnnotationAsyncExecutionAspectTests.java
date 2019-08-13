@@ -22,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
@@ -55,7 +55,7 @@ public class AnnotationAsyncExecutionAspectTests {
 	private CountingExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		Assume.group(TestGroup.PERFORMANCE);
 

@@ -18,8 +18,8 @@ package org.springframework.web.servlet.function;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
@@ -32,7 +32,7 @@ public class RequestPredicateTests {
 
 	private ServerRequest request;
 
-	@Before
+	@BeforeEach
 	public void createRequest() {
 		this.request = new DefaultServerRequest(new MockHttpServletRequest(),
 				Collections.emptyList());

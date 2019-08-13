@@ -21,7 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert
 import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.util.ReflectionUtils

@@ -21,9 +21,9 @@ import java.util.Map;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.Payload;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -52,14 +52,14 @@ public class DefaultMetadataExtractorTests {
 	private DefaultMetadataExtractor extractor;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		DataBufferFactory bufferFactory = new LeakAwareNettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
 		this.strategies = RSocketStrategies.builder().dataBufferFactory(bufferFactory).build();
 		this.extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws InterruptedException {
 		DataBufferFactory bufferFactory = this.strategies.dataBufferFactory();
 		((LeakAwareNettyDataBufferFactory) bufferFactory).checkForLeaks(Duration.ofSeconds(5));

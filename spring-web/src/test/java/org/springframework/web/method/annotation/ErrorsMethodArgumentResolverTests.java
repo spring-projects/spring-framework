@@ -16,8 +16,8 @@
 
 package org.springframework.web.method.annotation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -47,7 +47,7 @@ public class ErrorsMethodArgumentResolverTests {
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		paramErrors = new MethodParameter(getClass().getDeclaredMethod("handle", Errors.class), 0);
 		bindingResult = new WebDataBinder(new Object(), "attr").getBindingResult();

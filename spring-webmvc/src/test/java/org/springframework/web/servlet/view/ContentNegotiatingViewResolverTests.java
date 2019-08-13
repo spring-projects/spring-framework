@@ -24,9 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -58,7 +58,7 @@ public class ContentNegotiatingViewResolverTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void createViewResolver() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -69,7 +69,7 @@ public class ContentNegotiatingViewResolverTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestContextHolder() {
 		RequestContextHolder.resetRequestAttributes();
 	}

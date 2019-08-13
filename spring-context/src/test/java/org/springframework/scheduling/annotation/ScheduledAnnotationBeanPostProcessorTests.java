@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -73,7 +73,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	private final StaticApplicationContext context = new StaticApplicationContext();
 
 
-	@After
+	@AfterEach
 	public void closeContextAfterTest() {
 		context.close();
 	}

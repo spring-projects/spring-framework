@@ -21,7 +21,7 @@ import java.net.InetSocketAddress;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.sun.net.httpserver.HttpServer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.remoting.RemoteAccessException;

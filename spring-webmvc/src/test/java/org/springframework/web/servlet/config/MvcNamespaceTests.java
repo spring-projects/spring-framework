@@ -40,8 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
@@ -167,7 +167,7 @@ public class MvcNamespaceTests {
 	private HandlerMethod handlerMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		TestMockServletContext servletContext = new TestMockServletContext();
 		appContext = new XmlWebApplicationContext();

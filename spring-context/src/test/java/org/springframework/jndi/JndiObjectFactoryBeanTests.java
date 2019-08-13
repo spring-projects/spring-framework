@@ -19,7 +19,7 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;

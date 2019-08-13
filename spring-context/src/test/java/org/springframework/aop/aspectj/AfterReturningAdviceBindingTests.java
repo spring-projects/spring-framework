@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
@@ -50,7 +50,7 @@ public class AfterReturningAdviceBindingTests {
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());

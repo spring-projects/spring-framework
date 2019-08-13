@@ -21,8 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -42,7 +42,7 @@ public class BufferedImageHttpMessageConverterTests {
 
 	private BufferedImageHttpMessageConverter converter;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		converter = new BufferedImageHttpMessageConverter();
 	}

@@ -17,7 +17,7 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

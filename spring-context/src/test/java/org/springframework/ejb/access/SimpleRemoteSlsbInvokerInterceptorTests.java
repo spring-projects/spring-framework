@@ -24,7 +24,7 @@ import javax.ejb.EJBObject;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;

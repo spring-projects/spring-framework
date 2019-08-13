@@ -19,9 +19,9 @@ package org.springframework.cache.config;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -58,7 +58,7 @@ public abstract class AbstractCacheAnnotationTests {
 	protected abstract ConfigurableApplicationContext getApplicationContext();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.ctx = getApplicationContext();
 		this.cs = ctx.getBean("service", CacheableService.class);
@@ -71,7 +71,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cn.contains("primary")).isTrue();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.ctx != null) {
 			this.ctx.close();

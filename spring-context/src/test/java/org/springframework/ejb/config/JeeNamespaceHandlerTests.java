@@ -16,8 +16,8 @@
 
 package org.springframework.ejb.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -42,7 +42,7 @@ public class JeeNamespaceHandlerTests {
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(

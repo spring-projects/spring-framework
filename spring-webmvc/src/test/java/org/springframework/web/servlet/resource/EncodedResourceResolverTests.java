@@ -27,9 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -57,7 +57,7 @@ public class EncodedResourceResolverTests {
 	private Cache cache;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void createGzippedResources() throws IOException {
 		createGzippedFile("/js/foo.js");
 		createGzippedFile("foo.css");
@@ -77,7 +77,7 @@ public class EncodedResourceResolverTests {
 	}
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.cache = new ConcurrentMapCache("resourceCache");
 

@@ -20,8 +20,8 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -55,7 +55,7 @@ public abstract class AbstractMBeanServerTests {
 	protected MBeanServer server;
 
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
@@ -75,7 +75,7 @@ public abstract class AbstractMBeanServerTests {
 		return ctx;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		releaseServer();
 		onTearDown();

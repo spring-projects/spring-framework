@@ -18,8 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -54,7 +54,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	protected Method exceptionalMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		getNameMethod = TestBean.class.getMethod("getName");
 		setNameMethod = TestBean.class.getMethod("setName", String.class);

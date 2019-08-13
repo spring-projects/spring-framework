@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileUrlResource;

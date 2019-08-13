@@ -16,7 +16,7 @@
 
 package org.springframework.aop.interceptor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NamedBean;

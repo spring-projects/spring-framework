@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
@@ -63,7 +63,7 @@ public class JdbcTemplateQueryTests {
 	private JdbcTemplate template;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.connection = mock(Connection.class);
 		this.dataSource = mock(DataSource.class);

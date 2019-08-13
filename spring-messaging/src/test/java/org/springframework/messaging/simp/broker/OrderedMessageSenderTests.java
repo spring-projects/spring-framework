@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -51,7 +51,7 @@ public class OrderedMessageSenderTests {
 	private ThreadPoolTaskExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.executor = new ThreadPoolTaskExecutor();
 		this.executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
@@ -65,7 +65,7 @@ public class OrderedMessageSenderTests {
 
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.executor.shutdown();
 	}

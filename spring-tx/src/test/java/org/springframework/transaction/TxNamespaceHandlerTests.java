@@ -18,8 +18,8 @@ package org.springframework.transaction;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
@@ -46,7 +46,7 @@ public class TxNamespaceHandlerTests {
 	private Method setAgeMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge");

@@ -22,9 +22,9 @@ import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,12 +62,12 @@ public class ConvertingEncoderDecoderSupportTests {
 	private MyType myType = new MyType("test");
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		setup(Config.class);
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		ContextLoaderTestUtils.setCurrentWebApplicationContext(null);
 	}

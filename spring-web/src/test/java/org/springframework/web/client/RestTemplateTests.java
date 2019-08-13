@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -90,7 +90,7 @@ public class RestTemplateTests {
 	private HttpMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		requestFactory = mock(ClientHttpRequestFactory.class);
 		request = mock(ClientHttpRequest.class);

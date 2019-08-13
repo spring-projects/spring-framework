@@ -24,9 +24,9 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -72,7 +72,7 @@ public class DataSourceTransactionManagerTests  {
 	private DataSourceTransactionManager tm;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ds = mock(DataSource.class);
 		con = mock(Connection.class);
@@ -80,7 +80,7 @@ public class DataSourceTransactionManagerTests  {
 		tm = new DataSourceTransactionManager(ds);
 	}
 
-	@After
+	@AfterEach
 	public void verifyTransactionSynchronizationManagerState() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

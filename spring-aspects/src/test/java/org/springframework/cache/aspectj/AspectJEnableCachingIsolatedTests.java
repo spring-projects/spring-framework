@@ -16,9 +16,9 @@
 
 package org.springframework.cache.aspectj;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.cache.CacheManager;
@@ -57,7 +57,7 @@ public class AspectJEnableCachingIsolatedTests {
 		this.ctx = new AnnotationConfigApplicationContext(config);
 	}
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.ctx != null) {
 			this.ctx.close();
@@ -126,7 +126,7 @@ public class AspectJEnableCachingIsolatedTests {
 	}
 
 	@Test
-	@Ignore("AspectJ has some sort of caching that makes this one fail")
+	@Disabled("AspectJ has some sort of caching that makes this one fail")
 	public void emptyConfigSupport() {
 		load(EmptyConfigSupportConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);

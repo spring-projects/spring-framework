@@ -25,9 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -86,7 +86,7 @@ public class RequestMappingHandlerAdapterTests {
 	private StaticWebApplicationContext webAppContext;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void setupOnce() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setApplicationContext(new StaticWebApplicationContext());
@@ -97,7 +97,7 @@ public class RequestMappingHandlerAdapterTests {
 		HANDLER_COUNT = adapter.getReturnValueHandlers().size();
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.webAppContext = new StaticWebApplicationContext();
 		this.handlerAdapter = new RequestMappingHandlerAdapter();

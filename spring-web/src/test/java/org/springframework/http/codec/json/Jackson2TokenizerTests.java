@@ -27,8 +27,8 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -52,7 +52,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 	private ObjectMapper objectMapper;
 
 
-	@Before
+	@BeforeEach
 	public void createParser() {
 		this.jsonFactory = new JsonFactory();
 		this.objectMapper = new ObjectMapper(this.jsonFactory);

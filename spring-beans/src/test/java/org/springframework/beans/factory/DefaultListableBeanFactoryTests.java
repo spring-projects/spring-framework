@@ -43,8 +43,9 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -2329,7 +2330,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	@Ignore  // TODO re-enable when ConstructorResolver TODO sorted out
+	@Disabled  // TODO re-enable when ConstructorResolver TODO sorted out
 	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
@@ -2794,7 +2795,8 @@ public class DefaultListableBeanFactoryTests {
 	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
 	 * hardware the method will take ~13000 ms. See SPR-6870.
 	 */
-	@Test(timeout = 1000)
+	@Test
+	@Timeout(1)
 	public void testByTypeLookupIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 
@@ -2810,7 +2812,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	@Test(timeout = 1000)
+	@Test
+	@Timeout(1)
 	public void testRegistrationOfManyBeanDefinitionsIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 		lbf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
@@ -2821,7 +2824,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	@Test(timeout = 1000)
+	@Test
+	@Timeout(1)
 	public void testRegistrationOfManySingletonsIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 		lbf.registerBeanDefinition("b", new RootBeanDefinition(B.class));

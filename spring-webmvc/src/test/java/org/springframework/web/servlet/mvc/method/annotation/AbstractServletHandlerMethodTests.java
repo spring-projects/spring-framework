@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import javax.servlet.ServletException;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
@@ -52,7 +52,7 @@ public abstract class AbstractServletHandlerMethodTests {
 		return servlet;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.servlet = null;
 	}

@@ -20,9 +20,9 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
@@ -47,14 +47,14 @@ public class EnvironmentSecurityManagerIntegrationTests {
 	private Map<String, String> env;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		originalSecurityManager = System.getSecurityManager();
 		env = StandardEnvironmentTests.getModifiableSystemEnvironment();
 		env.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "p1");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		env.remove(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME);
 		System.setSecurityManager(originalSecurityManager);

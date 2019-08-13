@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation
 
 import org.junit.Assert.*
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.mock.web.test.MockHttpServletRequest
 import org.springframework.mock.web.test.MockHttpServletResponse
 import org.springframework.web.bind.annotation.RequestMapping

@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.core.annotation.AnnotationUtils;

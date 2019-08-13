@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -47,7 +47,7 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  */
 public class RequestMappingInfoTests {
 
-	// TODO: CORS pre-flight (see @Ignore)
+	// TODO: CORS pre-flight (see @Disabled)
 
 
 	@Test
@@ -274,7 +274,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void preFlightRequest() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "https://domain.com")

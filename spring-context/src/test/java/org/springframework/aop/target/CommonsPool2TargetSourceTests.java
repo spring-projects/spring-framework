@@ -18,9 +18,9 @@ package org.springframework.aop.target;
 
 import java.util.NoSuchElementException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -54,7 +54,7 @@ public class CommonsPool2TargetSourceTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -64,7 +64,7 @@ public class CommonsPool2TargetSourceTests {
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
-	@After
+	@AfterEach
 	public void tearDown() {
 		// Will call pool.close()
 		this.beanFactory.destroySingletons();

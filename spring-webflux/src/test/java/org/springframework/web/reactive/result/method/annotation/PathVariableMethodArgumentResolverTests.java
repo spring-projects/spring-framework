@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -61,7 +61,7 @@ public class PathVariableMethodArgumentResolverTests {
 	private MethodParameter paramMono;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new PathVariableMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance());
 

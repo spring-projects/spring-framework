@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 

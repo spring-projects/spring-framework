@@ -34,9 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -106,7 +106,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
@@ -133,7 +133,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}

@@ -24,13 +24,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.Assert.fail
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.server.reactive.bootstrap.HttpServer
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
@@ -46,42 +47,65 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		return context
 	}
 
-	@Test
-	fun `Suspending handler method`() {
+
+	@ParameterizedHttpServerTest
+	fun `Suspending handler method`(httpServer: HttpServer) {
+		startServer(httpServer)
+
 		val entity = performGet<String>("/suspend", HttpHeaders.EMPTY, String::class.java)
 		assertEquals(HttpStatus.OK, entity.statusCode)
 		assertEquals("foo", entity.body)
 	}
 
-	@Test
-	fun `Handler method returning Deferred`() {
+	@ParameterizedHttpServerTest
+	fun `Handler method returning Deferred`(httpServer: HttpServer) {
+		startServer(httpServer)
+
 		val entity = performGet<String>("/deferred", HttpHeaders.EMPTY, String::class.java)
 		assertEquals(HttpStatus.OK, entity.statusCode)
 		assertEquals("foo", entity.body)
 	}
 
-	@Test
-	fun `Handler method returning Flow`() {
+	@ParameterizedHttpServerTest
+	fun `Handler method returning Flow`(httpServer: HttpServer) {
+		startServer(httpServer)
+
 		val entity = performGet<String>("/flow", HttpHeaders.EMPTY, String::class.java)
 		assertEquals(HttpStatus.OK, entity.statusCode)
 		assertEquals("foobar", entity.body)
 	}
 
-	@Test
-	fun `Suspending handler method returning Flow`() {
+	@ParameterizedHttpServerTest
+	fun `Suspending handler method returning Flow`(httpServer: HttpServer) {
+		startServer(httpServer)
+
 		val entity = performGet<String>("/suspending-flow", HttpHeaders.EMPTY, String::class.java)
 		assertEquals(HttpStatus.OK, entity.statusCode)
 		assertEquals("foobar", entity.body)
 	}
 
-	@Test(expected = HttpServerErrorException.InternalServerError::class)
-	fun `Suspending handler method throwing exception`() {
-		performGet<String>("/error", HttpHeaders.EMPTY, String::class.java)
+	@ParameterizedHttpServerTest
+	fun `Suspending handler method throwing exception`(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		try {
+			performGet<String>("/error", HttpHeaders.EMPTY, String::class.java)
+			fail("should have thrown an HttpServerErrorException.InternalServerError")
+		} catch (e: HttpServerErrorException.InternalServerError) {
+			// expected
+		}
 	}
 
-	@Test(expected = HttpServerErrorException.InternalServerError::class)
-	fun `Handler method returning Flow throwing exception`() {
-		performGet<String>("/flow-error", HttpHeaders.EMPTY, String::class.java)
+	@ParameterizedHttpServerTest
+	fun `Handler method returning Flow throwing exception`(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		try {
+			performGet<String>("/flow-error", HttpHeaders.EMPTY, String::class.java)
+			fail("should have thrown an HttpServerErrorException.InternalServerError")
+		} catch (e: HttpServerErrorException.InternalServerError) {
+			// expected
+		}
 	}
 
 	@Configuration

@@ -33,9 +33,9 @@ import org.joda.time.MonthDay;
 import org.joda.time.Period;
 import org.joda.time.YearMonth;
 import org.joda.time.chrono.ISOChronology;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -60,7 +60,7 @@ public class JodaTimeFormattingTests {
 	private DataBinder binder;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
 		setup(registrar);
@@ -82,7 +82,7 @@ public class JodaTimeFormattingTests {
 		JodaTimeContextHolder.setJodaTimeContext(context);
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		LocaleContextHolder.setLocale(null);
 		JodaTimeContextHolder.setJodaTimeContext(null);

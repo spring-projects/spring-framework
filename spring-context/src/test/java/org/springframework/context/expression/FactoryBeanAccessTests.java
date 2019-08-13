@@ -16,7 +16,7 @@
 
 package org.springframework.context.expression;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.FactoryBean;

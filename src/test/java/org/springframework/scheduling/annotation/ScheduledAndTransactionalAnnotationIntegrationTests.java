@@ -19,8 +19,8 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("resource")
 public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
-	@Before
+	@BeforeEach
 	public void assumePerformanceTests() {
 		Assume.group(TestGroup.PERFORMANCE);
 	}

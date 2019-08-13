@@ -22,8 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -47,7 +47,7 @@ public class EvalTagTests extends AbstractTagTests {
 	private MockPageContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();

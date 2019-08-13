@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -87,7 +87,7 @@ public class StompSubProtocolHandlerTests {
 	private ArgumentCaptor<Message> messageCaptor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.protocolHandler = new StompSubProtocolHandler();
 		this.channel = Mockito.mock(MessageChannel.class);

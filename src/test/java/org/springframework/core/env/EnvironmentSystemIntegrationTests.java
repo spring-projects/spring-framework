@@ -19,8 +19,8 @@ package org.springframework.core.env;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -99,7 +99,7 @@ public class EnvironmentSystemIntegrationTests {
 
 	private final ConfigurableEnvironment prodWebEnv = new StandardServletEnvironment();
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		prodEnv.setActiveProfiles(PROD_ENV_NAME);
 		devEnv.setActiveProfiles(DEV_ENV_NAME);

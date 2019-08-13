@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;

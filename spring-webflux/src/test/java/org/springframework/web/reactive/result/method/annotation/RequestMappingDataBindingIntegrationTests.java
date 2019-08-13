@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -30,6 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Errors;
@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingDataBindingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingDataBindingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -61,14 +61,17 @@ public class RequestMappingDataBindingIntegrationTests extends AbstractRequestMa
 	}
 
 
-	@Test
-	public void handleDateParam() throws Exception {
+	@ParameterizedHttpServerTest
+	void handleDateParam(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		assertThat(performPost("/date-param?date=2016-10-31&date-pattern=YYYY-mm-dd",
 				new HttpHeaders(), null, String.class).getBody()).isEqualTo("Processed date!");
 	}
 
-	@Test
-	public void handleForm() throws Exception {
+	@ParameterizedHttpServerTest
+	void handleForm(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("name", "George");

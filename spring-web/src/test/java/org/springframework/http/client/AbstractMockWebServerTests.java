@@ -22,19 +22,18 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * @author Brian Clozel
  */
-public class AbstractMockWebServerTestCase {
+public abstract class AbstractMockWebServerTests {
 
 	private MockWebServer server;
 
@@ -45,7 +44,7 @@ public class AbstractMockWebServerTestCase {
 	protected static final MediaType textContentType =
 			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.server = new MockWebServer();
 		this.server.setDispatcher(new TestDispatcher());
@@ -54,7 +53,7 @@ public class AbstractMockWebServerTestCase {
 		this.baseUrl = "http://localhost:" + this.port;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.server.shutdown();
 	}

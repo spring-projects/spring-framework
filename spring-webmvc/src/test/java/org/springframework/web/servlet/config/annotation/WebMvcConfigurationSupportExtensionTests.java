@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
@@ -113,7 +113,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	private StaticWebApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.context = new StaticWebApplicationContext();
 		this.context.setServletContext(new MockServletContext(new FileSystemResourceLoader()));

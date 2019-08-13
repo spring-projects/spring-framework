@@ -18,7 +18,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

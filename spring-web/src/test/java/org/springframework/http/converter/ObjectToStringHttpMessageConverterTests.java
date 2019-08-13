@@ -22,8 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -52,7 +52,7 @@ public class ObjectToStringHttpMessageConverterTests {
 	private ServletServerHttpResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ConversionService conversionService = new DefaultConversionService();
 		this.converter = new ObjectToStringHttpMessageConverter(conversionService);

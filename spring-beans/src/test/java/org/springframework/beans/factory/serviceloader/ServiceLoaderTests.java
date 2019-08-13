@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;

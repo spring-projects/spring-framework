@@ -31,8 +31,8 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -61,7 +61,7 @@ public class JmsInvokerTests {
 	private Queue mockQueue;
 
 
-	@Before
+	@BeforeEach
 	public void setUpMocks() throws Exception {
 		mockConnectionFactory = mock(QueueConnectionFactory.class);
 		mockConnection = mock(QueueConnection.class);

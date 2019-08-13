@@ -18,7 +18,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 
 import org.springframework.aop.Advisor;

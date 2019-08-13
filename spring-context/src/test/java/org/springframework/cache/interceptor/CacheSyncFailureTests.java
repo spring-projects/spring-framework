@@ -18,9 +18,9 @@ package org.springframework.cache.interceptor;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
@@ -48,13 +48,13 @@ public class CacheSyncFailureTests {
 
 	private SimpleService simpleService;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.context = new AnnotationConfigApplicationContext(Config.class);
 		this.simpleService = this.context.getBean(SimpleService.class);
 	}
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();

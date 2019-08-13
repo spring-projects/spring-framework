@@ -20,7 +20,7 @@ import java.util.Map;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTextMessage;
 import org.springframework.messaging.Message;

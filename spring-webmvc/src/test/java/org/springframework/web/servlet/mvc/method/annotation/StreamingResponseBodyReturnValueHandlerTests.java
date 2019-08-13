@@ -23,8 +23,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +59,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.handler = new StreamingResponseBodyReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();

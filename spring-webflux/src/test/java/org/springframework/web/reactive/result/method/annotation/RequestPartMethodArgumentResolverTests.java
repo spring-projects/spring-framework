@@ -23,8 +23,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -71,7 +71,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private MultipartHttpMessageWriter writer;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<HttpMessageReader<?>> readers = ServerCodecConfigurer.create().getReaders();
 		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();

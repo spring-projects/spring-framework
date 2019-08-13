@@ -23,8 +23,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
@@ -75,7 +75,7 @@ public class HttpEntityMethodProcessorTests {
 	private MockHttpServletResponse servletResponse;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);

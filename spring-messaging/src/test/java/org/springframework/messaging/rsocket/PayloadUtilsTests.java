@@ -22,8 +22,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.Payload;
 import io.rsocket.util.ByteBufPayload;
 import io.rsocket.util.DefaultPayload;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -47,7 +47,7 @@ public class PayloadUtilsTests {
 	private DefaultDataBufferFactory defaultBufferFactory = new DefaultDataBufferFactory();
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.nettyBufferFactory.checkForLeaks(Duration.ofSeconds(5));
 	}

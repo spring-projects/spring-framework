@@ -16,8 +16,8 @@
 
 package org.springframework.transaction;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -40,7 +40,7 @@ public class TxNamespaceHandlerEventTests {
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);

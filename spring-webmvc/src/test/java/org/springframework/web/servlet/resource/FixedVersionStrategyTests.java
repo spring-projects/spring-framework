@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.resource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -38,7 +38,7 @@ public class FixedVersionStrategyTests {
 	private FixedVersionStrategy strategy;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.strategy = new FixedVersionStrategy(VERSION);
 	}

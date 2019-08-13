@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;

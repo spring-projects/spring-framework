@@ -18,9 +18,9 @@ package org.springframework.web.socket.server.standard;
 
 import javax.websocket.server.ServerEndpoint;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +44,7 @@ public class SpringConfiguratorTests {
 	private SpringConfigurator configurator;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletContext = new MockServletContext();
 
@@ -57,7 +57,7 @@ public class SpringConfiguratorTests {
 		this.configurator = new SpringConfigurator();
 	}
 
-	@After
+	@AfterEach
 	public void destroy() {
 		this.contextLoader.closeWebApplicationContext(this.servletContext);
 	}

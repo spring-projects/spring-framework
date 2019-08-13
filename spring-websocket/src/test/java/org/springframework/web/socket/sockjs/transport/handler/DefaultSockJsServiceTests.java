@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Sebastien Deleuze
  * @author Ben Kiefer
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	private static final String sockJsPrefix = "/mysockjs";
@@ -89,7 +89,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setup();
 

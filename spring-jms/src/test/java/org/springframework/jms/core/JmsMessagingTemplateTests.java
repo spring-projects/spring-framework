@@ -26,13 +26,13 @@ import javax.jms.MessageNotWriteableException;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -65,7 +65,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Stephane Nicoll
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class JmsMessagingTemplateTests {
 
 	@Captor
@@ -77,7 +77,7 @@ public class JmsMessagingTemplateTests {
 	private JmsMessagingTemplate messagingTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 	}
