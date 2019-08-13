@@ -367,11 +367,13 @@ example shows:
 .Kotlin
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
+    import org.springframework.beans.factory.getBean
+
 	// create and configure beans
     val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 
     // retrieve configured instance
-    val service = context.getBean("petStore", PetStoreService::class.java)
+    val service = context.getBean<PetStoreService>("petStore")
 
     // use configured instance
     var userList = service.getUsernameList()
@@ -4356,7 +4358,7 @@ The following Java application runs the preceding code and configuration:
 
 		public static void main(final String[] args) throws Exception {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("scripting/beans.xml");
-			Messenger messenger = (Messenger) ctx.getBean("messenger");
+			Messenger messenger = ctx.getBean("messenger", Messenger.class);
 			System.out.println(messenger);
 		}
 
@@ -4365,9 +4367,11 @@ The following Java application runs the preceding code and configuration:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+    import org.springframework.beans.factory.getBean
+
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("scripting/beans.xml")
-		val messenger = ctx.getBean("messenger") as Messenger
+		val messenger = ctx.getBean<Messenger>("messenger")
 		println(messenger)
 	}
 ----
