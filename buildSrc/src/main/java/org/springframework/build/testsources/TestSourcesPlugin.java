@@ -30,6 +30,8 @@ import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 
+import org.springframework.build.optional.OptionalDependenciesPlugin;
+
 /**
  * {@link Plugin} that automatically updates testCompile dependencies to include
  * the test source sets of {@code project()} dependencies.
@@ -49,7 +51,7 @@ public class TestSourcesPlugin implements Plugin<Project> {
 			JavaPlugin.COMPILE_CONFIGURATION_NAME,
 			JavaPlugin.API_CONFIGURATION_NAME,
 			JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME,
-			"optional",
+			OptionalDependenciesPlugin.OPTIONAL_CONFIGURATION_NAME,
 			JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME);
 
 	@Override

@@ -13,6 +13,10 @@ dependencies {
 
 gradlePlugin {
 	plugins {
+		optionalDependenciesPlugin {
+			id = "org.springframework.build.optional-dependencies"
+			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
+		}
 		testSourcesPlugin {
 			id = "org.springframework.build.test-sources"
 			implementationClass = "org.springframework.build.testsources.TestSourcesPlugin"

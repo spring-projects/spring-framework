@@ -1,4 +1,4 @@
-apply plugin: "propdeps-maven"
+apply plugin: "maven"
 
 install {
 	repositories.mavenInstaller {

@@ -8,13 +8,13 @@ dependencyManagement {
 }
 
 dependencies {
-	provided("javax.servlet:javax.servlet-api:4.0.1")
 	compile(project(":spring-aop"))
 	compile(project(":spring-beans"))
 	compile(project(":spring-context"))
 	compile(project(":spring-core"))
 	compile(project(":spring-expression"))
 	compile(project(":spring-web"))
+	compileOnly("javax.servlet:javax.servlet-api:4.0.1")
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional(project(":spring-oxm"))
 	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")

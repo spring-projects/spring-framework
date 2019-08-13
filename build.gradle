@@ -3,7 +3,6 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
-		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("io.spring.nohttp:nohttp-gradle:0.0.3.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
 		classpath("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
@@ -65,7 +64,7 @@ configure(allprojects) { project ->
 	apply plugin: "java"
 	apply plugin: "kotlin"
 	apply plugin: "checkstyle"
-	apply plugin: "propdeps"
+	apply plugin: 'org.springframework.build.optional-dependencies'
 	apply plugin: 'org.springframework.build.test-sources'
 	apply plugin: "io.spring.dependency-management"
 	apply from: "${gradleScriptDir}/ide.gradle"
