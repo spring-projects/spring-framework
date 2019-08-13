@@ -389,7 +389,7 @@ The following example shows Groovy configuration:
 	ApplicationContext context = new GenericGroovyApplicationContext("services.groovy", "daos.groovy");
 ----
 .Kotlin
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 val context = GenericGroovyApplicationContext("services.groovy", "daos.groovy")
 ----
