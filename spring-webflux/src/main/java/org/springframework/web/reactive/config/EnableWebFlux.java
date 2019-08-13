@@ -47,10 +47,17 @@ import org.springframework.context.annotation.Import;
  * &#064;EnableWebFlux
  * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
  * public class MyConfiguration implements WebFluxConfigurer {
+ * 
+ * 	   private ObjectMapper objectMapper;
  *
  * 	   &#064;Override
- * 	   public void configureMessageWriters(List&lt;HttpMessageWriter&lt;?&gt&gt messageWriters) {
- *         messageWriters.add(new MyHttpMessageWriter());
+ * 	   public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+ *         configurer.defaultCodecs().jackson2JsonEncoder(
+ *             new Jackson2JsonEncoder(objectMapper)
+ *         );
+ *         configurer.defaultCodecs().jackson2JsonDecoder(
+ *             new Jackson2JsonDecoder(objectMapper)
+ *         );
  * 	   }
  *
  * 	   // ...
