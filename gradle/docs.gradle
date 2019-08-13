@@ -94,10 +94,10 @@ dependencies {
 
 task extractDocResources(type: Sync) {
 	dependsOn configurations.docs
-	from "src/docs/asciidoc/"
 	from {
 		configurations.docs.collect { zipTree(it) }
 	}
+	from "src/docs/asciidoc/"
 	into "$buildDir/asciidoc/build"
 }
 
