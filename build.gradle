@@ -12,6 +12,7 @@ buildscript {
 
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
+	id 'org.springframework.build.test-sources' apply false
 	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.3.41" apply false
 	id "org.jetbrains.dokka" version "0.9.18"
@@ -27,7 +28,7 @@ ext {
 	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
 
 	moduleProjects = subprojects.findAll {
-		(it.name != "spring-build-src") && (it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
+		(it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
 	}
 
 	aspectjVersion       = "1.9.4"
@@ -65,7 +66,7 @@ configure(allprojects) { project ->
 	apply plugin: "kotlin"
 	apply plugin: "checkstyle"
 	apply plugin: "propdeps"
-	apply plugin: "test-source-set-dependencies"
+	apply plugin: 'org.springframework.build.test-sources'
 	apply plugin: "io.spring.dependency-management"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
@@ -206,7 +207,7 @@ configure(allprojects) { project ->
 	] as String[]
 }
 
-configure(subprojects.findAll { (it.name != "spring-build-src") && (it.name != "spring-core-coroutines") } ) { subproject ->
+configure(subprojects.findAll { (it.name != "spring-core-coroutines") } ) { subproject ->
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
 	jar {

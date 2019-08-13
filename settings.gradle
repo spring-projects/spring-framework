@@ -22,10 +22,6 @@ include "spring-webflux"
 include "spring-websocket"
 include "spring-framework-bom"
 
-// Exposes gradle buildSrc for IDE support
-include "buildSrc"
-rootProject.children.find{ it.name == "buildSrc" }.name = "spring-build-src"
-
 rootProject.name = "spring"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"

@@ -1,0 +1,21 @@
+plugins {
+	id 'java-gradle-plugin'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.assertj:assertj-core:3.11.1'
+}
+
+gradlePlugin {
+	plugins {
+		testSourcesPlugin {
+			id = "org.springframework.build.test-sources"
+			implementationClass = "org.springframework.build.testsources.TestSourcesPlugin"
+		}
+	}
+}
