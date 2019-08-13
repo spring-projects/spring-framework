@@ -25,3 +25,7 @@
     background-color: #282c34;
     color: #e6e1dc;
 }
+
+.listingblock pre.highlightjs {
+    padding: 0;
+}
