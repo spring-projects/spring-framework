@@ -176,7 +176,7 @@ example shows:
 .Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("new String('hello world').toUpperCase()");
+	Expression exp = parser.parseExpression("new String('hello world').toUpperCase()"); // <1>
 	String message = exp.getValue(String.class);
 ----
 <1> Construct a new `String` from the literal and make it be upper case.
@@ -185,7 +185,7 @@ example shows:
 .Kotlin
 ----
 	val parser = SpelExpressionParser()
-	val exp = parser.parseExpression("new String('hello world').toUpperCase()")
+	val exp = parser.parseExpression("new String('hello world').toUpperCase()")  // <1>
 	val message = exp.getValue(String::class.java)
 ----
 <1> Construct a new `String` from the literal and make it be upper case.
