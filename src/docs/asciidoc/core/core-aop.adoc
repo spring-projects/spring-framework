@@ -481,33 +481,38 @@ pointcut expressions by name. The following example shows three pointcut express
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// matches if a method execution join point represents the execution of any public method
 	@Pointcut("execution(public * *(..))")
-	private void anyPublicOperation() {}
+	private void anyPublicOperation() {} // <1>
 
-	// matches if a method execution is in the trading module
 	@Pointcut("within(com.xyz.someapp.trading..*)")
-	private void inTrading() {}
+	private void inTrading() {} // <2>
 
-	// matches if a method execution represents any public method in the trading module
 	@Pointcut("anyPublicOperation() && inTrading()")
-	private void tradingOperation() {}
+	private void tradingOperation() {} // <3>
 ----
+<1> `anyPublicOperation` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// matches if a method execution join point represents the execution of any public method.
 	@Pointcut("execution(public * *(..))")
-	private fun anyPublicOperation() {}
+	private fun anyPublicOperation() {} // <1>
 
-	// matches if a method execution is in the trading module
 	@Pointcut("within(com.xyz.someapp.trading..*)")
-	private fun inTrading() {}
+	private fun inTrading() {} // <2>
 
-	// matches if a method execution represents any public method in the trading module
 	@Pointcut("anyPublicOperation() && inTrading()")
-	private fun tradingOperation() {}
+	private fun tradingOperation() {} // <3>
 ----
+<1> `anyPublicOperation` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
 
 It is a best practice to build more complex pointcut expressions out of smaller named
 components, as shown earlier. When referring to pointcuts by name, normal Java visibility

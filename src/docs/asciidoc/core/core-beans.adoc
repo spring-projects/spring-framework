@@ -5599,24 +5599,27 @@ following example:
 	public class MovieRecommender {
 
 		@Autowired
-		@Offline
+		@Offline // <1>
 		private MovieCatalog offlineCatalog;
 
 		// ...
 	}
 ----
+<1> This line adds the `@Offline` annotation.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 class MovieRecommender {
 
 	@Autowired
-	@Offline
+	@Offline // <1>
 	private lateinit var offlineCatalog: MovieCatalog
 
 	// ...
 }
 ----
+<1> This line adds the `@Offline` annotation.
 
 Now the bean definition only needs a qualifier `type`, as shown in the following example:
 
@@ -5915,21 +5918,24 @@ as demonstrated in the following example:
 
 		private MovieFinder movieFinder;
 
-		@Resource(name="myMovieFinder") // This line injects a @Resource
+		@Resource(name="myMovieFinder") // <1>
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 	}
 ----
+<1> This line injects a `@Resource`.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 class SimpleMovieLister {
 
-	@Resource(name="myMovieFinder") // This line injects a @Resource
+	@Resource(name="myMovieFinder") // <1>
 	private lateinit var movieFinder:MovieFinder
 }
 ----
+<1> This line injects a `@Resource`.
 
 
 If no name is explicitly specified, the default name is derived from the field name or
@@ -5986,10 +5992,8 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 		@Resource
 		private CustomerPreferenceDao customerPreferenceDao;
 
-		// The context field is injected based on the known resolvable dependency
-		// type: ApplicationContext
 		@Resource
-		private ApplicationContext context;
+		private ApplicationContext context; // <1>
 
 		public MovieRecommender() {
 		}
@@ -5997,6 +6001,9 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 		// ...
 	}
 ----
+<1> The `context` field is injected based on the known resolvable dependency type:
+`ApplicationContext`.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -6005,14 +6012,15 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 		@Resource
 		private lateinit var customerPreferenceDao: CustomerPreferenceDao
 
-		// The context field is injected based on the known resolvable dependency
-		// type: ApplicationContext
+
 		@Resource
-		private lateinit var context: ApplicationContext
+		private lateinit var context: ApplicationContext // <1>
 
 		// ...
 	}
 ----
+<1> The `context` field is injected based on the known resolvable dependency type:
+`ApplicationContext`.
 
 [[beans-value-annotations]]
 === Using `@Value`
@@ -6341,24 +6349,27 @@ is meta-annotated with `@Component`, as the following example shows:
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Component // Causes @Service to be treated in the same way as @Component
+	@Component // <1>
 	public @interface Service {
 
 		// ...
 	}
 ----
+<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
 	@MustBeDocumented
-	@Component // Causes @Service to be treated in the same way as @Component
+	@Component // <1>
 	annotation class Service {
 
 		// ...
 	}
 ----
+<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
 the `@RestController` annotation from Spring MVC is composed of `@Controller` and
@@ -7779,20 +7790,23 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 .Java
 ----
 	@Configuration
-	@ComponentScan(basePackages = "com.acme") // This annotation enables component scanning
+	@ComponentScan(basePackages = "com.acme") // <1>
 	public class AppConfig  {
 		...
 	}
 ----
+<1> This annotation enables component scanning.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Configuration
-	@ComponentScan(basePackages = ["com.acme"]) // This annotation enables component scanning
+	@ComponentScan(basePackages = ["com.acme"]) // <1>
 	class AppConfig  {
 		// ...
 	}
 ----
+<1> This annotation enables component scanning.
 
 
 [TIP]
@@ -9655,7 +9669,7 @@ the following example shows:
 	public class AppConfig {
 
 		@Bean("dataSource")
-		@Profile("development") // The standaloneDataSource method is available only in the development profile
+		@Profile("development") // <1>
 		public DataSource standaloneDataSource() {
 			return new EmbeddedDatabaseBuilder()
 				.setType(EmbeddedDatabaseType.HSQL)
@@ -9665,13 +9679,16 @@ the following example shows:
 		}
 
 		@Bean("dataSource")
-		@Profile("production") // The jndiDataSource method is available only in the production profile
+		@Profile("production") // <2>
 		public DataSource jndiDataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 		}
 	}
 ----
+<1> The `standaloneDataSource` method is available only in the `development` profile.
+<2> The `jndiDataSource` method is available only in the `production` profile.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -9679,7 +9696,7 @@ the following example shows:
 	class AppConfig {
 
 		@Bean("dataSource")
-		@Profile("development") // The standaloneDataSource method is available only in the development profile
+		@Profile("development") // <1>
 		fun standaloneDataSource(): DataSource {
 			return EmbeddedDatabaseBuilder()
 					.setType(EmbeddedDatabaseType.HSQL)
@@ -9689,11 +9706,13 @@ the following example shows:
 		}
 
 		@Bean("dataSource")
-		@Profile("production") // The jndiDataSource method is available only in the production profile
+		@Profile("production") // <2>
 		fun jndiDataSource() =
 			InitialContext().lookup("java:comp/env/jdbc/datasource") as DataSource
 	}
 ----
+<1> The `standaloneDataSource` method is available only in the `development` profile.
+<2> The `jndiDataSource` method is available only in the `production` profile.
 
 [NOTE]
 ====

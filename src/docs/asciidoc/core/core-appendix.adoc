@@ -860,14 +860,10 @@ we can parse our custom XML content, as you can see in the following example:
 
 	import java.text.SimpleDateFormat;
 
-	// We use the Spring-provided AbstractSingleBeanDefinitionParser to handle a lot of
-	// the basic grunt work of creating a single BeanDefinition.
-	public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+	public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefinitionParser { // <1>
 
 		protected Class getBeanClass(Element element) {
-			// We supply the AbstractSingleBeanDefinitionParser superclass with the type that our
-			// single BeanDefinition represents.
-			return SimpleDateFormat.class;
+			return SimpleDateFormat.class; // <2>
 		}
 
 		protected void doParse(Element element, BeanDefinitionBuilder bean) {
@@ -884,6 +880,11 @@ we can parse our custom XML content, as you can see in the following example:
 
 	}
 ----
+<1> We use the Spring-provided `AbstractSingleBeanDefinitionParser` to handle a lot of
+the basic grunt work of creating a single `BeanDefinition`.
+<2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
+single `BeanDefinition` represents.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -896,13 +897,9 @@ we can parse our custom XML content, as you can see in the following example:
 
 	import java.text.SimpleDateFormat
 
-	// We use the Spring-provided AbstractSingleBeanDefinitionParser to handle a lot of
-	// the basic grunt work of creating a single BeanDefinition.
-	class SimpleDateFormatBeanDefinitionParser : AbstractSingleBeanDefinitionParser() {
+	class SimpleDateFormatBeanDefinitionParser : AbstractSingleBeanDefinitionParser() { // <1>
 
-		override fun getBeanClass(element: Element): Class<*>? {
-			// We supply the AbstractSingleBeanDefinitionParser superclass with the type that our
-			// single BeanDefinition represents.
+		override fun getBeanClass(element: Element): Class<*>? { // <2>
 			return SimpleDateFormat::class.java
 		}
 
@@ -919,6 +916,11 @@ we can parse our custom XML content, as you can see in the following example:
 		}
 	}
 ----
+<1> We use the Spring-provided `AbstractSingleBeanDefinitionParser` to handle a lot of
+the basic grunt work of creating a single `BeanDefinition`.
+<2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
+single `BeanDefinition` represents.
+
 
 In this simple case, this is all that we need to do. The creation of our single
 `BeanDefinition` is handled by the `AbstractSingleBeanDefinitionParser` superclass, as
