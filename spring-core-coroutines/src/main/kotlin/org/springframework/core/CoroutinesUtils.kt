@@ -24,7 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.flow.asPublisher
+import kotlinx.coroutines.reactor.asFlux
 
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
@@ -68,7 +68,7 @@ internal fun invokeHandlerMethod(method: Method, bean: Any, vararg args: Any?): 
 					.let { if (it == Unit) null else it }
 		}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
 		if (function.returnType.classifier == Flow::class) {
-			mono.flatMapMany { (it as Flow<Any>).asPublisher() }
+			mono.flatMapMany { (it as Flow<Any>).asFlux() }
 		}
 		else {
 			mono
