@@ -36,7 +36,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Controller
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.messaging.MessageHandlingException
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 

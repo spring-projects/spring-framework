@@ -22,7 +22,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.tests.sample.beans.TestBean
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.BeanCreationException
 import org.springframework.tests.sample.beans.Colour
 

@@ -40,10 +40,11 @@ import org.springframework.test.context.web.socket.WebSocketServletServerContain
 import org.springframework.test.web.client.samples.SampleTests;
 import org.springframework.test.web.servlet.samples.context.JavaConfigTests;
 import org.springframework.test.web.servlet.samples.context.WebAppResourceTests;
-import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.tests.TestGroups;
 import org.springframework.util.ReflectionUtils;
 
+import static org.junit.Assume.assumeTrue;
 import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
@@ -97,7 +98,8 @@ public class SpringJUnit4ConcurrencyTests {
 
 	@BeforeClass
 	public static void abortIfLongRunningTestGroupIsNotEnabled() {
-		Assume.group(TestGroup.LONG_RUNNING);
+		assumeTrue("TestGroup " + TestGroup.LONG_RUNNING + " is not active.",
+			TestGroups.isGroupActive(TestGroup.LONG_RUNNING));
 	}
 
 	@Test

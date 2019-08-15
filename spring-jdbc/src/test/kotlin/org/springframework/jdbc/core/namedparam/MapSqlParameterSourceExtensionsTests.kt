@@ -18,7 +18,7 @@ package org.springframework.jdbc.core.namedparam
 
 import java.sql.JDBCType
 
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**

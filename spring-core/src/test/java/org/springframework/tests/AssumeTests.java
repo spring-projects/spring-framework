@@ -18,10 +18,10 @@ package org.springframework.tests;
 
 import java.util.Arrays;
 
-import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.TestAbortedException;
 
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +77,7 @@ public class AssumeTests {
 		try {
 			Assume.group(LONG_RUNNING);
 		}
-		catch (AssumptionViolatedException ex) {
+		catch (TestAbortedException ex) {
 			fail("assumption should NOT have failed");
 		}
 	}

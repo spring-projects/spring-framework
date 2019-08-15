@@ -16,7 +16,7 @@
 
 package org.springframework.context.support
 
-import org.junit.Assert.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 

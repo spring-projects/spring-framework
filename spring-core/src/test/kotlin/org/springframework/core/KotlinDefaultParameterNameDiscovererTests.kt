@@ -16,7 +16,7 @@
 
 package org.springframework.core
 
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class KotlinDefaultParameterNameDiscovererTests {

@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.server
 
-import org.junit.Assert.fail
+import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*

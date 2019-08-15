@@ -19,10 +19,10 @@ package org.springframework.web.servlet.function
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
 
 /**
  * Tests for WebMvc.fn [ServerResponse] extensions.
@@ -38,7 +38,7 @@ class ServerResponseExtensionsTests {
 		val body = Arrays.asList("foo", "bar")
 		val typeReference = object: ParameterizedTypeReference<List<String>>() {}
 		every { builder.body(body, typeReference) } returns response
-		Assert.assertEquals(response, builder.bodyWithType<List<String>>(body))
+		assertEquals(response, builder.bodyWithType<List<String>>(body))
 		verify { builder.body(body, typeReference) }
 	}
 }

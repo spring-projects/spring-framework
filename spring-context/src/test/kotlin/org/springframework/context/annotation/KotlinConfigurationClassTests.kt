@@ -16,7 +16,8 @@
 
 package org.springframework.context.annotation
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException

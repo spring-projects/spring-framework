@@ -36,10 +36,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.tests.TestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -125,7 +126,8 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	public void verifyExampleInClassLevelJavadoc() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
+		assumeTrue("TestGroup " + TestGroup.PERFORMANCE + " is not active.",
+			TestGroups.isGroupActive(TestGroup.PERFORMANCE));
 
 		WebClient webClient = new WebClient();
 

@@ -19,8 +19,7 @@ package org.springframework.web.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
@@ -277,9 +276,9 @@ class RestOperationsExtensionsTests {
 				if (method.parameterTypes.contains(kClass.java)) {
 					val parameters = mutableListOf<Class<*>>(RestOperations::class.java).apply { addAll(method.parameterTypes.filter { it !=  kClass.java }) }
 					val f = extensions.getDeclaredMethod(method.name, *parameters.toTypedArray()).kotlinFunction!!
-					Assert.assertEquals(1, f.typeParameters.size)
+					assertEquals(1, f.typeParameters.size)
 					System.out.println(method.name + f.typeParameters)
-					Assert.assertEquals("Failed: " + method.name, listOf(Any::class.createType(nullable = true)), f.typeParameters[0].upperBounds)
+					assertEquals(listOf(Any::class.createType(nullable = true)), f.typeParameters[0].upperBounds, "Failed: " + method.name)
 				}
 			}
 		}

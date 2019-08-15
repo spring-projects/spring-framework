@@ -16,7 +16,10 @@
 
 package org.springframework.context.support
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
@@ -28,7 +31,7 @@ import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
-	
+
 	@Test
 	fun `Declare beans with the functional Kotlin DSL`() {
 		val beans = beans {
@@ -193,12 +196,12 @@ class BeanDefinitionDslTests {
 
 		try {
 			context.getBean<Foo>()
-			fail()
+			fail("should have thrown an Exception")
 		} catch (ignored: Exception) {
 		}
 		try {
 			context.getBean<FooFoo>()
-			fail()
+			fail("should have thrown an Exception")
 		} catch (ignored: Exception) {
 		}
 	}

@@ -138,9 +138,6 @@ configure(allprojects) { project ->
 	dependencies {
 		testCompile("org.junit.jupiter:junit-jupiter-api")
 		testCompile("org.junit.jupiter:junit-jupiter-params")
-		testCompile("junit:junit:4.13-beta-3") {
-			exclude group: "org.hamcrest", module: "hamcrest-core"
-		}
 		testCompile("org.mockito:mockito-core:3.0.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
@@ -151,7 +148,6 @@ configure(allprojects) { project ->
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntime("org.junit.platform:junit-platform-launcher")
 		testRuntime("org.junit.jupiter:junit-jupiter-engine")
-		testRuntime("org.junit.vintage:junit-vintage-engine")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")

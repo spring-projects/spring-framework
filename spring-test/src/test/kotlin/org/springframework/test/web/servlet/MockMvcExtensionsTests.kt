@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet
 
 import org.hamcrest.CoreMatchers
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -81,8 +81,8 @@ class MockMvcExtensionsTests {
 		}.andDo {
 			handle(handler)
 		}
-		Assert.assertTrue(matcherInvoked)
-		Assert.assertTrue(handlerInvoked)
+		assertTrue(matcherInvoked)
+		assertTrue(handlerInvoked)
 	}
 
 	@Test
