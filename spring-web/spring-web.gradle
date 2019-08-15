@@ -21,7 +21,10 @@ dependencies {
 	optional("io.reactivex:rxjava")
 	optional("io.reactivex:rxjava-reactive-streams")
 	optional("io.reactivex.rxjava2:rxjava")
-	optional("io.netty:netty-all")
+	optional("io.netty:netty-buffer")
+	optional("io.netty:netty-handler")
+	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
+	optional("io.netty:netty-transport")  // Until Netty4ClientHttpRequest is removed
 	optional("io.projectreactor.netty:reactor-netty")
 	optional("io.undertow:undertow-core")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
