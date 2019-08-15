@@ -47,6 +47,7 @@ public class TestSourcesPlugin implements Plugin<Project> {
 	/**
 	 * List of configurations this plugin should look for project dependencies in.
 	 */
+	@SuppressWarnings("deprecation")
 	private static final List<String> CONFIGURATIONS = Arrays.asList(
 			JavaPlugin.COMPILE_CONFIGURATION_NAME,
 			JavaPlugin.API_CONFIGURATION_NAME,

@@ -13,6 +13,10 @@ dependencies {
 
 gradlePlugin {
 	plugins {
+		compileConventionsPlugin {
+			id = "org.springframework.build.compile"
+			implementationClass = "org.springframework.build.compile.CompilerConventionsPlugin"
+		}
 		optionalDependenciesPlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
