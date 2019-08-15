@@ -1,0 +1,20 @@
+spring ioc 的本质就是：
+1.先是对资源进行定位，明确资源的位置，不管是什么类型的资源（比如网络资源，文件资源，二进制字节流等等），不管是一个资源还是多个资源，以及带通配符的资源路径进行匹配。
+2.确定了资源，BeanDefinitionReader就要对资源进行解析，解析出bean的元数据信息赋值到BeanDefinition上，内部对BeanDefinition使用单例池进行缓存，本质是一个map<id，BeanDefinition>。
+3.
+
+一.IoC 之 Spring 统一资源加载策略
+总结：spring提供了Resource接口和ResourceLoader接口来抽象资源和资源的加载。默认的实现分别是AbstractResource和DefaultResourceLoader。
+这样做的好处是让资源和资源的加载又一个清晰的界线。
+AbstractResource有几个实现分别是：
+    FileSystemResource ：对 java.io.File 类型资源的封装，只要是跟 File 打交道的，基本上与 FileSystemResource 也可以打交道。支持文件和 URL 的形式，实现 WritableResource 接口，
+    且从 Spring Framework 5.0 开始，FileSystemResource 使用 NIO2 API进行读/写交互。
+    ByteArrayResource ：对字节数组提供的数据的封装。如果通过 InputStream 形式访问该类型的资源，该实现会根据字节数组的数据构造一个相应的 ByteArrayInputStream。
+    UrlResource ：对 java.net.URL类型资源的封装。内部委派 URL 进行具体的资源操作。
+    ClassPathResource ：class path 类型资源的实现。使用给定的 ClassLoader 或者给定的 Class 来加载资源。
+    InputStreamResource ：将给定的 InputStream 作为一种资源的 Resource 的实现类。
+DefaultResourceLoader(每次只能加载单一的文件):
+    我们除了可以继承该类外还可以实现 ProtocolResolver 接口来实现自定资源加载协议。
+ResourcePatternResolver（可以加载多个文件，使用通配符匹配）:
+    PathMatchingResourcePatternResolver功能很强大，实现了上面两个方法的总和。
+以上就是spring资源定位的过程。

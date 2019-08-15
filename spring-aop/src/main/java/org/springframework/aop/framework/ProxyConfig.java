@@ -160,6 +160,15 @@ public class ProxyConfig implements Serializable {
 		this.opaque = other.opaque;
 	}
 
+	/**
+	 *
+	 *					ProxyConfig: 这个类里面对spring aop的代码方式做了配置，通过设置properties key就可以设置：
+	 *							proxyTargetClass:true  ---- CGLIB proxies
+	 *							optimize 			   ----  控制是否将积极优化应用于通过CGLIB创建的代理。除非您完全了解相关AOP代理如何处理优化，否则您不应轻易使用此设置。目前仅用于CGLIB代理。它对JDK动态代理没有影响。
+	 *							frozen                 ----  此属性的默认值为false，因此允许更改（例如添加其他建议）
+	 *							exposeProxy 		   ----  确定当前代理是否应在ThreadLocal中公开，以便目标可以访问它。如果目标需要获取代理并且exposeProxy属性设置为true，则目标可以使用AopContext.currentProxy（）方法。
+	 * @return
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

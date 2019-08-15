@@ -139,6 +139,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * but mirrors TransactionProxyFactoryBean's "setProxyInterfaces".
 	 * @see #setInterfaces
 	 * @see AbstractSingletonProxyFactoryBean#setProxyInterfaces
+	 * 设置我们需要代理的接口名字，如果没有接口，默认使用CGLIB代理
 	 */
 	public void setProxyInterfaces(Class<?>[] proxyInterfaces) throws ClassNotFoundException {
 		setInterfaces(proxyInterfaces);

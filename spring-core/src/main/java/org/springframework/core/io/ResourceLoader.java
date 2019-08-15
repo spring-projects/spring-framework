@@ -38,6 +38,8 @@ import org.springframework.util.ResourceUtils;
  * @see org.springframework.core.io.support.ResourcePatternResolver
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
+ * Spring 将资源的定义和资源的加载区分开了,资源的定义接口为Resource，资源的加载为ResourceLoader
+ * 子类DefaultResourceLoader提供默认实现
  */
 public interface ResourceLoader {
 

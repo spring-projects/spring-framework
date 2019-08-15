@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="person" class="com.atlwj.demo.ioc.annotation.entity.Person">
+		<constructor-arg name="username" index="0" value="lucy"></constructor-arg>
+		<constructor-arg name="age" index="1" value="100"></constructor-arg>
+	</bean>
+</beans>

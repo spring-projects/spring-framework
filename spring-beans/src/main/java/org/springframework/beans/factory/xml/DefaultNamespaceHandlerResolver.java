@@ -98,6 +98,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
 	 * may be {@code null}, in which case the thread context ClassLoader will be used)
 	 * @param handlerMappingsLocation the mapping file location
+	 *  处理器映射地址: META-INF/spring.handlers
 	 */
 	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");

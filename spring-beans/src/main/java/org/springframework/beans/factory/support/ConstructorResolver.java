@@ -273,6 +273,7 @@ class ConstructorResolver {
 						beanFactory.getAccessControlContext());
 			}
 			else {
+				// 策略模式
 				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
 

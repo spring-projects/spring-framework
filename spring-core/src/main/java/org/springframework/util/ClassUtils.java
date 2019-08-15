@@ -179,6 +179,7 @@ public abstract class ClassUtils {
 	public static ClassLoader getDefaultClassLoader() {
 		ClassLoader cl = null;
 		try {
+			// 如果ClassLoader为空，就系统创建一个ClassLoader
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
