@@ -499,14 +499,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
 	protected void initStrategies(ApplicationContext context) {
+		//初始化 MultipartResolver, 用来处理文件上传
 		initMultipartResolver(context);
+		//初始化 LocaleResolver，国际化配置
 		initLocaleResolver(context);
+		//初始化 ThemeResolver, 主题
 		initThemeResolver(context);
+		//初始化 HandlerMappings
 		initHandlerMappings(context);
+		//初始化 HandlerAdapters，适配器
 		initHandlerAdapters(context);
+		//初始化 HandlerExceptionResolvers，异常处理
 		initHandlerExceptionResolvers(context);
+		//初始化 RequestToViewNameTranslator
 		initRequestToViewNameTranslator(context);
+		//初始化 ViewResolvers
 		initViewResolvers(context);
+		//初始化 FlashMapManager
 		initFlashMapManager(context);
 	}
 
@@ -1014,11 +1023,13 @@ public class DispatcherServlet extends FrameworkServlet {
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
+					// 没找到则报404
 					noHandlerFound(processedRequest, response);
 					return;
 				}
 
 				// Determine handler adapter for the current request.
+				// 获取适配器即我们定义的controller
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1030,12 +1041,13 @@ public class DispatcherServlet extends FrameworkServlet {
 						return;
 					}
 				}
-
+				// 拦截器 preHandler 调用
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				// 真正的激活handler并返回视图
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1107,6 +1119,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			else {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+				// 处理异常结果
 				mv = processHandlerException(request, response, handler, exception);
 				errorView = (mv != null);
 			}
@@ -1114,6 +1127,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Did the handler return a view to render?
 		if (mv != null && !mv.wasCleared()) {
+			// 处理页面跳转
 			render(mv, request, response);
 			if (errorView) {
 				WebUtils.clearErrorRequestAttributes(request);

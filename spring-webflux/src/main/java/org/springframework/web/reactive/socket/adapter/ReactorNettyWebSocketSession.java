@@ -89,10 +89,11 @@ public class ReactorNettyWebSocketSession
 					}
 				})
 				.map(this::toFrame);
+		return null;/*
 		return getDelegate().getOutbound()
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
-				.then();
+				.then();*/
 	}
 
 	@Override

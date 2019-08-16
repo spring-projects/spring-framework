@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+		targetNamespace="http://www.lc.com/schema/lc"
+		xmlns:tns="http://www.lc.com/schema/lc"
+		elementFormDefault="qualified">
+
+	<element name="custom">
+		<complexType>
+			<attribute name="id" type="string"/>
+			<attribute name="name" type="string"/>
+			<attribute name="hobby" type="string"/>
+		</complexType>
+	</element>
+
+</schema>
