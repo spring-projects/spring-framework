@@ -59,7 +59,6 @@ ext {
 
 configure(allprojects) { project ->
 	group = "org.springframework"
-	version = qualifyVersionIfNecessary(version)
 
 	apply plugin: "java"
 	apply plugin: "kotlin"
@@ -288,33 +287,5 @@ configure(rootProject) {
 		archives distZip
 	}
 
-	wrapper {
-		doLast() {
-			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
-			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-			File wrapperFile = file("gradlew")
-			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-					"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-			File wrapperBatFile = file("gradlew.bat")
-			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-					"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-		}
-	}
 }
 
-/*
- * Support publication of artifacts versioned by topic branch.
- * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
- * If <TOPIC> starts with 'SPR-', change version
- *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
- *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
- */
-def qualifyVersionIfNecessary(version) {
-	if (rootProject.hasProperty("BRANCH_NAME")) {
-		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("SPR-")) {
-			return version.replace("BUILD", qualifier)
-		}
-	}
-	return version
-}
