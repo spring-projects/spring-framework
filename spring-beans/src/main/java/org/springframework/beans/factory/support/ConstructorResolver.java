@@ -771,7 +771,7 @@ class ConstructorResolver {
 							methodParam, beanName, autowiredBeanNames, converter, fallback);
 					args.rawArguments[paramIndex] = autowiredArgument;
 					args.arguments[paramIndex] = autowiredArgument;
-					args.preparedArguments[paramIndex] = new AutowiredArgumentMarker();
+					args.preparedArguments[paramIndex] = AutowiredArgumentMarker.INST;
 					args.resolveNecessary = true;
 				}
 				catch (BeansException ex) {
@@ -809,7 +809,7 @@ class ConstructorResolver {
 		for (int argIndex = 0; argIndex < argsToResolve.length; argIndex++) {
 			Object argValue = argsToResolve[argIndex];
 			MethodParameter methodParam = MethodParameter.forExecutable(executable, argIndex);
-			if (argValue instanceof AutowiredArgumentMarker) {
+			if (argValue == AutowiredArgumentMarker.INST) {
 				argValue = resolveAutowiredArgument(methodParam, beanName, null, converter, fallback);
 			}
 			else if (argValue instanceof BeanMetadataElement) {
@@ -966,7 +966,8 @@ class ConstructorResolver {
 	/**
 	 * Marker for autowired arguments in a cached argument array.
  	 */
-	private static class AutowiredArgumentMarker {
+	private enum AutowiredArgumentMarker {
+		INST
 	}
 
 
