@@ -17,7 +17,7 @@
 package org.springframework.test.web.servlet
 
 import org.hamcrest.CoreMatchers
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod

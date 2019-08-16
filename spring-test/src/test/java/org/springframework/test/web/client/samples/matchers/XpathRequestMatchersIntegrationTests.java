@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -67,7 +67,7 @@ public class XpathRequestMatchersIntegrationTests {
 	private PeopleWrapper people;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),

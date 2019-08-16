@@ -16,9 +16,9 @@
 
 package org.springframework.test.util;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -43,7 +43,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
  * @author Sam Brannen
  * @author Juergen Hoeller
  */
-public class ReflectionTestUtilsTests {
+class ReflectionTestUtilsTests {
 
 	private static final Float PI = Float.valueOf((float) 22 / 7);
 
@@ -54,67 +54,67 @@ public class ReflectionTestUtilsTests {
 	private final LegacyEntity entity = new LegacyEntity();
 
 
-	@Before
-	public void resetStaticFields() {
+	@BeforeEach
+	void resetStaticFields() {
 		StaticFields.reset();
 	}
 
 	@Test
-	public void setFieldWithNullTargetObject() throws Exception {
+	void setFieldWithNullTargetObject() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				setField((Object) null, "id", Long.valueOf(99)))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void getFieldWithNullTargetObject() throws Exception {
+	void getFieldWithNullTargetObject() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getField((Object) null, "id"))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void setFieldWithNullTargetClass() throws Exception {
+	void setFieldWithNullTargetClass() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				setField((Class<?>) null, "id", Long.valueOf(99)))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void getFieldWithNullTargetClass() throws Exception {
+	void getFieldWithNullTargetClass() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getField((Class<?>) null, "id"))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void setFieldWithNullNameAndNullType() throws Exception {
+	void setFieldWithNullNameAndNullType() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				setField(person, null, Long.valueOf(99), null))
 			.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
-	public void setFieldWithBogusName() throws Exception {
+	void setFieldWithBogusName() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				setField(person, "bogus", Long.valueOf(99), long.class))
 			.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
-	public void setFieldWithWrongType() throws Exception {
+	void setFieldWithWrongType() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				setField(person, "id", Long.valueOf(99), String.class))
 			.withMessageStartingWith("Could not find field");
 	}
 
 	@Test
-	public void setFieldAndGetFieldForStandardUseCases() throws Exception {
+	void setFieldAndGetFieldForStandardUseCases() throws Exception {
 		assertSetFieldAndGetFieldBehavior(this.person);
 	}
 
 	@Test
-	public void setFieldAndGetFieldViaJdkDynamicProxy() throws Exception {
+	void setFieldAndGetFieldViaJdkDynamicProxy() throws Exception {
 		ProxyFactory pf = new ProxyFactory(this.person);
 		pf.addInterface(Person.class);
 		Person proxy = (Person) pf.getProxy();
@@ -123,7 +123,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void setFieldAndGetFieldViaCglibProxy() throws Exception {
+	void setFieldAndGetFieldViaCglibProxy() throws Exception {
 		ProxyFactory pf = new ProxyFactory(this.person);
 		pf.setProxyTargetClass(true);
 		Person proxy = (Person) pf.getProxy();
@@ -170,7 +170,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void setFieldWithNullValuesForNonPrimitives() throws Exception {
+	void setFieldWithNullValuesForNonPrimitives() throws Exception {
 		// Fields must be non-null to start with
 		setField(person, "name", "Tom");
 		setField(person, "eyeColor", "blue", String.class);
@@ -190,25 +190,22 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void setFieldWithNullValueForPrimitiveLong() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, "id", null, long.class));
+	void setFieldWithNullValueForPrimitiveLong() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "id", null, long.class));
 	}
 
 	@Test
-	public void setFieldWithNullValueForPrimitiveInt() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, "age", null, int.class));
+	void setFieldWithNullValueForPrimitiveInt() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "age", null, int.class));
 	}
 
 	@Test
-	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, "likesPets", null, boolean.class));
+	void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "likesPets", null, boolean.class));
 	}
 
 	@Test
-	public void setStaticFieldViaClass() throws Exception {
+	void setStaticFieldViaClass() throws Exception {
 		setField(StaticFields.class, "publicField", "xxx");
 		setField(StaticFields.class, "privateField", "yyy");
 
@@ -217,7 +214,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void setStaticFieldViaClassWithExplicitType() throws Exception {
+	void setStaticFieldViaClassWithExplicitType() throws Exception {
 		setField(StaticFields.class, "publicField", "xxx", String.class);
 		setField(StaticFields.class, "privateField", "yyy", String.class);
 
@@ -226,7 +223,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void setStaticFieldViaInstance() throws Exception {
+	void setStaticFieldViaInstance() throws Exception {
 		StaticFields staticFields = new StaticFields();
 		setField(staticFields, null, "publicField", "xxx", null);
 		setField(staticFields, null, "privateField", "yyy", null);
@@ -236,20 +233,20 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void getStaticFieldViaClass() throws Exception {
+	void getStaticFieldViaClass() throws Exception {
 		assertThat(getField(StaticFields.class, "publicField")).as("public static field").isEqualTo("public");
 		assertThat(getField(StaticFields.class, "privateField")).as("private static field").isEqualTo("private");
 	}
 
 	@Test
-	public void getStaticFieldViaInstance() throws Exception {
+	void getStaticFieldViaInstance() throws Exception {
 		StaticFields staticFields = new StaticFields();
 		assertThat(getField(staticFields, "publicField")).as("public static field").isEqualTo("public");
 		assertThat(getField(staticFields, "privateField")).as("private static field").isEqualTo("private");
 	}
 
 	@Test
-	public void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
+	void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
 		invokeSetterMethod(person, "setId", Long.valueOf(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
 		invokeSetterMethod(person, "setAge", Integer.valueOf(33), int.class);
@@ -273,7 +270,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
+	void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
 		invokeSetterMethod(person, "id", Long.valueOf(99), long.class);
 		invokeSetterMethod(person, "name", "Tom");
 		invokeSetterMethod(person, "age", Integer.valueOf(42));
@@ -297,7 +294,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterMethodWithNullValuesForNonPrimitives() throws Exception {
+	void invokeSetterMethodWithNullValuesForNonPrimitives() throws Exception {
 		invokeSetterMethod(person, "name", null, String.class);
 		invokeSetterMethod(person, "eyeColor", null, String.class);
 		invokeSetterMethod(person, "favoriteNumber", null, Number.class);
@@ -308,47 +305,45 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				invokeSetterMethod(person, "id", null, long.class));
+	void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "id", null, long.class));
 	}
 
 	@Test
-	public void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				invokeSetterMethod(person, "age", null, int.class));
+	void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "age", null, int.class));
 	}
 
 	@Test
-	public void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
+	void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				invokeSetterMethod(person, "likesPets", null, boolean.class));
 	}
 
 	@Test
-	public void invokeMethodWithAutoboxingAndUnboxing() {
+	void invokeMethodWithAutoboxingAndUnboxing() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer difference = invokeMethod(component, "subtract", 5, 2);
 		assertThat(difference.intValue()).as("subtract(5, 2)").isEqualTo(3);
 	}
 
 	@Test
-	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
-	public void invokeMethodWithPrimitiveVarArgs() {
+	@Disabled("[SPR-8644] findMethod() does not currently support var-args")
+	void invokeMethodWithPrimitiveVarArgs() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", 1, 2, 3, 4);
 		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test
-	public void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
+	void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
 		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test
-	public void invokeMethodSimulatingLifecycleEvents() {
+	void invokeMethodSimulatingLifecycleEvents() {
 		assertThat(component.getNumber()).as("number").isNull();
 		assertThat(component.getText()).as("text").isNull();
 
@@ -368,61 +363,61 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeInitMethodBeforeAutowiring() {
+	void invokeInitMethodBeforeAutowiring() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				invokeMethod(component, "init"))
 			.withMessageStartingWith("number must not be null");
 	}
 
 	@Test
-	public void invokeMethodWithIncompatibleArgumentTypes() {
+	void invokeMethodWithIncompatibleArgumentTypes() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				invokeMethod(component, "subtract", "foo", 2.0))
 		.withMessageStartingWith("Method not found");
 	}
 
 	@Test
-	public void invokeMethodWithTooFewArguments() {
+	void invokeMethodWithTooFewArguments() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				invokeMethod(component, "configure", Integer.valueOf(42)))
 			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
-	public void invokeMethodWithTooManyArguments() {
+	void invokeMethodWithTooManyArguments() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
 			.withMessageStartingWith("Method not found");
 	}
 
 	@Test // SPR-14363
-	public void getFieldOnLegacyEntityWithSideEffectsInToString() {
+	void getFieldOnLegacyEntityWithSideEffectsInToString() {
 		Object collaborator = getField(entity, "collaborator");
 		assertThat(collaborator).isNotNull();
 	}
 
 	@Test // SPR-9571 and SPR-14363
-	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
+	void setFieldOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		setField(entity, "collaborator", testCollaborator, Object.class);
 		assertThat(entity.toString().contains(testCollaborator)).isTrue();
 	}
 
 	@Test // SPR-14363
-	public void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
 		invokeMethod(entity, "configure", Integer.valueOf(42), "enigma");
 		assertThat(entity.getNumber()).as("number should have been configured").isEqualTo(Integer.valueOf(42));
 		assertThat(entity.getText()).as("text should have been configured").isEqualTo("enigma");
 	}
 
 	@Test // SPR-14363
-	public void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		Object collaborator = invokeGetterMethod(entity, "collaborator");
 		assertThat(collaborator).isNotNull();
 	}
 
 	@Test // SPR-14363
-	public void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		invokeSetterMethod(entity, "collaborator", testCollaborator);
 		assertThat(entity.toString().contains(testCollaborator)).isTrue();

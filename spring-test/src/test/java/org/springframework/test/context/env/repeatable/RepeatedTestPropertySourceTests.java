@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -32,10 +32,10 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = "first = repeated")
 @TestPropertySource(properties = "second = repeated")
 @TestPropertySource(properties = "first = repeated override")
-public class RepeatedTestPropertySourceTests extends AbstractRepeatableTestPropertySourceTests {
+class RepeatedTestPropertySourceTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("first", "repeated override");
 		assertEnvironmentValue("second", "repeated");
 	}

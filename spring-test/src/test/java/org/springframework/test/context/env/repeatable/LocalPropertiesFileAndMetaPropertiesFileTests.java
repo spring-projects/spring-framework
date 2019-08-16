@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.env.repeatable.LocalPropertiesFileAndMetaPropertiesFileTests.MetaFileTestProperty;
@@ -40,10 +40,10 @@ import org.springframework.test.context.env.repeatable.LocalPropertiesFileAndMet
  */
 @TestPropertySource("local.properties")
 @MetaFileTestProperty
-public class LocalPropertiesFileAndMetaPropertiesFileTests extends AbstractRepeatableTestPropertySourceTests {
+class LocalPropertiesFileAndMetaPropertiesFileTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("key1", "local file");
 		assertEnvironmentValue("key2", "meta file");
 	}

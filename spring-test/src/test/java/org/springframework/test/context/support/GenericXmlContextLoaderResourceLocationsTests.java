@@ -21,10 +21,8 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,7 +33,7 @@ import org.springframework.util.ObjectUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * JUnit 4 based unit test which verifies proper
+ * Unit test which verifies proper
  * {@link ContextLoader#processLocations(Class, String...) processing} of
  * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
@@ -47,17 +45,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
-@RunWith(Parameterized.class)
-public class GenericXmlContextLoaderResourceLocationsTests {
+class GenericXmlContextLoaderResourceLocationsTests {
 
 	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
-	protected final Class<?> testClass;
-	protected final String[] expectedLocations;
 
-
-	@Parameters(name = "{0}")
-	public static Collection<Object[]> contextConfigurationLocationsData() {
+	static Collection<Object[]> contextConfigurationLocationsData() {
 		@ContextConfiguration
 		class ClasspathNonExistentDefaultLocationsTestCase {
 		}
@@ -115,27 +108,25 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 		});
 	}
 
-	public GenericXmlContextLoaderResourceLocationsTests(final String testClassName, final String[] expectedLocations) throws Exception {
-		this.testClass = ClassUtils.forName(getClass().getName() + "$1" + testClassName, getClass().getClassLoader());
-		this.expectedLocations = expectedLocations;
-	}
 
-	@Test
-	public void assertContextConfigurationLocations() throws Exception {
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("contextConfigurationLocationsData")
+	void assertContextConfigurationLocations(String testClassName, String[] expectedLocations) throws Exception {
+		Class<?> testClass = ClassUtils.forName(getClass().getName() + "$1" + testClassName, getClass().getClassLoader());
 
-		final ContextConfiguration contextConfig = this.testClass.getAnnotation(ContextConfiguration.class);
+		final ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
 		final ContextLoader contextLoader = new GenericXmlContextLoader();
 		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
-		final String[] processedLocations = contextLoader.processLocations(this.testClass, configuredLocations);
+		final String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("----------------------------------------------------------------------");
 			logger.debug("Configured locations: " + ObjectUtils.nullSafeToString(configuredLocations));
-			logger.debug("Expected   locations: " + ObjectUtils.nullSafeToString(this.expectedLocations));
+			logger.debug("Expected   locations: " + ObjectUtils.nullSafeToString(expectedLocations));
 			logger.debug("Processed  locations: " + ObjectUtils.nullSafeToString(processedLocations));
 		}
 
-		assertThat(processedLocations).as("Verifying locations for test [" + this.testClass + "].").isEqualTo(this.expectedLocations);
+		assertThat(processedLocations).as("Verifying locations for test [" + testClass + "].").isEqualTo(expectedLocations);
 	}
 
 }

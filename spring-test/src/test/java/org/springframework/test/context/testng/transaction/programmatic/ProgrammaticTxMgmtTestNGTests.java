@@ -35,7 +35,6 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.test.context.transaction.programmatic.ProgrammaticTxMgmtTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +44,9 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
- * This class is a copy of the JUnit-based {@link ProgrammaticTxMgmtTests} class
- * that has been modified to run with TestNG.
+ * This class is a copy of the JUnit-based
+ * {@link org.springframework.test.context.transaction.programmatic.ProgrammaticTxMgmtTests}
+ * class that has been modified to run with TestNG.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -54,12 +54,12 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
 @ContextConfiguration
 public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSpringContextTests {
 
-	private String method;
+	private String methodName;
 
 
 	@Override
 	public void run(IHookCallBack callBack, ITestResult testResult) {
-		this.method = testResult.getMethod().getMethodName();
+		this.methodName = testResult.getMethod().getMethodName();
 		super.run(callBack, testResult);
 	}
 
@@ -71,7 +71,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@AfterTransaction
 	public void afterTransaction() {
-		switch (method) {
+		switch (this.methodName) {
 			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
@@ -88,7 +88,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 				break;
 			}
 			default: {
-				fail("missing 'after transaction' assertion for test method: " + method);
+				fail("missing 'after transaction' assertion for test method: " + this.methodName);
 			}
 		}
 	}

@@ -14,31 +14,42 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.jdbc;
 
-import org.junit.jupiter.api.Test;
+import java.util.List;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
- * @since 4.3
+ * @since 5.2
  */
 @ExtendWith(SpringExtension.class)
-class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
+@Transactional
+public abstract class AbstractTransactionalTests {
 
 	@Autowired
-	WebApplicationContext wac;
+	protected JdbcTemplate jdbcTemplate;
 
+	protected final int countRowsInTable(String tableName) {
+		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+	}
 
-	@Test
-	void wacLoaded() {
-		assertThat(wac).isNotNull();
+	protected final void assertNumUsers(int expected) {
+		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
+	}
+
+	protected final void assertUsers(String... expectedUsers) {
+		List<String> actualUsers = this.jdbcTemplate.queryForList("select name from user", String.class);
+		assertThat(actualUsers).containsExactlyInAnyOrder(expectedUsers);
 	}
 
 }

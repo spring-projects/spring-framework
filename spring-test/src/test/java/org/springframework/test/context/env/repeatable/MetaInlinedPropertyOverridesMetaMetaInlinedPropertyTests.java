@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -29,10 +29,10 @@ import org.springframework.test.context.TestPropertySource;
  */
 @MetaInlinedTestProperty
 @MetaComposedTestProperty
-public class MetaInlinedPropertyOverridesMetaMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
+class MetaInlinedPropertyOverridesMetaMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("enigma", "meta");
 	}
 

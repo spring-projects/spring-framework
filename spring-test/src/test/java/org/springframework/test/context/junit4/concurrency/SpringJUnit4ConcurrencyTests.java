@@ -24,7 +24,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
-import org.springframework.test.context.hierarchies.web.DispatcherWacRootWacEarTests;
 import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;
@@ -35,11 +34,6 @@ import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
 import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpringRuleTests;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import org.springframework.test.context.web.RequestAndSessionScopedBeansWacTests;
-import org.springframework.test.context.web.socket.WebSocketServletServerContainerFactoryBeanTests;
-import org.springframework.test.web.client.samples.SampleTests;
-import org.springframework.test.web.servlet.samples.context.JavaConfigTests;
-import org.springframework.test.web.servlet.samples.context.WebAppResourceTests;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.TestGroups;
 import org.springframework.util.ReflectionUtils;
@@ -85,14 +79,8 @@ public class SpringJUnit4ConcurrencyTests {
 			MethodLevelTransactionalSpringRunnerTests.class,
 			TimedTransactionalSpringRunnerTests.class,
 		// Web and Scopes
-			DispatcherWacRootWacEarTests.class,
 			BasicAnnotationConfigWacSpringRuleTests.class,
-			RequestAndSessionScopedBeansWacTests.class,
-			WebSocketServletServerContainerFactoryBeanTests.class,
 		// Spring MVC Test
-			JavaConfigTests.class,
-			WebAppResourceTests.class,
-			SampleTests.class
 	};
 
 

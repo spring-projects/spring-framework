@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -29,10 +29,10 @@ import org.springframework.test.context.TestPropertySource;
  * @since 5.2
  */
 @TestPropertySource(properties = "key2 = local")
-public class LocalInlinedPropertyAndInheritedInlinedPropertyTests extends AbstractClassWithTestProperty {
+class LocalInlinedPropertyAndInheritedInlinedPropertyTests extends AbstractClassWithTestProperty {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("key1", "parent");
 		assertEnvironmentValue("key2", "local");
 	}

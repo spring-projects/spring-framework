@@ -16,20 +16,13 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
  * Transactional integration tests for {@link Sql @Sql} support with
@@ -39,23 +32,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.2
  * @see TransactionalSqlScriptsTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Transactional
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Sql(
 	scripts    = "schema.sql",
 	statements = "INSERT INTO user VALUES('Dilbert')"
 )
 @DirtiesContext
-public class TransactionalInlinedStatementsSqlScriptsTests {
-
-	@Autowired
-	JdbcTemplate jdbcTemplate;
+class TransactionalInlinedStatementsSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
+	@Order(1)
+	void classLevelScripts() {
 		assertNumUsers(1);
 	}
 
@@ -63,17 +51,9 @@ public class TransactionalInlinedStatementsSqlScriptsTests {
 	@Sql(statements = "DROP TABLE user IF EXISTS")
 	@Sql("schema.sql")
 	@Sql(statements = "INSERT INTO user VALUES ('Dilbert'), ('Dogbert'), ('Catbert')")
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
+	@Order(2)
+	void methodLevelScripts() {
 		assertNumUsers(3);
-	}
-
-	protected int countRowsInTable(String tableName) {
-		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }

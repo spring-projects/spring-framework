@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,7 @@ public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScri
 	 */
 	@Test
 	@Override
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
+	public void classLevelScripts() {
 		assertNumUsers(1);
 	}
 
@@ -71,8 +70,7 @@ public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScri
 	@Test
 	@Sql({ "../../jdbc/drop-schema.sql", "../../jdbc/schema.sql", "../../jdbc/data.sql", "../../jdbc/data-add-dogbert.sql" })
 	@Override
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
+	public void methodLevelScripts() {
 		assertNumUsers(2);
 	}
 

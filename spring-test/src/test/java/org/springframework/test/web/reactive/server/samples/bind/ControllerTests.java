@@ -16,8 +16,8 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +34,7 @@ public class ControllerTests {
 	private WebTestClient client;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.client = WebTestClient.bindToController(new TestController()).build();
 	}

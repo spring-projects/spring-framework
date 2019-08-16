@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

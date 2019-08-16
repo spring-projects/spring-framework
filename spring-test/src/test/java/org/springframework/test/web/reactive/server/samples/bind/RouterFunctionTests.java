@@ -16,8 +16,8 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -37,7 +37,7 @@ public class RouterFunctionTests {
 	private WebTestClient testClient;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		RouterFunction<?> route = route(GET("/test"), request ->

@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -43,7 +43,7 @@ import static org.springframework.test.context.support.ContextLoaderUtils.resolv
  * @author Sam Brannen
  * @since 3.2.2
  */
-public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurationUtilsTests {
+class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurationUtilsTests {
 
 	private void debugConfigAttributes(List<ContextConfigurationAttributes> configAttributesList) {
 		// for (ContextConfigurationAttributes configAttributes : configAttributesList) {
@@ -52,19 +52,19 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchy() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchy() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchy.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithImplicitSingleLevelContextHierarchy() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithImplicitSingleLevelContextHierarchy() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(BareAnnotations.class);
 		assertThat(hierarchyAttributes.size()).isEqualTo(1);
 		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
@@ -73,7 +73,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchy() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchy() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(SingleTestClassWithSingleLevelContextHierarchy.class);
 		assertThat(hierarchyAttributes.size()).isEqualTo(1);
 		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
@@ -82,7 +82,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation() {
 		Class<SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation> testClass = SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation.class;
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(testClass);
 		assertThat(hierarchyAttributes.size()).isEqualTo(1);
@@ -96,7 +96,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForSingleTestClassWithTripleLevelContextHierarchy() {
+	void resolveContextHierarchyAttributesForSingleTestClassWithTripleLevelContextHierarchy() {
 		Class<SingleTestClassWithTripleLevelContextHierarchy> testClass = SingleTestClassWithTripleLevelContextHierarchy.class;
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(testClass);
 		assertThat(hierarchyAttributes.size()).isEqualTo(1);
@@ -114,7 +114,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchies() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchies() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithSingleLevelContextHierarchy.class);
 		assertThat(hierarchyAttributes.size()).isEqualTo(3);
 
@@ -135,7 +135,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchiesAndMetaAnnotations() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchiesAndMetaAnnotations() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation.class);
 		assertThat(hierarchyAttributes.size()).isEqualTo(3);
 
@@ -181,27 +181,27 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSuperclass() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSuperclass() {
 		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSuperclass.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSubclass() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithBareContextConfigurationInSubclass() {
 		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareContextConfigurationInSubclass.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSuperclass() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSuperclass() {
 		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareMetaContextConfigWithOverridesInSuperclass.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSubclass() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithBareMetaContextConfigWithOverridesInSubclass() {
 		assertOneTwo(resolveContextHierarchyAttributes(TestClass2WithBareMetaContextConfigWithOverridesInSubclass.class));
 	}
 
 	@Test
-	public void resolveContextHierarchyAttributesForTestClassHierarchyWithMultiLevelContextHierarchies() {
+	void resolveContextHierarchyAttributesForTestClassHierarchyWithMultiLevelContextHierarchies() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithMultiLevelContextHierarchy.class);
 		assertThat(hierarchyAttributes.size()).isEqualTo(3);
 
@@ -226,7 +226,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchies() {
+	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchies() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass3WithMultiLevelContextHierarchy.class);
 
 		assertThat(map).hasSize(3).containsKeys("alpha", "beta", "gamma");
@@ -249,7 +249,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndUnnamedConfig() {
+	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndUnnamedConfig() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass3WithMultiLevelContextHierarchyAndUnnamedConfig.class);
 
 		String level1 = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + 1;
@@ -282,7 +282,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndPartiallyNamedConfig() {
+	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndPartiallyNamedConfig() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyAndPartiallyNamedConfig.class);
 
 		String level1 = "parent";
@@ -317,12 +317,12 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	@Test
-	public void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig() {
+	void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig() {
 		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithEmptyContextConfig.class);
 	}
 
 	@Test
-	public void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig() {
+	void buildContextHierarchyMapForSingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig() {
 		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig.class);
 	}
 
@@ -330,7 +330,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
 	 */
 	@Test
-	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
+	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers.class);
 
 		assertThat(map).hasSize(2).containsKeys("alpha", "beta");

@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.setup;
 
 import javax.servlet.http.HttpSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;

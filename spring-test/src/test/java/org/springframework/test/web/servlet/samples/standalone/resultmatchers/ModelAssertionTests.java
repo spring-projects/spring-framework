@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import javax.validation.Valid;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
@@ -54,7 +54,7 @@ public class ModelAssertionTests {
 	private MockMvc mockMvc;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		SampleController controller = new SampleController("a string value", 3, new Person("a name"));

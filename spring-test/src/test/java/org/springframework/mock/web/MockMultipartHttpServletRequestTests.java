@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
@@ -37,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class MockMultipartHttpServletRequestTests {
+class MockMultipartHttpServletRequestTests {
 
 	@Test
-	public void mockMultipartHttpServletRequestWithByteArray() throws IOException {
+	void mockMultipartHttpServletRequestWithByteArray() throws IOException {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		assertThat(request.getFileNames().hasNext()).isFalse();
 		assertThat(request.getFile("file1")).isNull();
@@ -53,7 +53,7 @@ public class MockMultipartHttpServletRequestTests {
 	}
 
 	@Test
-	public void mockMultipartHttpServletRequestWithInputStream() throws IOException {
+	void mockMultipartHttpServletRequestWithInputStream() throws IOException {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.addFile(new MockMultipartFile("file1", new ByteArrayInputStream("myContent1".getBytes())));
 		request.addFile(new MockMultipartFile("file2", "myOrigFilename", "text/plain", new ByteArrayInputStream(

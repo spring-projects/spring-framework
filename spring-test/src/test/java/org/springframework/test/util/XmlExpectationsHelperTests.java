@@ -16,7 +16,7 @@
 
 package org.springframework.test.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -25,11 +25,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Matthew Depue
  */
-public class XmlExpectationsHelperTests {
-
+class XmlExpectationsHelperTests {
 
 	@Test
-	public void assertXmlEqualForEqual() throws Exception {
+	void assertXmlEqualForEqual() throws Exception {
 		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2></root>";
 		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
@@ -37,7 +36,7 @@ public class XmlExpectationsHelperTests {
 	}
 
 	@Test
-	public void assertXmlEqualExceptionForIncorrectValue() throws Exception {
+	void assertXmlEqualExceptionForIncorrectValue() throws Exception {
 		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>notf1</field1><field2>f2</field2></root>";
 		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
@@ -47,7 +46,7 @@ public class XmlExpectationsHelperTests {
 	}
 
 	@Test
-	public void assertXmlEqualForOutOfOrder() throws Exception {
+	void assertXmlEqualForOutOfOrder() throws Exception {
 		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field2>f2</field2><field1>f1</field1></root>";
 		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
@@ -55,7 +54,7 @@ public class XmlExpectationsHelperTests {
 	}
 
 	@Test
-	public void assertXmlEqualExceptionForMoreEntries() throws Exception {
+	void assertXmlEqualExceptionForMoreEntries() throws Exception {
 		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2><field3>f3</field3></root>";
 		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
@@ -66,7 +65,7 @@ public class XmlExpectationsHelperTests {
 	}
 
 	@Test
-	public void assertXmlEqualExceptionForLessEntries() throws Exception {
+	void assertXmlEqualExceptionForLessEntries() throws Exception {
 		String control = "<root><field1>f1</field1><field2>f2</field2><field3>f3</field3></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2></root>";
 		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();

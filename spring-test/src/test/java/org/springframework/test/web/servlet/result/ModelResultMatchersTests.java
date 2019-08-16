@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.StubMvcResult;
@@ -46,7 +46,7 @@ public class ModelResultMatchersTests {
 	private MvcResult mvcResult;
 	private MvcResult mvcResultWithError;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.matchers = new ModelResultMatchers();
 

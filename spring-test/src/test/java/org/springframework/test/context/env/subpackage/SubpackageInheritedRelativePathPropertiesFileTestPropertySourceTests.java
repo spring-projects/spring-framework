@@ -27,7 +27,7 @@ import org.springframework.test.context.env.ExplicitPropertiesFileTestPropertySo
  * @author Sam Brannen
  * @since 4.1
  */
-public class SubpackageInheritedRelativePathPropertiesFileTestPropertySourceTests extends
+class SubpackageInheritedRelativePathPropertiesFileTestPropertySourceTests extends
 		ExplicitPropertiesFileTestPropertySourceTests {
 
 	/* all tests are in superclass */

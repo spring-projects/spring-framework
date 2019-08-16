@@ -22,7 +22,7 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRegistration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 
@@ -34,39 +34,39 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 19.02.2006
  */
-public class MockServletContextTests {
+class MockServletContextTests {
 
 	private final MockServletContext sc = new MockServletContext("org/springframework/mock");
 
 
 	@Test
-	public void listFiles() {
+	void listFiles() {
 		Set<String> paths = sc.getResourcePaths("/web");
 		assertThat(paths).isNotNull();
 		assertThat(paths.contains("/web/MockServletContextTests.class")).isTrue();
 	}
 
 	@Test
-	public void listSubdirectories() {
+	void listSubdirectories() {
 		Set<String> paths = sc.getResourcePaths("/");
 		assertThat(paths).isNotNull();
 		assertThat(paths.contains("/web/")).isTrue();
 	}
 
 	@Test
-	public void listNonDirectory() {
+	void listNonDirectory() {
 		Set<String> paths = sc.getResourcePaths("/web/MockServletContextTests.class");
 		assertThat(paths).isNull();
 	}
 
 	@Test
-	public void listInvalidPath() {
+	void listInvalidPath() {
 		Set<String> paths = sc.getResourcePaths("/web/invalid");
 		assertThat(paths).isNull();
 	}
 
 	@Test
-	public void registerContextAndGetContext() {
+	void registerContextAndGetContext() {
 		MockServletContext sc2 = new MockServletContext();
 		sc.setContextPath("/");
 		sc.registerContext("/second", sc2);
@@ -75,7 +75,7 @@ public class MockServletContextTests {
 	}
 
 	@Test
-	public void getMimeType() {
+	void getMimeType() {
 		assertThat(sc.getMimeType("test.html")).isEqualTo("text/html");
 		assertThat(sc.getMimeType("test.gif")).isEqualTo("image/gif");
 		assertThat(sc.getMimeType("test.foobar")).isNull();
@@ -86,13 +86,13 @@ public class MockServletContextTests {
 	 * <a href="https://stackoverflow.com/questions/22986109/testing-spring-managed-servlet">Testing Spring managed servlet</a>
 	 */
 	@Test
-	public void getMimeTypeWithCustomConfiguredType() {
+	void getMimeTypeWithCustomConfiguredType() {
 		sc.addMimeType("enigma", new MediaType("text", "enigma"));
 		assertThat(sc.getMimeType("filename.enigma")).isEqualTo("text/enigma");
 	}
 
 	@Test
-	public void servletVersion() {
+	void servletVersion() {
 		assertThat(sc.getMajorVersion()).isEqualTo(3);
 		assertThat(sc.getMinorVersion()).isEqualTo(1);
 		assertThat(sc.getEffectiveMajorVersion()).isEqualTo(3);
@@ -109,7 +109,7 @@ public class MockServletContextTests {
 	}
 
 	@Test
-	public void registerAndUnregisterNamedDispatcher() throws Exception {
+	void registerAndUnregisterNamedDispatcher() throws Exception {
 		final String name = "test-servlet";
 		final String url = "/test";
 		assertThat(sc.getNamedDispatcher(name)).isNull();
@@ -126,7 +126,7 @@ public class MockServletContextTests {
 	}
 
 	@Test
-	public void getNamedDispatcherForDefaultServlet() throws Exception {
+	void getNamedDispatcherForDefaultServlet() throws Exception {
 		final String name = "default";
 		RequestDispatcher namedDispatcher = sc.getNamedDispatcher(name);
 		assertThat(namedDispatcher).isNotNull();
@@ -137,7 +137,7 @@ public class MockServletContextTests {
 	}
 
 	@Test
-	public void setDefaultServletName() throws Exception {
+	void setDefaultServletName() throws Exception {
 		final String originalDefault = "default";
 		final String newDefault = "test";
 		assertThat(sc.getNamedDispatcher(originalDefault)).isNotNull();
@@ -157,7 +157,7 @@ public class MockServletContextTests {
 	 * @since 4.1.2
 	 */
 	@Test
-	public void getServletRegistration() {
+	void getServletRegistration() {
 		assertThat(sc.getServletRegistration("servlet")).isNull();
 	}
 
@@ -165,7 +165,7 @@ public class MockServletContextTests {
 	 * @since 4.1.2
 	 */
 	@Test
-	public void getServletRegistrations() {
+	void getServletRegistrations() {
 		Map<String, ? extends ServletRegistration> servletRegistrations = sc.getServletRegistrations();
 		assertThat(servletRegistrations).isNotNull();
 		assertThat(servletRegistrations.size()).isEqualTo(0);
@@ -175,7 +175,7 @@ public class MockServletContextTests {
 	 * @since 4.1.2
 	 */
 	@Test
-	public void getFilterRegistration() {
+	void getFilterRegistration() {
 		assertThat(sc.getFilterRegistration("filter")).isNull();
 	}
 
@@ -183,7 +183,7 @@ public class MockServletContextTests {
 	 * @since 4.1.2
 	 */
 	@Test
-	public void getFilterRegistrations() {
+	void getFilterRegistrations() {
 		Map<String, ? extends FilterRegistration> filterRegistrations = sc.getFilterRegistrations();
 		assertThat(filterRegistrations).isNotNull();
 		assertThat(filterRegistrations.size()).isEqualTo(0);

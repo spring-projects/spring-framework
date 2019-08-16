@@ -18,8 +18,8 @@ package org.springframework.test.context.support;
 
 import java.lang.reflect.Constructor;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
@@ -35,42 +35,42 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ANNO
  * @author Sam Brannen
  * @since 5.2
  */
-public class TestConstructorUtilsTests {
+class TestConstructorUtilsTests {
 
-	@After
-	public void clearGlobalFlag() {
+	@AfterEach
+	void clearGlobalFlag() {
 		setGlobalFlag(null);
 	}
 
 	@Test
-	public void notAutowirable() throws Exception {
+	void notAutowirable() throws Exception {
 		assertNotAutowirable(NotAutowirableTestCase.class);
 	}
 
 	@Test
-	public void autowiredAnnotation() throws Exception {
+	void autowiredAnnotation() throws Exception {
 		assertAutowirable(AutowiredAnnotationTestCase.class);
 	}
 
 	@Test
-	public void testConstructorAnnotation() throws Exception {
+	void testConstructorAnnotation() throws Exception {
 		assertAutowirable(TestConstructorAnnotationTestCase.class);
 	}
 
 	@Test
-	public void automaticallyAutowired() throws Exception {
+	void automaticallyAutowired() throws Exception {
 		setGlobalFlag();
 		assertAutowirable(AutomaticallyAutowiredTestCase.class);
 	}
 
 	@Test
-	public void automaticallyAutowiredButOverriddenLocally() throws Exception {
+	void automaticallyAutowiredButOverriddenLocally() throws Exception {
 		setGlobalFlag();
 		assertNotAutowirable(TestConstructorAnnotationOverridesGlobalFlagTestCase.class);
 	}
 
 	@Test
-	public void globalFlagVariations() throws Exception {
+	void globalFlagVariations() throws Exception {
 		Class<?> testClass = AutomaticallyAutowiredTestCase.class;
 
 		setGlobalFlag(ALL.name());

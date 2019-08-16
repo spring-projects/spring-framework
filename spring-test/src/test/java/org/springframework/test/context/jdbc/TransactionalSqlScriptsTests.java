@@ -16,20 +16,13 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
  * Transactional integration tests for {@link Sql @Sql} support.
@@ -37,36 +30,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Transactional
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Sql({ "schema.sql", "data.sql" })
 @DirtiesContext
-public class TransactionalSqlScriptsTests {
-
-	@Autowired
-	JdbcTemplate jdbcTemplate;
+public class TransactionalSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
+	@Order(1)
+	public void classLevelScripts() {
 		assertNumUsers(1);
 	}
 
 	@Test
 	@Sql({ "recreate-schema.sql", "data.sql", "data-add-dogbert.sql" })
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
+	@Order(2)
+	public void methodLevelScripts() {
 		assertNumUsers(2);
-	}
-
-	protected int countRowsInTable(String tableName) {
-		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }
