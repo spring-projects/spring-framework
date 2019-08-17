@@ -42,8 +42,8 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 
 	/**
 	 * Default constructor with {@link PathPatternParser} customized for
-	 * {@link PathContainer.Options#MESSAGE_ROUTE MESSAGE_ROUTE} and without
-	 * matching of trailing separator.
+	 * {@link org.springframework.http.server.PathContainer.Options#MESSAGE_ROUTE MESSAGE_ROUTE}
+	 * and without matching of trailing separator.
 	 */
 	public PathPatternRouteMatcher() {
 		this.parser = new PathPatternParser();

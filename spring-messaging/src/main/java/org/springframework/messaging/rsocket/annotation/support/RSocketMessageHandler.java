@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * {@link io.rsocket.RSocketFactory.ClientRSocketFactory ClientRSocketFactory},
  * or use the static shortcut
  * {@link #clientResponder(RSocketStrategies, Object...)} to obtain a configurer
- * for {@link RSocketRequester.Builder#rsocketFactory}.
+ * for {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory}.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -93,8 +93,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the encoders in it.
 	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#encoder(Encoder[]) defaults} from
-	 * {@code RSocketStrategies}.
+	 * {@linkplain org.springframework.messaging.rsocket.RSocketStrategies.Builder#encoder(Encoder[]) defaults}
+	 * from {@code RSocketStrategies}.
 	 */
 	public void setEncoders(List<? extends Encoder<?>> encoders) {
 		this.encoders.clear();
@@ -121,8 +121,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the decoders in them.
 	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#decoder(Decoder[]) defaults} from
-	 * {@code RSocketStrategies}.
+	 * {@linkplain org.springframework.messaging.rsocket.RSocketStrategies.Builder#decoder(Decoder[]) defaults}
+	 * from {@code RSocketStrategies}.
 	 */
 	@Override
 	public void setDecoders(List<? extends Decoder<?>> decoders) {
@@ -142,7 +142,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the matcher in it.
 	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#routeMatcher(RouteMatcher) defaults}
+	 * {@linkplain org.springframework.messaging.rsocket.RSocketStrategies.Builder#routeMatcher(RouteMatcher) defaults}
 	 * from {@code RSocketStrategies}.
 	 */
 	@Override
@@ -158,7 +158,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the registry in it.
 	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) defaults}
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) defaults}
 	 * from {@code RSocketStrategies}.
 	 */
 	@Override
@@ -175,7 +175,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the extractor in it.
 	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
 	 * from {@code RSocketStrategies}.
 	 * @param extractor the extractor to use
 	 */
@@ -386,7 +386,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * Static factory method for a configurer of a client side responder with
 	 * annotated handler methods. This is intended to be passed into
-	 * {@link RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}.
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}.
 	 * <p>In effect a shortcut to create and initialize
 	 * {@code RSocketMessageHandler} with the given strategies and handlers,
 	 * and use {@link #clientResponder()} to obtain the responder.
@@ -399,7 +399,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * handler methods; used to call {@link #setHandlers(List)} with
 	 * on the created {@code RSocketMessageHandler}
 	 * @return a configurer that may be passed into
-	 * {@link RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}
 	 */
 	public static ClientRSocketFactoryConfigurer clientResponder(
 			RSocketStrategies strategies, Object... candidateHandlers) {
