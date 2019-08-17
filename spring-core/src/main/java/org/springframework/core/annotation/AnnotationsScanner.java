@@ -234,9 +234,7 @@ abstract class AnnotationsScanner {
 		if (includeEnclosing && enclosingClass != null) {
 			R enclosingResult = processClassHierarchy(context, aggregateIndex,
 					enclosingClass, processor, classFilter, includeInterfaces, true);
-			if (enclosingResult != null) {
-				return enclosingResult;
-			}
+			return enclosingResult;
 		}
 		return null;
 	}
@@ -323,9 +321,7 @@ abstract class AnnotationsScanner {
 		if (superclass != Object.class && superclass != null) {
 			R superclassResult = processMethodHierarchy(context, aggregateIndex,
 					superclass, processor, classFilter, rootMethod, includeInterfaces);
-			if (superclassResult != null) {
-				return superclassResult;
-			}
+			return superclassResult;
 		}
 		return null;
 	}
