@@ -154,7 +154,7 @@ configure(allprojects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.7")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
 	}
 
 	ext.javadocLinks = [
