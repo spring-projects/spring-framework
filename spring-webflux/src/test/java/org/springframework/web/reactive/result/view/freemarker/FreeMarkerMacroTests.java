@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import freemarker.template.Configuration;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.GenericApplicationContext;
@@ -66,7 +66,7 @@ public class FreeMarkerMacroTests {
 
 	private Configuration freeMarkerConfig;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.applicationContext.refresh();
 

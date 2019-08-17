@@ -19,8 +19,8 @@ package org.springframework.web.reactive.result.condition;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,7 +44,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
  */
 public class RequestMethodsRequestConditionTests {
 
-	// TODO: custom method, CORS pre-flight (see @Ignored)
+	// TODO: custom method, CORS pre-flight (see @Disabledd)
 
 	@Test
 	public void getMatchingCondition() throws Exception {
@@ -73,7 +73,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void getMatchingConditionWithCustomMethod() throws Exception {
 		ServerWebExchange exchange = getExchange("PROPFIND");
 		assertThat(new RequestMethodsRequestCondition().getMatchingCondition(exchange)).isNotNull();
@@ -81,7 +81,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void getMatchingConditionWithCorsPreFlight() throws Exception {
 		ServerWebExchange exchange = getExchange("OPTIONS");
 		exchange.getRequest().getHeaders().add("Origin", "https://example.com");

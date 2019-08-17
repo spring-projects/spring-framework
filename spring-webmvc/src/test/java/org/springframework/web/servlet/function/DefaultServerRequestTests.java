@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;

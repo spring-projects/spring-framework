@@ -18,8 +18,8 @@ package org.springframework.context.support;
 
 import java.io.FileNotFoundException;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -139,7 +139,7 @@ public class PropertyResourceConfigurerIntegrationTests {
 				ac::refresh);
 	}
 
-	@Ignore // this test was breaking after the 3.0 repackaging
+	@Disabled // this test was breaking after the 3.0 repackaging
 	@Test
 	public void testPropertyPlaceholderConfigurerWithAutowireByType() {
 //		StaticApplicationContext ac = new StaticApplicationContext();

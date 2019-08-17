@@ -20,8 +20,8 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -44,7 +44,7 @@ public class UrlBasedViewResolverTests {
 	private final UrlBasedViewResolver resolver = new UrlBasedViewResolver();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();

@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;

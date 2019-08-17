@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -46,7 +46,7 @@ public class ServletWebRequestTests {
 	private ServletWebRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();

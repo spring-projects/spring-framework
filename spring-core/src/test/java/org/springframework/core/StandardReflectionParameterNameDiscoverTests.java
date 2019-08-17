@@ -17,8 +17,8 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StandardReflectionParameterNameDiscoverTests {
 	private ParameterNameDiscoverer parameterNameDiscoverer;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		parameterNameDiscoverer = new StandardReflectionParameterNameDiscoverer();
 	}

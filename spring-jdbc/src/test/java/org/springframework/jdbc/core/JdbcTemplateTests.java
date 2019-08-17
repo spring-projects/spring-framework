@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -89,7 +89,7 @@ public class JdbcTemplateTests {
 	private CallableStatement callableStatement;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.connection = mock(Connection.class);
 		this.dataSource = mock(DataSource.class);

@@ -16,15 +16,11 @@
 
 package org.springframework.test.context.jdbc.merging;
 
-import java.util.List;
-
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.AbstractTransactionalTests;
 import org.springframework.test.context.jdbc.EmptyDatabaseConfig;
 import org.springframework.test.context.jdbc.SqlMergeMode;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for tests involving {@link SqlMergeMode @SqlMergeMode}.
@@ -34,11 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-abstract class AbstractSqlMergeModeTests extends AbstractTransactionalJUnit4SpringContextTests {
-
-	protected void assertUsers(String... expectedUsers) {
-		List<String> actualUsers = super.jdbcTemplate.queryForList("select name from user", String.class);
-		assertThat(actualUsers).containsExactlyInAnyOrder(expectedUsers);
-	}
+abstract class AbstractSqlMergeModeTests extends AbstractTransactionalTests {
 
 }

@@ -16,8 +16,8 @@
 
 package org.springframework.web.method.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 
@@ -47,7 +47,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	private MethodParameter stringType;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.integerType = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);

@@ -19,7 +19,7 @@ package org.springframework.web.context;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;

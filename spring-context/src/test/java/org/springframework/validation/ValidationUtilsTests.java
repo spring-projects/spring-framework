@@ -16,7 +16,7 @@
 
 package org.springframework.validation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;

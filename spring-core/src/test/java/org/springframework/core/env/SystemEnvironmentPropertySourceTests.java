@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +41,7 @@ public class SystemEnvironmentPropertySourceTests {
 	private PropertySource<?> ps;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		envMap = new HashMap<>();
 		ps = new SystemEnvironmentPropertySource("sysEnv", envMap);

@@ -19,7 +19,7 @@ package org.springframework.context.i18n;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

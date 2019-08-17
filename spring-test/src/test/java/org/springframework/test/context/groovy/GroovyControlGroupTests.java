@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.groovy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericGroovyApplicationContext;
@@ -38,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-public class GroovyControlGroupTests {
+class GroovyControlGroupTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void verifyScriptUsingGenericGroovyApplicationContext() {
+	void verifyScriptUsingGenericGroovyApplicationContext() {
 		ApplicationContext ctx = new GenericGroovyApplicationContext(getClass(), "context.groovy");
 
 		String foo = ctx.getBean("foo", String.class);

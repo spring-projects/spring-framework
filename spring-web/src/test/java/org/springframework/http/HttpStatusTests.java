@@ -19,8 +19,8 @@ package org.springframework.http;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +32,7 @@ public class HttpStatusTests {
 	private Map<Integer, String> statusCodes = new LinkedHashMap<>();
 
 
-	@Before
+	@BeforeEach
 	public void createStatusCodes() {
 		statusCodes.put(100, "CONTINUE");
 		statusCodes.put(101, "SWITCHING_PROTOCOLS");

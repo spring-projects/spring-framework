@@ -16,9 +16,9 @@
 
 package org.springframework.context.annotation.scope;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
@@ -57,7 +57,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	private ServletRequestAttributes newRequestAttributesWithSession;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MockHttpServletRequest oldRequestWithSession = new MockHttpServletRequest();
 		oldRequestWithSession.setSession(new MockHttpSession());
@@ -68,7 +68,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		this.newRequestAttributesWithSession = new ServletRequestAttributes(newRequestWithSession);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		RequestContextHolder.resetRequestAttributes();
 	}

@@ -16,7 +16,7 @@
 
 package org.springframework.aop.target.dynamic;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;

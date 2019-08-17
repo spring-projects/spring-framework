@@ -27,8 +27,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.XmlContent;
 
@@ -45,7 +45,7 @@ public class StaxResultTests {
 
 	private XMLOutputFactory inputFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		transformer = transformerFactory.newTransformer();

@@ -18,8 +18,8 @@ package org.springframework.test.web.client.match;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -40,7 +40,7 @@ public class ContentRequestMatchersTests {
 	private MockClientHttpRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.request = new MockClientHttpRequest();
 	}

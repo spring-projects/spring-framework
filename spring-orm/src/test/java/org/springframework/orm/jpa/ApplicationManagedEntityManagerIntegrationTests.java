@@ -22,7 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.orm.jpa.domain.Person;
 

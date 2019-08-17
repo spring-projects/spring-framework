@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.jdbc.merging;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
@@ -36,23 +36,23 @@ import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.OVERR
  */
 @Sql({ "../recreate-schema.sql", "../data-add-catbert.sql" })
 @SqlMergeMode(MERGE)
-public class ClassLevelMergeSqlMergeModeTests extends AbstractSqlMergeModeTests {
+class ClassLevelMergeSqlMergeModeTests extends AbstractSqlMergeModeTests {
 
 	@Test
-	public void classLevelScripts() {
+	void classLevelScripts() {
 		assertUsers("Catbert");
 	}
 
 	@Test
 	@Sql("../data-add-dogbert.sql")
-	public void merged() {
+	void merged() {
 		assertUsers("Catbert", "Dogbert");
 	}
 
 	@Test
 	@Sql({ "../recreate-schema.sql", "../data.sql", "../data-add-dogbert.sql", "../data-add-catbert.sql" })
 	@SqlMergeMode(OVERRIDE)
-	public void overridden() {
+	void overridden() {
 		assertUsers("Dilbert", "Dogbert", "Catbert");
 	}
 

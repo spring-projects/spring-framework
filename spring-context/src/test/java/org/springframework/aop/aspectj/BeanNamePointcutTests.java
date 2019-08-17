@@ -19,8 +19,8 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
@@ -54,7 +54,7 @@ public class BeanNamePointcutTests {
 	private ClassPathXmlApplicationContext ctx;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean1 = (ITestBean) ctx.getBean("testBean1");

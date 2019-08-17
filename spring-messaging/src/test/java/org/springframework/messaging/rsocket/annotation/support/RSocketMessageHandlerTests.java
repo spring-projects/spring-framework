@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.rsocket.frame.FrameType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;

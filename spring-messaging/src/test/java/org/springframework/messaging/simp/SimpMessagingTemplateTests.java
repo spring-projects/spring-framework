@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -49,7 +49,7 @@ public class SimpMessagingTemplateTests {
 	private StubMessageChannel messageChannel;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.messagingTemplate = new SimpMessagingTemplate(this.messageChannel);

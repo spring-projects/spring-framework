@@ -16,19 +16,18 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.io.IOException;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.Test;
+
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	@Override
 	protected RouterFunction<?> routerFunction() {
@@ -37,8 +36,10 @@ public class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionInt
 				.andRoute(RequestPredicates.all(), request -> ServerResponse.ok().body("BAR"));
 	}
 
-	@Test
-	public void invalidHttpMethod() throws IOException {
+	@ParameterizedHttpServerTest
+	void invalidHttpMethod(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		OkHttpClient client = new OkHttpClient();
 
 		Request request = new Request.Builder()

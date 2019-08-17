@@ -43,11 +43,11 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.assertj.core.api.AbstractAssert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
@@ -68,7 +68,7 @@ import static org.mockito.Mockito.verify;
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("rawtypes")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResolvableTypeTests {
 
 	@Captor

@@ -19,7 +19,7 @@ package org.springframework.core.serializer;
 import java.io.NotSerializableException;
 import java.io.Serializable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.serializer.support.DeserializingConverter;
 import org.springframework.core.serializer.support.SerializationFailedException;

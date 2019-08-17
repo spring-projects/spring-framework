@@ -16,7 +16,7 @@
 
 package org.springframework.cache;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 

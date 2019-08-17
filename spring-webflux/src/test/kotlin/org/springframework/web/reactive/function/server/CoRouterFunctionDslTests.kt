@@ -16,7 +16,8 @@
 
 package org.springframework.web.reactive.function.server
 
-import org.junit.Test
+import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
@@ -119,9 +120,15 @@ class CoRouterFunctionDslTests {
 				.verifyComplete()
 	}
 
-	@Test(expected = IllegalStateException::class)
+	@Test
 	fun emptyRouter() {
-		router { }
+		try {
+			router { }
+			fail("should have thrown an IllegalStateException")
+		}
+		catch (e: IllegalStateException) {
+			// expected
+		}
 	}
 
 

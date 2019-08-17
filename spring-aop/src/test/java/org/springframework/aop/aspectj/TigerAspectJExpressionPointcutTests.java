@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
 
@@ -44,7 +44,7 @@ public class TigerAspectJExpressionPointcutTests {
 	private final Map<String, Method> methodsOnHasGeneric = new HashMap<>();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		// Assumes no overloading

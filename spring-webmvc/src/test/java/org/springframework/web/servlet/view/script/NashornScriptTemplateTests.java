@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,7 @@ public class NashornScriptTemplateTests {
 	private ServletContext servletContext;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
 		this.servletContext = new MockServletContext();

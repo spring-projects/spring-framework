@@ -31,11 +31,11 @@ import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -70,7 +70,7 @@ public class RSocketBufferLeakTests {
 	private static RSocketRequester requester;
 
 
-	@BeforeClass
+	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
 
@@ -93,20 +93,20 @@ public class RSocketBufferLeakTests {
 				.block();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownOnce() {
 		requester.rsocket().dispose();
 		server.dispose();
 	}
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		getLeakAwareNettyDataBufferFactory().reset();
 		payloadInterceptor.reset();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws InterruptedException {
 		getLeakAwareNettyDataBufferFactory().checkForLeaks(Duration.ofSeconds(5));
 		payloadInterceptor.checkForLeaks();

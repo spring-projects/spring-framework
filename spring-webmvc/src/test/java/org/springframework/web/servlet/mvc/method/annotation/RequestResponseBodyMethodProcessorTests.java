@@ -29,8 +29,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -102,7 +102,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private MethodParameter returnTypeString;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		container = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest();

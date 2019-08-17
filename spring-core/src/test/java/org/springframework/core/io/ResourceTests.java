@@ -27,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
 
@@ -218,7 +218,8 @@ public class ResourceTests {
 		assertThat(relative).isEqualTo(new UrlResource("file:dir/subdir"));
 	}
 
-	@Ignore @Test // this test is quite slow. TODO: re-enable with JUnit categories
+	@Disabled
+	@Test // this test is quite slow. TODO: re-enable with JUnit categories
 	public void testNonFileResourceExists() throws Exception {
 		Resource resource = new UrlResource("https://www.springframework.org");
 		assertThat(resource.exists()).isTrue();

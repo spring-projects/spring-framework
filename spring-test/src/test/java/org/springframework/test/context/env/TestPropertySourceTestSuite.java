@@ -36,7 +36,7 @@ import org.springframework.test.context.TestPropertySource;
  * @since 5.2
  */
 @RunWith(JUnitPlatform.class)
-@IncludeEngines("junit-vintage")
+@IncludeEngines("junit-jupiter")
 @SelectPackages("org.springframework.test.context.env")
 @IncludeClassNamePatterns(".*Tests$")
 @UseTechnicalNames

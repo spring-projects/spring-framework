@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;

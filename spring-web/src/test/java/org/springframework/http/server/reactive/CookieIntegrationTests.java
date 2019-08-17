@@ -21,15 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Rossen Stoyanchev
  */
-@RunWith(Parameterized.class)
 public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final CookieHandler cookieHandler = new CookieHandler();
@@ -49,8 +46,10 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 	}
 
 
-	@Test
-	public void basicTest() throws Exception {
+	@ParameterizedHttpServerTest
+	public void basicTest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + port);
 		String header = "SID=31d4d96e407aad42; lang=en-US";
 		ResponseEntity<Void> response = new RestTemplate().exchange(

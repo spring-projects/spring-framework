@@ -18,8 +18,8 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -55,7 +55,7 @@ public class CookieValueMethodArgumentResolverTests {
 	private MethodParameter cookieMonoParameter;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

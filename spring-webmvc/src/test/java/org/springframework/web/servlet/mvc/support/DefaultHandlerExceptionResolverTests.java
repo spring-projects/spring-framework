@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.support;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -59,7 +59,7 @@ public class DefaultHandlerExceptionResolverTests {
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
 	}

@@ -19,8 +19,8 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -42,7 +42,7 @@ public class StringHttpMessageConverterTests {
 	private MockHttpOutputMessage outputMessage;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.converter = new StringHttpMessageConverter();
 		this.outputMessage = new MockHttpOutputMessage();

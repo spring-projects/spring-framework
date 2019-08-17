@@ -16,8 +16,8 @@
 
 package org.springframework.aop.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
@@ -45,7 +45,7 @@ public class NameMatchMethodPointcutTests {
 	/**
 	 * Create an empty pointcut, populating instance variables.
 	 */
-	@Before
+	@BeforeEach
 	public void setup() {
 		ProxyFactory pf = new ProxyFactory(new SerializablePerson());
 		nop = new SerializableNopInterceptor();

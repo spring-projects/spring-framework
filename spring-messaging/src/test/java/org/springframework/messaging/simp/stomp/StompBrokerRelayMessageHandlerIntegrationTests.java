@@ -28,11 +28,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,11 +55,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class StompBrokerRelayMessageHandlerIntegrationTests {
-
-	@Rule
-	public final TestName testName = new TestName();
 
 	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandlerIntegrationTests.class);
 
@@ -77,9 +74,10 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	private int port;
 
 
-	@Before
-	public void setup() throws Exception {
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	public void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
+
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
 		this.responseHandler = new TestMessageHandler();
@@ -114,7 +112,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
-	@After
+	@AfterEach
 	public void stop() throws Exception {
 		try {
 			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
@@ -133,6 +131,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
 		this.activeMQBroker.addShutdownHook(new Runnable() {
+			@Override
 			public void run() {
 				latch.countDown();
 			}

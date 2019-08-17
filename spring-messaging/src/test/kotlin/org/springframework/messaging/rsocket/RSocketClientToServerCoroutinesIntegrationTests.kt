@@ -26,9 +26,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -194,7 +194,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		private lateinit var requester: RSocketRequester
 
 
-		@BeforeClass
+		@BeforeAll
 		@JvmStatic
 		fun setupOnce() {
 			context = AnnotationConfigApplicationContext(ServerConfig::class.java)
@@ -214,7 +214,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 					.block()!!
 		}
 
-		@AfterClass
+		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
 			requester.rsocket().dispose()

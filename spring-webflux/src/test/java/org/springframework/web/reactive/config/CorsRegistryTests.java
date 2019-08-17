@@ -19,7 +19,7 @@ package org.springframework.web.reactive.config;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.cors.CorsConfiguration;
 

@@ -18,7 +18,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.sql.Types;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.JdbcUtils;

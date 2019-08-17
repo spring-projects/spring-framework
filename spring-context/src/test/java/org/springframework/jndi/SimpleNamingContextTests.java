@@ -33,7 +33,7 @@ import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.mock.jndi.SimpleNamingContext;
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;

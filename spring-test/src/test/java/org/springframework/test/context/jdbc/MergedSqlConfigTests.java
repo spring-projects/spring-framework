@@ -18,7 +18,7 @@ package org.springframework.test.context.jdbc;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -39,17 +39,17 @@ import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.IS
  * @author Sam Brannen
  * @since 4.1
  */
-public class MergedSqlConfigTests {
+class MergedSqlConfigTests {
 
 	@Test
-	public void nullLocalSqlConfig() {
+	void nullLocalSqlConfig() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new MergedSqlConfig(null, getClass()))
 			.withMessage("Local @SqlConfig must not be null");
 	}
 
 	@Test
-	public void nullTestClass() {
+	void nullTestClass() {
 		SqlConfig sqlConfig = GlobalConfigClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -58,7 +58,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithEmptyCommentPrefix() throws Exception {
+	void localConfigWithEmptyCommentPrefix() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithEmptyCommentPrefix");
 		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
 
@@ -68,7 +68,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithEmptyCommentPrefixes() throws Exception {
+	void localConfigWithEmptyCommentPrefixes() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithEmptyCommentPrefixes");
 		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
 
@@ -78,7 +78,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithDuplicatedCommentPrefixes() throws Exception {
+	void localConfigWithDuplicatedCommentPrefixes() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithDuplicatedCommentPrefixes");
 		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
 
@@ -88,7 +88,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithDefaults() throws Exception {
+	void localConfigWithDefaults() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithDefaults");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -96,7 +96,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithCustomValues() throws Exception {
+	void localConfigWithCustomValues() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithCustomValues");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -116,7 +116,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithCustomCommentPrefixes() throws Exception {
+	void localConfigWithCustomCommentPrefixes() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithCustomCommentPrefixes");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -126,7 +126,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithMultipleCommentPrefixes() throws Exception {
+	void localConfigWithMultipleCommentPrefixes() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithMultipleCommentPrefixes");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -136,7 +136,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithContinueOnError() throws Exception {
+	void localConfigWithContinueOnError() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithContinueOnError");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -146,7 +146,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void localConfigWithIgnoreFailedDrops() throws Exception {
+	void localConfigWithIgnoreFailedDrops() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithIgnoreFailedDrops");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
@@ -156,7 +156,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithEmptyCommentPrefix() throws Exception {
+	void globalConfigWithEmptyCommentPrefix() throws Exception {
 		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -165,7 +165,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithEmptyCommentPrefixes() throws Exception {
+	void globalConfigWithEmptyCommentPrefixes() throws Exception {
 		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -174,7 +174,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithDuplicatedCommentPrefixes() throws Exception {
+	void globalConfigWithDuplicatedCommentPrefixes() throws Exception {
 		SqlConfig sqlConfig = GlobalConfigWithWithDuplicatedCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -183,7 +183,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithDefaults() throws Exception {
+	void globalConfigWithDefaults() throws Exception {
 		Method method = GlobalConfigWithDefaultsClass.class.getMethod("globalConfigMethod");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigWithDefaultsClass.class);
@@ -191,7 +191,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfig() throws Exception {
+	void globalConfig() throws Exception {
 		Method method = GlobalConfigClass.class.getMethod("globalConfigMethod");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
@@ -211,7 +211,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithLocalOverrides() throws Exception {
+	void globalConfigWithLocalOverrides() throws Exception {
 		Method method = GlobalConfigClass.class.getMethod("globalConfigWithLocalOverridesMethod");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
@@ -231,7 +231,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
+	void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
 		Class<?> testClass = GlobalConfigWithPrefixClass.class;
 
 		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefix");
@@ -248,7 +248,7 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
+	void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
 		Class<?> testClass = GlobalConfigWithPrefixesClass.class;
 
 		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefixes");

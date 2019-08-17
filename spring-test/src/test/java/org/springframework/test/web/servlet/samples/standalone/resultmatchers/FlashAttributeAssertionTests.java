@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.net.URL;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,7 +46,7 @@ public class FlashAttributeAssertionTests {
 	private MockMvc mockMvc;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mockMvc = standaloneSetup(new PersonController())
 				.alwaysExpect(status().isFound())

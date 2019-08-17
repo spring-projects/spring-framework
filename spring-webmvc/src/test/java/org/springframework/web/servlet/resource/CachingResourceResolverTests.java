@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.cache.Cache;
@@ -47,7 +47,7 @@ public class CachingResourceResolverTests {
 	private List<Resource> locations;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.cache = new ConcurrentMapCache("resourceCache");

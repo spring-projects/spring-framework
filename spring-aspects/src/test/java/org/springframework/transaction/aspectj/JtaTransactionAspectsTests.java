@@ -19,15 +19,15 @@ package org.springframework.transaction.aspectj;
 import java.io.IOException;
 import javax.transaction.Transactional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,14 +37,14 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
 /**
  * @author Stephane Nicoll
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = JtaTransactionAspectsTests.Config.class)
 public class JtaTransactionAspectsTests {
 
 	@Autowired
 	private CallCountingTransactionManager txManager;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.txManager.clear();
 	}

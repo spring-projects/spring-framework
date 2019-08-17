@@ -25,12 +25,12 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import org.springframework.util.FileCopyUtils;
 
@@ -66,10 +66,6 @@ public class PathResourceTests {
 	private static String platformPath(String string) {
 		return string.replace('/', File.separatorChar);
 	}
-
-
-	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 
 	@Test
@@ -270,15 +266,15 @@ public class PathResourceTests {
 	}
 
 	@Test
-	public void outputStream() throws IOException {
-		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
+	public void outputStream(@TempDir Path temporaryFolder) throws IOException {
+		PathResource resource = new PathResource(temporaryFolder.resolve("test"));
 		FileCopyUtils.copy("test".getBytes(StandardCharsets.UTF_8), resource.getOutputStream());
 		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
 
 	@Test
-	public void doesNotExistOutputStream() throws IOException {
-		File file = temporaryFolder.newFile("test");
+	public void doesNotExistOutputStream(@TempDir Path temporaryFolder) throws IOException {
+		File file = temporaryFolder.resolve("test").toFile();
 		file.delete();
 		PathResource resource = new PathResource(file.toPath());
 		FileCopyUtils.copy("test".getBytes(), resource.getOutputStream());
@@ -329,8 +325,10 @@ public class PathResourceTests {
 	}
 
 	@Test
-	public void getWritableChannel() throws IOException {
-		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
+	public void getWritableChannel(@TempDir Path temporaryFolder) throws IOException {
+		Path testPath = temporaryFolder.resolve("test");
+		Files.createFile(testPath);
+		PathResource resource = new PathResource(testPath);
 		ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
 		WritableByteChannel channel = null;
 		try {

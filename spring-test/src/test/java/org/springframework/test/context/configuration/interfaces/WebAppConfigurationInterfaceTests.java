@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,15 +29,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.3
  */
-@RunWith(SpringRunner.class)
-public class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
+@ExtendWith(SpringExtension.class)
+class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
 
 	@Autowired
 	WebApplicationContext wac;
 
 
 	@Test
-	public void wacLoaded() {
+	void wacLoaded() {
 		assertThat(wac).isNotNull();
 	}
 

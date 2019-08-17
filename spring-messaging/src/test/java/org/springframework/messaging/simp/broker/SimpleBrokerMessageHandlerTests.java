@@ -21,13 +21,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
 public class SimpleBrokerMessageHandlerTests {
 
@@ -80,7 +80,7 @@ public class SimpleBrokerMessageHandlerTests {
 	ArgumentCaptor<Message<?>> messageCaptor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messageHandler = new SimpleBrokerMessageHandler(
 				this.clientInChannel, this.clientOutChannel, this.brokerChannel, Collections.emptyList());

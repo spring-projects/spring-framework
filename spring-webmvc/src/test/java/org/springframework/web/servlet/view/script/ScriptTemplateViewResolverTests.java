@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.view.script;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 

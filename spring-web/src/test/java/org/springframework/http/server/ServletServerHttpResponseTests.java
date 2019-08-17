@@ -20,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,7 +43,7 @@ public class ServletServerHttpResponseTests {
 	private MockHttpServletResponse mockResponse;
 
 
-	@Before
+	@BeforeEach
 	public void create() throws Exception {
 		mockResponse = new MockHttpServletResponse();
 		response = new ServletServerHttpResponse(mockResponse);

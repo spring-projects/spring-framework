@@ -20,16 +20,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.gargoylesoftware.htmlunit.util.Cookie;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.tests.Assume;
@@ -50,10 +47,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@WebAppConfiguration
-public class MockMvcHtmlUnitDriverBuilderTests {
+@SpringJUnitWebConfig
+class MockMvcHtmlUnitDriverBuilderTests {
 
 	private static final String EXPECTED_BODY = "MockMvcHtmlUnitDriverBuilderTests mvc";
 
@@ -65,26 +60,26 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	private HtmlUnitDriver driver;
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
 
 	@Test
-	public void webAppContextSetupNull() {
+	void webAppContextSetupNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null));
 	}
 
 	@Test
-	public void mockMvcSetupNull() {
+	void mockMvcSetupNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null));
 	}
 
 	@Test
-	public void mockMvcSetupWithCustomDriverDelegate() throws Exception {
+	void mockMvcSetupWithCustomDriverDelegate() throws Exception {
 		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
@@ -93,7 +88,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	public void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
+	void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed("http://localhost/test");
@@ -101,19 +96,19 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	public void javaScriptEnabledByDefault() {
+	void javaScriptEnabledByDefault() {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 		assertThat(this.driver.isJavascriptEnabled()).isTrue();
 	}
 
 	@Test
-	public void javaScriptDisabled() {
+	void javaScriptDisabled() {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
 		assertThat(this.driver.isJavascriptEnabled()).isFalse();
 	}
 
 	@Test // SPR-14066
-	public void cookieManagerShared() throws Exception {
+	void cookieManagerShared() throws Exception {
 		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc)

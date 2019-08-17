@@ -19,7 +19,7 @@ package org.springframework.jms.annotation;
 import javax.jms.JMSException;
 import javax.jms.MessageListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

@@ -18,8 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -27,6 +25,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,15 +35,16 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private WebClient webClient;
 
 
-	@Before
-	public void setup() throws Exception {
-		super.setup();
+	@Override
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
 		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
@@ -57,8 +57,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 
 
-	@Test
-	public void sseAsString() {
+	@ParameterizedHttpServerTest
+	void sseAsString(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
@@ -72,8 +74,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.verify(Duration.ofSeconds(5L));
 	}
 
-	@Test
-	public void sseAsPerson() {
+	@ParameterizedHttpServerTest
+	void sseAsPerson(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
@@ -87,8 +91,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.verify(Duration.ofSeconds(5L));
 	}
 
-	@Test
-	public void sseAsEvent() {
+	@ParameterizedHttpServerTest
+	void sseAsEvent(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)

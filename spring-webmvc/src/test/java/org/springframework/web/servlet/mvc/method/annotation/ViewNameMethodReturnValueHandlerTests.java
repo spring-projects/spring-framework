@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,7 +44,7 @@ public class ViewNameMethodReturnValueHandlerTests {
 	private MethodParameter param;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws NoSuchMethodException {
 		this.handler = new ViewNameMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();

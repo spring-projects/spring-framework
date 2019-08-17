@@ -23,9 +23,9 @@ import java.lang.annotation.Target;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -63,7 +63,7 @@ public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 	private ServletRequestAttributes newRequestAttributesWithSession;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.oldRequestAttributes = new ServletRequestAttributes(new MockHttpServletRequest());
 		this.newRequestAttributes = new ServletRequestAttributes(new MockHttpServletRequest());
@@ -77,7 +77,7 @@ public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 		this.newRequestAttributesWithSession = new ServletRequestAttributes(newRequestWithSession);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		RequestContextHolder.setRequestAttributes(null);
 	}

@@ -19,7 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.beans.PropertyEditorSupport;
 import java.util.StringTokenizer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyBatchUpdateException;

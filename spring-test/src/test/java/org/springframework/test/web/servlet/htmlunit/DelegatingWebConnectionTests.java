@@ -26,11 +26,11 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rob Winch
  * @since 4.2
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DelegatingWebConnectionTests {
 
 	private DelegatingWebConnection webConnection;
@@ -76,7 +76,7 @@ public class DelegatingWebConnectionTests {
 	private WebConnection connection2;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
 		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.emptyList());

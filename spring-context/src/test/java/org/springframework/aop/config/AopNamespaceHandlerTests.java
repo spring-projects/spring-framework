@@ -17,8 +17,8 @@
 package org.springframework.aop.config;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
@@ -42,7 +42,7 @@ public class AopNamespaceHandlerTests {
 	private ApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.context = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 	}

@@ -19,8 +19,6 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.time.Duration;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -30,16 +28,16 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * @author Stephane Maldini
  * @since 5.0
  */
-public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final Scheduler asyncGroup = Schedulers.parallel();
 
@@ -51,12 +49,12 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		return new AsyncHandler();
 	}
 
-	@Test
-	@Ignore  // TODO: fragile due to socket failures
-	public void basicTest() throws Exception {
+	@ParameterizedHttpServerTest
+	void basicTest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + port);
-		ResponseEntity<String> response = new RestTemplate().exchange(
-				RequestEntity.get(url).build(), String.class);
+		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url).build(), String.class);
 
 		assertThat(response.getBody()).isEqualTo("hello");
 	}

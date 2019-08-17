@@ -22,9 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -69,7 +69,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -94,7 +94,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
-	@After
+	@AfterEach
 	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}

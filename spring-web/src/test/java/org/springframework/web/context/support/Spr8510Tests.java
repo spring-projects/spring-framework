@@ -18,7 +18,7 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContextEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.mock.web.test.MockServletContext;

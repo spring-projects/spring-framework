@@ -19,8 +19,8 @@ package org.springframework.core.codec;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
@@ -52,7 +52,7 @@ public class ResourceRegionEncoderTests  {
 	private LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.bufferFactory.checkForLeaks();
 	}

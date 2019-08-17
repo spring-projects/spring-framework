@@ -18,11 +18,9 @@ package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testng.ITestNGListener;
 import org.testng.TestNG;
 
@@ -43,7 +41,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.asser
 import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
 
 /**
- * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
+ * JUnit based integration test which verifies correct {@linkplain ContextCache
  * application context caching} in conjunction with Spring's TestNG support
  * and {@link DirtiesContext @DirtiesContext} at the class level.
  *
@@ -53,15 +51,14 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(JUnit4.class)
-public class ClassLevelDirtiesContextTestNGTests {
+class ClassLevelDirtiesContextTestNGTests {
 
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
 
-	@BeforeClass
-	public static void verifyInitialCacheState() {
+	@BeforeAll
+	static void verifyInitialCacheState() {
 		resetContextCache();
 		// Reset static counters in case tests are run multiple times in a test suite --
 		// for example, via JUnit's @Suite.
@@ -71,7 +68,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 	}
 
 	@Test
-	public void verifyDirtiesContextBehavior() throws Exception {
+	void verifyDirtiesContextBehavior() throws Exception {
 
 		assertBehaviorForCleanTestCase();
 
@@ -158,8 +155,8 @@ public class ClassLevelDirtiesContextTestNGTests {
 		assertContextCacheStatistics("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
 	}
 
-	@AfterClass
-	public static void verifyFinalCacheState() {
+	@AfterAll
+	static void verifyFinalCacheState() {
 		assertContextCacheStatistics("AfterClass", 0, cacheHits.get(), cacheMisses.get());
 	}
 

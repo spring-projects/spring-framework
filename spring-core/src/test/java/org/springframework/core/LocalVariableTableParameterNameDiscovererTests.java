@@ -22,8 +22,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 
@@ -203,7 +203,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 		assertThat(names.length).isEqualTo(0);
 	}
 
-	@Ignore("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")
+	@Disabled("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")
 	@Test
 	public void classesWithoutDebugSymbols() throws Exception {
 		// JDK classes don't have debug information (usually)

@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.mock.env.MockPropertySource;
@@ -44,7 +44,7 @@ public class PropertySourcesPropertyResolverTests {
 	private ConfigurablePropertyResolver propertyResolver;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		propertySources = new MutablePropertySources();
 		propertyResolver = new PropertySourcesPropertyResolver(propertySources);

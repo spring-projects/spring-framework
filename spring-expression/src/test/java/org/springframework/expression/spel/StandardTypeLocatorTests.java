@@ -17,7 +17,7 @@ package org.springframework.expression.spel;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.support.StandardTypeLocator;

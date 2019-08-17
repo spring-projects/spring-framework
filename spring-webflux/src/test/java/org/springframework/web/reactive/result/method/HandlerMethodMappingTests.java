@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -55,7 +55,7 @@ public class HandlerMethodMappingTests {
 	private Method method2;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.mapping = new MyHandlerMethodMapping();
 		this.handler = new MyHandler();

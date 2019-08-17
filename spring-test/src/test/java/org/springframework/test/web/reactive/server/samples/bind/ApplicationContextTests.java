@@ -16,8 +16,8 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +39,7 @@ public class ApplicationContextTests {
 	private WebTestClient client;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

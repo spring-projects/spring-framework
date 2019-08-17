@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;

@@ -20,8 +20,8 @@ import java.time.Duration;
 import java.util.Optional;
 
 import io.reactivex.Single;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -55,7 +55,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 			.named("handleWithRequestAttribute").build();
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

@@ -25,8 +25,8 @@ import java.util.List;
 
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import org.springframework.http.MediaType;
@@ -44,7 +44,7 @@ public class RssChannelHttpMessageConverterTests {
 	private RssChannelHttpMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		converter = new RssChannelHttpMessageConverter();
 	}

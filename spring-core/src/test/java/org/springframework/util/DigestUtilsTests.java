@@ -20,8 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +34,7 @@ public class DigestUtilsTests {
 	private byte[] bytes;
 
 
-	@Before
+	@BeforeEach
 	public void createBytes() throws UnsupportedEncodingException {
 		bytes = "Hello World".getBytes("UTF-8");
 	}

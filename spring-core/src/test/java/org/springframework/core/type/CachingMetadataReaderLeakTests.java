@@ -18,7 +18,7 @@ package org.springframework.core.type;
 
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

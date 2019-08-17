@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -87,7 +87,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());

@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.env.repeatable.LocalInlinedPropertyOverridesInheritedAndMetaInlinedPropertiesTests.Key1InlinedTestProperty;
@@ -36,10 +36,10 @@ import org.springframework.test.context.env.repeatable.LocalInlinedPropertyOverr
  */
 @TestPropertySource(properties = "key1 = local")
 @Key1InlinedTestProperty
-public class LocalInlinedPropertyOverridesInheritedAndMetaInlinedPropertiesTests extends AbstractClassWithTestProperty {
+class LocalInlinedPropertyOverridesInheritedAndMetaInlinedPropertiesTests extends AbstractClassWithTestProperty {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("key1", "local");
 	}
 

@@ -23,9 +23,9 @@ import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
@@ -57,7 +57,7 @@ public class RSocketClientToServerIntegrationTests {
 	private static RSocketRequester requester;
 
 
-	@BeforeClass
+	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
 
@@ -79,7 +79,7 @@ public class RSocketClientToServerIntegrationTests {
 				.block();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownOnce() {
 		requester.rsocket().dispose();
 		server.dispose();

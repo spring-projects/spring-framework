@@ -24,8 +24,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -53,7 +53,7 @@ public class UtilNamespaceHandlerTests {
 	private CollectingReaderEventListener listener = new CollectingReaderEventListener();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);

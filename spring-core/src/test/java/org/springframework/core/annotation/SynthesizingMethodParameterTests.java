@@ -18,8 +18,8 @@ package org.springframework.core.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 
@@ -41,7 +41,7 @@ public class SynthesizingMethodParameterTests {
 	private SynthesizingMethodParameter intReturnType;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws NoSuchMethodException {
 		method = getClass().getMethod("method", String.class, Long.TYPE);
 		stringParameter = new SynthesizingMethodParameter(method, 0);

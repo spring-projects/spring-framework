@@ -32,8 +32,8 @@ import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -297,7 +297,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		final ProtectionDomain empty = new ProtectionDomain(null,

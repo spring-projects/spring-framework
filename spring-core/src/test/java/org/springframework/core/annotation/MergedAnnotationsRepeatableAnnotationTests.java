@@ -27,7 +27,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
 
 import org.assertj.core.api.ThrowableTypeAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 

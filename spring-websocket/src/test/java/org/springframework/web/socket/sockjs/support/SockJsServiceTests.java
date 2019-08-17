@@ -22,8 +22,8 @@ import java.util.Collections;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -57,7 +57,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setup();
 		this.service = new TestSockJsService(new ThreadPoolTaskScheduler());

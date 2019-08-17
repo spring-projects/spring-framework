@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("deprecation")
-public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
+public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
 			new org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory());

@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -51,7 +51,7 @@ public class DeferredResultReturnValueHandlerTests {
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.handler = new DeferredResultMethodReturnValueHandler();
 		this.request = new MockHttpServletRequest();

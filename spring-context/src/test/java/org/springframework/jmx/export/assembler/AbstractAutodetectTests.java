@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.export.assembler;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.JmxTestBean;
 

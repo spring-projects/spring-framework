@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -29,7 +29,7 @@ import org.springframework.expression.MethodExecutor;
 
 public class Spr7538Tests {
 
-	@Ignore @Test
+	@Disabled @Test
 	public void repro() throws Exception {
 		AlwaysTrueReleaseStrategy target = new AlwaysTrueReleaseStrategy();
 		BeanFactoryTypeConverter converter = new BeanFactoryTypeConverter();

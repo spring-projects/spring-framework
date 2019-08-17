@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.jms.StubTextMessage;

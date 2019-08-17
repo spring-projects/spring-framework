@@ -24,11 +24,9 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -43,27 +41,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * HTTPS-specific integration test for {@link ServerHttpRequest}.
+ *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class ServerHttpsRequestIntegrationTests {
+class ServerHttpsRequestIntegrationTests {
+
+	private final HttpServer server = new ReactorHttpsServer();
 
 	private int port;
 
-	@Parameterized.Parameter(0)
-	public HttpServer server;
-
 	private RestTemplate restTemplate;
 
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][]{
-				{new ReactorHttpsServer()},
-		};
-	}
 
-	@Before
-	public void setup() throws Exception {
+	@BeforeEach
+	void startServer() throws Exception {
 		this.server.setHandler(new CheckRequestHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -82,21 +74,21 @@ public class ServerHttpsRequestIntegrationTests {
 		this.restTemplate = new RestTemplate(requestFactory);
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void stopServer() {
 		this.server.stop();
-		this.port = 0;
 	}
 
 	@Test
-	public void checkUri() throws Exception {
+	void checkUri() throws Exception {
 		URI url = new URI("https://localhost:" + port + "/foo?param=bar");
 		RequestEntity<Void> request = RequestEntity.post(url).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-	public static class CheckRequestHandler implements HttpHandler {
+
+	private static class CheckRequestHandler implements HttpHandler {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors
+ * Copyright 2002-2019 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.jdbc.core.namedparam
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
 import java.sql.JDBCType
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * Tests for [MapSqlParameterSource] Kotlin extensions.
@@ -50,4 +51,5 @@ class MapSqlParameterSourceExtensionsTests {
 		assertEquals(JDBCType.INTEGER.vendorTypeNumber, source.getSqlType("foo"))
 		assertEquals("INT", source.getTypeName("foo"))
 	}
+
 }

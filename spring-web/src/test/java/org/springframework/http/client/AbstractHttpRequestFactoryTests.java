@@ -21,9 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,12 +40,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Arjen Poutsma
  */
-public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
+public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTests {
 
 	protected ClientHttpRequestFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public final void createFactory() throws Exception {
 		factory = createRequestFactory();
 		if (factory instanceof InitializingBean) {
@@ -53,7 +53,7 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		}
 	}
 
-	@After
+	@AfterEach
 	public final void destroyFactory() throws Exception {
 		if (factory instanceof DisposableBean) {
 			((DisposableBean) factory).destroy();

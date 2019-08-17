@@ -16,13 +16,14 @@
 
 package org.springframework.jdbc.core
 
+import java.sql.*
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
-import java.sql.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 
 /**
  * Mock object based tests for [JdbcOperations] Kotlin extensions

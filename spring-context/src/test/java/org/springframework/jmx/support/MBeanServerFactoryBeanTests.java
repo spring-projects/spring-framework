@@ -21,9 +21,9 @@ import java.util.List;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.MBeanTestUtils;
 
@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MBeanServerFactoryBeanTests {
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}

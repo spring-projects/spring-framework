@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;

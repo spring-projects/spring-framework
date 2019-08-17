@@ -18,8 +18,8 @@ package org.springframework.test.context.hierarchies.web;
 
 import javax.servlet.ServletContext;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.hierarchies.web.ControllerIntegrationTests.AppConfig;
 import org.springframework.test.context.hierarchies.web.ControllerIntegrationTests.WebConfig;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -39,20 +39,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.2.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextHierarchy({
 	//
 	@ContextConfiguration(name = "root", classes = AppConfig.class),
 	@ContextConfiguration(name = "dispatcher", classes = WebConfig.class) //
 })
-public class ControllerIntegrationTests {
+class ControllerIntegrationTests {
 
 	@Configuration
 	static class AppConfig {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo";
 		}
 	}
@@ -61,7 +61,7 @@ public class ControllerIntegrationTests {
 	static class WebConfig {
 
 		@Bean
-		public String bar() {
+		String bar() {
 			return "bar";
 		}
 	}
@@ -80,7 +80,7 @@ public class ControllerIntegrationTests {
 
 
 	@Test
-	public void verifyRootWacSupport() {
+	void verifyRootWacSupport() {
 		assertThat(foo).isEqualTo("foo");
 		assertThat(bar).isEqualTo("bar");
 

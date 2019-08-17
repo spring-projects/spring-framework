@@ -18,8 +18,8 @@ package org.springframework.test.context.hierarchies.web;
 
 import javax.servlet.ServletContext;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -49,22 +49,22 @@ public class DispatcherWacRootWacEarTests extends RootWacEarTests {
 	private String dispatcher;
 
 
-	@Ignore("Superseded by verifyDispatcherWacConfig()")
+	@Disabled("Superseded by verifyDispatcherWacConfig()")
 	@Test
 	@Override
-	public void verifyEarConfig() {
+	void verifyEarConfig() {
 		/* no-op */
 	}
 
-	@Ignore("Superseded by verifyDispatcherWacConfig()")
+	@Disabled("Superseded by verifyDispatcherWacConfig()")
 	@Test
 	@Override
-	public void verifyRootWacConfig() {
+	void verifyRootWacConfig() {
 		/* no-op */
 	}
 
 	@Test
-	public void verifyDispatcherWacConfig() {
+	void verifyDispatcherWacConfig() {
 		ApplicationContext parent = wac.getParent();
 		assertThat(parent).isNotNull();
 		boolean condition = parent instanceof WebApplicationContext;

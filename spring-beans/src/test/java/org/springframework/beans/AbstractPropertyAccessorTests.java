@@ -36,7 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -76,14 +76,12 @@ import static org.assertj.core.api.Assertions.within;
  */
 public abstract class AbstractPropertyAccessorTests {
 
-
 	protected abstract AbstractPropertyAccessor createAccessor(Object target);
 
 
 	@Test
 	public void createWithNullTarget() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				createAccessor(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> createAccessor(null));
 	}
 
 	@Test
@@ -114,8 +112,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isReadablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isReadableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isReadableProperty(null));
 	}
 
 	@Test
@@ -129,8 +126,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isWritablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isWritableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isWritableProperty(null));
 	}
 
 	@Test
@@ -519,7 +515,6 @@ public abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getSpouse() == null).as("spouse is now null").isTrue();
 	}
 
-
 	@Test
 	public void setIndexedPropertyIgnored() {
 		MutablePropertyValues values = new MutablePropertyValues();
@@ -692,7 +687,6 @@ public abstract class AbstractPropertyAccessorTests {
 
 		assertThat(target.getMyPrimitiveDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
 		assertThat(target.getMyDouble().doubleValue()).isCloseTo(Double.MAX_VALUE, within(0.001));
-
 	}
 
 	@Test
@@ -1104,7 +1098,6 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("object", array);
 		assertThat(target.getObject()).isEqualTo(array);
 	}
-
 
 	@Test
 	public void setCollectionProperty() {
@@ -1917,7 +1910,6 @@ public abstract class AbstractPropertyAccessorTests {
 	private static class DifferentTestBean extends TestBean {
 		// class to test naming of beans in a error message
 	}
-
 
 	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {

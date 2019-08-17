@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 

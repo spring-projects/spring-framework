@@ -22,7 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.Types;
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.SqlParameter;
 

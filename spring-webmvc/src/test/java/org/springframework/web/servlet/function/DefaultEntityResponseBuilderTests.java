@@ -27,7 +27,7 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;

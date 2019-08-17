@@ -6,8 +6,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -136,4 +136,5 @@ class RSocketRequesterExtensionsTests {
 			assertEquals(listOf("foo", "bar"), responseSpec.retrieveFlux<String>().collectList().block())
 		}
 	}
+
 }

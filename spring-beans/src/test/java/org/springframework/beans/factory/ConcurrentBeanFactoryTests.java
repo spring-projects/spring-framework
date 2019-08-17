@@ -27,8 +27,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -71,7 +71,7 @@ public class ConcurrentBeanFactoryTests {
 	private Throwable ex;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 

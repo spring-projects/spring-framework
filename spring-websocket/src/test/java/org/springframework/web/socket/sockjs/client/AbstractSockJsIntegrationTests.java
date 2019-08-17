@@ -39,12 +39,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.Timeout;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -81,9 +81,6 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public abstract class AbstractSockJsIntegrationTests {
 
-	@Rule
-	public final TestName testName = new TestName();
-
 	protected Log logger = LogFactory.getLog(getClass());
 
 
@@ -98,15 +95,16 @@ public abstract class AbstractSockJsIntegrationTests {
 	private String baseUrl;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void performanceTestGroupAssumption() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
 
 
-	@Before
-	public void setup() throws Exception {
-		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	public void setup(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up '" + testInfo.getTestMethod().get().getName() + "'");
+
 		this.testFilter = new TestFilter();
 
 		this.wac = new AnnotationConfigWebApplicationContext();
@@ -123,7 +121,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.baseUrl = "http://localhost:" + this.server.getPort();
 	}
 
-	@After
+	@AfterEach
 	public void teardown() throws Exception {
 		try {
 			this.sockJsClient.stop();
@@ -249,7 +247,8 @@ public abstract class AbstractSockJsIntegrationTests {
 		handler.awaitMessage(message, 5000);
 	}
 
-	@Test(timeout = 5000)
+	@Test
+	@Timeout(5)
 	public void fallbackAfterConnectTimeout() throws Exception {
 		TestClientHandler clientHandler = new TestClientHandler();
 		this.testFilter.sleepDelayMap.put("/xhr_streaming", 10000L);

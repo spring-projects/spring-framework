@@ -20,8 +20,8 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -60,7 +60,7 @@ public class DomContentHandlerTests {
 	private DocumentBuilder documentBuilder;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")  // on JDK 9
 	public void setUp() throws Exception {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;
@@ -41,10 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 5.0
  * @see org.springframework.test.context.junit4.concurrency.SpringJUnit4ConcurrencyTests
  */
-public class TestContextConcurrencyTests {
+class TestContextConcurrencyTests {
 
-	private static Set<String> expectedMethods = stream(TestCase.class.getDeclaredMethods()).map(
-		Method::getName).collect(toCollection(TreeSet::new));
+	private static Set<String> expectedMethods = stream(TestCase.class.getDeclaredMethods())
+			.map(Method::getName)
+			.collect(toCollection(TreeSet::new));
 
 	private static final Set<String> actualMethods = Collections.synchronizedSet(new TreeSet<>());
 
@@ -52,7 +53,7 @@ public class TestContextConcurrencyTests {
 
 
 	@Test
-	public void invokeTestContextManagerFromConcurrentThreads() {
+	void invokeTestContextManagerFromConcurrentThreads() {
 		TestContextManager tcm = new TestContextManager(TestCase.class);
 
 		// Run the actual test several times in order to increase the chance of threads

@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -51,7 +51,7 @@ public class HandlerExecutionChainTests {
 	private AsyncHandlerInterceptor interceptor3;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.response= new MockHttpServletResponse() ;

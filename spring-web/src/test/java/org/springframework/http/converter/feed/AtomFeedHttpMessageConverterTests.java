@@ -25,8 +25,8 @@ import java.util.List;
 
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.ElementSelectors;
@@ -47,7 +47,7 @@ public class AtomFeedHttpMessageConverterTests {
 	private AtomFeedHttpMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		converter = new AtomFeedHttpMessageConverter();
 	}

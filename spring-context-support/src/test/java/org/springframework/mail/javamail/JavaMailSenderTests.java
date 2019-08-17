@@ -35,7 +35,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;

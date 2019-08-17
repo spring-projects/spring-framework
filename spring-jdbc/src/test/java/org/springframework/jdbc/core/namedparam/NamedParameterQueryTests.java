@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -61,7 +61,7 @@ public class NamedParameterQueryTests {
 	private NamedParameterJdbcTemplate template;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);
@@ -76,7 +76,7 @@ public class NamedParameterQueryTests {
 		given(preparedStatement.executeQuery()).willReturn(resultSet);
 	}
 
-	@After
+	@AfterEach
 	public void verifyClose() throws Exception {
 		verify(preparedStatement).close();
 		verify(resultSet).close();

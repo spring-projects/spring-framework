@@ -30,8 +30,8 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -62,7 +62,7 @@ public class MockHttpServletRequestBuilderTests {
 	private MockHttpServletRequestBuilder builder;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
 	}

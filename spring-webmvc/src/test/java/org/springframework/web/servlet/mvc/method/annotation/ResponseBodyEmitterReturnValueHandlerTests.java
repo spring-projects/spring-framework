@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 
@@ -69,7 +69,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 
 		List<HttpMessageConverter<?>> converters = Arrays.asList(

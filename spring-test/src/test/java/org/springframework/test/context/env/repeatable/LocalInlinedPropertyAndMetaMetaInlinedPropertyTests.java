@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -30,10 +30,10 @@ import org.springframework.test.context.TestPropertySource;
  */
 @TestPropertySource(properties = "key1 = local")
 @MetaComposedTestProperty
-public class LocalInlinedPropertyAndMetaMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
+class LocalInlinedPropertyAndMetaMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
-	public void test() {
+	void test() {
 		assertEnvironmentValue("key1", "local");
 		assertEnvironmentValue("enigma", "meta meta");
 	}

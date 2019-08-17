@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap.Entry;
@@ -487,7 +487,7 @@ public class ConcurrentReferenceHashMapTests {
 	}
 
 	@Test
-	@Ignore("Intended for use during development only")
+	@Disabled("Intended for use during development only")
 	public void shouldBeFasterThanSynchronizedMap() throws InterruptedException {
 		Map<Integer, WeakReference<String>> synchronizedMap = Collections.synchronizedMap(new WeakHashMap<Integer, WeakReference<String>>());
 		StopWatch mapTime = timeMultiThreaded("SynchronizedMap", synchronizedMap, v -> new WeakReference<>(String.valueOf(v)));

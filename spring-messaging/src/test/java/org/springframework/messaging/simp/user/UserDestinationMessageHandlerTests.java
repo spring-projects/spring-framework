@@ -18,8 +18,8 @@ package org.springframework.messaging.simp.user;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -54,7 +54,7 @@ public class UserDestinationMessageHandlerTests {
 	private SubscribableChannel brokerChannel;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registry = mock(SimpUserRegistry.class);
 		this.brokerChannel = mock(SubscribableChannel.class);

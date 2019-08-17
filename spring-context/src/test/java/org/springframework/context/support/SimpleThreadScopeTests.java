@@ -19,7 +19,7 @@ package org.springframework.context.support;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;

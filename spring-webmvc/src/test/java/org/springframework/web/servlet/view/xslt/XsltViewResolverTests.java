@@ -18,7 +18,7 @@ package org.springframework.web.servlet.view.xslt;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ClassUtils;

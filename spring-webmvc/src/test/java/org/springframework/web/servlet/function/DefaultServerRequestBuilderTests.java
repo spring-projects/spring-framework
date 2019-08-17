@@ -22,7 +22,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;

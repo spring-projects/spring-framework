@@ -16,7 +16,7 @@
 
 package org.springframework.core.env;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 

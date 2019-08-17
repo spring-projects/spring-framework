@@ -21,7 +21,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

@@ -26,11 +26,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -46,23 +45,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for {@link ReactorNettyTcpStompClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ReactorNettyTcpStompClientTests {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyTcpStompClientTests.class);
 
-	@Rule
-	public final TestName testName = new TestName();
 
 	private BrokerService activeMQBroker;
 
 	private ReactorNettyTcpStompClient client;
 
 
-	@Before
-	public void setUp() throws Exception {
-
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	public void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		int port = SocketUtils.findAvailableTcpPort(61613);
 
@@ -83,7 +80,7 @@ public class ReactorNettyTcpStompClientTests {
 		this.client.setTaskScheduler(taskScheduler);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		try {
 			this.client.shutdown();

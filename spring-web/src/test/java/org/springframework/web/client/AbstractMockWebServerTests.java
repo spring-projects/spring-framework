@@ -26,8 +26,8 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.http.MediaType;
 
@@ -42,7 +42,7 @@ import static org.springframework.http.MediaType.MULTIPART_MIXED;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class AbstractMockWebServerTestCase {
+abstract class AbstractMockWebServerTests {
 
 	protected static final MediaType MULTIPART_RELATED = new MediaType("multipart", "related");
 
@@ -58,16 +58,16 @@ public class AbstractMockWebServerTestCase {
 	protected String baseUrl;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		this.server.setDispatcher(new TestDispatcher());
 		this.server.start();
 		this.port = this.server.getPort();
 		this.baseUrl = "http://localhost:" + this.port;
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		this.server.shutdown();
 	}
 

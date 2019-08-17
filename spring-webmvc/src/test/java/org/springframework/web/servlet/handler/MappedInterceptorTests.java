@@ -20,8 +20,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -45,7 +45,7 @@ public class MappedInterceptorTests {
 
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.interceptor = new LocaleChangeInterceptor();
 	}

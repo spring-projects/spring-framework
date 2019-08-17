@@ -79,6 +79,7 @@ dependencies {
 	testCompile("io.projectreactor.netty:reactor-netty")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1")
 	testRuntime("org.junit.jupiter:junit-jupiter-engine")
+	testRuntime("org.junit.vintage:junit-vintage-engine")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")

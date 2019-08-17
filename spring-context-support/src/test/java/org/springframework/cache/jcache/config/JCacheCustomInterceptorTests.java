@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -53,14 +53,14 @@ public class JCacheCustomInterceptorTests {
 	protected Cache exceptionCache;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 		cs = ctx.getBean("service", JCacheableService.class);
 		exceptionCache = ctx.getBean("exceptionCache", Cache.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (ctx != null) {
 			ctx.close();

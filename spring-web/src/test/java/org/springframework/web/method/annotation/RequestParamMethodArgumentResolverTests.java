@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.Part;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.MethodParameter;

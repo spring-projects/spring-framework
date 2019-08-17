@@ -31,8 +31,8 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.reactivex.Single;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -82,7 +82,7 @@ public class BodyInsertersTests {
 	private Map<String, Object> hints;
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));

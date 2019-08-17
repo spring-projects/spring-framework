@@ -19,8 +19,8 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -59,7 +59,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	private Method handleMethod;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

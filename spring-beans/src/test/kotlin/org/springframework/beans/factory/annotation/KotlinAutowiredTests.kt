@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.annotation
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.tests.sample.beans.TestBean
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.BeanCreationException
 import org.springframework.tests.sample.beans.Colour
 
@@ -183,7 +184,7 @@ class KotlinAutowiredTests {
 		bf.getBean(KotlinBeanWithPrimaryAndSecondaryConstructors::class.java)
 	}
 
-	@Test(expected = BeanCreationException::class)  // SPR-16022
+	@Test  // SPR-16022
 	fun `No autowiring with primary and secondary non annotated constructors`() {
 		val bf = DefaultListableBeanFactory()
 		val bpp = AutowiredAnnotationBeanPostProcessor()
@@ -196,8 +197,14 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("testBean", tb)
 		val colour = Colour.BLUE
 		bf.registerSingleton("colour", colour)
-
-		bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+		
+		try {
+			bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+			fail("should have thrown a BeanCreationException")			
+		}
+		catch (e: BeanCreationException) {
+			// expected
+		}
 	}
 
 

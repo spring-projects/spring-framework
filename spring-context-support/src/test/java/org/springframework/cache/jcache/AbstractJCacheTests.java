@@ -19,8 +19,8 @@ package org.springframework.cache.jcache;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -34,11 +34,18 @@ import org.springframework.cache.support.SimpleCacheManager;
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public abstract class AbstractJCacheTests {
 
-	@Rule
-	public final TestName name = new TestName();
+	protected String cacheName;
+
+
+	@BeforeEach
+	void trackCacheName(TestInfo testInfo) {
+		this.cacheName = testInfo.getTestMethod().get().getName();
+	}
+
 
 	protected final CacheManager cacheManager = createSimpleCacheManager("default", "simpleCache");
 

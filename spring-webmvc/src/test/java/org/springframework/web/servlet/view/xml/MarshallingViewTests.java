@@ -23,8 +23,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -51,7 +51,7 @@ public class MarshallingViewTests {
 	private MarshallingView view;
 
 
-	@Before
+	@BeforeEach
 	public void createView() throws Exception {
 		marshallerMock = mock(Marshaller.class);
 		view = new MarshallingView(marshallerMock);

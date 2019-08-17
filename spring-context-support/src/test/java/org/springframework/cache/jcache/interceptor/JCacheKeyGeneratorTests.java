@@ -23,8 +23,8 @@ import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -51,7 +51,7 @@ public class JCacheKeyGeneratorTests {
 
 	private Cache cache;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.keyGenerator = context.getBean(TestKeyGenerator.class);

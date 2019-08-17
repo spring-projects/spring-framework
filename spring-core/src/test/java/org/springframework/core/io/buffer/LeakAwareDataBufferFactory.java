@@ -27,16 +27,16 @@ import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the {@code DataBufferFactory} interface that keep track of memory leaks.
- * Useful for unit tests that handle data buffers. Simply inherit from
+ * Implementation of the {@code DataBufferFactory} interface that keeps track of
+ * memory leaks.
+ * <p>Useful for unit tests that handle data buffers. Simply inherit from
  * {@link AbstractLeakCheckingTestCase} or call {@link #checkForLeaks()} in
- * a JUnit {@link After} method yourself, and any buffers have not been released will result in an
- * {@link AssertionError}.
+ * a JUnit <em>after</em> method yourself, and any buffers that have not been
+ * released will result in an {@link AssertionError}.
  *
  * @author Arjen Poutsma
  * @see LeakAwareDataBufferFactory
@@ -71,7 +71,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	/**
 	 * Checks whether all of the data buffers allocated by this factory have also been released.
-	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit {@link After}
+	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit <em>after</em>
 	 * method.
 	 */
 	public void checkForLeaks() {

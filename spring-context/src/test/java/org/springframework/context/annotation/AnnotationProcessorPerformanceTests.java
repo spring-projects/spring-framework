@@ -24,8 +24,8 @@ import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.awaitility.Awaitility;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -50,7 +50,7 @@ public class AnnotationProcessorPerformanceTests {
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void commonAssumptions() {
 		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);

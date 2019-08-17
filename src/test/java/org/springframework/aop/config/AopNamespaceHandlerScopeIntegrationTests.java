@@ -16,8 +16,8 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -52,7 +52,7 @@ public class AopNamespaceHandlerScopeIntegrationTests {
 	private ApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.setConfigLocations(CONTEXT);

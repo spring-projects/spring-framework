@@ -19,7 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 

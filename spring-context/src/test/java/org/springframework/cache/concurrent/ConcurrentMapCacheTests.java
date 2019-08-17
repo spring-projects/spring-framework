@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
@@ -48,7 +48,7 @@ public class ConcurrentMapCacheTests
 	protected ConcurrentMapCache cacheNoNull;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);

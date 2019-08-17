@@ -25,8 +25,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
@@ -62,7 +62,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	private ContentHandler standardContentHandler;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")  // on JDK 9
 	public void setUp() throws Exception {
 		inputFactory = XMLInputFactory.newInstance();

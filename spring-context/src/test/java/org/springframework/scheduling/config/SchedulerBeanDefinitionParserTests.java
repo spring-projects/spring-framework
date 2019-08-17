@@ -16,8 +16,8 @@
 
 package org.springframework.scheduling.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
@@ -34,7 +34,7 @@ public class SchedulerBeanDefinitionParserTests {
 	private ApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"schedulerContext.xml", SchedulerBeanDefinitionParserTests.class);
