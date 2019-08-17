@@ -4,6 +4,7 @@
 
 	<!-- global -->
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
@@ -70,6 +71,8 @@
 	<suppress files="HeaderAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
 	<suppress files="StatusAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
 	<suppress files="JsonPathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit4" checks="SpringJUnit5"/>
+	<suppress files="ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.*WacTests|JUnit4SpringContextWebTests"  checks="SpringJUnit5"/>
 
 	<!-- spring-web -->
 	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />

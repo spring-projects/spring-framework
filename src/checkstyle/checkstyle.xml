@@ -211,5 +211,6 @@
 		</module>
 		<module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck" />
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck" />
+		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check" />
  	</module>
 </module>
