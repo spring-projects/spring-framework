@@ -58,7 +58,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
@@ -163,8 +163,8 @@ public abstract class AbstractAopProxyTests {
 	 * CGLIB this will be slow or will run out of memory.
 	 */
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testManyProxies() {
-		Assume.group(TestGroup.PERFORMANCE);
 		int howMany = 10000;
 		StopWatch sw = new StopWatch();
 		sw.start("Create " + howMany + " proxies");

@@ -49,7 +49,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.BooleanTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
@@ -62,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.
@@ -960,8 +961,8 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void setPrimitiveArrayPropertyLargeMatching() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
 
 		PrimitiveArrayBean target = new PrimitiveArrayBean();

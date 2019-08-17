@@ -44,8 +44,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -55,6 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link GenericConversionService}.
@@ -343,8 +343,8 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testPerformance2() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		List<String> source = new LinkedList<>();
@@ -368,8 +368,8 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testPerformance3() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		Map<String, String> source = new HashMap<>();
@@ -884,6 +884,7 @@ public class GenericConversionServiceTests {
 
 	private static class StringToMyEnumInterfaceConverterFactory implements ConverterFactory<String, MyEnumInterface> {
 
+		@Override
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public <T extends MyEnumInterface> Converter<String, T> getConverter(Class<T> targetType) {
 			return new StringToMyEnumInterfaceConverter(targetType);
@@ -897,6 +898,7 @@ public class GenericConversionServiceTests {
 				this.enumType = enumType;
 			}
 
+			@Override
 			public T convert(String source) {
 				for (T value : enumType.getEnumConstants()) {
 					if (value.getCode().equals(source)) {
@@ -911,6 +913,7 @@ public class GenericConversionServiceTests {
 
 	private static class StringToMyEnumBaseInterfaceConverterFactory implements ConverterFactory<String, MyEnumBaseInterface> {
 
+		@Override
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public <T extends MyEnumBaseInterface> Converter<String, T> getConverter(Class<T> targetType) {
 			return new StringToMyEnumBaseInterfaceConverter(targetType);
@@ -924,6 +927,7 @@ public class GenericConversionServiceTests {
 				this.enumType = enumType;
 			}
 
+			@Override
 			public T convert(String source) {
 				for (T value : enumType.getEnumConstants()) {
 					if (value.getBaseCode().equals(source)) {

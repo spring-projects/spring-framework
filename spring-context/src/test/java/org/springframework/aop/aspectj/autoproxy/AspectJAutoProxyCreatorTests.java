@@ -52,6 +52,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.INestedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -112,8 +113,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
@@ -134,8 +135,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
@@ -156,8 +157,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		GenericApplicationContext ac = new GenericApplicationContext();

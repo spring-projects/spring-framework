@@ -33,11 +33,12 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class AnnotationProcessorPerformanceTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
@@ -52,7 +54,6 @@ public class AnnotationProcessorPerformanceTests {
 
 	@BeforeAll
 	public static void commonAssumptions() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 	}
 

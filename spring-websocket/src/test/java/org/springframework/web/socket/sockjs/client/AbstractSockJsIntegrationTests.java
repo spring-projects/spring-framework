@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -52,8 +51,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TextMessage;
@@ -70,6 +68,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Abstract base class for integration tests using the
@@ -79,6 +78,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@EnabledForTestGroups(PERFORMANCE)
 public abstract class AbstractSockJsIntegrationTests {
 
 	protected Log logger = LogFactory.getLog(getClass());
@@ -93,12 +93,6 @@ public abstract class AbstractSockJsIntegrationTests {
 	private TestFilter testFilter;
 
 	private String baseUrl;
-
-
-	@BeforeAll
-	public static void performanceTestGroupAssumption() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-	}
 
 
 	@BeforeEach

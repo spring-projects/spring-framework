@@ -37,18 +37,18 @@ import static org.springframework.tests.TestGroup.PERFORMANCE;
  * @author Sam Brannen
  * @since 5.0
  */
-public class AssumeTests {
+class AssumeTests {
 
 	private String originalTestGroups;
 
 
 	@BeforeEach
-	public void trackOriginalTestGroups() {
+	void trackOriginalTestGroups() {
 		this.originalTestGroups = System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY);
 	}
 
 	@AfterEach
-	public void restoreOriginalTestGroups() {
+	void restoreOriginalTestGroups() {
 		if (this.originalTestGroups != null) {
 			setTestGroups(this.originalTestGroups);
 		}
@@ -58,21 +58,24 @@ public class AssumeTests {
 	}
 
 	@Test
-	public void assumeGroupWithNoActiveTestGroups() {
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithNoActiveTestGroups() {
 		setTestGroups("");
 		Assume.group(LONG_RUNNING);
 		fail("assumption should have failed");
 	}
 
 	@Test
-	public void assumeGroupWithNoMatchingActiveTestGroup() {
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithNoMatchingActiveTestGroup() {
 		setTestGroups(PERFORMANCE, CI);
 		Assume.group(LONG_RUNNING);
 		fail("assumption should have failed");
 	}
 
 	@Test
-	public void assumeGroupWithMatchingActiveTestGroup() {
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithMatchingActiveTestGroup() {
 		setTestGroups(LONG_RUNNING);
 		try {
 			Assume.group(LONG_RUNNING);
@@ -83,15 +86,16 @@ public class AssumeTests {
 	}
 
 	@Test
-	public void assumeGroupWithBogusActiveTestGroup() {
+	void assumeGroupWithBogusActiveTestGroup() {
 		assertBogusActiveTestGroupBehavior("bogus");
 	}
 
 	@Test
-	public void assumeGroupWithAllMinusBogusActiveTestGroup() {
+	void assumeGroupWithAllMinusBogusActiveTestGroup() {
 		assertBogusActiveTestGroupBehavior("all-bogus");
 	}
 
+	@SuppressWarnings("deprecation")
 	private void assertBogusActiveTestGroupBehavior(String testGroups) {
 		// Should result in something similar to the following:
 		//

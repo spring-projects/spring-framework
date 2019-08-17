@@ -52,13 +52,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -245,8 +246,8 @@ public class ApplicationContextExpressionTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void prototypeCreationIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);

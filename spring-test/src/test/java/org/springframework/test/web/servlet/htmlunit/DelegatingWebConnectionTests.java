@@ -36,13 +36,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Unit and integration tests for {@link DelegatingWebConnection}.
@@ -124,9 +124,8 @@ public class DelegatingWebConnectionTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void verifyExampleInClassLevelJavadoc() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup().build();

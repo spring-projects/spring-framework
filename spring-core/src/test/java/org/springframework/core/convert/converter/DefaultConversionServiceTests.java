@@ -51,13 +51,13 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link DefaultConversionService}.
@@ -966,8 +966,8 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testPerformance1() {
-		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		for (int i = 0; i < 4000000; i++) {

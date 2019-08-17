@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.tests.Assume;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +45,7 @@ import static org.springframework.tests.TestResourceUtils.qualifiedResource;
  * @author Chris Beams
  * @since 10.03.2004
  */
+@EnabledForTestGroups(TestGroup.PERFORMANCE)
 public class ConcurrentBeanFactoryTests {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
@@ -73,8 +74,6 @@ public class ConcurrentBeanFactoryTests {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml"));

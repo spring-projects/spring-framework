@@ -27,12 +27,12 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Rob Harrop
@@ -326,9 +326,8 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void getUniqueDeclaredMethods_isFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		@SuppressWarnings("unused")
 		class C {
 			void m00() { } void m01() { } void m02() { } void m03() { } void m04() { }

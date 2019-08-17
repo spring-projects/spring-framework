@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 3.2
+ * @see EnabledForTestGroups @EnabledForTestGroups
  * @see #group(TestGroup)
  * @see #group(TestGroup, Executable)
  * @see TestGroup
@@ -56,7 +57,9 @@ public abstract class Assume {
 	 * Assume that a particular {@link TestGroup} is active.
 	 * @param group the group that must be active
 	 * @throws org.opentest4j.TestAbortedException if the assumption fails
+	 * @deprecated as of Spring Framework 5.2 in favor of {@link EnabledForTestGroups}
 	 */
+	@Deprecated
 	public static void group(TestGroup group) {
 		Set<TestGroup> testGroups = TestGroups.loadTestGroups();
 		assumeTrue(testGroups.contains(group),

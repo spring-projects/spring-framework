@@ -19,7 +19,6 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -32,8 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -42,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -53,20 +52,15 @@ import static org.mockito.Mockito.mock;
  * @since 3.1
  */
 @SuppressWarnings("resource")
+@EnabledForTestGroups(PERFORMANCE)
 class ScheduledAndTransactionalAnnotationIntegrationTests {
-
-	@BeforeAll
-	static void assumePerformanceTests() {
-		Assume.group(TestGroup.PERFORMANCE);
-	}
-
 
 	@Test
 	void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				ctx::refresh)
+		assertThatExceptionOfType(BeanCreationException.class)
+			.isThrownBy(ctx::refresh)
 			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IllegalStateException.class));
 	}
 
