@@ -143,7 +143,7 @@ configure(allprojects) { project ->
 		}
 		testCompile("org.mockito:mockito-junit-jupiter:3.0.0")
 		testCompile("io.mockk:mockk:1.9.3")
-		testCompile("org.hamcrest:hamcrest-all:1.3")
+		testCompile("org.hamcrest:hamcrest:2.1")
 		testCompile("org.assertj:assertj-core:3.13.1")
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntime("org.junit.platform:junit-platform-launcher")
