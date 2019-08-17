@@ -19,7 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -53,16 +53,16 @@ import static org.mockito.Mockito.mock;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-public class ScheduledAndTransactionalAnnotationIntegrationTests {
+class ScheduledAndTransactionalAnnotationIntegrationTests {
 
-	@BeforeEach
-	public void assumePerformanceTests() {
+	@BeforeAll
+	static void assumePerformanceTests() {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
 
 
 	@Test
-	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
+	void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
@@ -71,7 +71,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void succeedsWhenSubclassProxyAndScheduledMethodNotPresentOnInterface() throws InterruptedException {
+	void succeedsWhenSubclassProxyAndScheduledMethodNotPresentOnInterface() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, SubclassProxyTxConfig.class, RepoConfigA.class);
 		ctx.refresh();
@@ -86,7 +86,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void succeedsWhenJdkProxyAndScheduledMethodIsPresentOnInterface() throws InterruptedException {
+	void succeedsWhenJdkProxyAndScheduledMethodIsPresentOnInterface() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigB.class);
 		ctx.refresh();
@@ -101,7 +101,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void withAspectConfig() throws InterruptedException {
+	void withAspectConfig() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AspectConfig.class, MyRepositoryWithScheduledMethodImpl.class);
 		ctx.refresh();
@@ -130,7 +130,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	static class RepoConfigA {
 
 		@Bean
-		public MyRepository repository() {
+		MyRepository repository() {
 			return new MyRepositoryImpl();
 		}
 	}
@@ -140,7 +140,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	static class RepoConfigB {
 
 		@Bean
-		public MyRepositoryWithScheduledMethod repository() {
+		MyRepositoryWithScheduledMethod repository() {
 			return new MyRepositoryWithScheduledMethodImpl();
 		}
 	}
@@ -151,17 +151,17 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	static class Config {
 
 		@Bean
-		public PlatformTransactionManager txManager() {
+		PlatformTransactionManager txManager() {
 			return new CallCountingTransactionManager();
 		}
 
 		@Bean
-		public PersistenceExceptionTranslator peTranslator() {
+		PersistenceExceptionTranslator peTranslator() {
 			return mock(PersistenceExceptionTranslator.class);
 		}
 
 		@Bean
-		public static PersistenceExceptionTranslationPostProcessor peTranslationPostProcessor() {
+		static PersistenceExceptionTranslationPostProcessor peTranslationPostProcessor() {
 			return new PersistenceExceptionTranslationPostProcessor();
 		}
 	}
@@ -172,14 +172,14 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	static class AspectConfig {
 
 		@Bean
-		public static AnnotationAwareAspectJAutoProxyCreator autoProxyCreator() {
+		static AnnotationAwareAspectJAutoProxyCreator autoProxyCreator() {
 			AnnotationAwareAspectJAutoProxyCreator apc = new AnnotationAwareAspectJAutoProxyCreator();
 			apc.setProxyTargetClass(true);
 			return apc;
 		}
 
 		@Bean
-		public static MyAspect myAspect() {
+		static MyAspect myAspect() {
 			return new MyAspect();
 		}
 	}
