@@ -98,7 +98,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
 		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
-		Flux<WebSocketClient> f1 = Flux.fromArray(clients).concatMap(c -> Flux.just(c).repeat(servers.size()));
+		Flux<WebSocketClient> f1 = Flux.fromArray(clients).concatMap(c -> Flux.just(c).repeat(servers.size() - 1));
 		Flux<HttpServer> f2 = Flux.fromIterable(servers.keySet()).repeat(clients.length);
 		Flux<Class<?>> f3 = Flux.fromIterable(servers.values()).repeat(clients.length);
 
