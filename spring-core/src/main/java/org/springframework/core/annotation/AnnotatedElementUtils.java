@@ -830,6 +830,6 @@ public abstract class AnnotatedElementUtils {
 			return this.annotations.clone();
 		}
 
-	};
+	}
 
 }
