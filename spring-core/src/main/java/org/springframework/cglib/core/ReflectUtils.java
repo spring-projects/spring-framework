@@ -96,12 +96,8 @@ public class ReflectUtils {
 					}
 				}
 			});
-			classLoaderDefineClass = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					return ClassLoader.class.getDeclaredMethod("defineClass",
-							String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
-				}
-			});
+			classLoaderDefineClass = (Method) AccessController.doPrivileged((PrivilegedExceptionAction) () -> ClassLoader.class.getDeclaredMethod("defineClass",
+					String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class));
 			protectionDomain = getProtectionDomain(ReflectUtils.class);
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
@@ -160,11 +156,7 @@ public class ReflectUtils {
 		if (source == null) {
 			return null;
 		}
-		return (ProtectionDomain) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return source.getProtectionDomain();
-			}
-		});
+		return (ProtectionDomain) AccessController.doPrivileged((PrivilegedAction) () -> source.getProtectionDomain());
 	}
 
 	public static Type[] getExceptionTypes(Member member) {

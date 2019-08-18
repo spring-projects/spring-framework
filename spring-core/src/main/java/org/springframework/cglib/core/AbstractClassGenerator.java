@@ -87,17 +87,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 		 */
 		private final WeakReference<ClassLoader> classLoader;
 
-		private final Predicate uniqueNamePredicate = new Predicate() {
-			public boolean evaluate(Object name) {
-				return reservedClassNames.contains(name);
-			}
-		};
+		private final Predicate uniqueNamePredicate = name -> reservedClassNames.contains(name);
 
-		private static final Function<AbstractClassGenerator, Object> GET_KEY = new Function<AbstractClassGenerator, Object>() {
-			public Object apply(AbstractClassGenerator gen) {
-				return gen.key;
-			}
-		};
+		private static final Function<AbstractClassGenerator, Object> GET_KEY = gen -> gen.key;
 
 		public ClassLoaderData(ClassLoader classLoader) {
 			if (classLoader == null) {
@@ -105,11 +97,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 			}
 			this.classLoader = new WeakReference<ClassLoader>(classLoader);
 			Function<AbstractClassGenerator, Object> load =
-					new Function<AbstractClassGenerator, Object>() {
-						public Object apply(AbstractClassGenerator gen) {
-							Class klass = gen.generate(ClassLoaderData.this);
-							return gen.wrapCachedClass(klass);
-						}
+					gen -> {
+						Class klass = gen.generate(ClassLoaderData.this);
+						return gen.wrapCachedClass(klass);
 					};
 			generatedClasses = new LoadingCache<AbstractClassGenerator, Object, Object>(GET_KEY, load);
 		}

@@ -467,12 +467,12 @@ public class Enhancer extends AbstractClassGenerator {
 			callbackTypes = CallbackInfo.determineTypes(callbacks);
 		}
 		if (interfaces != null) {
-			for (int i = 0; i < interfaces.length; i++) {
-				if (interfaces[i] == null) {
+			for (Class anInterface : interfaces) {
+				if (anInterface == null) {
 					throw new IllegalStateException("Interfaces cannot be null");
 				}
-				if (!interfaces[i].isInterface()) {
-					throw new IllegalStateException(interfaces[i] + " is not an interface");
+				if (!anInterface.isInterface()) {
+					throw new IllegalStateException(anInterface + " is not an interface");
 				}
 			}
 		}
@@ -632,9 +632,9 @@ public class Enhancer extends AbstractClassGenerator {
 		ReflectUtils.addAllMethods(superclass, methods);
 		List target = (interfaceMethods != null) ? interfaceMethods : methods;
 		if (interfaces != null) {
-			for (int i = 0; i < interfaces.length; i++) {
-				if (interfaces[i] != Factory.class) {
-					ReflectUtils.addAllMethods(interfaces[i], target);
+			for (Class anInterface : interfaces) {
+				if (anInterface != Factory.class) {
+					ReflectUtils.addAllMethods(anInterface, target);
 				}
 			}
 		}

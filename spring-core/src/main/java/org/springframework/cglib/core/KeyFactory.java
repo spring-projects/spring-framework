@@ -98,11 +98,9 @@ abstract public class KeyFactory {
 			938313161, 1288102441, 1768288259};
 
 
-	public static final Customizer CLASS_BY_NAME = new Customizer() {
-		public void customize(CodeEmitter e, Type type) {
-			if (type.equals(Constants.TYPE_CLASS)) {
-				e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
-			}
+	public static final Customizer CLASS_BY_NAME = (e, type) -> {
+		if (type.equals(Constants.TYPE_CLASS)) {
+			e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
 		}
 	};
 
@@ -139,11 +137,7 @@ abstract public class KeyFactory {
 	 * It is recommended to have pre-processing method that would strip Objects and represent Classes as Strings
 	 */
 	@Deprecated
-	public static final Customizer OBJECT_BY_CLASS = new Customizer() {
-		public void customize(CodeEmitter e, Type type) {
-			e.invoke_virtual(Constants.TYPE_OBJECT, GET_CLASS);
-		}
-	};
+	public static final Customizer OBJECT_BY_CLASS = (e, type) -> e.invoke_virtual(Constants.TYPE_OBJECT, GET_CLASS);
 
 	protected KeyFactory() {
 	}
