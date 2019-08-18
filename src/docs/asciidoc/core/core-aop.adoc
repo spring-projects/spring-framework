@@ -3180,7 +3180,7 @@ following example shows:
 
 		public static void main(String[] args) {
 			ProxyFactory factory = new ProxyFactory(new SimplePojo());
-			factory.adddInterface(Pojo.class);
+			factory.addInterface(Pojo.class);
 			factory.addAdvice(new RetryAdvice());
 			factory.setExposeProxy(true);
 
@@ -3195,7 +3195,7 @@ following example shows:
 ----
 	fun main() {
 		val factory = ProxyFactory(SimplePojo())
-		factory.adddInterface(Pojo::class.java)
+		factory.addInterface(Pojo::class.java)
 		factory.addAdvice(RetryAdvice())
 		factory.isExposeProxy = true
 
