@@ -237,7 +237,7 @@ configure(rootProject) {
 
 	apply plugin: "groovy"
 	apply plugin: "io.spring.nohttp"
-	apply from: "${gradleScriptDir}/jdiff.gradle"
+	apply plugin: 'org.springframework.build.api-diff'
 	apply from: "${gradleScriptDir}/docs.gradle"
 
 	nohttp {
