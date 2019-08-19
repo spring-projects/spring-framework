@@ -54,66 +54,57 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-public class EnableTransactionManagementIntegrationTests {
+class EnableTransactionManagementIntegrationTests {
 
 	@Test
-	public void repositoryIsNotTxProxy() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class);
-		ctx.refresh();
+	void repositoryIsNotTxProxy() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
+
 		assertThat(isTxProxy(ctx.getBean(FooRepository.class))).isFalse();
 	}
 
 	@Test
-	public void repositoryIsTxProxy_withDefaultTxManagerName() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class, DefaultTxManagerNameConfig.class);
-		ctx.refresh();
+	void repositoryIsTxProxy_withDefaultTxManagerName() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, DefaultTxManagerNameConfig.class);
 
 		assertTxProxying(ctx);
 	}
 
 	@Test
-	public void repositoryIsTxProxy_withCustomTxManagerName() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class, CustomTxManagerNameConfig.class);
-		ctx.refresh();
+	void repositoryIsTxProxy_withCustomTxManagerName() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, CustomTxManagerNameConfig.class);
 
 		assertTxProxying(ctx);
 	}
 
 	@Test
-	public void repositoryIsTxProxy_withNonConventionalTxManagerName_fallsBackToByTypeLookup() {
+	void repositoryIsTxProxy_withNonConventionalTxManagerName_fallsBackToByTypeLookup() {
 		assertTxProxying(new AnnotationConfigApplicationContext(Config.class, NonConventionalTxManagerNameConfig.class));
 	}
 
 	@Test
-	public void repositoryIsClassBasedTxProxy() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class, ProxyTargetClassTxConfig.class);
-		ctx.refresh();
+	void repositoryIsClassBasedTxProxy() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, ProxyTargetClassTxConfig.class);
 
 		assertTxProxying(ctx);
 		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class))).isTrue();
 	}
 
 	@Test
-	public void repositoryUsesAspectJAdviceMode() {
+	void repositoryUsesAspectJAdviceMode() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, AspectJTxConfig.class);
 		// this test is a bit fragile, but gets the job done, proving that an
 		// attempt was made to look up the AJ aspect. It's due to classpath issues
 		// in .integration-tests that it's not found.
-		assertThatExceptionOfType(Exception.class).isThrownBy(
-				ctx::refresh)
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(ctx::refresh)
 			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 
 	@Test
-	public void implicitTxManager() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ImplicitTxManagerConfig.class);
-		ctx.refresh();
+	void implicitTxManager() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImplicitTxManagerConfig.class);
 
 		FooRepository fooRepository = ctx.getBean(FooRepository.class);
 		fooRepository.findAll();
@@ -125,10 +116,8 @@ public class EnableTransactionManagementIntegrationTests {
 	}
 
 	@Test
-	public void explicitTxManager() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ExplicitTxManagerConfig.class);
-		ctx.refresh();
+	void explicitTxManager() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ExplicitTxManagerConfig.class);
 
 		FooRepository fooRepository = ctx.getBean(FooRepository.class);
 		fooRepository.findAll();
@@ -145,10 +134,8 @@ public class EnableTransactionManagementIntegrationTests {
 	}
 
 	@Test
-	public void apcEscalation() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(EnableTxAndCachingConfig.class);
-		ctx.refresh();
+	void apcEscalation() {
+		new AnnotationConfigApplicationContext(EnableTxAndCachingConfig.class);
 	}
 
 

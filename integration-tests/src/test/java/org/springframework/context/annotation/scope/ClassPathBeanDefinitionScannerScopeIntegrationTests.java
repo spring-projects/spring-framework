@@ -45,7 +45,7 @@ import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLAS
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
+class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 	private static final String DEFAULT_NAME = "default";
 	private static final String MODIFIED_NAME = "modified";
@@ -58,7 +58,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		MockHttpServletRequest oldRequestWithSession = new MockHttpServletRequest();
 		oldRequestWithSession.setSession(new MockHttpSession());
 		this.oldRequestAttributesWithSession = new ServletRequestAttributes(oldRequestWithSession);
@@ -69,13 +69,13 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
 
 	@Test
-	public void singletonScopeWithNoProxy() {
+	void singletonScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(NO);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
@@ -96,7 +96,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void singletonScopeIgnoresProxyInterfaces() {
+	void singletonScopeIgnoresProxyInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(INTERFACES);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
@@ -117,7 +117,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void singletonScopeIgnoresProxyTargetClass() {
+	void singletonScopeIgnoresProxyTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(TARGET_CLASS);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
@@ -138,7 +138,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void requestScopeWithNoProxy() {
+	void requestScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(NO);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("request");
@@ -159,7 +159,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void requestScopeWithProxiedInterfaces() {
+	void requestScopeWithProxiedInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(INTERFACES);
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("request");
@@ -181,7 +181,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void requestScopeWithProxiedTargetClass() {
+	void requestScopeWithProxiedTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(TARGET_CLASS);
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("request");
@@ -203,7 +203,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void sessionScopeWithNoProxy() {
+	void sessionScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(NO);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("session");
@@ -224,7 +224,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void sessionScopeWithProxiedInterfaces() {
+	void sessionScopeWithProxiedInterfaces() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(INTERFACES);
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("session");
@@ -252,7 +252,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@Test
-	public void sessionScopeWithProxiedTargetClass() {
+	void sessionScopeWithProxiedTargetClass() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		ApplicationContext context = createContext(TARGET_CLASS);
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("session");
@@ -298,7 +298,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	static interface IScopedTestBean {
+	interface IScopedTestBean {
 
 		String getName();
 
@@ -323,7 +323,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	static interface AnotherScopeTestInterface {
+	interface AnotherScopeTestInterface {
 	}
 
 

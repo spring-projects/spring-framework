@@ -18,29 +18,26 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.MethodExecutor;
 
-public class Spr7538Tests {
+class Spr7538Tests {
 
-	@Disabled @Test
-	public void repro() throws Exception {
+	@Test
+	void repro() throws Exception {
 		AlwaysTrueReleaseStrategy target = new AlwaysTrueReleaseStrategy();
 		BeanFactoryTypeConverter converter = new BeanFactoryTypeConverter();
 
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setTypeConverter(converter);
 
-		List<Foo> arguments = new ArrayList<>();
-
-		// !!!! With the below line commented you'll get NPE. Uncomment and everything is OK!
-		//arguments.add(new Foo());
+		List<Foo> arguments = Collections.emptyList();
 
 		List<TypeDescriptor> paramDescriptors = new ArrayList<>();
 		Method method = AlwaysTrueReleaseStrategy.class.getMethod("checkCompleteness", List.class);
@@ -56,11 +53,11 @@ public class Spr7538Tests {
 		System.out.println("Result: " + result);
 	}
 
-	public static class AlwaysTrueReleaseStrategy {
+	static class AlwaysTrueReleaseStrategy {
 		public boolean checkCompleteness(List<Foo> messages) {
 			return true;
 		}
 	}
 
-	public static class Foo{}
+	static class Foo{}
 }

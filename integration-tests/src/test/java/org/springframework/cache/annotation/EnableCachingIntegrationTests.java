@@ -43,10 +43,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-public class EnableCachingIntegrationTests {
+class EnableCachingIntegrationTests {
 
 	@Test
-	public void repositoryIsClassBasedCacheProxy() {
+	void repositoryIsClassBasedCacheProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, ProxyTargetClassCachingConfig.class);
 		ctx.refresh();
@@ -56,7 +56,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
-	public void repositoryUsesAspectJAdviceMode() {
+	void repositoryUsesAspectJAdviceMode() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, AspectJCacheConfig.class);
 		// this test is a bit fragile, but gets the job done, proving that an

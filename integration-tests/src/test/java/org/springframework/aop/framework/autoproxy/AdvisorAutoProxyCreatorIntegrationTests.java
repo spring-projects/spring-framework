@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class AdvisorAutoProxyCreatorIntegrationTests {
+class AdvisorAutoProxyCreatorIntegrationTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorIntegrationTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -66,7 +66,7 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	public void testDefaultExclusionPrefix() throws Exception {
+	void testDefaultExclusionPrefix() throws Exception {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
 		assertThat(aapc.getAdvisorBeanNamePrefix()).isEqualTo((ADVISOR_APC_BEAN_NAME + DefaultAdvisorAutoProxyCreator.SEPARATOR));
 		assertThat(aapc.isUsePrefix()).isFalse();
@@ -76,21 +76,21 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	 * If no pointcuts match (no attrs) there should be proxying.
 	 */
 	@Test
-	public void testNoProxy() throws Exception {
+	void testNoProxy() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Object o = bf.getBean("noSetters");
 		assertThat(AopUtils.isAopProxy(o)).isFalse();
 	}
 
 	@Test
-	public void testTxIsProxied() throws Exception {
+	void testTxIsProxied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertThat(AopUtils.isAopProxy(test)).isTrue();
 	}
 
 	@Test
-	public void testRegexpApplied() throws Exception {
+	void testRegexpApplied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		MethodCounter counter = (MethodCounter) bf.getBean("countingAdvice");
@@ -100,7 +100,7 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	public void testTransactionAttributeOnMethod() throws Exception {
+	void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 
@@ -122,7 +122,7 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	 * Should not roll back on servlet exception.
 	 */
 	@Test
-	public void testRollbackRulesOnMethodCauseRollback() throws Exception {
+	void testRollbackRulesOnMethodCauseRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
@@ -148,7 +148,7 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	public void testRollbackRulesOnMethodPreventRollback() throws Exception {
+	void testRollbackRulesOnMethodPreventRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
@@ -166,7 +166,7 @@ public class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	public void testProgrammaticRollback() throws Exception {
+	void testProgrammaticRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 
 		Object bean = bf.getBean(TXMANAGER_BEAN_NAME);

@@ -16,23 +16,20 @@
 
 package org.springframework.aop.config;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -44,51 +41,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @see org.springframework.aop.config.AopNamespaceHandlerTests
  */
-public class AopNamespaceHandlerScopeIntegrationTests {
+@SpringJUnitWebConfig
+class AopNamespaceHandlerScopeIntegrationTests {
 
-	private static final String CONTEXT = format("classpath:%s-context.xml",
-			ClassUtils.convertClassNameToResourcePath(AopNamespaceHandlerScopeIntegrationTests.class.getName()));
+	@Autowired
+	ITestBean singletonScoped;
 
-	private ApplicationContext context;
+	@Autowired
+	ITestBean requestScoped;
 
+	@Autowired
+	ITestBean sessionScoped;
 
-	@BeforeEach
-	public void setUp() {
-		XmlWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.setConfigLocations(CONTEXT);
-		wac.refresh();
-		this.context = wac;
-	}
+	@Autowired
+	ITestBean sessionScopedAlias;
+
+	@Autowired
+	ITestBean testBean;
 
 
 	@Test
-	public void testSingletonScoping() throws Exception {
-		ITestBean scoped = (ITestBean) this.context.getBean("singletonScoped");
-		assertThat(AopUtils.isAopProxy(scoped)).as("Should be AOP proxy").isTrue();
-		boolean condition = scoped instanceof TestBean;
+	void testSingletonScoping() throws Exception {
+		assertThat(AopUtils.isAopProxy(singletonScoped)).as("Should be AOP proxy").isTrue();
+		boolean condition = singletonScoped instanceof TestBean;
 		assertThat(condition).as("Should be target class proxy").isTrue();
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
-		assertThat(scoped.getName()).isEqualTo(rob);
-		scoped.setName(bram);
-		assertThat(scoped.getName()).isEqualTo(bram);
-		ITestBean deserialized = (ITestBean) SerializationTestUtils.serializeAndDeserialize(scoped);
+		assertThat(singletonScoped.getName()).isEqualTo(rob);
+		singletonScoped.setName(bram);
+		assertThat(singletonScoped.getName()).isEqualTo(bram);
+		ITestBean deserialized = (ITestBean) SerializationTestUtils.serializeAndDeserialize(singletonScoped);
 		assertThat(deserialized.getName()).isEqualTo(bram);
 	}
 
 	@Test
-	public void testRequestScoping() throws Exception {
+	void testRequestScoping() throws Exception {
 		MockHttpServletRequest oldRequest = new MockHttpServletRequest();
 		MockHttpServletRequest newRequest = new MockHttpServletRequest();
 
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 
-		ITestBean scoped = (ITestBean) this.context.getBean("requestScoped");
-		assertThat(AopUtils.isAopProxy(scoped)).as("Should be AOP proxy").isTrue();
-		boolean condition = scoped instanceof TestBean;
+		assertThat(AopUtils.isAopProxy(requestScoped)).as("Should be AOP proxy").isTrue();
+		boolean condition = requestScoped instanceof TestBean;
 		assertThat(condition).as("Should be target class proxy").isTrue();
 
-		ITestBean testBean = (ITestBean) this.context.getBean("testBean");
 		assertThat(AopUtils.isAopProxy(testBean)).as("Should be AOP proxy").isTrue();
 		boolean condition1 = testBean instanceof TestBean;
 		assertThat(condition1).as("Regular bean should be JDK proxy").isFalse();
@@ -96,18 +92,18 @@ public class AopNamespaceHandlerScopeIntegrationTests {
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
 
-		assertThat(scoped.getName()).isEqualTo(rob);
-		scoped.setName(bram);
+		assertThat(requestScoped.getName()).isEqualTo(rob);
+		requestScoped.setName(bram);
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(newRequest));
-		assertThat(scoped.getName()).isEqualTo(rob);
+		assertThat(requestScoped.getName()).isEqualTo(rob);
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
-		assertThat(scoped.getName()).isEqualTo(bram);
+		assertThat(requestScoped.getName()).isEqualTo(bram);
 
-		assertThat(((Advised) scoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
+		assertThat(((Advised) requestScoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
 	}
 
 	@Test
-	public void testSessionScoping() throws Exception {
+	void testSessionScoping() throws Exception {
 		MockHttpSession oldSession = new MockHttpSession();
 		MockHttpSession newSession = new MockHttpSession();
 
@@ -115,15 +111,12 @@ public class AopNamespaceHandlerScopeIntegrationTests {
 		request.setSession(oldSession);
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		ITestBean scoped = (ITestBean) this.context.getBean("sessionScoped");
-		assertThat(AopUtils.isAopProxy(scoped)).as("Should be AOP proxy").isTrue();
-		boolean condition1 = scoped instanceof TestBean;
+		assertThat(AopUtils.isAopProxy(sessionScoped)).as("Should be AOP proxy").isTrue();
+		boolean condition1 = sessionScoped instanceof TestBean;
 		assertThat(condition1).as("Should not be target class proxy").isFalse();
 
-		ITestBean scopedAlias = (ITestBean) this.context.getBean("sessionScopedAlias");
-		assertThat(scopedAlias).isSameAs(scoped);
+		assertThat(sessionScopedAlias).isSameAs(sessionScoped);
 
-		ITestBean testBean = (ITestBean) this.context.getBean("testBean");
 		assertThat(AopUtils.isAopProxy(testBean)).as("Should be AOP proxy").isTrue();
 		boolean condition = testBean instanceof TestBean;
 		assertThat(condition).as("Regular bean should be JDK proxy").isFalse();
@@ -131,14 +124,14 @@ public class AopNamespaceHandlerScopeIntegrationTests {
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
 
-		assertThat(scoped.getName()).isEqualTo(rob);
-		scoped.setName(bram);
+		assertThat(sessionScoped.getName()).isEqualTo(rob);
+		sessionScoped.setName(bram);
 		request.setSession(newSession);
-		assertThat(scoped.getName()).isEqualTo(rob);
+		assertThat(sessionScoped.getName()).isEqualTo(rob);
 		request.setSession(oldSession);
-		assertThat(scoped.getName()).isEqualTo(bram);
+		assertThat(sessionScoped.getName()).isEqualTo(bram);
 
-		assertThat(((Advised) scoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
+		assertThat(((Advised) sessionScoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
 	}
 
 }

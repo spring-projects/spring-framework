@@ -35,10 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  */
 @SuppressWarnings("resource")
-public class ProxyAnnotationDiscoveryTests {
+class ProxyAnnotationDiscoveryTests {
 
 	@Test
-	public void annotatedServiceWithoutInterface_PTC_true() {
+	void annotatedServiceWithoutInterface_PTC_true() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCTrue.class, AnnotatedServiceWithoutInterface.class);
 		ctx.refresh();
@@ -48,7 +48,7 @@ public class ProxyAnnotationDiscoveryTests {
 	}
 
 	@Test
-	public void annotatedServiceWithoutInterface_PTC_false() {
+	void annotatedServiceWithoutInterface_PTC_false() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCFalse.class, AnnotatedServiceWithoutInterface.class);
 		ctx.refresh();
@@ -58,7 +58,7 @@ public class ProxyAnnotationDiscoveryTests {
 	}
 
 	@Test
-	public void nonAnnotatedService_PTC_true() {
+	void nonAnnotatedService_PTC_true() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCTrue.class, AnnotatedServiceImpl.class);
 		ctx.refresh();
@@ -68,7 +68,7 @@ public class ProxyAnnotationDiscoveryTests {
 	}
 
 	@Test
-	public void nonAnnotatedService_PTC_false() {
+	void nonAnnotatedService_PTC_false() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCFalse.class, AnnotatedServiceImpl.class);
 		ctx.refresh();
@@ -78,7 +78,7 @@ public class ProxyAnnotationDiscoveryTests {
 	}
 
 	@Test
-	public void annotatedService_PTC_true() {
+	void annotatedService_PTC_true() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCTrue.class, NonAnnotatedServiceImpl.class);
 		ctx.refresh();
@@ -88,7 +88,7 @@ public class ProxyAnnotationDiscoveryTests {
 	}
 
 	@Test
-	public void annotatedService_PTC_false() {
+	void annotatedService_PTC_false() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(PTCFalse.class, NonAnnotatedServiceImpl.class);
 		ctx.refresh();

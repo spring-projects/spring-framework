@@ -100,14 +100,14 @@ public class EnvironmentSystemIntegrationTests {
 	private final ConfigurableEnvironment prodWebEnv = new StandardServletEnvironment();
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		prodEnv.setActiveProfiles(PROD_ENV_NAME);
 		devEnv.setActiveProfiles(DEV_ENV_NAME);
 		prodWebEnv.setActiveProfiles(PROD_ENV_NAME);
 	}
 
 	@Test
-	public void genericApplicationContext_standardEnv() {
+	void genericApplicationContext_standardEnv() {
 		ConfigurableApplicationContext ctx = new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		ctx.refresh();
 
@@ -117,7 +117,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void genericApplicationContext_customEnv() {
+	void genericApplicationContext_customEnv() {
 		GenericApplicationContext ctx = new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
@@ -128,7 +128,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void xmlBeanDefinitionReader_inheritsEnvironmentFromEnvironmentCapableBDR() {
+	void xmlBeanDefinitionReader_inheritsEnvironmentFromEnvironmentCapableBDR() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.setEnvironment(prodEnv);
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(XML_PATH);
@@ -138,7 +138,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotatedBeanDefinitionReader_inheritsEnvironmentFromEnvironmentCapableBDR() {
+	void annotatedBeanDefinitionReader_inheritsEnvironmentFromEnvironmentCapableBDR() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.setEnvironment(prodEnv);
 		new AnnotatedBeanDefinitionReader(ctx).register(Config.class);
@@ -148,7 +148,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void classPathBeanDefinitionScanner_inheritsEnvironmentFromEnvironmentCapableBDR_scanProfileAnnotatedConfigClasses() {
+	void classPathBeanDefinitionScanner_inheritsEnvironmentFromEnvironmentCapableBDR_scanProfileAnnotatedConfigClasses() {
 		// it's actually ConfigurationClassPostProcessor's Environment that gets the job done here.
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.setEnvironment(prodEnv);
@@ -160,7 +160,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void classPathBeanDefinitionScanner_inheritsEnvironmentFromEnvironmentCapableBDR_scanProfileAnnotatedComponents() {
+	void classPathBeanDefinitionScanner_inheritsEnvironmentFromEnvironmentCapableBDR_scanProfileAnnotatedComponents() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.setEnvironment(prodEnv);
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(ctx);
@@ -172,7 +172,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void genericXmlApplicationContext() {
+	void genericXmlApplicationContext() {
 		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
 		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(prodEnv);
@@ -187,7 +187,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void classPathXmlApplicationContext() {
+	void classPathXmlApplicationContext() {
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(XML_PATH);
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
@@ -200,7 +200,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void fileSystemXmlApplicationContext() throws IOException {
+	void fileSystemXmlApplicationContext() throws IOException {
 		ClassPathResource xml = new ClassPathResource(XML_PATH);
 		File tmpFile = File.createTempFile("test", "xml");
 		FileCopyUtils.copy(xml.getFile(), tmpFile);
@@ -218,7 +218,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withPojos() {
+	void annotationConfigApplicationContext_withPojos() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -231,7 +231,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProdEnvAndProdConfigClass() {
+	void annotationConfigApplicationContext_withProdEnvAndProdConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -244,7 +244,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProdEnvAndDevConfigClass() {
+	void annotationConfigApplicationContext_withProdEnvAndDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -258,7 +258,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withDevEnvAndDevConfigClass() {
+	void annotationConfigApplicationContext_withDevEnvAndDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -272,7 +272,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withImportedConfigClasses() {
+	void annotationConfigApplicationContext_withImportedConfigClasses() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -288,7 +288,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void mostSpecificDerivedClassDrivesEnvironment_withDerivedDevEnvAndDerivedDevConfigClass() {
+	void mostSpecificDerivedClassDrivesEnvironment_withDerivedDevEnvAndDerivedDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		StandardEnvironment derivedDevEnv = new StandardEnvironment();
 		derivedDevEnv.setActiveProfiles(DERIVED_DEV_ENV_NAME);
@@ -302,7 +302,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass() {
+	void mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.setEnvironment(devEnv);
 		ctx.register(DerivedDevConfig.class);
@@ -314,22 +314,22 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProfileExpressionMatchOr() {
+	void annotationConfigApplicationContext_withProfileExpressionMatchOr() {
 		testProfileExpression(true, "p3");
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProfileExpressionMatchAnd() {
+	void annotationConfigApplicationContext_withProfileExpressionMatchAnd() {
 		testProfileExpression(true, "p1", "p2");
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProfileExpressionNoMatchAnd() {
+	void annotationConfigApplicationContext_withProfileExpressionNoMatchAnd() {
 		testProfileExpression(false, "p1");
 	}
 
 	@Test
-	public void annotationConfigApplicationContext_withProfileExpressionNoMatchNone() {
+	void annotationConfigApplicationContext_withProfileExpressionNoMatchNone() {
 		testProfileExpression(false, "p4");
 	}
 
@@ -344,7 +344,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void webApplicationContext() {
+	void webApplicationContext() {
 		GenericWebApplicationContext ctx = new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		assertHasStandardServletEnvironment(ctx);
 		ctx.setEnvironment(prodWebEnv);
@@ -356,7 +356,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void xmlWebApplicationContext() {
+	void xmlWebApplicationContext() {
 		AbstractRefreshableWebApplicationContext ctx = new XmlWebApplicationContext();
 		ctx.setConfigLocation("classpath:" + XML_PATH);
 		ctx.setEnvironment(prodWebEnv);
@@ -370,7 +370,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void staticApplicationContext() {
+	void staticApplicationContext() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		assertHasStandardEnvironment(ctx);
@@ -386,7 +386,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void staticWebApplicationContext() {
+	void staticWebApplicationContext() {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 
 		assertHasStandardServletEnvironment(ctx);
@@ -402,7 +402,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void annotationConfigWebApplicationContext() {
+	void annotationConfigWebApplicationContext() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setEnvironment(prodWebEnv);
 		ctx.setConfigLocation(EnvironmentAwareBean.class.getName());
@@ -414,7 +414,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void registerServletParamPropertySources_AbstractRefreshableWebApplicationContext() {
+	void registerServletParamPropertySources_AbstractRefreshableWebApplicationContext() {
 		MockServletContext servletContext = new MockServletContext();
 		servletContext.addInitParameter("pCommon", "pCommonContextValue");
 		servletContext.addInitParameter("pContext1", "pContext1Value");
@@ -459,7 +459,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void registerServletParamPropertySources_GenericWebApplicationContext() {
+	void registerServletParamPropertySources_GenericWebApplicationContext() {
 		MockServletContext servletContext = new MockServletContext();
 		servletContext.addInitParameter("pCommon", "pCommonContextValue");
 		servletContext.addInitParameter("pContext1", "pContext1Value");
@@ -493,7 +493,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void registerServletParamPropertySources_StaticWebApplicationContext() {
+	void registerServletParamPropertySources_StaticWebApplicationContext() {
 		MockServletContext servletContext = new MockServletContext();
 		servletContext.addInitParameter("pCommon", "pCommonContextValue");
 		servletContext.addInitParameter("pContext1", "pContext1Value");
@@ -536,7 +536,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void resourceAdapterApplicationContext() {
+	void resourceAdapterApplicationContext() {
 		ResourceAdapterApplicationContext ctx = new ResourceAdapterApplicationContext(new SimpleBootstrapContext(new SimpleTaskWorkManager()));
 
 		assertHasStandardEnvironment(ctx);
@@ -552,7 +552,7 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void abstractApplicationContextValidatesRequiredPropertiesOnRefresh() {
+	void abstractApplicationContextValidatesRequiredPropertiesOnRefresh() {
 		{
 			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 			ctx.refresh();
