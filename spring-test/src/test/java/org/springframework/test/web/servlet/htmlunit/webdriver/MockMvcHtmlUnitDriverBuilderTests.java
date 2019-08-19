@@ -20,16 +20,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.gargoylesoftware.htmlunit.util.Cookie;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,30 +49,23 @@ class MockMvcHtmlUnitDriverBuilderTests {
 
 	private static final String EXPECTED_BODY = "MockMvcHtmlUnitDriverBuilderTests mvc";
 
-	@Autowired
-	private WebApplicationContext wac;
-
 	private MockMvc mockMvc;
 
 	private HtmlUnitDriver driver;
 
-
-	@BeforeEach
-	void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	MockMvcHtmlUnitDriverBuilderTests(WebApplicationContext wac) {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 	}
 
 
 	@Test
 	void webAppContextSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null));
 	}
 
 	@Test
 	void mockMvcSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null));
 	}
 
 	@Test
@@ -84,7 +74,10 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertMockMvcUsed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed("https://example.com/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed("https://example.com/");
+		}
 	}
 
 	@Test
@@ -92,7 +85,10 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed("https://example.com/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed("https://example.com/");
+		}
 	}
 
 	@Test
@@ -111,8 +107,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 	void cookieManagerShared() throws Exception {
 		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
-		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc)
-				.withDelegate(otherDriver).build();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertThat(get("http://localhost/")).isEqualTo("");
 		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
@@ -143,7 +138,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		static class ContextPathController {
 
 			@RequestMapping("/test")
-			public String contextPath(HttpServletRequest request) {
+			String contextPath(HttpServletRequest request) {
 				return EXPECTED_BODY;
 			}
 		}

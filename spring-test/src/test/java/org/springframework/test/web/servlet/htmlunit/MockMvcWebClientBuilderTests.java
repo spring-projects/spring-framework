@@ -26,15 +26,12 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,28 +56,21 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 @SpringJUnitWebConfig
 class MockMvcWebClientBuilderTests {
 
-	@Autowired
-	private WebApplicationContext wac;
-
 	private MockMvc mockMvc;
 
-
-	@BeforeEach
-	void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	MockMvcWebClientBuilderTests(WebApplicationContext wac) {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 	}
 
 
 	@Test
 	void mockMvcSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcWebClientBuilder.mockMvcSetup(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcWebClientBuilder.mockMvcSetup(null));
 	}
 
 	@Test
 	void webAppContextSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcWebClientBuilder.webAppContextSetup(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcWebClientBuilder.webAppContextSetup(null));
 	}
 
 	@Test
@@ -88,7 +78,10 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://spring.io/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed(client, "https://spring.io/");
+		}
 	}
 
 	@Test
@@ -97,7 +90,10 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://spring.io/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed(client, "https://spring.io/");
+		}
 	}
 
 	@Test // SPR-14066

@@ -49,7 +49,7 @@ class TestGroupsCondition implements ExecutionCondition {
 		}
 		TestGroup[] testGroups = optional.get().value();
 		Assert.state(testGroups.length > 0, "You must declare at least one TestGroup in @EnabledForTestGroups");
-		return (Arrays.stream(testGroups).anyMatch(TestGroups::isGroupActive)) ?
+		return (Arrays.stream(testGroups).anyMatch(TestGroup::isActive)) ?
 				enabled("Enabled for TestGroups: " + Arrays.toString(testGroups)) :
 				disabled("Disabled for TestGroups: " + Arrays.toString(testGroups));
 	}

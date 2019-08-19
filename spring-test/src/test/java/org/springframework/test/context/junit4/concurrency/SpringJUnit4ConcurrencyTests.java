@@ -35,7 +35,6 @@ import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpr
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.tests.TestGroup;
-import org.springframework.tests.TestGroups;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assume.assumeTrue;
@@ -86,8 +85,7 @@ public class SpringJUnit4ConcurrencyTests {
 
 	@BeforeClass
 	public static void abortIfLongRunningTestGroupIsNotEnabled() {
-		assumeTrue("TestGroup " + TestGroup.LONG_RUNNING + " is not active.",
-			TestGroups.isGroupActive(TestGroup.LONG_RUNNING));
+		assumeTrue("TestGroup " + TestGroup.LONG_RUNNING + " is not active.", TestGroup.LONG_RUNNING.isActive());
 	}
 
 	@Test

@@ -43,10 +43,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * @author Sam Brannen
  * @since 3.2
  * @see EnabledForTestGroups @EnabledForTestGroups
- * @see #group(TestGroup)
- * @see #group(TestGroup, Executable)
+ * @see #notLogging(Log)
  * @see TestGroup
- * @see TestGroups
  */
 public abstract class Assume {
 
@@ -61,24 +59,9 @@ public abstract class Assume {
 	 */
 	@Deprecated
 	public static void group(TestGroup group) {
-		Set<TestGroup> testGroups = TestGroups.loadTestGroups();
+		Set<TestGroup> testGroups = TestGroup.loadTestGroups();
 		assumeTrue(testGroups.contains(group),
 			() -> "Requires inactive test group " + group + "; active test groups: " + testGroups);
-	}
-
-	/**
-	 * Assume that a particular {@link TestGroup} is active before executing the
-	 * supplied {@link Executable}.
-	 * <p>If the assumption fails, the executable will not be executed, but
-	 * no {@link org.opentest4j.TestAbortedException} will be thrown.
-	 * @param group the group that must be active
-	 * @param executable the executable to execute if the test group is active
-	 * @since 4.2
-	 */
-	public static void group(TestGroup group, Executable executable) throws Exception {
-		if (TestGroups.loadTestGroups().contains(group)) {
-			executable.execute();
-		}
 	}
 
 	/**

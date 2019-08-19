@@ -25,67 +25,64 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * Tests for {@link TestGroup}.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class TestGroupTests {
+class TestGroupTests {
 
 	@Test
-	public void parseNull() {
+	void parseNull() {
 		assertThat(TestGroup.parse(null)).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseEmptyString() {
+	void parseEmptyString() {
 		assertThat(TestGroup.parse("")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseBlankString() {
+	void parseBlankString() {
 		assertThat(TestGroup.parse("     ")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void parseWithSpaces() {
-		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE ")).containsOnly(
-				TestGroup.PERFORMANCE);
+	void parseWithSpaces() {
+		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE ")).containsOnly(TestGroup.PERFORMANCE);
 	}
 
 	@Test
-	public void parseInMixedCase() {
-		assertThat(TestGroup.parse("performance,  PERFormaNCE")).containsOnly(
-				TestGroup.PERFORMANCE);
+	void parseInMixedCase() {
+		assertThat(TestGroup.parse("performance,  PERFormaNCE")).containsOnly(TestGroup.PERFORMANCE);
 	}
 
 	@Test
-	public void parseMissing() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				TestGroup.parse("performance, missing"))
+	void parseMissing() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> TestGroup.parse("performance, missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
 					"testGroups value: 'performance, missing'. Available groups include: " +
 					"[LONG_RUNNING,PERFORMANCE,CI]");
 	}
 
 	@Test
-	public void parseAll() {
+	void parseAll() {
 		assertThat(TestGroup.parse("all")).isEqualTo(EnumSet.allOf(TestGroup.class));
 	}
 
 	@Test
-	public void parseAllExceptPerformance() {
+	void parseAllExceptPerformance() {
 		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
 		expected.remove(TestGroup.PERFORMANCE);
 		assertThat(TestGroup.parse("all-performance")).isEqualTo(expected);
 	}
 
 	@Test
-	public void parseAllExceptMissing() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				TestGroup.parse("all-missing"))
+	void parseAllExceptMissing() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> TestGroup.parse("all-missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
 					"testGroups value: 'all-missing'. Available groups include: " +
 					"[LONG_RUNNING,PERFORMANCE,CI]");
