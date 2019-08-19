@@ -405,6 +405,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List<String> result = new ArrayList<>();
 
 		// Check all bean definitions.
+		// 这里面有6个内置的bd 注意：什么时候注册的？？
+		//org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+		//org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+		//org.springframework.context.annotation.internalRequiredAnnotationProcessor
+		//org.springframework.context.annotation.internalCommonAnnotationProcessor
+		//org.springframework.context.event.internalEventListenerProcessor
+		//org.springframework.context.event.internalEventListenerFactory
 		for (String beanName : this.beanDefinitionNames) {
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.

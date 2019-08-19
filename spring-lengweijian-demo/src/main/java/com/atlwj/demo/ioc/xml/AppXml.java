@@ -1,8 +1,10 @@
 package com.atlwj.demo.ioc.xml;
 
 import com.atlwj.demo.ioc.annotation.entity.Person;
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 public class AppXml {
@@ -19,5 +21,12 @@ public class AppXml {
 		Person person = (Person) factory.getBean("person");
 		System.out.println(person);
 
+	}
+
+	@Test
+	public void test(){
+		ClassPathXmlApplicationContext ioc = new ClassPathXmlApplicationContext("bean1.xml");
+		Person bean = ioc.getBean(Person.class);
+		System.out.println(bean);
 	}
 }

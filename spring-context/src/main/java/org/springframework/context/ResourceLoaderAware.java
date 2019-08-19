@@ -36,7 +36,7 @@ import org.springframework.core.io.ResourceLoader;
  * to make the object use a {@link org.springframework.core.io.DefaultResourceLoader}
  * but still implement {@code ResourceLoaderAware} to allow for overriding when
  * running in an {@code ApplicationContext}. See
- * {@link org.springframework.context.support.ReloadableResourceBundleMessageSource}
+ * {@link org.springframework.context.support.ReloadableResourceBuandleMessageSource}
  * for an example.
  *
  * <p>A passed-in {@code ResourceLoader} can also be checked for the
