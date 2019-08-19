@@ -74,14 +74,4 @@ public abstract class Assume {
 		assumeFalse(log.isDebugEnabled());
 	}
 
-
-	/**
-	 * @since 4.2
-	 */
-	@FunctionalInterface
-	public interface Executable {
-
-		void execute() throws Exception;
-	}
-
 }
