@@ -42,6 +42,9 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  */
 public final class ContentDisposition {
 
+	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
+			"Invalid header field parameter format (as defined in RFC 5987)";
+
 	@Nullable
 	private final String type;
 
@@ -357,7 +360,7 @@ public final class ContentDisposition {
 	}
 
 	/**
-	 * Decode the given header field param as describe in RFC 5987.
+	 * Decode the given header field param as described in RFC 5987.
 	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
 	 * @param input the header field param
 	 * @return the encoded header field param
@@ -383,13 +386,18 @@ public final class ContentDisposition {
 				bos.write((char) b);
 				index++;
 			}
-			else if (b == '%') {
-				char[] array = { (char)value[index + 1], (char)value[index + 2]};
-				bos.write(Integer.parseInt(String.valueOf(array), 16));
+			else if (b == '%' && index < value.length - 2) {
+				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
+				try {
+					bos.write(Integer.parseInt(String.valueOf(array), 16));
+				}
+				catch (NumberFormatException ex) {
+					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
+				}
 				index+=3;
 			}
 			else {
-				throw new IllegalArgumentException("Invalid header field parameter format (as defined in RFC 5987)");
+				throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT);
 			}
 		}
 		return new String(bos.toByteArray(), charset);
