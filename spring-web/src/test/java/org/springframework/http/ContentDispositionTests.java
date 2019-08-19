@@ -28,6 +28,7 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link ContentDisposition}
@@ -35,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sebastien Deleuze
  */
 public class ContentDispositionTests {
-
 
 	@Test
 	public void parseTest() {
@@ -196,6 +196,24 @@ public class ContentDispositionTests {
 		ReflectionUtils.makeAccessible(decode);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ReflectionUtils.invokeMethod(decode, null, "UTF-16''test"));
+	}
+
+	@Test
+	public void decodeHeaderFieldParamShortInvalidEncodedFilename() {
+		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
+				"decodeHeaderFieldParam", String.class);
+		ReflectionUtils.makeAccessible(decode);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.invokeMethod(decode, null, "UTF-8''%A"));
+	}
+
+	@Test
+	public void decodeHeaderFieldParamLongerInvalidEncodedFilename() {
+		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
+				"decodeHeaderFieldParam", String.class);
+		ReflectionUtils.makeAccessible(decode);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.invokeMethod(decode, null, "UTF-8''%A.txt"));
 	}
 
 }
