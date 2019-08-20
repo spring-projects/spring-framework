@@ -14,13 +14,20 @@ plugins {
 	id 'org.springframework.build.test-sources' apply false
 	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.3.41" apply false
-	id "org.jetbrains.dokka" version "0.9.18" apply false
+	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
 }
 
 ext {
+	linkHomepage = "https://spring.io/projects/spring-framework"
+	linkCi = "https://build.spring.io/browse/SPR"
+	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
+	linkScmUrl = "https://github.com/spring-projects/spring-framework"
+	linkScmConnection = "scm:git:git://github.com/spring-projects/spring-framework.git"
+	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
+
 	moduleProjects = subprojects.findAll {
-		(it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines") && (it.name != "integration-tests")
+		(it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
 	}
 
 	aspectjVersion       = "1.9.4"
@@ -44,6 +51,7 @@ ext {
 	tomcatVersion        = "9.0.22"
 	undertowVersion      = "2.0.23.Final"
 
+	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4j = {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
@@ -53,10 +61,13 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 
 	apply plugin: "java"
+	apply plugin: "kotlin"
 	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.compile'
+	apply plugin: 'org.springframework.build.optional-dependencies'
+	apply plugin: 'org.springframework.build.test-sources'
 	apply plugin: "io.spring.dependency-management"
-	apply from: "${rootDir}/gradle/ide.gradle"
+	apply from: "${gradleScriptDir}/ide.gradle"
 
 	dependencyManagement {
 		resolutionStrategy {
@@ -85,19 +96,17 @@ configure(allprojects) { project ->
 		}
 	}
 
-	pluginManager.withPlugin("kotlin") {
-		apply plugin: "org.jetbrains.dokka"
-		compileKotlin {
-			kotlinOptions {
-				jvmTarget = "1.8"
-				freeCompilerArgs = ["-Xjsr305=strict"]
-			}
+	compileKotlin {
+		kotlinOptions {
+			jvmTarget = "1.8"
+			freeCompilerArgs = ["-Xjsr305=strict"]
 		}
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = "1.8"
-				freeCompilerArgs = ["-Xjsr305=strict"]
-			}
+	}
+
+	compileTestKotlin {
+		kotlinOptions {
+			jvmTarget = "1.8"
+			freeCompilerArgs = ["-Xjsr305=strict"]
 		}
 	}
 
@@ -170,18 +179,67 @@ configure(allprojects) { project ->
 	] as String[]
 }
 
-configure(moduleProjects) { project ->
-	apply from: "${rootDir}/gradle/spring-module.gradle"
+configure(subprojects.findAll { (it.name != "spring-core-coroutines"
+		&& it.name != "spring-integration-tests") } ) { subproject ->
+	apply from: "${gradleScriptDir}/publish-maven.gradle"
+
+	jar {
+		manifest.attributes["Implementation-Title"] = subproject.name
+		manifest.attributes["Implementation-Version"] = subproject.version
+		manifest.attributes["Automatic-Module-Name"] = subproject.name.replace('-', '.')  // for Jigsaw
+		manifest.attributes["Created-By"] =
+				"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+
+		from("${rootProject.projectDir}/src/docs/dist") {
+			include "license.txt"
+			include "notice.txt"
+			into "META-INF"
+			expand(copyright: new Date().format("yyyy"), version: project.version)
+		}
+	}
+
+	javadoc {
+		description = "Generates project-level javadoc for use in -javadoc jar"
+
+		options.encoding = "UTF-8"
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = project.name
+		options.use = true
+		options.links(project.ext.javadocLinks)
+		options.addStringOption("Xdoclint:none", "-quiet")
+
+		// Suppress warnings due to cross-module @see and @link references.
+		// Note that global 'api' task does display all warnings.
+		logging.captureStandardError LogLevel.INFO
+		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
+	}
+
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		classifier = "sources"
+		from sourceSets.main.allSource
+		// Don't include or exclude anything explicitly by default. See SPR-12085.
+	}
+
+	task javadocJar(type: Jar) {
+		classifier = "javadoc"
+		from javadoc
+	}
+
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
 }
 
 configure(rootProject) {
 	description = "Spring Framework"
 
 	apply plugin: "groovy"
-	apply plugin: "kotlin"
 	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
-	apply from: "${rootDir}/gradle/docs.gradle"
+	apply from: "${gradleScriptDir}/docs.gradle"
 
 	nohttp {
 		source.exclude "**/test-output/**"
@@ -200,6 +258,9 @@ configure(rootProject) {
 		}
 	}
 
+	// Don't publish the default jar for the root project
+	configurations.archives.artifacts.clear()
+
 	dependencies {
 		asciidoctor("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
@@ -209,5 +270,6 @@ configure(rootProject) {
 		archives schemaZip
 		archives distZip
 	}
+
 }
 

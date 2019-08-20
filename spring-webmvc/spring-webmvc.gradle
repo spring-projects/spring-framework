@@ -1,7 +1,5 @@
 description = "Spring Web MVC"
 
-apply plugin: "kotlin"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"

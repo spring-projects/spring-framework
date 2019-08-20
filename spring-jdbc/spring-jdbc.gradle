@@ -1,7 +1,5 @@
 description = "Spring JDBC"
 
-apply plugin: "kotlin"
-
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))

@@ -1,7 +1,6 @@
 description = "Spring Context"
 
 apply plugin: "groovy"
-apply plugin: "kotlin"
 
 dependencyManagement {
 	imports {

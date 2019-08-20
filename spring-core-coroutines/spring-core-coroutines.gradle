@@ -1,18 +1,11 @@
 description = "Spring Core Coroutines support"
 
-apply plugin: "kotlin"
-
 dependencies {
 	compile("org.jetbrains.kotlin:kotlin-reflect")
 	compile("org.jetbrains.kotlin:kotlin-stdlib")
 	compile("io.projectreactor:reactor-core")
 	compile("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	compile("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-}
-
-// Avoid publishing coroutines JAR to the artifact repository
-if (project.hasProperty("artifactoryPublish")) {
-	artifactoryPublish.skip = true
 }
 
 eclipse {
