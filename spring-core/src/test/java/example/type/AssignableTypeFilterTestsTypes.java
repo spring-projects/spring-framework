@@ -14,38 +14,39 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type;
+package example.type;
 
 /**
  * We must use a standalone set of types to ensure that no one else is loading
- * them and interfering with {@link ClassloadingAssertions#assertClassNotLoaded(String)}.
+ * them and interfering with
+ * {@link org.springframework.core.type.ClassloadingAssertions#assertClassNotLoaded(String)}.
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @see AssignableTypeFilterTests
+ * @see org.springframework.core.type.AssignableTypeFilterTests
  */
-class AssignableTypeFilterTestsTypes {
+public class AssignableTypeFilterTestsTypes {
 
-	static class TestNonInheritingClass {
+	public static class TestNonInheritingClass {
 	}
 
-	interface TestInterface {
+	public interface TestInterface {
 	}
 
-	static class TestInterfaceImpl implements TestInterface {
+	public static class TestInterfaceImpl implements TestInterface {
 	}
 
-	interface SomeDaoLikeInterface {
+	public interface SomeDaoLikeInterface {
 	}
 
-	static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
+	public static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
 	}
 
-	interface JdbcDaoSupport {
+	public interface JdbcDaoSupport {
 	}
 
-	static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
+	public static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
 	}
 
 }

@@ -40,17 +40,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class StaxUtilsTests {
+class StaxUtilsTests {
 
 	@Test
-	public void isStaxSourceInvalid() throws Exception {
+	void isStaxSourceInvalid() throws Exception {
 		assertThat(StaxUtils.isStaxSource(new DOMSource())).as("A StAX Source").isFalse();
 		assertThat(StaxUtils.isStaxSource(new SAXSource())).as("A StAX Source").isFalse();
 		assertThat(StaxUtils.isStaxSource(new StreamSource())).as("A StAX Source").isFalse();
 	}
 
 	@Test
-	public void isStaxSource() throws Exception {
+	void isStaxSource() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		String expected = "<element/>";
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(expected));
@@ -60,7 +60,7 @@ public class StaxUtilsTests {
 	}
 
 	@Test
-	public void isStaxSourceJaxp14() throws Exception {
+	void isStaxSourceJaxp14() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		String expected = "<element/>";
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(expected));
@@ -70,14 +70,14 @@ public class StaxUtilsTests {
 	}
 
 	@Test
-	public void isStaxResultInvalid() throws Exception {
+	void isStaxResultInvalid() throws Exception {
 		assertThat(StaxUtils.isStaxResult(new DOMResult())).as("A StAX Result").isFalse();
 		assertThat(StaxUtils.isStaxResult(new SAXResult())).as("A StAX Result").isFalse();
 		assertThat(StaxUtils.isStaxResult(new StreamResult())).as("A StAX Result").isFalse();
 	}
 
 	@Test
-	public void isStaxResult() throws Exception {
+	void isStaxResult() throws Exception {
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(new StringWriter());
 		Result result = StaxUtils.createCustomStaxResult(streamWriter);
@@ -86,7 +86,7 @@ public class StaxUtilsTests {
 	}
 
 	@Test
-	public void isStaxResultJaxp14() throws Exception {
+	void isStaxResultJaxp14() throws Exception {
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(new StringWriter());
 		StAXResult result = new StAXResult(streamWriter);

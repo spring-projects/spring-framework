@@ -29,13 +29,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
+class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
-	public ByteArrayEncoderTests() {
+	ByteArrayEncoderTests() {
 		super(new ByteArrayEncoder());
 	}
 

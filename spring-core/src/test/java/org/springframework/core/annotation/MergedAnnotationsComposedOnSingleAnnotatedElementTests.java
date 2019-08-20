@@ -41,22 +41,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
+class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 
 	// See SPR-13486
 
 	@Test
-	public void inheritedStrategyMultipleComposedAnnotationsOnClass() {
+	void inheritedStrategyMultipleComposedAnnotationsOnClass() {
 		assertInheritedStrategyBehavior(MultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void inheritedStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
+	void inheritedStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
 		assertInheritedStrategyBehavior(SubMultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void inheritedStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
+	void inheritedStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				MultipleNoninheritedComposedCachesClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS);
@@ -65,7 +65,7 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void inheritedStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
+	void inheritedStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				SubMultipleNoninheritedComposedCachesClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS);
@@ -73,12 +73,12 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void inheritedStrategyComposedPlusLocalAnnotationsOnClass() {
+	void inheritedStrategyComposedPlusLocalAnnotationsOnClass() {
 		assertInheritedStrategyBehavior(ComposedPlusLocalCachesClass.class);
 	}
 
 	@Test
-	public void inheritedStrategyMultipleComposedAnnotationsOnInterface() {
+	void inheritedStrategyMultipleComposedAnnotationsOnInterface() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				MultipleComposedCachesOnInterfaceClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS);
@@ -86,13 +86,13 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void inheritedStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
+	void inheritedStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
 		assertInheritedStrategyBehavior(
 				getClass().getDeclaredMethod("multipleComposedCachesMethod"));
 	}
 
 	@Test
-	public void inheritedStrategyComposedPlusLocalAnnotationsOnMethod() throws Exception {
+	void inheritedStrategyComposedPlusLocalAnnotationsOnMethod() throws Exception {
 		assertInheritedStrategyBehavior(
 				getClass().getDeclaredMethod("composedPlusLocalCachesMethod"));
 	}
@@ -105,17 +105,17 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleComposedAnnotationsOnClass() {
+	void typeHierarchyStrategyMultipleComposedAnnotationsOnClass() {
 		assertTypeHierarchyStrategyBehavior(MultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
+	void typeHierarchyStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
 		assertTypeHierarchyStrategyBehavior(SubMultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
+	void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				MultipleNoninheritedComposedCachesClass.class, SearchStrategy.TYPE_HIERARCHY);
 		assertThat(stream(annotations, "value")).containsExactly("noninheritedCache1",
@@ -123,7 +123,7 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
+	void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				SubMultipleNoninheritedComposedCachesClass.class,
 				SearchStrategy.TYPE_HIERARCHY);
@@ -132,36 +132,36 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void typeHierarchyStrategyComposedPlusLocalAnnotationsOnClass() {
+	void typeHierarchyStrategyComposedPlusLocalAnnotationsOnClass() {
 		assertTypeHierarchyStrategyBehavior(ComposedPlusLocalCachesClass.class);
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleComposedAnnotationsOnInterface() {
+	void typeHierarchyStrategyMultipleComposedAnnotationsOnInterface() {
 		assertTypeHierarchyStrategyBehavior(MultipleComposedCachesOnInterfaceClass.class);
 	}
 
 	@Test
-	public void typeHierarchyStrategyComposedCacheOnInterfaceAndLocalCacheOnClass() {
+	void typeHierarchyStrategyComposedCacheOnInterfaceAndLocalCacheOnClass() {
 		assertTypeHierarchyStrategyBehavior(
 				ComposedCacheOnInterfaceAndLocalCacheClass.class);
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
+	void typeHierarchyStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
 		assertTypeHierarchyStrategyBehavior(
 				getClass().getDeclaredMethod("multipleComposedCachesMethod"));
 	}
 
 	@Test
-	public void typeHierarchyStrategyComposedPlusLocalAnnotationsOnMethod()
+	void typeHierarchyStrategyComposedPlusLocalAnnotationsOnMethod()
 			throws Exception {
 		assertTypeHierarchyStrategyBehavior(
 				getClass().getDeclaredMethod("composedPlusLocalCachesMethod"));
 	}
 
 	@Test
-	public void typeHierarchyStrategyMultipleComposedAnnotationsOnBridgeMethod()
+	void typeHierarchyStrategyMultipleComposedAnnotationsOnBridgeMethod()
 			throws Exception {
 		assertTypeHierarchyStrategyBehavior(getBridgeMethod());
 	}
@@ -173,7 +173,7 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 		assertThat(stream(annotations, "value")).containsExactly("fooCache", "barCache");
 	}
 
-	public Method getBridgeMethod() throws NoSuchMethodException {
+	Method getBridgeMethod() throws NoSuchMethodException {
 		List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithLocalMethods(StringGenericParameter.class, method -> {
 			if ("getFor".equals(method.getName())) {

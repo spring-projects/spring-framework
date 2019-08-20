@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 5.2
  */
-public class MergedAnnotationClassLoaderTests {
+class MergedAnnotationClassLoaderTests {
 
 	private static final String TEST_ANNOTATION = TestAnnotation.class.getName();
 
@@ -45,7 +45,7 @@ public class MergedAnnotationClassLoaderTests {
 	private static final String TEST_REFERENCE = TestReference.class.getName();
 
 	@Test
-	public void synthesizedUsesCorrectClassLoader() throws Exception {
+	void synthesizedUsesCorrectClassLoader() throws Exception {
 		ClassLoader parent = getClass().getClassLoader();
 		TestClassLoader child = new TestClassLoader(parent);
 		Class<?> source = child.loadClass(WITH_TEST_ANNOTATION);

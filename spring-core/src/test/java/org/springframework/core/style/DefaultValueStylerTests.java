@@ -33,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @since 5.2
  */
-public class DefaultValueStylerTests {
+class DefaultValueStylerTests {
 
 	private final DefaultValueStyler styler = new DefaultValueStyler();
 
 
 	@Test
-	public void styleBasics() throws NoSuchMethodException {
+	void styleBasics() throws NoSuchMethodException {
 		assertThat(styler.style(null)).isEqualTo("[null]");
 		assertThat(styler.style("str")).isEqualTo("'str'");
 		assertThat(styler.style(String.class)).isEqualTo("String");
@@ -47,14 +47,14 @@ public class DefaultValueStylerTests {
 	}
 
 	@Test
-	public void stylePlainObject() {
+	void stylePlainObject() {
 		Object obj = new Object();
 
 		assertThat(styler.style(obj)).isEqualTo(String.valueOf(obj));
 	}
 
 	@Test
-	public void styleMaps() {
+	void styleMaps() {
 		Map<String, Integer> map = Collections.emptyMap();
 		assertThat(styler.style(map)).isEqualTo("map[[empty]]");
 
@@ -68,7 +68,7 @@ public class DefaultValueStylerTests {
 	}
 
 	@Test
-	public void styleMapEntries() {
+	void styleMapEntries() {
 		Map<String, Integer> map = new LinkedHashMap<>();
 		map.put("key1", 1);
 		map.put("key2", 2);
@@ -80,7 +80,7 @@ public class DefaultValueStylerTests {
 	}
 
 	@Test
-	public void styleCollections() {
+	void styleCollections() {
 		List<Integer> list = Collections.emptyList();
 		assertThat(styler.style(list)).isEqualTo("list[[empty]]");
 
@@ -92,7 +92,7 @@ public class DefaultValueStylerTests {
 	}
 
 	@Test
-	public void stylePrimitiveArrays() {
+	void stylePrimitiveArrays() {
 		int[] array = new int[0];
 		assertThat(styler.style(array)).isEqualTo("array<Object>[[empty]]");
 
@@ -104,7 +104,7 @@ public class DefaultValueStylerTests {
 	}
 
 	@Test
-	public void styleObjectArrays() {
+	void styleObjectArrays() {
 		String[] array = new String[0];
 		assertThat(styler.style(array)).isEqualTo("array<String>[[empty]]");
 

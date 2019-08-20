@@ -14,51 +14,52 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type;
+package example.type;
 
 /**
  * We must use a standalone set of types to ensure that no one else is loading
- * them and interfering with {@link ClassloadingAssertions#assertClassNotLoaded(String)}.
+ * them and interfering with
+ * {@link org.springframework.core.type.ClassloadingAssertions#assertClassNotLoaded(String)}.
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @author Oliver Gierke
  * @author Sam Brannen
- * @see AnnotationTypeFilterTests
+ * @see org.springframework.core.type.AnnotationTypeFilterTests
  */
-class AnnotationTypeFilterTestsTypes {
+public class AnnotationTypeFilterTestsTypes {
 
-	@AnnotationTypeFilterTests.InheritedAnnotation
-	private static class SomeComponent {
+	@InheritedAnnotation
+	public static class SomeComponent {
 	}
 
 
-	@AnnotationTypeFilterTests.InheritedAnnotation
-	private interface SomeComponentInterface {
-	}
-
-
-	@SuppressWarnings("unused")
-	private static class SomeClassWithSomeComponentInterface implements Cloneable, SomeComponentInterface {
+	@InheritedAnnotation
+	public interface SomeComponentInterface {
 	}
 
 
 	@SuppressWarnings("unused")
-	private static class SomeSubclassOfSomeComponent extends SomeComponent {
-	}
-
-	@AnnotationTypeFilterTests.NonInheritedAnnotation
-	private static class SomeClassMarkedWithNonInheritedAnnotation {
+	public static class SomeClassWithSomeComponentInterface implements Cloneable, SomeComponentInterface {
 	}
 
 
 	@SuppressWarnings("unused")
-	private static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
+	public static class SomeSubclassOfSomeComponent extends SomeComponent {
+	}
+
+	@NonInheritedAnnotation
+	public static class SomeClassMarkedWithNonInheritedAnnotation {
 	}
 
 
 	@SuppressWarnings("unused")
-	private static class SomeNonCandidateClass {
+	public static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
+	}
+
+
+	@SuppressWarnings("unused")
+	public static class SomeNonCandidateClass {
 	}
 
 }

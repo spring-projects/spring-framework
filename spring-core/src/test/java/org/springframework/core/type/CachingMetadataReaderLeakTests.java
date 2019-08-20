@@ -39,14 +39,14 @@ import static org.springframework.tests.TestGroup.LONG_RUNNING;
  * @author Sam Brannen
  */
 @EnabledForTestGroups(LONG_RUNNING)
-public class CachingMetadataReaderLeakTests {
+class CachingMetadataReaderLeakTests {
 
 	private static final int ITEMS_TO_LOAD = 9999;
 
 	private final MetadataReaderFactory mrf = new CachingMetadataReaderFactory();
 
 	@Test
-	public void testSignificantLoad() throws Exception {
+	void significantLoad() throws Exception {
 		// the biggest public class in the JDK (>60k)
 		URL url = getClass().getResource("/java/awt/Component.class");
 		assertThat(url).isNotNull();

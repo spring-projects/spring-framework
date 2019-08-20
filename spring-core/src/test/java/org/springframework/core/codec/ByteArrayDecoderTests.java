@@ -31,14 +31,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDecoder> {
+class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public ByteArrayDecoderTests() {
+	ByteArrayDecoderTests() {
 		super(new ByteArrayDecoder());
 	}
 

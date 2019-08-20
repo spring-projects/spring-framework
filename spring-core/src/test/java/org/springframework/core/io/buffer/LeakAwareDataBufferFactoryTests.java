@@ -30,7 +30,7 @@ class LeakAwareDataBufferFactoryTests {
 
 
 	@Test
-	public void leak() {
+	void leak() {
 		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer();
 		try {
 			assertThatExceptionOfType(AssertionError.class).isThrownBy(
@@ -42,7 +42,7 @@ class LeakAwareDataBufferFactoryTests {
 	}
 
 	@Test
-	public void noLeak() {
+	void noLeak() {
 		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer();
 		release(dataBuffer);
 		this.bufferFactory.checkForLeaks();

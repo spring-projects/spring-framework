@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class CompositePropertySourceTests {
+class CompositePropertySourceTests {
 
 	@Test
-	public void addFirst() {
+	void addFirst() {
 		PropertySource<?> p1 = new MapPropertySource("p1", Collections.emptyMap());
 		PropertySource<?> p2 = new MapPropertySource("p2", Collections.emptyMap());
 		PropertySource<?> p3 = new MapPropertySource("p3", Collections.emptyMap());

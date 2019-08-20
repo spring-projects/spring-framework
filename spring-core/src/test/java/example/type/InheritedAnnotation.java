@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type;
+package example.type;
 
-/**
- * Tests for {@link StandardMethodMetadata}.
- *
- * @author Phillip Webb
- */
-class StandardMethodMetadataTests extends AbstractMethodMetadataTests {
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-	@Override
-	protected AnnotationMetadata get(Class<?> source) {
-		return AnnotationMetadata.introspect(source);
-	}
-
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+public @interface InheritedAnnotation {
 }

@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class StopWatchTests {
+class StopWatchTests {
 
 	private static final String ID = "myId";
 
@@ -47,17 +47,17 @@ public class StopWatchTests {
 
 
 	@Test
-	public void failureToStartBeforeGettingTimings() {
+	void failureToStartBeforeGettingTimings() {
 		assertThatIllegalStateException().isThrownBy(stopWatch::getLastTaskTimeMillis);
 	}
 
 	@Test
-	public void failureToStartBeforeStop() {
+	void failureToStartBeforeStop() {
 		assertThatIllegalStateException().isThrownBy(stopWatch::stop);
 	}
 
 	@Test
-	public void rejectsStartTwice() {
+	void rejectsStartTwice() {
 		stopWatch.start();
 		assertThat(stopWatch.isRunning()).isTrue();
 		stopWatch.stop();
@@ -69,7 +69,7 @@ public class StopWatchTests {
 	}
 
 	@Test
-	public void validUsage() throws Exception {
+	void validUsage() throws Exception {
 		assertThat(stopWatch.isRunning()).isFalse();
 
 		stopWatch.start(name1);
@@ -118,7 +118,7 @@ public class StopWatchTests {
 	}
 
 	@Test
-	public void validUsageDoesNotKeepTaskList() throws Exception {
+	void validUsageDoesNotKeepTaskList() throws Exception {
 		stopWatch.setKeepTaskList(false);
 
 		stopWatch.start(name1);

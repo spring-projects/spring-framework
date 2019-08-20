@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
+class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 
 	public static final String CONTENT = "<root xmlns='http://springframework.org/spring-ws'><child/></root>";
 
@@ -42,7 +42,7 @@ public class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	public void partial() throws Exception {
+	void partial() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(CONTENT));
 		eventReader.nextTag();  // skip to root

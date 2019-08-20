@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class StaxSourceTests {
+class StaxSourceTests {
 
 	private static final String XML = "<root xmlns='namespace'><child/></root>";
 
@@ -51,7 +51,7 @@ public class StaxSourceTests {
 	private DocumentBuilder documentBuilder;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		transformer = transformerFactory.newTransformer();
 		inputFactory = XMLInputFactory.newInstance();
@@ -61,7 +61,7 @@ public class StaxSourceTests {
 	}
 
 	@Test
-	public void streamReaderSourceToStreamResult() throws Exception {
+	void streamReaderSourceToStreamResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
 		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
@@ -72,7 +72,7 @@ public class StaxSourceTests {
 	}
 
 	@Test
-	public void streamReaderSourceToDOMResult() throws Exception {
+	void streamReaderSourceToDOMResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
 		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
@@ -85,7 +85,7 @@ public class StaxSourceTests {
 	}
 
 	@Test
-	public void eventReaderSourceToStreamResult() throws Exception {
+	void eventReaderSourceToStreamResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
 		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);
@@ -96,7 +96,7 @@ public class StaxSourceTests {
 	}
 
 	@Test
-	public void eventReaderSourceToDOMResult() throws Exception {
+	void eventReaderSourceToDOMResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
 		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);

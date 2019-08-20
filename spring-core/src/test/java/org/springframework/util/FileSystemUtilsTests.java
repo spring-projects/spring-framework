@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Rob Harrop
  */
-public class FileSystemUtilsTests {
+class FileSystemUtilsTests {
 
 	@Test
-	public void deleteRecursively() throws Exception {
+	void deleteRecursively() throws Exception {
 		File root = new File("./tmp/root");
 		File child = new File(root, "child");
 		File grandchild = new File(child, "grandchild");
@@ -53,7 +53,7 @@ public class FileSystemUtilsTests {
 	}
 
 	@Test
-	public void copyRecursively() throws Exception {
+	void copyRecursively() throws Exception {
 		File src = new File("./tmp/src");
 		File child = new File(src, "child");
 		File grandchild = new File(child, "grandchild");
@@ -80,7 +80,7 @@ public class FileSystemUtilsTests {
 
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		File tmp = new File("./tmp");
 		if (tmp.exists()) {
 			FileSystemUtils.deleteRecursively(tmp);

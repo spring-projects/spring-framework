@@ -24,25 +24,24 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Unit tests covering the extensibility of {@link AbstractEnvironment}.
  *
  * @author Chris Beams
  * @since 3.1
  */
-public class CustomEnvironmentTests {
+class CustomEnvironmentTests {
 
 	// -- tests relating to customizing reserved default profiles ----------------------
 
 	@Test
-	public void control() {
+	void control() {
 		Environment env = new AbstractEnvironment() { };
 		assertThat(env.acceptsProfiles(defaultProfile())).isTrue();
 	}
 
 	@Test
-	public void withNoReservedDefaultProfile() {
+	void withNoReservedDefaultProfile() {
 		class CustomEnvironment extends AbstractEnvironment {
 			@Override
 			protected Set<String> getReservedDefaultProfiles() {
@@ -55,7 +54,7 @@ public class CustomEnvironmentTests {
 	}
 
 	@Test
-	public void withSingleCustomReservedDefaultProfile() {
+	void withSingleCustomReservedDefaultProfile() {
 		class CustomEnvironment extends AbstractEnvironment {
 			@Override
 			protected Set<String> getReservedDefaultProfiles() {
@@ -69,7 +68,7 @@ public class CustomEnvironmentTests {
 	}
 
 	@Test
-	public void withMultiCustomReservedDefaultProfile() {
+	void withMultiCustomReservedDefaultProfile() {
 		class CustomEnvironment extends AbstractEnvironment {
 			@Override
 			@SuppressWarnings("serial")

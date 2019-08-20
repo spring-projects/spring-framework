@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @since 3.1.1
  */
-public class AnnotationAttributesTests {
+class AnnotationAttributesTests {
 
 	private AnnotationAttributes attributes = new AnnotationAttributes();
 
 
 	@Test
-	public void typeSafeAttributeAccess() {
+	void typeSafeAttributeAccess() {
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
 		nestedAttributes.put("value", 10);
 		nestedAttributes.put("name", "algernon");
@@ -72,7 +72,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void unresolvableClassWithClassNotFoundException() throws Exception {
+	void unresolvableClassWithClassNotFoundException() throws Exception {
 		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
@@ -81,7 +81,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void unresolvableClassWithLinkageError() throws Exception {
+	void unresolvableClassWithLinkageError() throws Exception {
 		attributes.put("unresolvableClass", new LinkageError("myclass"));
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
@@ -90,7 +90,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void singleElementToSingleElementArrayConversionSupport() throws Exception {
+	void singleElementToSingleElementArrayConversionSupport() throws Exception {
 		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
 
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
@@ -118,7 +118,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void nestedAnnotations() throws Exception {
+	void nestedAnnotations() throws Exception {
 		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
 
 		attributes.put("filter", filter);
@@ -135,28 +135,28 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void getEnumWithNullAttributeName() {
+	void getEnumWithNullAttributeName() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getEnum(null))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
-	public void getEnumWithEmptyAttributeName() {
+	void getEnumWithEmptyAttributeName() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getEnum(""))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
-	public void getEnumWithUnknownAttributeName() {
+	void getEnumWithUnknownAttributeName() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getEnum("bogus"))
 			.withMessageContaining("Attribute 'bogus' not found");
 	}
 
 	@Test
-	public void getEnumWithTypeMismatch() {
+	void getEnumWithTypeMismatch() {
 		attributes.put("color", "RED");
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> attributes.getEnum("color"))
@@ -164,7 +164,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void getAliasedStringWithImplicitAliases() {
+	void getAliasedStringWithImplicitAliases() {
 		String value = "metaverse";
 		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 
@@ -188,7 +188,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void getAliasedStringArrayWithImplicitAliases() {
+	void getAliasedStringArrayWithImplicitAliases() {
 		String[] value = new String[] {"test.xml"};
 		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 

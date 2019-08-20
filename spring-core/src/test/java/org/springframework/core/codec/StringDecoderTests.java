@@ -43,12 +43,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  * @author Mark Paluch
  */
-public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
+class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 
 	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
 
 
-	public StringDecoderTests() {
+	StringDecoderTests() {
 		super(StringDecoder.allMimeTypes());
 	}
 
@@ -77,7 +77,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeMultibyteCharacterUtf16() {
+	void decodeMultibyteCharacterUtf16() {
 		String u = "ü";
 		String e = "é";
 		String o = "ø";
@@ -103,7 +103,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLine() {
+	void decodeNewLine() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("\r\nabc\n"),
 				stringBuffer("def"),
@@ -128,7 +128,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLineIncludeDelimiters() {
+	void decodeNewLineIncludeDelimiters() {
 		this.decoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
 		Flux<DataBuffer> input = Flux.just(
@@ -155,7 +155,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyFlux() {
+	void decodeEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecode(input, String.class, step -> step
@@ -164,7 +164,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyDataBuffer() {
+	void decodeEmptyDataBuffer() {
 		Flux<DataBuffer> input = Flux.just(stringBuffer(""));
 		Flux<String> output = this.decoder.decode(input,
 				TYPE, null, Collections.emptyMap());
@@ -190,7 +190,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeToMonoWithEmptyFlux() {
+	void decodeToMonoWithEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecodeToMono(input, String.class, step -> step
@@ -204,6 +204,5 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		buffer.write(bytes);
 		return buffer;
 	}
-
 
 }

@@ -260,4 +260,5 @@ public abstract class AbstractMethodMetadataTests {
 		int size();
 
 	}
+
 }

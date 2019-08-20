@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @author Phillip Webb
  */
-public class MethodParameterTests {
+class MethodParameterTests {
 
 	private Method method;
 
@@ -51,7 +51,7 @@ public class MethodParameterTests {
 
 
 	@BeforeEach
-	public void setup() throws NoSuchMethodException {
+	void setup() throws NoSuchMethodException {
 		method = getClass().getMethod("method", String.class, Long.TYPE);
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
@@ -60,7 +60,7 @@ public class MethodParameterTests {
 
 
 	@Test
-	public void testEquals() throws NoSuchMethodException {
+	void equals() throws NoSuchMethodException {
 		assertThat(stringParameter).isEqualTo(stringParameter);
 		assertThat(longParameter).isEqualTo(longParameter);
 		assertThat(intReturnType).isEqualTo(intReturnType);
@@ -81,7 +81,7 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void testHashCode() throws NoSuchMethodException {
+	void testHashCode() throws NoSuchMethodException {
 		assertThat(stringParameter.hashCode()).isEqualTo(stringParameter.hashCode());
 		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
 		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());
@@ -94,7 +94,7 @@ public class MethodParameterTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testFactoryMethods() {
+	void testFactoryMethods() {
 		assertThat(MethodParameter.forMethodOrConstructor(method, 0)).isEqualTo(stringParameter);
 		assertThat(MethodParameter.forMethodOrConstructor(method, 1)).isEqualTo(longParameter);
 
@@ -106,13 +106,13 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void testIndexValidation() {
+	void indexValidation() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MethodParameter(method, 2));
 	}
 
 	@Test
-	public void annotatedConstructorParameterInStaticNestedClass() throws Exception {
+	void annotatedConstructorParameterInStaticNestedClass() throws Exception {
 		Constructor<?> constructor = NestedClass.class.getDeclaredConstructor(String.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
 		assertThat(methodParameter.getParameterType()).isEqualTo(String.class);
@@ -120,7 +120,7 @@ public class MethodParameterTests {
 	}
 
 	@Test  // SPR-16652
-	public void annotatedConstructorParameterInInnerClass() throws Exception {
+	void annotatedConstructorParameterInInnerClass() throws Exception {
 		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Callable.class);
 
 		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
@@ -137,7 +137,7 @@ public class MethodParameterTests {
 	}
 
 	@Test  // SPR-16734
-	public void genericConstructorParameterInInnerClass() throws Exception {
+	void genericConstructorParameterInInnerClass() throws Exception {
 		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Callable.class);
 
 		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
@@ -155,7 +155,7 @@ public class MethodParameterTests {
 
 	@Test
 	@Deprecated
-	public void multipleResolveParameterTypeCalls() throws Exception {
+	void multipleResolveParameterTypeCalls() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
 		assertThat(methodParameter.getParameterType()).isEqualTo(Object.class);
@@ -166,7 +166,7 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void equalsAndHashCodeConsidersContainingClass() throws Exception {
+	void equalsAndHashCodeConsidersContainingClass() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = MethodParameter.forExecutable(method, -1);
@@ -176,7 +176,7 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void equalsAndHashCodeConsidersNesting() throws Exception {
+	void equalsAndHashCodeConsidersNesting() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1)
 				.withContainingClass(StringList.class);
@@ -189,7 +189,8 @@ public class MethodParameterTests {
 		assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
 	}
 
-	public void withContainingClassReturnsNewInstance() throws Exception {
+	@Test
+	void withContainingClassReturnsNewInstance() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = m1.withContainingClass(StringList.class);
@@ -201,7 +202,7 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void withTypeIndexReturnsNewInstance() throws Exception {
+	void withTypeIndexReturnsNewInstance() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = m1.withTypeIndex(2);
@@ -214,7 +215,7 @@ public class MethodParameterTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void mutatingNestingLevelShouldNotChangeNewInstance() throws Exception {
+	void mutatingNestingLevelShouldNotChangeNewInstance() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = m1.withTypeIndex(2);
@@ -225,7 +226,7 @@ public class MethodParameterTests {
 	}
 
 	@Test
-	public void nestedWithTypeIndexReturnsNewInstance() throws Exception {
+	void nestedWithTypeIndexReturnsNewInstance() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = m1.nested(2);

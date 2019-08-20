@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Arjen Poutsma
  * @author Andrzej Hołowko
  */
-public class ListBasedXMLEventReaderTests {
+class ListBasedXMLEventReaderTests {
 
 	private final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
@@ -50,7 +50,7 @@ public class ListBasedXMLEventReaderTests {
 
 
 	@Test
-	public void standard() throws Exception {
+	void standard() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 
@@ -64,7 +64,7 @@ public class ListBasedXMLEventReaderTests {
 	}
 
 	@Test
-	public void testGetElementText() throws Exception {
+	void getElementText() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 
@@ -79,7 +79,7 @@ public class ListBasedXMLEventReaderTests {
 	}
 
 	@Test
-	public void testGetElementTextThrowsExceptionAtWrongPosition() throws Exception {
+	void getElementTextThrowsExceptionAtWrongPosition() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 

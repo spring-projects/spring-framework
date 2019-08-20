@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEncoder> {
+class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
-	public ByteBufferEncoderTests() {
+	ByteBufferEncoderTests() {
 		super(new ByteBufferEncoder());
 	}
 
@@ -64,7 +64,6 @@ public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEn
 				.consumeNextWith(expectBytes(this.fooBytes))
 				.consumeNextWith(expectBytes(this.barBytes))
 				.verifyComplete());
-
-
 	}
+
 }

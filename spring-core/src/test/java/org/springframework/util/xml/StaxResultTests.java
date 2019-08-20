@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class StaxResultTests {
+class StaxResultTests {
 
 	private static final String XML = "<root xmlns='namespace'><child/></root>";
 
@@ -46,14 +46,14 @@ public class StaxResultTests {
 	private XMLOutputFactory inputFactory;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		transformer = transformerFactory.newTransformer();
 		inputFactory = XMLOutputFactory.newInstance();
 	}
 
 	@Test
-	public void streamWriterSource() throws Exception {
+	void streamWriterSource() throws Exception {
 		StringWriter stringWriter = new StringWriter();
 		XMLStreamWriter streamWriter = inputFactory.createXMLStreamWriter(stringWriter);
 		Reader reader = new StringReader(XML);
@@ -66,7 +66,7 @@ public class StaxResultTests {
 	}
 
 	@Test
-	public void eventWriterSource() throws Exception {
+	void eventWriterSource() throws Exception {
 		StringWriter stringWriter = new StringWriter();
 		XMLEventWriter eventWriter = inputFactory.createXMLEventWriter(stringWriter);
 		Reader reader = new StringReader(XML);

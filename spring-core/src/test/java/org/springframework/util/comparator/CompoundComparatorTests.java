@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Phillip Webb
  */
 @Deprecated
-public class CompoundComparatorTests {
+class CompoundComparatorTests {
 
 	@Test
-	public void shouldNeedAtLeastOneComparator() {
+	void shouldNeedAtLeastOneComparator() {
 		Comparator<String> c = new CompoundComparator<>();
 		assertThatIllegalStateException().isThrownBy(() ->
 				c.compare("foo", "bar"));

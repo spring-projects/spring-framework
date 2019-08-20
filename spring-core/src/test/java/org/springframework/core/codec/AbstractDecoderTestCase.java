@@ -44,8 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
-		extends AbstractLeakCheckingTestCase {
+public abstract class AbstractDecoderTestCase<D extends Decoder<?>> extends AbstractLeakCheckingTestCase {
 
 	/**
 	 * The decoder to test.

@@ -34,10 +34,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("unchecked")
-public class ListenableFutureTaskTests {
+class ListenableFutureTaskTests {
 
 	@Test
-	public void success() throws Exception {
+	void success() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 
@@ -60,7 +60,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void failure() throws Exception {
+	void failure() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> {
 			throw new IOException(s);
@@ -88,7 +88,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void successWithLambdas() throws Exception {
+	void successWithLambdas() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 
@@ -106,7 +106,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void failureWithLambdas() throws Exception {
+	void failureWithLambdas() throws Exception {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);
 		Callable<String> callable = () -> {

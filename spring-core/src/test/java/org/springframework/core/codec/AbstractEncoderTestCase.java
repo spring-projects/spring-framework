@@ -45,8 +45,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
-		extends	AbstractLeakCheckingTestCase {
+public abstract class AbstractEncoderTestCase<E extends Encoder<?>> extends AbstractLeakCheckingTestCase {
 
 	/**
 	 * The encoder to test.
@@ -272,6 +271,5 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
 	public static class InputException extends RuntimeException {
 
 	}
-
 
 }

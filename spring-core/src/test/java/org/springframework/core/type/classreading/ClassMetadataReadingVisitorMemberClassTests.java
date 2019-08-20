@@ -26,8 +26,7 @@ import org.springframework.core.type.ClassMetadata;
  * @since 3.1
  * @see AbstractClassMetadataMemberClassTests
  */
-public class ClassMetadataReadingVisitorMemberClassTests
-		extends AbstractClassMetadataMemberClassTests {
+class ClassMetadataReadingVisitorMemberClassTests extends AbstractClassMetadataMemberClassTests {
 
 	@Override
 	public ClassMetadata getClassMetadataFor(Class<?> clazz) {

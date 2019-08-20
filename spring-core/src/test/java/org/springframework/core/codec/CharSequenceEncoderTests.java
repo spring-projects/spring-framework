@@ -34,14 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class CharSequenceEncoderTests
-		extends AbstractEncoderTestCase<CharSequenceEncoder> {
+class CharSequenceEncoderTests extends AbstractEncoderTestCase<CharSequenceEncoder> {
 
 	private final String foo = "foo";
 
 	private final String bar = "bar";
 
-	public CharSequenceEncoderTests() {
+	CharSequenceEncoderTests() {
 		super(CharSequenceEncoder.textPlainOnly());
 	}
 
@@ -74,7 +73,7 @@ public class CharSequenceEncoderTests
 	}
 
 	@Test
-	public void calculateCapacity() {
+	void calculateCapacity() {
 		String sequence = "Hello World!";
 		Stream.of(UTF_8, UTF_16, ISO_8859_1, US_ASCII, Charset.forName("BIG5"))
 				.forEach(charset -> {
@@ -82,7 +81,6 @@ public class CharSequenceEncoderTests
 					int length = sequence.length();
 					assertThat(capacity >= length).as(String.format("%s has capacity %d; length %d", charset, capacity, length)).isTrue();
 				});
-
 	}
 
 }

@@ -27,12 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * @author Arjen Poutsma
  * @author Leo Arnold
  */
-public class SimpleNamespaceContextTests {
+class SimpleNamespaceContextTests {
 
 	private final String unboundPrefix = "unbound";
 	private final String prefix = "prefix";
@@ -45,13 +44,13 @@ public class SimpleNamespaceContextTests {
 
 
 	@Test
-	public void getNamespaceURI_withNull() throws Exception {
+	void getNamespaceURI_withNull() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getNamespaceURI(null));
 	}
 
 	@Test
-	public void getNamespaceURI() {
+	void getNamespaceURI() {
 		context.bindNamespaceUri(XMLConstants.XMLNS_ATTRIBUTE, additionalNamespaceUri);
 		assertThat(context.getNamespaceURI(XMLConstants.XMLNS_ATTRIBUTE))
 				.as("Always returns \"http://www.w3.org/2000/xmlns/\" for \"xmlns\"")
@@ -79,13 +78,13 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void getPrefix_withNull() throws Exception {
+	void getPrefix_withNull() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getPrefix(null));
 	}
 
 	@Test
-	public void getPrefix() {
+	void getPrefix() {
 		assertThat(context.getPrefix(XMLConstants.XMLNS_ATTRIBUTE_NS_URI))
 				.as("Always returns \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"")
 				.isEqualTo(XMLConstants.XMLNS_ATTRIBUTE);
@@ -102,13 +101,13 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void getPrefixes_withNull() throws Exception {
+	void getPrefixes_withNull() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getPrefixes(null));
 	}
 
 	@Test
-	public void getPrefixes_IteratorIsNotModifiable() throws Exception {
+	void getPrefixes_IteratorIsNotModifiable() throws Exception {
 		context.bindNamespaceUri(prefix, namespaceUri);
 		Iterator<String> iterator = context.getPrefixes(namespaceUri);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
@@ -116,7 +115,7 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void getPrefixes() {
+	void getPrefixes() {
 		assertThat(getItemSet(context.getPrefixes(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)))
 				.as("Returns only \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"")
 				.containsExactly(XMLConstants.XMLNS_ATTRIBUTE);
@@ -135,19 +134,19 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void bindNamespaceUri_withNullNamespaceUri() {
+	void bindNamespaceUri_withNullNamespaceUri() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.bindNamespaceUri("prefix", null));
 	}
 
 	@Test
-	public void bindNamespaceUri_withNullPrefix() {
+	void bindNamespaceUri_withNullPrefix() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.bindNamespaceUri(null, namespaceUri));
 	}
 
 	@Test
-	public void bindNamespaceUri() {
+	void bindNamespaceUri() {
 		context.bindNamespaceUri(prefix, namespaceUri);
 		assertThat(context.getNamespaceURI(prefix))
 				.as("The Namespace URI was bound to the prefix")
@@ -158,7 +157,7 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void getBoundPrefixes() {
+	void getBoundPrefixes() {
 		context.bindNamespaceUri("prefix1", namespaceUri);
 		context.bindNamespaceUri("prefix2", namespaceUri);
 		context.bindNamespaceUri("prefix3", additionalNamespaceUri);
@@ -168,7 +167,7 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void clear() {
+	void clear() {
 		context.bindNamespaceUri("prefix1", namespaceUri);
 		context.bindNamespaceUri("prefix2", namespaceUri);
 		context.bindNamespaceUri("prefix3", additionalNamespaceUri);
@@ -178,7 +177,7 @@ public class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	public void removeBinding() {
+	void removeBinding() {
 		context.removeBinding(unboundPrefix);
 
 		context.bindNamespaceUri(prefix, namespaceUri);

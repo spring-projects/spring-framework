@@ -35,8 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Phillip Webb
  */
 @SuppressWarnings("deprecation")
-public class AnnotationMetadataReadingVisitorTests
-		extends AbstractAnnotationMetadataTests {
+class AnnotationMetadataReadingVisitorTests extends AbstractAnnotationMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
