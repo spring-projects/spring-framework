@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Markus Malkusch
  * @author Sam Brannen
  */
-public class ServletWebRequestHttpMethodsTests {
+class ServletWebRequestHttpMethodsTests {
 
 	private static final String CURRENT_TIME = "Wed, 9 Apr 2014 09:57:42 GMT";
 
@@ -54,7 +54,7 @@ public class ServletWebRequestHttpMethodsTests {
 
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedNon2xxStatus(String method) {
+	void checkNotModifiedNon2xxStatus(String method) {
 		setUpRequest(method);
 
 		long epochTime = currentDate.getTime();
@@ -67,7 +67,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest  // SPR-13516
-	public void checkNotModifiedInvalidStatus(String method) {
+	void checkNotModifiedInvalidStatus(String method) {
 		setUpRequest(method);
 
 		long epochTime = currentDate.getTime();
@@ -78,7 +78,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest  // SPR-14559
-	public void checkNotModifiedInvalidIfNoneMatchHeader(String method) {
+	void checkNotModifiedInvalidIfNoneMatchHeader(String method) {
 		setUpRequest(method);
 
 		String etag = "\"etagvalue\"";
@@ -89,7 +89,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedHeaderAlreadySet(String method) {
+	void checkNotModifiedHeaderAlreadySet(String method) {
 		setUpRequest(method);
 
 		long epochTime = currentDate.getTime();
@@ -103,7 +103,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedTimestamp(String method) {
+	void checkNotModifiedTimestamp(String method) {
 		setUpRequest(method);
 
 		long epochTime = currentDate.getTime();
@@ -115,7 +115,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkModifiedTimestamp(String method) {
+	void checkModifiedTimestamp(String method) {
 		setUpRequest(method);
 
 		long oneMinuteAgo = currentDate.getTime() - (1000 * 60);
@@ -127,7 +127,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedETag(String method) {
+	void checkNotModifiedETag(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -139,7 +139,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedETagWithSeparatorChars(String method) {
+	void checkNotModifiedETagWithSeparatorChars(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo, Bar\"";
@@ -152,7 +152,7 @@ public class ServletWebRequestHttpMethodsTests {
 
 
 	@ParameterizedHttpMethodTest
-	public void checkModifiedETag(String method) {
+	void checkModifiedETag(String method) {
 		setUpRequest(method);
 
 		String currentETag = "\"Foo\"";
@@ -165,7 +165,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedUnpaddedETag(String method) {
+	void checkNotModifiedUnpaddedETag(String method) {
 		setUpRequest(method);
 
 		String etag = "Foo";
@@ -178,7 +178,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkModifiedUnpaddedETag(String method) {
+	void checkModifiedUnpaddedETag(String method) {
 		setUpRequest(method);
 
 		String currentETag = "Foo";
@@ -191,7 +191,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedWildcardIsIgnored(String method) {
+	void checkNotModifiedWildcardIsIgnored(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -203,7 +203,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedETagAndTimestamp(String method) {
+	void checkNotModifiedETagAndTimestamp(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -217,7 +217,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest  // SPR-14224
-	public void checkNotModifiedETagAndModifiedTimestamp(String method) {
+	void checkNotModifiedETagAndModifiedTimestamp(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -233,7 +233,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkModifiedETagAndNotModifiedTimestamp(String method) {
+	void checkModifiedETagAndNotModifiedTimestamp(String method) {
 		setUpRequest(method);
 
 		String currentETag = "\"Foo\"";
@@ -249,7 +249,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedETagWeakStrong(String method) {
+	void checkNotModifiedETagWeakStrong(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -262,7 +262,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedETagStrongWeak(String method) {
+	void checkNotModifiedETagStrongWeak(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Foo\"";
@@ -274,7 +274,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedMultipleETags(String method) {
+	void checkNotModifiedMultipleETags(String method) {
 		setUpRequest(method);
 
 		String etag = "\"Bar\"";
@@ -287,7 +287,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedTimestampWithLengthPart(String method) {
+	void checkNotModifiedTimestampWithLengthPart(String method) {
 		setUpRequest(method);
 
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
@@ -300,7 +300,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkModifiedTimestampWithLengthPart(String method) {
+	void checkModifiedTimestampWithLengthPart(String method) {
 		setUpRequest(method);
 
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
@@ -313,7 +313,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedTimestampConditionalPut(String method) {
+	void checkNotModifiedTimestampConditionalPut(String method) {
 		setUpRequest(method);
 
 		long currentEpoch = currentDate.getTime();
@@ -327,7 +327,7 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	public void checkNotModifiedTimestampConditionalPutConflict(String method) {
+	void checkNotModifiedTimestampConditionalPutConflict(String method) {
 		setUpRequest(method);
 
 		long currentEpoch = currentDate.getTime();
@@ -348,7 +348,7 @@ public class ServletWebRequestHttpMethodsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0}")
 	@ValueSource(strings = { "GET", "HEAD" })
 	@interface ParameterizedHttpMethodTest {
 	}

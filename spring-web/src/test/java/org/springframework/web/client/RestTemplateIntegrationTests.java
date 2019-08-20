@@ -82,13 +82,13 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0}")
 	@MethodSource("clientHttpRequestFactories")
 	@interface ParameterizedRestTemplateTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	static Stream<? extends ClientHttpRequestFactory> clientHttpRequestFactories() {
+	static Stream<ClientHttpRequestFactory> clientHttpRequestFactories() {
 		return Stream.of(
 			new SimpleClientHttpRequestFactory(),
 			new HttpComponentsClientHttpRequestFactory(),
