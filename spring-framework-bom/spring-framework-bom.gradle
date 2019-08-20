@@ -1,4 +1,5 @@
 description = "Spring Framework (Bill of Materials)"
+group = "org.springframework"
 
 apply plugin: "java"
 apply plugin: "maven"
