@@ -76,10 +76,10 @@ import java.lang.annotation.Target;
  * &#064;ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
  * public abstract class AbstractWebTests {}
  *
- * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/soap-ws-config.xml")
+ * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/soap-ws-config.xml"))
  * public class SoapWebServiceTests extends AbstractWebTests {}
  *
- * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/rest-ws-config.xml")
+ * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/rest-ws-config.xml"))
  * public class RestWebServiceTests extends AbstractWebTests {}</pre>
  *
  * <h4>Class Hierarchy with Merged Context Hierarchy Configuration</h4>
