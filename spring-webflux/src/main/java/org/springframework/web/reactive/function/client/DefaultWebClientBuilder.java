@@ -25,9 +25,11 @@ import java.util.function.Consumer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,6 +43,17 @@ import org.springframework.web.util.UriBuilderFactory;
  * @since 5.0
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
+	private static final boolean jettyHttpClientPresent;
+
+	private static final boolean reactorNettyHttpClientPresent;
+
+	static {
+		ClassLoader classLoader = DefaultWebClientBuilder.class.getClassLoader();
+		jettyHttpClientPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.client.HttpClient", classLoader);
+		reactorNettyHttpClientPresent = ClassUtils.isPresent(
+				"reactor.netty.http.client.HttpClient", classLoader);
+	}
 
 	@Nullable
 	private String baseUrl;
@@ -234,8 +247,18 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
 		}
 		else {
-			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
+			return ExchangeFunctions.create(createDefaultClientHttpConnector(), this.exchangeStrategies);
 		}
+	}
+
+	private ClientHttpConnector createDefaultClientHttpConnector() {
+		if (reactorNettyHttpClientPresent) {
+			return new ReactorClientHttpConnector();
+		}
+		else if (jettyHttpClientPresent) {
+			return new JettyClientHttpConnector();
+		}
+		throw new IllegalStateException("No suitable default ClientHttpConnector found");
 	}
 
 	private UriBuilderFactory initUriBuilderFactory() {
