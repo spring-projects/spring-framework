@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.jupiter.api.AfterEach;
@@ -73,7 +74,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * @author Sam Brannen
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class AbstractWebSocketIntegrationTests {
+abstract class AbstractWebSocketIntegrationTests {
 
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
@@ -84,7 +85,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@interface ParameterizedWebSocketTest {
 	}
 
-	static Object[][] arguments() throws IOException {
+	static Stream<Object[]> arguments() throws IOException {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
@@ -110,9 +111,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		return Flux.zip(f1, f2.map(Map.Entry::getKey), f2.map(Map.Entry::getValue))
 				.map(Tuple3::toArray)
-				.collectList()
-				.block()
-				.toArray(new Object[clients.length * servers.size()][2]);
+				.toStream();
 	}
 
 
