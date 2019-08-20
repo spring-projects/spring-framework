@@ -1,5 +1,7 @@
 description = "Spring Integration Tests"
 
+apply plugin: "org.springframework.build.test-sources"
+
 dependencies {
 	testCompile(project(":spring-aop"))
 	testCompile(project(":spring-beans"))
