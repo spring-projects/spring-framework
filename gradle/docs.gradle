@@ -79,22 +79,16 @@ dokka {
 	}
 }
 
-configurations {
-	docs
+task downloadResources(type: Download) {
+	def version = "0.1.2.RELEASE"
+	src "https://repo.spring.io/release/io/spring/docresources/" +
+			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
+	dest project.file("$buildDir/docs/spring-doc-resources.zip")
 }
 
-dependencies {
-	// for documentation resources
-	docs "io.spring.docresources:spring-doc-resources:0.1.0.RELEASE@zip"
-}
-
-task extractDocResources(type: Sync) {
-	dependsOn configurations.docs
-	from {
-		configurations.docs.collect { zipTree(it) }
-	}
-	from "src/docs/asciidoc/"
-	into "$buildDir/asciidoc/build"
+task extractDocResources(type: Copy, dependsOn: downloadResources) {
+	from project.zipTree(downloadResources.dest);
+	into "$buildDir/docs/spring-docs-resources/"
 }
 
 /**
@@ -102,14 +96,15 @@ task extractDocResources(type: Sync) {
  * from "src/docs/asciidoc" into  "build/asciidoc/html5"
  */
 asciidoctor {
-	sourceDir "$buildDir/asciidoc/build"
 	sources {
 		include '*.adoc'
 	}
+	outputDir "$buildDir/docs/ref-docs/"
 	resources {
 		from(sourceDir) {
 			include 'images/*', 'css/**', 'js/**'
 		}
+		from "$buildDir/docs/spring-docs-resources/"
 	}
 	logDocuments = true
 	backends = ["html5"]
@@ -121,10 +116,10 @@ asciidoctor {
 	attributes  'icons': 'font',
 			'idprefix': '',
 			'idseparator': '-',
-			docinfo: 'shared',
-			revnumber: project.version,
-			sectanchors: '',
-			sectnums: '',
+			'docinfo': 'shared',
+			'revnumber': project.version,
+			'sectanchors': '',
+			'sectnums': '',
 			'source-highlighter=highlight.js',
 			'highlightjsdir=js/highlight',
 			'highlightjs-theme=atom-one-dark-reasonable',
