@@ -1,5 +1,6 @@
 description = "Spring Framework (Bill of Materials)"
 
+apply plugin: "java"
 apply plugin: "maven"
 
 configurations.archives.artifacts.clear()

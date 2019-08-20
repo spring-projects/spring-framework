@@ -49,7 +49,7 @@ ext {
 	}
 }
 
-configure(allprojects) { project ->
+configure(allprojects.findAll { (it.name != "spring-framework-bom") } ) { project ->
 	group = "org.springframework"
 
 	apply plugin: "java"
