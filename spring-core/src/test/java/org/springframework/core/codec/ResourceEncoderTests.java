@@ -64,6 +64,7 @@ class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncoder> {
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<Resource> input = Flux.just(new ByteArrayResource(this.bytes));
 

@@ -79,6 +79,7 @@ class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecoder> {
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),

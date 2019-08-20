@@ -46,6 +46,7 @@ class CharSequenceEncoderTests extends AbstractEncoderTestCase<CharSequenceEncod
 
 
 	@Override
+	@Test
 	public void canEncode() throws Exception {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
@@ -63,6 +64,7 @@ class CharSequenceEncoderTests extends AbstractEncoderTestCase<CharSequenceEncod
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<CharSequence> input = Flux.just(this.foo, this.bar);
 

@@ -55,6 +55,7 @@ class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<byte[]> input = Flux.just(this.fooBytes, this.barBytes);
 
@@ -63,4 +64,5 @@ class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
 				.consumeNextWith(expectBytes(this.barBytes))
 				.verifyComplete());
 	}
+
 }

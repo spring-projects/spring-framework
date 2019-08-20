@@ -57,6 +57,7 @@ class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEncoder> 
 	}
 
 	@Override
+	@Test
 	public void encode() throws Exception {
 		Flux<DataBuffer> input = Flux.just(this.fooBytes, this.barBytes)
 				.flatMap(bytes -> Mono.defer(() -> {

@@ -55,6 +55,7 @@ class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDecoder> 
 	}
 
 	@Override
+	@Test
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(
 				this.bufferFactory.wrap(this.fooBytes),
@@ -67,6 +68,7 @@ class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDecoder> 
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() throws Exception {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
