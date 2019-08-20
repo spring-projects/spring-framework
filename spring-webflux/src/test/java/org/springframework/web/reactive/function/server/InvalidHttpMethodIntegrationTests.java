@@ -32,8 +32,8 @@ class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionIntegratio
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		return RouterFunctions.route(RequestPredicates.GET("/"),
-				request -> ServerResponse.ok().body("FOO"))
-				.andRoute(RequestPredicates.all(), request -> ServerResponse.ok().body("BAR"));
+				request -> ServerResponse.ok().bodyValue("FOO"))
+				.andRoute(RequestPredicates.all(), request -> ServerResponse.ok().bodyValue("BAR"));
 	}
 
 	@ParameterizedHttpServerTest

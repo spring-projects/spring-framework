@@ -408,7 +408,7 @@ public interface ServerResponse {
 		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
 		 * @since 5.2
 		 */
-		Mono<ServerResponse> body(Object body);
+		Mono<ServerResponse> bodyValue(Object body);
 
 		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
@@ -479,7 +479,7 @@ public interface ServerResponse {
 		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
 		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
 		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */
 		@Deprecated
 		Mono<ServerResponse> syncBody(Object body);

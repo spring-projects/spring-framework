@@ -67,12 +67,12 @@ class ServerResponseExtensionsTests {
 	fun `BodyBuilder#bodyAndAwait with object parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = "foo"
-		every { bodyBuilder.body(ofType<String>()) } returns Mono.just(response)
+		every { bodyBuilder.bodyValue(ofType<String>()) } returns Mono.just(response)
 		runBlocking {
 			bodyBuilder.bodyAndAwait(body)
 		}
 		verify {
-			bodyBuilder.body(ofType<String>())
+			bodyBuilder.bodyValue(ofType<String>())
 		}
 	}
 

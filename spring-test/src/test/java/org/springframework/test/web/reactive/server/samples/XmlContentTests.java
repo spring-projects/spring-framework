@@ -116,7 +116,7 @@ public class XmlContentTests {
 
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_XML)
-				.body(content)
+				.bodyValue(content)
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "/persons/John")

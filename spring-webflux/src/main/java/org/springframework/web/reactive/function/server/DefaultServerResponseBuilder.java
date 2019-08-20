@@ -223,7 +223,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public Mono<ServerResponse> body(Object body) {
+	public Mono<ServerResponse> bodyValue(Object body) {
 		return new DefaultEntityResponseBuilder<>(body,
 				BodyInserters.fromObject(body))
 				.status(this.statusCode)
@@ -286,7 +286,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	@Deprecated
 	public Mono<ServerResponse> syncBody(Object body) {
-		return body(body);
+		return bodyValue(body);
 	}
 
 	@Override

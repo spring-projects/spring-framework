@@ -145,7 +145,7 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() {
 		this.client.post()
-				.body(new Person("John"))
+				.bodyValue(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")

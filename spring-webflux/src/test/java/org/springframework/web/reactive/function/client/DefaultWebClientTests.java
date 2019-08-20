@@ -186,7 +186,7 @@ public class DefaultWebClientTests {
 		WebClient client = this.builder.build();
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				client.post().uri("https://example.com").body(mono));
+				client.post().uri("https://example.com").bodyValue(mono));
 	}
 
 	@Test

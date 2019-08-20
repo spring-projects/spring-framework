@@ -85,7 +85,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("/requestPart")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -101,7 +101,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyMap")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -117,7 +117,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyFlux")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -133,7 +133,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<String> result = webClient
 				.post()
 				.uri("/filePartFlux")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -149,7 +149,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<String> result = webClient
 				.post()
 				.uri("/filePartMono")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -165,7 +165,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Flux<String> result = webClient
 				.post()
 				.uri("/transferTo")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToFlux(String.class);
 
@@ -183,7 +183,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Mono<String> result = webClient
 				.post()
 				.uri("/modelAttribute")
-				.body(generateBody())
+				.bodyValue(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 

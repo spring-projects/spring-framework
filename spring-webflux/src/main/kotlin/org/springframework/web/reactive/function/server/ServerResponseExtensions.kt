@@ -75,7 +75,7 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyWithType(publisher: 
  * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance],
  */
 suspend fun ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
-		body(body).awaitSingle()
+		bodyValue(body).awaitSingle()
 
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.body] with [Any] and

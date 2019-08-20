@@ -642,7 +642,7 @@ public interface WebTestClient {
 		 * @return spec for decoding the response
 		 * @since 5.2
 		 */
-		RequestHeadersSpec<?> body(Object body);
+		RequestHeadersSpec<?> bodyValue(Object body);
 
 		/**
 		 * Set the body of the request to the given producer.
@@ -713,7 +713,7 @@ public interface WebTestClient {
 		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
 		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
 		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */
 		@Deprecated
 		RequestHeadersSpec<?> syncBody(Object body);

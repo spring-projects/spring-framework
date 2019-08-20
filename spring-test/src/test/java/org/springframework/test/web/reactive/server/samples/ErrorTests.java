@@ -63,7 +63,7 @@ public class ErrorTests {
 		EntityExchangeResult<Void> result = this.client.post()
 				.uri("/post")
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new Person("Dan"))
+				.bodyValue(new Person("Dan"))
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody().isEmpty();

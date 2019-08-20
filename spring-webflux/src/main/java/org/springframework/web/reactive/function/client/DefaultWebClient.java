@@ -288,7 +288,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object body) {
+		public RequestHeadersSpec<?> bodyValue(Object body) {
 			this.inserter = BodyInserters.fromObject(body);
 			return this;
 		}
@@ -327,7 +327,7 @@ class DefaultWebClient implements WebClient {
 		@Override
 		@Deprecated
 		public RequestHeadersSpec<?> syncBody(Object body) {
-			return body(body);
+			return bodyValue(body);
 		}
 
 		@Override

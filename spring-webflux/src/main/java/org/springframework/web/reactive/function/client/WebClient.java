@@ -59,7 +59,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * </ul>
  * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#body(Object) body(Object)}
+ * <li>{@link RequestBodySpec#bodyValue(Object) bodyValue(Object)}
  * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}
  * <li>{@link RequestBodySpec#body(Object, Class) body(Object,Class)}
  * <li>{@link RequestBodySpec#body(BodyInserter) body(BodyInserter)}
@@ -528,7 +528,7 @@ public interface WebClient {
 		 * Mono&lt;Void&gt; result = client.post()
 		 *     .uri("/persons/{id}", id)
 		 *     .contentType(MediaType.APPLICATION_JSON)
-		 *     .body(person)
+		 *     .bodyValue(person)
 		 *     .retrieve()
 		 *     .bodyToMono(Void.class);
 		 * </pre>
@@ -547,7 +547,7 @@ public interface WebClient {
 		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
 		 * @since 5.2
 		 */
-		RequestHeadersSpec<?> body(Object body);
+		RequestHeadersSpec<?> bodyValue(Object body);
 
 		/**
 		 * A shortcut for {@link #body(BodyInserter)} with a
@@ -657,7 +657,7 @@ public interface WebClient {
 		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
 		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
 		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */
 		@Deprecated
 		RequestHeadersSpec<?> syncBody(Object body);
