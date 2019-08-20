@@ -22,12 +22,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.context.Lifecycle;
@@ -36,11 +38,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Base class for WebSocket integration tests.
@@ -58,11 +64,18 @@ public abstract class AbstractWebSocketIntegrationTests {
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
 
+	static Stream<Arguments> argumentsFactory() {
+		return Stream.of(
+				arguments(new JettyWebSocketTestServer(), new JettyWebSocketClient()),
+				arguments(new TomcatWebSocketTestServer(), new StandardWebSocketClient()),
+				arguments(new UndertowTestServer(), new StandardWebSocketClient()));
+	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "server [{0}], client [{1}]")
-	@MethodSource("arguments")
+	@MethodSource("argumentsFactory")
 	protected @interface ParameterizedWebSocketTest {
 	}
 

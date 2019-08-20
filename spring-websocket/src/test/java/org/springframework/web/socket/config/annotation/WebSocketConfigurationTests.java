@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -26,14 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
-import org.springframework.web.socket.JettyWebSocketTestServer;
-import org.springframework.web.socket.TomcatWebSocketTestServer;
-import org.springframework.web.socket.UndertowTestServer;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.WebSocketTestServer;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
@@ -47,15 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  */
 class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
-
-	static Iterable<Object[]> arguments() {
-		return Arrays.asList(new Object[][] {
-				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
-				{new UndertowTestServer(), new StandardWebSocketClient()}
-		});
-	}
-
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
