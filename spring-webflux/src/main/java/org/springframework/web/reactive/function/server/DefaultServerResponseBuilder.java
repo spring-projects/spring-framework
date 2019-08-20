@@ -41,6 +41,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
@@ -218,63 +219,37 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	public Mono<ServerResponse> build(
 			BiFunction<ServerWebExchange, ServerResponse.Context, Mono<Void>> writeFunction) {
 
-		return Mono.just(
-				new WriterFunctionResponse(this.statusCode, this.headers, this.cookies, writeFunction));
+		return Mono.just(new WriterFunctionResponse(
+				this.statusCode, this.headers, this.cookies, writeFunction));
 	}
 
 	@Override
 	public Mono<ServerResponse> bodyValue(Object body) {
-		return new DefaultEntityResponseBuilder<>(body,
-				BodyInserters.fromObject(body))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
+		return initBuilder(body, BodyInserters.fromObject(body));
 	}
 
 	@Override
 	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass) {
-		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, elementClass))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
+		return initBuilder(publisher, BodyInserters.fromPublisher(publisher, elementClass));
 	}
 
 	@Override
-	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-			ParameterizedTypeReference<T> elementTypeRef) {
-		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, elementTypeRef))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
+	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, ParameterizedTypeReference<T> typeRef) {
+		return initBuilder(publisher, BodyInserters.fromPublisher(publisher, typeRef));
 	}
 
 	@Override
 	public Mono<ServerResponse> body(Object producer, Class<?> elementClass) {
-		return new DefaultEntityResponseBuilder<>(producer,
-				BodyInserters.fromProducer(producer, elementClass))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
+		return initBuilder(producer, BodyInserters.fromProducer(producer, elementClass));
 	}
 
 	@Override
 	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-		return new DefaultEntityResponseBuilder<>(producer,
-				BodyInserters.fromProducer(producer, elementTypeRef))
+		return initBuilder(producer, BodyInserters.fromProducer(producer, elementTypeRef));
+	}
+
+	private  <T> Mono<ServerResponse> initBuilder(T entity, BodyInserter<T, ReactiveHttpOutputMessage> inserter) {
+		return new DefaultEntityResponseBuilder<>(entity, inserter)
 				.status(this.statusCode)
 				.headers(this.headers)
 				.cookies(cookies -> cookies.addAll(this.cookies))
@@ -285,8 +260,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
-		return Mono.just(
-				new BodyInserterResponse<>(this.statusCode, this.headers, this.cookies, inserter, this.hints));
+		return Mono.just(new BodyInserterResponse<>(
+				this.statusCode, this.headers, this.cookies, inserter, this.hints));
 	}
 
 	@Override

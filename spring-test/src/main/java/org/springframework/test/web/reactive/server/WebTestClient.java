@@ -47,6 +47,7 @@ import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -60,22 +61,27 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Non-blocking, reactive client for testing web servers. It uses the reactive
- * {@link WebClient} internally to perform requests and provides a fluent API
- * to verify responses.
+ * Client for testing web servers that uses {@link WebClient} internally to
+ * perform requests while also providing a fluent API to verify responses.
+ * This client can connect to any server over HTTP, or to a WebFlux application
+ * via mock request and response objects.
  *
- * <p>{@code WebTestClient} can connect to any server over an HTTP connection.
- * It can also bind directly to WebFlux applications using mock request and
- * response objects, without the need for an HTTP server.
+ * <p>Use one of the bindToXxx methods to create an instance. For example:
+ * <ul>
+ * <li>{@link #bindToController(Object...)}
+ * <li>{@link #bindToRouterFunction(RouterFunction)}
+ * <li>{@link #bindToApplicationContext(ApplicationContext)}
+ * <li>{@link #bindToServer()}
+ * <li>...
+ * </ul>
  *
- * <p>See the static {@code bindToXxx} entry points for creating an instance.
- *
- * <p><strong>Warning</strong>: {@code WebTestClient} is not usable yet in Kotlin due to a
- * <a href="https://youtrack.jetbrains.com/issue/KT-5464">type inference issue</a> which is
- * expected to be fixed as of Kotlin 1.3. You can watch
- * <a href="https://jira.spring.io/browse/SPR-16057">SPR-16057</a> for up-to-date information.
- * Meanwhile, the proposed alternative is to use directly {@link WebClient} with its Reactor
- * and Spring Kotlin extensions to perform integration tests on an embedded WebFlux server.
+ * <p><strong>Warning</strong>: {@code WebTestClient} is not usable yet in
+ * Kotlin due to a <a href="https://youtrack.jetbrains.com/issue/KT-5464">type inference issue</a>
+ * which is expected to be fixed as of Kotlin 1.3. You can watch
+ * <a href="https://github.com/spring-projects/spring-framework/issues/20606">gh-20606</a>
+ * for up-to-date information. Meanwhile, the proposed alternative is to use
+ * directly {@link WebClient} with its Reactor and Spring Kotlin extensions to
+ * perform integration tests on an embedded WebFlux server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -626,93 +632,81 @@ public interface WebTestClient {
 		RequestBodySpec contentType(MediaType contentType);
 
 		/**
-		 * Set the body of the request to the given {@code Object} and perform the request.
-		 * <p>This method is a convenient shortcut for:
-		 * <pre class="code">
-		 * .body(BodyInserters.fromObject(object))
-		 * </pre>
-		 * <p>The body can be a
-		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
-		 * a multipart request. The values in the {@code MultiValueMap} can be
-		 * any Object representing the body of the part, or an
-		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
-		 * part with body and headers. The {@code MultiValueMap} can be built
-		 * conveniently using
-		 * @param body the {@code Object} to write to the request
-		 * @return spec for decoding the response
+		 * Set the body to the given {@code Object} value. This method invokes the
+		 * {@link WebClient.RequestBodySpec#bodyValue(Object) bodyValue} method
+		 * on the underlying {@code WebClient}.
+		 * @param body the value to write to the request body
+		 * @return spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> bodyValue(Object body);
 
 		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * Set the body from the given {@code Publisher}. Shortcut for
+		 * {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
 		 * @param publisher the request body data
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for decoding the response
+		 * @return spec for further declaration of the request
 		 */
 		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * Variant of {@link #body(Publisher, Class)} that allows providing
+		 * element type information with generics.
 		 * @param publisher the request body data
 		 * @param elementTypeRef the type reference of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for decoding the response
+		 * @return spec for further declaration of the request
 		 * @since 5.2
 		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef);
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(
+				S publisher, ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Set the body of the request to the given producer.
+		 * Set the body from the given producer. This method invokes the
+		 * {@link WebClient.RequestBodySpec#body(Object, Class)} method on the
+		 * underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
 		 * @param elementClass the class of elements contained in the producer
-		 * @return spec for decoding the response
+		 * @return spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, Class<?> elementClass);
 
 		/**
-		 * Set the body of the request to the given producer.
+		 * Set the body from the given producer. This method invokes the
+		 * {@link WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)}
+		 * method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
 		 * @param elementTypeRef the type reference of elements contained in the producer
-		 * @return spec for decoding the response
+		 * @return spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
-		 * @param inserter the inserter
-		 * @return spec for decoding the response
+		 * This method invokes the
+		 * {@link WebClient.RequestBodySpec#body(BodyInserter)} method on the
+		 * underlying {@code WebClient}.
+		 * @param inserter the body inserter to use
+		 * @return spec for further declaration of the request
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Set the body of the request to the given {@code Object} and perform the request.
-		 * <p>This method is a convenient shortcut for:
-		 * <pre class="code">
-		 * .body(BodyInserters.fromObject(object))
-		 * </pre>
-		 * <p>The body can be a
-		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
-		 * a multipart request. The values in the {@code MultiValueMap} can be
-		 * any Object representing the body of the part, or an
-		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
-		 * part with body and headers. The {@code MultiValueMap} can be built
-		 * conveniently using
-		 * @param body the {@code Object} to write to the request
-		 * @return spec for decoding the response
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
-		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
-		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
+		 * Shortcut for {@link #body(BodyInserter)} with an
+		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
 		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */
 		@Deprecated
