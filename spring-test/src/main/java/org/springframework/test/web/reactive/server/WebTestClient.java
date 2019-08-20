@@ -645,6 +645,27 @@ public interface WebTestClient {
 		RequestHeadersSpec<?> bodyValue(Object body);
 
 		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * @param publisher the request body data
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return spec for decoding the response
+		 */
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
+
+		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * @param publisher the request body data
+		 * @param elementTypeRef the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
 		 * Set the body of the request to the given producer.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
@@ -665,27 +686,6 @@ public interface WebTestClient {
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
-
-		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
-		 * @param publisher the request body data
-		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for decoding the response
-		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
-
-		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
-		 * @param publisher the request body data
-		 * @param elementTypeRef the type reference of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for decoding the response
-		 * @since 5.2
-		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.

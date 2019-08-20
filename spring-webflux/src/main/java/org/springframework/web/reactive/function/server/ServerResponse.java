@@ -413,6 +413,31 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * @param publisher the {@code Publisher} to write to the response
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return the built response
+		 */
+		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
+
+		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromPublisher(Publisher, ParameterizedTypeReference)}.
+		 * @param publisher the {@code Publisher} to write to the response
+		 * @param elementTypeRef a type reference describing the elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return the built response
+		 */
+		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
+				ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromProducer(Object, Class)}.
 		 * @param producer the producer to write to the response. This must be a
 		 * {@link Publisher} or another producer adaptable to a
@@ -435,31 +460,6 @@ public interface ServerResponse {
 		 * @since 5.2
 		 */
 		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
-
-		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
-		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <P> the type of the {@code Publisher}
-		 * @return the built response
-		 */
-		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
-
-		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, ParameterizedTypeReference)}.
-		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementTypeRef a type reference describing the elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <P> the type of the {@code Publisher}
-		 * @return the built response
-		 */
-		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-				ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.

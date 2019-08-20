@@ -267,18 +267,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
-			this.bodySpec.body(producer, elementClass);
-			return this;
-		}
-
-		@Override
-		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-			this.bodySpec.body(producer, elementTypeRef);
-			return this;
-		}
-
-		@Override
 		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass) {
 			this.bodySpec.body(publisher, elementClass);
 			return this;
@@ -287,6 +275,18 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef) {
 			this.bodySpec.body(publisher, elementTypeRef);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.bodySpec.body(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.bodySpec.body(producer, elementTypeRef);
 			return this;
 		}
 

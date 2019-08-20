@@ -294,18 +294,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
-			this.inserter = BodyInserters.fromProducer(producer, elementClass);
-			return this;
-		}
-
-		@Override
-		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-			this.inserter = BodyInserters.fromProducer(producer, elementTypeRef);
-			return this;
-		}
-
-		@Override
 		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
 				P publisher, ParameterizedTypeReference<T> elementTypeRef) {
 			this.inserter = BodyInserters.fromPublisher(publisher, elementTypeRef);
@@ -315,6 +303,18 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass) {
 			this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.inserter = BodyInserters.fromProducer(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.inserter = BodyInserters.fromProducer(producer, elementTypeRef);
 			return this;
 		}
 

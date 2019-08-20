@@ -551,6 +551,41 @@ public interface WebClient {
 
 		/**
 		 * A shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
+		 * For example:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; personMono = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .body(personMono, Person.class)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 * @param publisher the {@code Publisher} to write to the request
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return this builder
+		 */
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
+
+		/**
+		 * A variant of {@link #body(Publisher, Class)} that allows providing
+		 * element type information that includes generics via a
+		 * {@link ParameterizedTypeReference}.
+		 * @param publisher the {@code Publisher} to write to the request
+		 * @param elementTypeRef the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return this builder
+		 */
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
+				ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * A shortcut for {@link #body(BodyInserter)} with a
 		 * {@linkplain BodyInserters#fromProducer inserter}.
 		 * For example:
 		 * <p><pre>
@@ -584,41 +619,6 @@ public interface WebClient {
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
-
-		/**
-		 * A shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
-		 * For example:
-		 * <p><pre>
-		 * Mono&lt;Person&gt; personMono = ... ;
-		 *
-		 * Mono&lt;Void&gt; result = client.post()
-		 *     .uri("/persons/{id}", id)
-		 *     .contentType(MediaType.APPLICATION_JSON)
-		 *     .body(personMono, Person.class)
-		 *     .retrieve()
-		 *     .bodyToMono(Void.class);
-		 * </pre>
-		 * @param publisher the {@code Publisher} to write to the request
-		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <P> the type of the {@code Publisher}
-		 * @return this builder
-		 */
-		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
-
-		/**
-		 * A variant of {@link #body(Publisher, Class)} that allows providing
-		 * element type information that includes generics via a
-		 * {@link ParameterizedTypeReference}.
-		 * @param publisher the {@code Publisher} to write to the request
-		 * @param elementTypeRef the type reference of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <P> the type of the {@code Publisher}
-		 * @return this builder
-		 */
-		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
-				ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the request using the given body inserter.

@@ -235,30 +235,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public Mono<ServerResponse> body(Object producer, Class<?> elementClass) {
-		return new DefaultEntityResponseBuilder<>(producer,
-				BodyInserters.fromProducer(producer, elementClass))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
-	}
-
-	@Override
-	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-		return new DefaultEntityResponseBuilder<>(producer,
-				BodyInserters.fromProducer(producer, elementTypeRef))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
-	}
-
-	@Override
 	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass) {
 		return new DefaultEntityResponseBuilder<>(publisher,
 				BodyInserters.fromPublisher(publisher, elementClass))
@@ -284,15 +260,39 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	@Deprecated
-	public Mono<ServerResponse> syncBody(Object body) {
-		return bodyValue(body);
+	public Mono<ServerResponse> body(Object producer, Class<?> elementClass) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromProducer(producer, elementClass))
+				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
+				.build()
+				.map(entityResponse -> entityResponse);
+	}
+
+	@Override
+	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromProducer(producer, elementTypeRef))
+				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
+				.build()
+				.map(entityResponse -> entityResponse);
 	}
 
 	@Override
 	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
 		return Mono.just(
 				new BodyInserterResponse<>(this.statusCode, this.headers, this.cookies, inserter, this.hints));
+	}
+
+	@Override
+	@Deprecated
+	public Mono<ServerResponse> syncBody(Object body) {
+		return bodyValue(body);
 	}
 
 	@Override
