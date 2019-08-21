@@ -1038,7 +1038,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void doAddHeaderValue(String name, @Nullable Object value, boolean replace) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
 		if (header == null || replace) {
 			header = new HeaderValueHolder();
@@ -1078,7 +1078,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	@Override
 	public long getDateHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
@@ -1115,13 +1115,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return (header != null ? header.getStringValue() : null);
 	}
 
 	@Override
 	public Enumeration<String> getHeaders(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<>());
 	}
 
@@ -1132,7 +1132,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getIntHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
