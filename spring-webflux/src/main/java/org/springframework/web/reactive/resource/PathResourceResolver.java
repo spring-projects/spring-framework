@@ -203,6 +203,9 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return true;
 				}
 			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
 			catch (UnsupportedEncodingException ex) {
 				// Should never happen...
 			}
