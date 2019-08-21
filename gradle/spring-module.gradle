@@ -49,7 +49,7 @@ task javadocJar(type: Jar) {
 
 publishing {
 	publications {
-		springFramework(MavenPublication) {
+		mavenJava(MavenPublication) {
 			from components.java
 			artifact sourcesJar
 			artifact javadocJar

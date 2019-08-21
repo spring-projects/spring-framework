@@ -2,7 +2,7 @@ apply plugin: "maven-publish"
 
 publishing {
 	publications {
-		springFramework(MavenPublication) {
+		mavenJava(MavenPublication) {
 			pom {
 				name = project.description
 				description = project.description

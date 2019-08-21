@@ -15,7 +15,7 @@ dependencies {
 
 publishing {
 	publications {
-		springFramework(MavenPublication) {
+		mavenJava(MavenPublication) {
 			artifactId = 'spring-framework-bom'
 			from components.javaPlatform
 		}

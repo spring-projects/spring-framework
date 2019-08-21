@@ -203,7 +203,7 @@ configure(rootProject) {
 
 	publishing {
 		publications {
-			springFramework(MavenPublication) {
+			mavenJava(MavenPublication) {
 				artifact docsZip
 				artifact schemaZip
 				artifact distZip
