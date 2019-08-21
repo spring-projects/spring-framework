@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,13 @@ public class PathResourceResolverTests {
 		assertNull(actual);
 	}
 
+	@Test // gh-23463
+	public void ignoreInvalidEscapeSequence() throws IOException {
+		UrlResource location = new UrlResource(getClass().getResource("./test/"));
+		Resource resource = location.createRelative("test%file.txt");
+		assertTrue(this.resolver.checkResource(resource, location));
+	}
+
 	@Test
 	public void checkResourceWithAllowedLocations() {
 		this.resolver.setAllowedLocations(
@@ -103,8 +110,7 @@ public class PathResourceResolverTests {
 		assertEquals("../testalternatepath/bar.css", actual);
 	}
 
-	// SPR-12432
-	@Test
+	@Test // SPR-12432
 	public void checkServletContextResource() throws Exception {
 		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
 		MockServletContext context = new MockServletContext();
@@ -116,8 +122,7 @@ public class PathResourceResolverTests {
 		assertTrue(this.resolver.checkResource(resource, servletContextLocation));
 	}
 
-	// SPR-12624
-	@Test
+	@Test // SPR-12624
 	public void checkRelativeLocation() throws Exception {
 		String locationUrl= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
 		Resource location = new UrlResource(locationUrl.replace("/springframework","/../org/springframework"));
@@ -125,15 +130,13 @@ public class PathResourceResolverTests {
 		assertNotNull(this.resolver.resolveResource(null, "main.css", Collections.singletonList(location), null));
 	}
 
-	// SPR-12747
-	@Test
+	@Test // SPR-12747
 	public void checkFileLocation() throws Exception {
 		Resource resource = getResource("main.css");
 		assertTrue(this.resolver.checkResource(resource, resource));
 	}
 
-	// SPR-13241
-	@Test
+	@Test // SPR-13241
 	public void resolvePathRootResource() {
 		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
 		String path = this.resolver.resolveUrlPathInternal("", Collections.singletonList(webjarsLocation), null);
