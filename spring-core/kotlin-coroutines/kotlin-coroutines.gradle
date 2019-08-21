@@ -10,11 +10,6 @@ dependencies {
 	compile("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 }
 
-// Avoid publishing JAR to the artifact repository
-if (pluginManager.hasPlugin("com.jfrog.artifactory")) {
-	artifactoryPublish.skip = true
-}
-
 eclipse {
 	project {
 		buildCommand "org.jetbrains.kotlin.ui.kotlinBuilder"
