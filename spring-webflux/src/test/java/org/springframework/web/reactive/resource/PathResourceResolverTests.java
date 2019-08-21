@@ -110,7 +110,7 @@ public class PathResourceResolverTests {
 	public void ignoreInvalidEscapeSequence() throws IOException {
 		UrlResource location = new UrlResource(getClass().getResource("./test/"));
 		Resource resource = location.createRelative("test%file.txt");
-		assertTrue(this.resolver.checkResource(resource, location));
+		assertThat(this.resolver.checkResource(resource, location)).isTrue();
 	}
 
 	@Test
