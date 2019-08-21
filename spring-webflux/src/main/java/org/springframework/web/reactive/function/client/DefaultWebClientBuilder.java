@@ -25,9 +25,11 @@ import java.util.function.Consumer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,6 +43,17 @@ import org.springframework.web.util.UriBuilderFactory;
  * @since 5.0
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
+
+	private static final boolean reactorClientPresent;
+
+	private static final boolean jettyClientPresent;
+
+	static {
+		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
+		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+	}
+
 
 	@Nullable
 	private String baseUrl;
@@ -215,7 +228,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient build() {
-		ExchangeFunction exchange = initExchangeFunction();
+		ExchangeFunction exchange = (this.exchangeFunction == null ?
+				ExchangeFunctions.create(getOrInitConnector(), this.exchangeStrategies) :
+				this.exchangeFunction);
 		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
 				.reduce(ExchangeFilterFunction::andThen)
 				.map(filter -> filter.apply(exchange))
@@ -226,16 +241,17 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
-	private ExchangeFunction initExchangeFunction() {
-		if (this.exchangeFunction != null) {
-			return this.exchangeFunction;
+	private ClientHttpConnector getOrInitConnector() {
+		if (this.connector != null) {
+			return this.connector;
 		}
-		else if (this.connector != null) {
-			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
+		else if (reactorClientPresent) {
+			return new ReactorClientHttpConnector();
 		}
-		else {
-			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
+		else if (jettyClientPresent) {
+			return new JettyClientHttpConnector();
 		}
+		throw new IllegalStateException("No suitable default ClientHttpConnector found");
 	}
 
 	private UriBuilderFactory initUriBuilderFactory() {
