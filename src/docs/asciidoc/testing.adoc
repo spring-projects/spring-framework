@@ -3271,10 +3271,10 @@ configuration scenario:
 	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
 	public abstract class AbstractWebTests {}
 
-	@ContextHierarchy(@ContextConfiguration("/spring/soap-ws-config.xml")
+	@ContextHierarchy(@ContextConfiguration("/spring/soap-ws-config.xml"))
 	public class SoapWebServiceTests extends AbstractWebTests {}
 
-	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml")
+	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml"))
 	public class RestWebServiceTests extends AbstractWebTests {}
 ----
 --
