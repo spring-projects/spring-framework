@@ -20,3 +20,8 @@ dependencies {
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	testCompile("org.hibernate:hibernate-core:5.1.17.Final")
 }
+
+// Avoid publishing JAR to the artifact repository
+if (pluginManager.hasPlugin("com.jfrog.artifactory")) {
+	artifactoryPublish.skip = true
+}

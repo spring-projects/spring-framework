@@ -1,35 +1,23 @@
 description = "Spring Framework (Bill of Materials)"
 
-apply plugin: "java"
-apply plugin: "maven"
+apply plugin: 'java-platform'
+apply from: "$rootDir/gradle/publications.gradle"
 
-configurations.archives.artifacts.clear()
-artifacts {
-	// work around GRADLE-2406 by attaching text artifact
-	archives(file("spring-framework-bom.txt"))
+group = "org.springframework"
+
+dependencies {
+	constraints {
+		parent.moduleProjects.sort { "$it.name" }.each {
+			api it
+		}
+	}
 }
 
-install {
-	repositories.mavenInstaller {
-		pom.whenConfigured {
-			packaging = "pom"
-			withXml {
-				asNode().children().last() + {
-					delegate.dependencyManagement {
-						delegate.dependencies {
-							parent.moduleProjects.sort { "$it.name" }.each { p ->
-								if (p != project) {
-									delegate.dependency {
-										delegate.groupId(p.group)
-										delegate.artifactId(p.name)
-										delegate.version(p.version)
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+publishing {
+	publications {
+		springFramework(MavenPublication) {
+			artifactId = 'spring-framework-bom'
+			from components.javaPlatform
 		}
 	}
 }

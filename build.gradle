@@ -45,7 +45,7 @@ ext {
 	}
 }
 
-configure(allprojects.findAll { (it.name != "spring-framework-bom") } ) { project ->
+configure(allprojects.findAll { (it.name != "framework-bom") } ) { project ->
 	group = "org.springframework"
 
 	apply plugin: "java"
@@ -177,6 +177,7 @@ configure(rootProject) {
 	apply plugin: "kotlin"
 	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
+	apply from: "${rootDir}/gradle/publications.gradle"
 	apply from: "${rootDir}/gradle/docs.gradle"
 
 	nohttp {
@@ -200,10 +201,14 @@ configure(rootProject) {
 		asciidoctor("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
 
-	artifacts {
-		archives docsZip
-		archives schemaZip
-		archives distZip
+	publishing {
+		publications {
+			springFramework(MavenPublication) {
+				artifact docsZip
+				artifact schemaZip
+				artifact distZip
+			}
+		}
 	}
 }
 

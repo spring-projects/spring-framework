@@ -1,7 +1,7 @@
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
 apply plugin: 'org.springframework.build.test-sources'
-apply plugin: "maven"
+apply from: "$rootDir/gradle/publications.gradle"
 
 jar {
 	manifest.attributes["Implementation-Title"] = project.name
@@ -47,66 +47,14 @@ task javadocJar(type: Jar) {
 	from javadoc
 }
 
-artifacts {
-	archives sourcesJar
-	archives javadocJar
-}
-
-install {
-	repositories.mavenInstaller {
-		customizePom(pom, project)
-	}
-}
-
-def customizePom(pom, gradleProject) {
-	pom.whenConfigured { generatedPom ->
-		// eliminate test-scoped dependencies (no need in maven central poms)
-		generatedPom.dependencies.removeAll { dep ->
-			dep.scope == "test"
-		}
-
-		// sort to make pom dependencies order consistent to ease comparison of older poms
-		generatedPom.dependencies = generatedPom.dependencies.sort { dep ->
-			"$dep.scope:$dep.groupId:$dep.artifactId"
-		}
-
-		def managedVersions = dependencyManagement.managedVersions
-		generatedPom.dependencies.findAll{dep -> !dep.version }.each { dep ->
-			dep.version = managedVersions["${dep.groupId}:${dep.artifactId}"]
-		}
-
-		// add all items necessary for maven central publication
-		generatedPom.project {
-			name = gradleProject.description
-			description = gradleProject.description
-			url = "https://github.com/spring-projects/spring-framework"
-			organization {
-				name = "Spring IO"
-				url = "https://projects.spring.io/spring-framework"
-			}
-			licenses {
-				license {
-					name "Apache License, Version 2.0"
-					url "https://www.apache.org/licenses/LICENSE-2.0"
-					distribution "repo"
-				}
-			}
-			scm {
-				url = "https://github.com/spring-projects/spring-framework"
-				connection = "scm:git:git://github.com/spring-projects/spring-framework"
-				developerConnection = "scm:git:git://github.com/spring-projects/spring-framework"
-			}
-			developers {
-				developer {
-					id = "jhoeller"
-					name = "Juergen Hoeller"
-					email = "jhoeller@pivotal.io"
-				}
-			}
-			issueManagement {
-				system = "GitHub"
-				url = "https://github.com/spring-projects/spring-framework/issues"
-			}
+publishing {
+	publications {
+		springFramework(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
 		}
 	}
 }
+
+
