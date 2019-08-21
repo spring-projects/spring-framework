@@ -84,6 +84,8 @@ task downloadResources(type: Download) {
 	src "https://repo.spring.io/release/io/spring/docresources/" +
 			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
+	onlyIfModified true
+	useETag "all"
 }
 
 task extractDocResources(type: Copy, dependsOn: downloadResources) {
