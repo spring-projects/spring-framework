@@ -5205,7 +5205,6 @@ public void test() throws Exception {
 <4> Manually perform an ASYNC dispatch (as there is no running container)
 <5> Verify the final response
 
-====
 
 
 [[spring-mvc-test-vs-streaming-response]]
