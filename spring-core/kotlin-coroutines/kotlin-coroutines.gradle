@@ -11,7 +11,7 @@ dependencies {
 }
 
 // Avoid publishing coroutines JAR to the artifact repository
-if (project.hasProperty("artifactoryPublish")) {
+if (pluginManager.hasPlugin("artifactoryPublish")) {
 	artifactoryPublish.skip = true
 }
 

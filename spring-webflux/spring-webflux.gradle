@@ -15,7 +15,7 @@ dependencies {
 	compile(project(":spring-core"))
 	compile(project(":spring-web"))
 	compile("io.projectreactor:reactor-core")
-	compileOnly(project(":spring-core-coroutines"))
+	compileOnly(project(":kotlin-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("javax.servlet:javax.servlet-api:4.0.1")
@@ -57,7 +57,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
 	testCompile("com.squareup.okhttp3:mockwebserver:3.14.2")
-	testCompile(project(":spring-core-coroutines"))
+	testCompile(project(":kotlin-coroutines"))
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
 	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
 	testRuntime("org.jruby:jruby:9.2.7.0")
