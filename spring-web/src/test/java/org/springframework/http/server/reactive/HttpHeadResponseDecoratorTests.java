@@ -18,7 +18,7 @@ package org.springframework.http.server.reactive;
 import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.PooledByteBufAllocator;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
@@ -42,7 +42,7 @@ public class HttpHeadResponseDecoratorTests {
 			new HttpHeadResponseDecorator(new MockServerHttpResponse(this.bufferFactory));
 
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.bufferFactory.checkForLeaks();
 	}
