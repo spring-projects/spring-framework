@@ -36,6 +36,14 @@ publishing {
 					url = "https://github.com/spring-projects/spring-framework/issues"
 				}
 			}
+			versionMapping {
+				usage('java-api') {
+					fromResolutionResult()
+				}
+				usage('java-runtime') {
+					fromResolutionResult()
+				}
+			}
 		}
 	}
 }
