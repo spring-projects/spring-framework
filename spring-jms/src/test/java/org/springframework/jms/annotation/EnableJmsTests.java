@@ -71,6 +71,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Override
+	@Test
 	public void fullConfigurableConfiguration() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsFullConfigurableConfig.class, FullConfigurableBean.class);

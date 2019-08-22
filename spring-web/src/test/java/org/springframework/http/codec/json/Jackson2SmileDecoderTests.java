@@ -67,6 +67,7 @@ public class Jackson2SmileDecoderTests extends AbstractDecoderTestCase<Jackson2S
 	}
 
 	@Override
+	@Test
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(this.pojo1, this.pojo2)
 				.map(this::writeObject)
@@ -90,6 +91,7 @@ public class Jackson2SmileDecoderTests extends AbstractDecoderTestCase<Jackson2S
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() {
 		List<Pojo> expected = Arrays.asList(pojo1, pojo2);
 

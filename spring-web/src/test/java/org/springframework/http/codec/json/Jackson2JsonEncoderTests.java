@@ -57,7 +57,6 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
  */
 public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2JsonEncoder> {
 
-
 	public Jackson2JsonEncoderTests() {
 		super(new Jackson2JsonEncoder());
 	}
@@ -78,6 +77,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2Js
 	}
 
 	@Override
+	@Test
 	public void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
