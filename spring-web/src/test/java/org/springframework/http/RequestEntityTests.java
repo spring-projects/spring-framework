@@ -106,6 +106,7 @@ public class RequestEntityTests {
 				ifNoneMatch(ifNoneMatch).
 				contentLength(contentLength).
 				contentType(contentType).
+				headers(headers -> assertThat(headers).hasSize(6)).
 				build();
 
 		assertThat(responseEntity).isNotNull();

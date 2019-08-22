@@ -171,6 +171,7 @@ public class ResponseEntityTests {
 				location(location).
 				contentLength(contentLength).
 				contentType(contentType).
+				headers(headers -> assertThat(headers).hasSize(5)).
 				build();
 
 		assertThat(responseEntity).isNotNull();
@@ -219,7 +220,7 @@ public class ResponseEntityTests {
 		ResponseEntity<Void> responseEntityWithEmptyHeaders =
 				ResponseEntity.ok().headers(new HttpHeaders()).build();
 		ResponseEntity<Void> responseEntityWithNullHeaders =
-				ResponseEntity.ok().headers(null).build();
+				ResponseEntity.ok().headers((HttpHeaders) null).build();
 
 		assertThat(responseEntityWithEmptyHeaders.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntityWithEmptyHeaders.getHeaders().isEmpty()).isTrue();
