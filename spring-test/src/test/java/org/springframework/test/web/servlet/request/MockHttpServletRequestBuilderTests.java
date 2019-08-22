@@ -538,6 +538,7 @@ public class MockHttpServletRequestBuilderTests {
 			return this;
 		}
 
+		@Override
 		public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 			request.setAttribute(attr, value);
 			return request;

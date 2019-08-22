@@ -377,6 +377,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return String.valueOf(value);
 	}
 
+	@Override
 	@Nullable
 	protected <T> T getAttributeValue(String attributeName, Class<T> type) {
 		int attributeIndex = getAttributeIndex(attributeName, false);

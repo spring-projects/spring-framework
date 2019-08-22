@@ -169,6 +169,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		return this.users.size();
 	}
 
+	@Override
 	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
 		Set<SimpSubscription> result = new HashSet<>();
 		for (LocalSimpSession session : this.sessions.values()) {

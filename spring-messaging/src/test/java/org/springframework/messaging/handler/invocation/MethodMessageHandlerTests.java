@@ -190,6 +190,7 @@ public class MethodMessageHandlerTests {
 			super.detectHandlerMethods(handler);
 		}
 
+		@Override
 		public void registerHandlerMethod(Object handler, Method method, String mapping) {
 			super.registerHandlerMethod(handler, method, mapping);
 		}

@@ -228,6 +228,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		// New in Jackson 2.7
+		@Override
 		public String getDescForKnownTypeIds() {
 			return null;
 		}

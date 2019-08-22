@@ -167,6 +167,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		@Autowired @Lazy
 		private List<TestBean> testBeans;
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -185,6 +186,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		@Autowired(required = false) @Lazy
 		private List<TestBean> testBeans;
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -200,6 +202,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		@LazyInject
 		private TestBean testBean;
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -218,6 +221,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -236,6 +240,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -254,6 +259,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -269,6 +275,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -284,6 +291,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
@@ -299,6 +307,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 			this.testBean = testBean;
 		}
 
+		@Override
 		public TestBean getTestBean() {
 			return this.testBean;
 		}

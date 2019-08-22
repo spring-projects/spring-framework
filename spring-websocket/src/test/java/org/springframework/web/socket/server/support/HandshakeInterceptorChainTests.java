@@ -53,6 +53,7 @@ public class HandshakeInterceptorChainTests extends AbstractHttpRequestTests {
 	private Map<String, Object> attributes;
 
 
+	@Override
 	@BeforeEach
 	public void setup() {
 		super.setup();

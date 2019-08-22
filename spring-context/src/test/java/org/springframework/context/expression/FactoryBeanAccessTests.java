@@ -77,14 +77,17 @@ public class FactoryBeanAccessTests {
 
 		static class CarFactoryBean implements FactoryBean<Car> {
 
+			@Override
 			public Car getObject() {
 				return new Car();
 			}
 
+			@Override
 			public Class<Car> getObjectType() {
 				return Car.class;
 			}
 
+			@Override
 			public boolean isSingleton() {
 				return false;
 			}

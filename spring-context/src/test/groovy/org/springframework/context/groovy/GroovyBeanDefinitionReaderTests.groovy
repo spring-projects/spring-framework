@@ -1003,22 +1003,27 @@ class TestScope implements Scope {
 
 	int instanceCount
 
+	@Override
 	public Object remove(String name) {
 		 // do nothing
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 	}
 
+	@Override
 	public String getConversationId() {
 		return "mock"
 	}
 
+	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		instanceCount++
 		objectFactory.getObject()
 	}
 
+	@Override
 	public Object resolveContextualObject(String s) {
 		return null;  // noop
 	}

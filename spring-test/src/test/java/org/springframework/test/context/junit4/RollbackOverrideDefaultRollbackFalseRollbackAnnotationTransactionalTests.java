@@ -46,6 +46,7 @@ public class RollbackOverrideDefaultRollbackFalseRollbackAnnotationTransactional
 	private static JdbcTemplate jdbcTemplate;
 
 
+	@Override
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);

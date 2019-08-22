@@ -177,6 +177,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();

@@ -34,6 +34,7 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.executeSqlScr
  */
 public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationTests {
 
+	@Override
 	protected EmbeddedDatabaseType getEmbeddedDatabaseType() {
 		return EmbeddedDatabaseType.HSQL;
 	}

@@ -840,6 +840,7 @@ public class AnnotationDrivenEventListenerTests {
 			this.eventCollector.addEvent(this, event);
 		}
 
+		@Override
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
@@ -866,6 +867,7 @@ public class AnnotationDrivenEventListenerTests {
 			this.eventCollector.addEvent(this, event);
 		}
 
+		@Override
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
@@ -988,11 +990,13 @@ public class AnnotationDrivenEventListenerTests {
 			super.handleString(payload);
 		}
 
+		@Override
 		@ConditionalEvent("#root.event.timestamp > #p0")
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
 
+		@Override
 		@ConditionalEvent("@conditionEvaluator.valid(#p0)")
 		public void handleRatio(Double ratio) {
 			collectEvent(ratio);

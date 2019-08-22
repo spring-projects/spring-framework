@@ -1281,6 +1281,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	public interface RepositoryInterface<T> {
 
+		@Override
 		String toString();
 	}
 

@@ -633,6 +633,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		private ApplicationContext applicationContext;
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}

@@ -565,11 +565,13 @@ public class AsyncExecutionTests {
 	@Async
 	public static class AsyncClassBeanWithInterface implements RegularInterface {
 
+		@Override
 		public void doSomething(int i) {
 			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
 			assertThat(condition).isTrue();
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
 			assertThat(condition).isTrue();

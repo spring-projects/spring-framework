@@ -187,6 +187,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
+	@Override
 	public List<String> getSubProtocols() {
 		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
@@ -676,6 +677,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 
+		@Override
 		public String toString() {
 			return SubProtocolWebSocketHandler.this.sessions.size() +
 					" current WS(" + this.webSocket.get() +

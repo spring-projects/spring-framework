@@ -166,6 +166,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 		private final Map<String, Boolean> invocations = new HashMap<>();
 
+		@Override
 		public void handleIt(@Payload String msg, @Header("my-header") String myHeader) {
 			invocations.put("handleIt", true);
 			assertThat(msg).as("Unexpected payload message").isEqualTo("FOO-BAR");

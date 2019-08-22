@@ -183,6 +183,7 @@ public class CacheErrorHandlerTests {
 			return new SimpleService();
 		}
 
+		@Override
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cacheManager = new SimpleCacheManager();

@@ -249,6 +249,7 @@ public class AsyncTests {
 		public DeferredResult<Person> getDeferredResultWithDelayedError() {
 			final DeferredResult<Person> deferredResult = new DeferredResult<>();
 			new Thread() {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(100);

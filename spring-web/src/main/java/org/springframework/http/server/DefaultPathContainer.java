@@ -295,6 +295,7 @@ final class DefaultPathContainer implements PathContainer {
 			return this.value.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return "[value='" + this.value + "']";
 		}

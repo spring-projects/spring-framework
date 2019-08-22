@@ -455,10 +455,12 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		private String string;
 
+		@Override
 		public String getString() {
 			return string;
 		}
 
+		@Override
 		public void setString(String string) {
 			this.string = string;
 		}

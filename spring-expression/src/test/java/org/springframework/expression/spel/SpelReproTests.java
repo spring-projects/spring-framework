@@ -2261,6 +2261,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			this.string = string;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof TestClass2 &&
 					this.string.equals(((TestClass2) other).string)));

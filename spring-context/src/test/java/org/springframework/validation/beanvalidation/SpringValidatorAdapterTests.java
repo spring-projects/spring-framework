@@ -322,12 +322,14 @@ public class SpringValidatorAdapterTests {
 
 		private String message;
 
+		@Override
 		public void initialize(Same constraintAnnotation) {
 			field = constraintAnnotation.field();
 			comparingField = constraintAnnotation.comparingField();
 			message = constraintAnnotation.message();
 		}
 
+		@Override
 		public boolean isValid(Object value, ConstraintValidatorContext context) {
 			BeanWrapper beanWrapper = new BeanWrapperImpl(value);
 			Object fieldValue = beanWrapper.getPropertyValue(field);

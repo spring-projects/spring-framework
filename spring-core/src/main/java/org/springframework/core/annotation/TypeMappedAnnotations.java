@@ -562,6 +562,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			this.aggregateCursor = 0;
 		}
 
+		@Override
 		public boolean tryAdvance(Consumer<? super MergedAnnotation<A>> action) {
 			while (this.aggregateCursor < this.aggregates.size()) {
 				Aggregate aggregate = this.aggregates.get(this.aggregateCursor);

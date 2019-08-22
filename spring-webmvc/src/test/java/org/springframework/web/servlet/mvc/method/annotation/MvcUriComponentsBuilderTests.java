@@ -578,6 +578,7 @@ public class MvcUriComponentsBuilderTests {
 
 	static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
+		@Override
 		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 		public Person get(@PathVariable Long id) {
 			return new Person();

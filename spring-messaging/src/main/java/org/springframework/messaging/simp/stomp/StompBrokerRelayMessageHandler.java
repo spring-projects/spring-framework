@@ -1086,6 +1086,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return this.disconnect.get();
 		}
 
+		@Override
 		public String toString() {
 			return (connectionHandlers.size() + " sessions, " + getTcpClientInfo() +
 					(isBrokerAvailable() ? " (available)" : " (not available)") +

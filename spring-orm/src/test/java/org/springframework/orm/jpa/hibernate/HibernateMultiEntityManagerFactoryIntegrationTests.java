@@ -46,6 +46,7 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 	}
 
 
+	@Override
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		boolean condition = this.entityManagerFactory instanceof EntityManagerFactoryInfo;

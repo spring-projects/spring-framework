@@ -81,6 +81,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		return ClassUtils.forName(name, this.resourceLoader.getClassLoader());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> loadClass(String name, Class<T> clazz) throws ClassNotFoundException {
 		return (Class<? extends T>) loadClass(name);

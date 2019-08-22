@@ -182,10 +182,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
@@ -216,6 +218,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
+	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource));
 	}
@@ -376,6 +379,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * This method overrides method invocation to create beans for each method name that
 	 * takes a class argument.
 	 */
+	@Override
 	@SuppressWarnings("rawtypes")
 	public Object invokeMethod(String name, Object arg) {
 		Object[] args = (Object[])arg;
@@ -609,6 +613,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * This method overrides property setting in the scope of the {@code GroovyBeanDefinitionReader}
 	 * to set properties on the current bean definition.
 	 */
+	@Override
 	public void setProperty(String name, Object value) {
 		if (this.currentBeanDefinition != null) {
 			applyPropertyToBeanDefinition(name, value);
@@ -656,6 +661,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * properties from the {@code GroovyBeanDefinitionReader} itself
 	 * </ul>
 	 */
+	@Override
 	public Object getProperty(String name) {
 		Binding binding = getBinding();
 		if (binding != null && binding.hasVariable(name)) {
@@ -758,10 +764,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			this.metaClass = InvokerHelper.getMetaClass(this);
 		}
 
+		@Override
 		public MetaClass getMetaClass() {
 			return this.metaClass;
 		}
 
+		@Override
 		public Object getProperty(String property) {
 			if (property.equals("beanName")) {
 				return getBeanName();
@@ -778,14 +786,17 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 		}
 
+		@Override
 		public Object invokeMethod(String name, Object args) {
 			return this.metaClass.invokeMethod(this, name, args);
 		}
 
+		@Override
 		public void setMetaClass(MetaClass metaClass) {
 			this.metaClass = metaClass;
 		}
 
+		@Override
 		public void setProperty(String property, Object newValue) {
 			if (!addDeferredProperty(property, newValue)) {
 				this.beanDefinition.getBeanDefinition().getPropertyValues().add(property, newValue);

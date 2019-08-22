@@ -135,6 +135,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		this.messageCodec = messageCodec;
 	}
 
+	@Override
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
 				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
