@@ -32,12 +32,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
-public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenTests {
+class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenTests {
 
 	@Override
 	@Test
-	public void sampleConfiguration() {
+	void sampleConfiguration() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-sample-config.xml", getClass());
 		testSampleConfiguration(context);
@@ -45,7 +46,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void fullConfiguration() {
+	void fullConfiguration() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-full-config.xml", getClass());
 		testFullConfiguration(context);
@@ -53,7 +54,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void fullConfigurableConfiguration() {
+	void fullConfigurableConfiguration() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-full-configurable-config.xml", getClass());
 		testFullConfiguration(context);
@@ -61,7 +62,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void customConfiguration() {
+	void customConfiguration() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-registry.xml", getClass());
 		testCustomConfiguration(context);
@@ -69,7 +70,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void explicitContainerFactory() {
+	void explicitContainerFactory() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-container-factory.xml", getClass());
 		testExplicitContainerFactoryConfiguration(context);
@@ -77,7 +78,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void defaultContainerFactory() {
+	void defaultContainerFactory() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-default-container-factory.xml", getClass());
 		testDefaultContainerFactoryConfiguration(context);
@@ -85,7 +86,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void jmsHandlerMethodFactoryConfiguration() throws JMSException {
+	void jmsHandlerMethodFactoryConfiguration() throws JMSException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-handler-method-factory.xml", getClass());
 
@@ -96,7 +97,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void jmsListenerIsRepeatable() {
+	void jmsListenerIsRepeatable() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-jms-listener-repeatable.xml", getClass());
 		testJmsListenerRepeatable(context);
@@ -104,7 +105,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 
 	@Override
 	@Test
-	public void jmsListeners() {
+	void jmsListeners() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-jms-listeners.xml", getClass());
 		testJmsListenerRepeatable(context);

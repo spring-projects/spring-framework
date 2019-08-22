@@ -79,7 +79,7 @@ public abstract class AbstractCacheAnnotationTests {
 	}
 
 
-	public void testCacheable(CacheableService<?> service) {
+	protected void testCacheable(CacheableService<?> service) {
 		Object o1 = new Object();
 
 		Object r1 = service.cache(o1);
@@ -90,7 +90,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r3).isSameAs(r1);
 	}
 
-	public void testCacheableNull(CacheableService<?> service) {
+	protected void testCacheableNull(CacheableService<?> service) {
 		Object o1 = new Object();
 		assertThat(this.cm.getCache("testCache").get(o1)).isNull();
 
@@ -105,7 +105,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r3).as("Cached value should be null").isNull();
 	}
 
-	public void testCacheableSync(CacheableService<?> service) {
+	protected void testCacheableSync(CacheableService<?> service) {
 		Object o1 = new Object();
 
 		Object r1 = service.cacheSync(o1);
@@ -116,7 +116,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r3).isSameAs(r1);
 	}
 
-	public void testCacheableSyncNull(CacheableService<?> service) {
+	protected void testCacheableSyncNull(CacheableService<?> service) {
 		Object o1 = new Object();
 		assertThat(this.cm.getCache("testCache").get(o1)).isNull();
 
@@ -131,7 +131,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r3).as("Cached value should be null").isNull();
 	}
 
-	public void testEvict(CacheableService<?> service, boolean successExpected) {
+	protected void testEvict(CacheableService<?> service, boolean successExpected) {
 		Cache cache = this.cm.getCache("testCache");
 
 		Object o1 = new Object();
@@ -155,7 +155,7 @@ public abstract class AbstractCacheAnnotationTests {
 		}
 	}
 
-	public void testEvictEarly(CacheableService<?> service) {
+	protected void testEvictEarly(CacheableService<?> service) {
 		Cache cache = this.cm.getCache("testCache");
 
 		Object o1 = new Object();
@@ -174,7 +174,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r2).isNotSameAs(r1);
 	}
 
-	public void testEvictException(CacheableService<?> service) {
+	protected void testEvictException(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object r1 = service.cache(o1);
 
@@ -189,7 +189,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r2).isSameAs(r1);
 	}
 
-	public void testEvictWithKey(CacheableService<?> service) {
+	protected void testEvictWithKey(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object r1 = service.cache(o1);
 
@@ -198,7 +198,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r2).isNotSameAs(r1);
 	}
 
-	public void testEvictWithKeyEarly(CacheableService<?> service) {
+	protected void testEvictWithKeyEarly(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object r1 = service.cache(o1);
 
@@ -212,7 +212,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r2).isNotSameAs(r1);
 	}
 
-	public void testEvictAll(CacheableService<?> service, boolean successExpected) {
+	protected void testEvictAll(CacheableService<?> service, boolean successExpected) {
 		Cache cache = this.cm.getCache("testCache");
 
 		Object o1 = new Object();
@@ -246,7 +246,7 @@ public abstract class AbstractCacheAnnotationTests {
 		}
 	}
 
-	public void testEvictAllEarly(CacheableService<?> service) {
+	protected void testEvictAllEarly(CacheableService<?> service) {
 		Cache cache = this.cm.getCache("testCache");
 
 		Object o1 = new Object();
@@ -273,7 +273,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isNotSameAs(r2);
 	}
 
-	public void testConditionalExpression(CacheableService<?> service) {
+	protected void testConditionalExpression(CacheableService<?> service) {
 		Object r1 = service.conditional(4);
 		Object r2 = service.conditional(4);
 
@@ -285,7 +285,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isSameAs(r3);
 	}
 
-	public void testConditionalExpressionSync(CacheableService<?> service) {
+	protected void testConditionalExpressionSync(CacheableService<?> service) {
 		Object r1 = service.conditionalSync(4);
 		Object r2 = service.conditionalSync(4);
 
@@ -297,7 +297,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isSameAs(r3);
 	}
 
-	public void testUnlessExpression(CacheableService<?> service) {
+	protected void testUnlessExpression(CacheableService<?> service) {
 		Cache cache = this.cm.getCache("testCache");
 		cache.clear();
 		service.unless(10);
@@ -306,7 +306,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cache.get(11)).isNull();
 	}
 
-	public void testKeyExpression(CacheableService<?> service) {
+	protected void testKeyExpression(CacheableService<?> service) {
 		Object r1 = service.key(5, 1);
 		Object r2 = service.key(5, 2);
 
@@ -318,7 +318,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isNotSameAs(r3);
 	}
 
-	public void testVarArgsKey(CacheableService<?> service) {
+	protected void testVarArgsKey(CacheableService<?> service) {
 		Object r1 = service.varArgsKey(1, 2, 3);
 		Object r2 = service.varArgsKey(1, 2, 3);
 
@@ -330,8 +330,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isNotSameAs(r3);
 	}
 
-
-	public void testNullValue(CacheableService<?> service) {
+	protected void testNullValue(CacheableService<?> service) {
 		Object key = new Object();
 		assertThat(service.nullValue(key)).isNull();
 		int nr = service.nullInvocations().intValue();
@@ -341,7 +340,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(service.nullInvocations().intValue()).isEqualTo(nr + 1);
 	}
 
-	public void testMethodName(CacheableService<?> service, String keyName) {
+	protected void testMethodName(CacheableService<?> service, String keyName) {
 		Object key = new Object();
 		Object r1 = service.name(key);
 		assertThat(service.name(key)).isSameAs(r1);
@@ -350,7 +349,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cache.get(keyName)).isNotNull();
 	}
 
-	public void testRootVars(CacheableService<?> service) {
+	protected void testRootVars(CacheableService<?> service) {
 		Object key = new Object();
 		Object r1 = service.rootVars(key);
 		assertThat(service.rootVars(key)).isSameAs(r1);
@@ -360,38 +359,38 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cache.get(expectedKey)).isNotNull();
 	}
 
-	public void testCheckedThrowable(CacheableService<?> service) {
+	protected void testCheckedThrowable(CacheableService<?> service) {
 		String arg = UUID.randomUUID().toString();
 		assertThatIOException().isThrownBy(() ->
 				service.throwChecked(arg))
 			.withMessage(arg);
 	}
 
-	public void testUncheckedThrowable(CacheableService<?> service) {
+	protected void testUncheckedThrowable(CacheableService<?> service) {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				service.throwUnchecked(1L))
 			.withMessage("1");
 	}
 
-	public void testCheckedThrowableSync(CacheableService<?> service) {
+	protected void testCheckedThrowableSync(CacheableService<?> service) {
 		String arg = UUID.randomUUID().toString();
 		assertThatIOException().isThrownBy(() ->
 				service.throwCheckedSync(arg))
 			.withMessage(arg);
 	}
 
-	public void testUncheckedThrowableSync(CacheableService<?> service) {
+	protected void testUncheckedThrowableSync(CacheableService<?> service) {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				service.throwUncheckedSync(1L))
 			.withMessage("1");
 	}
 
-	public void testNullArg(CacheableService<?> service) {
+	protected void testNullArg(CacheableService<?> service) {
 		Object r1 = service.cache(null);
 		assertThat(service.cache(null)).isSameAs(r1);
 	}
 
-	public void testCacheUpdate(CacheableService<?> service) {
+	protected void testCacheUpdate(CacheableService<?> service) {
 		Object o = new Object();
 		Cache cache = this.cm.getCache("testCache");
 		assertThat(cache.get(o)).isNull();
@@ -404,7 +403,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cache.get(o).get()).isSameAs(r2);
 	}
 
-	public void testConditionalCacheUpdate(CacheableService<?> service) {
+	protected void testConditionalCacheUpdate(CacheableService<?> service) {
 		Integer one = 1;
 		Integer three = 3;
 
@@ -416,7 +415,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat((int) Integer.valueOf(cache.get(three).get().toString())).isEqualTo((int) three);
 	}
 
-	public void testMultiCache(CacheableService<?> service) {
+	protected void testMultiCache(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object o2 = new Object();
 
@@ -442,7 +441,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(secondary.get(o2).get()).isSameAs(r4);
 	}
 
-	public void testMultiEvict(CacheableService<?> service) {
+	protected void testMultiEvict(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object o2 = o1.toString() + "A";
 
@@ -472,7 +471,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(secondary.get(o1).get()).isSameAs(r4);
 	}
 
-	public void testMultiPut(CacheableService<?> service) {
+	protected void testMultiPut(CacheableService<?> service) {
 		Object o = 1;
 
 		Cache primary = this.cm.getCache("primary");
@@ -492,7 +491,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(secondary.get(o).get()).isSameAs(r2);
 	}
 
-	public void testPutRefersToResult(CacheableService<?> service) {
+	protected void testPutRefersToResult(CacheableService<?> service) {
 		Long id = Long.MIN_VALUE;
 		TestEntity entity = new TestEntity();
 		Cache primary = this.cm.getCache("primary");
@@ -502,7 +501,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(primary.get(id).get()).isSameAs(entity);
 	}
 
-	public void testMultiCacheAndEvict(CacheableService<?> service) {
+	protected void testMultiCacheAndEvict(CacheableService<?> service) {
 		String methodName = "multiCacheAndEvict";
 
 		Cache primary = this.cm.getCache("primary");
@@ -523,7 +522,7 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(secondary.get(key)).isNull();
 	}
 
-	public void testMultiConditionalCacheAndEvict(CacheableService<?> service) {
+	protected void testMultiConditionalCacheAndEvict(CacheableService<?> service) {
 		Cache primary = this.cm.getCache("primary");
 		Cache secondary = this.cm.getCache("secondary");
 		Object key = 1;
