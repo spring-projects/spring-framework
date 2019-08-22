@@ -1,3 +1,10 @@
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		maven { url 'https://repo.spring.io/plugins-release' }
+	}
+}
+
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"
