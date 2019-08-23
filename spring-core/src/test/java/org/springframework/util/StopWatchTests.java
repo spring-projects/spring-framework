@@ -80,15 +80,15 @@ class StopWatchTests {
 		assertThat(stopWatch.isRunning()).isFalse();
 		assertThat(stopWatch.getLastTaskTimeNanos())
 			.as("last task time in nanoseconds for task #1")
-			.isGreaterThanOrEqualTo(millisToNanos(duration1))
+			.isGreaterThanOrEqualTo(millisToNanos(duration1 - fudgeFactor))
 			.isLessThanOrEqualTo(millisToNanos(duration1 + fudgeFactor));
 		assertThat(stopWatch.getTotalTimeMillis())
 			.as("total time in milliseconds for task #1")
-			.isGreaterThanOrEqualTo(duration1)
+			.isGreaterThanOrEqualTo(duration1 - fudgeFactor)
 			.isLessThanOrEqualTo(duration1 + fudgeFactor);
 		assertThat(stopWatch.getTotalTimeSeconds())
 			.as("total time in seconds for task #1")
-			.isGreaterThanOrEqualTo(duration1 / 1000.0)
+			.isGreaterThanOrEqualTo((duration1 - fudgeFactor) / 1000.0)
 			.isLessThanOrEqualTo((duration1 + fudgeFactor) / 1000.0);
 
 		stopWatch.start(name2);
@@ -103,11 +103,11 @@ class StopWatchTests {
 			.isLessThanOrEqualTo(millisToNanos(duration2 + fudgeFactor));
 		assertThat(stopWatch.getTotalTimeMillis())
 			.as("total time in milliseconds for tasks #1 and #2")
-			.isGreaterThanOrEqualTo(duration1 + duration2)
+			.isGreaterThanOrEqualTo(duration1 + duration2 - fudgeFactor)
 			.isLessThanOrEqualTo(duration1 + duration2 + fudgeFactor);
 		assertThat(stopWatch.getTotalTimeSeconds())
 			.as("total time in seconds for task #2")
-			.isGreaterThanOrEqualTo((duration1 + duration2) / 1000.0)
+			.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
 			.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
 
 		assertThat(stopWatch.getTaskCount()).isEqualTo(2);
