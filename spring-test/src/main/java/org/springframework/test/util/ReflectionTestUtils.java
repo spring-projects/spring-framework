@@ -55,8 +55,10 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>In addition, several methods in this class provide support for {@code static}
- * fields &mdash; for example, {@link #setField(Class, String, Object)},
- * {@link #getField(Class, String)}, etc.
+ * fields and {@code static} methods &mdash; for example,
+ * {@link #setField(Class, String, Object)}, {@link #getField(Class, String)},
+ * {@link #invokeMethod(Class, String, Object...)},
+ * {@link #invokeMethod(Object, Class, String, Object...)}, etc.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
