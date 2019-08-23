@@ -61,50 +61,50 @@ class ReflectionTestUtilsTests {
 
 	@Test
 	void setFieldWithNullTargetObject() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField((Object) null, "id", Long.valueOf(99)))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField((Object) null, "id", Long.valueOf(99)))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void getFieldWithNullTargetObject() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				getField((Object) null, "id"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> getField((Object) null, "id"))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void setFieldWithNullTargetClass() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField((Class<?>) null, "id", Long.valueOf(99)))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField((Class<?>) null, "id", Long.valueOf(99)))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void getFieldWithNullTargetClass() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				getField((Class<?>) null, "id"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> getField((Class<?>) null, "id"))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void setFieldWithNullNameAndNullType() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, null, Long.valueOf(99), null))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, null, Long.valueOf(99), null))
 			.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
 	void setFieldWithBogusName() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, "bogus", Long.valueOf(99), long.class))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, "bogus", Long.valueOf(99), long.class))
 			.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
 	void setFieldWithWrongType() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				setField(person, "id", Long.valueOf(99), String.class))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, "id", Long.valueOf(99), String.class))
 			.withMessageStartingWith("Could not find field");
 	}
 
@@ -316,8 +316,7 @@ class ReflectionTestUtilsTests {
 
 	@Test
 	void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				invokeSetterMethod(person, "likesPets", null, boolean.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "likesPets", null, boolean.class));
 	}
 
 	@Test
@@ -364,29 +363,29 @@ class ReflectionTestUtilsTests {
 
 	@Test
 	void invokeInitMethodBeforeAutowiring() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				invokeMethod(component, "init"))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "init"))
 			.withMessageStartingWith("number must not be null");
 	}
 
 	@Test
 	void invokeMethodWithIncompatibleArgumentTypes() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				invokeMethod(component, "subtract", "foo", 2.0))
-		.withMessageStartingWith("Method not found");
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "subtract", "foo", 2.0))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	void invokeMethodWithTooFewArguments() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				invokeMethod(component, "configure", Integer.valueOf(42)))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42)))
 			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	void invokeMethodWithTooManyArguments() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
 			.withMessageStartingWith("Method not found");
 	}
 
