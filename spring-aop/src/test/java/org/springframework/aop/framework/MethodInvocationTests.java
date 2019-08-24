@@ -41,12 +41,7 @@ public class MethodInvocationTests {
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List<Object> is = new LinkedList<>();
-		is.add(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return returnValue;
-			}
-		});
+		is.add((MethodInterceptor) invocation -> returnValue);
 			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, //?
 		m, null, null, is // list
 	);

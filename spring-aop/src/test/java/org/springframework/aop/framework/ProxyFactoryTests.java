@@ -170,11 +170,8 @@ public class ProxyFactoryTests {
 
 	@Test
 	public void testAddRepeatedInterface() {
-		TimeStamped tst = new TimeStamped() {
-			@Override
-			public long getTimeStamp() {
-				throw new UnsupportedOperationException("getTimeStamp");
-			}
+		TimeStamped tst = () -> {
+			throw new UnsupportedOperationException("getTimeStamp");
 		};
 		ProxyFactory pf = new ProxyFactory(tst);
 		// We've already implicitly added this interface.

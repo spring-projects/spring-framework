@@ -48,12 +48,7 @@ public class NullPrimitiveTests {
 
 		SimpleFoo target = new SimpleFoo();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Foo foo = (Foo) factory.getProxy();
 
@@ -73,12 +68,7 @@ public class NullPrimitiveTests {
 
 		Bar target = new Bar();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Bar bar = (Bar) factory.getProxy();
 
