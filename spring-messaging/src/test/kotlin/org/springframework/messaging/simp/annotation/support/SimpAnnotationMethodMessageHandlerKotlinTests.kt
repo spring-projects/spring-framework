@@ -20,8 +20,8 @@ import io.mockk.mockk
 import java.util.Collections
 import java.util.HashMap
 
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import org.springframework.context.support.StaticApplicationContext
 import org.springframework.messaging.Message
@@ -36,7 +36,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Controller
 
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.messaging.MessageHandlingException
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 
@@ -47,7 +47,6 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler
  */
 class SimpAnnotationMethodMessageHandlerKotlinTests {
 
-
 	lateinit var messageHandler: TestSimpAnnotationMethodMessageHandler
 
 	lateinit var testController: TestController
@@ -56,7 +55,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
 
     val converter = mockk<MessageConverter>(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         val brokerTemplate = SimpMessagingTemplate(channel)
         brokerTemplate.messageConverter = converter

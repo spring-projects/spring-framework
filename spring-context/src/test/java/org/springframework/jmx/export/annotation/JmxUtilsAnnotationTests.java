@@ -18,12 +18,11 @@ package org.springframework.jmx.export.annotation;
 
 import javax.management.MXBean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.support.JmxUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -32,12 +31,12 @@ public class JmxUtilsAnnotationTests {
 
 	@Test
 	public void notMXBean() throws Exception {
-		assertFalse("MXBean annotation not detected correctly", JmxUtils.isMBean(FooNotX.class));
+		assertThat(JmxUtils.isMBean(FooNotX.class)).as("MXBean annotation not detected correctly").isFalse();
 	}
 
 	@Test
 	public void annotatedMXBean() throws Exception {
-		assertTrue("MXBean annotation not detected correctly", JmxUtils.isMBean(FooX.class));
+		assertThat(JmxUtils.isMBean(FooX.class)).as("MXBean annotation not detected correctly").isTrue();
 	}
 
 

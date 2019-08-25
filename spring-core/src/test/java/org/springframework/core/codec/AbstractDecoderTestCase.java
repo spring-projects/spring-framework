@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Abstract base class for {@link Decoder} unit tests. Subclasses need to implement
@@ -44,8 +44,7 @@ import static org.junit.Assert.fail;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
-		extends AbstractLeakCheckingTestCase {
+public abstract class AbstractDecoderTestCase<D extends Decoder<?>> extends AbstractLeakCheckingTestCase {
 
 	/**
 	 * The decoder to test.
@@ -208,14 +207,9 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		input = Mono.from(input).concatWith(Flux.error(new InputException()));
-		try {
-			this.decoder.decode(input, outputType, mimeType, hints).blockLast(Duration.ofSeconds(5));
-			fail();
-		}
-		catch (InputException ex) {
-			// expected
-		}
+		Flux<DataBuffer> buffer = Mono.from(input).concatWith(Flux.error(new InputException()));
+		assertThatExceptionOfType(InputException.class).isThrownBy(() ->
+				this.decoder.decode(buffer, outputType, mimeType, hints).blockLast(Duration.ofSeconds(5)));
 	}
 
 	/**

@@ -59,6 +59,7 @@ class OrderedMessageSender implements MessageChannel {
 	}
 
 
+	@Override
 	public boolean send(Message<?> message) {
 		return send(message, -1);
 	}

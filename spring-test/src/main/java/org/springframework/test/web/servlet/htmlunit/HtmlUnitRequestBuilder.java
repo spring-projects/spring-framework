@@ -106,6 +106,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 
+	@Override
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();

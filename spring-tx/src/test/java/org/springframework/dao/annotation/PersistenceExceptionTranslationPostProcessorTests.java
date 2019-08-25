@@ -21,9 +21,8 @@ import javax.persistence.PersistenceException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -38,10 +37,8 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rod Johnson
@@ -69,35 +66,26 @@ public class PersistenceExceptionTranslationPostProcessorTests {
 		gac.refresh();
 
 		RepositoryInterface shouldNotBeProxied = (RepositoryInterface) gac.getBean("notProxied");
-		assertFalse(AopUtils.isAopProxy(shouldNotBeProxied));
+		assertThat(AopUtils.isAopProxy(shouldNotBeProxied)).isFalse();
 		RepositoryInterface shouldBeProxied = (RepositoryInterface) gac.getBean("proxied");
-		assertTrue(AopUtils.isAopProxy(shouldBeProxied));
+		assertThat(AopUtils.isAopProxy(shouldBeProxied)).isTrue();
 		RepositoryWithoutInterface rwi = (RepositoryWithoutInterface) gac.getBean("classProxied");
-		assertTrue(AopUtils.isAopProxy(rwi));
+		assertThat(AopUtils.isAopProxy(rwi)).isTrue();
 		checkWillTranslateExceptions(rwi);
 
 		Additional rwi2 = (Additional) gac.getBean("classProxiedAndAdvised");
-		assertTrue(AopUtils.isAopProxy(rwi2));
+		assertThat(AopUtils.isAopProxy(rwi2)).isTrue();
 		rwi2.additionalMethod(false);
 		checkWillTranslateExceptions(rwi2);
-		try {
-			rwi2.additionalMethod(true);
-			fail("Should have thrown DataAccessResourceFailureException");
-		}
-		catch (DataAccessResourceFailureException ex) {
-			assertEquals("my failure", ex.getMessage());
-		}
+		assertThatExceptionOfType(DataAccessResourceFailureException.class).isThrownBy(() ->
+				rwi2.additionalMethod(true))
+			.withMessage("my failure");
 	}
 
 	protected void checkWillTranslateExceptions(Object o) {
-		assertTrue(o instanceof Advised);
-		Advised a = (Advised) o;
-		for (Advisor advisor : a.getAdvisors()) {
-			if (advisor instanceof PersistenceExceptionTranslationAdvisor) {
-				return;
-			}
-		}
-		fail("No translation");
+		assertThat(o).isInstanceOf(Advised.class);
+		assertThat(((Advised) o).getAdvisors()).anyMatch(
+				PersistenceExceptionTranslationAdvisor.class::isInstance);
 	}
 
 

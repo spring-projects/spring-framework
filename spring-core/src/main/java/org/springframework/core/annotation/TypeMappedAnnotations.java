@@ -542,7 +542,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 	/**
 	 * {@link Spliterator} used to consume merged annotations from the
-	 * aggregates in depth fist order.
+	 * aggregates in distance fist order.
 	 */
 	private class AggregatesSpliterator<A extends Annotation> implements Spliterator<MergedAnnotation<A>> {
 
@@ -562,6 +562,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			this.aggregateCursor = 0;
 		}
 
+		@Override
 		public boolean tryAdvance(Consumer<? super MergedAnnotation<A>> action) {
 			while (this.aggregateCursor < this.aggregates.size()) {
 				Aggregate aggregate = this.aggregates.get(this.aggregateCursor);
@@ -578,15 +579,15 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			if (this.mappingCursors == null) {
 				this.mappingCursors = new int[aggregate.size()];
 			}
-			int lowestDepth = Integer.MAX_VALUE;
+			int lowestDistance = Integer.MAX_VALUE;
 			int annotationResult = -1;
 			for (int annotationIndex = 0; annotationIndex < aggregate.size(); annotationIndex++) {
 				AnnotationTypeMapping mapping = getNextSuitableMapping(aggregate, annotationIndex);
-				if (mapping != null && mapping.getDepth() < lowestDepth) {
+				if (mapping != null && mapping.getDistance() < lowestDistance) {
 					annotationResult = annotationIndex;
-					lowestDepth = mapping.getDepth();
+					lowestDistance = mapping.getDistance();
 				}
-				if (lowestDepth == 0) {
+				if (lowestDistance == 0) {
 					break;
 				}
 			}

@@ -19,10 +19,10 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -50,7 +50,7 @@ public class JndiTemplateTests {
 		};
 
 		Object o2 = jt.lookup(name);
-		assertEquals(o, o2);
+		assertThat(o2).isEqualTo(o);
 		verify(context).close();
 	}
 
@@ -68,13 +68,8 @@ public class JndiTemplateTests {
 			}
 		};
 
-		try {
-			jt.lookup(name);
-			fail("Should have thrown NamingException");
-		}
-		catch (NameNotFoundException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
+				jt.lookup(name));
 		verify(context).close();
 	}
 
@@ -91,13 +86,8 @@ public class JndiTemplateTests {
 			}
 		};
 
-		try {
-			jt.lookup(name);
-			fail("Should have thrown NamingException");
-		}
-		catch (NameNotFoundException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
+				jt.lookup(name));
 		verify(context).close();
 	}
 
@@ -115,13 +105,8 @@ public class JndiTemplateTests {
 			}
 		};
 
-		try {
-			jt.lookup(name, String.class);
-			fail("Should have thrown TypeMismatchNamingException");
-		}
-		catch (TypeMismatchNamingException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(TypeMismatchNamingException.class).isThrownBy(() ->
+				jt.lookup(name, String.class));
 		verify(context).close();
 	}
 

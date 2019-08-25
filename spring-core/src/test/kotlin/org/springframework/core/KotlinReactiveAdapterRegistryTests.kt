@@ -17,17 +17,17 @@
 package org.springframework.core
 
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -35,6 +35,7 @@ import reactor.test.StepVerifier
 import java.time.Duration
 import kotlin.reflect.KClass
 
+@ExperimentalCoroutinesApi
 class KotlinReactiveAdapterRegistryTests {
 
 	private val registry = ReactiveAdapterRegistry.getSharedInstance()
@@ -43,7 +44,7 @@ class KotlinReactiveAdapterRegistryTests {
 	fun deferredToPublisher() {
 		val source = GlobalScope.async { 1 }
 		val target: Publisher<Int> = getAdapter(Deferred::class).toPublisher(source)
-		assertTrue("Expected Mono Publisher: " + target.javaClass.name, target is Mono<*>)
+		assertTrue(target is Mono<*>, "Expected Mono Publisher: " + target.javaClass.name)
 		assertEquals(1, (target as Mono<Int>).block(Duration.ofMillis(1000)))
 	}
 
@@ -53,11 +54,9 @@ class KotlinReactiveAdapterRegistryTests {
 		val target = getAdapter(Deferred::class).fromPublisher(source)
 		assertTrue(target is Deferred<*>)
 		assertEquals(1, runBlocking { (target as Deferred<*>).await() })
-
 	}
 
 	@Test
-	@FlowPreview
 	fun flowToPublisher() {
 		val source = flow {
 			emit(1)
@@ -65,7 +64,7 @@ class KotlinReactiveAdapterRegistryTests {
 			emit(3)
 		}
 		val target: Publisher<Int> = getAdapter(Flow::class).toPublisher(source)
-		assertTrue("Expected Flux Publisher: " + target.javaClass.name, target is Flux<*>)
+		assertTrue(target is Flux<*>, "Expected Flux Publisher: " + target.javaClass.name)
 		StepVerifier.create(target)
 				.expectNext(1)
 				.expectNext(2)
@@ -74,7 +73,6 @@ class KotlinReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun publisherToFlow() {
 		val source = Flux.just(1, 2, 3)
 		val target = getAdapter(Flow::class).fromPublisher(source)

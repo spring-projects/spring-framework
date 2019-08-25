@@ -16,12 +16,11 @@
 
 package org.springframework.context.expression;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.expression.FactoryBeanAccessTests.SimpleBeanResolver.Boat;
 import org.springframework.context.expression.FactoryBeanAccessTests.SimpleBeanResolver.CarFactoryBean;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.expression.AccessException;
@@ -30,8 +29,8 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for expressions accessing beans and factory beans.
@@ -45,40 +44,25 @@ public class FactoryBeanAccessTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setBeanResolver(new SimpleBeanResolver());
 		Expression expr = new SpelExpressionParser().parseRaw("@car.colour");
-		assertEquals("red", expr.getValue(context));
+		assertThat(expr.getValue(context)).isEqualTo("red");
 		expr = new SpelExpressionParser().parseRaw("&car.class.name");
-		assertEquals(CarFactoryBean.class.getName(), expr.getValue(context));
+		assertThat(expr.getValue(context)).isEqualTo(CarFactoryBean.class.getName());
 
 		expr = new SpelExpressionParser().parseRaw("@boat.colour");
-		assertEquals("blue",expr.getValue(context));
-		expr = new SpelExpressionParser().parseRaw("&boat.class.name");
-		try {
-			assertEquals(Boat.class.getName(), expr.getValue(context));
-			fail("Expected BeanIsNotAFactoryException");
-		}
-		catch (BeanIsNotAFactoryException binafe) {
-			// success
-		}
+		assertThat(expr.getValue(context)).isEqualTo("blue");
+		Expression notFactoryExpr = new SpelExpressionParser().parseRaw("&boat.class.name");
+		assertThatExceptionOfType(BeanIsNotAFactoryException.class).isThrownBy(() ->
+				notFactoryExpr.getValue(context));
 
 		// No such bean
-		try {
-			expr = new SpelExpressionParser().parseRaw("@truck");
-			assertEquals("red", expr.getValue(context));
-			fail("Expected NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException nsbde) {
-			// success
-		}
+		Expression noBeanExpr = new SpelExpressionParser().parseRaw("@truck");
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				noBeanExpr.getValue(context));
 
 		// No such factory bean
-		try {
-			expr = new SpelExpressionParser().parseRaw("&truck");
-			assertEquals(CarFactoryBean.class.getName(), expr.getValue(context));
-			fail("Expected NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException nsbde) {
-			// success
-		}
+		Expression noFactoryBeanExpr = new SpelExpressionParser().parseRaw("&truck");
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				noFactoryBeanExpr.getValue(context));
 	}
 
 	static class SimpleBeanResolver
@@ -93,14 +77,17 @@ public class FactoryBeanAccessTests {
 
 		static class CarFactoryBean implements FactoryBean<Car> {
 
+			@Override
 			public Car getObject() {
 				return new Car();
 			}
 
+			@Override
 			public Class<Car> getObjectType() {
 				return Car.class;
 			}
 
+			@Override
 			public boolean isSingleton() {
 				return false;
 			}

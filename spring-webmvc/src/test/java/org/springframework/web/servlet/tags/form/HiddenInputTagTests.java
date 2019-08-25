@@ -19,14 +19,13 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rob Harrop
@@ -53,7 +52,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	public void render() throws Exception {
 		this.tag.setPath("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -73,7 +72,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -86,13 +85,9 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void dynamicTypeAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "email");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "email"))
+			.withMessage("Attribute type=\"email\" is not allowed");
 	}
 
 	@Test
@@ -126,11 +121,11 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertTagClosed(String output) {
-		assertTrue(output.endsWith("/>"));
+		assertThat(output.endsWith("/>")).isTrue();
 	}
 
 	private void assertTagOpened(String output) {
-		assertTrue(output.startsWith("<input "));
+		assertThat(output.startsWith("<input ")).isTrue();
 	}
 
 	@Override

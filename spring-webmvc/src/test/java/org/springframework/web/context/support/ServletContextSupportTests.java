@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -31,10 +31,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for various ServletContext-related support classes.
@@ -59,7 +57,7 @@ public class ServletContextSupportTests {
 		wac.refresh();
 
 		Object value = wac.getBean("importedAttr");
-		assertEquals("myValue", value);
+		assertThat(value).isEqualTo("myValue");
 	}
 
 	@Test
@@ -73,15 +71,10 @@ public class ServletContextSupportTests {
 		pvs.add("attributeName", "myAttr");
 		wac.registerSingleton("importedAttr", ServletContextAttributeFactoryBean.class, pvs);
 
-		try {
-			wac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().contains("myAttr"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				wac::refresh)
+			.withCauseInstanceOf(IllegalStateException.class)
+			.withMessageContaining("myAttr");
 	}
 
 	@Test
@@ -98,7 +91,7 @@ public class ServletContextSupportTests {
 		wac.refresh();
 
 		Object value = wac.getBean("importedParam");
-		assertEquals("myValue", value);
+		assertThat(value).isEqualTo("myValue");
 	}
 
 	@Test
@@ -112,15 +105,10 @@ public class ServletContextSupportTests {
 		pvs.add("initParamName", "myParam");
 		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
 
-		try {
-			wac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().contains("myParam"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				wac::refresh)
+			.withCauseInstanceOf(IllegalStateException.class)
+			.withMessageContaining("myParam");
 	}
 
 	@Test
@@ -135,18 +123,18 @@ public class ServletContextSupportTests {
 		exporter.setAttributes(attributes);
 		exporter.setServletContext(sc);
 
-		assertEquals("value1", sc.getAttribute("attr1"));
-		assertSame(tb, sc.getAttribute("attr2"));
+		assertThat(sc.getAttribute("attr1")).isEqualTo("value1");
+		assertThat(sc.getAttribute("attr2")).isSameAs(tb);
 	}
 
 	@Test
 	public void testServletContextResourceLoader() {
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context");
 		ServletContextResourceLoader rl = new ServletContextResourceLoader(sc);
-		assertTrue(rl.getResource("/WEB-INF/web.xml").exists());
-		assertTrue(rl.getResource("WEB-INF/web.xml").exists());
-		assertTrue(rl.getResource("../context/WEB-INF/web.xml").exists());
-		assertTrue(rl.getResource("/../context/WEB-INF/web.xml").exists());
+		assertThat(rl.getResource("/WEB-INF/web.xml").exists()).isTrue();
+		assertThat(rl.getResource("WEB-INF/web.xml").exists()).isTrue();
+		assertThat(rl.getResource("../context/WEB-INF/web.xml").exists()).isTrue();
+		assertThat(rl.getResource("/../context/WEB-INF/web.xml").exists()).isTrue();
 	}
 
 	@Test
@@ -171,9 +159,9 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertEquals(2, foundPaths.size());
-		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
-		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
+		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
+		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
 	}
 
 	@Test
@@ -204,9 +192,9 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertEquals(2, foundPaths.size());
-		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
-		assertTrue(foundPaths.contains("/WEB-INF/mydir2/context2.xml"));
+		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
+		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
 	}
 
 	@Test
@@ -244,10 +232,10 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertEquals(3, foundPaths.size());
-		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
-		assertTrue(foundPaths.contains("/WEB-INF/mydir2/context2.xml"));
-		assertTrue(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml"));
+		assertThat(foundPaths.size()).isEqualTo(3);
+		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
+		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
+		assertThat(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml")).isTrue();
 	}
 
 	@Test
@@ -273,9 +261,9 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertEquals(2, foundPaths.size());
-		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
-		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
+		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
+		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
 	}
 
 }

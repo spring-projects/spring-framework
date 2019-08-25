@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -47,13 +47,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -70,9 +66,12 @@ import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.parseMediaType;
 
 /**
+ * Unit tests for {@link RestTemplate}.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 @SuppressWarnings("unchecked")
 public class RestTemplateTests {
@@ -91,7 +90,7 @@ public class RestTemplateTests {
 	private HttpMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		requestFactory = mock(ClientHttpRequestFactory.class);
 		request = mock(ClientHttpRequest.class);
@@ -103,6 +102,25 @@ public class RestTemplateTests {
 		template.setErrorHandler(errorHandler);
 	}
 
+	@Test
+	public void constructorPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new RestTemplate((List<HttpMessageConverter<?>>) null))
+				.withMessage("At least one HttpMessageConverter is required");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new RestTemplate(Arrays.asList(null, this.converter)))
+				.withMessage("The HttpMessageConverter list must not contain null elements");
+	}
+
+	@Test
+	public void setMessageConvertersPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> template.setMessageConverters((List<HttpMessageConverter<?>>) null))
+				.withMessage("At least one HttpMessageConverter is required");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> template.setMessageConverters(Arrays.asList(null, this.converter)))
+				.withMessage("The HttpMessageConverter list must not contain null elements");
+	}
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
@@ -168,13 +186,8 @@ public class RestTemplateTests {
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
 				.given(errorHandler).handleError(new URI(url), GET, response);
 
-		try {
-			template.execute(url, GET, null, null);
-			fail("HttpServerErrorException expected");
-		}
-		catch (HttpServerErrorException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
+				template.execute(url, GET, null, null));
 
 		verify(response).close();
 	}
@@ -189,9 +202,8 @@ public class RestTemplateTests {
 		mockTextResponseBody("Hello World");
 
 		String result = template.getForObject("https://example.com", String.class);
-		assertEquals("Invalid GET result", expected, result);
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE,
-				requestHeaders.getFirst("Accept"));
+		assertThat(result).as("Invalid GET result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 
 		verify(response).close();
 	}
@@ -209,13 +221,8 @@ public class RestTemplateTests {
 		mockResponseBody("Foo", new MediaType("bar", "baz"));
 		given(converter.canRead(String.class, barBaz)).willReturn(false);
 
-		try {
-			template.getForObject("https://example.com/{p}", String.class, "resource");
-			fail("UnsupportedMediaTypeException expected");
-		}
-		catch (RestClientException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				template.getForObject("https://example.com/{p}", String.class, "resource"));
 
 		verify(response).close();
 	}
@@ -239,8 +246,7 @@ public class RestTemplateTests {
 		template.setMessageConverters(Arrays.asList(firstConverter, secondConverter));
 		template.getForObject("https://example.com/", String.class);
 
-		assertEquals("Sent duplicate Accept header values", 1,
-				requestHeaders.getAccept().size());
+		assertThat(requestHeaders.getAccept().size()).as("Sent duplicate Accept header values").isEqualTo(1);
 	}
 
 	@Test
@@ -253,10 +259,10 @@ public class RestTemplateTests {
 		mockTextResponseBody(expected);
 
 		ResponseEntity<String> result = template.getForEntity("https://example.com", String.class);
-		assertEquals("Invalid GET result", expected, result.getBody());
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
-		assertEquals("Invalid Content-Type header", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
-		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getBody()).as("Invalid GET result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type header").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
 		verify(response).close();
 	}
@@ -290,7 +296,7 @@ public class RestTemplateTests {
 
 		HttpHeaders result = template.headForHeaders("https://example.com");
 
-		assertSame("Invalid headers returned", responseHeaders, result);
+		assertThat(result).as("Invalid headers returned").isSameAs(responseHeaders);
 
 		verify(response).close();
 	}
@@ -307,7 +313,7 @@ public class RestTemplateTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 
 		URI result = template.postForLocation("https://example.com", helloWorld);
-		assertEquals("Invalid POST result", expected, result);
+		assertThat(result).as("Invalid POST result").isEqualTo(expected);
 
 		verify(response).close();
 	}
@@ -329,7 +335,7 @@ public class RestTemplateTests {
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("https://example.com", entity);
-		assertEquals("Invalid POST result", expected, result);
+		assertThat(result).as("Invalid POST result").isEqualTo(expected);
 
 		verify(response).close();
 	}
@@ -350,8 +356,8 @@ public class RestTemplateTests {
 		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 
 		URI result = template.postForLocation("https://example.com", entity);
-		assertEquals("Invalid POST result", expected, result);
-		assertEquals("No custom header set", "MyValue", requestHeaders.getFirst("MyHeader"));
+		assertThat(result).as("Invalid POST result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("MyHeader")).as("No custom header set").isEqualTo("MyValue");
 
 		verify(response).close();
 	}
@@ -363,7 +369,7 @@ public class RestTemplateTests {
 		mockResponseStatus(HttpStatus.OK);
 
 		URI result = template.postForLocation("https://example.com", "Hello World");
-		assertNull("Invalid POST result", result);
+		assertThat(result).as("Invalid POST result").isNull();
 
 		verify(response).close();
 	}
@@ -375,7 +381,7 @@ public class RestTemplateTests {
 		mockResponseStatus(HttpStatus.OK);
 
 		template.postForLocation("https://example.com", null);
-		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+		assertThat(requestHeaders.getContentLength()).as("Invalid content length").isEqualTo(0);
 
 		verify(response).close();
 	}
@@ -390,8 +396,8 @@ public class RestTemplateTests {
 		mockResponseBody(expected, MediaType.TEXT_PLAIN);
 
 		String result = template.postForObject("https://example.com", "Hello World", String.class);
-		assertEquals("Invalid POST result", expected, result);
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
+		assertThat(result).as("Invalid POST result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 
 		verify(response).close();
 	}
@@ -406,10 +412,10 @@ public class RestTemplateTests {
 		mockResponseBody(expected, MediaType.TEXT_PLAIN);
 
 		ResponseEntity<String> result = template.postForEntity("https://example.com", "Hello World", String.class);
-		assertEquals("Invalid POST result", expected, result.getBody());
-		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
-		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getBody()).as("Invalid POST result").isEqualTo(expected);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
 		verify(response).close();
 	}
@@ -428,8 +434,8 @@ public class RestTemplateTests {
 		given(converter.read(String.class, response)).willReturn(null);
 
 		String result = template.postForObject("https://example.com", null, String.class);
-		assertNull("Invalid POST result", result);
-		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+		assertThat(result).as("Invalid POST result").isNull();
+		assertThat(requestHeaders.getContentLength()).as("Invalid content length").isEqualTo(0);
 
 		verify(response).close();
 	}
@@ -448,10 +454,10 @@ public class RestTemplateTests {
 		given(converter.read(String.class, response)).willReturn(null);
 
 		ResponseEntity<String> result = template.postForEntity("https://example.com", null, String.class);
-		assertFalse("Invalid POST result", result.hasBody());
-		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
-		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
-		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+		assertThat(result.hasBody()).as("Invalid POST result").isFalse();
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getContentLength()).as("Invalid content length").isEqualTo(0);
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
 		verify(response).close();
 	}
@@ -474,7 +480,7 @@ public class RestTemplateTests {
 		mockResponseStatus(HttpStatus.OK);
 
 		template.put("https://example.com", null);
-		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+		assertThat(requestHeaders.getContentLength()).as("Invalid content length").isEqualTo(0);
 
 		verify(response).close();
 	}
@@ -489,8 +495,8 @@ public class RestTemplateTests {
 		mockResponseBody("42", MediaType.TEXT_PLAIN);
 
 		String result = template.patchForObject("https://example.com", "Hello World", String.class);
-		assertEquals("Invalid POST result", expected, result);
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
+		assertThat(result).as("Invalid POST result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 
 		verify(response).close();
 	}
@@ -508,8 +514,8 @@ public class RestTemplateTests {
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 
 		String result = template.patchForObject("https://example.com", null, String.class);
-		assertNull("Invalid POST result", result);
-		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+		assertThat(result).as("Invalid POST result").isNull();
+		assertThat(requestHeaders.getContentLength()).as("Invalid content length").isEqualTo(0);
 
 		verify(response).close();
 	}
@@ -535,7 +541,7 @@ public class RestTemplateTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 
 		Set<HttpMethod> result = template.optionsForAllow("https://example.com");
-		assertEquals("Invalid OPTIONS result", expected, result);
+		assertThat(result).as("Invalid OPTIONS result").isEqualTo(expected);
 
 		verify(response).close();
 	}
@@ -547,15 +553,10 @@ public class RestTemplateTests {
 		mockHttpMessageConverter(new MediaType("foo", "bar"), String.class);
 		given(request.execute()).willThrow(new IOException("Socket failure"));
 
-		try {
-			template.getForObject(url, String.class);
-			fail("RestClientException expected");
-		}
-		catch (ResourceAccessException ex) {
-			assertEquals("I/O error on GET request for \"https://example.com/resource\": " +
-							"Socket failure; nested exception is java.io.IOException: Socket failure",
-					ex.getMessage());
-		}
+		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
+				template.getForObject(url, String.class))
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
+							"Socket failure; nested exception is java.io.IOException: Socket failure");
 	}
 
 	@Test  // SPR-15900
@@ -570,15 +571,10 @@ public class RestTemplateTests {
 		given(request.getHeaders()).willReturn(new HttpHeaders());
 		given(request.execute()).willThrow(new IOException("Socket failure"));
 
-		try {
-			template.getForObject(uri, String.class);
-			fail("RestClientException expected");
-		}
-		catch (ResourceAccessException ex) {
-			assertEquals("I/O error on GET request for \"https://example.com/resource\": " +
-					"Socket failure; nested exception is java.io.IOException: Socket failure",
-					ex.getMessage());
-		}
+		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
+				template.getForObject(uri, String.class))
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
+					"Socket failure; nested exception is java.io.IOException: Socket failure");
 	}
 
 	@Test
@@ -594,11 +590,11 @@ public class RestTemplateTests {
 		entityHeaders.set("MyHeader", "MyValue");
 		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 		ResponseEntity<String> result = template.exchange("https://example.com", POST, entity, String.class);
-		assertEquals("Invalid POST result", expected, result.getBody());
-		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
-		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
-		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getBody()).as("Invalid POST result").isEqualTo(expected);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(requestHeaders.getFirst("MyHeader")).as("Invalid custom header").isEqualTo("MyValue");
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
 		verify(response).close();
 	}
@@ -629,11 +625,11 @@ public class RestTemplateTests {
 		entityHeaders.set("MyHeader", "MyValue");
 		HttpEntity<String> requestEntity = new HttpEntity<>("Hello World", entityHeaders);
 		ResponseEntity<List<Integer>> result = template.exchange("https://example.com", POST, requestEntity, intList);
-		assertEquals("Invalid POST result", expected, result.getBody());
-		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
-		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
-		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
-		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getBody()).as("Invalid POST result").isEqualTo(expected);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(requestHeaders.getFirst("MyHeader")).as("Invalid custom header").isEqualTo("MyValue");
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
 		verify(response).close();
 	}
@@ -654,7 +650,7 @@ public class RestTemplateTests {
 		entityHeaders.add("MyHeader", "MyEntityValue");
 		HttpEntity<Void> entity = new HttpEntity<>(null, entityHeaders);
 		template.exchange("https://example.com", POST, entity, Void.class);
-		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
+		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");
 
 		verify(response).close();
 	}
@@ -678,7 +674,7 @@ public class RestTemplateTests {
 		entityHeaders.add("MyHeader", "MyEntityValue");
 		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 		template.exchange("https://example.com", POST, entity, Void.class);
-		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
+		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");
 
 		verify(response).close();
 	}

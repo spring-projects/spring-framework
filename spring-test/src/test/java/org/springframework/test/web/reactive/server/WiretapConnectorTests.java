@@ -19,7 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
@@ -34,7 +34,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunctions;
 
 import static java.time.Duration.ofMillis;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WiretapConnector}.
@@ -59,8 +59,8 @@ public class WiretapConnectorTests {
 
 		WiretapConnector.Info actual = wiretapConnector.claimRequest("1");
 		ExchangeResult result = actual.createExchangeResult(Duration.ZERO, null);
-		assertEquals(HttpMethod.GET, result.getMethod());
-		assertEquals("/test", result.getUrl().toString());
+		assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(result.getUrl().toString()).isEqualTo("/test");
 	}
 
 }

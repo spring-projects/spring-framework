@@ -19,7 +19,7 @@ package org.springframework.core.codec;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -33,8 +33,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
@@ -46,8 +45,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
-		extends	AbstractLeakCheckingTestCase {
+public abstract class AbstractEncoderTestCase<E extends Encoder<?>> extends AbstractLeakCheckingTestCase {
 
 	/**
 	 * The encoder to test.
@@ -150,7 +148,6 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
 	 * @param hints the hints used for decoding. May be {@code null}.
 	 * @param <T> the output type
 	 */
-	@SuppressWarnings("unchecked")
 	protected <T> void testEncode(Publisher<? extends T> input, ResolvableType inputType,
 			Consumer<StepVerifier.FirstStep<DataBuffer>> stepConsumer,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
@@ -241,7 +238,7 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
 			byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 			dataBuffer.read(resultBytes);
 			release(dataBuffer);
-			assertArrayEquals(expected, resultBytes);
+			assertThat(resultBytes).isEqualTo(expected);
 		};
 	}
 
@@ -256,7 +253,7 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
 			dataBuffer.read(resultBytes);
 			release(dataBuffer);
 			String actual = new String(resultBytes, UTF_8);
-			assertEquals(expected, actual);
+			assertThat(actual).isEqualTo(expected);
 		};
 
 	}
@@ -274,6 +271,5 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>>
 	public static class InputException extends RuntimeException {
 
 	}
-
 
 }

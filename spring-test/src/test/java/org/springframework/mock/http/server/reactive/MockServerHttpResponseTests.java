@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.server.reactive;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MockServerHttpResponse}.
  * @author Rossen Stoyanchev
  */
-public class MockServerHttpResponseTests {
+class MockServerHttpResponseTests {
 
 	@Test
-	public void cookieHeaderSet() throws Exception {
+	void cookieHeaderSet() throws Exception {
 
 		ResponseCookie foo11 = ResponseCookie.from("foo1", "bar1").build();
 		ResponseCookie foo12 = ResponseCookie.from("foo1", "bar2").build();
@@ -46,8 +47,7 @@ public class MockServerHttpResponseTests {
 
 		response.applyCookies();
 
-		assertEquals(Arrays.asList("foo1=bar1", "foo1=bar2", "foo2=baz1", "foo2=baz2"),
-				response.getHeaders().get(HttpHeaders.SET_COOKIE));
+		assertThat(response.getHeaders().get(HttpHeaders.SET_COOKIE)).isEqualTo(Arrays.asList("foo1=bar1", "foo1=bar2", "foo2=baz1", "foo2=baz2"));
 	}
 
 }

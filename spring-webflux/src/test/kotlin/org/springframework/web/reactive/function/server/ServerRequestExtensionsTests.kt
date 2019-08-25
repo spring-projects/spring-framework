@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function.client
+package org.springframework.web.reactive.function.server
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.codec.multipart.Part
 import org.springframework.util.MultiValueMap
-import org.springframework.web.reactive.function.server.*
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Mono
 import java.security.Principal
@@ -54,7 +53,7 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
+	@ExperimentalCoroutinesApi
 	fun `bodyToFlow with reified type parameters`() {
 		request.bodyToFlow<List<Foo>>()
 		verify { request.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }

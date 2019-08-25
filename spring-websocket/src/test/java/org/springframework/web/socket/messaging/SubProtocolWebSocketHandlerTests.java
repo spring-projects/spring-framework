@@ -19,10 +19,11 @@ package org.springframework.web.socket.messaging;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
@@ -32,11 +33,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -49,11 +47,8 @@ import static org.mockito.Mockito.verify;
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
  */
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SubProtocolWebSocketHandlerTests {
-
-	private SubProtocolWebSocketHandler webSocketHandler;
-
-	private TestWebSocketSession session;
 
 	@Mock SubProtocolHandler stompHandler;
 
@@ -66,10 +61,13 @@ public class SubProtocolWebSocketHandlerTests {
 	@Mock
 	SubscribableChannel outClientChannel;
 
+	private SubProtocolWebSocketHandler webSocketHandler;
 
-	@Before
+	private TestWebSocketSession session;
+
+
+	@BeforeEach
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));
@@ -100,13 +98,14 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void subProtocolNoMatch() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.session.setAcceptedProtocol("wamp");
 
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
 	@Test
@@ -141,16 +140,18 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noSubProtocolTwoHandlers() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noSubProtocolNoDefaultHandler() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
 	@Test
@@ -180,14 +181,13 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.start();
 		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
 
-		assertTrue(session1.isOpen());
-		assertNull(session1.getCloseStatus());
+		assertThat(session1.isOpen()).isTrue();
+		assertThat(session1.getCloseStatus()).isNull();
 
-		assertFalse(session2.isOpen());
-		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
+		assertThat(session2.isOpen()).isFalse();
+		assertThat(session2.getCloseStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE);
 
-		assertNotEquals("lastSessionCheckTime not updated", sixtyOneSecondsAgo,
-				handlerAccessor.getPropertyValue("lastSessionCheckTime"));
+		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).as("lastSessionCheckTime not updated").isNotEqualTo(sixtyOneSecondsAgo);
 	}
 
 }

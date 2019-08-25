@@ -19,7 +19,7 @@ package org.springframework.web.filter;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
@@ -29,8 +29,8 @@ import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link RelativeRedirectFilter}.
@@ -45,14 +45,16 @@ public class RelativeRedirectFilterTests {
 	private HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void sendRedirectHttpStatusWhenNullThenIllegalArgumentException() {
-		this.filter.setRedirectStatus(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.filter.setRedirectStatus(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void sendRedirectHttpStatusWhenNot3xxThenIllegalArgumentException() {
-		this.filter.setRedirectStatus(HttpStatus.OK);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.filter.setRedirectStatus(HttpStatus.OK));
 	}
 
 	@Test
@@ -85,18 +87,18 @@ public class RelativeRedirectFilterTests {
 		this.filter.doFilterInternal(new MockHttpServletRequest(), original, chain);
 
 		HttpServletResponse wrapped1 = (HttpServletResponse) chain.getResponse();
-		assertNotSame(original, wrapped1);
+		assertThat(wrapped1).isNotSameAs(original);
 
 		chain.reset();
 		this.filter.doFilterInternal(new MockHttpServletRequest(), wrapped1, chain);
 		HttpServletResponse current = (HttpServletResponse) chain.getResponse();
-		assertSame(wrapped1, current);
+		assertThat(current).isSameAs(wrapped1);
 
 		chain.reset();
 		HttpServletResponse wrapped2 = new HttpServletResponseWrapper(wrapped1);
 		this.filter.doFilterInternal(new MockHttpServletRequest(), wrapped2, chain);
 		current = (HttpServletResponse) chain.getResponse();
-		assertSame(wrapped2, current);
+		assertThat(current).isSameAs(wrapped2);
 	}
 
 

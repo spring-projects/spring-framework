@@ -19,16 +19,14 @@ package org.springframework.orm.jpa.support;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -54,32 +52,28 @@ public class SharedEntityManagerFactoryTests {
 		proxyFactoryBean.setEntityManagerFactory(mockEmf);
 		proxyFactoryBean.afterPropertiesSet();
 
-		assertTrue(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType()));
-		assertTrue(proxyFactoryBean.isSingleton());
+		assertThat(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType())).isTrue();
+		assertThat(proxyFactoryBean.isSingleton()).isTrue();
 
 		EntityManager proxy = proxyFactoryBean.getObject();
-		assertSame(proxy, proxyFactoryBean.getObject());
-		assertFalse(proxy.contains(o));
+		assertThat(proxyFactoryBean.getObject()).isSameAs(proxy);
+		assertThat(proxy.contains(o)).isFalse();
 
-		assertTrue(proxy instanceof EntityManagerProxy);
+		boolean condition = proxy instanceof EntityManagerProxy;
+		assertThat(condition).isTrue();
 		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
-		try {
-			emProxy.getTargetEntityManager();
-			fail("Should have thrown IllegalStateException outside of transaction");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().as("outside of transaction").isThrownBy(
+				emProxy::getTargetEntityManager);
 
 		TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(mockEm));
 		try {
-			assertSame(mockEm, emProxy.getTargetEntityManager());
+			assertThat(emProxy.getTargetEntityManager()).isSameAs(mockEm);
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(mockEmf);
 		}
 
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		verify(mockEm).contains(o);
 		verify(mockEm).close();
 	}

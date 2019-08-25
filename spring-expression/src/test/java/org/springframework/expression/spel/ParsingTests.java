@@ -16,14 +16,12 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -454,20 +452,9 @@ public class ParsingTests {
 	 * @param expectedStringFormOfAST the expected string form of the AST
 	 */
 	public void parseCheck(String expression, String expectedStringFormOfAST) {
-		try {
-			SpelExpression e = parser.parseRaw(expression);
-			if (e != null && !e.toStringAST().equals(expectedStringFormOfAST)) {
-				SpelUtilities.printAbstractSyntaxTree(System.err, e);
-			}
-			if (e == null) {
-				fail("Parsed exception was null");
-			}
-			assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
-		}
-		catch (ParseException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		}
+		SpelExpression e = parser.parseRaw(expression);
+		assertThat(e).isNotNull();
+		assertThat(e.toStringAST()).isEqualTo(expectedStringFormOfAST);
 	}
 
 }

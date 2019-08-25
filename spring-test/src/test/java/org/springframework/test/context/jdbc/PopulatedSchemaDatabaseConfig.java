@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,20 +36,20 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class PopulatedSchemaDatabaseConfig {
 
 	@Bean
-	public PlatformTransactionManager transactionManager() {
+	PlatformTransactionManager transactionManager() {
 		return new DataSourceTransactionManager(dataSource());
 	}
 
 	@Bean
-	public DataSource dataSource() {
+	DataSource dataSource() {
 		return new EmbeddedDatabaseBuilder()//
-		.setName("populated-sql-scripts-test-db")//
+		.generateUniqueName(true)
 		.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql") //
 		.build();
 	}
 
 	@Bean
-	public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+	JdbcTemplate jdbcTemplate(DataSource dataSource) {
 		return new JdbcTemplate(dataSource);
 	}
 

@@ -18,14 +18,12 @@ package org.springframework.transaction.interceptor;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.
@@ -41,50 +39,53 @@ public class RollbackRuleTests {
 	@Test
 	public void foundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void foundImmediatelyWithClass() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void notFound() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
-		assertEquals(-1, rr.getDepth(new MyRuntimeException("")));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(-1);
 	}
 
 	@Test
 	public void ancestry() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException
-		assertThat(rr.getDepth(new MyRuntimeException("")), equalTo(3));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(3);
 	}
 
 	@Test
 	public void alwaysTrueForThrowable() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Throwable.class.getName());
-		assertTrue(rr.getDepth(new MyRuntimeException("")) > 0);
-		assertTrue(rr.getDepth(new IOException()) > 0);
-		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
-		assertTrue(rr.getDepth(new RuntimeException()) > 0);
+		assertThat(rr.getDepth(new MyRuntimeException("")) > 0).isTrue();
+		assertThat(rr.getDepth(new IOException()) > 0).isTrue();
+		assertThat(rr.getDepth(new FatalBeanException(null,null)) > 0).isTrue();
+		assertThat(rr.getDepth(new RuntimeException()) > 0).isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNonThrowableType() {
-		new RollbackRuleAttribute(StringBuffer.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute(StringBuffer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNullThrowableType() {
-		new RollbackRuleAttribute((Class<?>) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((Class<?>) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgExceptionStringNameVersionWithNull() {
-		new RollbackRuleAttribute((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((String) null));
 	}
 
 }

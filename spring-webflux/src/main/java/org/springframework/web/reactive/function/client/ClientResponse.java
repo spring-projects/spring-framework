@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -59,16 +60,17 @@ import org.springframework.web.reactive.function.BodyExtractor;
 public interface ClientResponse {
 
 	/**
-	 * Return the status code of this response.
-	 * @return the status as an HttpStatus enum value
+	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
 	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @since #getRawStatusCode()
 	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
 
 	/**
 	 * Return the (potentially non-standard) status code of this response.
-	 * @return the status as an integer
+	 * @return the HTTP status as an integer value
 	 * @since 5.1
 	 * @see #statusCode()
 	 * @see HttpStatus#resolve(int)
@@ -108,15 +110,15 @@ public interface ClientResponse {
 
 	/**
 	 * Extract the body to a {@code Mono}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the type reference of element in the {@code Mono}
 	 * @param <T> the element type
 	 * @return a mono containing the body of the given type {@code T}
 	 */
-	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
 	 * Extract the body to a {@code Flux}.
-	 * @param elementClass the class of element in the {@code Flux}
+	 * @param elementClass the class of elements in the {@code Flux}
 	 * @param <T> the element type
 	 * @return a flux containing the body of the given type {@code T}
 	 */
@@ -124,43 +126,51 @@ public interface ClientResponse {
 
 	/**
 	 * Extract the body to a {@code Flux}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the type reference of elements in the {@code Flux}
 	 * @param <T> the element type
 	 * @return a flux containing the body of the given type {@code T}
 	 */
-	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
+	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
 	 * Return this response as a delayed {@code ResponseEntity}.
-	 * @param bodyType the expected response body type
+	 * @param bodyClass the expected response body type
 	 * @param <T> response body type
 	 * @return {@code Mono} with the {@code ResponseEntity}
 	 */
-	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
+	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
 	/**
 	 * Return this response as a delayed {@code ResponseEntity}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param bodyTypeReference a type reference describing the expected response body type
 	 * @param <T> response body type
 	 * @return {@code Mono} with the {@code ResponseEntity}
 	 */
-	<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
 
 	/**
 	 * Return this response as a delayed list of {@code ResponseEntity}s.
-	 * @param elementType the expected response body list element type
+	 * @param elementClass the expected response body list element class
 	 * @param <T> the type of elements in the list
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
-	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
 	/**
 	 * Return this response as a delayed list of {@code ResponseEntity}s.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the expected response body list element reference type
 	 * @param <T> the type of elements in the list
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
-	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
+
+	/**
+	 * Creates a {@link WebClientResponseException} based on the status code,
+	 * headers, and body of this response as well as the corresponding request.
+	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
+	 * @since 5.2
+	 */
+	Mono<WebClientResponseException> createException();
 
 
 	// Static builder methods
@@ -192,6 +202,17 @@ public interface ClientResponse {
 	 */
 	static Builder create(HttpStatus statusCode, ExchangeStrategies strategies) {
 		return new DefaultClientResponseBuilder(strategies).statusCode(statusCode);
+	}
+
+	/**
+	 * Create a response builder with the given raw status code and strategies for reading the body.
+	 * @param statusCode the status code
+	 * @param strategies the strategies
+	 * @return the created builder
+	 * @since 5.1.9
+	 */
+	static Builder create(int statusCode, ExchangeStrategies strategies) {
+		return new DefaultClientResponseBuilder(strategies).rawStatusCode(statusCode);
 	}
 
 	/**
@@ -260,6 +281,14 @@ public interface ClientResponse {
 		Builder statusCode(HttpStatus statusCode);
 
 		/**
+		 * Set the raw status code of the response.
+		 * @param statusCode the new status code.
+		 * @return this builder
+		 * @since 5.1.9
+		 */
+		Builder rawStatusCode(int statusCode);
+
+		/**
 		 * Add the given header value(s) under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
@@ -316,6 +345,14 @@ public interface ClientResponse {
 		 * @return this builder
 		 */
 		Builder body(String body);
+
+		/**
+		 * Set the request associated with the response.
+		 * @param request the request
+		 * @return this builder
+		 * @since 5.2
+		 */
+		Builder request(HttpRequest request);
 
 		/**
 		 * Build the response.

@@ -1,5 +1,7 @@
 description = "Spring JDBC"
 
+apply plugin: "kotlin"
+
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
@@ -10,6 +12,6 @@ dependencies {
 	optional("com.h2database:h2:1.4.199")
 	optional("org.apache.derby:derby:10.14.2.0")
 	optional("org.apache.derby:derbyclient:10.14.2.0")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 }

@@ -1,0 +1,22 @@
+description = "Spring Integration Tests"
+
+apply plugin: "org.springframework.build.test-sources"
+
+dependencies {
+	testCompile(project(":spring-aop"))
+	testCompile(project(":spring-beans"))
+	testCompile(project(":spring-context"))
+	testCompile(project(":spring-core"))
+	testCompile(project(":spring-expression"))
+	testCompile(project(":spring-jdbc"))
+	testCompile(project(":spring-orm"))
+	testCompile(project(":spring-test"))
+	testCompile(project(":spring-tx"))
+	testCompile(project(":spring-web"))
+	testCompile("javax.inject:javax.inject:1")
+	testCompile("javax.resource:javax.resource-api:1.7.1")
+	testCompile("javax.servlet:javax.servlet-api:4.0.1")
+	testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
+	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
+	testCompile("org.hibernate:hibernate-core:5.1.17.Final")
+}

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.core.env.Profiles
 import java.util.function.Supplier
 
 /**
@@ -1082,11 +1083,12 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	}
 
 	/**
-	 * Take in account bean definitions enclosed in the provided lambda only when the
-	 * specified profile is active.
+	 * Take in account bean definitions enclosed in the provided lambda when the
+	 * profile is accepted.
+	 * @see org.springframework.core.env.Profiles.of
 	 */
 	fun profile(profile: String, init: BeanDefinitionDsl.() -> Unit) {
-		val beans = BeanDefinitionDsl(init, { it.activeProfiles.contains(profile) })
+		val beans = BeanDefinitionDsl(init, { it.acceptsProfiles(Profiles.of(profile)) })
 		children.add(beans)
 	}
 

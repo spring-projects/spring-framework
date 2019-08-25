@@ -21,16 +21,13 @@ import java.util.List;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.MBeanTestUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -40,13 +37,13 @@ import static org.junit.Assert.fail;
 public class MBeanServerFactoryBeanTests {
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
@@ -57,7 +54,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertNotNull("The MBeanServer should not be null", server);
+			assertThat(server).as("The MBeanServer should not be null").isNotNull();
 		}
 		finally {
 			bean.destroy();
@@ -71,7 +68,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertEquals("The default domain should be foo", "foo", server.getDefaultDomain());
+			assertThat(server.getDefaultDomain()).as("The default domain should be foo").isEqualTo("foo");
 		}
 		finally {
 			bean.destroy();
@@ -87,7 +84,7 @@ public class MBeanServerFactoryBeanTests {
 			bean.afterPropertiesSet();
 			try {
 				MBeanServer otherServer = bean.getObject();
-				assertSame("Existing MBeanServer not located", server, otherServer);
+				assertThat(otherServer).as("Existing MBeanServer not located").isSameAs(server);
 			}
 			finally {
 				bean.destroy();
@@ -104,7 +101,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();
@@ -117,7 +114,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();
@@ -138,26 +135,23 @@ public class MBeanServerFactoryBeanTests {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setRegisterWithFactory(referenceShouldExist);
 		bean.afterPropertiesSet();
-
 		try {
 			MBeanServer server = bean.getObject();
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
-
-			boolean found = false;
-			for (MBeanServer candidate : servers) {
-				if (candidate == server) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!(found == referenceShouldExist)) {
-				fail(failMsg);
-			}
+			assertThat(hasInstance(servers, server)).as(failMsg).isEqualTo(referenceShouldExist);
 		}
 		finally {
 			bean.destroy();
 		}
+	}
+
+	private boolean hasInstance(List<MBeanServer> servers, MBeanServer server) {
+		for (MBeanServer candidate : servers) {
+			if (candidate == server) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

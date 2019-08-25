@@ -19,62 +19,51 @@ package org.springframework.core.serializer;
 import java.io.NotSerializableException;
 import java.io.Serializable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.serializer.support.DeserializingConverter;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.core.serializer.support.SerializingConverter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
  */
-public class SerializationConverterTests {
+class SerializationConverterTests {
 
 	@Test
-	public void serializeAndDeserializeString() {
+	void serializeAndDeserializeString() {
 		SerializingConverter toBytes = new SerializingConverter();
 		byte[] bytes = toBytes.convert("Testing");
 		DeserializingConverter fromBytes = new DeserializingConverter();
-		assertEquals("Testing", fromBytes.convert(bytes));
+		assertThat(fromBytes.convert(bytes)).isEqualTo("Testing");
 	}
 
 	@Test
-	public void nonSerializableObject() {
+	void nonSerializableObject() {
 		SerializingConverter toBytes = new SerializingConverter();
-		try {
-			toBytes.convert(new Object());
-			fail("Expected IllegalArgumentException");
-		}
-		catch (SerializationFailedException e) {
-			assertNotNull(e.getCause());
-			assertTrue(e.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
+				toBytes.convert(new Object()))
+			.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void nonSerializableField() {
+	void nonSerializableField() {
 		SerializingConverter toBytes = new SerializingConverter();
-		try {
-			toBytes.convert(new UnSerializable());
-			fail("Expected SerializationFailureException");
-		}
-		catch (SerializationFailedException e) {
-			assertNotNull(e.getCause());
-			assertTrue(e.getCause() instanceof NotSerializableException);
-		}
+		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
+				toBytes.convert(new UnSerializable()))
+			.withCauseInstanceOf(NotSerializableException.class);
 	}
 
-	@Test(expected = SerializationFailedException.class)
-	public void deserializationFailure() {
+	@Test
+	void deserializationFailure() {
 		DeserializingConverter fromBytes = new DeserializingConverter();
-		fromBytes.convert("Junk".getBytes());
+		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
+				fromBytes.convert("Junk".getBytes()));
 	}
 
 

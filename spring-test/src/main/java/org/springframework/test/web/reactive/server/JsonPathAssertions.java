@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**
@@ -178,7 +179,7 @@ public class JsonPathAssertions {
 
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		throw new AssertionError("Object#equals is disabled " +
 				"to avoid being used in error instead of JsonPathAssertions#isEqualTo(String).");
 	}

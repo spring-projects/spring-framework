@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.ContextCustomizerSpringRunnerTest
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test which verifies support of
@@ -48,7 +48,7 @@ public class ContextCustomizerSpringRunnerTests {
 
 	@Test
 	public void injectedBean() {
-		assertEquals("foo", foo);
+		assertThat(foo).isEqualTo("foo");
 	}
 
 

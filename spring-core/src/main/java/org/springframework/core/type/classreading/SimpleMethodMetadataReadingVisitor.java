@@ -26,11 +26,10 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link MethodMetadata} returned from a {@link SimpleMetadataReader}.
+ * ASM method visitor that creates {@link SimpleMethodMetadata}.
  *
  * @author Phillip Webb
  * @since 5.2
@@ -127,7 +126,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -39,10 +39,8 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -63,7 +61,7 @@ public class PathVariableMethodArgumentResolverTests {
 	private MethodParameter paramMono;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new PathVariableMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance());
 
@@ -78,17 +76,11 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.paramNamedString));
-		assertFalse(this.resolver.supportsParameter(this.paramString));
-		try {
-			this.resolver.supportsParameter(this.paramMono);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"PathVariableMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThat(this.resolver.supportsParameter(this.paramNamedString)).isTrue();
+		assertThat(this.resolver.supportsParameter(this.paramString)).isFalse();
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.paramMono))
+			.withMessageStartingWith("PathVariableMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test
@@ -100,7 +92,7 @@ public class PathVariableMethodArgumentResolverTests {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
 		Object result = mono.block();
-		assertEquals("value", result);
+		assertThat(result).isEqualTo("value");
 	}
 
 	@Test
@@ -112,7 +104,7 @@ public class PathVariableMethodArgumentResolverTests {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
 		Object result = mono.block();
-		assertEquals("value", result);
+		assertThat(result).isEqualTo("value");
 	}
 
 	@Test
@@ -127,7 +119,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 		Object result = mono.block();
-		assertEquals(Optional.of("value"), result);
+		assertThat(result).isEqualTo(Optional.of("value"));
 	}
 
 	@Test
@@ -157,8 +149,9 @@ public class PathVariableMethodArgumentResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(value -> {
-					assertTrue(value instanceof Optional);
-					assertFalse(((Optional<?>) value).isPresent());
+					boolean condition = value instanceof Optional;
+					assertThat(condition).isTrue();
+					assertThat(((Optional<?>) value).isPresent()).isFalse();
 				})
 				.expectComplete()
 				.verify();

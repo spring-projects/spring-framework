@@ -18,13 +18,12 @@ package org.springframework.beans.propertyeditors;
 
 import java.io.InputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link InputStreamEditor} class.
@@ -34,9 +33,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class InputStreamEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new InputStreamEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new InputStreamEditor(null));
 	}
 
 	@Test
@@ -48,10 +48,11 @@ public class InputStreamEditorTests {
 			InputStreamEditor editor = new InputStreamEditor();
 			editor.setAsText(resource);
 			Object value = editor.getValue();
-			assertNotNull(value);
-			assertTrue(value instanceof InputStream);
+			assertThat(value).isNotNull();
+			boolean condition = value instanceof InputStream;
+			assertThat(condition).isTrue();
 			stream = (InputStream) value;
-			assertTrue(stream.available() > 0);
+			assertThat(stream.available() > 0).isTrue();
 		}
 		finally {
 			if (stream != null) {
@@ -60,20 +61,21 @@ public class InputStreamEditorTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenResourceDoesNotExist() throws Exception {
 		InputStreamEditor editor = new InputStreamEditor();
-		editor.setAsText("classpath:bingo!");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText("classpath:bingo!"));
 	}
 
 	@Test
 	public void testGetAsTextReturnsNullByDefault() throws Exception {
-		assertNull(new InputStreamEditor().getAsText());
+		assertThat(new InputStreamEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";
 		InputStreamEditor editor = new InputStreamEditor();
 		editor.setAsText(resource);
-		assertNull(editor.getAsText());
+		assertThat(editor.getAsText()).isNull();
 	}
 
 }

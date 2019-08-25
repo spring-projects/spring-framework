@@ -19,16 +19,15 @@ package org.springframework.oxm.jibx;
 import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 
 import org.springframework.oxm.AbstractMarshallerTests;
+import org.springframework.tests.XmlContent;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.condition.JRE.JAVA_8;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
@@ -38,14 +37,8 @@ import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
  * @author Sam Brannen
  */
 @Deprecated
+@EnabledOnJre(JAVA_8) // JiBX compiler is currently not compatible with JDK 9
 public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller> {
-
-	@BeforeClass
-	public static void compilerAssumptions() {
-		// JiBX compiler is currently not compatible with JDK 9
-		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
-	}
-
 
 	@Override
 	protected JibxMarshaller createMarshaller() throws Exception {
@@ -65,10 +58,11 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void afterPropertiesSetNoContextPath() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
-		marshaller.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				marshaller::afterPropertiesSet);
 	}
 
 	@Test
@@ -79,7 +73,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		String expected =
 				"<?xml version=\"1.0\"?>\n" + "<flights xmlns=\"http://samples.springframework.org/flight\">\n" +
 						"    <flight>\n" + "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
-		assertThat(writer.toString(), isSimilarTo(expected).ignoreWhitespace());
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(expected);
 	}
 
 	@Test
@@ -88,8 +82,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		marshaller.setStandalone(Boolean.TRUE);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
-		assertTrue("Encoding and standalone not set",
-				writer.toString().startsWith("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>"));
+		assertThat(writer.toString().startsWith("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>")).as("Encoding and standalone not set").isTrue();
 	}
 
 	@Test
@@ -98,15 +91,14 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		marshaller.setDocTypeSystemId("flights.dtd");
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
-		assertTrue("doc type not written",
-				writer.toString().contains("<!DOCTYPE flights SYSTEM \"flights.dtd\">"));
+		assertThat(writer.toString().contains("<!DOCTYPE flights SYSTEM \"flights.dtd\">")).as("doc type not written").isTrue();
 	}
 
 	@Test
 	public void supports() throws Exception {
-		assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
-		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
-		assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));
+		assertThat(marshaller.supports(Flights.class)).as("JibxMarshaller does not support Flights").isTrue();
+		assertThat(marshaller.supports(FlightType.class)).as("JibxMarshaller does not support FlightType").isTrue();
+		assertThat(marshaller.supports(getClass())).as("JibxMarshaller supports illegal type").isFalse();
 	}
 
 }

@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for collections that is aware of Java 5, Java 6, and Spring collection types.
+ * Factory for collections that is aware of common Java and Spring collection types.
  *
  * <p>Mainly for internal use within the framework.
  *
@@ -119,7 +119,7 @@ public final class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})
 	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<>();
@@ -178,7 +178,7 @@ public final class CollectionFactory {
 	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
 	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({ "unchecked", "cast" })
+	@SuppressWarnings({"unchecked", "cast"})
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
@@ -241,7 +241,7 @@ public final class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
@@ -294,7 +294,7 @@ public final class CollectionFactory {
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
@@ -329,14 +329,18 @@ public final class CollectionFactory {
 	}
 
 	/**
-	 * Create a variant of {@code java.util.Properties} that automatically adapts
-	 * non-String values to String representations on {@link Properties#getProperty}.
+	 * Create a variant of {@link java.util.Properties} that automatically adapts
+	 * non-String values to String representations in {@link Properties#getProperty}.
+	 * <p>In addition, the returned {@code Properties} instance sorts properties
+	 * alphanumerically based on their keys.
 	 * @return a new {@code Properties} instance
 	 * @since 4.3.4
+	 * @see #createSortedProperties(boolean)
+	 * @see #createSortedProperties(Properties, boolean)
 	 */
 	@SuppressWarnings("serial")
 	public static Properties createStringAdaptingProperties() {
-		return new Properties() {
+		return new SortedProperties(false) {
 			@Override
 			@Nullable
 			public String getProperty(String key) {
@@ -344,6 +348,47 @@ public final class CollectionFactory {
 				return (value != null ? value.toString() : null);
 			}
 		};
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 * <p>This can be useful when storing the {@link Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
+	 * @see #createSortedProperties(Properties, boolean)
+	 */
+	public static Properties createSortedProperties(boolean omitComments) {
+		return new SortedProperties(omitComments);
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 * <p>This can be useful when storing the {@code Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 * <p>The returned {@code Properties} instance will be populated with
+	 * properties from the supplied {@code properties} object, but default
+	 * properties from the supplied {@code properties} object will not be copied.
+	 * @param properties the {@code Properties} object from which to copy the
+	 * initial properties
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
+	 * @see #createSortedProperties(boolean)
+	 */
+	public static Properties createSortedProperties(Properties properties, boolean omitComments) {
+		return new SortedProperties(properties, omitComments);
 	}
 
 	/**

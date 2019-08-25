@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests cornering bug SPR-8514.
@@ -88,7 +88,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 		ctx.register(AppConfig.class);
 		ctx.register(FactoryBeanCallingConfig.class);
 		ctx.refresh();
-		assertEquals("true", ctx.getBean("myString"));
+		assertThat(ctx.getBean("myString")).isEqualTo("true");
 	}
 
 

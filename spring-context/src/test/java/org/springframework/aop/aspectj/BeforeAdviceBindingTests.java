@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AdviceBindingTestAspect.AdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
@@ -26,7 +26,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -46,13 +46,13 @@ public class BeforeAdviceBindingTests {
 	private TestBean testBeanTarget;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(testBeanProxy));
+		assertThat(AopUtils.isAopProxy(testBeanProxy)).isTrue();
 
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();

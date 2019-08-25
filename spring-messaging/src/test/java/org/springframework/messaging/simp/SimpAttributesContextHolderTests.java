@@ -19,20 +19,21 @@ package org.springframework.messaging.simp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+
+
+
+
+
 
 /**
  * Unit tests for
@@ -46,13 +47,13 @@ public class SimpAttributesContextHolderTests {
 	private SimpAttributes simpAttributes;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		Map<String, Object> map = new ConcurrentHashMap<>();
 		this.simpAttributes = new SimpAttributes("session1", map);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		SimpAttributesContextHolder.resetAttributes();
 	}
@@ -61,27 +62,27 @@ public class SimpAttributesContextHolderTests {
 	@Test
 	public void resetAttributes() {
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
-		assertThat(SimpAttributesContextHolder.getAttributes(), sameInstance(this.simpAttributes));
+		assertThat(SimpAttributesContextHolder.getAttributes()).isSameAs(this.simpAttributes);
 
 		SimpAttributesContextHolder.resetAttributes();
-		assertThat(SimpAttributesContextHolder.getAttributes(), nullValue());
+		assertThat(SimpAttributesContextHolder.getAttributes()).isNull();
 	}
 
 	@Test
 	public void getAttributes() {
-		assertThat(SimpAttributesContextHolder.getAttributes(), nullValue());
+		assertThat(SimpAttributesContextHolder.getAttributes()).isNull();
 
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
-		assertThat(SimpAttributesContextHolder.getAttributes(), sameInstance(this.simpAttributes));
+		assertThat(SimpAttributesContextHolder.getAttributes()).isSameAs(this.simpAttributes);
 	}
 
 	@Test
 	public void setAttributes() {
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
-		assertThat(SimpAttributesContextHolder.getAttributes(), sameInstance(this.simpAttributes));
+		assertThat(SimpAttributesContextHolder.getAttributes()).isSameAs(this.simpAttributes);
 
 		SimpAttributesContextHolder.setAttributes(null);
-		assertThat(SimpAttributesContextHolder.getAttributes(), nullValue());
+		assertThat(SimpAttributesContextHolder.getAttributes()).isNull();
 	}
 
 	@Test
@@ -98,11 +99,11 @@ public class SimpAttributesContextHolderTests {
 		SimpAttributesContextHolder.setAttributesFromMessage(message);
 
 		SimpAttributes attrs = SimpAttributesContextHolder.getAttributes();
-		assertThat(attrs, notNullValue());
-		assertThat(attrs.getSessionId(), is(sessionId));
+		assertThat(attrs).isNotNull();
+		assertThat(attrs.getSessionId()).isEqualTo(sessionId);
 
 		attrs.setAttribute("name1", "value1");
-		assertThat(map.get("name1"), is("value1"));
+		assertThat(map.get("name1")).isEqualTo("value1");
 	}
 
 	@Test
@@ -125,7 +126,7 @@ public class SimpAttributesContextHolderTests {
 	@Test
 	public void currentAttributes() {
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
-		assertThat(SimpAttributesContextHolder.currentAttributes(), sameInstance(this.simpAttributes));
+		assertThat(SimpAttributesContextHolder.currentAttributes()).isSameAs(this.simpAttributes);
 	}
 
 	@Test

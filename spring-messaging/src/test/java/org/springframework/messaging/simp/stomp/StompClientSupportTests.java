@@ -16,13 +16,10 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link StompClientSupport}.
@@ -41,35 +38,30 @@ public class StompClientSupportTests {
 	}
 
 	private void trySetDefaultHeartbeat(long[] heartbeat) {
-		try {
-			this.stompClient.setDefaultHeartbeat(heartbeat);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ignore
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.stompClient.setDefaultHeartbeat(heartbeat));
 	}
 
 	@Test
 	public void defaultHeartbeatValue() throws Exception {
-		assertArrayEquals(new long[] {10000, 10000}, this.stompClient.getDefaultHeartbeat());
+		assertThat(this.stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {10000, 10000});
 	}
 
 	@Test
 	public void isDefaultHeartbeatEnabled() throws Exception {
-		assertArrayEquals(new long[] {10000, 10000}, this.stompClient.getDefaultHeartbeat());
-		assertTrue(this.stompClient.isDefaultHeartbeatEnabled());
+		assertThat(this.stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {10000, 10000});
+		assertThat(this.stompClient.isDefaultHeartbeatEnabled()).isTrue();
 
 		this.stompClient.setDefaultHeartbeat(new long[] {0, 0});
-		assertFalse(this.stompClient.isDefaultHeartbeatEnabled());
+		assertThat(this.stompClient.isDefaultHeartbeatEnabled()).isFalse();
 	}
 
 	@Test
 	public void processConnectHeadersDefault() throws Exception {
 		StompHeaders connectHeaders = this.stompClient.processConnectHeaders(null);
 
-		assertNotNull(connectHeaders);
-		assertArrayEquals(new long[] {10000, 10000}, connectHeaders.getHeartbeat());
+		assertThat(connectHeaders).isNotNull();
+		assertThat(connectHeaders.getHeartbeat()).isEqualTo(new long[] {10000, 10000});
 	}
 
 	@Test
@@ -79,8 +71,8 @@ public class StompClientSupportTests {
 		connectHeaders.setHeartbeat(new long[] {15000, 15000});
 		connectHeaders = this.stompClient.processConnectHeaders(connectHeaders);
 
-		assertNotNull(connectHeaders);
-		assertArrayEquals(new long[] {15000, 15000}, connectHeaders.getHeartbeat());
+		assertThat(connectHeaders).isNotNull();
+		assertThat(connectHeaders.getHeartbeat()).isEqualTo(new long[] {15000, 15000});
 	}
 
 }

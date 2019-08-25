@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation.aspectj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that @EnableSpringConfigured properly registers an
@@ -39,7 +39,7 @@ public class AnnotationBeanConfigurerTests {
 	public void injection() {
 		try (AnnotationConfigApplicationContext context = new  AnnotationConfigApplicationContext(Config.class)) {
 			ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
-			assertEquals("Rod", myObject.getName());
+			assertThat(myObject.getName()).isEqualTo("Rod");
 		}
 	}
 

@@ -19,8 +19,8 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -35,8 +35,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.HttpSockJsSessionTests.TestAbstractHttpSockJsSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -63,7 +62,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler, null);
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		super.setUp();
@@ -83,8 +82,8 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
-		assertEquals("hhh\no", this.servletResponse.getContentAsString());
-		assertTrue(this.servletRequest.isAsyncStarted());
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo("hhh\no");
+		assertThat(this.servletRequest.isAsyncStarted()).isTrue();
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 	}
@@ -95,10 +94,10 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		this.session.getMessageCache().add("x");
 		this.session.handleSuccessiveRequest(this.request, this.response, this.frameFormat);
 
-		assertTrue(this.servletRequest.isAsyncStarted());
-		assertTrue(this.session.wasHeartbeatScheduled());
-		assertTrue(this.session.wasCacheFlushed());
-		assertEquals("hhh\n", this.servletResponse.getContentAsString());
+		assertThat(this.servletRequest.isAsyncStarted()).isTrue();
+		assertThat(this.session.wasHeartbeatScheduled()).isTrue();
+		assertThat(this.session.wasCacheFlushed()).isTrue();
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo("hhh\n");
 
 		verifyNoMoreInteractions(this.webSocketHandler);
 	}

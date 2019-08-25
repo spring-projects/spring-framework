@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Ramnivas Laddad
@@ -38,7 +38,7 @@ abstract class ClassloadingAssertions {
 	}
 
 	public static void assertClassNotLoaded(String className) {
-		assertFalse("Class [" + className + "] should not have been loaded", isClassLoaded(className));
+		assertThat(isClassLoaded(className)).as("Class [" + className + "] should not have been loaded").isFalse();
 	}
 
 }

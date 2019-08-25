@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.client.samples;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -27,7 +27,7 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -137,7 +137,7 @@ public class SampleAsyncTests {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
+			assertThat(error.getMessage().contains("2 unsatisfied expectation(s)")).as(error.getMessage()).isTrue();
 		}
 	}
 

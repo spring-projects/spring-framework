@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -29,11 +29,12 @@ import org.springframework.test.context.TestPropertySource;
  * @since 4.1
  */
 @TestPropertySource
-public class ExtendedDefaultPropertiesFileDetectionTestPropertySourceTests extends
+class ExtendedDefaultPropertiesFileDetectionTestPropertySourceTests extends
 		DefaultPropertiesFileDetectionTestPropertySourceTests {
 
 	@Test
-	public void verifyPropertiesAreAvailableInEnvironment() {
+	@Override
+	void verifyPropertiesAreAvailableInEnvironment() {
 		super.verifyPropertiesAreAvailableInEnvironment();
 		// from ExtendedDefaultPropertiesFileDetectionTestPropertySourceTests.properties
 		assertEnvironmentValue("enigma", "auto detected");

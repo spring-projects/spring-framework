@@ -19,12 +19,10 @@ package org.springframework.core.io.support;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link SpringFactoriesLoader}.
@@ -33,26 +31,28 @@ import static org.junit.Assert.assertTrue;
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class SpringFactoriesLoaderTests {
+class SpringFactoriesLoaderTests {
 
 	@Test
-	public void loadFactoriesInCorrectOrder() {
+	void loadFactoriesInCorrectOrder() {
 		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, null);
-		assertEquals(2, factories.size());
-		assertTrue(factories.get(0) instanceof MyDummyFactory1);
-		assertTrue(factories.get(1) instanceof MyDummyFactory2);
+		assertThat(factories.size()).isEqualTo(2);
+		boolean condition1 = factories.get(0) instanceof MyDummyFactory1;
+		assertThat(condition1).isTrue();
+		boolean condition = factories.get(1) instanceof MyDummyFactory2;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
-	public void loadPackagePrivateFactory() {
+	void loadPackagePrivateFactory() {
 		List<DummyPackagePrivateFactory> factories =
 				SpringFactoriesLoader.loadFactories(DummyPackagePrivateFactory.class, null);
-		assertEquals(1, factories.size());
-		assertFalse(Modifier.isPublic(factories.get(0).getClass().getModifiers()));
+		assertThat(factories.size()).isEqualTo(1);
+		assertThat(Modifier.isPublic(factories.get(0).getClass().getModifiers())).isFalse();
 	}
 
 	@Test
-	public void attemptToLoadFactoryOfIncompatibleType() {
+	void attemptToLoadFactoryOfIncompatibleType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				SpringFactoriesLoader.loadFactories(String.class, null))
 			.withMessageContaining("Unable to instantiate factory class "

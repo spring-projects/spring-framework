@@ -17,10 +17,11 @@
 package org.springframework.beans.factory.parsing;
 
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.DescriptiveResource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -33,11 +34,12 @@ import static org.mockito.Mockito.verify;
  */
 public class FailFastProblemReporterTests {
 
-	@Test(expected = BeanDefinitionParsingException.class)
+	@Test
 	public void testError() throws Exception {
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
-		reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
-				null, new IllegalArgumentException()));
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
+						null, new IllegalArgumentException())));
 	}
 
 	@Test

@@ -28,7 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
@@ -80,7 +80,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 	@Before
 	public void compareDataSources() throws Exception {
 		// NOTE: the two DataSource instances ARE the same!
-		assertSame(dataSourceFromTxManager, dataSourceViaInjection);
+		assertThat(dataSourceViaInjection).isSameAs(dataSourceFromTxManager);
 	}
 
 }

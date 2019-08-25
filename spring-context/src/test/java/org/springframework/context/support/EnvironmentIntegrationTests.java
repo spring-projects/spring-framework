@@ -16,7 +16,7 @@
 
 package org.springframework.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -24,9 +24,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests covering the integration of the {@link Environment} into
@@ -47,10 +46,7 @@ public class EnvironmentIntegrationTests {
 		child.refresh();
 
 		ConfigurableEnvironment env = child.getBean(ConfigurableEnvironment.class);
-		assertThat("unknown env", env, anyOf(
-				sameInstance(parent.getEnvironment()),
-				sameInstance(child.getEnvironment())));
-		assertThat("expected child ctx env", env, sameInstance(child.getEnvironment()));
+		assertThat(env).isSameAs(child.getEnvironment());
 
 		child.close();
 		parent.close();

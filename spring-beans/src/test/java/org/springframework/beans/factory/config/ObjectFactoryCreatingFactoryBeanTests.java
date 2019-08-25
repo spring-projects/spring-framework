@@ -19,9 +19,9 @@ package org.springframework.beans.factory.config;
 import java.util.Date;
 import javax.inject.Provider;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
@@ -29,10 +29,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
@@ -48,7 +46,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -56,7 +54,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		this.beanFactory.setSerializationId("test");
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		this.beanFactory.setSerializationId(null);
 	}
@@ -69,7 +67,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -82,7 +80,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -92,7 +90,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -105,7 +103,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -122,44 +120,37 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		factory.afterPropertiesSet();
 		ObjectFactory<?> objectFactory = factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
-		assertSame(expectedSingleton, actualSingleton);
+		assertThat(actualSingleton).isSameAs(expectedSingleton);
 	}
 
 	@Test
 	public void testWhenTargetBeanNameIsNull() throws Exception {
-		try {
-			new ObjectFactoryCreatingFactoryBean().afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property not set.");
-		}
-		catch (IllegalArgumentException expected) {}
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property not set").isThrownBy(
+						new ObjectFactoryCreatingFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test
 	public void testWhenTargetBeanNameIsEmptyString() throws Exception {
-		try {
-			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
-			factory.setTargetBeanName("");
-			factory.afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property set to (invalid) empty string.");
-		}
-		catch (IllegalArgumentException expected) {}
+		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
+		factory.setTargetBeanName("");
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property set to (invalid) empty string").isThrownBy(
+						factory::afterPropertiesSet);
 	}
 
 	@Test
 	public void testWhenTargetBeanNameIsWhitespacedString() throws Exception {
-		try {
-			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
-			factory.setTargetBeanName("  \t");
-			factory.afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property set to (invalid) only-whitespace string.");
-		}
-		catch (IllegalArgumentException expected) {}
+		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
+		factory.setTargetBeanName("  \t");
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property set to (invalid) only-whitespace string").isThrownBy(
+						factory::afterPropertiesSet);
 	}
 
 	@Test
 	public void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() {
-		assertEquals("Must be reporting that it creates ObjectFactory instances (as per class contract).",
-			ObjectFactory.class, new ObjectFactoryCreatingFactoryBean().getObjectType());
+		assertThat(new ObjectFactoryCreatingFactoryBean().getObjectType()).as("Must be reporting that it creates ObjectFactory instances (as per class contract).").isEqualTo(ObjectFactory.class);
 	}
 
 

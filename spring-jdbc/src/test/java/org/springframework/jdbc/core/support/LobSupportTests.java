@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -29,9 +29,8 @@ import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -65,8 +64,8 @@ public class LobSupportTests {
 			}
 		};
 
-		assertEquals(Integer.valueOf(3), psc.doInPreparedStatement(ps));
-		assertTrue(svc.b);
+		assertThat(psc.doInPreparedStatement(ps)).isEqualTo(Integer.valueOf(3));
+		assertThat(svc.b).isTrue();
 		verify(creator).close();
 		verify(handler).getLobCreator();
 		verify(ps).executeUpdate();

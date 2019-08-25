@@ -18,8 +18,8 @@ package org.springframework.web.reactive.function.client.support;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,8 +34,7 @@ import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -48,7 +47,7 @@ public class ClientResponseWrapperTests {
 
 	private ClientResponseWrapper wrapper;
 
-	@Before
+	@BeforeEach
 	public void createWrapper() {
 		this.mockResponse = mock(ClientResponse.class);
 		this.wrapper = new ClientResponseWrapper(mockResponse);
@@ -56,7 +55,7 @@ public class ClientResponseWrapperTests {
 
 	@Test
 	public void response() {
-		assertSame(mockResponse, wrapper.response());
+		assertThat(wrapper.response()).isSameAs(mockResponse);
 	}
 
 	@Test
@@ -64,7 +63,7 @@ public class ClientResponseWrapperTests {
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		given(mockResponse.statusCode()).willReturn(status);
 
-		assertSame(status, wrapper.statusCode());
+		assertThat(wrapper.statusCode()).isSameAs(status);
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public class ClientResponseWrapperTests {
 		int status = 999;
 		given(mockResponse.rawStatusCode()).willReturn(status);
 
-		assertEquals(status, wrapper.rawStatusCode());
+		assertThat(wrapper.rawStatusCode()).isEqualTo(status);
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class ClientResponseWrapperTests {
 		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
 		given(mockResponse.headers()).willReturn(headers);
 
-		assertSame(headers, wrapper.headers());
+		assertThat(wrapper.headers()).isSameAs(headers);
 	}
 
 	@Test
@@ -89,7 +88,7 @@ public class ClientResponseWrapperTests {
 		MultiValueMap<String, ResponseCookie> cookies = mock(MultiValueMap.class);
 		given(mockResponse.cookies()).willReturn(cookies);
 
-		assertSame(cookies, wrapper.cookies());
+		assertThat(wrapper.cookies()).isSameAs(cookies);
 	}
 
 	@Test
@@ -98,7 +97,7 @@ public class ClientResponseWrapperTests {
 		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 		given(mockResponse.body(extractor)).willReturn(result);
 
-		assertSame(result, wrapper.body(extractor));
+		assertThat(wrapper.body(extractor)).isSameAs(result);
 	}
 
 	@Test
@@ -106,7 +105,7 @@ public class ClientResponseWrapperTests {
 		Mono<String> result = Mono.just("foo");
 		given(mockResponse.bodyToMono(String.class)).willReturn(result);
 
-		assertSame(result, wrapper.bodyToMono(String.class));
+		assertThat(wrapper.bodyToMono(String.class)).isSameAs(result);
 	}
 
 	@Test
@@ -115,7 +114,7 @@ public class ClientResponseWrapperTests {
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.bodyToMono(reference)).willReturn(result);
 
-		assertSame(result, wrapper.bodyToMono(reference));
+		assertThat(wrapper.bodyToMono(reference)).isSameAs(result);
 	}
 
 	@Test
@@ -123,7 +122,7 @@ public class ClientResponseWrapperTests {
 		Flux<String> result = Flux.just("foo");
 		given(mockResponse.bodyToFlux(String.class)).willReturn(result);
 
-		assertSame(result, wrapper.bodyToFlux(String.class));
+		assertThat(wrapper.bodyToFlux(String.class)).isSameAs(result);
 	}
 
 	@Test
@@ -132,7 +131,7 @@ public class ClientResponseWrapperTests {
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.bodyToFlux(reference)).willReturn(result);
 
-		assertSame(result, wrapper.bodyToFlux(reference));
+		assertThat(wrapper.bodyToFlux(reference)).isSameAs(result);
 	}
 
 	@Test
@@ -140,7 +139,7 @@ public class ClientResponseWrapperTests {
 		Mono<ResponseEntity<String>> result = Mono.just(new ResponseEntity<>("foo", HttpStatus.OK));
 		given(mockResponse.toEntity(String.class)).willReturn(result);
 
-		assertSame(result, wrapper.toEntity(String.class));
+		assertThat(wrapper.toEntity(String.class)).isSameAs(result);
 	}
 
 	@Test
@@ -149,7 +148,7 @@ public class ClientResponseWrapperTests {
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.toEntity(reference)).willReturn(result);
 
-		assertSame(result, wrapper.toEntity(reference));
+		assertThat(wrapper.toEntity(reference)).isSameAs(result);
 	}
 
 	@Test
@@ -157,7 +156,7 @@ public class ClientResponseWrapperTests {
 		Mono<ResponseEntity<List<String>>> result = Mono.just(new ResponseEntity<>(singletonList("foo"), HttpStatus.OK));
 		given(mockResponse.toEntityList(String.class)).willReturn(result);
 
-		assertSame(result, wrapper.toEntityList(String.class));
+		assertThat(wrapper.toEntityList(String.class)).isSameAs(result);
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class ClientResponseWrapperTests {
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.toEntityList(reference)).willReturn(result);
 
-		assertSame(result, wrapper.toEntityList(reference));
+		assertThat(wrapper.toEntityList(reference)).isSameAs(result);
 	}
 
 

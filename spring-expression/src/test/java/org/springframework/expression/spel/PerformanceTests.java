@@ -16,16 +16,17 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 ///CLOVER:OFF
 
@@ -34,6 +35,7 @@ import static org.junit.Assert.fail;
  *
  * @author Andy Clement
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class PerformanceTests {
 
 	public static final int ITERATIONS = 10000;
@@ -46,26 +48,20 @@ public class PerformanceTests {
 
 	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		long starttime = 0;
 		long endtime = 0;
 
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
@@ -75,9 +71,7 @@ public class PerformanceTests {
 		}
 
 		Expression expr = parser.parseExpression("placeOfBirth.city");
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).isNotNull();
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			expr.getValue(eContext);
@@ -96,26 +90,20 @@ public class PerformanceTests {
 
 	@Test
 	public void testPerformanceOfMethodAccess() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		long starttime = 0;
 		long endtime = 0;
 
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
@@ -125,9 +113,7 @@ public class PerformanceTests {
 		}
 
 		Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).isNotNull();
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			expr.getValue(eContext);

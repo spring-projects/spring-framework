@@ -19,13 +19,12 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.JoinPoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for the {@link AspectJAdviceParameterNameDiscoverer} class.
@@ -226,8 +225,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 				return candidate;
 			}
 		}
-		fail("Bad test specification, no method '" + name + "' found in test class");
-		return null;
+		throw new AssertionError("Bad test specification, no method '" + name + "' found in test class");
 	}
 
 	protected void assertParameterNames(Method method, String pointcut, String[] parameterNames) {
@@ -237,8 +235,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 	protected void assertParameterNames(
 			Method method, String pointcut, String returning, String throwing, String[] parameterNames) {
 
-		assertEquals("bad test specification, must have same number of parameter names as method arguments",
-				method.getParameterCount(), parameterNames.length);
+		assertThat(parameterNames.length).as("bad test specification, must have same number of parameter names as method arguments").isEqualTo(method.getParameterCount());
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
@@ -249,40 +246,31 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		String formattedExpectedNames = format(parameterNames);
 		String formattedActualNames = format(discoveredNames);
 
-		assertEquals("Expecting " + parameterNames.length + " parameter names in return set '" +
+		assertThat(discoveredNames.length).as("Expecting " + parameterNames.length + " parameter names in return set '" +
 				formattedExpectedNames + "', but found " + discoveredNames.length +
-				" '" + formattedActualNames + "'",
-				parameterNames.length, discoveredNames.length);
+				" '" + formattedActualNames + "'").isEqualTo(parameterNames.length);
 
 		for (int i = 0; i < discoveredNames.length; i++) {
-			assertNotNull("Parameter names must never be null", discoveredNames[i]);
-			assertEquals("Expecting parameter " + i + " to be named '" +
-					parameterNames[i] + "' but was '" + discoveredNames[i] + "'",
-					parameterNames[i], discoveredNames[i]);
+			assertThat(discoveredNames[i]).as("Parameter names must never be null").isNotNull();
+			assertThat(discoveredNames[i]).as("Expecting parameter " + i + " to be named '" +
+						parameterNames[i] + "' but was '" + discoveredNames[i] + "'").isEqualTo(parameterNames[i]);
 		}
 	}
 
-	protected void assertException(Method method, String pointcut, Class<?> exceptionType, String message) {
+	protected void assertException(Method method, String pointcut, Class<? extends Throwable> exceptionType, String message) {
 		assertException(method, pointcut, null, null, exceptionType, message);
 	}
 
-	protected void assertException(
-			Method method, String pointcut, String returning, String throwing, Class<?> exceptionType, String message) {
+	protected void assertException(Method method, String pointcut, String returning,
+			String throwing, Class<? extends Throwable> exceptionType, String message) {
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
 		discoverer.setReturningName(returning);
 		discoverer.setThrowingName(throwing);
-
-		try {
-			discoverer.getParameterNames(method);
-			fail("Expecting " + exceptionType.getName() + " with message '" + message + "'");
-		}
-		catch (RuntimeException expected) {
-			assertEquals("Expecting exception of type " + exceptionType.getName(),
-					exceptionType, expected.getClass());
-			assertEquals("Exception message does not match expected", message, expected.getMessage());
-		}
+		assertThatExceptionOfType(exceptionType).isThrownBy(() ->
+				discoverer.getParameterNames(method))
+			.withMessageContaining(message);
 	}
 
 

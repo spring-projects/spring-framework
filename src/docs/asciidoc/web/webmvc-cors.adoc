@@ -83,24 +83,43 @@ The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@RestController
-@RequestMapping("/account")
-public class AccountController {
+	@RestController
+	@RequestMapping("/account")
+	public class AccountController {
 
-	@CrossOrigin
-	@GetMapping("/{id}")
-	public Account retrieve(@PathVariable Long id) {
-		// ...
-	}
+		@CrossOrigin
+		@GetMapping("/{id}")
+		public Account retrieve(@PathVariable Long id) {
+			// ...
+		}
 
-	@DeleteMapping("/{id}")
-	public void remove(@PathVariable Long id) {
-		// ...
+		@DeleteMapping("/{id}")
+		public void remove(@PathVariable Long id) {
+			// ...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@CrossOrigin
+		@GetMapping("/{id}")
+		fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		fun remove(@PathVariable id: Long) {
+			// ...
+		}
+	}
 ----
 
 By default, `@CrossOrigin` allows:
@@ -118,8 +137,8 @@ should only be used where appropriate.
 `@CrossOrigin` is supported at the class level, too, and is inherited by all methods,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 @CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 @RestController
@@ -137,29 +156,67 @@ public class AccountController {
 	}
 }
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@CrossOrigin(origins = ["https://domain2.com"], maxAge = 3600)
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@GetMapping("/{id}")
+		fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		fun remove(@PathVariable id: Long) {
+			// ...
+		}
+----
 
 You can use `@CrossOrigin` at both the class level and the method level,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@CrossOrigin(maxAge = 3600)
-@RestController
-@RequestMapping("/account")
-public class AccountController {
+	@CrossOrigin(maxAge = 3600)
+	@RestController
+	@RequestMapping("/account")
+	public class AccountController {
 
-	@CrossOrigin("https://domain2.com")
-	@GetMapping("/{id}")
-	public Account retrieve(@PathVariable Long id) {
-		// ...
-	}
+		@CrossOrigin("https://domain2.com")
+		@GetMapping("/{id}")
+		public Account retrieve(@PathVariable Long id) {
+			// ...
+		}
 
-	@DeleteMapping("/{id}")
-	public void remove(@PathVariable Long id) {
-		// ...
+		@DeleteMapping("/{id}")
+		public void remove(@PathVariable Long id) {
+			// ...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@CrossOrigin(maxAge = 3600)
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@CrossOrigin("https://domain2.com")
+		@GetMapping("/{id}")
+		fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		fun remove(@PathVariable id: Long) {
+			// ...
+		}
+	}
 ----
 
 
@@ -172,7 +229,7 @@ public class AccountController {
 In addition to fine-grained, controller method level configuration, you probably want to
 define some global CORS configuration, too. You can set URL-based `CorsConfiguration`
 mappings individually on any `HandlerMapping`. Most applications, however, use the
-MVC Java configuration or the MVC XNM namespace to do that.
+MVC Java configuration or the MVC XML namespace to do that.
 
 By default, global configuration enables the following:
 
@@ -196,26 +253,46 @@ should only be used where appropriate.
 To enable CORS in the MVC Java config, you can use the `CorsRegistry` callback,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Configuration
-@EnableWebMvc
-public class WebConfig implements WebMvcConfigurer {
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
 
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
+		@Override
+		public void addCorsMappings(CorsRegistry registry) {
 
-		registry.addMapping("/api/**")
-			.allowedOrigins("https://domain2.com")
-			.allowedMethods("PUT", "DELETE")
-			.allowedHeaders("header1", "header2", "header3")
-			.exposedHeaders("header1", "header2")
-			.allowCredentials(true).maxAge(3600);
+			registry.addMapping("/api/**")
+				.allowedOrigins("https://domain2.com")
+				.allowedMethods("PUT", "DELETE")
+				.allowedHeaders("header1", "header2", "header3")
+				.exposedHeaders("header1", "header2")
+				.allowCredentials(true).maxAge(3600);
 
-		// Add more mappings...
+			// Add more mappings...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		override fun addCorsMappings(registry: CorsRegistry) {
+
+			registry.addMapping("/api/**")
+					.allowedOrigins("https://domain2.com")
+					.allowedMethods("PUT", "DELETE")
+					.allowedHeaders("header1", "header2", "header3")
+					.exposedHeaders("header1", "header2")
+					.allowCredentials(true).maxAge(3600)
+
+			// Add more mappings...
+		}
+	}
 ----
 
 
@@ -226,8 +303,7 @@ public class WebConfig implements WebMvcConfigurer {
 To enable CORS in the XML namespace, you can use the `<mvc:cors>` element,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 <mvc:cors>
 
@@ -262,21 +338,39 @@ for CORS.
 To configure the filter, pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
 ----
-CorsConfiguration config = new CorsConfiguration();
+	CorsConfiguration config = new CorsConfiguration();
 
-// Possibly...
-// config.applyPermitDefaultValues()
+	// Possibly...
+	// config.applyPermitDefaultValues()
 
-config.setAllowCredentials(true);
-config.addAllowedOrigin("https://domain1.com");
-config.addAllowedHeader("*");
-config.addAllowedMethod("*");
+	config.setAllowCredentials(true);
+	config.addAllowedOrigin("https://domain1.com");
+	config.addAllowedHeader("*");
+	config.addAllowedMethod("*");
 
-UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-source.registerCorsConfiguration("/**", config);
+	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	source.registerCorsConfiguration("/**", config);
 
-CorsFilter filter = new CorsFilter(source);
+	CorsFilter filter = new CorsFilter(source);
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	val config = CorsConfiguration()
+
+	// Possibly...
+	// config.applyPermitDefaultValues()
+
+	config.allowCredentials = true
+	config.addAllowedOrigin("https://domain1.com")
+	config.addAllowedHeader("*")
+	config.addAllowedMethod("*")
+
+	val source = UrlBasedCorsConfigurationSource()
+	source.registerCorsConfiguration("/**", config)
+
+	val filter = CorsFilter(source)
 ----

@@ -18,7 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Phillip Webb
  */
 @Deprecated
-public class CompoundComparatorTests {
+class CompoundComparatorTests {
 
 	@Test
-	public void shouldNeedAtLeastOneComparator() {
+	void shouldNeedAtLeastOneComparator() {
 		Comparator<String> c = new CompoundComparator<>();
 		assertThatIllegalStateException().isThrownBy(() ->
 				c.compare("foo", "bar"));

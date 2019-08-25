@@ -36,7 +36,7 @@ http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announc
 [.small]#<<web.adoc#mvc-view-freemarker, Same as in Spring MVC>>#
 
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
-kind of text output from HTML to email and others. The Spring Framework has a built-in
+kind of text output from HTML to email and others. The Spring Framework has built-in
 integration for using Spring WebFlux with FreeMarker templates.
 
 
@@ -64,15 +64,15 @@ The following example shows how to configure FreeMarker as a view technology:
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfigurer() {
 			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("classpath:/templates");
+			configurer.setTemplateLoaderPath("classpath:/templates/freemarker");
 			return configurer;
 		}
 	}
 ----
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`,
-shown in the preceding example. Given the preceding configuration, if your controller returns the view name,
-`welcome`, the resolver looks for the
+shown in the preceding example. Given the preceding configuration, if your controller
+returns the view name, `welcome`, the resolver looks for the
 `classpath:/templates/freemarker/welcome.ftl` template.
 
 
@@ -82,9 +82,9 @@ shown in the preceding example. Given the preceding configuration, if your contr
 [.small]#<<web.adoc#mvc-views-freemarker, Same as in Spring MVC>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
-`Configuration` object (managed by Spring) by setting the appropriate bean properties on
-the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
-`java.util.Properties` object, and the `freemarkerVariables` property requires a
+`Configuration` object (which is managed by Spring) by setting the appropriate bean
+properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires
+a `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
 [source,java,indent=0]
@@ -112,6 +112,47 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
 
+
+
+[[webflux-view-freemarker-forms]]
+=== Form Handling
+[.small]#<<web.adoc#mvc-view-freemarker-forms, Same as in Spring MVC>>#
+
+Spring provides a tag library for use in JSPs that contains, among others, a
+`<spring:bind/>` element. This element primarily lets forms display values from
+form-backing objects and show the results of failed validations from a `Validator` in the
+web or business tier. Spring also has support for the same functionality in FreeMarker,
+with additional convenience macros for generating form input elements themselves.
+
+
+[[webflux-view-bind-macros]]
+==== The Bind Macros
+[.small]#<<web.adoc#mvc-view-bind-macros, Same as in Spring MVC>>#
+
+A standard set of macros are maintained within the `spring-webflux.jar` file for
+FreeMarker, so they are always available to a suitably configured application.
+
+Some of the macros defined in the Spring templating libraries are considered internal
+(private), but no such scoping exists in the macro definitions, making all macros visible
+to calling code and user templates. The following sections concentrate only on the macros
+you need to directly call from within your templates. If you wish to view the macro code
+directly, the file is called `spring.ftl` and is in the
+`org.springframework.web.reactive.result.view.freemarker` package.
+
+For additional details on binding support, see <<web.adoc#mvc-view-simple-binding, Simple
+Binding>> for Spring MVC.
+
+
+[[webflux-views-form-macros]]
+==== Form Macros
+
+For details on Spring's form macro support for FreeMarker templates, consult the following
+sections of the Spring MVC documentation.
+
+* <<web.adoc#mvc-views-form-macros, Input Macros>>
+* <<web.adoc#mvc-views-form-macros-input, Input Fields>>
+* <<web.adoc#mvc-views-form-macros-select, Selection Fields>>
+* <<web.adoc#mvc-views-form-macros-html-escaping, HTML Escaping>>
 
 
 

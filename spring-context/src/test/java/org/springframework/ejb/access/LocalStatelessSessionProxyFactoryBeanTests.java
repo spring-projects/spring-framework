@@ -22,14 +22,13 @@ import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jndi.JndiTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -58,7 +57,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -73,8 +72,8 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		assertTrue(mbm.getValue() == value);
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
+		assertThat(mbm.getValue() == value).isTrue();
 		verify(myEjb).remove();
 	}
 
@@ -90,7 +89,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return myEjb;
 			}
 		};
@@ -105,8 +104,8 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		assertTrue(mbm.getValue() == value);
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
+		assertThat(mbm.getValue() == value).isTrue();
 	}
 
 	@Test
@@ -121,7 +120,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
-				assertTrue(name.equals(jndiName));
+				assertThat(name.equals(jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -130,22 +129,18 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		fb.setJndiName(jndiName);
 		fb.setResourceRef(false);	// no java:comp/env prefix
 		fb.setBusinessInterface(MyBusinessMethods.class);
-		assertEquals(fb.getBusinessInterface(), MyBusinessMethods.class);
+		assertThat(MyBusinessMethods.class).isEqualTo(fb.getBusinessInterface());
 		fb.setJndiTemplate(jt);
 
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
 
-		try {
-			mbm.getValue();
-			fail("Should have failed to create EJB");
-		}
-		catch (EjbAccessException ex) {
-			assertSame(cex, ex.getCause());
-		}
+		assertThatExceptionOfType(EjbAccessException.class).isThrownBy(
+				mbm::getValue)
+			.withCause(cex);
 	}
 
 	@Test
@@ -160,7 +155,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -172,16 +167,11 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		fb.setJndiTemplate(jt);
 
 		// Check it's a singleton
-		assertTrue(fb.isSingleton());
+		assertThat(fb.isSingleton()).isTrue();
 
-		try {
-			fb.afterPropertiesSet();
-			fail("Should have failed to create EJB");
-		}
-		catch (IllegalArgumentException ex) {
-			// TODO more appropriate exception?
-			assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				fb::afterPropertiesSet)
+			.withMessageContaining("businessInterface");
 
 		// Expect no methods on home
 		verifyZeroInteractions(home);

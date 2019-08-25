@@ -24,8 +24,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.junit4.PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests which verify that the same custom {@link ContextLoader} can
@@ -51,11 +50,11 @@ public class ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLo
 
 	@Test
 	public void verifyExtendedAnnotationAutowiredFields() {
-		assertNotNull("The dog field should have been autowired.", this.dog);
-		assertEquals("Fido", this.dog.getName());
+		assertThat(this.dog).as("The dog field should have been autowired.").isNotNull();
+		assertThat(this.dog.getName()).isEqualTo("Fido");
 
-		assertNotNull("The testString2 field should have been autowired.", this.testString2);
-		assertEquals("Test String #2", this.testString2);
+		assertThat(this.testString2).as("The testString2 field should have been autowired.").isNotNull();
+		assertThat(this.testString2).isEqualTo("Test String #2");
 	}
 
 }

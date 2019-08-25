@@ -19,12 +19,13 @@ package org.springframework.web.reactive.config;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -37,10 +38,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
@@ -51,9 +49,8 @@ import static org.mockito.Mockito.verify;
  *
  * @author Brian Clozel
  */
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DelegatingWebFluxConfigurationTests {
-
-	private DelegatingWebFluxConfiguration delegatingConfig;
 
 	@Mock
 	private WebFluxConfigurer webFluxConfigurer;
@@ -67,10 +64,11 @@ public class DelegatingWebFluxConfigurationTests {
 	@Captor
 	private ArgumentCaptor<FormatterRegistry> formatterRegistry;
 
+	private DelegatingWebFluxConfiguration delegatingConfig;
 
-	@Before
+
+	@BeforeEach
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
 		given(webFluxConfigurer.getValidator()).willReturn(null);
@@ -106,10 +104,11 @@ public class DelegatingWebFluxConfigurationTests {
 		verify(webFluxConfigurer).addFormatters(formatterRegistry.capture());
 		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
-		assertNotNull(initializer);
-		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
-		assertSame(formatterRegistry.getValue(), initializer.getConversionService());
-		assertEquals(13, codecsConfigurer.getValue().getReaders().size());
+		assertThat(initializer).isNotNull();
+		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
+		assertThat(condition).isTrue();
+		assertThat(initializer.getConversionService()).isSameAs(formatterRegistry.getValue());
+		assertThat(codecsConfigurer.getValue().getReaders().size()).isEqualTo(13);
 	}
 
 	@Test

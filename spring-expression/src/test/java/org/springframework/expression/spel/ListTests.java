@@ -19,14 +19,14 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test usage of inline lists.
@@ -146,19 +146,21 @@ public class ListTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = (SpelExpression) parser.parseExpression(expressionText);
 		SpelNode node = expression.getAST();
-		assertTrue(node instanceof InlineList);
+		boolean condition = node instanceof InlineList;
+		assertThat(condition).isTrue();
 		InlineList inlineList = (InlineList) node;
 		if (expectedToBeConstant) {
-			assertTrue(inlineList.isConstant());
+			assertThat(inlineList.isConstant()).isTrue();
 		}
 		else {
-			assertFalse(inlineList.isConstant());
+			assertThat(inlineList.isConstant()).isFalse();
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testInlineListWriting() {
 		// list should be unmodifiable
-		evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass));
 	}
 }

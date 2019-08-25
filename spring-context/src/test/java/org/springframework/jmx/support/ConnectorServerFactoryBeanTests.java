@@ -27,13 +27,12 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rob Harrop
@@ -88,7 +87,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		try {
 			// Try to get the connector bean.
 			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-			assertNotNull("ObjectInstance should not be null", instance);
+			assertThat(instance).as("ObjectInstance should not be null").isNotNull();
 		}
 		finally {
 			bean.destroy();
@@ -99,14 +98,10 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	public void noRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
-
 		try {
 			// Try to get the connector bean.
-			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-			fail("Instance should not be found");
-		}
-		catch (InstanceNotFoundException ex) {
-			// expected
+			assertThatExceptionOfType(InstanceNotFoundException.class).isThrownBy(() ->
+				getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME)));
 		}
 		finally {
 			bean.destroy();
@@ -118,15 +113,14 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		JMXServiceURL serviceURL = new JMXServiceURL(ConnectorServerFactoryBean.DEFAULT_SERVICE_URL);
 		JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
 
-		assertNotNull("Client Connector should not be null", connector);
+		assertThat(connector).as("Client Connector should not be null").isNotNull();
 
 		// Get the MBean server connection.
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
-		assertNotNull("MBeanServerConnection should not be null", connection);
+		assertThat(connection).as("MBeanServerConnection should not be null").isNotNull();
 
 		// Test for MBean server equality.
-		assertEquals("Registered MBean count should be the same", hostedServer.getMBeanCount(),
-				connection.getMBeanCount());
+		assertThat(connection.getMBeanCount()).as("Registered MBean count should be the same").isEqualTo(hostedServer.getMBeanCount());
 	}
 
 }

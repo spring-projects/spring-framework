@@ -20,15 +20,14 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.SpringProxy;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rod Johnson
@@ -40,10 +39,10 @@ public class AopProxyUtilsTests {
 	public void testCompleteProxiedInterfacesWorksWithNull() {
 		AdvisedSupport as = new AdvisedSupport();
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(2, completedInterfaces.length);
+		assertThat(completedInterfaces.length).isEqualTo(2);
 		List<?> ifaces = Arrays.asList(completedInterfaces);
-		assertTrue(ifaces.contains(Advised.class));
-		assertTrue(ifaces.contains(SpringProxy.class));
+		assertThat(ifaces.contains(Advised.class)).isTrue();
+		assertThat(ifaces.contains(SpringProxy.class)).isTrue();
 	}
 
 	@Test
@@ -51,7 +50,7 @@ public class AopProxyUtilsTests {
 		AdvisedSupport as = new AdvisedSupport();
 		as.setOpaque(true);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(1, completedInterfaces.length);
+		assertThat(completedInterfaces.length).isEqualTo(1);
 	}
 
 	@Test
@@ -60,13 +59,13 @@ public class AopProxyUtilsTests {
 		as.addInterface(ITestBean.class);
 		as.addInterface(Comparable.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(4, completedInterfaces.length);
+		assertThat(completedInterfaces.length).isEqualTo(4);
 
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
-		assertTrue(l.contains(Advised.class));
-		assertTrue(l.contains(ITestBean.class));
-		assertTrue(l.contains(Comparable.class));
+		assertThat(l.contains(Advised.class)).isTrue();
+		assertThat(l.contains(ITestBean.class)).isTrue();
+		assertThat(l.contains(Comparable.class)).isTrue();
 	}
 
 	@Test
@@ -76,13 +75,13 @@ public class AopProxyUtilsTests {
 		as.addInterface(Comparable.class);
 		as.addInterface(Advised.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(4, completedInterfaces.length);
+		assertThat(completedInterfaces.length).isEqualTo(4);
 
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
-		assertTrue(l.contains(Advised.class));
-		assertTrue(l.contains(ITestBean.class));
-		assertTrue(l.contains(Comparable.class));
+		assertThat(l.contains(Advised.class)).isTrue();
+		assertThat(l.contains(ITestBean.class)).isTrue();
+		assertThat(l.contains(Comparable.class)).isTrue();
 	}
 
 	@Test
@@ -92,13 +91,13 @@ public class AopProxyUtilsTests {
 		as.addInterface(ITestBean.class);
 		as.addInterface(Comparable.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(3, completedInterfaces.length);
+		assertThat(completedInterfaces.length).isEqualTo(3);
 
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
-		assertFalse(l.contains(Advised.class));
-		assertTrue(l.contains(ITestBean.class));
-		assertTrue(l.contains(Comparable.class));
+		assertThat(l.contains(Advised.class)).isFalse();
+		assertThat(l.contains(ITestBean.class)).isTrue();
+		assertThat(l.contains(Comparable.class)).isTrue();
 	}
 
 	@Test
@@ -108,8 +107,8 @@ public class AopProxyUtilsTests {
 		pf.addInterface(ITestBean.class);
 		Object proxy = pf.getProxy();
 		Class<?>[] userInterfaces = AopProxyUtils.proxiedUserInterfaces(proxy);
-		assertEquals(1, userInterfaces.length);
-		assertEquals(ITestBean.class, userInterfaces[0]);
+		assertThat(userInterfaces.length).isEqualTo(1);
+		assertThat(userInterfaces[0]).isEqualTo(ITestBean.class);
 	}
 
 	@Test
@@ -120,16 +119,17 @@ public class AopProxyUtilsTests {
 		pf.addInterface(Comparable.class);
 		Object proxy = pf.getProxy();
 		Class<?>[] userInterfaces = AopProxyUtils.proxiedUserInterfaces(proxy);
-		assertEquals(2, userInterfaces.length);
-		assertEquals(ITestBean.class, userInterfaces[0]);
-		assertEquals(Comparable.class, userInterfaces[1]);
+		assertThat(userInterfaces.length).isEqualTo(2);
+		assertThat(userInterfaces[0]).isEqualTo(ITestBean.class);
+		assertThat(userInterfaces[1]).isEqualTo(Comparable.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				(proxy1, method, args) -> null);
-		AopProxyUtils.proxiedUserInterfaces(proxy);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				AopProxyUtils.proxiedUserInterfaces(proxy));
 	}
 
 }

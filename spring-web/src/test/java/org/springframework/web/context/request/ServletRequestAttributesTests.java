@@ -21,14 +21,14 @@ import java.math.BigInteger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -49,9 +49,10 @@ public class ServletRequestAttributesTests {
 	};
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorRejectsNullArg() throws Exception {
-		new ServletRequestAttributes(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ServletRequestAttributes(null));
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class ServletRequestAttributesTests {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
 		Object value = request.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertThat(value).isSameAs(VALUE);
 	}
 
 	@Test
@@ -68,13 +69,8 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		request.close();
-		try {
-			attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST));
 	}
 
 	@Test
@@ -85,7 +81,7 @@ public class ServletRequestAttributesTests {
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
+		assertThat(session.getAttribute(KEY)).isSameAs(VALUE);
 	}
 
 	@Test
@@ -95,11 +91,11 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
+		assertThat(attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION)).isSameAs(VALUE);
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
+		assertThat(session.getAttribute(KEY)).isSameAs(VALUE);
 	}
 
 	@Test
@@ -108,7 +104,7 @@ public class ServletRequestAttributesTests {
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
-		assertNull(value);
+		assertThat(value).isNull();
 		verify(request).getSession(false);
 	}
 
@@ -121,7 +117,7 @@ public class ServletRequestAttributesTests {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
-		assertNull(value);
+		assertThat(value).isNull();
 	}
 
 	@Test
@@ -141,7 +137,7 @@ public class ServletRequestAttributesTests {
 		given(session.getAttribute(KEY)).willReturn(VALUE);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
+		assertThat(attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION)).isSameAs(VALUE);
 		attrs.requestCompleted();
 
 		verify(session, times(2)).getAttribute(KEY);

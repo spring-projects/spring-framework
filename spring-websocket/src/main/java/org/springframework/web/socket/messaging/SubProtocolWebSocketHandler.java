@@ -187,6 +187,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
+	@Override
 	public List<String> getSubProtocols() {
 		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
@@ -248,13 +249,14 @@ public class SubProtocolWebSocketHandler
 
 	/**
 	 * Return a String describing internal state and counters.
+	 * Effectively {@code toString()} on {@link #getStats() getStats()}.
 	 */
 	public String getStatsInfo() {
 		return this.stats.toString();
 	}
 
 	/**
-	 * Return a {@link Stats} object that contains various session counters.
+	 * Return a structured object with various session counters.
 	 * @since 5.2
 	 */
 	public Stats getStats() {
@@ -675,6 +677,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 
+		@Override
 		public String toString() {
 			return SubProtocolWebSocketHandler.this.sessions.size() +
 					" current WS(" + this.webSocket.get() +

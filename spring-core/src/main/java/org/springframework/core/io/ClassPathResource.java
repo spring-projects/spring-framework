@@ -244,7 +244,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying class path locations.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

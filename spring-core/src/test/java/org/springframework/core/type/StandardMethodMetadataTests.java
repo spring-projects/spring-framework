@@ -21,7 +21,7 @@ package org.springframework.core.type;
  *
  * @author Phillip Webb
  */
-public class StandardMethodMetadataTests extends AbstractMethodMetadataTests {
+class StandardMethodMetadataTests extends AbstractMethodMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {

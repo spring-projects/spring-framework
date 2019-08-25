@@ -18,10 +18,11 @@ package org.springframework.beans.factory.support;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rick Evans
@@ -40,27 +41,29 @@ public class ManagedPropertiesTests {
 		child.setProperty("three", "three");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
-		assertEquals("merge() obviously did not work.", 3, mergedMap.size());
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(3);
 	}
 
 	@Test
 	public void mergeWithNullParent() {
 		ManagedProperties child = new ManagedProperties();
 		child.setMergeEnabled(true);
-		assertSame(child, child.merge(null));
+		assertThat(child.merge(null)).isSameAs(child);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mergeWithNonCompatibleParentType() {
 		ManagedProperties map = new ManagedProperties();
 		map.setMergeEnabled(true);
-		map.merge("hello");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				map.merge("hello"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void mergeNotAllowedWhenMergeNotEnabled() {
 		ManagedProperties map = new ManagedProperties();
-		map.merge(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				map.merge(null));
 	}
 
 	@Test
@@ -71,7 +74,7 @@ public class ManagedPropertiesTests {
 		ManagedProperties child = new ManagedProperties();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
-		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(2);
 	}
 
 	@Test
@@ -84,8 +87,8 @@ public class ManagedPropertiesTests {
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		// child value for 'one' must override parent value...
-		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
-		assertEquals("Parent value not being overridden during merge().", "fork", mergedMap.get("one"));
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(2);
+		assertThat(mergedMap.get("one")).as("Parent value not being overridden during merge().").isEqualTo("fork");
 	}
 
 }

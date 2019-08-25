@@ -20,7 +20,7 @@ import java.io.Writer;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,9 +28,8 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.BindTag;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rob Harrop
@@ -74,7 +73,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	public void simpleBind() throws Exception {
 		this.tag.setPath("name");
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -92,7 +91,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		bindTag.doStartTag();
 
 		BindStatus bindStatus = (BindStatus) getPageContext().findAttribute(BindTag.STATUS_VARIABLE_NAME);
-		assertEquals("Rob", bindStatus.getValue());
+		assertThat(bindStatus.getValue()).isEqualTo("Rob");
 	}
 
 	@Test
@@ -103,7 +102,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.rob.setName(NAME);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -121,7 +120,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	public void complexBind() throws Exception {
 		this.tag.setPath("spouse.name");
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -198,7 +197,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -248,7 +247,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		this.tag.setPath("name");
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -271,7 +270,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		bindTag.doStartTag();
 
 		BindStatus bindStatus = (BindStatus) getPageContext().findAttribute(BindTag.STATUS_VARIABLE_NAME);
-		assertEquals("Sally", bindStatus.getValue());
+		assertThat(bindStatus.getValue()).isEqualTo("Sally");
 	}
 
 	@Test
@@ -285,7 +284,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -314,7 +313,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -332,7 +331,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setReadonly(true);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -348,7 +347,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setPath("myFloat");
 		this.tag.setDynamicAttribute(null, "type", "number");
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -360,32 +359,24 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void dynamicTypeRadioAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "radio");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"radio\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "radio"))
+			.withMessage("Attribute type=\"radio\" is not allowed");
 	}
 
 	@Test
 	public void dynamicTypeCheckboxAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "checkbox");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"checkbox\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "checkbox"))
+			.withMessage("Attribute type=\"checkbox\" is not allowed");
 	}
 
 	protected final void assertTagClosed(String output) {
-		assertTrue("Tag not closed properly", output.endsWith("/>"));
+		assertThat(output.endsWith("/>")).as("Tag not closed properly").isTrue();
 	}
 
 	protected final void assertTagOpened(String output) {
-		assertTrue("Tag not opened properly", output.startsWith("<input "));
+		assertThat(output.startsWith("<input ")).as("Tag not opened properly").isTrue();
 	}
 
 	@SuppressWarnings("serial")

@@ -17,7 +17,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -27,8 +27,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.StringContains.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link AbstractMockServerSpec}.
@@ -56,7 +55,7 @@ public class MockServerSpecTests {
 				.exchange()
 				.expectBody(String.class)
 				.consumeWith(result -> assertThat(
-						result.getResponseBody(), containsString("test-attribute=:A:B")));
+						result.getResponseBody()).contains("test-attribute=:A:B"));
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class MockServerSpecTests {
 				.exchange()
 				.expectBody(String.class)
 				.consumeWith(result -> assertThat(
-						result.getResponseBody(), containsString("test-attribute=:Fwk-A:Fwk-B:App-A:App-B")));
+						result.getResponseBody()).contains("test-attribute=:Fwk-A:Fwk-B:App-A:App-B"));
 	}
 
 

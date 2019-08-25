@@ -16,11 +16,10 @@
 
 package org.springframework.messaging.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Gary Russell
@@ -32,12 +31,12 @@ public class ErrorMessageTests {
 	public void testToString() {
 		ErrorMessage em = new ErrorMessage(new RuntimeException("foo"));
 		String emString = em.toString();
-		assertThat(emString, not(containsString("original")));
+		assertThat(emString).doesNotContain("original");
 
 		em = new ErrorMessage(new RuntimeException("foo"), new GenericMessage<>("bar"));
 		emString = em.toString();
-		assertThat(emString, containsString("original"));
-		assertThat(emString, containsString(em.getOriginalMessage().toString()));
+		assertThat(emString).contains("original");
+		assertThat(emString).contains(em.getOriginalMessage().toString());
 	}
 
 }

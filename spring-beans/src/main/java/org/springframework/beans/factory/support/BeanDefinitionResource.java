@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.AbstractResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -80,7 +81,7 @@ class BeanDefinitionResource extends AbstractResource {
 	 * This implementation compares the underlying BeanDefinition.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BeanDefinitionResource &&
 				((BeanDefinitionResource) other).beanDefinition.equals(this.beanDefinition)));
 	}

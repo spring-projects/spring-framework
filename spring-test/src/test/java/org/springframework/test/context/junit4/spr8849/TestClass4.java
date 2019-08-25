@@ -27,7 +27,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This name of this class intentionally does not end with "Test" or "Tests"
@@ -53,7 +53,7 @@ public class TestClass4 {
 
 	@Test
 	public void dummyTest() {
-		assertNotNull(dataSource);
+		assertThat(dataSource).isNotNull();
 	}
 
 }

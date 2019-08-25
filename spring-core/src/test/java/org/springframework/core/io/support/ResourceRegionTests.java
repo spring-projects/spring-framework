@@ -16,10 +16,11 @@
 
 package org.springframework.core.io.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -27,21 +28,24 @@ import static org.mockito.Mockito.mock;
  *
  * @author Brian Clozel
  */
-public class ResourceRegionTests {
+class ResourceRegionTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldThrowExceptionWithNullResource() {
-		new ResourceRegion(null, 0, 1);
+	@Test
+	void shouldThrowExceptionWithNullResource() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceRegion(null, 0, 1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldThrowExceptionForNegativePosition() {
-		new ResourceRegion(mock(Resource.class), -1, 1);
+	@Test
+	void shouldThrowExceptionForNegativePosition() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceRegion(mock(Resource.class), -1, 1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldThrowExceptionForNegativeCount() {
-		new ResourceRegion(mock(Resource.class), 0, -1);
+	@Test
+	void shouldThrowExceptionForNegativeCount() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceRegion(mock(Resource.class), 0, -1));
 	}
 
 }

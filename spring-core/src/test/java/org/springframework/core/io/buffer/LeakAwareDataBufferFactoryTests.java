@@ -16,28 +16,25 @@
 
 package org.springframework.core.io.buffer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
  * @author Arjen Poutsma
  */
-public class LeakAwareDataBufferFactoryTests {
+class LeakAwareDataBufferFactoryTests {
 
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
 	@Test
-	public void leak() {
+	void leak() {
 		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer();
 		try {
-			this.bufferFactory.checkForLeaks();
-			fail("AssertionError expected");
-		}
-		catch (AssertionError expected) {
-			// ignore
+			assertThatExceptionOfType(AssertionError.class).isThrownBy(
+					this.bufferFactory::checkForLeaks);
 		}
 		finally {
 			release(dataBuffer);
@@ -45,7 +42,7 @@ public class LeakAwareDataBufferFactoryTests {
 	}
 
 	@Test
-	public void noLeak() {
+	void noLeak() {
 		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer();
 		release(dataBuffer);
 		this.bufferFactory.checkForLeaks();

@@ -20,15 +20,13 @@ import java.io.IOException;
 
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -45,7 +43,7 @@ public class AtAspectJAfterThrowingTests {
 		ITestBean bean = (ITestBean) ctx.getBean("testBean");
 		ExceptionHandlingAspect aspect = (ExceptionHandlingAspect) ctx.getBean("aspect");
 
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		try {
 			bean.unreliableFileOperation();
 		}
@@ -53,8 +51,8 @@ public class AtAspectJAfterThrowingTests {
 			//
 		}
 
-		assertEquals(1, aspect.handled);
-		assertNotNull(aspect.lastException);
+		assertThat(aspect.handled).isEqualTo(1);
+		assertThat(aspect.lastException).isNotNull();
 	}
 }
 

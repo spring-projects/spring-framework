@@ -18,9 +18,9 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -61,13 +61,8 @@ public class SimpleTraceInterceptorTests {
 		Log log = mock(Log.class);
 
 		final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
-
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+			interceptor.invokeUnderTrace(mi, log));
 
 		verify(log).trace(anyString());
 		verify(log).trace(anyString(), eq(exception));

@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +25,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
@@ -39,18 +39,18 @@ import static org.junit.Assert.assertEquals;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource("ApplicationPropertyOverridePropertiesFileTestPropertySourceTests.properties")
-public class ApplicationPropertyOverridePropertiesFileTestPropertySourceTests {
+class ApplicationPropertyOverridePropertiesFileTestPropertySourceTests {
 
 	@Autowired
 	protected Environment env;
 
 
 	@Test
-	public void verifyPropertiesAreAvailableInEnvironment() {
-		assertEquals("test override", env.getProperty("explicit"));
+	void verifyPropertiesAreAvailableInEnvironment() {
+		assertThat(env.getProperty("explicit")).isEqualTo("test override");
 	}
 
 

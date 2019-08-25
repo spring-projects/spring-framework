@@ -143,10 +143,10 @@ public abstract class RouterFunctions {
 	 * The returned function can be {@linkplain Function#andThen(Function) composed} on, for
 	 * instance to return a default resource when the lookup function does not match:
 	 * <pre class="code">
-	 * Mono&lt;Resource&gt; defaultResource = Mono.just(new ClassPathResource("index.html"));
-	 * Function&lt;ServerRequest, Mono&lt;Resource&gt;&gt; lookupFunction =
+	 * Optional&lt;Resource&gt; defaultResource = Optional.of(new ClassPathResource("index.html"));
+	 * Function&lt;ServerRequest, Optional&lt;Resource&gt;&gt; lookupFunction =
 	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileSystemResource("public-resources/"))
-	 *     .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
+	 *     .andThen(resource -&gt; resource.or(() -&gt; defaultResource));
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources(lookupFunction);
      * </pre>
 	 * @param pattern the pattern to match
@@ -166,11 +166,6 @@ public abstract class RouterFunctions {
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
 		return new ResourcesRouterFunction(lookupFunction);
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T extends ServerResponse> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
-		return (HandlerFunction<T>) handlerFunction;
 	}
 
 

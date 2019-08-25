@@ -21,13 +21,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -46,13 +46,13 @@ public class AsyncResultTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail("Failure callback not expected: " + ex);
+				throw new AssertionError("Failure callback not expected: " + ex, ex);
 			}
 		});
-		assertSame(value, values.iterator().next());
-		assertSame(value, future.get());
-		assertSame(value, future.completable().get());
-		future.completable().thenAccept(v -> assertSame(value, v));
+		assertThat(values.iterator().next()).isSameAs(value);
+		assertThat(future.get()).isSameAs(value);
+		assertThat(future.completable().get()).isSameAs(value);
+		future.completable().thenAccept(v -> assertThat(v).isSameAs(value));
 	}
 
 	@Test
@@ -63,28 +63,20 @@ public class AsyncResultTests {
 		future.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
-				fail("Success callback not expected: " + result);
+				throw new AssertionError("Success callback not expected: " + result);
 			}
 			@Override
 			public void onFailure(Throwable ex) {
 				values.add(ex);
 			}
 		});
-		assertSame(ex, values.iterator().next());
-		try {
-			future.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
-		try {
-			future.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
+		assertThat(values.iterator().next()).isSameAs(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future::get)
+			.withCause(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future.completable()::get)
+			.withCause(ex);
 	}
 
 	@Test
@@ -92,11 +84,11 @@ public class AsyncResultTests {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
 		ListenableFuture<String> future = AsyncResult.forValue(value);
-		future.addCallback(values::add, ex -> fail("Failure callback not expected: " + ex));
-		assertSame(value, values.iterator().next());
-		assertSame(value, future.get());
-		assertSame(value, future.completable().get());
-		future.completable().thenAccept(v -> assertSame(value, v));
+		future.addCallback(values::add, ex -> new AssertionError("Failure callback not expected: " + ex));
+		assertThat(values.iterator().next()).isSameAs(value);
+		assertThat(future.get()).isSameAs(value);
+		assertThat(future.completable().get()).isSameAs(value);
+		future.completable().thenAccept(v -> assertThat(v).isSameAs(value));
 	}
 
 	@Test
@@ -104,22 +96,14 @@ public class AsyncResultTests {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
 		ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
-		future.addCallback(result -> fail("Success callback not expected: " + result), values::add);
-		assertSame(ex, values.iterator().next());
-		try {
-			future.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
-		try {
-			future.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
+		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
+		assertThat(values.iterator().next()).isSameAs(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future::get)
+			.withCause(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future.completable()::get)
+			.withCause(ex);
 	}
 
 }

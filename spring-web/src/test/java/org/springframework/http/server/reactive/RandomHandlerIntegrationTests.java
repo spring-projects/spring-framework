@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.util.Random;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,20 +28,19 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	public static final int REQUEST_SIZE = 4096 * 3;
+	private static final int REQUEST_SIZE = 4096 * 3;
 
-	public static final int RESPONSE_SIZE = 1024 * 4;
+	private static final int RESPONSE_SIZE = 1024 * 4;
 
 	private final Random rnd = new Random();
 
@@ -57,8 +55,10 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 	}
 
 
-	@Test
-	public void random() throws Throwable {
+	@ParameterizedHttpServerTest
+	void random(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		// TODO: fix Reactor support
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -67,10 +67,9 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertNotNull(response.getBody());
-		assertEquals(RESPONSE_SIZE,
-				response.getHeaders().getContentLength());
-		assertEquals(RESPONSE_SIZE, response.getBody().length);
+		assertThat(response.getBody()).isNotNull();
+		assertThat(response.getHeaders().getContentLength()).isEqualTo(RESPONSE_SIZE);
+		assertThat(response.getBody().length).isEqualTo(RESPONSE_SIZE);
 	}
 
 
@@ -82,7 +81,7 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 
 	private class RandomHandler implements HttpHandler {
 
-		public static final int CHUNKS = 16;
+		static final int CHUNKS = 16;
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
@@ -90,8 +89,8 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 					reduce(0, (integer, dataBuffer) -> integer +
 							dataBuffer.readableByteCount()).
 					doOnSuccessOrError((size, throwable) -> {
-						assertNull(throwable);
-						assertEquals(REQUEST_SIZE, (long) size);
+						assertThat(throwable).isNull();
+						assertThat(size).isEqualTo(REQUEST_SIZE);
 					});
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);

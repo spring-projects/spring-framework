@@ -18,16 +18,11 @@ package org.springframework.cache;
 
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.support.NoOpCacheManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link NoOpCacheManager}.
@@ -42,28 +37,28 @@ public class NoOpCacheManagerTests {
 	@Test
 	public void testGetCache() throws Exception {
 		Cache cache = this.manager.getCache("bucket");
-		assertNotNull(cache);
-		assertSame(cache, this.manager.getCache("bucket"));
+		assertThat(cache).isNotNull();
+		assertThat(this.manager.getCache("bucket")).isSameAs(cache);
 	}
 
 	@Test
 	public void testNoOpCache() throws Exception {
 		String name = createRandomKey();
 		Cache cache = this.manager.getCache(name);
-		assertEquals(name, cache.getName());
+		assertThat(cache.getName()).isEqualTo(name);
 		Object key = new Object();
 		cache.put(key, new Object());
-		assertNull(cache.get(key));
-		assertNull(cache.get(key, Object.class));
-		assertSame(cache, cache.getNativeCache());
+		assertThat(cache.get(key)).isNull();
+		assertThat(cache.get(key, Object.class)).isNull();
+		assertThat(cache.getNativeCache()).isSameAs(cache);
 	}
 
 	@Test
 	public void testCacheName() throws Exception {
 		String name = "bucket";
-		assertFalse(this.manager.getCacheNames().contains(name));
+		assertThat(this.manager.getCacheNames().contains(name)).isFalse();
 		this.manager.getCache(name);
-		assertTrue(this.manager.getCacheNames().contains(name));
+		assertThat(this.manager.getCacheNames().contains(name)).isTrue();
 	}
 
 	@Test
@@ -72,7 +67,7 @@ public class NoOpCacheManagerTests {
 		Cache cache = this.manager.getCache(name);
 		Object returnValue = new Object();
 		Object value = cache.get(new Object(), () -> returnValue);
-		assertEquals(returnValue, value);
+		assertThat(value).isEqualTo(returnValue);
 	}
 
 	@Test
@@ -85,8 +80,8 @@ public class NoOpCacheManagerTests {
 			});
 		}
 		catch (Cache.ValueRetrievalException ex) {
-			assertNotNull(ex.getCause());
-			assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
+			assertThat(ex.getCause()).isNotNull();
+			assertThat(ex.getCause().getClass()).isEqualTo(UnsupportedOperationException.class);
 		}
 	}
 

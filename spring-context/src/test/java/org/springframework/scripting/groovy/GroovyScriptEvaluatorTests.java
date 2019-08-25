@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.ScriptEvaluator;
@@ -28,8 +28,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.scripting.support.StandardScriptEvaluator;
 import org.springframework.scripting.support.StaticScriptSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -40,14 +39,14 @@ public class GroovyScriptEvaluatorTests {
 	public void testGroovyScriptFromString() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
 	public void testGroovyScriptFromFile() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		Object result = evaluator.evaluate(new ResourceScriptSource(new ClassPathResource("simple.groovy", getClass())));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class GroovyScriptEvaluatorTests {
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b"), arguments);
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
@@ -66,8 +65,8 @@ public class GroovyScriptEvaluatorTests {
 		MyBytecodeProcessor processor = new MyBytecodeProcessor();
 		evaluator.getCompilerConfiguration().setBytecodePostprocessor(processor);
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
-		assertEquals(6, result);
-		assertTrue(processor.processed.contains("Script1"));
+		assertThat(result).isEqualTo(6);
+		assertThat(processor.processed.contains("Script1")).isTrue();
 	}
 
 	@Test
@@ -77,7 +76,7 @@ public class GroovyScriptEvaluatorTests {
 		importCustomizer.addStarImports("org.springframework.util");
 		evaluator.setCompilationCustomizers(importCustomizer);
 		Object result = evaluator.evaluate(new StaticScriptSource("return ResourceUtils.CLASSPATH_URL_PREFIX"));
-		assertEquals("classpath:", result);
+		assertThat(result).isEqualTo("classpath:");
 	}
 
 	@Test
@@ -85,14 +84,14 @@ public class GroovyScriptEvaluatorTests {
 		StandardScriptEvaluator evaluator = new StandardScriptEvaluator();
 		evaluator.setLanguage("Groovy");
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
 	public void testGroovyScriptFromFileUsingJsr223() {
 		ScriptEvaluator evaluator = new StandardScriptEvaluator();
 		Object result = evaluator.evaluate(new ResourceScriptSource(new ClassPathResource("simple.groovy", getClass())));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
@@ -103,7 +102,7 @@ public class GroovyScriptEvaluatorTests {
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b"), arguments);
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 }

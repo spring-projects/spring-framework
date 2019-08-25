@@ -16,12 +16,12 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Adrian Colyer
@@ -32,7 +32,7 @@ public class AnnotationBindingTests {
 	private AnnotatedTestBean testBean;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
@@ -42,13 +42,13 @@ public class AnnotationBindingTests {
 
 	@Test
 	public void testAnnotationBindingInAroundAdvice() {
-		assertEquals("this value", testBean.doThis());
-		assertEquals("that value", testBean.doThat());
+		assertThat(testBean.doThis()).isEqualTo("this value");
+		assertThat(testBean.doThat()).isEqualTo("that value");
 	}
 
 	@Test
 	public void testNoMatchingWithoutAnnotationPresent() {
-		assertEquals("doTheOther", testBean.doTheOther());
+		assertThat(testBean.doTheOther()).isEqualTo("doTheOther");
 	}
 
 }

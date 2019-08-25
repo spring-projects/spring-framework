@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -46,11 +44,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Stephane Nicoll
@@ -58,9 +53,6 @@ import static org.junit.Assert.assertTrue;
 public class DefaultMessageHandlerMethodFactoryTests {
 
 	private final SampleBean sample = new SampleBean();
-
-	@Rule
-	public final TestName name = new TestName();
 
 
 	@Test
@@ -87,8 +79,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 	public void customConversionServiceFailure() throws Exception {
 		DefaultMessageHandlerMethodFactory instance = createInstance();
 		GenericConversionService conversionService = new GenericConversionService();
-		assertFalse("conversion service should fail to convert payload",
-				conversionService.canConvert(Integer.class, String.class));
+		assertThat(conversionService.canConvert(Integer.class, String.class)).as("conversion service should fail to convert payload").isFalse();
 		instance.setConversionService(conversionService);
 		instance.afterPropertiesSet();
 
@@ -189,7 +180,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 
 
 	private void assertMethodInvocation(SampleBean bean, String methodName) {
-		assertTrue("Method " + methodName + " should have been invoked", bean.invocations.get(methodName));
+		assertThat((boolean) bean.invocations.get(methodName)).as("Method " + methodName + " should have been invoked").isTrue();
 	}
 
 	private InvocableHandlerMethod createInvocableHandlerMethod(
@@ -205,7 +196,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 
 	private Method getListenerMethod(String methodName, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
-		assertNotNull("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes));
+		assertThat(("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes))).isNotNull();
 		return method;
 	}
 
@@ -224,7 +215,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 
 		public void customArgumentResolver(Locale locale) {
 			invocations.put("customArgumentResolver", true);
-			assertEquals("Wrong value for locale", Locale.getDefault(), locale);
+			assertThat(locale).as("Wrong value for locale").isEqualTo(Locale.getDefault());
 		}
 	}
 

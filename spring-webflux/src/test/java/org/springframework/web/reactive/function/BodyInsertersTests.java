@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import io.reactivex.Single;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -68,9 +68,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -84,7 +82,7 @@ public class BodyInsertersTests {
 	private Map<String, Object> hints;
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -127,7 +125,7 @@ public class BodyInsertersTests {
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(buf -> {
 					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
-					Assert.assertEquals("foo", actual);
+					assertThat(actual).isEqualTo("foo");
 				})
 				.expectComplete()
 				.verify();
@@ -163,6 +161,51 @@ public class BodyInsertersTests {
 	}
 
 	@Test
+	public void ofProducerWithMono() {
+		Mono<User> body = Mono.just(new User("foo", "bar"));
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofProducerWithFlux() {
+		Flux<String> body = Flux.just("foo");
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, String.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(buf -> {
+					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					assertThat(actual).isEqualTo("foo");
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofProducerWithSingle() {
+		Single<User> body = Single.just(new User("foo", "bar"));
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void ofPublisher() {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<Flux<String>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromPublisher(body, String.class);
@@ -173,7 +216,7 @@ public class BodyInsertersTests {
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(buf -> {
 					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
-					Assert.assertEquals("foo", actual);
+					assertThat(actual).isEqualTo("foo");
 				})
 				.expectComplete()
 				.verify();
@@ -195,7 +238,7 @@ public class BodyInsertersTests {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
-					assertArrayEquals(expectedBytes, resultBytes);
+					assertThat(resultBytes).isEqualTo(expectedBytes);
 				})
 				.expectComplete()
 				.verify();
@@ -238,7 +281,7 @@ public class BodyInsertersTests {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
-					assertArrayEquals(expectedBytes, resultBytes);
+					assertThat(resultBytes).isEqualTo(expectedBytes);
 				})
 				.expectComplete()
 				.verify();
@@ -276,8 +319,7 @@ public class BodyInsertersTests {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
-					assertArrayEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8),
-							resultBytes);
+					assertThat(resultBytes).isEqualTo("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8));
 				})
 				.expectComplete()
 				.verify();
@@ -301,8 +343,7 @@ public class BodyInsertersTests {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
-					assertArrayEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8),
-							resultBytes);
+					assertThat(resultBytes).isEqualTo("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8));
 				})
 				.expectComplete()
 				.verify();
@@ -341,16 +382,16 @@ public class BodyInsertersTests {
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
-					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
+					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
 							"Content-Length: 6\r\n" +
 							"\r\n" +
-							"value1"));
-					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
+							"value1");
+					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
 							"Content-Length: 6\r\n" +
 							"\r\n" +
-							"value2"));
+							"value2");
 				})
 				.expectComplete()
 				.verify();

@@ -16,15 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.componentscan.cycle.left.LeftConfig;
 import org.springframework.context.annotation.componentscan.level1.Level1Config;
 import org.springframework.context.annotation.componentscan.level2.Level2Config;
 import org.springframework.context.annotation.componentscan.level3.Level3Component;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests ensuring that configuration classes marked with @ComponentScan
@@ -47,8 +47,8 @@ public class ComponentScanAnnotationRecursionTests {
 		ctx.getBean(Level3Component.class);
 
 		// assert that enhancement is working
-		assertThat(ctx.getBean("level1Bean"), sameInstance(ctx.getBean("level1Bean")));
-		assertThat(ctx.getBean("level2Bean"), sameInstance(ctx.getBean("level2Bean")));
+		assertThat(ctx.getBean("level1Bean")).isSameAs(ctx.getBean("level1Bean"));
+		assertThat(ctx.getBean("level2Bean")).isSameAs(ctx.getBean("level2Bean"));
 	}
 
 	public void evenCircularScansAreSupported() {

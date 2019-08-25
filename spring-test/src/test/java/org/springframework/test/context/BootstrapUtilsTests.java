@@ -19,15 +19,14 @@ package org.springframework.test.context;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
 
@@ -38,12 +37,12 @@ import static org.springframework.test.context.BootstrapUtils.resolveTestContext
  * @author Phillip Webb
  * @since 4.2
  */
-public class BootstrapUtilsTests {
+class BootstrapUtilsTests {
 
 	private final CacheAwareContextLoaderDelegate delegate = mock(CacheAwareContextLoaderDelegate.class);
 
 	@Test
-	public void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
+	void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(EmptyBootstrapWithAnnotationClass.class, delegate);
 		assertThatIllegalStateException().isThrownBy(() ->
 				resolveTestContextBootstrapper(bootstrapContext))
@@ -51,7 +50,7 @@ public class BootstrapUtilsTests {
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
+	void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
 			DoubleMetaAnnotatedBootstrapWithAnnotationClass.class, delegate);
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -62,32 +61,32 @@ public class BootstrapUtilsTests {
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperForNonAnnotatedClass() {
+	void resolveTestContextBootstrapperForNonAnnotatedClass() {
 		assertBootstrapper(NonAnnotatedClass.class, DefaultTestContextBootstrapper.class);
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperForWebAppConfigurationAnnotatedClass() {
+	void resolveTestContextBootstrapperForWebAppConfigurationAnnotatedClass() {
 		assertBootstrapper(WebAppConfigurationAnnotatedClass.class, WebTestContextBootstrapper.class);
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperWithDirectBootstrapWithAnnotation() {
+	void resolveTestContextBootstrapperWithDirectBootstrapWithAnnotation() {
 		assertBootstrapper(DirectBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperWithInheritedBootstrapWithAnnotation() {
+	void resolveTestContextBootstrapperWithInheritedBootstrapWithAnnotation() {
 		assertBootstrapper(InheritedBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperWithMetaBootstrapWithAnnotation() {
+	void resolveTestContextBootstrapperWithMetaBootstrapWithAnnotation() {
 		assertBootstrapper(MetaAnnotatedBootstrapWithAnnotationClass.class, BarBootstrapper.class);
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperWithDuplicatingMetaBootstrapWithAnnotations() {
+	void resolveTestContextBootstrapperWithDuplicatingMetaBootstrapWithAnnotations() {
 		assertBootstrapper(DuplicateMetaAnnotatedBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
 
@@ -95,15 +94,15 @@ public class BootstrapUtilsTests {
 	 * @since 5.1
 	 */
 	@Test
-	public void resolveTestContextBootstrapperWithLocalDeclarationThatOverridesMetaBootstrapWithAnnotations() {
+	void resolveTestContextBootstrapperWithLocalDeclarationThatOverridesMetaBootstrapWithAnnotations() {
 		assertBootstrapper(LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass.class, EnigmaBootstrapper.class);
 	}
 
 	private void assertBootstrapper(Class<?> testClass, Class<?> expectedBootstrapper) {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, delegate);
 		TestContextBootstrapper bootstrapper = resolveTestContextBootstrapper(bootstrapContext);
-		assertNotNull(bootstrapper);
-		assertEquals(expectedBootstrapper, bootstrapper.getClass());
+		assertThat(bootstrapper).isNotNull();
+		assertThat(bootstrapper.getClass()).isEqualTo(expectedBootstrapper);
 	}
 
 	// -------------------------------------------------------------------

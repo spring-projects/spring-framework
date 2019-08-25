@@ -20,14 +20,14 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.max;
@@ -55,8 +55,8 @@ public class SimpleRequestExpectationManagerTests {
 			this.manager.validateRequest(createRequest(GET, "/foo"));
 		}
 		catch (AssertionError error) {
-			assertEquals("No further requests expected: HTTP GET /foo\n" +
-					"0 request(s) executed.\n", error.getMessage());
+			assertThat(error.getMessage()).isEqualTo(("No further requests expected: HTTP GET /foo\n" +
+						"0 request(s) executed.\n"));
 		}
 	}
 

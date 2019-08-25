@@ -19,7 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -29,8 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.HEAD;
 
 /**
@@ -107,7 +106,7 @@ public class RouterFunctionBuilderTests {
 	@Test
 	public void resources() {
 		Resource resource = new ClassPathResource("/org/springframework/web/reactive/function/server/");
-		assertTrue(resource.exists());
+		assertThat(resource.exists()).isTrue();
 
 		RouterFunction<ServerResponse> route = RouterFunctions.route()
 				.resources("/resources/**", resource)
@@ -175,20 +174,20 @@ public class RouterFunctionBuilderTests {
 				.GET("/bar", request -> Mono.error(new IllegalStateException()))
 				.before(request -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(0, count);
+					assertThat(count).isEqualTo(0);
 					return request;
 				})
 				.after((request, response) -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(3, count);
+					assertThat(count).isEqualTo(3);
 					return response;
 				})
 				.filter((request, next) -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(1, count);
+					assertThat(count).isEqualTo(1);
 					Mono<ServerResponse> responseMono = next.handle(request);
 					count = filterCount.getAndIncrement();
-					assertEquals(2, count);
+					assertThat(count).isEqualTo(2);
 					return responseMono;
 				})
 				.onError(IllegalStateException.class, (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
@@ -204,8 +203,7 @@ public class RouterFunctionBuilderTests {
 
 
 		StepVerifier.create(fooResponseMono)
-				.consumeNextWith(serverResponse ->
-					assertEquals(4, filterCount.get())
+				.consumeNextWith(serverResponse -> assertThat(filterCount.get()).isEqualTo(4)
 				)
 				.verifyComplete();
 

@@ -17,8 +17,8 @@
 package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AroundAdviceBindingTestAspect.AroundAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
@@ -28,7 +28,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -48,14 +48,14 @@ public class AroundAdviceBindingTests {
 
 	protected ApplicationContext ctx;
 
-	@Before
+	@BeforeEach
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
 
 		ITestBean injectedTestBean = (ITestBean) ctx.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(injectedTestBean));
+		assertThat(AopUtils.isAopProxy(injectedTestBean)).isTrue();
 
 		this.testBeanProxy = injectedTestBean;
 		// we need the real target too, not just the proxy...

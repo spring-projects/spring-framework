@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -30,9 +30,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.invocation.ResolvableMethod;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.destinationVar;
 
 /**
@@ -50,8 +49,8 @@ public class DestinationVariableMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(resolver.supportsParameter(this.resolvable.annot(destinationVar().noValue()).arg()));
-		assertFalse(resolver.supportsParameter(this.resolvable.annotNotPresent(DestinationVariable.class).arg()));
+		assertThat(resolver.supportsParameter(this.resolvable.annot(destinationVar().noValue()).arg())).isTrue();
+		assertThat(resolver.supportsParameter(this.resolvable.annotNotPresent(DestinationVariable.class).arg())).isFalse();
 	}
 
 	@Test
@@ -65,16 +64,17 @@ public class DestinationVariableMethodArgumentResolverTests {
 			DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars).build();
 
 		Object result = resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message);
-		assertEquals("bar", result);
+		assertThat(result).isEqualTo("bar");
 
 		result = resolveArgument(this.resolvable.annot(destinationVar("name")).arg(), message);
-		assertEquals("value", result);
+		assertThat(result).isEqualTo("value");
 	}
 
-	@Test(expected = MessageHandlingException.class)
+	@Test
 	public void resolveArgumentNotFound() {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
-		resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message);
+		assertThatExceptionOfType(MessageHandlingException.class).isThrownBy(() ->
+				resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message));
 	}
 
 	@SuppressWarnings({"unchecked", "ConstantConditions"})

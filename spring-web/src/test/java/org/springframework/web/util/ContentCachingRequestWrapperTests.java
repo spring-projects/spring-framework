@@ -16,15 +16,13 @@
 
 package org.springframework.web.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Brian Clozel
@@ -46,7 +44,7 @@ public class ContentCachingRequestWrapperTests {
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
 		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
-		assertArrayEquals(response, wrapper.getContentAsByteArray());
+		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
 	}
 
 	@Test
@@ -57,8 +55,8 @@ public class ContentCachingRequestWrapperTests {
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request, 3);
 		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
-		assertArrayEquals("Hello World".getBytes(CHARSET), response);
-		assertArrayEquals("Hel".getBytes(CHARSET), wrapper.getContentAsByteArray());
+		assertThat(response).isEqualTo("Hello World".getBytes(CHARSET));
+		assertThat(wrapper.getContentAsByteArray()).isEqualTo("Hel".getBytes(CHARSET));
 	}
 
 	@Test
@@ -74,13 +72,9 @@ public class ContentCachingRequestWrapperTests {
 			}
 		};
 
-		try {
-			FileCopyUtils.copyToByteArray(wrapper.getInputStream());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("3", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				FileCopyUtils.copyToByteArray(wrapper.getInputStream()))
+			.withMessage("3");
 	}
 
 	@Test
@@ -93,10 +87,10 @@ public class ContentCachingRequestWrapperTests {
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
 		// getting request parameters will consume the request body
-		assertFalse(wrapper.getParameterMap().isEmpty());
-		assertEquals("first=value&second=foo&second=bar", new String(wrapper.getContentAsByteArray()));
+		assertThat(wrapper.getParameterMap().isEmpty()).isFalse();
+		assertThat(new String(wrapper.getContentAsByteArray())).isEqualTo("first=value&second=foo&second=bar");
 		// SPR-12810 : inputstream body should be consumed
-		assertEquals("", new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream())));
+		assertThat(new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream()))).isEqualTo("");
 	}
 
 	@Test  // SPR-12810
@@ -110,7 +104,7 @@ public class ContentCachingRequestWrapperTests {
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
 
 		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
-		assertArrayEquals(response, wrapper.getContentAsByteArray());
+		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
 	}
 
 }

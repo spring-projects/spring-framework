@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Brian Clozel
  * @author Vedran Pavic
+ * @author Sebastien Deleuze
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -204,9 +206,35 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.content.toByteArray();
 	}
 
+	/**
+	 * Get the content of the response body as a {@code String}, using the charset
+	 * specified for the response by the application, either through
+	 * {@link HttpServletResponse} methods or through a charset parameter on the
+	 * {@code Content-Type}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @see #getContentAsString(Charset)
+	 */
 	public String getContentAsString() throws UnsupportedEncodingException {
 		return (this.characterEncoding != null ?
 				this.content.toString(this.characterEncoding) : this.content.toString());
+	}
+
+	/**
+	 * Get the content of the response body as a {@code String}, using the provided
+	 * {@code fallbackCharset} if no charset has been explicitly defined and otherwise
+	 * using the charset specified for the response by the application, either
+	 * through {@link HttpServletResponse} methods or through a charset parameter on the
+	 * {@code Content-Type}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @since 5.2
+	 * @see #getContentAsString()
+	 */
+	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
+		return (isCharset() && this.characterEncoding != null ?
+				this.content.toString(this.characterEncoding) :
+				this.content.toString(fallbackCharset.name()));
 	}
 
 	@Override
@@ -381,7 +409,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public boolean containsHeader(String name) {
-		return (HeaderValueHolder.getByName(this.headers, name) != null);
+		return (this.headers.get(name) != null);
 	}
 
 	/**
@@ -406,7 +434,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return (header != null ? header.getStringValue() : null);
 	}
 
@@ -420,7 +448,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	@Override
 	public List<String> getHeaders(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		if (header != null) {
 			return header.getStringValues();
 		}
@@ -437,7 +465,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	@Nullable
 	public Object getHeaderValue(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return (header != null ? header.getValue() : null);
 	}
 
@@ -447,7 +475,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @return the associated header values, or an empty List if none
 	 */
 	public List<Object> getHeaderValues(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		if (header != null) {
 			return header.getValues();
 		}
@@ -615,7 +643,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
 		if (header == null) {
 			header = new HeaderValueHolder();

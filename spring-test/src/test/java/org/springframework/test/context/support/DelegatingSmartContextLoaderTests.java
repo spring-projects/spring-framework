@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -27,11 +27,10 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link DelegatingSmartContextLoader}.
@@ -39,7 +38,7 @@ import static org.junit.Assert.assertTrue;
  * @author Sam Brannen
  * @since 3.1
  */
-public class DelegatingSmartContextLoaderTests {
+class DelegatingSmartContextLoaderTests {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
@@ -48,31 +47,31 @@ public class DelegatingSmartContextLoaderTests {
 
 
 	private static void assertEmpty(Object[] array) {
-		assertTrue(ObjectUtils.isEmpty(array));
+		assertThat(ObjectUtils.isEmpty(array)).isTrue();
 	}
 
 	// --- SmartContextLoader - processContextConfiguration() ------------------
 
 	@Test
-	public void processContextConfigurationWithDefaultXmlConfigGeneration() {
+	void processContextConfigurationWithDefaultXmlConfigGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
 				XmlTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
-		assertEquals(1, configAttributes.getLocations().length);
+		assertThat(configAttributes.getLocations().length).isEqualTo(1);
 		assertEmpty(configAttributes.getClasses());
 	}
 
 	@Test
-	public void processContextConfigurationWithDefaultConfigurationClassGeneration() {
+	void processContextConfigurationWithDefaultConfigurationClassGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
 				ConfigClassTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
-		assertEquals(1, configAttributes.getClasses().length);
+		assertThat(configAttributes.getClasses().length).isEqualTo(1);
 		assertEmpty(configAttributes.getLocations());
 	}
 
 	@Test
-	public void processContextConfigurationWithDefaultXmlConfigAndConfigurationClassGeneration() {
+	void processContextConfigurationWithDefaultXmlConfigAndConfigurationClassGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
 				ImproperDuplicateDefaultXmlAndConfigClassTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY,
 				true, null, true, ContextLoader.class);
@@ -82,35 +81,35 @@ public class DelegatingSmartContextLoaderTests {
 	}
 
 	@Test
-	public void processContextConfigurationWithLocation() {
+	void processContextConfigurationWithLocation() {
 		String[] locations = new String[] {"classpath:/foo.xml"};
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
 				getClass(), locations, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
-		assertArrayEquals(locations, configAttributes.getLocations());
+		assertThat(configAttributes.getLocations()).isEqualTo(locations);
 		assertEmpty(configAttributes.getClasses());
 	}
 
 	@Test
-	public void processContextConfigurationWithConfigurationClass() {
+	void processContextConfigurationWithConfigurationClass() {
 		Class<?>[] classes = new Class<?>[] {getClass()};
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
 				getClass(), EMPTY_STRING_ARRAY, classes, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
-		assertArrayEquals(classes, configAttributes.getClasses());
+		assertThat(configAttributes.getClasses()).isEqualTo(classes);
 		assertEmpty(configAttributes.getLocations());
 	}
 
 	// --- SmartContextLoader - loadContext() ----------------------------------
 
-	@Test(expected = IllegalArgumentException.class)
-	public void loadContextWithNullConfig() throws Exception {
-		MergedContextConfiguration mergedConfig = null;
-		loader.loadContext(mergedConfig);
+	@Test
+	void loadContextWithNullConfig() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				loader.loadContext((MergedContextConfiguration) null));
 	}
 
 	@Test
-	public void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
+	void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 				getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -123,7 +122,7 @@ public class DelegatingSmartContextLoaderTests {
 	 * @since 4.1
 	 */
 	@Test
-	public void loadContextWithLocationsAndConfigurationClasses() throws Exception {
+	void loadContextWithLocationsAndConfigurationClasses() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 				new String[] {"test.xml"}, new Class<?>[] {getClass()}, EMPTY_STRING_ARRAY, loader);
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -136,14 +135,15 @@ public class DelegatingSmartContextLoaderTests {
 			throws Exception {
 
 		ApplicationContext applicationContext = loader.loadContext(mergedConfig);
-		assertNotNull(applicationContext);
-		assertEquals("foo", applicationContext.getBean(String.class));
-		assertTrue(applicationContext instanceof ConfigurableApplicationContext);
+		assertThat(applicationContext).isNotNull();
+		assertThat(applicationContext.getBean(String.class)).isEqualTo("foo");
+		boolean condition = applicationContext instanceof ConfigurableApplicationContext;
+		assertThat(condition).isTrue();
 		((ConfigurableApplicationContext) applicationContext).close();
 	}
 
 	@Test
-	public void loadContextWithXmlConfig() throws Exception {
+	void loadContextWithXmlConfig() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 				XmlTestCase.class,
 				new String[] {"classpath:/org/springframework/test/context/support/DelegatingSmartContextLoaderTests$XmlTestCase-context.xml"},
@@ -152,7 +152,7 @@ public class DelegatingSmartContextLoaderTests {
 	}
 
 	@Test
-	public void loadContextWithConfigurationClass() throws Exception {
+	void loadContextWithConfigurationClass() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(ConfigClassTestCase.class,
 				EMPTY_STRING_ARRAY, new Class<?>[] {ConfigClassTestCase.Config.class}, EMPTY_STRING_ARRAY, loader);
 		assertApplicationContextLoadsAndContainsFooString(mergedConfig);
@@ -160,14 +160,16 @@ public class DelegatingSmartContextLoaderTests {
 
 	// --- ContextLoader -------------------------------------------------------
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void processLocations() {
-		loader.processLocations(getClass(), EMPTY_STRING_ARRAY);
+	@Test
+	void processLocations() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				loader.processLocations(getClass(), EMPTY_STRING_ARRAY));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void loadContextFromLocations() throws Exception {
-		loader.loadContext(EMPTY_STRING_ARRAY);
+	@Test
+	void loadContextFromLocations() throws Exception {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				loader.loadContext(EMPTY_STRING_ARRAY));
 	}
 
 

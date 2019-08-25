@@ -21,12 +21,13 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
+
 
 /**
  * Tests for {@link CandidateComponentsIndex}.
@@ -40,8 +41,8 @@ public class CandidateComponentsIndexTests {
 		CandidateComponentsIndex index = new CandidateComponentsIndex(
 				Collections.singletonList(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service", "service");
-		assertThat(actual, containsInAnyOrder("com.example.service.One",
-				"com.example.service.sub.Two", "com.example.service.Three"));
+		assertThat(actual).contains("com.example.service.One",
+				"com.example.service.sub.Two", "com.example.service.Three");
 	}
 
 	@Test
@@ -49,7 +50,7 @@ public class CandidateComponentsIndexTests {
 		CandidateComponentsIndex index = new CandidateComponentsIndex(
 				Collections.singletonList(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service.sub", "service");
-		assertThat(actual, containsInAnyOrder("com.example.service.sub.Two"));
+		assertThat(actual).contains("com.example.service.sub.Two");
 	}
 
 	@Test
@@ -57,7 +58,7 @@ public class CandidateComponentsIndexTests {
 		CandidateComponentsIndex index = new CandidateComponentsIndex(
 				Collections.singletonList(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service.none", "service");
-		assertThat(actual, hasSize(0));
+		assertThat(actual).isEmpty();
 	}
 
 	@Test
@@ -65,7 +66,7 @@ public class CandidateComponentsIndexTests {
 		CandidateComponentsIndex index = new CandidateComponentsIndex(
 				Collections.singletonList(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service", "entity");
-		assertThat(actual, hasSize(0));
+		assertThat(actual).isEmpty();
 	}
 
 	@Test
@@ -73,10 +74,10 @@ public class CandidateComponentsIndexTests {
 		CandidateComponentsIndex index = new CandidateComponentsIndex(Arrays.asList(
 				createProperties("com.example.Foo", "service"),
 				createProperties("com.example.Foo", "entity")));
-		assertThat(index.getCandidateTypes("com.example", "service"),
-				contains("com.example.Foo"));
-		assertThat(index.getCandidateTypes("com.example", "entity"),
-				contains("com.example.Foo"));
+		assertThat(index.getCandidateTypes("com.example", "service"))
+				.contains("com.example.Foo");
+		assertThat(index.getCandidateTypes("com.example", "entity"))
+				.contains("com.example.Foo");
 	}
 
 	private static Properties createProperties(String key, String stereotypes) {

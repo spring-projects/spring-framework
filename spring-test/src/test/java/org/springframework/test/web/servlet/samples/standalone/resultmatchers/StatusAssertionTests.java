@@ -19,7 +19,7 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;

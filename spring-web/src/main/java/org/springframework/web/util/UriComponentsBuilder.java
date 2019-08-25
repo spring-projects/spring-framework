@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +100,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
 
 	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
+
+	private static final Object[] EMPTY_VALUES = new Object[0];
 
 
 	@Nullable
@@ -696,6 +699,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #queryParam(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder queryParam(String name, Object... values) {
@@ -711,6 +715,22 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	/**
+	 * Append the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @since 5.2.0
+	 * @see #queryParam(String, Object...)
+	 */
+	@Override
+	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
+		return queryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**
@@ -733,6 +753,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParam(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
@@ -743,6 +764,20 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	/**
+	 * Set the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is removed.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParam(String, Object...)
+	 * @since 5.2.0
+	 */
+	@Override
+	public UriComponentsBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
+		return replaceQueryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**

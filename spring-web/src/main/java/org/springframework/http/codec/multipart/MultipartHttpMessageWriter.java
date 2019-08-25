@@ -202,8 +202,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
 		}
-		for (String name : map.keySet()) {
-			for (Object value : map.get(name)) {
+		for (List<?> values : map.values()) {
+			for (Object value : values) {
 				if (value != null && !(value instanceof String)) {
 					return true;
 				}

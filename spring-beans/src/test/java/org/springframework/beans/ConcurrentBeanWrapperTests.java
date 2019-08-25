@@ -26,11 +26,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Guillaume Poirier
@@ -75,7 +73,7 @@ public class ConcurrentBeanWrapperTests {
 			}
 		}
 		if (ex != null) {
-			fail(ex.getMessage());
+			throw new AssertionError("Unexpected exception", ex);
 		}
 	}
 
@@ -84,7 +82,7 @@ public class ConcurrentBeanWrapperTests {
 
 		Properties p = (Properties) System.getProperties().clone();
 
-		assertTrue("The System properties must not be empty", p.size() != 0);
+		assertThat(p.size() != 0).as("The System properties must not be empty").isTrue();
 
 		for (Iterator<?> i = p.entrySet().iterator(); i.hasNext();) {
 			i.next();
@@ -105,7 +103,7 @@ public class ConcurrentBeanWrapperTests {
 
 		BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
 		wrapper.setPropertyValue("properties", value);
-		assertEquals(p, bean.getProperties());
+		assertThat(bean.getProperties()).isEqualTo(p);
 	}
 
 

@@ -18,10 +18,10 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -38,14 +38,14 @@ public class PerformanceMonitorInterceptorTests {
 	public void testSuffixAndPrefixAssignment() {
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+		assertThat(interceptor.getPrefix()).isNotNull();
+		assertThat(interceptor.getSuffix()).isNotNull();
 
 		interceptor.setPrefix(null);
 		interceptor.setSuffix(null);
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+		assertThat(interceptor.getPrefix()).isNotNull();
+		assertThat(interceptor.getSuffix()).isNotNull();
 	}
 
 	@Test
@@ -70,12 +70,8 @@ public class PerformanceMonitorInterceptorTests {
 		Log log = mock(Log.class);
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.invokeUnderTrace(mi, log));
 
 		verify(log).trace(anyString());
 	}

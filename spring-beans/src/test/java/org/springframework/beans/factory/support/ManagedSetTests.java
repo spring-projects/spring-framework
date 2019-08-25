@@ -18,10 +18,11 @@ package org.springframework.beans.factory.support;
 
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rick Evans
@@ -40,7 +41,7 @@ public class ManagedSetTests {
 		child.add("three");
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
-		assertEquals("merge() obviously did not work.", 3, mergedSet.size());
+		assertThat(mergedSet.size()).as("merge() obviously did not work.").isEqualTo(3);
 	}
 
 	@Test
@@ -48,20 +49,22 @@ public class ManagedSetTests {
 		ManagedSet child = new ManagedSet();
 		child.add("one");
 		child.setMergeEnabled(true);
-		assertSame(child, child.merge(null));
+		assertThat(child.merge(null)).isSameAs(child);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void mergeNotAllowedWhenMergeNotEnabled() {
-		new ManagedSet().merge(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new ManagedSet().merge(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mergeWithNonCompatibleParentType() {
 		ManagedSet child = new ManagedSet();
 		child.add("one");
 		child.setMergeEnabled(true);
-		child.merge("hello");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				child.merge("hello"));
 	}
 
 	@Test
@@ -72,7 +75,7 @@ public class ManagedSetTests {
 		ManagedSet child = new ManagedSet();
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
-		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
+		assertThat(mergedSet.size()).as("merge() obviously did not work.").isEqualTo(2);
 	}
 
 	@Test
@@ -85,7 +88,7 @@ public class ManagedSetTests {
 		child.add("one");
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
-		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
+		assertThat(mergedSet.size()).as("merge() obviously did not work.").isEqualTo(2);
 	}
 
 }

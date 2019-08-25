@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.reactive;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -27,9 +27,7 @@ import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for transactional support through {@link ReactiveTestTransactionManager}.
@@ -44,16 +42,15 @@ public class ReactiveTransactionSupportTests {
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
-				.as(StepVerifier::create).consumeNextWith(actual ->
-					assertFalse(actual.hasTransaction())
-				).verifyComplete();
+				.as(StepVerifier::create).consumeNextWith(actual -> assertThat(actual.hasTransaction()).isFalse()
+		).verifyComplete();
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
 				.cast(GenericReactiveTransaction.class).subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).consumeNextWith(actual -> {
-					assertTrue(actual.hasTransaction());
-					assertTrue(actual.isNewTransaction());
-				}).verifyComplete();
+			assertThat(actual.hasTransaction()).isTrue();
+			assertThat(actual.isNewTransaction()).isTrue();
+		}).verifyComplete();
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
@@ -67,23 +64,23 @@ public class ReactiveTransactionSupportTests {
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
-					assertNotNull(actual.getTransaction());
-					assertFalse(actual.isNewTransaction());
-				}).verifyComplete();
+			assertThat(actual.getTransaction()).isNotNull();
+			assertThat(actual.isNewTransaction()).isFalse();
+		}).verifyComplete();
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
-					assertNotNull(actual.getTransaction());
-					assertFalse(actual.isNewTransaction());
-				}).verifyComplete();
+			assertThat(actual.getTransaction()).isNotNull();
+			assertThat(actual.isNewTransaction()).isFalse();
+		}).verifyComplete();
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
-					assertNotNull(actual.getTransaction());
-					assertFalse(actual.isNewTransaction());
-				}).verifyComplete();
+			assertThat(actual.getTransaction()).isNotNull();
+			assertThat(actual.isNewTransaction()).isFalse();
+		}).verifyComplete();
 	}
 
 	@Test
@@ -207,43 +204,43 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	private void assertHasBegan(ReactiveTestTransactionManager actual) {
-		assertTrue("Expected <ReactiveTransactionManager.begin()> but was <begin()> was not invoked", actual.begin);
+		assertThat(actual.begin).as("Expected <ReactiveTransactionManager.begin()> but was <begin()> was not invoked").isTrue();
 	}
 
 	private void assertHasNotBegan(ReactiveTestTransactionManager actual) {
-		assertFalse("Expected to not call <ReactiveTransactionManager.begin()> but was <begin()> was called", actual.begin);
+		assertThat(actual.begin).as("Expected to not call <ReactiveTransactionManager.begin()> but was <begin()> was called").isFalse();
 	}
 
 	private void assertHasCommitted(ReactiveTestTransactionManager actual) {
-		assertTrue("Expected <ReactiveTransactionManager.commit()> but was <commit()> was not invoked", actual.commit);
+		assertThat(actual.commit).as("Expected <ReactiveTransactionManager.commit()> but was <commit()> was not invoked").isTrue();
 	}
 
 	private void assertHasNotCommitted(ReactiveTestTransactionManager actual) {
-		assertFalse("Expected to not call <ReactiveTransactionManager.commit()> but was <commit()> was called", actual.commit);
+		assertThat(actual.commit).as("Expected to not call <ReactiveTransactionManager.commit()> but was <commit()> was called").isFalse();
 	}
 
 	private void assertHasRolledBack(ReactiveTestTransactionManager actual) {
-		assertTrue("Expected <ReactiveTransactionManager.rollback()> but was <rollback()> was not invoked", actual.rollback);
+		assertThat(actual.rollback).as("Expected <ReactiveTransactionManager.rollback()> but was <rollback()> was not invoked").isTrue();
 	}
 
 	private void assertHasNoRollback(ReactiveTestTransactionManager actual) {
-assertFalse("Expected to not call <ReactiveTransactionManager.rollback()> but was <rollback()> was called", actual.rollback);
+		assertThat(actual.rollback).as("Expected to not call <ReactiveTransactionManager.rollback()> but was <rollback()> was called").isFalse();
 	}
 
 	private void assertHasSetRollbackOnly(ReactiveTestTransactionManager actual) {
-		assertTrue("Expected <ReactiveTransactionManager.setRollbackOnly()> but was <setRollbackOnly()> was not invoked", actual.rollbackOnly);
+		assertThat(actual.rollbackOnly).as("Expected <ReactiveTransactionManager.setRollbackOnly()> but was <setRollbackOnly()> was not invoked").isTrue();
 	}
 
 	private void assertHasNotSetRollbackOnly(ReactiveTestTransactionManager actual) {
-		assertFalse("Expected to not call <ReactiveTransactionManager.setRollbackOnly()> but was <setRollbackOnly()> was called", actual.rollbackOnly);
+		assertThat(actual.rollbackOnly).as("Expected to not call <ReactiveTransactionManager.setRollbackOnly()> but was <setRollbackOnly()> was called").isFalse();
 	}
 
 	private void assertHasCleanedUp(ReactiveTestTransactionManager actual) {
-		assertTrue("Expected <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was not invoked", actual.cleanup);
+		assertThat(actual.cleanup).as("Expected <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was not invoked").isTrue();
 	}
 
 	private void assertHasNotCleanedUp(ReactiveTestTransactionManager actual) {
-		assertFalse("Expected to not call <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was called", actual.cleanup);
+		assertThat(actual.cleanup).as("Expected to not call <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was called").isFalse();
 	}
 
 }

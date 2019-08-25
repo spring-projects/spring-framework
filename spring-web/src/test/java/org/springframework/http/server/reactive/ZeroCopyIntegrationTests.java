@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.io.File;
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
@@ -28,12 +27,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -50,8 +49,10 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	}
 
 
-	@Test
-	public void zeroCopy() throws Exception {
+	@ParameterizedHttpServerTest
+	public void zeroCopy(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		// Zero-copy only does not support servlet
 		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
 
@@ -61,10 +62,10 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		Resource logo = new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
 
-		assertTrue(response.hasBody());
-		assertEquals(logo.contentLength(), response.getHeaders().getContentLength());
-		assertEquals(logo.contentLength(), response.getBody().length);
-		assertEquals(MediaType.IMAGE_PNG, response.getHeaders().getContentType());
+		assertThat(response.hasBody()).isTrue();
+		assertThat(response.getHeaders().getContentLength()).isEqualTo(logo.contentLength());
+		assertThat(response.getBody().length).isEqualTo(logo.contentLength());
+		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_PNG);
 	}
 
 

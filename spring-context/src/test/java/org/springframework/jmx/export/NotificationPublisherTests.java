@@ -32,7 +32,7 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationListener;
 import javax.management.ReflectionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jmx.AbstractMBeanServerTests;
@@ -40,9 +40,7 @@ import org.springframework.jmx.export.notification.NotificationPublisher;
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.ObjectNameManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for the Spring JMX {@link NotificationPublisher} functionality.
@@ -62,9 +60,9 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 				null);
 
 		MyNotificationPublisher publisher = (MyNotificationPublisher) ctx.getBean("publisher");
-		assertNotNull("NotificationPublisher should not be null", publisher.getNotificationPublisher());
+		assertThat(publisher.getNotificationPublisher()).as("NotificationPublisher should not be null").isNotNull();
 		publisher.sendNotification();
-		assertEquals("Notification not sent", 1, listener.count);
+		assertThat(listener.count).as("Notification not sent").isEqualTo(1);
 	}
 
 	@Test
@@ -77,9 +75,9 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 		this.server.addNotificationListener(ObjectNameManager.getInstance("spring:type=Publisher2"), listener, null,
 				null);
 
-		assertNotNull("NotificationPublisher should not be null", publisher.getNotificationPublisher());
+		assertThat(publisher.getNotificationPublisher()).as("NotificationPublisher should not be null").isNotNull();
 		publisher.sendNotification();
-		assertEquals("Notification not sent", 1, listener.count);
+		assertThat(listener.count).as("Notification not sent").isEqualTo(1);
 	}
 
 	@Test
@@ -91,7 +89,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 		MyNotificationPublisherMBean publisher = (MyNotificationPublisherMBean) ctx.getBean("publisherMBean");
 		publisher.sendNotification();
-		assertEquals("Notification not sent", 1, listener.count);
+		assertThat(listener.count).as("Notification not sent").isEqualTo(1);
 	}
 
 	/*
@@ -111,7 +109,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 	public void testLazyInit() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherLazyTests.xml");
-		assertFalse("Should not have instantiated the bean yet", ctx.getBeanFactory().containsSingleton("publisher"));
+		assertThat(ctx.getBeanFactory().containsSingleton("publisher")).as("Should not have instantiated the bean yet").isFalse();
 
 		// need to touch the MBean proxy
 		server.getAttribute(ObjectNameManager.getInstance("spring:type=Publisher"), "Name");
@@ -119,9 +117,9 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 				null);
 
 		MyNotificationPublisher publisher = (MyNotificationPublisher) ctx.getBean("publisher");
-		assertNotNull("NotificationPublisher should not be null", publisher.getNotificationPublisher());
+		assertThat(publisher.getNotificationPublisher()).as("NotificationPublisher should not be null").isNotNull();
 		publisher.sendNotification();
-		assertEquals("Notification not sent", 1, listener.count);
+		assertThat(listener.count).as("Notification not sent").isEqualTo(1);
 	}
 
 	private static class CountingNotificationListener implements NotificationListener {

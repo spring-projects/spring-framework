@@ -16,9 +16,10 @@
 
 package org.springframework.web.servlet.function
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
@@ -109,9 +110,15 @@ class RouterFunctionDslTests {
 		assertTrue(sampleRouter().route(request).get().handle(request) is RenderingResponse)
 	}
 
-	@Test(expected = IllegalStateException::class)
+	@Test
 	fun emptyRouter() {
-		router { }
+		try {
+			router { }
+			fail("should have thrown an IllegalStateException")
+		}
+		catch (e: IllegalStateException) {
+			// expected
+		}
 	}
 
 

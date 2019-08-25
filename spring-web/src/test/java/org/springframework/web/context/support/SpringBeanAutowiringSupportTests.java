@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,7 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -51,8 +50,9 @@ public class SpringBeanAutowiringSupportTests {
 
 		InjectionTarget target = new InjectionTarget();
 		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(target, sc);
-		assertTrue(target.testBean instanceof TestBean);
-		assertEquals("tb", target.name);
+		boolean condition = target.testBean instanceof TestBean;
+		assertThat(condition).isTrue();
+		assertThat(target.name).isEqualTo("tb");
 	}
 
 

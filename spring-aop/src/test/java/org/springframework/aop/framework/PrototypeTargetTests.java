@@ -18,13 +18,13 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -47,8 +47,8 @@ public class PrototypeTargetTests {
 			tb.doSomething();
 		}
 		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
-		assertEquals(10, TestBeanImpl.constructionCount);
-		assertEquals(10, interceptor.invocationCount);
+		assertThat(TestBeanImpl.constructionCount).isEqualTo(10);
+		assertThat(interceptor.invocationCount).isEqualTo(10);
 	}
 
 	@Test
@@ -61,8 +61,8 @@ public class PrototypeTargetTests {
 			tb.doSomething();
 		}
 		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
-		assertEquals(1, TestBeanImpl.constructionCount);
-		assertEquals(10, interceptor.invocationCount);
+		assertThat(TestBeanImpl.constructionCount).isEqualTo(1);
+		assertThat(interceptor.invocationCount).isEqualTo(10);
 	}
 
 

@@ -19,17 +19,16 @@ package org.springframework.context.support;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
@@ -43,8 +42,8 @@ public class SerializableBeanFactoryMemoryLeakTests {
 	 * Defensively zero-out static factory count - other tests
 	 * may have misbehaved before us.
 	 */
-	@BeforeClass
-	@AfterClass
+	@BeforeAll
+	@AfterAll
 	public static void zeroOutFactoryCount() throws Exception {
 		getSerializableFactoryMap().clear();
 	}
@@ -79,17 +78,17 @@ public class SerializableBeanFactoryMemoryLeakTests {
 	}
 
 	private void assertFactoryCountThroughoutLifecycle(ConfigurableApplicationContext ctx) throws Exception {
-		assertThat(serializableFactoryCount(), equalTo(0));
+		assertThat(serializableFactoryCount()).isEqualTo(0);
 		try {
 			ctx.refresh();
-			assertThat(serializableFactoryCount(), equalTo(1));
+			assertThat(serializableFactoryCount()).isEqualTo(1);
 			ctx.close();
 		}
 		catch (BeanCreationException ex) {
 			// ignore - this is expected on refresh() for failure case tests
 		}
 		finally {
-			assertThat(serializableFactoryCount(), equalTo(0));
+			assertThat(serializableFactoryCount()).isEqualTo(0);
 		}
 	}
 

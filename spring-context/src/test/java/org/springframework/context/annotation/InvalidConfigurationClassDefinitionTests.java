@@ -15,14 +15,13 @@
  */
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
@@ -43,14 +42,10 @@ public class InvalidConfigurationClassDefinitionTests {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", configBeanDef);
 
-		try {
-			ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-			pp.postProcessBeanFactory(beanFactory);
-			fail("expected exception");
-		}
-		catch (BeanDefinitionParsingException ex) {
-			assertTrue(ex.getMessage(), ex.getMessage().contains("Remove the final modifier"));
-		}
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				pp.postProcessBeanFactory(beanFactory))
+			.withMessageContaining("Remove the final modifier");
 	}
 
 }

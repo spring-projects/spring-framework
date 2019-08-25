@@ -16,10 +16,11 @@
 
 package org.springframework.aop.scope;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -33,24 +34,28 @@ public class DefaultScopedObjectTests {
 	private static final String GOOD_BEAN_NAME = "foo";
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullBeanFactory() throws Exception {
-		new DefaultScopedObject(null, GOOD_BEAN_NAME);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+			new DefaultScopedObject(null, GOOD_BEAN_NAME));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullTargetBeanName() throws Exception {
-		testBadTargetBeanName(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				testBadTargetBeanName(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithEmptyTargetBeanName() throws Exception {
-		testBadTargetBeanName("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				testBadTargetBeanName(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithJustWhitespacedTargetBeanName() throws Exception {
-		testBadTargetBeanName("   ");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				testBadTargetBeanName("   "));
 	}
 
 	private static void testBadTargetBeanName(final String badTargetBeanName) {

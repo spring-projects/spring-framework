@@ -23,7 +23,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -390,7 +389,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
 			endLastMatch = matcher.end();
 		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		result.append(targetUrl.substring(endLastMatch));
 		return result;
 	}
 
@@ -456,18 +455,17 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		boolean first = (targetUrl.toString().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
-			Iterator<Object> valueIter;
+			Collection<Object> values;
 			if (rawValue != null && rawValue.getClass().isArray()) {
-				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
+				values = Arrays.asList(ObjectUtils.toObjectArray(rawValue));
 			}
 			else if (rawValue instanceof Collection) {
-				valueIter = ((Collection<Object>) rawValue).iterator();
+				values = ((Collection<Object>) rawValue);
 			}
 			else {
-				valueIter = Collections.singleton(rawValue).iterator();
+				values = Collections.singleton(rawValue);
 			}
-			while (valueIter.hasNext()) {
-				Object value = valueIter.next();
+			for (Object value : values) {
 				if (first) {
 					targetUrl.append('?');
 					first = false;

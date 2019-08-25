@@ -18,6 +18,8 @@ package org.springframework.jms.support;
 
 import javax.jms.Message;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Gather the Quality-of-Service settings that can be used when sending a message.
  *
@@ -108,7 +110,7 @@ public class QosSettings {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

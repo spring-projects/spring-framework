@@ -16,12 +16,12 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -38,7 +38,7 @@ public class TopLevelAopTagTests {
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				qualifiedResource(TopLevelAopTagTests.class, "context.xml"));
 
-		assertTrue(beanFactory.containsBeanDefinition("testPointcut"));
+		assertThat(beanFactory.containsBeanDefinition("testPointcut")).isTrue();
 	}
 
 }

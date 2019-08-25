@@ -18,13 +18,12 @@ package org.springframework.beans.propertyeditors;
 
 import java.io.Reader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link ReaderEditor} class.
@@ -34,9 +33,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class ReaderEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new ReaderEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ReaderEditor(null));
 	}
 
 	@Test
@@ -48,10 +48,11 @@ public class ReaderEditorTests {
 			ReaderEditor editor = new ReaderEditor();
 			editor.setAsText(resource);
 			Object value = editor.getValue();
-			assertNotNull(value);
-			assertTrue(value instanceof Reader);
+			assertThat(value).isNotNull();
+			boolean condition = value instanceof Reader;
+			assertThat(condition).isTrue();
 			reader = (Reader) value;
-			assertTrue(reader.ready());
+			assertThat(reader.ready()).isTrue();
 		}
 		finally {
 			if (reader != null) {
@@ -60,21 +61,22 @@ public class ReaderEditorTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenResourceDoesNotExist() throws Exception {
 		String resource = "classpath:bingo!";
 		ReaderEditor editor = new ReaderEditor();
-		editor.setAsText(resource);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(resource));
 	}
 
 	@Test
 	public void testGetAsTextReturnsNullByDefault() throws Exception {
-		assertNull(new ReaderEditor().getAsText());
+		assertThat(new ReaderEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";
 		ReaderEditor editor = new ReaderEditor();
 		editor.setAsText(resource);
-		assertNull(editor.getAsText());
+		assertThat(editor.getAsText()).isNull();
 	}
 
 }

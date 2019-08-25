@@ -28,16 +28,15 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -64,7 +63,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content.length, ((byte[]) converter.fromMessage(msg)).length);
+		assertThat(((byte[]) converter.fromMessage(msg)).length).isEqualTo(content.length);
 
 		verify(message).writeBytes(content);
 	}
@@ -108,7 +107,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 
 		verify(message).setObject("key1", "value1");
 		verify(message).setObject("key2", "value2");
@@ -126,17 +125,19 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void testToMessageThrowsExceptionIfGivenNullObjectToConvert() throws Exception {
-		new SimpleMessageConverter().toMessage(null, null);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				new SimpleMessageConverter().toMessage(null, null));
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() throws Exception {
-		new SimpleMessageConverter().toMessage(new Object(), null);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				new SimpleMessageConverter().toMessage(new Object(), null));
 	}
 
 	@Test
@@ -146,7 +147,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(message, session);
-		assertSame(message, msg);
+		assertThat(msg).isSameAs(message);
 	}
 
 	@Test
@@ -155,7 +156,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Object msg = converter.fromMessage(message);
-		assertSame(message, msg);
+		assertThat(msg).isSameAs(message);
 	}
 
 	@Test
@@ -168,11 +169,8 @@ public class SimpleMessageConverterTests {
 		content.put(1, "value1");
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
-		try {
-			converter.toMessage(content, session);
-			fail("expected MessageConversionException");
-		}
-		catch (MessageConversionException ex) { /* expected */ }
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				converter.toMessage(content, session));
 	}
 
 	@Test
@@ -185,11 +183,8 @@ public class SimpleMessageConverterTests {
 		content.put(null, "value1");
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
-		try {
-			converter.toMessage(content, session);
-			fail("expected MessageConversionException");
-		}
-		catch (MessageConversionException ex) { /* expected */ }
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				converter.toMessage(content, session));
 	}
 
 }

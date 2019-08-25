@@ -758,7 +758,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public final boolean equals(Object other) {
+		public final boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

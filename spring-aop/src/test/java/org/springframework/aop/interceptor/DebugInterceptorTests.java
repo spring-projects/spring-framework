@@ -18,10 +18,10 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -64,12 +64,8 @@ public class DebugInterceptorTests {
 		given(log.isTraceEnabled()).willReturn(true);
 
 		DebugInterceptor interceptor = new StubDebugInterceptor(log);
-		try {
-			interceptor.invoke(methodInvocation);
-			fail("Must have propagated the IllegalArgumentException.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.invoke(methodInvocation));
 		checkCallCountTotal(interceptor);
 
 		verify(log).trace(anyString());
@@ -77,7 +73,7 @@ public class DebugInterceptorTests {
 	}
 
 	private void checkCallCountTotal(DebugInterceptor interceptor) {
-		assertEquals("Intercepted call count not being incremented correctly", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Intercepted call count not being incremented correctly").isEqualTo(1);
 	}
 
 

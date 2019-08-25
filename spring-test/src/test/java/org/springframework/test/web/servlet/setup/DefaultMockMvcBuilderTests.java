@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.StaticApplicationContext;
@@ -27,9 +27,8 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
@@ -67,8 +66,7 @@ public class DefaultMockMvcBuilderTests {
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, child);
 
 		DefaultMockMvcBuilder builder = webAppContextSetup(child);
-		assertSame(builder.initWebAppContext(),
-			WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext)).isSameAs(builder.initWebAppContext());
 	}
 
 	/**
@@ -85,8 +83,7 @@ public class DefaultMockMvcBuilderTests {
 		child.setServletContext(this.servletContext);
 
 		DefaultMockMvcBuilder builder = webAppContextSetup(child);
-		assertSame(builder.initWebAppContext().getParent(),
-			WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext)).isSameAs(builder.initWebAppContext().getParent());
 	}
 
 	/**
@@ -97,8 +94,8 @@ public class DefaultMockMvcBuilderTests {
 		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
 		DefaultMockMvcBuilder builder = webAppContextSetup(root);
 		WebApplicationContext wac = builder.initWebAppContext();
-		assertSame(root, wac);
-		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+		assertThat(wac).isSameAs(root);
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext)).isSameAs(root);
 	}
 
 	/**
@@ -117,10 +114,10 @@ public class DefaultMockMvcBuilderTests {
 		DefaultMockMvcBuilder builder = webAppContextSetup(dispatcher);
 		WebApplicationContext wac = builder.initWebAppContext();
 
-		assertSame(dispatcher, wac);
-		assertSame(root, wac.getParent());
-		assertSame(ear, wac.getParent().getParent());
-		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+		assertThat(wac).isSameAs(dispatcher);
+		assertThat(wac.getParent()).isSameAs(root);
+		assertThat(wac.getParent().getParent()).isSameAs(ear);
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext)).isSameAs(root);
 	}
 
 	/**
@@ -135,7 +132,7 @@ public class DefaultMockMvcBuilderTests {
 		MockMvc mvc = builder.build();
 		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
 				.getPropertyValue("servlet");
-		assertEquals("test-id", ds.getContextId());
+		assertThat(ds.getContextId()).isEqualTo("test-id");
 	}
 
 	@Test
@@ -148,7 +145,7 @@ public class DefaultMockMvcBuilderTests {
 		MockMvc mvc = builder.build();
 		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
 				.getPropertyValue("servlet");
-		assertEquals("override-id", ds.getContextId());
+		assertThat(ds.getContextId()).isEqualTo("override-id");
 	}
 
 }

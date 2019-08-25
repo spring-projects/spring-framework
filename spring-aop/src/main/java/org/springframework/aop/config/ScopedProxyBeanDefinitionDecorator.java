@@ -45,7 +45,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 		if (node instanceof Element) {
 			Element ele = (Element) node;
 			if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
-				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
+				proxyTargetClass = Boolean.parseBoolean(ele.getAttribute(PROXY_TARGET_CLASS));
 			}
 		}
 

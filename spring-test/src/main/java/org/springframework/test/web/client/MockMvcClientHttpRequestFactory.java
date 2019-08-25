@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MockMvcClientHttpRequestFactory
 
 
 	@Override
-	public ClientHttpRequest createRequest(final URI uri, final HttpMethod httpMethod) {
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
 		return new MockClientHttpRequest(httpMethod, uri) {
 			@Override
 			public ClientHttpResponse executeInternal() throws IOException {

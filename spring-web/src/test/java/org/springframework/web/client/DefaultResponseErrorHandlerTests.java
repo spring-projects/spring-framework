@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,11 +28,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -53,13 +50,13 @@ public class DefaultResponseErrorHandlerTests {
 	@Test
 	public void hasErrorTrue() throws Exception {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
 	public void hasErrorFalse() throws Exception {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		assertFalse(handler.hasError(response));
+		assertThat(handler.hasError(response)).isFalse();
 	}
 
 	@Test
@@ -72,16 +69,12 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
 
-		try {
-			handler.handleError(response);
-			fail("expected HttpClientErrorException");
-		}
-		catch (HttpClientErrorException ex) {
-			assertSame(headers, ex.getResponseHeaders());
-		}
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				handler.handleError(response))
+			.satisfies(ex -> assertThat(ex.getResponseHeaders()).isSameAs(headers));
 	}
 
-	@Test(expected = HttpClientErrorException.class)
+	@Test
 	public void handleErrorIOException() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -91,10 +84,11 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willThrow(new IOException());
 
-		handler.handleError(response);
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				handler.handleError(response));
 	}
 
-	@Test(expected = HttpClientErrorException.class)
+	@Test
 	public void handleErrorNullResponse() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -103,7 +97,8 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 
-		handler.handleError(response);
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				handler.handleError(response));
 	}
 
 	@Test  // SPR-16108
@@ -115,10 +110,10 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertFalse(handler.hasError(response));
+		assertThat(handler.hasError(response)).isFalse();
 	}
 
-	@Test(expected = UnknownHttpStatusCodeException.class)  // SPR-9406
+	@Test // SPR-9406
 	public void handleErrorUnknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -127,7 +122,8 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		handler.handleError(response);
+		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
+				handler.handleError(response));
 	}
 
 	@Test  // SPR-17461
@@ -139,10 +135,10 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
-	@Test(expected = UnknownHttpStatusCodeException.class)
+	@Test
 	public void handleErrorForCustomClientError() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -151,7 +147,8 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		handler.handleError(response);
+		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
+				handler.handleError(response));
 	}
 
 	@Test  // SPR-17461
@@ -163,10 +160,10 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
-	@Test(expected = UnknownHttpStatusCodeException.class)
+	@Test
 	public void handleErrorForCustomServerError() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -175,7 +172,8 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		handler.handleError(response);
+		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
+				handler.handleError(response));
 	}
 
 	@Test  // SPR-16604
@@ -189,9 +187,9 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		assertFalse(handler.hasError(response));
-		assertFalse(body.isClosed());
-		assertEquals("Hello World", StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
+		assertThat(handler.hasError(response)).isFalse();
+		assertThat(body.isClosed()).isFalse();
+		assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)).isEqualTo("Hello World");
 	}
 
 

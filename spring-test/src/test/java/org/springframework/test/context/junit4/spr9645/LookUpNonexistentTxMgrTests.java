@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify the behavior requested in
@@ -52,9 +52,9 @@ public class LookUpNonexistentTxMgrTests {
 
 	@Test
 	public void nonTransactionalTest() {
-		assertEquals(0, txManager.begun);
-		assertEquals(0, txManager.inflight);
-		assertEquals(0, txManager.commits);
-		assertEquals(0, txManager.rollbacks);
+		assertThat(txManager.begun).isEqualTo(0);
+		assertThat(txManager.inflight).isEqualTo(0);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 	}
 }

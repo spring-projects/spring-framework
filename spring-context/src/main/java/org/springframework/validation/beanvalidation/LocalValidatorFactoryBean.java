@@ -414,6 +414,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		throw new ValidationException("Cannot unwrap to " + type);
 	}
 
+	@Override
 	public void close() {
 		if (this.validatorFactory != null) {
 			this.validatorFactory.close();

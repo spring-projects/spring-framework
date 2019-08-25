@@ -29,8 +29,8 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
@@ -45,10 +45,9 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -68,7 +67,7 @@ public class MessagingMessageListenerAdapterTests {
 	private final SampleBean sample = new SampleBean();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		initializeFactory(factory);
 	}
@@ -88,11 +87,11 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message replyMessage = listener.buildMessage(session, result);
 
 		verify(session).createTextMessage("Response");
-		assertNotNull("reply should never be null", replyMessage);
-		assertEquals("Response", ((TextMessage) replyMessage).getText());
-		assertEquals("custom header not copied", "bar", replyMessage.getStringProperty("foo"));
-		assertEquals("type header not copied", "msg_type", replyMessage.getJMSType());
-		assertEquals("replyTo header not copied", replyTo, replyMessage.getJMSReplyTo());
+		assertThat(replyMessage).as("reply should never be null").isNotNull();
+		assertThat(((TextMessage) replyMessage).getText()).isEqualTo("Response");
+		assertThat(replyMessage.getStringProperty("foo")).as("custom header not copied").isEqualTo("bar");
+		assertThat(replyMessage.getJMSType()).as("type header not copied").isEqualTo("msg_type");
+		assertThat(replyMessage.getJMSReplyTo()).as("replyTo header not copied").isEqualTo(replyTo);
 	}
 
 	@Test
@@ -100,18 +99,10 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message message = new StubTextMessage("foo");
 		Session session = mock(Session.class);
 		MessagingMessageListenerAdapter listener = getSimpleInstance("fail", String.class);
-
-		try {
-			listener.onMessage(message, session);
-			fail("Should have thrown an exception");
-		}
-		catch (JMSException ex) {
-			fail("Should not have thrown a JMS exception");
-		}
-		catch (ListenerExecutionFailedException ex) {
-			assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
-			assertEquals("Expected test exception", ex.getCause().getMessage());
-		}
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				listener.onMessage(message, session))
+			.withCauseExactlyInstanceOf(IllegalArgumentException.class)
+			.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo("Expected test exception"));
 	}
 
 	@Test
@@ -120,16 +111,9 @@ public class MessagingMessageListenerAdapterTests {
 		Session session = mock(Session.class);
 		MessagingMessageListenerAdapter listener = getSimpleInstance("wrongParam", Integer.class);
 
-		try {
-			listener.onMessage(message, session);
-			fail("Should have thrown an exception");
-		}
-		catch (JMSException ex) {
-			fail("Should not have thrown a JMS exception");
-		}
-		catch (ListenerExecutionFailedException ex) {
-			assertEquals(MessageConversionException.class, ex.getCause().getClass());
-		}
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				listener.onMessage(message, session))
+			.withCauseExactlyInstanceOf(MessageConversionException.class);
 	}
 
 	@Test
@@ -141,7 +125,7 @@ public class MessagingMessageListenerAdapterTests {
 		listener.setMessageConverter(messageConverter);
 		Message<?> message = listener.toMessagingMessage(jmsMessage);
 		verify(messageConverter, never()).fromMessage(jmsMessage);
-		assertEquals("FooBar", message.getPayload());
+		assertThat(message.getPayload()).isEqualTo("FooBar");
 		verify(messageConverter, times(1)).fromMessage(jmsMessage);
 	}
 
@@ -168,8 +152,8 @@ public class MessagingMessageListenerAdapterTests {
 		listener.setMessageConverter(messageConverter);
 		listener.onMessage(jmsMessage, session);
 		verify(messageConverter, times(1)).fromMessage(jmsMessage);
-		assertEquals(1, sample.simples.size());
-		assertEquals("FooBar", sample.simples.get(0).getPayload());
+		assertThat(sample.simples.size()).isEqualTo(1);
+		assertThat(sample.simples.get(0).getPayload()).isEqualTo("FooBar");
 	}
 
 	@Test
@@ -184,8 +168,8 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message replyMessage = listener.buildMessage(session, result);
 
 		verify(messageConverter, times(1)).toMessage("Response", session);
-		assertNotNull("reply should never be null", replyMessage);
-		assertEquals("Response", ((TextMessage) replyMessage).getText());
+		assertThat(replyMessage).as("reply should never be null").isNotNull();
+		assertThat(((TextMessage) replyMessage).getText()).isEqualTo("Response");
 	}
 
 	@Test

@@ -21,7 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
@@ -31,8 +31,8 @@ import org.springframework.http.codec.Pojo;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -58,24 +58,24 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTestCase<Jackson2Cb
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(forClass(Pojo.class), CBOR_MIME_TYPE));
-		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
+		assertThat(decoder.canDecode(forClass(Pojo.class), CBOR_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(forClass(Pojo.class), null)).isTrue();
 
-		assertFalse(decoder.canDecode(forClass(String.class), null));
-		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
+		assertThat(decoder.canDecode(forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON)).isFalse();
 	}
 
 	@Override
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(this.pojo1, this.pojo2)
 				.map(this::writeObject)
 				.flatMap(this::dataBuffer);
-
-		testDecodeAll(input, Pojo.class, step -> step
-				.expectNext(pojo1)
-				.expectNext(pojo2)
-				.verifyComplete());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				testDecodeAll(input, Pojo.class, step -> step
+						.expectNext(pojo1)
+						.expectNext(pojo2)
+						.verifyComplete()));
 
 	}
 
@@ -90,6 +90,7 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTestCase<Jackson2Cb
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() {
 		List<Pojo> expected = Arrays.asList(pojo1, pojo2);
 

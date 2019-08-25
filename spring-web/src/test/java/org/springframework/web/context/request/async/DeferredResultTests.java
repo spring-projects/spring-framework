@@ -18,14 +18,11 @@ package org.springframework.web.context.request.async;
 
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -43,7 +40,7 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
-		assertTrue(result.setResult("hello"));
+		assertThat(result.setResult("hello")).isTrue();
 		verify(handler).handleResult("hello");
 	}
 
@@ -54,8 +51,8 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
-		assertTrue(result.setResult("hello"));
-		assertFalse(result.setResult("hi"));
+		assertThat(result.setResult("hello")).isTrue();
+		assertThat(result.setResult("hi")).isFalse();
 
 		verify(handler).handleResult("hello");
 	}
@@ -67,11 +64,11 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
-		assertFalse(result.isSetOrExpired());
+		assertThat(result.isSetOrExpired()).isFalse();
 
 		result.setResult("hello");
 
-		assertTrue(result.isSetOrExpired());
+		assertThat(result.isSetOrExpired()).isTrue();
 
 		verify(handler).handleResult("hello");
 	}
@@ -83,12 +80,12 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
-		assertFalse(result.hasResult());
-		assertNull(result.getResult());
+		assertThat(result.hasResult()).isFalse();
+		assertThat(result.getResult()).isNull();
 
 		result.setResult("hello");
 
-		assertEquals("hello", result.getResult());
+		assertThat(result.getResult()).isEqualTo("hello");
 	}
 
 	@Test
@@ -105,8 +102,8 @@ public class DeferredResultTests {
 
 		result.getInterceptor().afterCompletion(null, null);
 
-		assertTrue(result.isSetOrExpired());
-		assertEquals("completion event", sb.toString());
+		assertThat(result.isSetOrExpired()).isTrue();
+		assertThat(sb.toString()).isEqualTo("completion event");
 	}
 
 	@Test
@@ -126,8 +123,8 @@ public class DeferredResultTests {
 
 		result.getInterceptor().handleTimeout(null, null);
 
-		assertEquals("timeout event", sb.toString());
-		assertFalse("Should not be able to set result a second time", result.setResult("hello"));
+		assertThat(sb.toString()).isEqualTo("timeout event");
+		assertThat(result.setResult("hello")).as("Should not be able to set result a second time").isFalse();
 		verify(handler).handleResult("timeout result");
 	}
 
@@ -149,8 +146,8 @@ public class DeferredResultTests {
 
 		result.getInterceptor().handleError(null, null, e);
 
-		assertEquals("error event", sb.toString());
-		assertFalse("Should not be able to set result a second time", result.setResult("hello"));
+		assertThat(sb.toString()).isEqualTo("error event");
+		assertThat(result.setResult("hello")).as("Should not be able to set result a second time").isFalse();
 		verify(handler).handleResult(e);
 	}
 

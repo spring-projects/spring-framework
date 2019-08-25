@@ -89,11 +89,11 @@ final class AttributeMethods {
 
 
 	/**
-	 * Determine if this instance only contains only a single attribute named
+	 * Determine if this instance only contains a single attribute named
 	 * {@code value}.
-	 * @return {@code true} if this is only a value attribute
+	 * @return {@code true} if there is only a value attribute
 	 */
-	boolean isOnlyValueAttribute() {
+	boolean hasOnlyValueAttribute() {
 		return (this.attributeMethods.length == 1 &&
 				MergedAnnotation.VALUE.equals(this.attributeMethods[0].getName()));
 	}

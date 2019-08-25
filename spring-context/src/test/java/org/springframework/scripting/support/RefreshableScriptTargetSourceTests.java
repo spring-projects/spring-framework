@@ -16,10 +16,11 @@
 
 package org.springframework.scripting.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -27,9 +28,10 @@ import static org.mockito.Mockito.mock;
  */
 public class RefreshableScriptTargetSourceTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createWithNullScriptSource() throws Exception {
-		new RefreshableScriptTargetSource(mock(BeanFactory.class), "a.bean", null, null, false);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RefreshableScriptTargetSource(mock(BeanFactory.class), "a.bean", null, null, false));
 	}
 
 }

@@ -74,6 +74,7 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringValueResolver;
@@ -92,6 +93,10 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements EmbeddedValueResolverAware, SmartLifecycle {
+
+	private static final boolean reactorPresent = ClassUtils.isPresent(
+			"reactor.core.publisher.Flux", SimpAnnotationMethodMessageHandler.class.getClassLoader());
+
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -298,6 +303,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 
+	@Override
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		ApplicationContext context = getApplicationContext();
 		ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?
@@ -328,7 +334,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		handlers.add(new ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
-		handlers.add(new ReactiveReturnValueHandler());
+		if (reactorPresent) {
+			handlers.add(new ReactiveReturnValueHandler());
+		}
 
 		// Annotation-based return value types
 

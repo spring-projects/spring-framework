@@ -18,8 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,7 +33,6 @@ import org.springframework.transaction.reactive.TransactionContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -48,18 +47,18 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 public abstract class AbstractReactiveTransactionAspectTests {
 
-	protected Method exceptionalMethod;
-
 	protected Method getNameMethod;
 
 	protected Method setNameMethod;
 
+	protected Method exceptionalMethod;
 
-	@Before
+
+	@BeforeEach
 	public void setup() throws Exception {
-		exceptionalMethod = TestBean.class.getMethod("exceptional", Throwable.class);
 		getNameMethod = TestBean.class.getMethod("getName");
 		setNameMethod = TestBean.class.getMethod("setName", String.class);
+		exceptionalMethod = TestBean.class.getMethod("exceptional", Throwable.class);
 	}
 
 
@@ -337,8 +336,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		Mono.from(itb.setName(name))
 				.as(StepVerifier::create)
 				.consumeErrorWith(throwable -> {
-					assertEquals(RuntimeException.class, throwable.getClass());
-					assertEquals(ex, throwable.getCause());
+					assertThat(throwable.getClass()).isEqualTo(RuntimeException.class);
+					assertThat(throwable.getCause()).isEqualTo(ex);
 				})
 				.verify();
 
@@ -352,7 +351,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 	private void checkReactiveTransaction(boolean expected) {
 		Mono.subscriberContext().handle((context, sink) -> {
-			if (context.hasKey(TransactionContext.class) != expected){
+			if (context.hasKey(TransactionContext.class) != expected) {
 				fail("Should have thrown NoTransactionException");
 			}
 			sink.complete();
@@ -382,11 +381,11 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 	public interface TestBean {
 
-		Mono<Void> exceptional(Throwable t);
-
 		Mono<String> getName();
 
 		Publisher<Void> setName(String name);
+
+		Mono<Void> exceptional(Throwable t);
 	}
 
 
@@ -400,7 +399,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		}
 
 		@Override
-		public Mono<Void> setName(String name) {
+		public Publisher<Void> setName(String name) {
 			return Mono.fromRunnable(() -> this.name = name);
 		}
 

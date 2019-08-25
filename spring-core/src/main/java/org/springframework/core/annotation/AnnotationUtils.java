@@ -229,8 +229,8 @@ public abstract class AnnotationUtils {
 	}
 
 	private static <A extends Annotation> boolean isSingleLevelPresent(MergedAnnotation<A> mergedAnnotation) {
-		int depth = mergedAnnotation.getDepth();
-		return (depth == 0 || depth == 1);
+		int distance = mergedAnnotation.getDistance();
+		return (distance == 0 || distance == 1);
 	}
 
 	/**
@@ -524,7 +524,7 @@ public abstract class AnnotationUtils {
 			return method.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY,
 					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
@@ -563,7 +563,7 @@ public abstract class AnnotationUtils {
 			return clazz.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY,
 					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);

@@ -19,8 +19,8 @@ package org.springframework.cache.interceptor;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -36,9 +36,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
@@ -58,7 +57,7 @@ public class CacheErrorHandlerTests {
 
 	private SimpleService simpleService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);
@@ -89,8 +88,8 @@ public class CacheErrorHandlerTests {
 		willReturn(new SimpleValueWrapper(2L)).given(this.cache).get(0L);
 		Object counter2 = this.simpleService.get(0L);
 		Object counter3 = this.simpleService.get(0L);
-		assertNotSame(counter, counter2);
-		assertEquals(counter2, counter3);
+		assertThat(counter2).isNotSameAs(counter);
+		assertThat(counter3).isEqualTo(counter2);
 	}
 
 	@Test
@@ -184,6 +183,7 @@ public class CacheErrorHandlerTests {
 			return new SimpleService();
 		}
 
+		@Override
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cacheManager = new SimpleCacheManager();

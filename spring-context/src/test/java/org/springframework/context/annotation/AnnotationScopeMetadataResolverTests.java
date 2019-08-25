@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -29,8 +29,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
 import static org.springframework.context.annotation.ScopedProxyMode.NO;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
@@ -52,9 +52,9 @@ public class AnnotationScopeMetadataResolverTests {
 	public void resolveScopeMetadataShouldNotApplyScopedProxyModeToSingleton() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithSingletonScope.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals(BeanDefinition.SCOPE_SINGLETON, scopeMetadata.getScopeName());
-		assertEquals(NO, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo(BeanDefinition.SCOPE_SINGLETON);
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(NO);
 	}
 
 	@Test
@@ -62,27 +62,27 @@ public class AnnotationScopeMetadataResolverTests {
 		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(INTERFACES);
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithPrototypeScope.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals(BeanDefinition.SCOPE_PROTOTYPE, scopeMetadata.getScopeName());
-		assertEquals(INTERFACES, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo(BeanDefinition.SCOPE_PROTOTYPE);
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(INTERFACES);
 	}
 
 	@Test
 	public void resolveScopeMetadataShouldReadScopedProxyModeFromAnnotation() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithScopedProxy.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals("request", scopeMetadata.getScopeName());
-		assertEquals(TARGET_CLASS, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo("request");
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(TARGET_CLASS);
 	}
 
 	@Test
 	public void customRequestScope() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithCustomRequestScope.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals("request", scopeMetadata.getScopeName());
-		assertEquals(NO, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo("request");
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(NO);
 	}
 
 	@Test
@@ -91,9 +91,9 @@ public class AnnotationScopeMetadataResolverTests {
 		MetadataReader reader = readerFactory.getMetadataReader(AnnotatedWithCustomRequestScope.class.getName());
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(reader.getAnnotationMetadata());
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals("request", scopeMetadata.getScopeName());
-		assertEquals(NO, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo("request");
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(NO);
 	}
 
 	@Test
@@ -101,9 +101,9 @@ public class AnnotationScopeMetadataResolverTests {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(
 			AnnotatedWithCustomRequestScopeWithAttributeOverride.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals("request", scopeMetadata.getScopeName());
-		assertEquals(TARGET_CLASS, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo("request");
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(TARGET_CLASS);
 	}
 
 	@Test
@@ -112,19 +112,21 @@ public class AnnotationScopeMetadataResolverTests {
 		MetadataReader reader = readerFactory.getMetadataReader(AnnotatedWithCustomRequestScopeWithAttributeOverride.class.getName());
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(reader.getAnnotationMetadata());
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
-		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
-		assertEquals("request", scopeMetadata.getScopeName());
-		assertEquals(TARGET_CLASS, scopeMetadata.getScopedProxyMode());
+		assertThat(scopeMetadata).as("resolveScopeMetadata(..) must *never* return null.").isNotNull();
+		assertThat(scopeMetadata.getScopeName()).isEqualTo("request");
+		assertThat(scopeMetadata.getScopedProxyMode()).isEqualTo(TARGET_CLASS);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithNullScopedProxyMode() {
-		new AnnotationScopeMetadataResolver(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new AnnotationScopeMetadataResolver(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setScopeAnnotationTypeWithNullType() {
-		scopeMetadataResolver.setScopeAnnotationType(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				scopeMetadataResolver.setScopeAnnotationType(null));
 	}
 
 

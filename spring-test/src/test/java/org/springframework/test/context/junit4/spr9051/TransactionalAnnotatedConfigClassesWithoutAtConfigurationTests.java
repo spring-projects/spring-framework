@@ -31,8 +31,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
@@ -107,7 +106,7 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 	@Before
 	public void compareDataSources() throws Exception {
 		// NOTE: the two DataSource instances are NOT the same!
-		assertNotSame(dataSourceFromTxManager, dataSourceViaInjection);
+		assertThat(dataSourceViaInjection).isNotSameAs(dataSourceFromTxManager);
 	}
 
 	/**
@@ -121,7 +120,7 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 	@AfterTransaction
 	@Override
 	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(YODA));
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
 
 		// NOTE: We would actually expect that there are now ZERO entries in the
 		// person table, since the transaction is rolled back by the framework;

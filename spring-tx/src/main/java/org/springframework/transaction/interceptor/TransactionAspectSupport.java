@@ -834,16 +834,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				return TransactionContextManager.currentContext().flatMap(context ->
 						createTransactionIfNecessary(tm, txAttr, joinpointIdentification).flatMap(it -> {
 							try {
-								// This is an around advice: Invoke the next interceptor in the chain.
-								// This will normally result in a target object being invoked.
-								// Need re-wrapping of ReactiveTransaction until we get hold of the exception
-								// through usingWhen.
+								// Need re-wrapping until we get hold of the exception through usingWhen.
 								return Mono.<Object, ReactiveTransactionInfo>usingWhen(Mono.just(it), txInfo -> {
 									try {
 										return (Mono<?>) invocation.proceedWithInvocation();
 									}
-									catch (Throwable throwable) {
-										return Mono.error(throwable);
+									catch (Throwable ex) {
+										return Mono.error(ex);
 									}
 								}, this::commitTransactionAfterReturning, txInfo -> Mono.empty())
 										.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
@@ -856,19 +853,17 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
 			}
 
-			return TransactionContextManager.currentContext().flatMapMany(context ->
+			// Any other reactive type, typically a Flux
+			return this.adapter.fromPublisher(TransactionContextManager.currentContext().flatMapMany(context ->
 					createTransactionIfNecessary(tm, txAttr, joinpointIdentification).flatMapMany(it -> {
 						try {
-							// This is an around advice: Invoke the next interceptor in the chain.
-							// This will normally result in a target object being invoked.
-							// Need re-wrapping of ReactiveTransaction until we get hold of the exception
-							// through usingWhen.
+							// Need re-wrapping until we get hold of the exception through usingWhen.
 							return Flux.usingWhen(Mono.just(it), txInfo -> {
 								try {
 									return this.adapter.toPublisher(invocation.proceedWithInvocation());
 								}
-								catch (Throwable throwable) {
-									return Mono.error(throwable);
+								catch (Throwable ex) {
+									return Mono.error(ex);
 								}
 							}, this::commitTransactionAfterReturning, txInfo -> Mono.empty())
 									.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
@@ -878,7 +873,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							return completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));
 						}
 					})).subscriberContext(TransactionContextManager.getOrCreateContext())
-					.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+					.subscriberContext(TransactionContextManager.getOrCreateContextHolder()));
 		}
 
 		@Nullable

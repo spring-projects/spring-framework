@@ -18,7 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,19 +26,18 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEncoder> {
+class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
-	public DataBufferEncoderTests() {
+	DataBufferEncoderTests() {
 		super(new DataBufferEncoder());
 	}
 
@@ -46,18 +45,19 @@ public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEn
 	@Override
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON)).isTrue();
 
 		// SPR-15464
-		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
+		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override
+	@Test
 	public void encode() throws Exception {
 		Flux<DataBuffer> input = Flux.just(this.fooBytes, this.barBytes)
 				.flatMap(bytes -> Mono.defer(() -> {
@@ -72,6 +72,5 @@ public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEn
 				.verifyComplete());
 
 	}
-
 
 }

@@ -16,14 +16,13 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Adrian Colyer
@@ -38,13 +37,9 @@ public class AopNamespaceHandlerThrowingTests {
 
 	@Test
 	public void testParseThrowingOnOtherAdviceType() {
-		try {
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass());
-			fail("Expected BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			assertTrue(ex.contains(SAXParseException.class));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass()))
+			.matches(ex -> ex.contains(SAXParseException.class));
 	}
 
 }

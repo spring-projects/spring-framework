@@ -18,7 +18,7 @@ package org.springframework.cache.jcache.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.cache.CacheManager;
@@ -29,9 +29,8 @@ import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Stephane Nicoll
@@ -88,9 +87,9 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 
 		CacheOperationInvoker invoker = new DummyInvoker(0L);
 		Object execute = interceptor.execute(invoker, service, method, new Object[] {"myId"});
-		assertNotNull("result cannot be null.", execute);
-		assertEquals("Wrong result type", Long.class, execute.getClass());
-		assertEquals("Wrong result", 0L, execute);
+		assertThat(execute).as("result cannot be null.").isNotNull();
+		assertThat(execute.getClass()).as("Wrong result type").isEqualTo(Long.class);
+		assertThat(execute).as("Wrong result").isEqualTo(0L);
 	}
 
 	protected JCacheOperationSource createOperationSource(CacheManager cacheManager,

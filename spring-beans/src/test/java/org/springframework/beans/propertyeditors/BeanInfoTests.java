@@ -20,15 +20,14 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.SimpleBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.util.Assert;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -43,17 +42,17 @@ public class BeanInfoTests {
 		Integer value = new Integer(1);
 
 		bw.setPropertyValue("value", value);
-		assertEquals("value not set correctly", bean.getValue(), value);
+		assertThat(value).as("value not set correctly").isEqualTo(bean.getValue());
 
 		value = new Integer(2);
 		bw.setPropertyValue("value", value.toString());
-		assertEquals("value not converted", bean.getValue(), value);
+		assertThat(value).as("value not converted").isEqualTo(bean.getValue());
 
 		bw.setPropertyValue("value", null);
-		assertNull("value not null", bean.getValue());
+		assertThat(bean.getValue()).as("value not null").isNull();
 
 		bw.setPropertyValue("value", "");
-		assertNull("value not converted to null", bean.getValue());
+		assertThat(bean.getValue()).as("value not converted to null").isNull();
 	}
 
 

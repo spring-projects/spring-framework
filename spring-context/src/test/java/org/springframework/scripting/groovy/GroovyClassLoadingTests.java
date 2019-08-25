@@ -19,13 +19,13 @@ package org.springframework.scripting.groovy;
 import java.lang.reflect.Method;
 
 import groovy.lang.GroovyClassLoader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -45,14 +45,14 @@ public class GroovyClassLoadingTests {
 		Object testBean1 = context.getBean("testBean");
 		Method method1 = class1.getDeclaredMethod("myMethod", new Class<?>[0]);
 		Object result1 = ReflectionUtils.invokeMethod(method1, testBean1);
-		assertEquals("foo", result1);
+		assertThat(result1).isEqualTo("foo");
 
 		context.removeBeanDefinition("testBean");
 		context.registerBeanDefinition("testBean", new RootBeanDefinition(class2));
 		Object testBean2 = context.getBean("testBean");
 		Method method2 = class2.getDeclaredMethod("myMethod", new Class<?>[0]);
 		Object result2 = ReflectionUtils.invokeMethod(method2, testBean2);
-		assertEquals("bar", result2);
+		assertThat(result2).isEqualTo("bar");
 	}
 
 }

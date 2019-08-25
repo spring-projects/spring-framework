@@ -22,20 +22,18 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  * @author Stephane Nicoll
  */
 @SuppressWarnings("deprecation")
-public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
+public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTests {
 
 	@Override
 	protected AsyncClientHttpRequestFactory createRequestFactory() {
@@ -59,8 +57,7 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
 
-		assertNull("No custom config should be set with a custom HttpAsyncClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+		assertThat(request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG)).as("No custom config should be set with a custom HttpAsyncClient").isNull();
 	}
 
 	@Test
@@ -74,19 +71,18 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
 
-		assertNull("No custom config should be set with a custom HttpClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+		assertThat(request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG)).as("No custom config should be set with a custom HttpClient").isNull();
 
 		factory.setConnectionRequestTimeout(4567);
 		HttpComponentsAsyncClientHttpRequest request2 = (HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
 		Object requestConfigAttribute = request2.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
-		assertNotNull(requestConfigAttribute);
+		assertThat(requestConfigAttribute).isNotNull();
 		RequestConfig requestConfig = (RequestConfig) requestConfigAttribute;
 
-		assertEquals(4567, requestConfig.getConnectionRequestTimeout());
+		assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(4567);
 		// No way to access the request config of the HTTP client so no way to "merge" our customizations
-		assertEquals(-1, requestConfig.getConnectTimeout());
+		assertThat(requestConfig.getConnectTimeout()).isEqualTo(-1);
 	}
 
 }

@@ -233,15 +233,15 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 		@Override
 		public boolean tryAdvance(Consumer<? super MergedAnnotation<A>> action) {
-			int lowestDepth = Integer.MAX_VALUE;
+			int lowestDistance = Integer.MAX_VALUE;
 			int annotationResult = -1;
 			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
 				AnnotationTypeMapping mapping = getNextSuitableMapping(annotationIndex);
-				if (mapping != null && mapping.getDepth() < lowestDepth) {
+				if (mapping != null && mapping.getDistance() < lowestDistance) {
 					annotationResult = annotationIndex;
-					lowestDepth = mapping.getDepth();
+					lowestDistance = mapping.getDistance();
 				}
-				if (lowestDepth == 0) {
+				if (lowestDistance == 0) {
 					break;
 				}
 			}

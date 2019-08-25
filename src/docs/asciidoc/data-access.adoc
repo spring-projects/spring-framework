@@ -1822,7 +1822,7 @@ settings by using Spring XML configuration:
 			class="org.springframework.transaction.support.TransactionTemplate">
 		<property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
 		<property name="timeout" value="30"/>
-	</bean>"
+	</bean>
 ----
 
 You can then inject the `sharedTransactionTemplate`
@@ -5737,7 +5737,7 @@ generic or customized to various platforms (such as Tomcat, JBoss and WebSphere)
 
 As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
 a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
-`context:load-time-weaver` XML element. Such a global weaver is automatically picked u
+`context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
 shows the preferred way of setting up a load-time weaver, delivering auto-detection
 of the platform (e.g. Tomcat's weaving-capable class loader or Spring's JVM agent)

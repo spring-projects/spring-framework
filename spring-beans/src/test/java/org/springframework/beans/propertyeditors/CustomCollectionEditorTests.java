@@ -20,11 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link CustomCollectionEditor} class.
@@ -34,21 +33,24 @@ import static org.junit.Assert.assertTrue;
  */
 public class CustomCollectionEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullCollectionType() throws Exception {
-		new CustomCollectionEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CustomCollectionEditor(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCtorWithNonCollectionType() throws Exception {
-		new CustomCollectionEditor((Class) String.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CustomCollectionEditor((Class) String.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
-		editor.setValue("1");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setValue("1"));
 	}
 
 	@Test
@@ -56,13 +58,14 @@ public class CustomCollectionEditorTests {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue(new int[] {0, 1, 2});
 		Object value = editor.getValue();
-		assertNotNull(value);
-		assertTrue(value instanceof ArrayList);
+		assertThat(value).isNotNull();
+		boolean condition = value instanceof ArrayList;
+		assertThat(condition).isTrue();
 		List<?> list = (List<?>) value;
-		assertEquals("There must be 3 elements in the converted collection", 3, list.size());
-		assertEquals(new Integer(0), list.get(0));
-		assertEquals(new Integer(1), list.get(1));
-		assertEquals(new Integer(2), list.get(2));
+		assertThat(list.size()).as("There must be 3 elements in the converted collection").isEqualTo(3);
+		assertThat(list.get(0)).isEqualTo(new Integer(0));
+		assertThat(list.get(1)).isEqualTo(new Integer(1));
+		assertThat(list.get(2)).isEqualTo(new Integer(2));
 	}
 
 	@Test
@@ -70,9 +73,9 @@ public class CustomCollectionEditorTests {
 		CustomCollectionEditor editor = new CustomCollectionEditor(Collection.class);
 		editor.setValue("0, 1, 2");
 		Collection<?> value = (Collection<?>) editor.getValue();
-		assertNotNull(value);
-		assertEquals("There must be 1 element in the converted collection", 1, value.size());
-		assertEquals("0, 1, 2", value.iterator().next());
+		assertThat(value).isNotNull();
+		assertThat(value.size()).as("There must be 1 element in the converted collection").isEqualTo(1);
+		assertThat(value.iterator().next()).isEqualTo("0, 1, 2");
 	}
 
 	@Test
@@ -80,11 +83,12 @@ public class CustomCollectionEditorTests {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue("0, 1, 2");
 		Object value = editor.getValue();
-		assertNotNull(value);
-		assertTrue(value instanceof ArrayList);
+		assertThat(value).isNotNull();
+		boolean condition = value instanceof ArrayList;
+		assertThat(condition).isTrue();
 		List<?> list = (List<?>) value;
-		assertEquals("There must be 1 element in the converted collection", 1, list.size());
-		assertEquals("0, 1, 2", list.get(0));
+		assertThat(list.size()).as("There must be 1 element in the converted collection").isEqualTo(1);
+		assertThat(list.get(0)).isEqualTo("0, 1, 2");
 	}
 
 

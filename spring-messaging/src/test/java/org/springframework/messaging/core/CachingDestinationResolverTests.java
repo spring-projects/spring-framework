@@ -16,9 +16,10 @@
 
 package org.springframework.messaging.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -41,24 +42,26 @@ public class CachingDestinationResolverTests {
 		given(resolver.resolveDestination("abcd")).willReturn("dcba");
 		given(resolver.resolveDestination("1234")).willReturn("4321");
 
-		assertEquals("dcba", resolverProxy.resolveDestination("abcd"));
-		assertEquals("4321", resolverProxy.resolveDestination("1234"));
-		assertEquals("4321", resolverProxy.resolveDestination("1234"));
-		assertEquals("dcba", resolverProxy.resolveDestination("abcd"));
+		assertThat(resolverProxy.resolveDestination("abcd")).isEqualTo("dcba");
+		assertThat(resolverProxy.resolveDestination("1234")).isEqualTo("4321");
+		assertThat(resolverProxy.resolveDestination("1234")).isEqualTo("4321");
+		assertThat(resolverProxy.resolveDestination("abcd")).isEqualTo("dcba");
 
 		verify(resolver, times(1)).resolveDestination("abcd");
 		verify(resolver, times(1)).resolveDestination("1234");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noTargetSet() {
 		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>();
-		resolverProxy.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				resolverProxy::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void nullTargetThroughConstructor() {
-		new CachingDestinationResolverProxy<String>(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CachingDestinationResolverProxy<String>(null));
 	}
 
 }

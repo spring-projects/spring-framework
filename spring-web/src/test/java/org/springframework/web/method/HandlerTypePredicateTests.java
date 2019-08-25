@@ -17,13 +17,12 @@ package org.springframework.web.method;
 
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link HandlerTypePredicate}.
@@ -36,9 +35,9 @@ public class HandlerTypePredicateTests {
 
 		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class);
 
-		assertTrue(predicate.test(HtmlController.class));
-		assertTrue(predicate.test(ApiController.class));
-		assertTrue(predicate.test(AnotherApiController.class));
+		assertThat(predicate.test(HtmlController.class)).isTrue();
+		assertThat(predicate.test(ApiController.class)).isTrue();
+		assertThat(predicate.test(AnotherApiController.class)).isTrue();
 	}
 
 	@Test
@@ -47,9 +46,9 @@ public class HandlerTypePredicateTests {
 		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class)
 				.and(HandlerTypePredicate.forAssignableType(Special.class));
 
-		assertFalse(predicate.test(HtmlController.class));
-		assertFalse(predicate.test(ApiController.class));
-		assertTrue(predicate.test(AnotherApiController.class));
+		assertThat(predicate.test(HtmlController.class)).isFalse();
+		assertThat(predicate.test(ApiController.class)).isFalse();
+		assertThat(predicate.test(AnotherApiController.class)).isTrue();
 	}
 
 

@@ -18,12 +18,12 @@ package org.springframework.test.web.client;
 
 import java.net.SocketException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -63,14 +63,15 @@ public class MockRestServiceServerTests {
 		server.verify();
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void exactExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(false).build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.restTemplate.getForObject("/bar", Void.class));
 	}
 
 	@Test
@@ -143,21 +144,13 @@ public class MockRestServiceServerTests {
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
 
 		this.restTemplate.postForEntity("/remoteurl", null, String.class);
-		try {
-			this.restTemplate.postForEntity("/remoteurl", null, String.class);
-			fail("Expected assertion error");
-		}
-		catch (AssertionError error) {
-			assertThat(error.getMessage()).startsWith("No further requests expected");
-		}
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.restTemplate.postForEntity("/remoteurl", null, String.class))
+			.withMessageStartingWith("No further requests expected");
 
-		try {
-			server.verify();
-			fail("Expected verify failure");
-		}
-		catch (AssertionError error) {
-			assertThat(error.getMessage()).startsWith("Some requests did not execute successfully");
-		}
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(
+				server::verify)
+			.withMessageStartingWith("Some requests did not execute successfully");
 	}
 
 }

@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;

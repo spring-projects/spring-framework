@@ -16,11 +16,11 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -33,13 +33,13 @@ public class Spr16179Tests {
 		AnnotationConfigApplicationContext bf =
 				new AnnotationConfigApplicationContext(AssemblerConfig.class, AssemblerInjection.class);
 
-		assertSame(bf.getBean("someAssembler"), bf.getBean(AssemblerInjection.class).assembler0);
+		assertThat(bf.getBean(AssemblerInjection.class).assembler0).isSameAs(bf.getBean("someAssembler"));
 		// assertNull(bf.getBean(AssemblerInjection.class).assembler1);  TODO: accidental match
 		// assertNull(bf.getBean(AssemblerInjection.class).assembler2);
-		assertSame(bf.getBean("pageAssembler"), bf.getBean(AssemblerInjection.class).assembler3);
-		assertSame(bf.getBean("pageAssembler"), bf.getBean(AssemblerInjection.class).assembler4);
-		assertSame(bf.getBean("pageAssembler"), bf.getBean(AssemblerInjection.class).assembler5);
-		assertSame(bf.getBean("pageAssembler"), bf.getBean(AssemblerInjection.class).assembler6);
+		assertThat(bf.getBean(AssemblerInjection.class).assembler3).isSameAs(bf.getBean("pageAssembler"));
+		assertThat(bf.getBean(AssemblerInjection.class).assembler4).isSameAs(bf.getBean("pageAssembler"));
+		assertThat(bf.getBean(AssemblerInjection.class).assembler5).isSameAs(bf.getBean("pageAssembler"));
+		assertThat(bf.getBean(AssemblerInjection.class).assembler6).isSameAs(bf.getBean("pageAssembler"));
 	}
 
 

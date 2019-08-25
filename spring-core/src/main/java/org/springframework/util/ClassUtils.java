@@ -657,11 +657,11 @@ public abstract class ClassUtils {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
-		StringJoiner sj = new StringJoiner(", ", "[", "]");
+		StringJoiner stringJoiner = new StringJoiner(", ", "[", "]");
 		for (Class<?> clazz : classes) {
-			sj.add(clazz.getName());
+			stringJoiner.add(clazz.getName());
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -911,14 +911,10 @@ public abstract class ClassUtils {
 		}
 		Class<?> clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
-			StringBuilder result = new StringBuilder(clazz.getName());
-			result.append(" implementing ");
-			Class<?>[] ifcs = clazz.getInterfaces();
-			for (int i = 0; i < ifcs.length; i++) {
-				result.append(ifcs[i].getName());
-				if (i < ifcs.length - 1) {
-					result.append(',');
-				}
+			String prefix = clazz.getName() + " implementing ";
+			StringJoiner result = new StringJoiner(",", prefix, "");
+			for (Class<?> ifc : clazz.getInterfaces()) {
+				result.add(ifc.getName());
 			}
 			return result.toString();
 		}

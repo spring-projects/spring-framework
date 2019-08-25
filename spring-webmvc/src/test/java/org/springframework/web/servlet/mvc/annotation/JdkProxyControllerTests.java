@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -36,7 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -54,7 +54,7 @@ public class JdkProxyControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("doIt", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("doIt");
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class JdkProxyControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("doIt", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("doIt");
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class JdkProxyControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/bookings");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("doIt", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("doIt");
 	}
 
 

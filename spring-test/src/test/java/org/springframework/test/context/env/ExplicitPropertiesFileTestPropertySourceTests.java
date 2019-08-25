@@ -16,17 +16,17 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource("explicit.properties")
 public class ExplicitPropertiesFileTestPropertySourceTests {
@@ -45,14 +45,12 @@ public class ExplicitPropertiesFileTestPropertySourceTests {
 
 
 	@Test
-	public void verifyPropertiesAreAvailableInEnvironment() {
+	void verifyPropertiesAreAvailableInEnvironment() {
 		String userHomeKey = "user.home";
-		assertEquals(System.getProperty(userHomeKey), env.getProperty(userHomeKey));
-		assertEquals("enigma", env.getProperty("explicit"));
+		assertThat(env.getProperty(userHomeKey)).isEqualTo(System.getProperty(userHomeKey));
+		assertThat(env.getProperty("explicit")).isEqualTo("enigma");
 	}
 
-
-	// -------------------------------------------------------------------
 
 	@Configuration
 	static class Config {

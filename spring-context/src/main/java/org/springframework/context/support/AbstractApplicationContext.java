@@ -1209,6 +1209,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type) {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type);

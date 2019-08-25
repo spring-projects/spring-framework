@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
@@ -74,13 +75,11 @@ public class ContentResultMatchers {
 	 * parameters. For checking only the type and sub-type see
 	 * {@link #contentTypeCompatibleWith(MediaType)}.
 	 */
-	public ResultMatcher contentType(final MediaType contentType) {
+	public ResultMatcher contentType(MediaType contentType) {
 		return result -> {
 			String actual = result.getResponse().getContentType();
-			assertTrue("Content type not set", actual != null);
-			if (actual != null) {
-				assertEquals("Content type", contentType, MediaType.parseMediaType(actual));
-			}
+			assertNotNull("Content type not set", actual);
+			assertEquals("Content type", contentType, MediaType.parseMediaType(actual));
 		};
 	}
 
@@ -96,15 +95,13 @@ public class ContentResultMatchers {
 	 * Assert the ServletResponse content type is compatible with the given
 	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
 	 */
-	public ResultMatcher contentTypeCompatibleWith(final MediaType contentType) {
+	public ResultMatcher contentTypeCompatibleWith(MediaType contentType) {
 		return result -> {
 			String actual = result.getResponse().getContentType();
-			assertTrue("Content type not set", actual != null);
-			if (actual != null) {
-				MediaType actualContentType = MediaType.parseMediaType(actual);
-				assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
-						actualContentType.isCompatibleWith(contentType));
-			}
+			assertNotNull("Content type not set", actual);
+			MediaType actualContentType = MediaType.parseMediaType(actual);
+			assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
+					actualContentType.isCompatibleWith(contentType));
 		};
 	}
 
@@ -112,7 +109,7 @@ public class ContentResultMatchers {
 	 * Assert the character encoding in the ServletResponse.
 	 * @see HttpServletResponse#getCharacterEncoding()
 	 */
-	public ResultMatcher encoding(final String characterEncoding) {
+	public ResultMatcher encoding(String characterEncoding) {
 		return result -> {
 			String actual = result.getResponse().getCharacterEncoding();
 			assertEquals("Character encoding", characterEncoding, actual);
@@ -126,21 +123,21 @@ public class ContentResultMatchers {
 	 *   .andExpect(content().string(containsString("text")));
 	 * </pre>
 	 */
-	public ResultMatcher string(final Matcher<? super String> matcher) {
+	public ResultMatcher string(Matcher<? super String> matcher) {
 		return result -> assertThat("Response content", result.getResponse().getContentAsString(), matcher);
 	}
 
 	/**
 	 * Assert the response body content as a String.
 	 */
-	public ResultMatcher string(final String expectedContent) {
+	public ResultMatcher string(String expectedContent) {
 		return result -> assertEquals("Response content", expectedContent, result.getResponse().getContentAsString());
 	}
 
 	/**
 	 * Assert the response body content as a byte array.
 	 */
-	public ResultMatcher bytes(final byte[] expectedContent) {
+	public ResultMatcher bytes(byte[] expectedContent) {
 		return result -> assertEquals("Response content", expectedContent, result.getResponse().getContentAsByteArray());
 	}
 
@@ -154,7 +151,7 @@ public class ContentResultMatchers {
 	 * @see MockMvcResultMatchers#xpath(String, Object...)
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
-	public ResultMatcher xml(final String xmlContent) {
+	public ResultMatcher xml(String xmlContent) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
 			this.xmlHelper.assertXmlEqual(xmlContent, content);
@@ -165,7 +162,7 @@ public class ContentResultMatchers {
 	 * Parse the response content as {@link Node} and apply the given Hamcrest
 	 * {@link Matcher}.
 	 */
-	public ResultMatcher node(final Matcher<? super Node> matcher) {
+	public ResultMatcher node(Matcher<? super Node> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
 			this.xmlHelper.assertNode(content, matcher);
@@ -177,7 +174,7 @@ public class ContentResultMatchers {
 	 * Hamcrest {@link Matcher}.
 	 * @see <a href="https://code.google.com/p/xml-matchers/">xml-matchers</a>
 	 */
-	public ResultMatcher source(final Matcher<? super Source> matcher) {
+	public ResultMatcher source(Matcher<? super Source> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
 			this.xmlHelper.assertSource(content, matcher);
@@ -192,7 +189,7 @@ public class ContentResultMatchers {
 	 * @param jsonContent the expected JSON content
 	 * @since 4.1
 	 */
-	public ResultMatcher json(final String jsonContent) {
+	public ResultMatcher json(String jsonContent) {
 		return json(jsonContent, false);
 	}
 
@@ -210,7 +207,7 @@ public class ContentResultMatchers {
 	 * @param strict enables strict checking
 	 * @since 4.2
 	 */
-	public ResultMatcher json(final String jsonContent, final boolean strict) {
+	public ResultMatcher json(String jsonContent, boolean strict) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
 			this.jsonHelper.assertJsonEqual(jsonContent, content, strict);

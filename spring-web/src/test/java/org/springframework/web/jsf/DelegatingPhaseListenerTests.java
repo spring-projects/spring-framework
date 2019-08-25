@@ -21,13 +21,12 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Colin Sampaleanu
@@ -52,14 +51,14 @@ public class DelegatingPhaseListenerTests {
 		TestListener target = new TestListener();
 		beanFactory.addBean("testListener", target);
 
-		assertEquals(PhaseId.ANY_PHASE, delPhaseListener.getPhaseId());
+		assertThat((Object) delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);
-		assertTrue(target.beforeCalled);
+		assertThat(target.beforeCalled).isTrue();
 
 		delPhaseListener.afterPhase(event);
-		assertTrue(target.afterCalled);
+		assertThat(target.afterCalled).isTrue();
 	}
 
 	@Test
@@ -69,16 +68,16 @@ public class DelegatingPhaseListenerTests {
 		beanFactory.addBean("testListener1", target1);
 		beanFactory.addBean("testListener2", target2);
 
-		assertEquals(PhaseId.ANY_PHASE, delPhaseListener.getPhaseId());
+		assertThat((Object) delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);
-		assertTrue(target1.beforeCalled);
-		assertTrue(target2.beforeCalled);
+		assertThat(target1.beforeCalled).isTrue();
+		assertThat(target2.beforeCalled).isTrue();
 
 		delPhaseListener.afterPhase(event);
-		assertTrue(target1.afterCalled);
-		assertTrue(target2.afterCalled);
+		assertThat(target1.afterCalled).isTrue();
+		assertThat(target2.afterCalled).isTrue();
 	}
 
 

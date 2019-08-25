@@ -16,11 +16,11 @@
 
 package org.springframework.instrument.classloading;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Costin Leau
@@ -33,7 +33,7 @@ public class InstrumentableClassLoaderTests {
 	public void testDefaultLoadTimeWeaver() {
 		ClassLoader loader = new SimpleInstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
 		ReflectiveLoadTimeWeaver handler = new ReflectiveLoadTimeWeaver(loader);
-		assertSame(loader, handler.getInstrumentableClassLoader());
+		assertThat(handler.getInstrumentableClassLoader()).isSameAs(loader);
 	}
 
 }

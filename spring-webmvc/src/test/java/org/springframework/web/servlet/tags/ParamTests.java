@@ -16,10 +16,9 @@
 
 package org.springframework.web.servlet.tags;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link Param}.
@@ -33,19 +32,19 @@ public class ParamTests {
 	@Test
 	public void name() {
 		param.setName("name");
-		assertEquals("name", param.getName());
+		assertThat(param.getName()).isEqualTo("name");
 	}
 
 	@Test
 	public void value() {
 		param.setValue("value");
-		assertEquals("value", param.getValue());
+		assertThat(param.getValue()).isEqualTo("value");
 	}
 
 	@Test
 	public void nullDefaults() {
-		assertNull(param.getName());
-		assertNull(param.getValue());
+		assertThat(param.getName()).isNull();
+		assertThat(param.getValue()).isNull();
 	}
 
 }

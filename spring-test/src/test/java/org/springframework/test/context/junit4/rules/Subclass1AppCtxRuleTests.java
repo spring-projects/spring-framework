@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Subclass #1 of {@link BaseAppCtxRuleTests}.
@@ -40,7 +40,7 @@ public class Subclass1AppCtxRuleTests extends BaseAppCtxRuleTests {
 
 	@Test
 	public void bar() {
-		assertEquals("bar", bar);
+		assertThat(bar).isEqualTo("bar");
 	}
 
 

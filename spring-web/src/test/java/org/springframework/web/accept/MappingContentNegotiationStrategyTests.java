@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A test fixture with a test sub-class of AbstractMappingContentNegotiationStrategy.
@@ -42,8 +42,8 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(1, mediaTypes.size());
-		assertEquals("application/json", mediaTypes.get(0).toString());
+		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/json");
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, mediaTypes);
+		assertThat(mediaTypes).isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, mediaTypes);
+		assertThat(mediaTypes).isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
 	}
 
 	@Test
@@ -73,8 +73,8 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(1, mediaTypes.size());
-		assertEquals("application/xml", mediaTypes.get(0).toString());
+		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/xml");
 	}
 
 

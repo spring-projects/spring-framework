@@ -307,7 +307,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			if (frameData != null) {
 				String[] data = getMessageCodec().decode(frameData);
 				if (data != null && data.length == 2) {
-					closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
+					closeStatus = new CloseStatus(Integer.parseInt(data[0]), data[1]);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);

@@ -24,16 +24,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Scott Andrews
@@ -45,7 +42,7 @@ public class UrlTagTests extends AbstractTagTests {
 	private MockPageContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		context = createPageContext();
 		tag = new UrlTag();
@@ -55,14 +52,14 @@ public class UrlTagTests extends AbstractTagTests {
 
 	@Test
 	public void paramSupport() {
-		assertThat(tag, instanceOf(ParamAware.class));
+		assertThat(tag).isInstanceOf(ParamAware.class);
 	}
 
 	@Test
 	public void doStartTag() throws JspException {
 		int action = tag.doStartTag();
 
-		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
 	}
 
 	@Test
@@ -71,7 +68,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
 	}
 
 	@Test
@@ -81,7 +78,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		tag.doEndTag();
 
-		assertEquals("url/path", context.getAttribute("var", PageContext.PAGE_SCOPE));
+		assertThat(context.getAttribute("var", PageContext.PAGE_SCOPE)).isEqualTo("url/path");
 	}
 
 	@Test
@@ -92,7 +89,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		tag.doEndTag();
 
-		assertEquals("url/path", context.getAttribute("var", PageContext.REQUEST_SCOPE));
+		assertThat(context.getAttribute("var", PageContext.REQUEST_SCOPE)).isEqualTo("url/path");
 	}
 
 	@Test
@@ -112,7 +109,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
+		assertThat(context.getAttribute("var")).isEqualTo("url/path?n%20me=v%26l%3De&name=value2");
 	}
 
 	@Test
@@ -134,7 +131,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
+		assertThat(context.getAttribute("var")).isEqualTo("url/path?n%20me=v%26l%3De&name=value2");
 	}
 
 	@Test
@@ -155,7 +152,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-		assertEquals("url/path?n%20me=v%26l%3De&amp;name=value2", context.getAttribute("var"));
+		assertThat(context.getAttribute("var")).isEqualTo("url/path?n%20me=v%26l%3De&amp;name=value2");
 	}
 
 	@Test
@@ -176,7 +173,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-		assertEquals("url\\/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
+		assertThat(context.getAttribute("var")).isEqualTo("url\\/path?n%20me=v%26l%3De&name=value2");
 	}
 
 	@Test
@@ -198,7 +195,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-		assertEquals("url\\/path?n%20me=v%26l%3De&amp;name=value2", context.getAttribute("var"));
+		assertThat(context.getAttribute("var")).isEqualTo("url\\/path?n%20me=v%26l%3De&amp;name=value2");
 	}
 
 	@Test
@@ -207,7 +204,7 @@ public class UrlTagTests extends AbstractTagTests {
 		Set<String> usedParams = new HashSet<>();
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("", queryString);
+		assertThat(queryString).isEqualTo("");
 	}
 
 	@Test
@@ -221,7 +218,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("?name=value", queryString);
+		assertThat(queryString).isEqualTo("?name=value");
 	}
 
 	@Test
@@ -235,7 +232,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, false);
-		assertEquals("&name=value", queryString);
+		assertThat(queryString).isEqualTo("&name=value");
 	}
 
 	@Test
@@ -249,7 +246,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("?name=", queryString);
+		assertThat(queryString).isEqualTo("?name=");
 	}
 
 	@Test
@@ -263,7 +260,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("?name", queryString);
+		assertThat(queryString).isEqualTo("?name");
 	}
 
 	@Test
@@ -278,7 +275,7 @@ public class UrlTagTests extends AbstractTagTests {
 		usedParams.add("name");
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("", queryString);
+		assertThat(queryString).isEqualTo("");
 	}
 
 	@Test
@@ -297,7 +294,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("?name=value&name=value2", queryString);
+		assertThat(queryString).isEqualTo("?name=value&name=value2");
 	}
 
 	@Test
@@ -316,7 +313,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("?n%20me=v%26l%3De&name=value2", queryString);
+		assertThat(queryString).isEqualTo("?n%20me=v%26l%3De&name=value2");
 	}
 
 	@Test
@@ -330,7 +327,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("", queryString);
+		assertThat(queryString).isEqualTo("");
 	}
 
 	@Test
@@ -344,7 +341,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertEquals("", queryString);
+		assertThat(queryString).isEqualTo("");
 	}
 
 	@Test
@@ -353,8 +350,8 @@ public class UrlTagTests extends AbstractTagTests {
 		Set<String> usedParams = new HashSet<>();
 
 		String uri = tag.replaceUriTemplateParams("url/path", params, usedParams);
-		assertEquals("url/path", uri);
-		assertEquals(0, usedParams.size());
+		assertThat(uri).isEqualTo("url/path");
+		assertThat(usedParams.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -363,8 +360,8 @@ public class UrlTagTests extends AbstractTagTests {
 		Set<String> usedParams = new HashSet<>();
 
 		String uri = tag.replaceUriTemplateParams("url/{path}", params, usedParams);
-		assertEquals("url/{path}", uri);
-		assertEquals(0, usedParams.size());
+		assertThat(uri).isEqualTo("url/{path}");
+		assertThat(usedParams.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -378,9 +375,9 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
-		assertEquals("url/value", uri);
-		assertEquals(1, usedParams.size());
-		assertTrue(usedParams.contains("name"));
+		assertThat(uri).isEqualTo("url/value");
+		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams.contains("name")).isTrue();
 	}
 
 	@Test
@@ -394,9 +391,9 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String uri = tag.replaceUriTemplateParams("url/{n me}", params, usedParams);
-		assertEquals("url/value", uri);
-		assertEquals(1, usedParams.size());
-		assertTrue(usedParams.contains("n me"));
+		assertThat(uri).isEqualTo("url/value");
+		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams.contains("n me")).isTrue();
 	}
 
 	@Test
@@ -412,9 +409,9 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{name}", params,
 				usedParams);
 
-		assertEquals("url/v%20lue", uri);
-		assertEquals(1, usedParams.size());
-		assertTrue(usedParams.contains("name"));
+		assertThat(uri).isEqualTo("url/v%20lue");
+		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams.contains("name")).isTrue();
 	}
 
 	@Test  // SPR-11401
@@ -429,9 +426,9 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{/name}", params, usedParams);
 
-		assertEquals("url/my%2FId", uri);
-		assertEquals(1, usedParams.size());
-		assertTrue(usedParams.contains("name"));
+		assertThat(uri).isEqualTo("url/my%2FId");
+		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams.contains("name")).isTrue();
 	}
 
 	@Test
@@ -445,9 +442,9 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
-		assertEquals("url/my/Id", uri);
-		assertEquals(1, usedParams.size());
-		assertTrue(usedParams.contains("name"));
+		assertThat(uri).isEqualTo("url/my/Id");
+		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams.contains("name")).isTrue();
 	}
 
 	@Test
@@ -456,7 +453,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("https://www.springframework.org/", uri);
+		assertThat(uri).isEqualTo("https://www.springframework.org/");
 	}
 
 	@Test
@@ -465,7 +462,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("url/path", uri);
+		assertThat(uri).isEqualTo("url/path");
 	}
 
 	@Test
@@ -476,7 +473,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("/app-context/url/path", uri);
+		assertThat(uri).isEqualTo("/app-context/url/path");
 	}
 
 	@Test
@@ -488,7 +485,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("/some-other-context/url/path", uri);
+		assertThat(uri).isEqualTo("/some-other-context/url/path");
 	}
 
 	@Test
@@ -500,7 +497,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("/some-other-context/url/path", uri);
+		assertThat(uri).isEqualTo("/some-other-context/url/path");
 	}
 
 	@Test
@@ -512,7 +509,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("/url/path", uri);
+		assertThat(uri).isEqualTo("/url/path");
 	}
 
 	@Test
@@ -531,7 +528,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		String uri = tag.createUrl();
-		assertEquals("url/path?name=value&n%20me=v%20lue", uri);
+		assertThat(uri).isEqualTo("url/path?name=value&n%20me=v%20lue");
 	}
 
 	@Test
@@ -550,7 +547,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		String uri = tag.createUrl();
-		assertEquals("url/value?n%20me=v%20lue", uri);
+		assertThat(uri).isEqualTo("url/value?n%20me=v%20lue");
 	}
 
 	@Test
@@ -564,7 +561,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		String uri = tag.createUrl();
-		assertEquals("url/path?foo=bar&name=value", uri);
+		assertThat(uri).isEqualTo("url/path?foo=bar&name=value");
 	}
 
 }

@@ -20,15 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,7 +51,7 @@ public class WebJarsResourceResolverTests {
 	private HttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		// for this to work, an actual WebJar must be on the test classpath
 		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars"));
@@ -69,7 +68,7 @@ public class WebJarsResourceResolverTests {
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
-		assertEquals(file, actual);
+		assertThat(actual).isEqualTo(file);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 	}
 
@@ -81,7 +80,7 @@ public class WebJarsResourceResolverTests {
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
-		assertNull(actual);
+		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, never()).resolveUrlPath("foo/2.3/foo.txt", this.locations);
 	}
@@ -95,7 +94,7 @@ public class WebJarsResourceResolverTests {
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, times(1)).resolveUrlPath(expected, this.locations);
 	}
@@ -107,7 +106,7 @@ public class WebJarsResourceResolverTests {
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
-		assertNull(actual);
+		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, never()).resolveUrlPath(null, this.locations);
 	}
@@ -121,7 +120,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 	}
 
@@ -132,7 +131,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
 
-		assertNull(actual);
+		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 		verify(this.chain, never()).resolveResource(this.request, null, this.locations);
 	}
@@ -147,7 +146,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 	}
 

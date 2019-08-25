@@ -124,7 +124,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				}
 			}
 			if (StringUtils.hasText(readOnly)) {
-				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
+				attribute.setReadOnly(Boolean.parseBoolean(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
 			}
 
 			List<RollbackRuleAttribute> rollbackRules = new LinkedList<>();

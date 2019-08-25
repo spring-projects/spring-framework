@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation.configuration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -25,9 +25,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
 
 /**
  * @author Phillip Webb
@@ -48,19 +49,19 @@ public class Spr10744Tests {
 
 		Foo bean1 = context.getBean("foo", Foo.class);
 		Foo bean2 = context.getBean("foo", Foo.class);
-		assertThat(bean1, sameInstance(bean2));
+		assertThat(bean1).isSameAs(bean2);
 
 		// Should not have invoked constructor for the proxy instance
-		assertThat(createCount, equalTo(0));
-		assertThat(scopeCount, equalTo(0));
+		assertThat(createCount).isEqualTo(0);
+		assertThat(scopeCount).isEqualTo(0);
 
 		// Proxy mode should create new scoped object on each method call
 		bean1.getMessage();
-		assertThat(createCount, equalTo(1));
-		assertThat(scopeCount, equalTo(1));
+		assertThat(createCount).isEqualTo(1);
+		assertThat(scopeCount).isEqualTo(1);
 		bean1.getMessage();
-		assertThat(createCount, equalTo(2));
-		assertThat(scopeCount, equalTo(2));
+		assertThat(createCount).isEqualTo(2);
+		assertThat(scopeCount).isEqualTo(2);
 
 		context.close();
 	}

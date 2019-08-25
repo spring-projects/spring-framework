@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket.sockjs.transport;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
@@ -27,12 +27,12 @@ public class TransportTypeTests {
 
 	@Test
 	public void testFromValue() {
-		assertEquals(TransportType.WEBSOCKET, TransportType.fromValue("websocket"));
-		assertEquals(TransportType.XHR, TransportType.fromValue("xhr"));
-		assertEquals(TransportType.XHR_SEND, TransportType.fromValue("xhr_send"));
-		assertEquals(TransportType.XHR_STREAMING, TransportType.fromValue("xhr_streaming"));
-		assertEquals(TransportType.EVENT_SOURCE, TransportType.fromValue("eventsource"));
-		assertEquals(TransportType.HTML_FILE, TransportType.fromValue("htmlfile"));
+		assertThat(TransportType.fromValue("websocket")).isEqualTo(TransportType.WEBSOCKET);
+		assertThat(TransportType.fromValue("xhr")).isEqualTo(TransportType.XHR);
+		assertThat(TransportType.fromValue("xhr_send")).isEqualTo(TransportType.XHR_SEND);
+		assertThat(TransportType.fromValue("xhr_streaming")).isEqualTo(TransportType.XHR_STREAMING);
+		assertThat(TransportType.fromValue("eventsource")).isEqualTo(TransportType.EVENT_SOURCE);
+		assertThat(TransportType.fromValue("htmlfile")).isEqualTo(TransportType.HTML_FILE);
 	}
 
 }

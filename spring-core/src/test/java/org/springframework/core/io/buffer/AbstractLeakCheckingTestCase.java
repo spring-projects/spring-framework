@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 /**
  * Abstract base class for unit tests that allocate data buffers via a {@link DataBufferFactory}.
@@ -39,8 +39,8 @@ public abstract class AbstractLeakCheckingTestCase {
 	 * Checks whether any of the data buffers created by {@link #bufferFactory} have not been
 	 * released, throwing an assertion error if so.
 	 */
-	@After
-	public final void checkForLeaks() {
+	@AfterEach
+	final void checkForLeaks() {
 		this.bufferFactory.checkForLeaks();
 	}
 

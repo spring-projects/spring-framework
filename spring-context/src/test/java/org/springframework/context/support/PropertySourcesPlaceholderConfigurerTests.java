@@ -19,7 +19,7 @@ package org.springframework.context.support;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -33,13 +33,9 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
@@ -65,8 +61,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setEnvironment(env);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("myValue"));
-		assertThat(ppc.getAppliedPropertySources(), not(nullValue()));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("myValue");
+		assertThat(ppc.getAppliedPropertySources()).isNotNull();
 	}
 
 	@Test
@@ -81,7 +77,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		Resource resource = new ClassPathResource("PropertySourcesPlaceholderConfigurerTests.properties", this.getClass());
 		ppc.setLocation(resource);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("foo"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");
 	}
 
 	@Test
@@ -108,8 +104,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setPropertySources(propertySources);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("foo"));
-		assertEquals(ppc.getAppliedPropertySources().iterator().next(), propertySources.iterator().next());
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");
+		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test
@@ -128,8 +124,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setEnvironment(new MockEnvironment().withProperty("my.name", "env"));
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
-		assertEquals(ppc.getAppliedPropertySources().iterator().next(), propertySources.iterator().next());
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${my.name}");
+		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test
@@ -151,10 +147,10 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}});
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${my.name}");
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void ignoreUnresolvablePlaceholders_falseIsDefault() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -164,7 +160,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		//pc.setIgnoreUnresolvablePlaceholders(false); // the default
-		ppc.postProcessBeanFactory(bf); // should throw
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(bf));
 	}
 
 	@Test
@@ -178,10 +175,10 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${my.name}");
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	@SuppressWarnings("serial")
 	public void nestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -194,7 +191,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setProperties(new Properties() {{
 			put("my.name", "${bogus}");
 		}});
-		ppc.postProcessBeanFactory(bf); // should throw
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(bf));
 	}
 
 	@Test
@@ -212,7 +210,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}});
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${bogus}"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${bogus}");
 	}
 
 	@Test
@@ -237,7 +235,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setEnvironment(env);
 
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("bar"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("bar");
 	}
 
 	@SuppressWarnings("serial")
@@ -257,10 +255,10 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setEnvironment(new MockEnvironment().withProperty("foo", "enclosing"));
 		ppc.postProcessBeanFactory(bf);
 		if (override) {
-			assertThat(bf.getBean(TestBean.class).getName(), equalTo("local"));
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("local");
 		}
 		else {
-			assertThat(bf.getBean(TestBean.class).getName(), equalTo("enclosing"));
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("enclosing");
 		}
 	}
 
@@ -284,8 +282,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		System.clearProperty("key1");
 		System.clearProperty("key2");
 
-		assertThat(bf.getBean(TestBean.class).getName(), is("systemKey1Value"));
-		assertThat(bf.getBean(TestBean.class).getSex(), is("${key2}"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("systemKey1Value");
+		assertThat(bf.getBean(TestBean.class).getSex()).isEqualTo("${key2}");
 	}
 
 	@Test
@@ -298,7 +296,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 				.getBeanDefinition());
 		ppc.setEnvironment(new MockEnvironment().withProperty("my.name", "customNull"));
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), nullValue());
+		assertThat(bf.getBean(TestBean.class).getName()).isNull();
 	}
 
 	@Test
@@ -310,7 +308,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 				.getBeanDefinition());
 		ppc.setEnvironment(new MockEnvironment().withProperty("my.name", " myValue  "));
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo(" myValue  "));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo(" myValue  ");
 	}
 
 	@Test
@@ -323,7 +321,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 				.getBeanDefinition());
 		ppc.setEnvironment(new MockEnvironment().withProperty("my.name", " myValue  "));
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), equalTo("myValue"));
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("myValue");
 	}
 
 	@Test
@@ -348,7 +346,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 					.addPropertyValue("jedi", "${jedi:false}")
 					.getBeanDefinition());
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).isJedi(), equalTo(true));
+		assertThat(bf.getBean(TestBean.class).isJedi()).isEqualTo(true);
 	}
 
 	@Test
@@ -367,7 +365,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setEnvironment(env);
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(OptionalTestBean.class).getName(), equalTo(Optional.of("myValue")));
+		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.of("myValue"));
 	}
 
 	@Test
@@ -387,7 +385,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.setNullValue("");
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(OptionalTestBean.class).getName(), equalTo(Optional.empty()));
+		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.empty());
 	}
 
 

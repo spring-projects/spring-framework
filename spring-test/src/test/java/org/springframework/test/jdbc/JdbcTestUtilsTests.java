@@ -16,15 +16,14 @@
 
 package org.springframework.test.jdbc;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -34,32 +33,32 @@ import static org.mockito.BDDMockito.given;
  * @since 2.5.4
  * @see JdbcTestUtilsIntegrationTests
  */
-@RunWith(MockitoJUnitRunner.class)
-public class JdbcTestUtilsTests {
+@ExtendWith(MockitoExtension.class)
+class JdbcTestUtilsTests {
 
 	@Mock
 	private JdbcTemplate jdbcTemplate;
 
 
 	@Test
-	public void deleteWithoutWhereClause() throws Exception {
+	void deleteWithoutWhereClause() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person")).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", null);
-		assertThat(deleted, equalTo(10));
+		assertThat(deleted).isEqualTo(10);
 	}
 
 	@Test
-	public void deleteWithWhereClause() throws Exception {
+	void deleteWithWhereClause() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person WHERE name = 'Bob' and age > 25")).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", "name = 'Bob' and age > 25");
-		assertThat(deleted, equalTo(10));
+		assertThat(deleted).isEqualTo(10);
 	}
 
 	@Test
-	public void deleteWithWhereClauseAndArguments() throws Exception {
+	void deleteWithWhereClauseAndArguments() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person WHERE name = ? and age > ?", "Bob", 25)).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", "name = ? and age > ?", "Bob", 25);
-		assertThat(deleted, equalTo(10));
+		assertThat(deleted).isEqualTo(10);
 	}
 
 }

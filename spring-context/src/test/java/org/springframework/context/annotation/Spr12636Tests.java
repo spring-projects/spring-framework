@@ -18,8 +18,8 @@ package org.springframework.context.annotation;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -39,7 +38,7 @@ public class Spr12636Tests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
@@ -51,8 +50,8 @@ public class Spr12636Tests {
 		this.context = new AnnotationConfigApplicationContext(
 				UserServiceTwo.class, UserServiceOne.class, UserServiceCollector.class);
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertSame(context.getBean("serviceOne", UserService.class), bean.userServices.get(0));
-		assertSame(context.getBean("serviceTwo", UserService.class), bean.userServices.get(1));
+		assertThat(bean.userServices.get(0)).isSameAs(context.getBean("serviceOne", UserService.class));
+		assertThat(bean.userServices.get(1)).isSameAs(context.getBean("serviceTwo", UserService.class));
 
 	}
 
@@ -64,12 +63,12 @@ public class Spr12636Tests {
 		// Validate those beans are indeed wrapped by a proxy
 		UserService serviceOne = this.context.getBean("serviceOne", UserService.class);
 		UserService serviceTwo = this.context.getBean("serviceTwo", UserService.class);
-		assertTrue(AopUtils.isAopProxy(serviceOne));
-		assertTrue(AopUtils.isAopProxy(serviceTwo));
+		assertThat(AopUtils.isAopProxy(serviceOne)).isTrue();
+		assertThat(AopUtils.isAopProxy(serviceTwo)).isTrue();
 
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertSame(serviceOne, bean.userServices.get(0));
-		assertSame(serviceTwo, bean.userServices.get(1));
+		assertThat(bean.userServices.get(0)).isSameAs(serviceOne);
+		assertThat(bean.userServices.get(1)).isSameAs(serviceTwo);
 	}
 
 	@Configuration

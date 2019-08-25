@@ -22,12 +22,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -41,10 +40,10 @@ public class RuleBasedTransactionAttributeTests {
 	@Test
 	public void testDefaultRule() {
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute();
-		assertTrue(rta.rollbackOn(new RuntimeException()));
-		assertTrue(rta.rollbackOn(new MyRuntimeException("")));
-		assertFalse(rta.rollbackOn(new Exception()));
-		assertFalse(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(rta.rollbackOn(new MyRuntimeException(""))).isTrue();
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
+		assertThat(rta.rollbackOn(new IOException())).isFalse();
 	}
 
 	/**
@@ -56,11 +55,11 @@ public class RuleBasedTransactionAttributeTests {
 		list.add(new RollbackRuleAttribute(IOException.class.getName()));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
-		assertTrue(rta.rollbackOn(new RuntimeException()));
-		assertTrue(rta.rollbackOn(new MyRuntimeException("")));
-		assertFalse(rta.rollbackOn(new Exception()));
+		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(rta.rollbackOn(new MyRuntimeException(""))).isTrue();
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
 		// Check that default behaviour is overridden
-		assertTrue(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new IOException())).isTrue();
 	}
 
 	@Test
@@ -70,12 +69,12 @@ public class RuleBasedTransactionAttributeTests {
 		list.add(new RollbackRuleAttribute(IOException.class.getName()));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
-		assertTrue(rta.rollbackOn(new RuntimeException()));
+		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
 		// Check default behaviour is overridden
-		assertFalse(rta.rollbackOn(new MyRuntimeException("")));
-		assertFalse(rta.rollbackOn(new Exception()));
+		assertThat(rta.rollbackOn(new MyRuntimeException(""))).isFalse();
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
 		// Check that default behaviour is overridden
-		assertTrue(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new IOException())).isTrue();
 	}
 
 	@Test
@@ -94,11 +93,11 @@ public class RuleBasedTransactionAttributeTests {
 	}
 
 	private void doTestRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
-		assertTrue(rta.rollbackOn(new RuntimeException()));
+		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
 		// Check default behaviour is overridden
-		assertFalse(rta.rollbackOn(new Exception()));
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
 		// Check that default behaviour is overridden
-		assertTrue(rta.rollbackOn(new RemoteException()));
+		assertThat(rta.rollbackOn(new RemoteException())).isTrue();
 	}
 
 	/**
@@ -114,10 +113,10 @@ public class RuleBasedTransactionAttributeTests {
 		list.add(new NoRollbackRuleAttribute("IOException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
-		assertTrue(rta.rollbackOn(new RuntimeException()));
-		assertTrue(rta.rollbackOn(new Exception()));
+		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(rta.rollbackOn(new Exception())).isTrue();
 		// Check that default behaviour is overridden
-		assertFalse(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new IOException())).isFalse();
 	}
 
 	@Test
@@ -126,11 +125,11 @@ public class RuleBasedTransactionAttributeTests {
 		list.add(new NoRollbackRuleAttribute("Throwable"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
-		assertFalse(rta.rollbackOn(new Throwable()));
-		assertFalse(rta.rollbackOn(new RuntimeException()));
-		assertFalse(rta.rollbackOn(new MyRuntimeException("")));
-		assertFalse(rta.rollbackOn(new Exception()));
-		assertFalse(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new Throwable())).isFalse();
+		assertThat(rta.rollbackOn(new RuntimeException())).isFalse();
+		assertThat(rta.rollbackOn(new MyRuntimeException(""))).isFalse();
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
+		assertThat(rta.rollbackOn(new IOException())).isFalse();
 	}
 
 	@Test
@@ -143,11 +142,11 @@ public class RuleBasedTransactionAttributeTests {
 		tae.setAsText(rta.toString());
 		rta = (RuleBasedTransactionAttribute) tae.getValue();
 
-		assertFalse(rta.rollbackOn(new Throwable()));
-		assertFalse(rta.rollbackOn(new RuntimeException()));
-		assertFalse(rta.rollbackOn(new MyRuntimeException("")));
-		assertFalse(rta.rollbackOn(new Exception()));
-		assertFalse(rta.rollbackOn(new IOException()));
+		assertThat(rta.rollbackOn(new Throwable())).isFalse();
+		assertThat(rta.rollbackOn(new RuntimeException())).isFalse();
+		assertThat(rta.rollbackOn(new MyRuntimeException(""))).isFalse();
+		assertThat(rta.rollbackOn(new Exception())).isFalse();
+		assertThat(rta.rollbackOn(new IOException())).isFalse();
 	}
 
 	/**
@@ -160,8 +159,8 @@ public class RuleBasedTransactionAttributeTests {
 		list.add(new RollbackRuleAttribute(MyBusinessException.class));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
-		assertTrue(rta.rollbackOn(new MyBusinessException()));
-		assertFalse(rta.rollbackOn(new MyBusinessWarningException()));
+		assertThat(rta.rollbackOn(new MyBusinessException())).isTrue();
+		assertThat(rta.rollbackOn(new MyBusinessWarningException())).isFalse();
 	}
 
 

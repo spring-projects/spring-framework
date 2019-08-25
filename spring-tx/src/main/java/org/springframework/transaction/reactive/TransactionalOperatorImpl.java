@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -107,7 +108,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (super.equals(other) && (!(other instanceof TransactionalOperatorImpl) ||
 				getTransactionManager() == ((TransactionalOperatorImpl) other).getTransactionManager())));
 	}

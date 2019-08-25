@@ -20,8 +20,8 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -29,8 +29,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.util.MBeanTestUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * <p>If you run into the <em>"Unsupported protocol: jmxmp"</em> error, you will need to
@@ -56,7 +55,7 @@ public abstract class AbstractMBeanServerTests {
 	protected MBeanServer server;
 
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
@@ -76,7 +75,7 @@ public abstract class AbstractMBeanServerTests {
 		return ctx;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		releaseServer();
 		onTearDown();
@@ -106,11 +105,11 @@ public abstract class AbstractMBeanServerTests {
 	}
 
 	protected void assertIsRegistered(String message, ObjectName objectName) {
-		assertTrue(message, getServer().isRegistered(objectName));
+		assertThat(getServer().isRegistered(objectName)).as(message).isTrue();
 	}
 
 	protected void assertIsNotRegistered(String message, ObjectName objectName) {
-		assertFalse(message, getServer().isRegistered(objectName));
+		assertThat(getServer().isRegistered(objectName)).as(message).isFalse();
 	}
 
 }

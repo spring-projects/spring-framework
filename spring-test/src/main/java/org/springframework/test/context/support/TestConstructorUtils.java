@@ -19,10 +19,14 @@ package org.springframework.test.context.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestConstructor;
+import org.springframework.test.context.TestConstructor.AutowireMode;
 
 /**
  * Utility methods for working with {@link TestConstructor @TestConstructor}.
@@ -35,9 +39,11 @@ import org.springframework.test.context.TestConstructor;
  */
 public abstract class TestConstructorUtils {
 
+	private static final Log logger = LogFactory.getLog(TestConstructorUtils.class);
+
+
 	private TestConstructorUtils() {
 	}
-
 
 	/**
 	 * Determine if the supplied executable for the given test class is an
@@ -67,9 +73,11 @@ public abstract class TestConstructorUtils {
 	 * <li>The constructor is annotated with {@link Autowired @Autowired}.</li>
 	 * <li>{@link TestConstructor @TestConstructor} is <em>present</em> or
 	 * <em>meta-present</em> on the test class with
-	 * {@link TestConstructor#autowire autowire} set to {@code true}.</li>
-	 * <li>The default <em>test constructor autowire</em> mode is set to {@code true}
-	 * (see {@link TestConstructor#TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME}).</li>
+	 * {@link TestConstructor#autowireMode() autowireMode} set to
+	 * {@link AutowireMode#ALL ALL}.</li>
+	 * <li>The default <em>test constructor autowire mode</em> has been changed
+	 * to {@code ALL} (see
+	 * {@link TestConstructor#TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME}).</li>
 	 * </ol>
 	 *
 	 * @param constructor a constructor for the test class
@@ -82,13 +90,31 @@ public abstract class TestConstructorUtils {
 		if (AnnotatedElementUtils.hasAnnotation(constructor, Autowired.class)) {
 			return true;
 		}
+
+		AutowireMode autowireMode = null;
+
 		// Is the test class annotated with @TestConstructor?
 		TestConstructor testConstructor = AnnotatedElementUtils.findMergedAnnotation(testClass, TestConstructor.class);
 		if (testConstructor != null) {
-			return testConstructor.autowire();
+			autowireMode = testConstructor.autowireMode();
 		}
-		// Else use global default.
-		return SpringProperties.getFlag(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME);
+		else {
+			// Custom global default?
+			String value = SpringProperties.getProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME);
+			if (value != null) {
+				try {
+					autowireMode = AutowireMode.valueOf(value.trim().toUpperCase());
+				}
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Failed to parse autowire mode '%s' for property '%s': %s", value,
+							TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, ex.getMessage()));
+					}
+				}
+			}
+		}
+
+		return (autowireMode == AutowireMode.ALL);
 	}
 
 }

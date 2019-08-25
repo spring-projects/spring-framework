@@ -21,13 +21,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses;
 
 /**
@@ -36,32 +35,33 @@ import static org.springframework.test.context.support.AnnotationConfigContextLo
  * @author Sam Brannen
  * @since 4.1.5
  */
-public class AnnotationConfigContextLoaderUtilsTests {
+class AnnotationConfigContextLoaderUtilsTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void detectDefaultConfigurationClassesWithNullDeclaringClass() {
-		detectDefaultConfigurationClasses(null);
+	@Test
+	void detectDefaultConfigurationClassesWithNullDeclaringClass() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				detectDefaultConfigurationClasses(null));
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithoutConfigurationClass() {
+	void detectDefaultConfigurationClassesWithoutConfigurationClass() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(NoConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals(0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).isEqualTo(0);
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithExplicitConfigurationAnnotation() {
+	void detectDefaultConfigurationClassesWithExplicitConfigurationAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(ExplicitConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertArrayEquals(new Class<?>[] { ExplicitConfigTestCase.Config.class }, configClasses);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses).isEqualTo(new Class<?>[] { ExplicitConfigTestCase.Config.class });
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithConfigurationMetaAnnotation() {
+	void detectDefaultConfigurationClassesWithConfigurationMetaAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(MetaAnnotatedConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertArrayEquals(new Class<?>[] { MetaAnnotatedConfigTestCase.Config.class }, configClasses);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses).isEqualTo(new Class<?>[] { MetaAnnotatedConfigTestCase.Config.class });
 	}
 
 

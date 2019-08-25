@@ -18,12 +18,12 @@ package org.springframework.jms.config;
 
 import javax.jms.MessageListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -38,7 +38,7 @@ public class SimpleJmsListenerEndpointTests {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		MessageListener messageListener = new MessageListenerAdapter();
 		endpoint.setMessageListener(messageListener);
-		assertSame(messageListener, endpoint.createMessageListener(container));
+		assertThat(endpoint.createMessageListener(container)).isSameAs(messageListener);
 	}
 
 }

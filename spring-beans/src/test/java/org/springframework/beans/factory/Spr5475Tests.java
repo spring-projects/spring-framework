@@ -16,16 +16,14 @@
 
 package org.springframework.beans.factory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
@@ -74,14 +72,9 @@ public class Spr5475Tests {
 	private void assertExceptionMessageForMisconfiguredFactoryMethod(BeanDefinition bd, String expectedMessage) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("foo", bd);
-
-		try {
-			factory.preInstantiateSingletons();
-			fail("should have failed with BeanCreationException due to incorrectly invoked factory method");
-		}
-		catch (BeanCreationException ex) {
-			assertThat(ex.getMessage(), equalTo(expectedMessage));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining(expectedMessage);
 	}
 
 	@Test

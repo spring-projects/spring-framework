@@ -18,11 +18,11 @@ package org.springframework.util;
 
 import java.math.BigInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test for static utility to help with serialization.
@@ -30,7 +30,7 @@ import static org.junit.Assert.assertNull;
  * @author Dave Syer
  * @since 3.0.5
  */
-public class SerializationUtilsTests {
+class SerializationUtilsTests {
 
 	private static BigInteger FOO = new BigInteger(
 			"-9702942423549012526722364838327831379660941553432801565505143675386108883970811292563757558516603356009681061" +
@@ -38,35 +38,37 @@ public class SerializationUtilsTests {
 
 
 	@Test
-	public void serializeCycleSunnyDay() throws Exception {
-		assertEquals("foo", SerializationUtils.deserialize(SerializationUtils.serialize("foo")));
+	void serializeCycleSunnyDay() throws Exception {
+		assertThat(SerializationUtils.deserialize(SerializationUtils.serialize("foo"))).isEqualTo("foo");
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void deserializeUndefined() throws Exception {
+	@Test
+	void deserializeUndefined() throws Exception {
 		byte[] bytes = FOO.toByteArray();
-		Object foo = SerializationUtils.deserialize(bytes);
-		assertNotNull(foo);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void serializeNonSerializable() throws Exception {
-		SerializationUtils.serialize(new Object());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void deserializeNonSerializable() throws Exception {
-		SerializationUtils.deserialize("foo".getBytes());
+		assertThatIllegalStateException().isThrownBy(() ->
+				SerializationUtils.deserialize(bytes));
 	}
 
 	@Test
-	public void serializeNull() throws Exception {
-		assertNull(SerializationUtils.serialize(null));
+	void serializeNonSerializable() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SerializationUtils.serialize(new Object()));
 	}
 
 	@Test
-	public void deserializeNull() throws Exception {
-		assertNull(SerializationUtils.deserialize(null));
+	void deserializeNonSerializable() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SerializationUtils.deserialize("foo".getBytes()));
+	}
+
+	@Test
+	void serializeNull() throws Exception {
+		assertThat(SerializationUtils.serialize(null)).isNull();
+	}
+
+	@Test
+	void deserializeNull() throws Exception {
+		assertThat(SerializationUtils.deserialize(null)).isNull();
 	}
 
 }

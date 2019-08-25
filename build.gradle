@@ -1,70 +1,57 @@
 buildscript {
-	repositories {
-		maven { url "https://repo.spring.io/plugins-release" }
-	}
 	dependencies {
-		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
-		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
+		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
+		classpath 'io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE'
 	}
 }
-
-// 3rd party plugin repositories can be configured in settings.gradle
 plugins {
-	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.3.31" apply false
-	id "org.jetbrains.dokka" version "0.9.18"
-	id "org.asciidoctor.convert" version "1.5.8"
+	id 'io.spring.dependency-management' version '1.0.7.RELEASE' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.3.41' apply false
+	id 'org.jetbrains.dokka' version '0.9.18' apply false
+	id 'org.asciidoctor.convert' version '1.5.8'
+	id 'io.spring.nohttp' version '0.0.3.RELEASE'
+	id 'de.undercouch.download' version '4.0.0'
+	id "com.jfrog.artifactory" version '4.9.8' apply false
+	id "io.freefair.aspectj" version "4.0.0" apply false
 }
 
 ext {
-	linkHomepage = "https://spring.io/projects/spring-framework"
-	linkCi = "https://build.spring.io/browse/SPR"
-	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
-	linkScmUrl = "https://github.com/spring-projects/spring-framework"
-	linkScmConnection = "scm:git:git://github.com/spring-projects/spring-framework.git"
-	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
+	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
 
-	moduleProjects = subprojects.findAll {
-		(it.name != "spring-build-src") && (it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
-	}
-
-	aspectjVersion       = "1.9.3"
-	coroutinesVersion    = "1.2.1"
+	aspectjVersion       = "1.9.4"
+	coroutinesVersion    = "1.3.0-RC2"
 	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.6"
-	hsqldbVersion        = "2.4.1"
-	jackson2Version      = "2.9.8"
-	jettyVersion         = "9.4.18.v20190429"
-	junit5Version        = "5.4.2"
-	kotlinVersion        = "1.3.31"
-	log4jVersion         = "2.11.2"
-	nettyVersion         = "4.1.36.Final"
-	reactorVersion       = "Dysprosium-M1"
+	groovyVersion        = "2.5.7"
+	hsqldbVersion        = "2.5.0"
+	jackson2Version      = "2.9.9"
+	jettyVersion         = "9.4.19.v20190610"
+	junit5Version        = "5.5.1"
+	kotlinVersion        = "1.3.41"
+	log4jVersion         = "2.12.0"
+	nettyVersion         = "4.1.38.Final"
+	reactorVersion       = "Dysprosium-M3"
+	rsocketVersion       = "1.0.0-RC2"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.8"
+	rxjava2Version       = "2.2.10"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.19"
-	undertowVersion      = "2.0.20.Final"
+	tomcatVersion        = "9.0.22"
+	undertowVersion      = "2.0.23.Final"
 
-	gradleScriptDir = "${rootProject.projectDir}/gradle"
-	withoutJclOverSlf4J = {
+	withoutJclOverSlf4j = {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 }
 
-configure(allprojects) { project ->
+configure(allprojects.findAll { (it.name != "framework-bom") } ) { project ->
 	group = "org.springframework"
-	version = qualifyVersionIfNecessary(version)
 
 	apply plugin: "java"
-	apply plugin: "kotlin"
 	apply plugin: "checkstyle"
-	apply plugin: "propdeps"
-	apply plugin: "test-source-set-dependencies"
+	apply plugin: 'org.springframework.build.compile'
 	apply plugin: "io.spring.dependency-management"
-	apply from: "${gradleScriptDir}/ide.gradle"
+	apply from: "${rootDir}/gradle/ide.gradle"
 
 	dependencyManagement {
 		resolutionStrategy {
@@ -73,6 +60,11 @@ configure(allprojects) { project ->
 		applyMavenExclusions = false
 		generatedPomCustomization {
 			enabled = false
+		}
+		imports {
+			mavenBom "org.junit:junit-bom:${junit5Version}"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:${kotlinVersion}"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:${coroutinesVersion}"
 		}
 	}
 
@@ -88,43 +80,19 @@ configure(allprojects) { project ->
 		}
 	}
 
-	def commonCompilerArgs =
-			["-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
-			 "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
-			 "-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options"]
-
-	compileJava.options*.compilerArgs = commonCompilerArgs +
-			["-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes",
-			 "-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
-
-	compileTestJava.options*.compilerArgs = commonCompilerArgs +
-			["-Xlint:-varargs", "-Xlint:-fallthrough", "-Xlint:-rawtypes",
-			 "-Xlint:-deprecation", "-Xlint:-unchecked"]
-
-	compileJava {
-		sourceCompatibility = 1.8  // can be switched to 11 for testing
-		targetCompatibility = 1.8
-		options.encoding = "UTF-8"
-	}
-
-	compileTestJava {
-		sourceCompatibility = 1.8  // can be switched to 11 for testing
-		targetCompatibility = 1.8
-		options.encoding = "UTF-8"
-		options.compilerArgs += "-parameters"
-	}
-
-	compileKotlin {
-		kotlinOptions {
-			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xjsr305=strict"]
+	pluginManager.withPlugin("kotlin") {
+		apply plugin: "org.jetbrains.dokka"
+		compileKotlin {
+			kotlinOptions {
+				jvmTarget = "1.8"
+				freeCompilerArgs = ["-Xjsr305=strict"]
+			}
 		}
-	}
-
-	compileTestKotlin {
-		kotlinOptions {
-			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xjsr305=strict"]
+		compileTestKotlin {
+			kotlinOptions {
+				jvmTarget = "1.8"
+				freeCompilerArgs = ["-Xjsr305=strict"]
+			}
 		}
 	}
 
@@ -132,44 +100,47 @@ configure(allprojects) { project ->
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		systemProperty("io.netty.leakDetection.level", "paranoid")
+		useJUnitPlatform()
 		scanForTestClasses = false
 		include(["**/*Tests.class", "**/*Test.class"])
 		// Since we set scanForTestClasses to false, we need to filter out inner
 		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
 		// run MyTests by itself will fail if MyTests contains any inner classes.
 		exclude(["**/Abstract*.class", '**/*$*'])
-		reports.junitXml.setDestination(file("$buildDir/test-results"))
 	}
 
 	checkstyle {
-		toolVersion = "8.20"
+		toolVersion = "8.23"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
 	repositories {
+		mavenCentral()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" } // Reactor
-		maven { url "https://oss.jfrog.org/artifactory/libs-snapshot" } // RSocket
 		mavenLocal()
 	}
 
 	dependencies {
-		testCompile("junit:junit:4.13-beta-3") {
+		testCompile("org.junit.jupiter:junit-jupiter-api")
+		testCompile("org.junit.jupiter:junit-jupiter-params")
+		testCompile("org.mockito:mockito-core:3.0.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.27.0") {
-			exclude group: "org.hamcrest", module: "hamcrest-core"
-		}
+		testCompile("org.mockito:mockito-junit-jupiter:3.0.0")
 		testCompile("io.mockk:mockk:1.9.3")
-		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.assertj:assertj-core:3.12.2")
+		testCompile("org.hamcrest:hamcrest:2.1")
+		testCompile("org.assertj:assertj-core:3.13.1")
+		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
+		testRuntime("org.junit.platform:junit-platform-launcher")
+		testRuntime("org.junit.jupiter:junit-jupiter-engine")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.7")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
 	}
 
 	ext.javadocLinks = [
@@ -194,64 +165,30 @@ configure(allprojects) { project ->
 	] as String[]
 }
 
-configure(subprojects.findAll { (it.name != "spring-build-src") && (it.name != "spring-core-coroutines") } ) { subproject ->
-	apply from: "${gradleScriptDir}/publish-maven.gradle"
-
-	jar {
-		manifest.attributes["Implementation-Title"] = subproject.name
-		manifest.attributes["Implementation-Version"] = subproject.version
-		manifest.attributes["Automatic-Module-Name"] = subproject.name.replace('-', '.')  // for Jigsaw
-		manifest.attributes["Created-By"] =
-				"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
-
-		from("${rootProject.projectDir}/src/docs/dist") {
-			include "license.txt"
-			include "notice.txt"
-			into "META-INF"
-			expand(copyright: new Date().format("yyyy"), version: project.version)
-		}
-	}
-
-	javadoc {
-		description = "Generates project-level javadoc for use in -javadoc jar"
-
-		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-		options.author = true
-		options.header = project.name
-		options.use = true
-		options.links(project.ext.javadocLinks)
-		options.addStringOption("Xdoclint:none", "-quiet")
-
-		// Suppress warnings due to cross-module @see and @link references.
-		// Note that global 'api' task does display all warnings.
-		logging.captureStandardError LogLevel.INFO
-		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		classifier = "sources"
-		from sourceSets.main.allSource
-		// Don't include or exclude anything explicitly by default. See SPR-12085.
-	}
-
-	task javadocJar(type: Jar) {
-		classifier = "javadoc"
-		from javadoc
-	}
-
-	artifacts {
-		archives sourcesJar
-		archives javadocJar
-	}
+configure(moduleProjects) { project ->
+	apply from: "${rootDir}/gradle/spring-module.gradle"
 }
 
 configure(rootProject) {
 	description = "Spring Framework"
 
 	apply plugin: "groovy"
-	apply from: "${gradleScriptDir}/jdiff.gradle"
-	apply from: "${gradleScriptDir}/docs.gradle"
+	apply plugin: "kotlin"
+	apply plugin: "io.spring.nohttp"
+	apply plugin: 'org.springframework.build.api-diff'
+	apply from: "${rootDir}/gradle/publications.gradle"
+	apply from: "${rootDir}/gradle/docs.gradle"
+
+	nohttp {
+		source.exclude "**/test-output/**"
+		whitelistFile = project.file("src/nohttp/whitelist.lines")
+		def projectDirURI = project.projectDir.toURI()
+		allprojects.forEach { p ->
+			def outURI = p.file("out").toURI()
+			def pattern = projectDirURI.relativize(outURI).path + "**"
+			source.exclude pattern
+		}
+	}
 
 	dependencyManagement {
 		imports {
@@ -259,61 +196,18 @@ configure(rootProject) {
 		}
 	}
 
-	// Don't publish the default jar for the root project
-	configurations.archives.artifacts.clear()
-
-	dependencies {  // for integration tests
-		testCompile(project(":spring-aop"))
-		testCompile(project(":spring-beans"))
-		testCompile(project(":spring-context"))
-		testCompile(project(":spring-core"))
-		testCompile(project(":spring-expression"))
-		testCompile(project(":spring-jdbc"))
-		testCompile(project(":spring-orm"))
-		testCompile(project(":spring-test"))
-		testCompile(project(":spring-tx"))
-		testCompile(project(":spring-web"))
-		testCompile("javax.inject:javax.inject:1")
-		testCompile("javax.resource:javax.resource-api:1.7.1")
-		testCompile("javax.servlet:javax.servlet-api:3.1.0")
-		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
+	dependencies {
+		asciidoctor("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
 
-	artifacts {
-		archives docsZip
-		archives schemaZip
-		archives distZip
-	}
-
-	wrapper {
-		doLast() {
-			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
-			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-			File wrapperFile = file("gradlew")
-			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-					"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-			File wrapperBatFile = file("gradlew.bat")
-			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-					"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				artifact docsZip
+				artifact schemaZip
+				artifact distZip
+			}
 		}
 	}
 }
 
-/*
- * Support publication of artifacts versioned by topic branch.
- * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
- * If <TOPIC> starts with 'SPR-', change version
- *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
- *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
- */
-def qualifyVersionIfNecessary(version) {
-	if (rootProject.hasProperty("BRANCH_NAME")) {
-		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("SPR-")) {
-			return version.replace("BUILD", qualifier)
-		}
-	}
-	return version
-}

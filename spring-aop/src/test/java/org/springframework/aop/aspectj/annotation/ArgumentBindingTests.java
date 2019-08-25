@@ -24,13 +24,15 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Adrian Colyer
@@ -39,24 +41,26 @@ import static org.junit.Assert.assertEquals;
  */
 public class ArgumentBindingTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testBindingInPointcutUsedByAdvice() {
 		TestBean tb = new TestBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(NamedPointcutWithArgs.class);
 
 		ITestBean proxiedTestBean = proxyFactory.getProxy();
-		proxiedTestBean.setName("Supercalifragalisticexpialidocious");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				proxiedTestBean.setName("Supercalifragalisticexpialidocious"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testAnnotationArgumentNameBinding() {
 		TransactionalBean tb = new TransactionalBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
 
 		ITransactionalBean proxiedTestBean = proxyFactory.getProxy();
-		proxiedTestBean.doInTransaction();
+		assertThatIllegalStateException().isThrownBy(
+				proxiedTestBean::doInTransaction);
 	}
 
 	@Test
@@ -67,8 +71,8 @@ public class ArgumentBindingTests {
 		Method methodUsedForParameterTypeDiscovery =
 				getClass().getMethod("methodWithOneParam", String.class);
 		String[] pnames = discoverer.getParameterNames(methodUsedForParameterTypeDiscovery);
-		assertEquals("one parameter name", 1, pnames.length);
-		assertEquals("formal", pnames[0]);
+		assertThat(pnames.length).as("one parameter name").isEqualTo(1);
+		assertThat(pnames[0]).isEqualTo("formal");
 	}
 
 

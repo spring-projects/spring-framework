@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -24,7 +24,7 @@ import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test providing operator support
@@ -42,13 +42,13 @@ public class OperatorOverloaderTests extends AbstractExpressionTests {
 		eContext.setOperatorOverloader(new StringAndBooleanAddition());
 
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'+true");
-		assertEquals("abctrue",expr.getValue(eContext));
+		assertThat(expr.getValue(eContext)).isEqualTo("abctrue");
 
 		expr = (SpelExpression)parser.parseExpression("'abc'-true");
-		assertEquals("abc",expr.getValue(eContext));
+		assertThat(expr.getValue(eContext)).isEqualTo("abc");
 
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
-		assertEquals("abcnull",expr.getValue(eContext));
+		assertThat(expr.getValue(eContext)).isEqualTo("abcnull");
 	}
 
 

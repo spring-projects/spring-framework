@@ -759,8 +759,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 */
 	protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
 		if (this.marshallerProperties != null) {
-			for (String name : this.marshallerProperties.keySet()) {
-				marshaller.setProperty(name, this.marshallerProperties.get(name));
+			for (Map.Entry<String, ?> entry : this.marshallerProperties.entrySet()) {
+				marshaller.setProperty(entry.getKey(), entry.getValue());
 			}
 		}
 		if (this.marshallerListener != null) {
@@ -913,8 +913,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 */
 	protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
 		if (this.unmarshallerProperties != null) {
-			for (String name : this.unmarshallerProperties.keySet()) {
-				unmarshaller.setProperty(name, this.unmarshallerProperties.get(name));
+			for (Map.Entry<String, ?> entry : this.unmarshallerProperties.entrySet()) {
+				unmarshaller.setProperty(entry.getKey(), entry.getValue());
 			}
 		}
 		if (this.unmarshallerListener != null) {
@@ -1025,7 +1025,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				return FileCopyUtils.copyToByteArray(dataHandler.getInputStream());
 			}
 			catch (IOException ex) {
-				throw new UnmarshallingFailureException("Couldn't read attachment", ex);
+				throw new UnmarshallingFailureException("Could not read attachment", ex);
 			}
 		}
 

@@ -24,7 +24,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jca.cci.connection.CciLocalTransactionManager;
@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -73,7 +73,7 @@ public class CciLocalTransactionTests {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
+				assertThat(TransactionSynchronizationManager.hasResource(connectionFactory)).as("Has thread connection").isTrue();
 				CciTemplate ct = new CciTemplate(connectionFactory);
 				ct.execute(interactionSpec, record, record);
 			}
@@ -113,7 +113,7 @@ public class CciLocalTransactionTests {
 			tt.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
+					assertThat(TransactionSynchronizationManager.hasResource(connectionFactory)).as("Has thread connection").isTrue();
 					CciTemplate ct = new CciTemplate(connectionFactory);
 					ct.execute(interactionSpec, record, record);
 					throw new DataRetrievalFailureException("error");

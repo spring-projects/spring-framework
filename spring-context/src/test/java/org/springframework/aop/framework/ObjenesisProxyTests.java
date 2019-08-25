@@ -16,14 +16,14 @@
 
 package org.springframework.aop.framework;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Integration test for Objenesis proxy creation.
@@ -41,8 +41,8 @@ public class ObjenesisProxyTests {
 		bean.method();
 
 		DebugInterceptor interceptor = context.getBean(DebugInterceptor.class);
-		assertThat(interceptor.getCount(), is(1L));
-		assertThat(bean.getDependency().getValue(), is(1));
+		assertThat(interceptor.getCount()).isEqualTo(1L);
+		assertThat(bean.getDependency().getValue()).isEqualTo(1);
 	}
 
 }

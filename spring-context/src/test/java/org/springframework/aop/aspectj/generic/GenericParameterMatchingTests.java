@@ -21,11 +21,11 @@ import java.util.Collection;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that poitncut matching is correct with generic method parameter.
@@ -42,7 +42,7 @@ public class GenericParameterMatchingTests {
 
 
 	@SuppressWarnings("unchecked")
-	@org.junit.Before
+	@org.junit.jupiter.api.BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
@@ -57,19 +57,19 @@ public class GenericParameterMatchingTests {
 	@Test
 	public void testGenericInterfaceGenericArgExecution() {
 		testBean.save("");
-		assertEquals(1, counterAspect.genericInterfaceGenericArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceGenericArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testGenericInterfaceGenericCollectionArgExecution() {
 		testBean.saveAll(null);
-		assertEquals(1, counterAspect.genericInterfaceGenericCollectionArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
 		testBean.saveAll(null);
-		assertEquals(1, counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 

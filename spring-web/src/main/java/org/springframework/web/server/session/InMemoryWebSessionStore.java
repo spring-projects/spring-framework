@@ -140,6 +140,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		return Mono.empty();
 	}
 
+	@Override
 	public Mono<WebSession> updateLastAccessTime(WebSession session) {
 		return Mono.fromSupplier(() -> {
 			Assert.isInstanceOf(InMemoryWebSession.class, session);

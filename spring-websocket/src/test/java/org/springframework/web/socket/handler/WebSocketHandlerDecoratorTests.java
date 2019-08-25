@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket.handler;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link WebSocketHandlerDecorator}.
@@ -34,7 +34,7 @@ public class WebSocketHandlerDecoratorTests {
 		WebSocketHandlerDecorator h2 = new WebSocketHandlerDecorator(h1);
 		WebSocketHandlerDecorator h3 = new WebSocketHandlerDecorator(h2);
 
-		assertSame(h1, h3.getLastHandler());
+		assertThat(h3.getLastHandler()).isSameAs(h1);
 	}
 
 }

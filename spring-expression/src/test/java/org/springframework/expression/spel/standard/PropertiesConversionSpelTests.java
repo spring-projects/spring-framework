@@ -21,12 +21,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -45,7 +45,7 @@ public class PropertiesConversionSpelTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("props", props);
 		String result = expression.getValue(context, new TestBean(), String.class);
-		assertEquals("123", result);
+		assertThat(result).isEqualTo("123");
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class PropertiesConversionSpelTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("props", map);
 		String result = expression.getValue(context, new TestBean(), String.class);
-		assertEquals("123", result);
+		assertThat(result).isEqualTo("123");
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class PropertiesConversionSpelTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("props", map);
 		String result = expression.getValue(context, new TestBean(), String.class);
-		assertEquals("1null3", result);
+		assertThat(result).isEqualTo("1null3");
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class PropertiesConversionSpelTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("props", map);
 		String result = expression.getValue(context, new TestBean(), String.class);
-		assertEquals("1null3", result);
+		assertThat(result).isEqualTo("1null3");
 	}
 
 

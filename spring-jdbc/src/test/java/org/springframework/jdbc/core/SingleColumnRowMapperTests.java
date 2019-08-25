@@ -23,13 +23,13 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.TypeMismatchDataAccessException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -57,7 +57,7 @@ public class SingleColumnRowMapperTests {
 
 		LocalDateTime actualLocalDateTime = rowMapper.mapRow(resultSet, 1);
 
-		assertEquals(timestamp.toLocalDateTime(), actualLocalDateTime);
+		assertThat(actualLocalDateTime).isEqualTo(timestamp.toLocalDateTime());
 	}
 
 	@Test  // SPR-16483
@@ -80,11 +80,11 @@ public class SingleColumnRowMapperTests {
 
 		MyLocalDateTime actualMyLocalDateTime = rowMapper.mapRow(resultSet, 1);
 
-		assertNotNull(actualMyLocalDateTime);
-		assertEquals(timestamp.toLocalDateTime(), actualMyLocalDateTime.value);
+		assertThat(actualMyLocalDateTime).isNotNull();
+		assertThat(actualMyLocalDateTime.value).isEqualTo(timestamp.toLocalDateTime());
 	}
 
-	@Test(expected = TypeMismatchDataAccessException.class)  // SPR-16483
+	@Test // SPR-16483
 	public void doesNotUseConversionService() throws SQLException {
 		SingleColumnRowMapper<LocalDateTime> rowMapper =
 				SingleColumnRowMapper.newInstance(LocalDateTime.class, null);
@@ -96,8 +96,8 @@ public class SingleColumnRowMapperTests {
 		given(resultSet.getObject(1, LocalDateTime.class))
 				.willThrow(new SQLFeatureNotSupportedException());
 		given(resultSet.getTimestamp(1)).willReturn(new Timestamp(0));
-
-		rowMapper.mapRow(resultSet, 1);
+		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
+				rowMapper.mapRow(resultSet, 1));
 	}
 
 

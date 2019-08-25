@@ -19,11 +19,11 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpression;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * These are tests for language features that are not yet considered 'live'. Either missing implementation or
@@ -79,7 +79,7 @@ public class InProgressTests extends AbstractExpressionTests {
 	@Test
 	public void testProjection06() throws Exception {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.![true]");
-		assertEquals("'abc'.![true]", expr.toStringAST());
+		assertThat(expr.toStringAST()).isEqualTo("'abc'.![true]");
 	}
 
 	// SELECTION
@@ -142,11 +142,11 @@ public class InProgressTests extends AbstractExpressionTests {
 	@Test
 	public void testSelectionAST() throws Exception {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.^[true]");
-		assertEquals("'abc'.^[true]", expr.toStringAST());
+		assertThat(expr.toStringAST()).isEqualTo("'abc'.^[true]");
 		expr = (SpelExpression) parser.parseExpression("'abc'.?[true]");
-		assertEquals("'abc'.?[true]", expr.toStringAST());
+		assertThat(expr.toStringAST()).isEqualTo("'abc'.?[true]");
 		expr = (SpelExpression) parser.parseExpression("'abc'.$[true]");
-		assertEquals("'abc'.$[true]", expr.toStringAST());
+		assertThat(expr.toStringAST()).isEqualTo("'abc'.$[true]");
 	}
 
 	// Constructor invocation

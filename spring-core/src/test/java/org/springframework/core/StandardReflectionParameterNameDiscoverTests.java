@@ -13,39 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for StandardReflectionParameterNameDiscoverer
  *
  * @author Rob Winch
  */
-public class StandardReflectionParameterNameDiscoverTests {
+class StandardReflectionParameterNameDiscoverTests {
+
 	private ParameterNameDiscoverer parameterNameDiscoverer;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		parameterNameDiscoverer = new StandardReflectionParameterNameDiscoverer();
 	}
 
 	@Test
-	public void getParameterNamesOnInterface() {
+	void getParameterNamesOnInterface() {
 		Method method = ReflectionUtils.findMethod(MessageService.class,"sendMessage", String.class);
 		String[] actualParams = parameterNameDiscoverer.getParameterNames(method);
-		assertThat(actualParams, is(new String[]{"message"}));
+		assertThat(actualParams).isEqualTo(new String[]{"message"});
 	}
 
 	public interface MessageService {
 		void sendMessage(String message);
 	}
+
 }

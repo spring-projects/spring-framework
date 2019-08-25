@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -110,7 +111,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ApplicationListenerDetector &&
 				this.applicationContext == ((ApplicationListenerDetector) other).applicationContext));
 	}

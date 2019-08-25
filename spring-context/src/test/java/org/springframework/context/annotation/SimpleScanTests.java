@@ -18,12 +18,11 @@ package org.springframework.context.annotation;
 
 import example.scannable.FooService;
 import example.scannable.ServiceInvocationCounter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -43,17 +42,17 @@ public class SimpleScanTests {
 		FooService fooService = (FooService) ctx.getBean("fooServiceImpl");
 		ServiceInvocationCounter serviceInvocationCounter = (ServiceInvocationCounter) ctx.getBean("serviceInvocationCounter");
 
-		assertEquals(0, serviceInvocationCounter.getCount());
+		assertThat(serviceInvocationCounter.getCount()).isEqualTo(0);
 
-		assertTrue(fooService.isInitCalled());
-		assertEquals(1, serviceInvocationCounter.getCount());
+		assertThat(fooService.isInitCalled()).isTrue();
+		assertThat(serviceInvocationCounter.getCount()).isEqualTo(1);
 
 		String value = fooService.foo(1);
-		assertEquals("bar", value);
-		assertEquals(2, serviceInvocationCounter.getCount());
+		assertThat(value).isEqualTo("bar");
+		assertThat(serviceInvocationCounter.getCount()).isEqualTo(2);
 
 		fooService.foo(1);
-		assertEquals(3, serviceInvocationCounter.getCount());
+		assertThat(serviceInvocationCounter.getCount()).isEqualTo(3);
 	}
 
 }

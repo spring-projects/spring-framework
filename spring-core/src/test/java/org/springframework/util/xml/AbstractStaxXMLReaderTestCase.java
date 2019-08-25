@@ -25,8 +25,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
@@ -43,7 +43,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.MockitoUtils;
 import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-public abstract class AbstractStaxXMLReaderTestCase {
+abstract class AbstractStaxXMLReaderTestCase {
 
 	protected static XMLInputFactory inputFactory;
 
@@ -62,9 +62,9 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	private ContentHandler standardContentHandler;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")  // on JDK 9
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		inputFactory = XMLInputFactory.newInstance();
 		standardReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		standardContentHandler = mockContentHandler();
@@ -73,7 +73,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 
 
 	@Test
-	public void contentHandlerNamespacesNoPrefixes() throws Exception {
+	void contentHandlerNamespacesNoPrefixes() throws Exception {
 		standardReader.setFeature("http://xml.org/sax/features/namespaces", true);
 		standardReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
 		standardReader.parse(new InputSource(createTestInputStream()));
@@ -89,7 +89,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	public void contentHandlerNamespacesPrefixes() throws Exception {
+	void contentHandlerNamespacesPrefixes() throws Exception {
 		standardReader.setFeature("http://xml.org/sax/features/namespaces", true);
 		standardReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		standardReader.parse(new InputSource(createTestInputStream()));
@@ -105,7 +105,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	public void contentHandlerNoNamespacesPrefixes() throws Exception {
+	void contentHandlerNoNamespacesPrefixes() throws Exception {
 		standardReader.setFeature("http://xml.org/sax/features/namespaces", false);
 		standardReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		standardReader.parse(new InputSource(createTestInputStream()));
@@ -121,7 +121,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	public void whitespace() throws Exception {
+	void whitespace() throws Exception {
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><test><node1> </node1><node2> Some text </node2></test>";
 
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -135,12 +135,12 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		transformer.transform(source, result);
 
 		Node node1 = result.getNode().getFirstChild().getFirstChild();
-		assertEquals(" ", node1.getTextContent());
-		assertEquals(" Some text ", node1.getNextSibling().getTextContent());
+		assertThat(node1.getTextContent()).isEqualTo(" ");
+		assertThat(node1.getNextSibling().getTextContent()).isEqualTo(" Some text ");
 	}
 
 	@Test
-	public void lexicalHandler() throws Exception {
+	void lexicalHandler() throws Exception {
 		Resource testLexicalHandlerXml = new ClassPathResource("testLexicalHandler.xml", getClass());
 
 		LexicalHandler expectedLexicalHandler = mockLexicalHandler();

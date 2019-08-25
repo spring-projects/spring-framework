@@ -16,13 +16,12 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Adrian Colyer
@@ -37,13 +36,9 @@ public class AopNamespaceHandlerArgNamesTests {
 
 	@Test
 	public void testArgNamesError() {
-		try {
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass());
-			fail("Expected BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.contains(IllegalArgumentException.class));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass()))
+			.matches(ex -> ex.contains(IllegalArgumentException.class));
 	}
 
 }

@@ -113,11 +113,13 @@ class LiteralPathElement extends PathElement {
 		return this.len;
 	}
 
+	@Override
 	public char[] getChars() {
 		return this.text;
 	}
 
 
+	@Override
 	public String toString() {
 		return "Literal(" + String.valueOf(this.text) + ")";
 	}

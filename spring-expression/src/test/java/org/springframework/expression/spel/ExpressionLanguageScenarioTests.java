@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -35,8 +35,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 ///CLOVER:OFF
 
@@ -78,12 +78,11 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			// They are reusable
 			value = expr.getValue();
 
-			assertEquals("hello world", value);
-			assertEquals(String.class, value.getClass());
+			assertThat(value).isEqualTo("hello world");
+			assertThat(value.getClass()).isEqualTo(String.class);
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 
@@ -103,16 +102,16 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 		Expression expr = parser.parseRaw("#favouriteColour");
 		Object value = expr.getValue(ctx);
-		assertEquals("blue", value);
+		assertThat(value).isEqualTo("blue");
 
 		expr = parser.parseRaw("#primes.get(1)");
 		value = expr.getValue(ctx);
-		assertEquals(3, value);
+		assertThat(value).isEqualTo(3);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
 		expr = parser.parseRaw("#primes.?[#this>10]");
 		value = expr.getValue(ctx);
-		assertEquals("[11, 13, 17]", value.toString());
+		assertThat(value.toString()).isEqualTo("[11, 13, 17]");
 	}
 
 
@@ -141,30 +140,30 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		// read it, set it, read it again
 		Expression expr = parser.parseRaw("str");
 		Object value = expr.getValue(ctx);
-		assertEquals("wibble", value);
+		assertThat(value).isEqualTo("wibble");
 		expr = parser.parseRaw("str");
 		expr.setValue(ctx, "wobble");
 		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
-		assertEquals("wobble", value);
+		assertThat(value).isEqualTo("wobble");
 		// or using assignment within the expression
 		expr = parser.parseRaw("str='wabble'");
 		value = expr.getValue(ctx);
 		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
-		assertEquals("wabble", value);
+		assertThat(value).isEqualTo("wabble");
 
 		// private property will be accessed through getter()
 		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
-		assertEquals(42, value);
+		assertThat(value).isEqualTo(42);
 
 		// ... and set through setter
 		expr = parser.parseRaw("property=4");
 		value = expr.getValue(ctx);
 		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
-		assertEquals(4,value);
+		assertThat(value).isEqualTo(4);
 	}
 
 	public static String repeat(String s) { return s+s; }
@@ -183,12 +182,11 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 			Expression expr = parser.parseRaw("#repeat('hello')");
 			Object value = expr.getValue(ctx);
-			assertEquals("hellohello", value);
+			assertThat(value).isEqualTo("hellohello");
 
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 
@@ -205,15 +203,10 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(new FruitColourAccessor());
 		Expression expr = parser.parseRaw("orange");
 		Object value = expr.getValue(ctx);
-		assertEquals(Color.orange, value);
-
-		try {
-			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set oranges to be blue !");
-		}
-		catch (SpelEvaluationException ee) {
-			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
-		}
+		assertThat(value).isEqualTo(Color.orange);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.setValue(ctx, Color.blue))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL));
 	}
 
 	@Test
@@ -226,15 +219,11 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(new VegetableColourAccessor());
 		Expression expr = parser.parseRaw("pea");
 		Object value = expr.getValue(ctx);
-		assertEquals(Color.green, value);
+		assertThat(value).isEqualTo(Color.green);
 
-		try {
-			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set peas to be blue !");
-		}
-		catch (SpelEvaluationException ee) {
-			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.setValue(ctx, Color.blue))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL));
 	}
 
 

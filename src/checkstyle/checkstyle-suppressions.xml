@@ -4,6 +4,7 @@
 
 	<!-- global -->
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
@@ -13,6 +14,9 @@
 	<suppress files="BeanComponentDefinition" checks="EqualsHashCode" />
 	<suppress files="GenericBeanDefinition" checks="EqualsHashCode" />
 	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
+
+	<!-- spring-context -->
+	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" />
 
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
@@ -56,6 +60,19 @@
 
 	<!-- spring-test -->
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]ExpectedExceptionSpringRunnerTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]StandardJUnit4FeaturesTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]support[\\/]ContextLoaderUtilsContextHierarchyTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/]transaction[\\/]programmatic/ProgrammaticTxMgmtTestNGTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]transaction[\\/]programmatic[\\/]ProgrammaticTxMgmtTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="JsonPathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="XpathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="DefaultWebTestClient" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="HeaderAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="StatusAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="JsonPathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit4" checks="SpringJUnit5"/>
+	<suppress files="ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.*WacTests|JUnit4SpringContextWebTests"  checks="SpringJUnit5"/>
 
 	<!-- spring-web -->
 	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />

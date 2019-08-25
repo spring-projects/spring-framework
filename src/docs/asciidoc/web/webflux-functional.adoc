@@ -164,6 +164,15 @@ URI location = ...
 ServerResponse.created(location).build();
 ----
 
+Depending on the codec used, it is possible to pass hint parameters to customize how the
+body is serialized or deserialized. For example, to specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON view]:
+
+====
+[source,java]
+----
+ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
+----
+====
 
 
 [[webflux-fn-handler-classes]]
@@ -253,8 +262,8 @@ public class PersonHandler {
 	}
 
 	private void validate(Person person) {
-		Errors errors = new BeanPropertyBindingResult(body, "person");
-		validator.validate(body, errors);
+		Errors errors = new BeanPropertyBindingResult(person, "person");
+		validator.validate(person, errors);
 		if (errors.hasErrors) {
 			throw new ServerWebInputException(errors.toString()); <3>
 		}

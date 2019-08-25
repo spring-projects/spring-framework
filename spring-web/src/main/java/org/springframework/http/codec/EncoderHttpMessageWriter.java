@@ -29,8 +29,8 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -114,22 +114,23 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		MediaType contentType = updateContentType(message, mediaType);
 
-		Flux<DataBuffer> body = this.encoder.encode(
-				inputStream, message.bufferFactory(), elementType, contentType, hints);
-
 		if (inputStream instanceof Mono) {
-			HttpHeaders headers = message.getHeaders();
-			return Mono.from(body)
+			return Mono.from(inputStream)
 					.switchIfEmpty(Mono.defer(() -> {
-						headers.setContentLength(0);
+						message.getHeaders().setContentLength(0);
 						return message.setComplete().then(Mono.empty());
 					}))
-					.flatMap(buffer -> {
-						headers.setContentLength(buffer.readableByteCount());
+					.flatMap(value -> {
+						DataBufferFactory factory = message.bufferFactory();
+						DataBuffer buffer = this.encoder.encodeValue(value, factory, elementType, contentType, hints);
+						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
 								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
 					});
 		}
+
+		Flux<DataBuffer> body = this.encoder.encode(
+				inputStream, message.bufferFactory(), elementType, contentType, hints);
 
 		if (isStreamingMediaType(contentType)) {
 			return message.writeAndFlushWith(body.map(buffer ->

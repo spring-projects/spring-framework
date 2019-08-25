@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for overriding properties from
@@ -31,19 +31,19 @@ import static org.junit.Assert.assertEquals;
  * @since 4.1
  */
 @TestPropertySource(properties = { "explicit = inlined", "extended = inlined1", "extended = inlined2" })
-public class MergedPropertiesFilesOverriddenByInlinedPropertiesTestPropertySourceTests extends
+class MergedPropertiesFilesOverriddenByInlinedPropertiesTestPropertySourceTests extends
 		MergedPropertiesFilesTestPropertySourceTests {
 
 	@Test
 	@Override
-	public void verifyPropertiesAreAvailableInEnvironment() {
-		assertEquals("inlined", env.getProperty("explicit"));
+	void verifyPropertiesAreAvailableInEnvironment() {
+		assertThat(env.getProperty("explicit")).isEqualTo("inlined");
 	}
 
 	@Test
 	@Override
-	public void verifyExtendedPropertiesAreAvailableInEnvironment() {
-		assertEquals("inlined2", env.getProperty("extended"));
+	void verifyExtendedPropertiesAreAvailableInEnvironment() {
+		assertThat(env.getProperty("extended")).isEqualTo("inlined2");
 	}
 
 }

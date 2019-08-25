@@ -16,9 +16,9 @@
 
 package org.springframework.remoting.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rick Evans
@@ -33,8 +33,7 @@ public class RemoteInvocationUtilsTests {
 		catch (Exception ex) {
 			int originalStackTraceLngth = ex.getStackTrace().length;
 			RemoteInvocationUtils.fillInClientStackTraceIfPossible(ex);
-			assertTrue("Stack trace not being filled in",
-					ex.getStackTrace().length > originalStackTraceLngth);
+			assertThat(ex.getStackTrace().length > originalStackTraceLngth).as("Stack trace not being filled in").isTrue();
 		}
 	}
 

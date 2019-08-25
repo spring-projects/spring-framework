@@ -16,9 +16,9 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
@@ -42,10 +42,10 @@ public class HttpServerTests {
 	private WebTestClient client;
 
 
-	@Before
+	@BeforeEach
 	public void start() throws Exception {
 		HttpHandler httpHandler = RouterFunctions.toHttpHandler(
-				route(GET("/test"), request -> ServerResponse.ok().syncBody("It works!")));
+				route(GET("/test"), request -> ServerResponse.ok().bodyValue("It works!")));
 
 		this.server = new ReactorHttpServer();
 		this.server.setHandler(httpHandler);
@@ -57,7 +57,7 @@ public class HttpServerTests {
 				.build();
 	}
 
-	@After
+	@AfterEach
 	public void stop() {
 		this.server.stop();
 	}
