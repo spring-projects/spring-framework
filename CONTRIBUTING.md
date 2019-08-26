@@ -97,6 +97,13 @@ If asked to make corrections, simply push the changes against the same branch, a
 pull request will be updated. In other words, you do not need to create a new pull request
 when asked to make changes.
 
+#### Participate in Reviews
+
+Helping to review pull requests is another great way to contribute. Your feedback
+can help to shape the implementation of new features. When reviewing pull requests,
+however, please refrain from approving or rejecting a PR unless you are a core
+committer for the Spring Framework.
+
 ### Build from Source
 
 See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source)
