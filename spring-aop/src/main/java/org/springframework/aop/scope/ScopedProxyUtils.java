@@ -113,7 +113,7 @@ public abstract class ScopedProxyUtils {
 	 * @return the original bean name
 	 * @throws IllegalArgumentException if the supplied bean name does not refer
 	 * to the target of a scoped proxy
-	 * @since 5.2
+	 * @since 5.1.10
 	 * @see #getTargetBeanName(String)
 	 * @see #isScopedTarget(String)
 	 */
