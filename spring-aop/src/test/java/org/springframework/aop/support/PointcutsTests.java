@@ -56,12 +56,7 @@ public class PointcutsTests {
 	public static Pointcut allTestBeanMethodsPointcut = new StaticMethodMatcherPointcut() {
 		@Override
 		public ClassFilter getClassFilter() {
-			return new ClassFilter() {
-				@Override
-				public boolean matches(Class<?> clazz) {
-					return clazz.equals(TestBean.class);
-				}
-			};
+			return type -> type.equals(TestBean.class);
 		}
 
 		@Override
