@@ -467,7 +467,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
-
+		// 创建代理对象，默认支持两种【cgLib和jdk】
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 

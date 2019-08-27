@@ -93,29 +93,46 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			}, acc);
 		}
 		else {
+			// 在bean的自定义初始化方法执行之前，执行XXXXAware接口
 			invokeAwareInterfaces(bean);
 		}
 
 		return bean;
 	}
 
+	/**
+	 * 根据当前的bean的Aware接口类型，执行Aware接口功能的赋值操作
+	 * @param bean
+	 */
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
+			// 如果当前bean实现了EnvironmentAware接口，就为当前bean注入ConfigurableEnvironment，
+			// 可以获取当前IOC容器的所有系统环境信息
 			if (bean instanceof EnvironmentAware) {
 				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 			}
+			// 如果当前bean实现了EmbeddedValueResolverAware接口，就为当前bean注入StringValueResolver值解析器，
+			// 何为值解析器呢？？可以获取当前系统的类路径下的properties里面的k=v值，并注入到当前bean
 			if (bean instanceof EmbeddedValueResolverAware) {
 				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
 			}
+			// 如果当前bean实现了ResourceLoaderAware接口，就为当前bean注入ConfigurableApplicationContext，
+			// 可以获取当前IOC容器的带有完整LifeCycle的ApplicationContext上下文
 			if (bean instanceof ResourceLoaderAware) {
 				((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 			}
+			// 如果当前bean实现了ApplicationEventPublisherAware接口，就为当前bean注入ConfigurableApplicationContext，
+			// 可以获取当前IOC容器的带有完整LifeCycle的ApplicationContext上下文
 			if (bean instanceof ApplicationEventPublisherAware) {
 				((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
 			}
+			// 如果当前bean实现了ApplicationEventPublisherAware接口，就为当前bean注入ConfigurableApplicationContext，
+			// 可以获取当前IOC容器的带有完整LifeCycle的ApplicationContext上下文,里面可以
 			if (bean instanceof MessageSourceAware) {
 				((MessageSourceAware) bean).setMessageSource(this.applicationContext);
 			}
+			// 如果当前bean实现了ApplicationEventPublisherAware接口，就为当前bean注入ConfigurableApplicationContext，
+			// 可以获取当前IOC容器的带有完整LifeCycle的ApplicationContext上下文
 			if (bean instanceof ApplicationContextAware) {
 				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 			}

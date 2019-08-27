@@ -431,13 +431,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	/**
+	 * 执行我们自定义的后置处理器，用来对bean的初始化方法执行增强操作
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors})
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
-
 		Object result = existingBean;
+		// 执行我们自定义的后置处理器，用来对bean的初始化方法执行增强操作
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			// 执行初始化方法的后置增强
 			Object current = processor.postProcessAfterInitialization(result, beanName);
+			// 如果我们自定义的后置处理器后一个后置逻辑返回null，那么就自定义的后置处理器的后置增强一个都不会执行。
 			if (current == null) {
 				return result;
 			}
@@ -502,6 +512,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			// 创建bean
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Finished creating instance of bean '" + beanName + "'");
@@ -1054,10 +1065,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
 			// Make sure bean class is actually resolved at this point.
 			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+				// 判定目标对象的类型
 				Class<?> targetType = determineTargetType(beanName, mbd);
 				if (targetType != null) {
+					// 执行后置处理器的前置增强
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {
+						// 执行完前置增强逻辑后，并且前置增强逻辑返回一个非null的obj才会执行后置处理器的后置增强
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
 				}
