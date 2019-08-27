@@ -322,22 +322,36 @@ public class MockHttpServletResponseTests {
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
+	/**
+	 * @since 5.1.10
+	 */
 	@Test
-	public void setCookieHeaderValid() {
-		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
-		Cookie cookie = response.getCookie("SESSION");
-		assertNotNull(cookie);
-		assertTrue(cookie instanceof MockCookie);
-		assertEquals("SESSION", cookie.getName());
-		assertEquals("123", cookie.getValue());
-		assertEquals("/", cookie.getPath());
-		assertTrue(cookie.getSecure());
-		assertTrue(cookie.isHttpOnly());
-		assertEquals("Lax", ((MockCookie) cookie).getSameSite());
+	public void setCookieHeader() {
+		response.setHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(1);
+		assertPrimarySessionCookie("123");
+
+		// Setting the Set-Cookie header a 2nd time should overwrite the previous value
+		response.setHeader(HttpHeaders.SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(1);
+		assertPrimarySessionCookie("999");
 	}
 
 	@Test
-	public void addMockCookie() {
+	public void addCookieHeader() {
+		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(1);
+		assertPrimarySessionCookie("123");
+
+		// Adding a 2nd cookie header should result in 2 cookies.
+		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(2);
+		assertPrimarySessionCookie("123");
+		assertCookieValues("123", "999");
+	}
+
+	@Test
+	public void addCookie() {
 		MockCookie mockCookie = new MockCookie("SESSION", "123");
 		mockCookie.setPath("/");
 		mockCookie.setDomain("example.com");
@@ -348,9 +362,35 @@ public class MockHttpServletResponseTests {
 
 		response.addCookie(mockCookie);
 
+		assertNumCookies(1);
 		assertEquals("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
 				"Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax",
 				response.getHeader(HttpHeaders.SET_COOKIE));
+
+		// Adding a 2nd Cookie should result in 2 Cookies.
+		response.addCookie(new MockCookie("SESSION", "999"));
+		assertNumCookies(2);
+		assertCookieValues("123", "999");
+	}
+
+	private void assertNumCookies(int expected) {
+		assertEquals(expected, this.response.getCookies().length);
+	}
+
+	private void assertCookieValues(String... expected) {
+		assertArrayEquals(expected, Arrays.stream(response.getCookies()).map(Cookie::getValue).toArray());
+	}
+
+	private void assertPrimarySessionCookie(String expectedValue) {
+		Cookie cookie = this.response.getCookie("SESSION");
+		assertNotNull(cookie);
+		assertTrue(cookie instanceof MockCookie);
+		assertEquals("SESSION", cookie.getName());
+		assertEquals(expectedValue, cookie.getValue());
+		assertEquals("/", cookie.getPath());
+		assertTrue(cookie.getSecure());
+		assertTrue(cookie.isHttpOnly());
+		assertEquals("Lax", ((MockCookie) cookie).getSameSite());
 	}
 
 }
