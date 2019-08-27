@@ -28,6 +28,7 @@ import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.DuplexConnection;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,7 +151,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	public void mimeTypesCannotBeChangedAtRSocketFactoryLevel() {
 		MimeType dataMimeType = MimeTypeUtils.APPLICATION_JSON;
-		MimeType metaMimeType = MetadataExtractor.ROUTING;
+		MimeType metaMimeType = MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 
 		RSocketRequester requester = RSocketRequester.builder()
 				.metadataMimeType(metaMimeType)

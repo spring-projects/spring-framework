@@ -38,16 +38,6 @@ public interface MetadataExtractor {
 	 */
 	String ROUTE_KEY = "route";
 
-	/**
-	 * Constant MimeType {@code "message/x.rsocket.composite-metadata.v0"}.
-	 */
-	MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
-
-	/**
-	 * Constant for MimeType {@code "message/x.rsocket.routing.v0"}.
-	 */
-	MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
-
 
 	/**
 	 * Extract a map of values from the given {@link Payload} metadata.

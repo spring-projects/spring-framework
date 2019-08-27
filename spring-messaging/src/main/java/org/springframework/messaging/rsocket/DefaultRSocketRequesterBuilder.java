@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import io.rsocket.Payload;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
@@ -43,6 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Default implementation of {@link RSocketRequester.Builder}.
@@ -59,7 +61,8 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Nullable
 	private MimeType dataMimeType;
 
-	private MimeType metadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
+	@Nullable
+	private MimeType metadataMimeType;
 
 	@Nullable
 	private Object setupData;
@@ -159,11 +162,14 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			factory.frameDecoder(PayloadDecoder.ZERO_COPY);
 		}
 
+		MimeType metaMimeType = this.metadataMimeType != null ? this.metadataMimeType :
+				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
+
 		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
 		factory.dataMimeType(dataMimeType.toString());
-		factory.metadataMimeType(this.metadataMimeType.toString());
+		factory.metadataMimeType(metaMimeType.toString());
 
-		Payload setupPayload = getSetupPayload(dataMimeType, rsocketStrategies);
+		Payload setupPayload = getSetupPayload(dataMimeType, metaMimeType, rsocketStrategies);
 		if (setupPayload != null) {
 			factory.setupPayload(setupPayload);
 		}
@@ -171,14 +177,14 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		return factory.transport(transport)
 				.start()
 				.map(rsocket -> new DefaultRSocketRequester(
-						rsocket, dataMimeType, this.metadataMimeType, rsocketStrategies));
+						rsocket, dataMimeType, metaMimeType, rsocketStrategies));
 	}
 
 	@Nullable
-	private Payload getSetupPayload(MimeType dataMimeType, RSocketStrategies strategies) {
+	private Payload getSetupPayload(MimeType dataMimeType, MimeType metaMimeType, RSocketStrategies strategies) {
 		DataBuffer metadata = null;
 		if (this.setupRoute != null || !CollectionUtils.isEmpty(this.setupMetadata)) {
-			metadata = new MetadataEncoder(this.metadataMimeType, strategies)
+			metadata = new MetadataEncoder(metaMimeType, strategies)
 					.metadataAndOrRoute(this.setupMetadata, this.setupRoute, this.setupRouteVars)
 					.encode();
 		}
@@ -246,7 +252,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private static MimeType getMimeType(Decoder<?> decoder) {
 		MimeType mimeType = decoder.getDecodableMimeTypes().get(0);
-		return new MimeType(mimeType, Collections.emptyMap());
+		return mimeType.getParameters().isEmpty() ? mimeType : new MimeType(mimeType, Collections.emptyMap());
 	}
 
 }

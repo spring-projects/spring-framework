@@ -23,6 +23,7 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.metadata.CompositeMetadata;
+import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -43,12 +44,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class MetadataEncoderTests {
 
+	private static MimeType COMPOSITE_METADATA =
+			MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
+
+
 	private final RSocketStrategies strategies = RSocketStrategies.create();
 
 
 	@Test
 	public void compositeMetadataWithRoute() {
-		DataBuffer buffer = new MetadataEncoder(MetadataExtractor.COMPOSITE_METADATA, this.strategies)
+		DataBuffer buffer = new MetadataEncoder(COMPOSITE_METADATA, this.strategies)
 				.route("toA")
 				.encode();
 
@@ -57,7 +62,7 @@ public class MetadataEncoderTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(MetadataExtractor.ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isFalse();
@@ -66,7 +71,7 @@ public class MetadataEncoderTests {
 	@Test
 	public void compositeMetadataWithRouteAndText() {
 
-		DataBuffer buffer = new MetadataEncoder(MetadataExtractor.COMPOSITE_METADATA, this.strategies)
+		DataBuffer buffer = new MetadataEncoder(COMPOSITE_METADATA, this.strategies)
 				.route("toA")
 				.metadata("My metadata", MimeTypeUtils.TEXT_PLAIN)
 				.encode();
@@ -76,7 +81,7 @@ public class MetadataEncoderTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(MetadataExtractor.ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isTrue();
@@ -89,8 +94,11 @@ public class MetadataEncoderTests {
 
 	@Test
 	public void routeWithRoutingMimeType() {
+		MimeType metaMimeType = MimeTypeUtils.parseMimeType(
+				WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
+
 		DataBuffer buffer =
-				new MetadataEncoder(MetadataExtractor.ROUTING, this.strategies)
+				new MetadataEncoder(metaMimeType, this.strategies)
 						.route("toA")
 						.encode();
 
@@ -154,7 +162,7 @@ public class MetadataEncoderTests {
 
 	@Test
 	public void mimeTypeRequiredForCompositeEntries() {
-		MetadataEncoder encoder = new MetadataEncoder(MetadataExtractor.COMPOSITE_METADATA, this.strategies);
+		MetadataEncoder encoder = new MetadataEncoder(COMPOSITE_METADATA, this.strategies);
 
 		assertThatThrownBy(() -> encoder.metadata("toA", null))
 				.hasMessage("MimeType is required for composite metadata entries.");
@@ -174,7 +182,7 @@ public class MetadataEncoderTests {
 		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 		RSocketStrategies strategies = RSocketStrategies.builder().dataBufferFactory(bufferFactory).build();
 
-		DataBuffer buffer = new MetadataEncoder(MetadataExtractor.COMPOSITE_METADATA, strategies)
+		DataBuffer buffer = new MetadataEncoder(COMPOSITE_METADATA, strategies)
 				.route("toA")
 				.encode();
 
@@ -187,7 +195,7 @@ public class MetadataEncoderTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(MetadataExtractor.ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isFalse();

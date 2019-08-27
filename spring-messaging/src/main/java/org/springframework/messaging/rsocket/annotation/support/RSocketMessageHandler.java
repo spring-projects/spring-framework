@@ -24,6 +24,7 @@ import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.FrameType;
+import io.rsocket.metadata.WellKnownMimeType;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
@@ -73,7 +74,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Nullable
 	private MimeType defaultDataMimeType;
 
-	private MimeType defaultMetadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
+	private MimeType defaultMetadataMimeType = MimeTypeUtils.parseMimeType(
+			WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 
 
 	public RSocketMessageHandler() {

@@ -28,6 +28,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
 import io.rsocket.metadata.CompositeMetadata;
+import io.rsocket.metadata.WellKnownMimeType;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -153,7 +154,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 	@Override
 	public Map<String, Object> extract(Payload payload, MimeType metadataMimeType) {
 		Map<String, Object> result = new HashMap<>();
-		if (metadataMimeType.equals(COMPOSITE_METADATA)) {
+		if (metadataMimeType.toString().equals(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.toString())) {
 			for (CompositeMetadata.Entry entry : new CompositeMetadata(payload.metadata(), false)) {
 				extractEntry(entry.getContent(), entry.getMimeType(), result);
 			}
@@ -170,7 +171,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 			extractor.extract(content, result);
 			return;
 		}
-		if (MetadataExtractor.ROUTING.toString().equals(mimeType)) {
+		if (mimeType != null && mimeType.equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString())) {
 			// TODO: use rsocket-core API when available
 			result.put(MetadataExtractor.ROUTE_KEY, content.toString(StandardCharsets.UTF_8));
 		}

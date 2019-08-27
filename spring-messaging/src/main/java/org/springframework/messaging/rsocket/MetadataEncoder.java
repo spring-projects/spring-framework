@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
 import io.rsocket.metadata.CompositeMetadataFlyweight;
+import io.rsocket.metadata.WellKnownMimeType;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
@@ -46,7 +47,7 @@ import org.springframework.util.ObjectUtils;
 final class MetadataEncoder {
 
 	/** For route variable replacement. */
-	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)}");
 
 
 	private final MimeType metadataMimeType;
@@ -68,7 +69,8 @@ final class MetadataEncoder {
 		Assert.notNull(strategies, "RSocketStrategies is required");
 		this.metadataMimeType = metadataMimeType;
 		this.strategies = strategies;
-		this.isComposite = metadataMimeType.equals(MetadataExtractor.COMPOSITE_METADATA);
+		this.isComposite = this.metadataMimeType.toString().equals(
+				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 		this.allocator = bufferFactory() instanceof NettyDataBufferFactory ?
 				((NettyDataBufferFactory) bufferFactory()).getByteBufAllocator() : ByteBufAllocator.DEFAULT;
 	}
@@ -157,11 +159,15 @@ final class MetadataEncoder {
 	 * @see PayloadUtils#createPayload(DataBuffer, DataBuffer)
 	 */
 	public DataBuffer encode() {
-		Map<Object, MimeType> mergedMetadata = mergeRouteAndMetadata();
 		if (this.isComposite) {
 			CompositeByteBuf composite = this.allocator.compositeBuffer();
+			if (this.route != null) {
+				CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+						WellKnownMimeType.MESSAGE_RSOCKET_ROUTING,
+						PayloadUtils.asByteBuf(bufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8))));
+			}
 			try {
-				mergedMetadata.forEach((value, mimeType) -> {
+				this.metadata.forEach((value, mimeType) -> {
 					DataBuffer buffer = encodeEntry(value, mimeType);
 					CompositeMetadataFlyweight.encodeAndAddMetadata(
 							composite, this.allocator, mimeType.toString(), PayloadUtils.asByteBuf(buffer));
@@ -180,36 +186,22 @@ final class MetadataEncoder {
 				throw ex;
 			}
 		}
+		else if (this.route != null) {
+			Assert.isTrue(this.metadata.isEmpty(), "Composite metadata required for route and other entries");
+			return this.metadataMimeType.toString().equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString()) ?
+					bufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8)) :
+					encodeEntry(this.route, this.metadataMimeType);
+		}
 		else {
-			Assert.isTrue(mergedMetadata.size() == 1, "Composite metadata required for multiple entries");
-			Map.Entry<Object, MimeType> entry = mergedMetadata.entrySet().iterator().next();
+			Assert.isTrue(this.metadata.size() == 1, "Composite metadata required for multiple entries");
+			Map.Entry<Object, MimeType> entry = this.metadata.entrySet().iterator().next();
 			if (!this.metadataMimeType.equals(entry.getValue())) {
 				throw new IllegalArgumentException(
 						"Connection configured for metadata mime type " +
-								"'" + this.metadataMimeType + "', but actual is `" + mergedMetadata + "`");
+								"'" + this.metadataMimeType + "', but actual is `" + this.metadata + "`");
 			}
 			return encodeEntry(entry.getKey(), entry.getValue());
 		}
-	}
-
-	private Map<Object, MimeType> mergeRouteAndMetadata() {
-		if (this.route == null) {
-			return this.metadata;
-		}
-
-		MimeType routeMimeType = this.metadataMimeType.equals(MetadataExtractor.COMPOSITE_METADATA) ?
-				MetadataExtractor.ROUTING : this.metadataMimeType;
-
-		Object routeValue = this.route;
-		if (routeMimeType.equals(MetadataExtractor.ROUTING)) {
-			// TODO: use rsocket-core API when available
-			routeValue = bufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8));
-		}
-
-		Map<Object, MimeType> result = new LinkedHashMap<>();
-		result.put(routeValue, routeMimeType);
-		result.putAll(this.metadata);
-		return result;
 	}
 
 	@SuppressWarnings("unchecked")
