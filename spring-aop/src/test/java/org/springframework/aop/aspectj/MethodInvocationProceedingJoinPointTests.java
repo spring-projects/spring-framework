@@ -17,8 +17,8 @@
 package org.springframework.aop.aspectj;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.JoinPoint.StaticPart;
@@ -33,7 +33,6 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -51,14 +50,12 @@ public class MethodInvocationProceedingJoinPointTests {
 
 	@Test
 	public void testingBindingWithJoinPoint() {
-		assertThatIllegalStateException().isThrownBy(
-				AbstractAspectJAdvice::currentJoinPoint);
+		assertThatIllegalStateException().isThrownBy(AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
 	public void testingBindingWithProceedingJoinPoint() {
-		assertThatIllegalStateException().isThrownBy(
-				AbstractAspectJAdvice::currentJoinPoint);
+		assertThatIllegalStateException().isThrownBy(AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
@@ -70,54 +67,50 @@ public class MethodInvocationProceedingJoinPointTests {
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.setExposeProxy(true);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
-		pf.addAdvice(new MethodBeforeAdvice() {
-			private int depth;
+		AtomicInteger depth = new AtomicInteger();
+		pf.addAdvice((MethodBeforeAdvice) (method, args, target) -> {
+			JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
+			assertThat(jp.toString().contains(method.getName())).as("Method named in toString").isTrue();
+			// Ensure that these don't cause problems
+			jp.toShortString();
+			jp.toLongString();
 
-			@Override
-			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
-				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
-				assertThat(jp.toString().contains(method.getName())).as("Method named in toString").isTrue();
-				// Ensure that these don't cause problems
-				jp.toShortString();
-				jp.toLongString();
+			assertThat(AbstractAspectJAdvice.currentJoinPoint().getTarget()).isSameAs(target);
+			assertThat(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getTarget())).isFalse();
 
-				assertThat(AbstractAspectJAdvice.currentJoinPoint().getTarget()).isSameAs(target);
-				assertThat(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getTarget())).isFalse();
+			ITestBean thisProxy = (ITestBean) AbstractAspectJAdvice.currentJoinPoint().getThis();
+			assertThat(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getThis())).isTrue();
 
-				ITestBean thisProxy = (ITestBean) AbstractAspectJAdvice.currentJoinPoint().getThis();
-				assertThat(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getThis())).isTrue();
+			assertThat(thisProxy).isNotSameAs(target);
 
-				assertThat(thisProxy).isNotSameAs(target);
+			// Check getting again doesn't cause a problem
+			assertThat(AbstractAspectJAdvice.currentJoinPoint().getThis()).isSameAs(thisProxy);
 
-				// Check getting again doesn't cause a problem
-				assertThat(AbstractAspectJAdvice.currentJoinPoint().getThis()).isSameAs(thisProxy);
-
-				// Try reentrant call--will go through this advice.
-				// Be sure to increment depth to avoid infinite recursion
-				if (depth++ == 0) {
-					// Check that toString doesn't cause a problem
-					thisProxy.toString();
-					// Change age, so this will be returned by invocation
-					thisProxy.setAge(newAge);
-					assertThat(thisProxy.getAge()).isEqualTo(newAge);
-				}
-
-				assertThat(thisProxy).isSameAs(AopContext.currentProxy());
-				assertThat(raw).isSameAs(target);
-
-				assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature().getName()).isSameAs(method.getName());
-				assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature().getModifiers()).isEqualTo(method.getModifiers());
-
-				MethodSignature msig = (MethodSignature) AbstractAspectJAdvice.currentJoinPoint().getSignature();
-				assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature()).as("Return same MethodSignature repeatedly").isSameAs(msig);
-				assertThat(AbstractAspectJAdvice.currentJoinPoint()).as("Return same JoinPoint repeatedly").isSameAs(AbstractAspectJAdvice.currentJoinPoint());
-				assertThat(msig.getDeclaringType()).isEqualTo(method.getDeclaringClass());
-				assertThat(Arrays.equals(method.getParameterTypes(), msig.getParameterTypes())).isTrue();
-				assertThat(msig.getReturnType()).isEqualTo(method.getReturnType());
-				assertThat(Arrays.equals(method.getExceptionTypes(), msig.getExceptionTypes())).isTrue();
-				msig.toLongString();
-				msig.toShortString();
+			// Try reentrant call--will go through this advice.
+			// Be sure to increment depth to avoid infinite recursion
+			if (depth.getAndIncrement() == 0) {
+				// Check that toString doesn't cause a problem
+				thisProxy.toString();
+				// Change age, so this will be returned by invocation
+				thisProxy.setAge(newAge);
+				assertThat(thisProxy.getAge()).isEqualTo(newAge);
 			}
+
+			assertThat(thisProxy).isSameAs(AopContext.currentProxy());
+			assertThat(raw).isSameAs(target);
+
+			assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature().getName()).isSameAs(method.getName());
+			assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature().getModifiers()).isEqualTo(method.getModifiers());
+
+			MethodSignature msig = (MethodSignature) AbstractAspectJAdvice.currentJoinPoint().getSignature();
+			assertThat(AbstractAspectJAdvice.currentJoinPoint().getSignature()).as("Return same MethodSignature repeatedly").isSameAs(msig);
+			assertThat(AbstractAspectJAdvice.currentJoinPoint()).as("Return same JoinPoint repeatedly").isSameAs(AbstractAspectJAdvice.currentJoinPoint());
+			assertThat(msig.getDeclaringType()).isEqualTo(method.getDeclaringClass());
+			assertThat(Arrays.equals(method.getParameterTypes(), msig.getParameterTypes())).isTrue();
+			assertThat(msig.getReturnType()).isEqualTo(method.getReturnType());
+			assertThat(Arrays.equals(method.getExceptionTypes(), msig.getExceptionTypes())).isTrue();
+			msig.toLongString();
+			msig.toShortString();
 		});
 		ITestBean itb = (ITestBean) pf.getProxy();
 		// Any call will do

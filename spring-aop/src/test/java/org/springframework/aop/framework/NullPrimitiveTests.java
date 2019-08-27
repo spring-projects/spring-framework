@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class NullPrimitiveTests {
 
-	static interface Foo {
+	interface Foo {
 		int getValue();
 	}
 
