@@ -53,7 +53,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private static final char PATH_DELIMITER = '/';
 
-	private static final String PATH_DELIMITER_STRING = "/";
+	private static final String PATH_DELIMITER_STRING = String.valueOf(PATH_DELIMITER);
 
 	private static final MultiValueMap<String, String> EMPTY_QUERY_PARAMS =
 			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
@@ -916,7 +916,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public String getPath() {
-			String delimiter = String.valueOf(PATH_DELIMITER);
+			String delimiter = PATH_DELIMITER_STRING;
 			StringJoiner pathBuilder = new StringJoiner(delimiter, delimiter, "");
 			for (String pathSegment : this.pathSegments) {
 				pathBuilder.add(pathSegment);
