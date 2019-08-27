@@ -57,6 +57,7 @@ import org.springframework.web.util.WebUtils;
  * @author Brian Clozel
  * @author Vedran Pavic
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -602,20 +603,22 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void setHeaderValue(String name, Object value) {
-		if (setSpecialHeader(name, value)) {
+		boolean replaceHeader = true;
+		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;
 		}
-		doAddHeaderValue(name, value, true);
+		doAddHeaderValue(name, value, replaceHeader);
 	}
 
 	private void addHeaderValue(String name, Object value) {
-		if (setSpecialHeader(name, value)) {
+		boolean replaceHeader = false;
+		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;
 		}
-		doAddHeaderValue(name, value, false);
+		doAddHeaderValue(name, value, replaceHeader);
 	}
 
-	private boolean setSpecialHeader(String name, Object value) {
+	private boolean setSpecialHeader(String name, Object value, boolean replaceHeader) {
 		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			setContentType(value.toString());
 			return true;
@@ -634,7 +637,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {
 			MockCookie cookie = MockCookie.parse(value.toString());
-			addCookie(cookie);
+			if (replaceHeader) {
+				setCookie(cookie);
+			}
+			else {
+				addCookie(cookie);
+			}
 			return true;
 		}
 		else {
@@ -655,6 +663,20 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		else {
 			header.addValue(value);
 		}
+	}
+
+	/**
+	 * Set the {@code Set-Cookie} header to the supplied {@link Cookie},
+	 * overwriting any previous cookies.
+	 * @param cookie the {@code Cookie} to set
+	 * @since 5.1.10
+	 * @see #addCookie(Cookie)
+	 */
+	private void setCookie(Cookie cookie) {
+		Assert.notNull(cookie, "Cookie must not be null");
+		this.cookies.clear();
+		this.cookies.add(cookie);
+		doAddHeaderValue(HttpHeaders.SET_COOKIE, getCookieHeader(cookie), true);
 	}
 
 	@Override
