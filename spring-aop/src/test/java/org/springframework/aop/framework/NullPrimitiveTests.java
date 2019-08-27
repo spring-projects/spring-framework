@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.AopInvocationException;
