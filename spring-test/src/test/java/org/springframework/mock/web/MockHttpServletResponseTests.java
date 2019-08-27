@@ -393,9 +393,7 @@ class MockHttpServletResponseTests {
 
 	private void assertPrimarySessionCookie(String expectedValue) {
 		Cookie cookie = this.response.getCookie("SESSION");
-		assertThat(cookie).isNotNull();
-		boolean condition = cookie instanceof MockCookie;
-		assertThat(condition).isTrue();
+		assertThat(cookie).isInstanceOf(MockCookie.class);
 		assertThat(cookie.getName()).isEqualTo("SESSION");
 		assertThat(cookie.getValue()).isEqualTo(expectedValue);
 		assertThat(cookie.getPath()).isEqualTo("/");
