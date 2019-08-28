@@ -927,6 +927,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 				// Repeatable annotations in container?
+				// 处理@Repeatable注解
 				else if (currentAnnotationType == containerType) {
 					for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
 						T result = processor.process(element, contained, metaDepth);
@@ -1554,11 +1555,12 @@ public class AnnotatedElementUtils {
 							}
 						}
 					}
-
+					// 覆盖属性
 					overrideAttributes(element, annotation, attributes, attributeName, targetAttributeNames);
 				}
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
+					// 覆盖属性
 					overrideAttribute(element, annotation, attributes, attributeName, attributeName);
 				}
 			}

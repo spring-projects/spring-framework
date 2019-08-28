@@ -1,6 +1,6 @@
 package com.atlwj.demo.ioc.xml;
 
-import com.atlwj.demo.ioc.annotation.entity.Person;
+import com.atlwj.demo.ioc.annotation.autowired.entity.Person;
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;

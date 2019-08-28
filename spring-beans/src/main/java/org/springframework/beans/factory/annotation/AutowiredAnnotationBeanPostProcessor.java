@@ -120,14 +120,28 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 自动注入注解类型
+	 */
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(4);
 
 	private String requiredParameterName = "required";
 
+	/**
+	 * 是否必须注入参数
+	 */
 	private boolean requiredParameterValue = true;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
+	/**
+	 * 配置可罗列的BeanFactory:作用是将工厂系列Bean再额外地统一配置
+	 * 				ConfigurableBeanFactory
+	 * 				HierarchicalBeanFactory
+	 * 				AutowireCapableBeanFactory
+	 *				ListableBeanFactory
+	 *			    BeanFactory
+	 */
 	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -135,6 +149,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache = new ConcurrentHashMap<>(256);
 
+	/**
+	 * 依赖注入元数据缓存
+	 */
 	private final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 
@@ -227,6 +244,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		// 查询自动注入元数据
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
 	}
@@ -412,7 +430,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
+					/**
+					 * 真正构建自动注入元数据
+					 */
 					metadata = buildAutowiringMetadata(clazz);
+					// 加入缓存
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
@@ -420,6 +442,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
+	// 构建自动注入元数据
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
@@ -428,6 +451,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
+				// 查找自动注入的注解
 				AnnotationAttributes ann = findAutowiredAnnotation(field);
 				if (ann != null) {
 					if (Modifier.isStatic(field.getModifiers())) {
@@ -478,6 +502,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
 		if (ao.getAnnotations().length > 0) {  // autowiring annotations have to be local
 			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+				// 获取合并后的注解的属性
 				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
 				if (attributes != null) {
 					return attributes;

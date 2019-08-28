@@ -63,6 +63,7 @@ public class BeanDefinitionReaderUtils {
 		if (className != null) {
 			// 设置 beanClass
 			if (classLoader != null) {
+				// 使用反射创建Class
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
 			// 设置 beanClassName

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class DogFactoryBean implements FactoryBean<Dog> {
 
 
-
 	@Override
 	public Dog getObject() throws Exception {
 		return getDog();

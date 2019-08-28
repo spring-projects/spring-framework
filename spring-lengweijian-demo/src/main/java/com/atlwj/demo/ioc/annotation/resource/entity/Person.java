@@ -1,10 +1,19 @@
-package com.atlwj.demo.ioc.annotation.entity;
+package com.atlwj.demo.ioc.annotation.resource.entity;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 
+@Component
 public class Person implements Serializable {
+	@Value("tom")
 	private String username;
+	@Value("20")
 	private Integer age;
+
+	public Person() {
+	}
 
 	public Person(String username, Integer age) {
 		this.username = username;

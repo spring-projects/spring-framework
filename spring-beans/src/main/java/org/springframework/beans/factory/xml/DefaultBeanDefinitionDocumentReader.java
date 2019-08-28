@@ -124,7 +124,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * 注册每一个根标签<beans />内的bd
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
-		// Any nested <beans> elements will cause recursion in this method. In
+		// Any nested（嵌套的） <beans> elements will cause recursion(递归) in this method. In
 		// order to propagate and preserve <beans> default-* attributes correctly,
 		// keep track of the current (parent) delegate, which may be null. Create
 		// the new (child) delegate with a reference to the parent for fallback purposes,

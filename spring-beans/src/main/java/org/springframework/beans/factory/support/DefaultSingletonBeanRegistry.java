@@ -304,9 +304,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void removeSingleton(String beanName) {
 		synchronized (this.singletonObjects) {
+			// 从一级缓存中remove
 			this.singletonObjects.remove(beanName);
+			// 从三级缓存中remove
 			this.singletonFactories.remove(beanName);
+			// 从二级缓存中remove
 			this.earlySingletonObjects.remove(beanName);
+			// 已经注册的单实例beanNames
 			this.registeredSingletons.remove(beanName);
 		}
 	}
@@ -520,6 +524,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	// 销毁单实例Bean
 	public void destroySingletons() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Destroying singletons in " + this);
@@ -565,6 +570,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public void destroySingleton(String beanName) {
 		// Remove a registered singleton of the given name, if any.
+		// 从123级缓存中remove单实例bean
 		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
@@ -583,6 +589,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
+		// 触发销毁bean的依赖
 		Set<String> dependencies;
 		synchronized (this.dependentBeanMap) {
 			// Within full synchronization in order to guarantee a disconnected Set

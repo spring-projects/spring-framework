@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	   xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
 
 	<bean id="movieFinder" class="com.atlwj.demo.ioc.di.MovieFinder"></bean>
 
@@ -9,4 +12,18 @@
 		<!--<constructor-arg index="0" ref="movieFinder"></constructor-arg>-->
 		<property name="movieFinder" ref="movieFinder"></property>
 	</bean>
+
+	<!--隐士地注册了四种后置处理器包括：
+		1.AutowiredAnnotationBeanPostProcessor
+			——————> 【@Autowired、@Value、@Inject、处理@Repxxxx就是可重复的那个注解，忘了咋写了、处理属性覆盖，就是同时配置注解和xml两种方式等等这里不展开说，
+					以后有机会会说】
+		2.CommonAnnotationBeanPostProcessor
+			——————> 【@PostConstruct、@PreDestroy、@Resource。另外有一点需要格外注意：<context:annotation-config />标签和<context:component-scan />
+					 都可以做到隐式地册该后置处理器，后者标签除了具备前者标签的全部功能，还具备包扫描的功能。也就是说同时声明这两个标签，前者就无效了。】
+		3.PersistenceAnnotationBeanPostProcessor
+			——————> 【支持@PersistenceUnit、@PersistenceContext，用于发现每个bean中的持久化注解并完成这些持久化属性的注入。】
+		4.RequiredAnnotationBeanPostProcessor
+			——————>  【支持@Required注解】-->
+	<context:annotation-config/>
+
 </beans>
