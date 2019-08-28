@@ -119,7 +119,6 @@ configure(allprojects.findAll { (it.name != "framework-bom") } ) { project ->
 		maven { url "https://repo.spring.io/ext-release-local" } // WebSphere uow
 		maven { url "https://repo.spring.io/milestone" } // Reactor
 		maven { url "https://oss.jfrog.org/artifactory/libs-snapshot" } // RSocket
-		mavenLocal()
 	}
 
 	dependencies {
