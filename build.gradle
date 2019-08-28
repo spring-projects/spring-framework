@@ -6,7 +6,7 @@ buildscript {
 }
 plugins {
 	id 'io.spring.dependency-management' version '1.0.7.RELEASE' apply false
-	id 'org.jetbrains.kotlin.jvm' version '1.3.41' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.3.50' apply false
 	id 'org.jetbrains.dokka' version '0.9.18' apply false
 	id 'org.asciidoctor.convert' version '1.5.8'
 	id 'io.spring.nohttp' version '0.0.3.RELEASE'
@@ -26,7 +26,7 @@ ext {
 	jackson2Version      = "2.9.9"
 	jettyVersion         = "9.4.19.v20190610"
 	junit5Version        = "5.5.1"
-	kotlinVersion        = "1.3.41"
+	kotlinVersion        = "1.3.50"
 	log4jVersion         = "2.12.0"
 	nettyVersion         = "4.1.38.Final"
 	reactorVersion       = "Dysprosium-M3"
