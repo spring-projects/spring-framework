@@ -497,7 +497,7 @@ like `Mono` or Kotlin Coroutines `Deferred` as the following example shows:
 	client.post()
 			.uri("/persons/{id}", id)
 			.contentType(MediaType.APPLICATION_JSON)
-			.bodyWithType<Person>(personDeferred)
+			.body<Person>(personDeferred)
 			.retrieve()
 			.awaitBody<Unit>()
 ----
@@ -524,7 +524,7 @@ You can also have a stream of objects be encoded, as the following example shows
 	client.post()
 			.uri("/persons/{id}", id)
 			.contentType(MediaType.APPLICATION_JSON)
-			.bodyWithType(people)
+			.body(people)
 			.retrieve()
 			.awaitBody<Unit>()
 ----

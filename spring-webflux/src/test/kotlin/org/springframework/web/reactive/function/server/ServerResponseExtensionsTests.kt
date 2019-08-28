@@ -45,21 +45,21 @@ class ServerResponseExtensionsTests {
 	@Test
 	fun `BodyBuilder#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<List<Foo>>>()
-		bodyBuilder.bodyWithType(body)
+		bodyBuilder.body(body)
 		verify { bodyBuilder.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `BodyBuilder#body with CompletableFuture and reified type parameters`() {
 		val body = mockk<CompletableFuture<List<Foo>>>()
-		bodyBuilder.bodyWithType<List<Foo>>(body)
+		bodyBuilder.body<List<Foo>>(body)
 		verify { bodyBuilder.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `BodyBuilder#body with Flowable and reified type parameters`() {
 		val body = mockk<Flowable<List<Foo>>>()
-		bodyBuilder.bodyWithType(body)
+		bodyBuilder.body(body)
 		verify { bodyBuilder.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 

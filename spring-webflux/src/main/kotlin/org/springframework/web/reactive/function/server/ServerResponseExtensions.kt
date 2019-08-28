@@ -32,13 +32,12 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Deprecated("Use 'bodyWithType' instead.", replaceWith = ReplaceWith("bodyWithType(publisher)"))
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publisher<T>): Mono<ServerResponse> =
 		body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [ServerResponse.BodyBuilder.body] providing a `bodyWithType<T>(Any)` variant
+ * Extension for [ServerResponse.BodyBuilder.body] providing a `body<T>(Any)` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param producer the producer to write to the response. This must be a
@@ -48,20 +47,8 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publishe
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyWithType(producer: Any): Mono<ServerResponse> =
+inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mono<ServerResponse> =
 		body(producer, object : ParameterizedTypeReference<T>() {})
-
-/**
- * Extension for [ServerResponse.BodyBuilder.body] providing a `bodyWithType(Publisher<T>)` variant
- * leveraging Kotlin reified type parameters. This extension is not subject to type
- * erasure and retains actual generic type arguments.
- * @param publisher the [Publisher] to write to the response
- * @param <T> the type of the elements contained in the publisher
- * @author Sebastien Deleuze
- * @since 5.2
- */
-inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyWithType(publisher: Publisher<T>): Mono<ServerResponse> =
-		body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.body] with an [Any] parameter.
@@ -97,7 +84,7 @@ suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(flo
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Deprecated("Use 'sse().bodyWithType(publisher)' instead.", replaceWith = ReplaceWith("sse().bodyWithType(publisher)"))
+@Deprecated("Use 'sse().body(publisher)' instead.", replaceWith = ReplaceWith("sse().body(publisher)"))
 inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEvents(publisher: Publisher<T>): Mono<ServerResponse> =
 		contentType(MediaType.TEXT_EVENT_STREAM).body(publisher, object : ParameterizedTypeReference<T>() {})
 

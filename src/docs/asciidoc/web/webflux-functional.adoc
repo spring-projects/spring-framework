@@ -231,8 +231,8 @@ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-val person: Mono<Person> = ...
-ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyWithType<Person>(person)
+val person: Person = ...
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(person)
 ----
 
 The following example shows how to build a 201 (CREATED) response with a `Location` header and no body:
@@ -262,7 +262,7 @@ ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.clas
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).bodyWithType(...)
+ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
 ====
 
