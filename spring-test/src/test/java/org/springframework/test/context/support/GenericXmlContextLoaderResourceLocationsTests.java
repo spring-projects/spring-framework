@@ -51,7 +51,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
 
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("contextConfigurationLocationsData")
 	void assertContextConfigurationLocations(String testClassName, String[] expectedLocations) throws Exception {
 		Class<?> testClass = ClassUtils.forName(getClass().getName() + "$" + testClassName, getClass().getClassLoader());

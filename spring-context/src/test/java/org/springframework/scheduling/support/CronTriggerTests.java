@@ -857,7 +857,7 @@ class CronTriggerTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "localDateTime [{0}], time zone [{1}]")
+	@ParameterizedTest(name = "[{index}] localDateTime[{0}], time zone[{1}]")
 	@MethodSource("parameters")
 	@interface ParameterizedCronTriggerTest {
 	}

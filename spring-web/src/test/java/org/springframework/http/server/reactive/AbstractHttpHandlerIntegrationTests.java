@@ -118,7 +118,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests#httpServers()")
 	// public for Kotlin
 	public @interface ParameterizedHttpServerTest {

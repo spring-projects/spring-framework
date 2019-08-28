@@ -348,7 +348,7 @@ class ServletWebRequestHttpMethodsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@ValueSource(strings = { "GET", "HEAD" })
 	@interface ParameterizedHttpMethodTest {
 	}

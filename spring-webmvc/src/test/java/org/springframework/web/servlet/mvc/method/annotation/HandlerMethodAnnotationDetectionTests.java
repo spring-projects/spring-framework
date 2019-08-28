@@ -116,7 +116,7 @@ class HandlerMethodAnnotationDetectionTests {
 	}
 
 
-	@ParameterizedTest(name = "controller [{0}], auto-proxy [{1}]")
+	@ParameterizedTest(name = "[{index}] controller [{0}], auto-proxy [{1}]")
 	@MethodSource("handlerTypes")
 	void testRequestMappingMethod(Class<?> controllerType, boolean useAutoProxy) throws Exception {
 		setUp(controllerType, useAutoProxy);

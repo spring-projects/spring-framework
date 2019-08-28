@@ -73,7 +73,7 @@ class WebClientIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "webClient [{0}]")
+	@ParameterizedTest(name = "[{index}] webClient [{0}]")
 	@MethodSource("arguments")
 	@interface ParameterizedWebClientTest {
 	}

@@ -57,15 +57,15 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
 
-	@ParameterizedTest(name = "error: [{0}], exception: [{1}]")
+	@ParameterizedTest(name = "[{index}] error: [{0}]")
 	@DisplayName("hasError() returns true")
 	@MethodSource("errorCodes")
-	void hasErrorTrue(HttpStatus httpStatus, Class<? extends Throwable> expectedExceptionClass) throws Exception {
+	void hasErrorTrue(HttpStatus httpStatus) throws Exception {
 		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
 		assertThat(this.handler.hasError(this.response)).isTrue();
 	}
 
-	@ParameterizedTest(name = "error: [{0}], exception: [{1}]")
+	@ParameterizedTest(name = "[{index}] error: [{0}], exception: [{1}]")
 	@DisplayName("handleError() throws an exception")
 	@MethodSource("errorCodes")
 	void handleErrorException(HttpStatus httpStatus, Class<? extends Throwable> expectedExceptionClass) throws Exception {
@@ -75,8 +75,7 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
 		given(this.response.getHeaders()).willReturn(headers);
 
-		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() ->
-				this.handler.handleError(this.response));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> this.handler.handleError(this.response));
 	}
 
 	static Object[][] errorCodes() {

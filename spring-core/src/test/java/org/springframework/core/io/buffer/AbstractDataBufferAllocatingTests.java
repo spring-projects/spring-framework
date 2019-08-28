@@ -143,7 +143,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 	public @interface ParameterizedDataBufferAllocatingTest {
 	}

@@ -96,7 +96,7 @@ class HeadersAdaptersTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("headers")
 	@interface ParameterizedHeadersTest {
 	}

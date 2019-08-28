@@ -65,7 +65,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "server [{0}] webClient [{1}]")
+	@ParameterizedTest(name = "[{index}] server [{0}], webClient [{1}]")
 	@MethodSource("arguments")
 	protected @interface ParameterizedSseTest {
 	}

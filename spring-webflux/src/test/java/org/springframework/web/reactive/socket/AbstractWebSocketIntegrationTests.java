@@ -80,7 +80,7 @@ abstract class AbstractWebSocketIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "client[{0}] - server [{1}]")
+	@ParameterizedTest(name = "[{index}] client[{0}], server[{1}]")
 	@MethodSource("arguments")
 	@interface ParameterizedWebSocketTest {
 	}
