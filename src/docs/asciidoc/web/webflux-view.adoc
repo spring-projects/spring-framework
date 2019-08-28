@@ -47,8 +47,8 @@ integration for using Spring WebFlux with FreeMarker templates.
 
 The following example shows how to configure FreeMarker as a view technology:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -56,7 +56,7 @@ The following example shows how to configure FreeMarker as a view technology:
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.freemarker();
+			registry.freeMarker();
 		}
 
 		// Configure FreeMarker...
@@ -66,6 +66,25 @@ The following example shows how to configure FreeMarker as a view technology:
 			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 			configurer.setTemplateLoaderPath("classpath:/templates/freemarker");
 			return configurer;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+		}
+
+		// Configure FreeMarker...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates/freemarker")
 		}
 	}
 ----
@@ -87,8 +106,8 @@ properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property
 a `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -105,6 +124,22 @@ a `java.util.Properties` object, and the `freemarkerVariables` property requires
 			configurer.setTemplateLoaderPath("classpath:/templates");
 			configurer.setFreemarkerVariables(variables);
 			return configurer;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		// ...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates")
+			setFreemarkerVariables(mapOf("xml_escape" to XmlEscape()))
 		}
 	}
 ----
@@ -210,8 +245,8 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses Mustache templates and the Nashorn JavaScript engine:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -230,6 +265,26 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 			configurer.setRenderObject("Mustache");
 			configurer.setRenderFunction("render");
 			return configurer;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.scriptTemplate()
+		}
+
+		@Bean
+		fun configurer() = ScriptTemplateConfigurer().apply {
+			engineName = "nashorn"
+			setScripts("mustache.js")
+			renderObject = "Mustache"
+			renderFunction = "render"
 		}
 	}
 ----
@@ -252,11 +307,11 @@ https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
 browser facilities not available in the server-side script engine.
 The following example shows how to set a custom render function:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
-	@EnableWebMvc
+	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -275,6 +330,26 @@ The following example shows how to set a custom render function:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.scriptTemplate()
+		}
+
+		@Bean
+		fun configurer() = ScriptTemplateConfigurer().apply {
+			engineName = "nashorn"
+			setScripts("polyfill.js", "handlebars.js", "render.js")
+			renderFunction = "render"
+			isSharedEngine = false
+		}
+	}
+----
 
 NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or
@@ -284,8 +359,7 @@ to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
 `polyfill.js` defines only the `window` object needed by Handlebars to run properly,
 as the following snippet shows:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	var window = {};
 ----
@@ -296,8 +370,7 @@ This can be done on the script side, as well as any customization you need (mana
 template engine configuration for example).
 The following example shows how compile a template:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	function render(template, model) {
 		var compiledTemplate = Handlebars.compile(template);
