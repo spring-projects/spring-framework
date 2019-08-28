@@ -1,4 +1,4 @@
-package com.atlwj.demo.ioc.annotation.autowired.entity;
+package com.atlwj.demo.ioc.annotation.resource.entity;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,10 +8,10 @@ import java.io.Serializable;
 @Component
 public class Person implements Serializable {
 
-	private static final long serialVersionUID = -6793896245102633905L;
-	@Value("tom")
+	private static final long serialVersionUID = -1593440478830232276L;
+	@Value("lucy")
 	private String username;
-	@Value("20")
+	@Value("250")
 	private Integer age;
 
 	public Person() {
