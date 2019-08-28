@@ -19,7 +19,7 @@ import org.springframework.context.annotation.*;
  *
  */
 @Configuration
-@ComponentScan(value = "com.atlwj.demo.ioc.annotation")
+@ComponentScan(value = "com.atlwj.demo.ioc.annotation.autowired")
 public class Config {
 
 

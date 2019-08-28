@@ -19,6 +19,9 @@ dependencies {
     compile project(":spring-aop")
     compile project(":spring-jdbc")
     compile project(":spring-tx")
+    // https://mvnrepository.com/artifact/aspectj/aspectjrt
+    compile group: 'aspectj', name: 'aspectjrt', version: '1.5.3'
+
     compile group: 'org.mybatis', name: 'mybatis-spring', version: '1.3.2'
     // https://mvnrepository.com/artifact/org.mybatis/mybatis
     compile group: 'org.mybatis', name: 'mybatis', version: '3.4.6'
@@ -30,9 +33,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.mchange/c3p0
     compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.2'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'junit', name: 'junit', version: '4.12'
 
     compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

@@ -10,15 +10,13 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-@ComponentScan(value = "com.atlwj.demo.ioc.annotation.resource")
-public class ResourceConfig {
+public class Config02 {
 
 
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ResourceConfig.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config02.class);
 		for (String bdNamne : context.getBeanDefinitionNames()) {
 			System.out.println(bdNamne);
 		}
-		//context.getBean(PersonController.class).add();
 	}
 }
