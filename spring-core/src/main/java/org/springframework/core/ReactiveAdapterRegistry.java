@@ -349,8 +349,8 @@ public class ReactiveAdapterRegistry {
 
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
-					source -> kotlinx.coroutines.reactor.FlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
-					kotlinx.coroutines.reactive.FlowKt::asFlow
+					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
+					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow
 			);
 		}
 	}
