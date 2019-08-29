@@ -96,10 +96,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				if (this.indexLookupPath == -1) {
-					throw new IllegalStateException(
-							"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
-							"Does the path have invalid encoded characters for characterEncoding '" +
-							getRequest().getCharacterEncoding() + "'?");
+					throw new LookupPathIndexException(lookupPath, requestUri);
 				}
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
@@ -161,6 +158,16 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return super.encodeURL(urlPath);
 			}
 			return super.encodeURL(url);
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	static class LookupPathIndexException extends IllegalArgumentException {
+
+		LookupPathIndexException(String lookupPath, String requestUri) {
+			super("Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
+					"This could be because the path has invalid encoded characters or isn't normalized.");
 		}
 	}
 
