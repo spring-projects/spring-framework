@@ -231,7 +231,7 @@ public class AnnotatedBeanDefinitionReader {
 		abd.setScope(scopeMetadata.getScopeName());
 
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
-
+		// 处理common的definition 注解 包括 Lazy DepandOn,Role,Descrpition
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
@@ -251,9 +251,15 @@ public class AnnotatedBeanDefinitionReader {
 		}
 		/**
 		 * 在这里将BeanDefinition包装成BeanDefinitionHolder
+		 *
 		 */
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		// 到这里为止，还只是配置类extConfig的bdh
+		// 使用代理模式cglib jdk
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		/**
+		 * 开始注册bean
+		 */
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 

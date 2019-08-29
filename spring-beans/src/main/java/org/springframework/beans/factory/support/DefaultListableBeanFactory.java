@@ -791,7 +791,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
-	// 该方法实现了bdr的接口，完成bd的注册
+
+	/**
+	 * 注册bd 该方法实现了bdr的接口，完成bd的注册
+	 * @param beanName the name of the bean instance to register
+	 * @param beanDefinition definition of the bean instance to register
+	 * @throws BeanDefinitionStoreException
+	 * @author LengWJ
+	 */
 	@Override
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
@@ -809,7 +816,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Validation of bean definition failed", ex);
 			}
 		}
-		// 根据beanName去单例池里边获取映射的bd
+
+		/**
+		 *  根据beanName去单例池里边获取映射的bd
+		 * 	单例池里边默认是6个spring内置的处理类,问题？？什么时候开启的？？
+		 * 	internalConfigurationAnnotationProcessor
+		 * 	internalEventListenerFactory
+		 * 	internalEventListenerProcessor
+		 * 	internalAutowiredAnnotationProcessor
+		 * 	internalCommonAnnotationProcessor
+		 * 	internalRequiredAnnotationProcessor
+		 */
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
 			if (!isAllowBeanDefinitionOverriding()) {

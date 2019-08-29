@@ -58,6 +58,9 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	 * @see GenericBeanDefinition
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition
+	 *
+	 * 这个方法提供了bean的注册功能，Spring提供了两个实现，模式使用DefaultListableBeanFactory，
+	 * SimpleBeanDefinitionRegistry这个仅仅提供了bean的注册方法，内部只有一个单例池字段，用于用户testing测试使用
 	 */
 	void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException;

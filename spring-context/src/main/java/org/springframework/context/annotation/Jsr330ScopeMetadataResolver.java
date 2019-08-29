@@ -88,7 +88,9 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 		ScopeMetadata metadata = new ScopeMetadata();
 		metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);
 		if (definition instanceof AnnotatedBeanDefinition) {
+			// 创建被注解了的bd，里面包括[AnnotationMetadata\MethodMetadata]
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+			// 获取所有的注解类型
 			Set<String> annTypes = annDef.getMetadata().getAnnotationTypes();
 			String found = null;
 			for (String annType : annTypes) {
