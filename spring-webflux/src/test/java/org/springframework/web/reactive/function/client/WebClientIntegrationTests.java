@@ -409,12 +409,13 @@ public class WebClientIntegrationTests {
 		byte[] expected = Files.readAllBytes(resource.getFile().toPath());
 		Flux<DataBuffer> body = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096);
 
-		this.webClient.post()
+		Mono<Void> result = this.webClient.post()
 				.uri("/")
 				.body(body, DataBuffer.class)
 				.retrieve()
-				.bodyToMono(Void.class)
-				.block(Duration.ofSeconds(5));
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).verifyComplete();
 
 		expectRequest(request -> {
 			ByteArrayOutputStream actual = new ByteArrayOutputStream();
