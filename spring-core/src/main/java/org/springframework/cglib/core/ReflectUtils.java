@@ -382,7 +382,7 @@ public class ReflectUtils {
 			}
 		}
 		methods.remove(null);
-		return (Method[]) methods.toArray(new Method[0]);
+		return (Method[]) methods.toArray(new Method[methods.size()]);
 	}
 
 	public static PropertyDescriptor[] getBeanProperties(Class type) {
@@ -412,7 +412,7 @@ public class ReflectUtils {
 					properties.add(pd);
 				}
 			}
-			return (PropertyDescriptor[]) properties.toArray(new PropertyDescriptor[0]);
+			return (PropertyDescriptor[]) properties.toArray(new PropertyDescriptor[properties.size()]);
 		}
 		catch (IntrospectionException e) {
 			throw new CodeGenerationException(e);
