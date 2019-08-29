@@ -1131,7 +1131,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		if (mappedHandler != null) {
-			mappedHandler.triggerAfterCompletion(request, response, null);
+			mappedHandler.triggerAfterCompletion(request, response, exception);
 		}
 	}
 
