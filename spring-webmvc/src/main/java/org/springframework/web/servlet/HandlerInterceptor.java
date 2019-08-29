@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,8 @@ public interface HandlerInterceptor {
 	 * @param response current HTTP response
 	 * @param handler handler (or {@link HandlerMethod}) that started asynchronous
 	 * execution, for type and/or instance examination
-	 * @param ex exception thrown on handler execution, if any
+	 * @param ex any exception thrown on handler execution, if any; this does not
+	 * include exceptions that have been handled through an exception resolver
 	 * @throws Exception in case of errors
 	 */
 	default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
