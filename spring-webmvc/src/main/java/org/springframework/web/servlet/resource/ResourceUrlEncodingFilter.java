@@ -162,6 +162,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 	}
 
 
+	/**
+	 * Runtime exception to get far enough (to ResourceUrlProviderExposingInterceptor)
+	 * where it can be re-thrown as ServletRequestBindingException to result in
+	 * a 400 response.
+	 */
 	@SuppressWarnings("serial")
 	static class LookupPathIndexException extends IllegalArgumentException {
 
