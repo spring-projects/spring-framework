@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
@@ -28,6 +30,7 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.bind.ServletRequestBindingException;
 
 import static org.junit.Assert.*;
 
@@ -155,14 +158,36 @@ public class ResourceUrlEncodingFilterTests {
 				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org#something");
 	}
 
+	@Test // gh-23508
+	public void invalidLookupPath() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/a/b/../logo.png");
+		request.setServletPath("/a/logo.png");
+
+			this.filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
+				try {
+					ResourceUrlProviderExposingInterceptor interceptor =
+							new ResourceUrlProviderExposingInterceptor(this.urlProvider);
+
+					interceptor.preHandle((HttpServletRequest) req, (HttpServletResponse) res, new Object());
+					fail();
+				}
+				catch (Exception ex) {
+					assertEquals(ServletRequestBindingException.class, ex.getClass());
+				}
+			});
+	}
+
 	private void testEncodeUrl(MockHttpServletRequest request, String url, String expected)
 			throws ServletException, IOException {
 
-		this.filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
+		FilterChain chain = (req, res) -> {
 			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
 			String result = ((HttpServletResponse) res).encodeURL(url);
 			assertEquals(expected, result);
-		});
+		};
+
+		this.filter.doFilter(request, new MockHttpServletResponse(), chain);
 	}
 
 }
