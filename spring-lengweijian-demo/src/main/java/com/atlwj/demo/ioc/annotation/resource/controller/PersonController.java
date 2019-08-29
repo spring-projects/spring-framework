@@ -13,7 +13,7 @@ public class PersonController {
 	@Resource
 	private ApplicationContext applicationContext;
 
-	@Resource(name = "personServiceImpl")
+	@Resource(name = "personServiceImpl",description = "personService 的第一个实现类",type = PersonService.class)
 	PersonService personService;
 
 	public int add(){
