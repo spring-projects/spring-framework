@@ -6,9 +6,9 @@
 	   http://www.springframework.org/schema/context
        https://www.springframework.org/schema/context/spring-context.xsd">
 
-	<bean id="movieFinder" class="com.atlwj.demo.ioc.di.MovieFinder"></bean>
+	<bean id="movieFinder" class="com.atlwj.demo.ioc.xml.di.MovieFinder"></bean>
 
-	<bean id="simpleMovieLister" class="com.atlwj.demo.ioc.di.SimpleMovieLister">
+	<bean id="simpleMovieLister" class="com.atlwj.demo.ioc.xml.di.SimpleMovieLister">
 		<!--<constructor-arg index="0" ref="movieFinder"></constructor-arg>-->
 		<property name="movieFinder" ref="movieFinder"></property>
 	</bean>

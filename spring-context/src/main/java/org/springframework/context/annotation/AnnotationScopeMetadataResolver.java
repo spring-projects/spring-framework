@@ -73,7 +73,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 
-
+	// 解析元数据的scope
 	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
@@ -87,6 +87,8 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 				if (proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}
+				// 这里的scopedProxyMode里面定义了使用不同种的动态代理的策略美剧
+				// 例如cglib   jdk
 				metadata.setScopedProxyMode(proxyMode);
 			}
 		}

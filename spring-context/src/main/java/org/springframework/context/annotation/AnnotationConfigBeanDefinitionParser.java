@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
  * @author Christian Dupuis
  * @since 2.5
  * @see AnnotationConfigUtils
+ *
+ * 这个类用于解析注解配置的bd的解析器
  */
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 

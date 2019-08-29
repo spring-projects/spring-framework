@@ -62,7 +62,12 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		// 创建AnnotatedBeanDefinitionReader
+		// 方便用于对Java config编程方式的bean的类进行注册，这个类对于传统的ClassPathBeanDefinitionScanner是替代方案，
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+
+		// 创建ClassPathBeanDefinitionScanner，类路径的bd扫描器
+		// 这里边主要设置了Environment和ResourceLoader
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -83,8 +88,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		// 创建AnnotatedBeanDefinitionReader
+		// 创建ClassPathBeanDefinitionScanner
 		this();
 		register(annotatedClasses);
+		// 刷新容器
 		refresh();
 	}
 

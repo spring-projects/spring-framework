@@ -224,19 +224,20 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
-
+		// 处理common的注解的属性
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
-
+		//获取自动注入的模式  no byName byType ??
 		Autowire autowire = bean.getEnum("autowire");
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
+		// 设置initMethod
 		String initMethodName = bean.getString("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
 		}
-
+		// 设置destroyMethod
 		String destroyMethodName = bean.getString("destroyMethod");
 		beanDef.setDestroyMethodName(destroyMethodName);
 
@@ -265,6 +266,8 @@ class ConfigurationClassBeanDefinitionReader {
 			logger.debug(String.format("Registering bean definition for @Bean method %s.%s()",
 					configClass.getMetadata().getClassName(), beanName));
 		}
+
+		// 注册bd
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 

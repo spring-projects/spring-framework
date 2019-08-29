@@ -24,6 +24,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @author Mark Fisher
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
+ *
+ * 这是一个用于解析bd的scope作用范围的一个策略接口
  */
 @FunctionalInterface
 public interface ScopeMetadataResolver {
@@ -39,6 +41,7 @@ public interface ScopeMetadataResolver {
 	 * {@link BeanDefinition#attributeNames()} of the supplied {@code definition}.
 	 * @param definition the target bean definition
 	 * @return the relevant scope metadata; never {@code null}
+	 * 这是一个用于解析bd的scope作用范围的一个策略接口
 	 */
 	ScopeMetadata resolveScopeMetadata(BeanDefinition definition);
 
