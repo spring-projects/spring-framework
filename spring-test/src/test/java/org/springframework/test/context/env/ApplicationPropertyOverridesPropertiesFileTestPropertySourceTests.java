@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
- * support with an explicitly named properties file that overrides a
+ * support with an explicitly named properties file that overrides an
  * application-level property configured via
  * {@link PropertySource @PropertySource} on an
  * {@link Configuration @Configuration} class.
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource("ApplicationPropertyOverridePropertiesFileTestPropertySourceTests.properties")
-class ApplicationPropertyOverridePropertiesFileTestPropertySourceTests {
+class ApplicationPropertyOverridesPropertiesFileTestPropertySourceTests {
 
 	@Autowired
 	protected Environment env;
