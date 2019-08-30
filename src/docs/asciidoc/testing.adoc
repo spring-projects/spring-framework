@@ -62,6 +62,7 @@ Spring includes a number of packages dedicated to mocking:
 * <<mock-objects-servlet>>
 * <<mock-objects-web-reactive>>
 
+
 [[mock-objects-env]]
 ==== Environment
 
@@ -449,10 +450,11 @@ file:
 .Java
 ----
 	@ContextConfiguration("/test-config.xml") <1>
-	public class XmlApplicationContextTests {
+	class XmlApplicationContextTests {
 		// class body...
     }
 ----
+<1> Referring to an XML file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -471,10 +473,11 @@ The following example shows a `@ContextConfiguration` annotation that refers to 
 .Java
 ----
 	@ContextConfiguration(classes = TestConfig.class) <1>
-	public class ConfigClassApplicationContextTests {
+	class ConfigClassApplicationContextTests {
 		// class body...
 	}
 ----
+<1> Referring to a class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -495,10 +498,11 @@ The following example shows such a case:
 .Java
 ----
 	@ContextConfiguration(initializers = CustomContextIntializer.class) <1>
-	public class ContextInitializerTests {
+	class ContextInitializerTests {
 		// class body...
 	}
 ----
+<1> Declaring an initializer class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -522,10 +526,11 @@ The following example uses both a location and a loader:
 .Java
 ----
 	@ContextConfiguration(locations = "/test-context.xml", loader = CustomContextLoader.class) <1>
-	public class CustomLoaderXmlApplicationContextTests {
+	class CustomLoaderXmlApplicationContextTests {
 		// class body...
 	}
 ----
+<1> Configuring both a location and a custom loader.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -563,10 +568,11 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 ----
 	@ContextConfiguration
 	@WebAppConfiguration <1>
-	public class WebAppTests {
+	class WebAppTests {
 		// class body...
 	}
 ----
+<1> The `@WebAppConfiguration` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -590,10 +596,11 @@ resource. The following example shows how to specify a classpath resource:
 ----
 	@ContextConfiguration
 	@WebAppConfiguration("classpath:test-web-resources") <1>
-	public class WebAppTests {
+	class WebAppTests {
 		// class body...
 	}
 ----
+<1> Specifying a classpath resource.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -630,7 +637,7 @@ within a test class hierarchy):
 		@ContextConfiguration("/parent-config.xml"),
 		@ContextConfiguration("/child-config.xml")
 	})
-	public class ContextHierarchyTests {
+	class ContextHierarchyTests {
 		// class body...
 	}
 ----
@@ -654,7 +661,7 @@ within a test class hierarchy):
 		@ContextConfiguration(classes = AppConfig.class),
 		@ContextConfiguration(classes = WebConfig.class)
 	})
-	public class WebIntegrationTests {
+	class WebIntegrationTests {
 		// class body...
 	}
 ----
@@ -692,10 +699,11 @@ The following example indicates that the `dev` profile should be active:
 ----
 	@ContextConfiguration
 	@ActiveProfiles("dev") <1>
-	public class DeveloperTests {
+	class DeveloperTests {
 		// class body...
 	}
 ----
+<1> Indicate that the `dev` profile should be active.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -717,17 +725,18 @@ be active:
 ----
 	@ContextConfiguration
 	@ActiveProfiles({"dev", "integration"}) <1>
-	public class DeveloperIntegrationTests {
+	class DeveloperIntegrationTests {
 		// class body...
 	}
 ----
+<1> Indicate that the `dev` and `integration` profiles should be active.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@ContextConfiguration
     @ActiveProfiles(["dev", "integration"]) <1>
-	public class DeveloperIntegrationTests {
+	class DeveloperIntegrationTests {
 		// class body...
 	}
 ----
@@ -766,10 +775,11 @@ The following example demonstrates how to declare a properties file from the cla
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") <1>
-	public class MyIntegrationTests {
+	class MyIntegrationTests {
 		// class body...
 	}
 ----
+<1> Get properties from `test.properties` in the root of the classpath.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -790,10 +800,11 @@ The following example demonstrates how to declare inlined properties:
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = { "timezone = GMT", "port: 4242" }) <1>
-	public class MyIntegrationTests {
+	class MyIntegrationTests {
 		// class body...
 	}
 ----
+<1> Declare `timezone` and `port` properties.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -834,10 +845,12 @@ configuration scenarios:
 .Java
 ----
 	@DirtiesContext(classMode = BEFORE_CLASS) <1>
-	public class FreshContextTests {
+	class FreshContextTests {
 		// some tests that require a new Spring container
 	}
 ----
+<1> Dirty the context before the current test class.
+
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -858,10 +871,11 @@ configuration scenarios:
 .Java
 ----
 	@DirtiesContext <1>
-	public class ContextDirtyingTests {
+	class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}
 ----
+<1> Dirty the context after the current test class.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -881,10 +895,11 @@ mode set to `BEFORE_EACH_TEST_METHOD.`
 .Java
 ----
 	@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD) <1>
-	public class FreshContextTests {
+	class FreshContextTests {
 		// some tests that require a new Spring container
 	}
 ----
+<1> Dirty the context before each test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -904,10 +919,11 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 .Java
 ----
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD) <1>
-	public class ContextDirtyingTests {
+	class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}
 ----
+<1> Dirty the context after each test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -928,17 +944,18 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 ----
 	@DirtiesContext(methodMode = BEFORE_METHOD) <1>
 	@Test
-	public void testProcessWhichRequiresFreshAppCtx() {
+	void testProcessWhichRequiresFreshAppCtx() {
 		// some logic that requires a new Spring container
 	}
 ----
+<1> Dirty the context before the current test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@DirtiesContext(methodMode = BEFORE_METHOD) <1>
 	@Test
-	public fun testProcessWhichRequiresFreshAppCtx() {
+	fun testProcessWhichRequiresFreshAppCtx() {
 		// some logic that requires a new Spring container
 	}
 ----
@@ -953,17 +970,18 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 ----
 	@DirtiesContext <1>
 	@Test
-	public void testProcessWhichDirtiesAppCtx() {
+	void testProcessWhichDirtiesAppCtx() {
 		// some logic that results in the Spring container being dirtied
 	}
 ----
+<1> Dirty the context after the current test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@DirtiesContext <1>
 	@Test
-	public fun testProcessWhichDirtiesAppCtx() {
+	fun testProcessWhichDirtiesAppCtx() {
 		// some logic that results in the Spring container being dirtied
 	}
 ----
@@ -987,19 +1005,20 @@ as the following example shows.
 		@ContextConfiguration("/parent-config.xml"),
 		@ContextConfiguration("/child-config.xml")
 	})
-	public class BaseTests {
+	class BaseTests {
 		// class body...
 	}
 
-	public class ExtendedTests extends BaseTests {
+	class ExtendedTests extends BaseTests {
 
 		@Test
 		@DirtiesContext(hierarchyMode = CURRENT_LEVEL) <1>
-		public void test() {
+		void test() {
 			// some logic that results in the child context being dirtied
 		}
 	}
 ----
+<1> Use the current-level algorithm.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1037,10 +1056,11 @@ The following example shows how to register two `TestExecutionListener` implemen
 ----
 	@ContextConfiguration
 	@TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class}) <1>
-	public class CustomTestExecutionListenerTests {
+	class CustomTestExecutionListenerTests {
 		// class body...
 	}
 ----
+<1> Register two `TestExecutionListener` implementations.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1074,17 +1094,18 @@ The following example shows how to use the `@Commit` annotation:
 ----
 	@Commit <1>
 	@Test
-	public void testProcessWithoutRollback() {
+	void testProcessWithoutRollback() {
 		// ...
 	}
 ----
+<1> Commit the result of the test to the database.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Commit <1>
 	@Test
-	public fun testProcessWithoutRollback() {
+	fun testProcessWithoutRollback() {
 		// ...
 	}
 ----
@@ -1113,17 +1134,18 @@ result is committed to the database):
 ----
 	@Rollback(false) <1>
 	@Test
-	public void testProcessWithoutRollback() {
+	void testProcessWithoutRollback() {
 		// ...
 	}
 ----
+<1> Do not roll back the result.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Rollback(false) <1>
 	@Test
-	public fun testProcessWithoutRollback() {
+	fun testProcessWithoutRollback() {
 		// ...
 	}
 ----
@@ -1149,6 +1171,7 @@ The following example shows how to use the `@BeforeTransaction` annotation:
 		// logic to be executed before a transaction is started
 	}
 ----
+<1> Run this method before a transaction.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1178,12 +1201,13 @@ transaction by using Spring's `@Transactional` annotation. As of Spring Framewor
 		// logic to be executed after a transaction has ended
 	}
 ----
+<1> Run this method after a transaction.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@AfterTransaction <1>
-	public fun afterTransaction() {
+	fun afterTransaction() {
 		// logic to be executed after a transaction has ended
 	}
 ----
@@ -1202,17 +1226,18 @@ it:
 ----
 	@Test
 	@Sql({"/test-schema.sql", "/test-user-data.sql"}) <1>
-	public void userTest() {
+	void userTest() {
 		// execute code that relies on the test schema and test data
 	}
 ----
+<1> Run two scripts for this test.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Test
     @Sql("/test-schema.sql", "/test-user-data.sql") <1>
-	public fun userTest() {
+	fun userTest() {
 		// execute code that relies on the test schema and test data
 	}
 ----
@@ -1235,10 +1260,11 @@ configured with the `@Sql` annotation. The following example shows how to use it
 		scripts = "/test-user-data.sql",
 		config = @SqlConfig(commentPrefix = "`", separator = "@@") <1>
 	)
-	public void userTest() {
+	void userTest() {
 		// execute code that relies on the test data
 	}
 ----
+<1> Set the comment prefix and the separator in SQL scripts.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1247,7 +1273,7 @@ configured with the `@Sql` annotation. The following example shows how to use it
     @Sql(scripts = ["/test-user-data.sql"],
         config = SqlConfig(commentPrefix = "`", separator = "@@") <1>
 	)
-	public fun userTest() {
+	fun userTest() {
 		// execute code that relies on the test data
 	}
 ----
@@ -1272,7 +1298,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
 	@SqlMergeMode(MERGE) <1>
-	public class UserTests {
+	class UserTests {
 
 		@Test
 		@Sql("/user-test-data-001.sql")
@@ -1281,6 +1307,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 		}
 	}
 ----
+<1> Set the `@Sql` merge mode to `MERGE` for all test methods in the class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1306,7 +1333,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
-	public class UserTests {
+	class UserTests {
 
 		@Test
 		@Sql("/user-test-data-001.sql")
@@ -1316,6 +1343,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 		}
 	}
 ----
+<1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1356,6 +1384,7 @@ annotation. The following example shows how to declare an SQL group:
 		// execute code that uses the test schema and test data
 	}
 ----
+<1> Declare a group of SQL scripts.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1446,13 +1475,14 @@ The following example shows a test that has an `@IfProfileValue` annotation:
 		// some logic that should run only on Java VMs from Oracle Corporation
 	}
 ----
+<1> Run this test only when the Java vendor is "Oracle Corporation".
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
     @IfProfileValue(name="java.vendor", value="Oracle Corporation") <1>
 	@Test
-	public fun testProcessWhichRunsOnlyOnOracleJvm() {
+	fun testProcessWhichRunsOnlyOnOracleJvm() {
 		// some logic that should run only on Java VMs from Oracle Corporation
 	}
 ----
@@ -1472,13 +1502,14 @@ Consider the following example:
 		// some logic that should run only for unit and integration test groups
 	}
 ----
+<1> Run this test for unit tests and integration tests.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
     @IfProfileValue(name="test-groups", values=["unit-tests", "integration-tests"]) <1>
 	@Test
-	public fun testProcessWhichRunsForUnitOrIntegrationTestGroups() {
+	fun testProcessWhichRunsForUnitOrIntegrationTestGroups() {
 		// some logic that should run only for unit and integration test groups
 	}
 ----
@@ -1502,6 +1533,7 @@ use `@ProfileValueSourceConfiguration`:
 		// class body...
 	}
 ----
+<1> Use a custom profile value source.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1533,12 +1565,13 @@ example shows how to use it:
 		// some logic that should not take longer than 1 second to execute
 	}
 ----
+<1> Set the time period for the test to one second.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
     @Timed(millis = 1000) <1>
-	public fun testProcessWithOneSecondTimeout() {
+	fun testProcessWithOneSecondTimeout() {
 		// some logic that should not take longer than 1 second to execute
 	}
 ----
@@ -1571,13 +1604,14 @@ how to use the `@Repeat` annotation:
 		// ...
 	}
 ----
+<1> Repeat this test ten times.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
     @Repeat(10) <1>
 	@Test
-	public fun testProcessRepeatedly() {
+	fun testProcessRepeatedly() {
 		// ...
 	}
 ----
@@ -1619,6 +1653,7 @@ configuration class:
 		// class body...
 	}
 ----
+<1> Specify the configuration class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1642,6 +1677,7 @@ location of a configuration file:
 		// class body...
 	}
 ----
+<1> Specify the location of a configuration file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1682,6 +1718,7 @@ a configuration class:
 		// class body...
 	}
 ----
+<1> Specify the configuration class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1705,6 +1742,7 @@ the location of a configuration file:
 		// class body...
 	}
 ----
+<1> Specify the location of a configuration file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2335,7 +2373,7 @@ listeners. The following listing demonstrates this style of configuration:
 		TransactionalTestExecutionListener.class,
 		SqlScriptsTestExecutionListener.class
 	})
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2353,7 +2391,7 @@ listeners. The following listing demonstrates this style of configuration:
 		TransactionalTestExecutionListener::class.java,
 		SqlScriptsTestExecutionListener::class.java
 	])
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2392,7 +2430,7 @@ be replaced with the following:
 		listeners = MyCustomTestExecutionListener.class,
 		mergeMode = MERGE_WITH_DEFAULTS
 	)
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2405,7 +2443,7 @@ be replaced with the following:
 		listeners = MyCustomTestExecutionListener::class.java,
 		mergeMode = MERGE_WITH_DEFAULTS
 	)
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2495,23 +2533,22 @@ a field or setter method, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration
-	public class MyTest {
+	@SpringJUnitConfig
+	class MyTest {
 
 		@Autowired <1>
-		private ApplicationContext applicationContext;
+		ApplicationContext applicationContext;
 
 		// class body...
 	}
 ----
+<1> Injecting the `ApplicationContext`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
-	@ContextConfiguration
-	public class MyTest {
+    @SpringJUnitConfig
+	class MyTest {
 
 		@Autowired <1>
 		private lateinit var applicationContext:ApplicationContext
@@ -2528,28 +2565,26 @@ the web application context into your test, as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@WebAppConfiguration <1>
-	@ContextConfiguration
-	public class MyWebAppTest {
+	@SpringJUnitWebConfig <1>
+	class MyWebAppTest {
 
 		@Autowired <2>
-		private WebApplicationContext wac;
+		WebApplicationContext wac;
 
 		// class body...
 	}
 ----
+<1> Configuring the `WebApplicationContext`.
+<2> Injecting the `WebApplicationContext`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
-	@WebAppConfiguration <1>
-	@ContextConfiguration
-	public class MyWebAppTest {
+    @SpringJUnitWebConfig <1>
+	class MyWebAppTest {
 
 		@Autowired <2>
-		private lateinit var wac:WebApplicationContext
+		lateinit var wac:WebApplicationContext
 		// class body...
 	}
 ----
@@ -2604,23 +2639,24 @@ path that represents a resource URL (i.e., a path prefixed with `classpath:`, `f
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
 	// "/test-config.xml" in the root of the classpath
 	@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"}) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Setting the locations attribute to a list of XML files.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from "/app-config.xml" and
 	// "/test-config.xml" in the root of the classpath
 	@ContextConfiguration(locations=["/app-config.xml", "/test-config.xml"]) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2636,19 +2672,20 @@ demonstrated in the following example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@ContextConfiguration({"/app-config.xml", "/test-config.xml"}) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Specifying XML files without using the `location` attribute.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	@ContextConfiguration(["/app-config.xml", "/test-config.xml"]) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2668,23 +2705,24 @@ example shows how to do so:
 ----
 	package com.example;
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTest-context.xml"
 	@ContextConfiguration <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Loading configuration from the default location.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTest-context.xml"
 	@ContextConfiguration <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2710,23 +2748,24 @@ The following example shows how to specify Groovy configuration files:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
 	// "/TestConfig.groovy" in the root of the classpath
 	@ContextConfiguration({"/AppConfig.groovy", "/TestConfig.Groovy"}) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Specifying the location of Groovy configuration files.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
 	// "/TestConfig.groovy" in the root of the classpath
 	@ContextConfiguration(["/AppConfig.groovy", "/TestConfig.Groovy"]) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2746,23 +2785,24 @@ the default:
 ----
 	package com.example;
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTestContext.groovy"
 	@ContextConfiguration <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Loading configuration from the default location.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTestContext.groovy"
 	@ContextConfiguration <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2783,11 +2823,11 @@ The following listing shows how to combine both in an integration test:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
 	// "/app-config.xml" and "/TestConfig.groovy"
 	@ContextConfiguration({ "/app-config.xml", "/TestConfig.groovy" })
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2795,11 +2835,11 @@ The following listing shows how to combine both in an integration test:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from
 	// "/app-config.xml" and "/TestConfig.groovy"
 	@ContextConfiguration(["/app-config.xml", "/TestConfig.groovy"])
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2816,21 +2856,22 @@ that contains references to annotated classes. The following example shows how t
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
 	@ContextConfiguration(classes = {AppConfig.class, TestConfig.class}) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Specifying annotated classes.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
 	@ContextConfiguration(classes = [AppConfig::class.java, TestConfig::class.java]) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
@@ -2869,18 +2910,17 @@ class:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@SpringJUnitConfig <1>
 	// ApplicationContext will be loaded from the
 	// static nested Config class
-	@ContextConfiguration <1>
-	public class OrderServiceTest {
+	class OrderServiceTest {
 
 		@Configuration
 		static class Config {
 
 			// this bean will be injected into the OrderServiceTest class
 			@Bean
-			public OrderService orderService() {
+			OrderService orderService() {
 				OrderService orderService = new OrderServiceImpl();
 				// set properties, etc.
 				return orderService;
@@ -2888,27 +2928,27 @@ class:
 		}
 
 		@Autowired
-		private OrderService orderService;
+		OrderService orderService;
 
 		@Test
-		public void testOrderService() {
+		void testOrderService() {
 			// test the orderService
 		}
 
 	}
 ----
+<1> Loading configuration information from the nested `Config` class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @SpringJUnitConfig <1>
     // ApplicationContext will be loaded from the
     // static nested Config class
-    @ContextConfiguration<1>
     class OrderServiceTest {
 
         @Autowired
-        private lateinit var orderService: OrderService
+        lateinit var orderService: OrderService
 
         @Configuration
         internal class Config {
@@ -2981,21 +3021,22 @@ order in which the initializers are invoked depends on whether they implement Sp
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from TestConfig
 	// and initialized by TestAppCtxInitializer
 	@ContextConfiguration(
 		classes = TestConfig.class,
 		initializers = TestAppCtxInitializer.class) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Specifying configuration by using a configuration class and an initializer.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from TestConfig
 	// and initialized by TestAppCtxInitializer
 	@ContextConfiguration(
@@ -3017,19 +3058,20 @@ files or configuration classes. The following example shows how to do so:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be initialized by EntireAppInitializer
 	// which presumably registers beans in the context
 	@ContextConfiguration(initializers = EntireAppInitializer.class) <1>
-	public class MyTest {
+	class MyTest {
 		// class body...
 	}
 ----
+<1> Specifying configuration by using only an initializer.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be initialized by EntireAppInitializer
 	// which presumably registers beans in the context
 	@ContextConfiguration(initializers = EntireAppInitializer::class.java) <1>
@@ -3068,26 +3110,28 @@ another and use both its own configuration file and the superclass's configurati
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/base-config.xml"
 	// in the root of the classpath
 	@ContextConfiguration("/base-config.xml") <1>
-	public class BaseTest {
+	class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be loaded from "/base-config.xml" and
 	// "/extended-config.xml" in the root of the classpath
 	@ContextConfiguration("/extended-config.xml") <2>
-	public class ExtendedTest extends BaseTest {
+	class ExtendedTest extends BaseTest {
 		// class body...
 	}
 ----
+<1> Configuration file defined in the superclass.
+<2> Configuration file defined in the subclass.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    @RunWith(SpringRunner::class.java)
+    @ExtendWith(SpringExtension::class.java)
 	// ApplicationContext will be loaded from "/base-config.xml"
 	// in the root of the classpath
 	@ContextConfiguration("/base-config.xml") <1>
@@ -3115,32 +3159,32 @@ another and use both its own configuration class and the superclass's configurat
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from BaseConfig
-	@ContextConfiguration(classes = BaseConfig.class) <1>
-	public class BaseTest {
+	@SpringJUnitConfig(BaseConfig.class) <1>
+	class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
-	@ContextConfiguration(classes = ExtendedConfig.class) <2>
-	public class ExtendedTest extends BaseTest {
+	@SpringJUnitConfig(ExtendedConfig.class) <2>
+	class ExtendedTest extends BaseTest {
 		// class body...
 	}
 ----
+<1> Configuration class defined in the superclass.
+<2> Configuration class defined in the subclass.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::calss.java)
 	// ApplicationContext will be loaded from BaseConfig
-	@ContextConfiguration(classes = BaseConfig::class.java) <1>
+	@SpringJUnitConfig(BaseConfig::class.java) <1>
 	open class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
-	@ContextConfiguration(classes = ExtendedConfig::class.java) <2>
+	@SpringJUnitConfig(ExtendedConfig::class.java) <2>
 	class ExtendedTest : BaseTest() {
 		// class body...
 	}
@@ -3159,34 +3203,34 @@ extend another and use both its own initializer and the superclass's initializer
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
 	// ApplicationContext will be initialized by BaseInitializer
-	@ContextConfiguration(initializers = BaseInitializer.class) <1>
-	public class BaseTest {
+	@SpringJUnitConfig(initializers = BaseInitializer.class) <1>
+	class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be initialized by BaseInitializer
 	// and ExtendedInitializer
-	@ContextConfiguration(initializers = ExtendedInitializer.class) <2>
-	public class ExtendedTest extends BaseTest {
+	@SpringJUnitConfig(initializers = ExtendedInitializer.class) <2>
+	class ExtendedTest extends BaseTest {
 		// class body...
 	}
 ----
+<1> Initializer defined in the superclass.
+<2> Initializer defined in the subclass.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
 	// ApplicationContext will be initialized by BaseInitializer
-	@ContextConfiguration(initializers = BaseInitializer::class.java) <1>
+	@SpringJUnitConfig(initializers = BaseInitializer::class.java) <1>
 	open class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be initialized by BaseInitializer
 	// and ExtendedInitializer
-	@ContextConfiguration(initializers = ExtendedInitializer::class.java) <2>
+	@SpringJUnitConfig(initializers = ExtendedInitializer::class.java) <2>
 	class ExtendedTest : BaseTest() {
 		// class body...
 	}
@@ -3261,17 +3305,17 @@ Consider two examples with XML configuration and `@Configuration` classes:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
 	@ContextConfiguration("/app-config.xml")
 	@ActiveProfiles("dev")
-	public class TransferServiceTest {
+	class TransferServiceTest {
 
 		@Autowired
-		private TransferService transferService;
+		TransferService transferService;
 
 		@Test
-		public void testTransferService() {
+		void testTransferService() {
 			// test the transferService
 		}
 	}
@@ -3280,17 +3324,17 @@ Consider two examples with XML configuration and `@Configuration` classes:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringRunner::class.java)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
 	@ContextConfiguration("/app-config.xml")
 	@ActiveProfiles("dev")
 	class TransferServiceTest {
 
 		@Autowired
-		private lateinit var transferService:TransferService
+		lateinit var transferService:TransferService
 
 		@Test
-		public fun testTransferService() {
+		fun testTransferService() {
 			// test the transferService
 		}
 	}
@@ -3344,7 +3388,7 @@ integration test with `@Configuration` classes instead of XML:
 	class StandaloneDataConfig {
 
 		@Bean
-		public fun dataSource(): DataSource {
+		fun dataSource(): DataSource {
 			return EmbeddedDatabaseBuilder()
 				.setType(EmbeddedDatabaseType.HSQL)
 				.addScript("classpath:com/bank/config/sql/schema.sql")
@@ -3475,20 +3519,19 @@ integration test with `@Configuration` classes instead of XML:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration(classes = {
+	SpringJUnitConfig({
 			TransferServiceConfig.class,
 			StandaloneDataConfig.class,
 			JndiDataConfig.class,
 			DefaultDataConfig.class})
 	@ActiveProfiles("dev")
-	public class TransferServiceTest {
+	class TransferServiceTest {
 
 		@Autowired
-		private TransferService transferService;
+		TransferService transferService;
 
 		@Test
-		public void testTransferService() {
+		void testTransferService() {
 			// test the transferService
 		}
 	}
@@ -3497,16 +3540,14 @@ integration test with `@Configuration` classes instead of XML:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
-    @ContextConfiguration(
-        classes = [
+	SpringJUnitConfig([
             TransferServiceConfig::class.java, StandaloneDataConfig::class.java,
             JndiDataConfig::class.java, DefaultDataConfig::class.java])
     @ActiveProfiles("dev")
     class TransferServiceTest {
 
         @Autowired
-        private lateinit var transferService: TransferService
+        lateinit var transferService: TransferService
 
         @Test
         fun testTransferService() {
@@ -3542,8 +3583,7 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration(classes = {
+	@SpringJUnitConfig({
 			TransferServiceConfig.class,
 			StandaloneDataConfig.class,
 			JndiDataConfig.class,
@@ -3556,8 +3596,7 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
-	@ContextConfiguration(classes = [
+	@SpringJUnitConfig([
 			TransferServiceConfig::class.java,
 			StandaloneDataConfig::class.java,
 			JndiDataConfig::class.java,
@@ -3571,13 +3610,13 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 .Java
 ----
 	// "dev" profile inherited from superclass
-	public class TransferServiceTest extends AbstractIntegrationTest {
+	class TransferServiceTest extends AbstractIntegrationTest {
 
 		@Autowired
-		private TransferService transferService;
+		TransferService transferService;
 
 		@Test
-		public void testTransferService() {
+		void testTransferService() {
 			// test the transferService
 		}
 	}
@@ -3590,7 +3629,7 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
     class TransferServiceTest : AbstractIntegrationTest() {
 
     @Autowired
-    private lateinit var transferService: TransferService
+    lateinit var transferService: TransferService
 
     @Test
     fun testTransferService() {
@@ -3607,7 +3646,7 @@ disable the inheritance of active profiles, as the following example shows:
 ----
 	// "dev" profile overridden with "production"
 	@ActiveProfiles(profiles = "production", inheritProfiles = false)
-	public class ProductionTransferServiceTest extends AbstractIntegrationTest {
+	class ProductionTransferServiceTest extends AbstractIntegrationTest {
 		// test body
 	}
 ----
@@ -3646,7 +3685,7 @@ The following example demonstrates how to implement and register a custom
 	@ActiveProfiles(
 		resolver = OperatingSystemActiveProfilesResolver.class,
 		inheritProfiles = false)
-	public class TransferServiceTest extends AbstractIntegrationTest {
+	class TransferServiceTest extends AbstractIntegrationTest {
 		// test body
 	}
 ----
@@ -3669,7 +3708,7 @@ The following example demonstrates how to implement and register a custom
 	public class OperatingSystemActiveProfilesResolver implements ActiveProfilesResolver {
 
 		@Override
-		String[] resolve(Class<?> testClass) {
+		public String[] resolve(Class<?> testClass) {
 			String profile = ...;
 			// determine the value of profile based on the operating system
 			return new String[] {profile};
@@ -3737,10 +3776,11 @@ The following example uses a test properties file:
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") <1>
-	public class MyIntegrationTests {
+	class MyIntegrationTests {
 		// class body...
 	}
 ----
+<1> Specifying a properties file with an absolute path.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -3773,10 +3813,11 @@ The following example sets two inlined properties:
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = {"timezone = GMT", "port: 4242"}) <1>
-	public class MyIntegrationTests {
+	class MyIntegrationTests {
 		// class body...
 	}
 ----
+<1> Setting two properties by using two variations of the key-value syntax.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -3841,7 +3882,7 @@ to specify properties both in a file and inline:
 		locations = "/test.properties",
 		properties = {"timezone = GMT", "port: 4242"}
 	)
-	public class MyIntegrationTests {
+	class MyIntegrationTests {
 		// class body...
 	}
 ----
@@ -3887,13 +3928,13 @@ properties in both a subclass and its superclass by using `properties` files:
 ----
 	@TestPropertySource("base.properties")
 	@ContextConfiguration
-	public class BaseTest {
+	class BaseTest {
 		// ...
 	}
 
 	@TestPropertySource("extended.properties")
 	@ContextConfiguration
-	public class ExtendedTest extends BaseTest {
+	class ExtendedTest extends BaseTest {
 		// ...
 	}
 ----
@@ -3924,13 +3965,13 @@ to define properties in both a subclass and its superclass by using inline prope
 ----
 	@TestPropertySource(properties = "key1 = value1")
 	@ContextConfiguration
-	public class BaseTest {
+	class BaseTest {
 		// ...
 	}
 
 	@TestPropertySource(properties = "key2 = value2")
 	@ContextConfiguration
-	public class ExtendedTest extends BaseTest {
+	class ExtendedTest extends BaseTest {
 		// ...
 	}
 ----
@@ -3987,7 +4028,7 @@ framework's support for convention over configuration:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 
 	// defaults to "file:src/main/webapp"
 	@WebAppConfiguration
@@ -3995,7 +4036,7 @@ framework's support for convention over configuration:
 	// detects "WacTests-context.xml" in the same package
 	// or static nested @Configuration classes
 	@ContextConfiguration
-	public class WacTests {
+	class WacTests {
 		//...
 	}
 ----
@@ -4003,7 +4044,7 @@ framework's support for convention over configuration:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 
 	// defaults to "file:src/main/webapp"
 	@WebAppConfiguration
@@ -4030,7 +4071,7 @@ The following example shows how to explicitly declare a resource base path with
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 
 	// file system resource
 	@WebAppConfiguration("webapp")
@@ -4038,7 +4079,7 @@ The following example shows how to explicitly declare a resource base path with
 	// classpath resource
 	@ContextConfiguration("/spring/test-servlet-config.xml")
 
-	public class WacTests {
+	class WacTests {
 		//...
 	}
 ----
@@ -4046,7 +4087,7 @@ The following example shows how to explicitly declare a resource base path with
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 
 	// file system resource
 	@WebAppConfiguration("webapp")
@@ -4069,7 +4110,7 @@ annotations by specifying a Spring resource prefix:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 
 	// classpath resource
 	@WebAppConfiguration("classpath:test-web-resources")
@@ -4077,7 +4118,7 @@ annotations by specifying a Spring resource prefix:
 	// file system resource
 	@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
 
-	public class WacTests {
+	class WacTests {
 		//...
 	}
 ----
@@ -4085,7 +4126,7 @@ annotations by specifying a Spring resource prefix:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 
 	// classpath resource
 	@WebAppConfiguration("classpath:test-web-resources")
@@ -4122,9 +4163,8 @@ managed per test method by the `ServletTestExecutionListener`.
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@WebAppConfiguration
-	@ContextConfiguration
-	public class WacTests {
+	@SpringJUnitWebConfig
+	class WacTests {
 
 		@Autowired
 		WebApplicationContext wac; // cached
@@ -4151,8 +4191,7 @@ managed per test method by the `ServletTestExecutionListener`.
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@WebAppConfiguration
-    @ContextConfiguration
+	@SpringJUnitWebConfig
     class WacTests {
 
         @Autowired
@@ -4297,16 +4336,16 @@ lowest context in the hierarchy). The following listing shows this configuration
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration
 	@ContextHierarchy({
 		@ContextConfiguration(classes = TestAppConfig.class),
 		@ContextConfiguration(classes = WebConfig.class)
 	})
-	public class ControllerIntegrationTests {
+	class ControllerIntegrationTests {
 
 		@Autowired
-		private WebApplicationContext wac;
+		WebApplicationContext wac;
 
 		// ...
 	}
@@ -4315,7 +4354,7 @@ lowest context in the hierarchy). The following listing shows this configuration
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 	@WebAppConfiguration
 	@ContextHierarchy([
 		@ContextConfiguration(classes = TestAppConfig::class.java),
@@ -4324,7 +4363,7 @@ lowest context in the hierarchy). The following listing shows this configuration
 	class ControllerIntegrationTests {
 
 		@Autowired
-		private lateinit var wac: WebApplicationContext
+		lateinit var wac: WebApplicationContext
 
 		// ...
 	}
@@ -4350,7 +4389,7 @@ configuration scenario:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration
 	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
 	public abstract class AbstractWebTests {}
@@ -4365,7 +4404,7 @@ configuration scenario:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
+	@ExtendWith(SpringExtension::class)
     @WebAppConfiguration
     @ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
     abstract class AbstractWebTests
@@ -4375,7 +4414,6 @@ configuration scenario:
 
     @ContextHierarchy([ContextConfiguration("/spring/rest-ws-config.xml")])
     class RestWebServiceTests : AbstractWebTests()
-
 ----
 --
 
@@ -4396,23 +4434,23 @@ The following listing shows this configuration scenario:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@ContextHierarchy({
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
 	})
-	public class BaseTests {}
+	class BaseTests {}
 
 	@ContextHierarchy(
 		@ContextConfiguration(name = "child", locations = "/order-config.xml")
 	)
-	public class ExtendedTests extends BaseTests {}
+	class ExtendedTests extends BaseTests {}
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 	@ContextHierarchy([
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
@@ -4422,7 +4460,7 @@ The following listing shows this configuration scenario:
 	@ContextHierarchy(
 		@ContextConfiguration(name = "child", locations = "/order-config.xml")
 	)
-	public class ExtendedTests : BaseTests() {}
+	class ExtendedTests : BaseTests() {}
 ----
 --
 
@@ -4438,12 +4476,12 @@ shows this configuration scenario:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@ContextHierarchy({
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
 	})
-	public class BaseTests {}
+	class BaseTests {}
 
 	@ContextHierarchy(
 		@ContextConfiguration(
@@ -4451,13 +4489,13 @@ shows this configuration scenario:
 			locations = "/test-user-config.xml",
 			inheritLocations = false
 	))
-	public class ExtendedTests extends BaseTests {}
+	class ExtendedTests extends BaseTests {}
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
 	@ContextHierarchy([
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
@@ -4540,17 +4578,17 @@ uses `@Autowired` for field injection:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// specifies the Spring configuration to load for this test fixture
 	@ContextConfiguration("repository-config.xml")
-	public class HibernateTitleRepositoryTests {
+	class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
 		@Autowired
-		private HibernateTitleRepository titleRepository;
+		HibernateTitleRepository titleRepository;
 
 		@Test
-		public void findById() {
+		void findById() {
 			Title title = titleRepository.findById(new Long(10));
 			assertNotNull(title);
 		}
@@ -4560,14 +4598,14 @@ uses `@Autowired` for field injection:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
+	@ExtendWith(SpringExtension::class.java)
     // specifies the Spring configuration to load for this test fixture
     @ContextConfiguration("repository-config.xml")
     class HibernateTitleRepositoryTests {
 
         // this instance will be dependency injected by type
         @Autowired
-        private lateinit var titleRepository: HibernateTitleRepository
+        lateinit var titleRepository: HibernateTitleRepository
 
         @Test
         fun findById() {
@@ -4583,21 +4621,21 @@ follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	// specifies the Spring configuration to load for this test fixture
 	@ContextConfiguration("repository-config.xml")
-	public class HibernateTitleRepositoryTests {
+	class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
-		private HibernateTitleRepository titleRepository;
+		HibernateTitleRepository titleRepository;
 
 		@Autowired
-		public void setTitleRepository(HibernateTitleRepository titleRepository) {
+		void setTitleRepository(HibernateTitleRepository titleRepository) {
 			this.titleRepository = titleRepository;
 		}
 
 		@Test
-		public void findById() {
+		void findById() {
 			Title title = titleRepository.findById(new Long(10));
 			assertNotNull(title);
 		}
@@ -4607,13 +4645,13 @@ follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
+	@ExtendWith(SpringExtension::class)
     // specifies the Spring configuration to load for this test fixture
     @ContextConfiguration("repository-config.xml")
     class HibernateTitleRepositoryTests {
 
         // this instance will be dependency injected by type
-        private lateinit var titleRepository: HibernateTitleRepository
+        lateinit var titleRepository: HibernateTitleRepository
 
         @Autowired
         fun setTitleRepository(titleRepository: HibernateTitleRepository) {
@@ -4750,16 +4788,14 @@ inputs for the username and password. The following listing shows how to do so:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration
-	@WebAppConfiguration
-	public class RequestScopedBeanTests {
+	@SpringJUnitWebConfig
+	class RequestScopedBeanTests {
 
 		@Autowired UserService userService;
 		@Autowired MockHttpServletRequest request;
 
 		@Test
-		public void requestScope() {
+		void requestScope() {
 			request.setParameter("user", "enigma");
 			request.setParameter("pswd", "$pr!ng");
 
@@ -4772,9 +4808,7 @@ inputs for the username and password. The following listing shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
-    @ContextConfiguration
-    @WebAppConfiguration
+	@SpringJUnitWebConfig
     class RequestScopedBeanTests {
 
         @Autowired
@@ -4830,16 +4864,14 @@ configured theme. The following example shows how to do so:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration
-	@WebAppConfiguration
-	public class SessionScopedBeanTests {
+	@SpringJUnitWebConfig
+	class SessionScopedBeanTests {
 
 		@Autowired UserService userService;
 		@Autowired MockHttpSession session;
 
 		@Test
-		public void sessionScope() throws Exception {
+		void sessionScope() throws Exception {
 			session.setAttribute("theme", "blue");
 
 			Results results = userService.processUserPreferences();
@@ -4851,9 +4883,7 @@ configured theme. The following example shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
-	@ContextConfiguration
-	@WebAppConfiguration
+	@SpringJUnitWebConfig
 	class SessionScopedBeanTests {
 
 		@Autowired lateinit var serService:UserService
@@ -4861,7 +4891,7 @@ configured theme. The following example shows how to do so:
 
 		@Test
         @Throws(Exception::class)
-		public fun sessionScope() {
+		fun sessionScope() {
 			session.setAttribute("theme", "blue")
 
 			Results results = userService.processUserPreferences()
@@ -4977,10 +5007,9 @@ a Hibernate-based `UserRepository`:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration(classes = TestConfig.class)
+	@SpringJUnitConfig(TestConfig.class)
 	@Transactional
-	public class HibernateUserRepositoryTests {
+	class HibernateUserRepositoryTests {
 
 		@Autowired
 		HibernateUserRepository repository;
@@ -4991,12 +5020,12 @@ a Hibernate-based `UserRepository`:
 		JdbcTemplate jdbcTemplate;
 
 		@Autowired
-		public void setDataSource(DataSource dataSource) {
+		void setDataSource(DataSource dataSource) {
 			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
 
 		@Test
-		public void createUser() {
+		void createUser() {
 			// track initial state in test database:
 			final int count = countRowsInTable("user");
 
@@ -5008,11 +5037,11 @@ a Hibernate-based `UserRepository`:
 			assertNumUsers(count + 1);
 		}
 
-		protected int countRowsInTable(String tableName) {
+		private int countRowsInTable(String tableName) {
 			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
 		}
 
-		protected void assertNumUsers(int expected) {
+		private void assertNumUsers(int expected) {
 			assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"));
 		}
 	}
@@ -5021,8 +5050,7 @@ a Hibernate-based `UserRepository`:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
-    @ContextConfiguration(classes = [TestConfig::class.java])
+	@SpringJUnitConfig(TestConfig::class.java)
     @Transactional
     class HibernateUserRepositoryTests {
 
@@ -5052,11 +5080,11 @@ a Hibernate-based `UserRepository`:
             assertNumUsers(count + 1)
         }
 
-        protected fun countRowsInTable(tableName: String): Int {
+        private fun countRowsInTable(tableName: String): Int {
             return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName)
         }
 
-        protected fun assertNumUsers(expected: Int) {
+        private fun assertNumUsers(expected: Int) {
             assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"))
         }
     }
@@ -5196,31 +5224,30 @@ following example shows the relevant annotations:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration
+	@SpringJUnitConfig
 	@Transactional(transactionManager = "txMgr")
 	@Commit
-	public class FictitiousTransactionalTest {
+	class FictitiousTransactionalTest {
 
 		@BeforeTransaction
 		void verifyInitialDatabaseState() {
 			// logic to verify the initial state before a transaction is started
 		}
 
-		@Before
-		public void setUpTestDataWithinTransaction() {
+		@BeforeEach
+		void setUpTestDataWithinTransaction() {
 			// set up test data within the transaction
 		}
 
 		@Test
 		// overrides the class-level @Commit setting
 		@Rollback
-		public void modifyDatabaseWithinTransaction() {
+		void modifyDatabaseWithinTransaction() {
 			// logic which uses the test data and modifies database state
 		}
 
-		@After
-		public void tearDownWithinTransaction() {
+		@AfterEach
+		void tearDownWithinTransaction() {
 			// execute "tear down" logic within the transaction
 		}
 
@@ -5235,8 +5262,7 @@ following example shows the relevant annotations:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class.java)
-    @ContextConfiguration
+	@SpringJUnitConfig(
     @Transactional(transactionManager = "txMgr")
     @Commit
     class FictitiousTransactionalTest {
@@ -5246,7 +5272,7 @@ following example shows the relevant annotations:
             // logic to verify the initial state before a transaction is started
         }
 
-        @Before
+        @BeforeEach
         fun setUpTestDataWithinTransaction() {
             // set up test data within the transaction
         }
@@ -5258,7 +5284,7 @@ following example shows the relevant annotations:
             // logic which uses the test data and modifies database state
         }
 
-        @After
+        @AfterEach
         fun tearDownWithinTransaction() {
             // execute "tear down" logic within the transaction
         }
@@ -5378,7 +5404,7 @@ The following example shows matching methods for JPA:
 
 	@Transactional
 	@Test // no expected exception!
-	public fun falsePositive() {
+	fun falsePositive() {
 		updateEntityInJpaPersistenceContext()
 		// False positive: an exception will be thrown once the JPA
 		// EntityManager is finally flushed (i.e., in production code)
@@ -5386,7 +5412,7 @@ The following example shows matching methods for JPA:
 
 	@Transactional
 	@Test(expected = ...)
-	public void updateWithEntityManagerFlush() {
+	void updateWithEntityManagerFlush() {
 		updateEntityInJpaPersistenceContext()
 		// Manual flush is required to avoid false positive in test
 		entityManager.flush()
@@ -5518,7 +5544,7 @@ within a JUnit Jupiter based integration test class:
 	class DatabaseTests {
 
 		@Test
-		void emptySchemaTest() {
+		void emptySchemaTest {
 			// execute code that uses the test schema without any test data
 		}
 
@@ -5581,7 +5607,7 @@ The following example shows how to use `@Sql` as a repeatable annotation with Ja
 	@Test
 	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
 	@Sql("/test-user-data.sql")
-	public void userTest() {
+	void userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -5612,7 +5638,7 @@ Java 7.
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
 	)}
-	public void userTest() {
+	void userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -5625,7 +5651,7 @@ Java 7.
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
 	])
-	public fun userTest() {
+	fun userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -5651,7 +5677,7 @@ following example shows:
 		config = @SqlConfig(transactionMode = ISOLATED),
 		executionPhase = AFTER_TEST_METHOD
 	)
-	public void userTest() {
+	void userTest() {
 		// execute code that needs the test data to be committed
 		// to the database outside of the test's transaction
 	}
@@ -5906,7 +5932,7 @@ run with the custom Spring `Runner`:
 	class SimpleTest {
 
 		@Test
-		public fun testMethod() {
+		fun testMethod() {
 			// execute test logic...
 		}
 	}
@@ -6514,18 +6540,13 @@ configuration and injects a `WebApplicationContext` into the test to use to buil
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@WebAppConfiguration
-	@ContextConfiguration("my-servlet-context.xml")
-	public class MyWebTests {
+	@SpringJUnitWebConfig(locations = "my-servlet-context.xml")
+	class MyWebTests {
 
-		@Autowired
-		private WebApplicationContext wac;
+		MockMvc mockMvc;
 
-		private MockMvc mockMvc;
-
-		@Before
-		public void setup() {
+		@BeforeEach
+		void setup(WebApplicationContext wac) {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 		}
 
@@ -6537,18 +6558,13 @@ configuration and injects a `WebApplicationContext` into the test to use to buil
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
-    @WebAppConfiguration
-    @ContextConfiguration("my-servlet-context.xml")
+	@SpringJUnitWebConfig(locations = "my-servlet-context.xml")
     class MyWebTests {
 
-        @Autowired
-        private lateinit var wac: WebApplicationContext
+        var mockMvc: MockMvc? = null
 
-        private var mockMvc: MockMvc? = null
-
-        @Before
-        fun setup() {
+        @BeforeEach
+        fun setup(wac WebApplicationContext) {
             this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build()
         }
 
@@ -6565,12 +6581,12 @@ degree. The following example shows how to do so:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class MyWebTests {
+	class MyWebTests {
 
-		private MockMvc mockMvc;
+		MockMvc mockMvc;
 
-		@Before
-		public void setup() {
+		@BeforeEach
+		void setup() {
 			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
 		}
 
@@ -6587,7 +6603,7 @@ degree. The following example shows how to do so:
 		var mockMvc : MockMvc?
 
 		@Before
-		public void setup() {
+		void setup() {
 			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
 		}
 
@@ -6619,18 +6635,18 @@ expectations, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@RunWith(SpringRunner.class)
-	@WebAppConfiguration
-	@ContextConfiguration("test-servlet-context.xml")
-	public class AccountTests {
+	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
+	class AccountTests {
+
+		MockMvc mockMvc;
 
 		@Autowired
-		private WebApplicationContext wac;
+		AccountService accountService;
 
-		private MockMvc mockMvc;
-
-		@Autowired
-		private AccountService accountService;
+		@BeforeEach
+		void setup(WebApplicationContext wac) {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+		}
 
 		// ...
 
@@ -6640,18 +6656,17 @@ expectations, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@RunWith(SpringRunner::class)
-    @WebAppConfiguration
-    @ContextConfiguration("test-servlet-context.xml")
+	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
     class AccountTests {
+        var mockMvc: MockMvc? = null
 
         @Autowired
-        private lateinit var wac: WebApplicationContext
+        lateinit var accountService: AccountService
 
-        private var mockMvc: MockMvc? = null
-
-        @Autowired
-        private lateinit var accountService: AccountService
+        @BeforeEach
+        fun setup(wac WebApplicationContext) {
+            this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build()
+        }
 
         // ...
 
@@ -6828,12 +6843,12 @@ properties, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class MyWebTests {
+	class MyWebTests {
 
 		private MockMvc mockMvc;
 
-		@Before
-		public void setup() {
+		@BeforeEach
+		void setup() {
 			mockMvc = standaloneSetup(new AccountController())
 				.defaultRequest(get("/")
 				.contextPath("/app").servletPath("/main")
@@ -6849,7 +6864,7 @@ properties, as the following example shows:
 
         private var mockMvc: MockMvc? = null
 
-        @Before
+        @BeforeEach
         fun setup() {
             mockMvc = standaloneSetup(AccountController())
                     .defaultRequest(get("/")
@@ -7019,7 +7034,7 @@ resulting links by using XPath expressions:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
+	val ns = mapOf("ns" to "http://www.w3.org/2005/Atom");
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
 		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"))
 ----
@@ -7041,25 +7056,30 @@ or reactive type such as Reactor `Mono`:
 .Java
 ----
     @Test
-    public void test() throws Exception {
-    MvcResult mvcResult = this.mockMvc.perform(get("/path"))
-    .andExpect(status().isOk()) <1>
-    .andExpect(request().asyncStarted()) <2>
-    .andExpect(request().asyncResult("body")) <3>
-    .andReturn();
+    void test() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(get("/path"))
+            .andExpect(status().isOk()) <1>
+            .andExpect(request().asyncStarted()) <2>
+            .andExpect(request().asyncResult("body")) <3>
+            .andReturn();
 
         this.mockMvc.perform(asyncDispatch(mvcResult)) <4>
             .andExpect(status().isOk()) <5>
             .andExpect(content().string("body"));
 }
 ----
+<1> Check response status is still unchanged
+<2> Async processing must have started
+<3> Wait and assert the async result
+<4> Manually perform an ASYNC dispatch (as there is no running container)
+<5> Verify the final response
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
     @Test
     Throws(Exception::class)
-    public fun test() {
+    fun test() {
     var mvcResult = this.mockMvc.perform(get("/path"))
         .andExpect(status().isOk()) <1>
         .andExpect(request().asyncStarted()) <2>
@@ -7398,13 +7418,10 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Autowired
-	WebApplicationContext context;
-
 	WebClient webClient;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup(WebApplicationContext context) {
 		webClient = MockMvcWebClientBuilder
 				.webAppContextSetup(context)
 				.build();
@@ -7414,13 +7431,10 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Autowired
-	lateinit var context:WebApplicationContext
-
 	var webClient: WebClient? = null
 
-	@Before
-	public fun setup() {
+	@BeforeEach
+	fun setup(context:WebApplicationContext) {
 		webClient = MockMvcWebClientBuilder
 				.webAppContextSetup(context)
 				.build()
@@ -7534,13 +7548,10 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Autowired
-	WebApplicationContext context;
-
 	WebClient webClient;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup(WebApplicationContext context) {
 		webClient = MockMvcWebClientBuilder
 				.webAppContextSetup(context)
 				.build();
@@ -7550,13 +7561,10 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Autowired
-	lateinit var context: WebApplicationContext
-
 	var webClient: WebClient? = null
 
 	@Before
-	public fun setup() {
+	fun setup(context: WebApplicationContext) {
 		webClient = MockMvcWebClientBuilder
 				.webAppContextSetup(context)
 				.build();
@@ -7570,8 +7578,8 @@ We can also specify additional configuration options, as the following example s
 ----
 	WebClient webClient;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		webClient = MockMvcWebClientBuilder
 			// demonstrates applying a MockMvcConfigurer (Spring Security)
 			.webAppContextSetup(context, springSecurity())
@@ -7589,8 +7597,8 @@ We can also specify additional configuration options, as the following example s
 ----
 	var webClient: WebClient? = null
 
-	@Before
-	public fun setup() {
+	@BeforeEach
+	fun setup() {
 		webClient = MockMvcWebClientBuilder
 			// demonstrates applying a MockMvcConfigurer (Spring Security)
 			.webAppContextSetup(context, springSecurity())
@@ -7711,12 +7719,12 @@ ideally extract this code into its own method, as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	public fun createMessage(currentPage: HtmlPage, summary:String, text:String) :HtmlPage{
+	fun createMessage(currentPage: HtmlPage, summary:String, text:String) :HtmlPage{
 		setSummary(currentPage, summary);
 		// ...
 	}
 
-	public fun setSummary(currentPage:HtmlPage , summary:String ) {
+	fun setSummary(currentPage:HtmlPage , summary:String ) {
 		val summaryInput = currentPage.getHtmlElementById("summary")
 		summaryInput.setValueAttribute(summary)
 	}
@@ -7819,13 +7827,10 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Autowired
-	WebApplicationContext context;
-
 	WebDriver driver;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup(WebApplicationContext context) {
 		driver = MockMvcHtmlUnitDriverBuilder
 				.webAppContextSetup(context)
 				.build();
@@ -7835,13 +7840,10 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="seconday"]
 .Kotlin
 ----
-	@Autowired
-    lateinit var context: WebApplicationContext
+	var driver: WebDriver? = null
 
-    var driver: WebDriver
-
-    @Before
-    fun setup() {
+    @BeforeEach
+    fun setup(contect: WebApplicationContext) {
         driver = MockMvcHtmlUnitDriverBuilder
                 .webAppContextSetup(context)
                 .build()
@@ -7928,6 +7930,24 @@ with HtmlUnit, but it is much easier with WebDriver. Consider the following
 		}
 	}
 ----
+<1> `CreateMessagePage` extends the `AbstractPage`. We do not go over the details of
+`AbstractPage`, but, in summary, it contains common functionality for all of our pages.
+For example, if our application has a navigational bar, global error messages, and other
+features, we can place this logic in a shared location.
+
+<2> We have a member variable for each of the parts of the HTML page in which we are
+interested. These are of type `WebElement`. WebDriver's
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory[`PageFactory`] lets us remove a
+lot of code from the HtmlUnit version of `CreateMessagePage` by automatically resolving
+each `WebElement`. The
+https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
+method automatically resolves each `WebElement` by using the field name and looking it up
+by the `id` or `name` of the element within the HTML page.
+
+<3> We can use the
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
+to override the default lookup behavior. Our example shows how to use the `@FindBy`
+annotation to look up our submit button with a `css` selector (*input[type=submit]*).
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -8016,7 +8036,7 @@ example, it exposes a method that returns a `Message` object:
 .Kotlin
 ----
     @Throws(ParseException::class)
-	public fun getMessage():Message =
+	fun getMessage(): Message =
 		Message().apply{
                 setId(getId())
                 setCreated(getCreated())
@@ -8033,8 +8053,8 @@ as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@After
-	public void destroy() {
+	@AfterEach
+	void destroy() {
 		if (driver != null) {
 			driver.close();
 		}
@@ -8044,8 +8064,8 @@ as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@After
-	public fun destroy() {
+	@AfterEach
+	fun destroy() {
 		if (driver != null) {
 			driver.close()
 		}
@@ -8065,13 +8085,10 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Autowired
-	WebApplicationContext context;
-
 	WebDriver driver;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup(WebApplicationContext context) {
 		driver = MockMvcHtmlUnitDriverBuilder
 				.webAppContextSetup(context)
 				.build();
@@ -8081,13 +8098,10 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Autowired
-	lateinit var context: WebApplicationContext
-
 	var driver: WebDriver? = null
 
-	@Before
-	public fun setup() {
+	@BeforeEach
+	fun setup(context: WebApplicationContext) {
 		driver = MockMvcHtmlUnitDriverBuilder
 				.webAppContextSetup(context)
 				.build()
@@ -8101,8 +8115,8 @@ We can also specify additional configuration options, as follows:
 ----
 	WebDriver driver;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		driver = MockMvcHtmlUnitDriverBuilder
 				// demonstrates applying a MockMvcConfigurer (Spring Security)
 				.webAppContextSetup(context, springSecurity())
@@ -8120,8 +8134,8 @@ We can also specify additional configuration options, as follows:
 ----
 	var driver: WebDriver? = null
 
-	@Before
-	public fun setup() {
+	@BeforeEach
+	fun setup() {
 		driver = MockMvcHtmlUnitDriverBuilder
 				// demonstrates applying a MockMvcConfigurer (Spring Security)
 				.webAppContextSetup(context, springSecurity())
