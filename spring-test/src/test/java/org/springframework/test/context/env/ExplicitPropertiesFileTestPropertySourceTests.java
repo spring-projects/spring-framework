@@ -83,13 +83,13 @@ class ExplicitPropertiesFileTestPropertySourceTests {
 		@Nested
 		@DisplayName("with placeholder")
 		@TestPropertySource("/${current.test.package}/explicit.properties")
-		class WithPlaceholderTests extends AbstractExplicitPropertiesFileTests {
+		class PlaceholderTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
 		@DisplayName("with placeholder and classpath: prefix")
 		@TestPropertySource("classpath:${current.test.package}/explicit.properties")
-		class WithPlaceholderAndClasspathPrefixTests extends AbstractExplicitPropertiesFileTests {
+		class PlaceholderAndClasspathPrefixTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 	}
@@ -107,38 +107,38 @@ class ExplicitPropertiesFileTestPropertySourceTests {
 		@Nested
 		@DisplayName("with dot-path reference")
 		@TestPropertySource("file:./src/test/resources/org/springframework/test/context/env/explicit.properties")
-		class WithDotPathTests extends AbstractExplicitPropertiesFileTests {
+		class DotPathTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
 		@DisplayName("with relative path")
 		@TestPropertySource("file:../spring-test/src/test/resources/org/springframework/test/context/env/explicit.properties")
-		class WithRelativePathTests extends AbstractExplicitPropertiesFileTests {
+		class RelativePathTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
 		@DisplayName("with ${current.test.package} placeholder")
 		@TestPropertySource("file:src/test/resources/${current.test.package}/explicit.properties")
-		class WithCustomPlaceholderTests extends AbstractExplicitPropertiesFileTests {
+		class CustomPlaceholderTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
 		@DisplayName("with ${user.dir} placeholder")
 		@TestPropertySource("file:${user.dir}/src/test/resources/org/springframework/test/context/env/explicit.properties")
-		class WithUserDirPlaceholderTests extends AbstractExplicitPropertiesFileTests {
+		class UserDirPlaceholderTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
 		@DisplayName("with ${user.dir} and ${current.test.package} placeholders")
 		@TestPropertySource("file:${user.dir}/src/test/resources/${current.test.package}/explicit.properties")
-		class WithUserDirAndCustomPlaceholdersTests extends AbstractExplicitPropertiesFileTests {
+		class UserDirAndCustomPlaceholdersTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 		@Nested
-		@DisplayName("with placeholder followed immediately by relative path")
 		@TestPropertySource("file:${user.dir}/../spring-test/src/test/resources/org/springframework/test/context/env/explicit.properties")
 		@Disabled("Currently not supported (see https://github.com/spring-projects/spring-framework/issues/23544)")
-		class WithPlaceholderFollowedByRelativePathTests extends AbstractExplicitPropertiesFileTests {
+		@DisplayName("with placeholders followed immediately by relative paths")
+		class PlaceholdersFollowedByRelativePathsTests extends AbstractExplicitPropertiesFileTests {
 		}
 
 	}
