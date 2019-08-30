@@ -964,7 +964,7 @@ it:
 ----
 	@Test
 	@Sql({"/test-schema.sql", "/test-user-data.sql"}) <1>
-	void userTest {
+	void userTest() {
 		// execute code that relies on the test schema and test data
 	}
 ----
@@ -987,7 +987,7 @@ configured with the `@Sql` annotation. The following example shows how to use it
 		scripts = "/test-user-data.sql",
 		config = @SqlConfig(commentPrefix = "`", separator = "@@") <1>
 	)
-	void userTest {
+	void userTest() {
 		// execute code that relies on the test data
 	}
 ----
@@ -1061,7 +1061,7 @@ annotation. The following example shows how to declare an SQL group:
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
 	)}
-	void userTest {
+	void userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -4091,7 +4091,7 @@ within a JUnit Jupiter based integration test class:
 
 		@Test
 		@Sql({"/test-schema.sql", "/test-user-data.sql"})
-		void userTest {
+		void userTest() {
 			// execute code that uses the test schema and test data
 		}
 	}
@@ -4128,7 +4128,7 @@ The following example shows how to use `@Sql` as a repeatable annotation with Ja
 	@Test
 	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
 	@Sql("/test-user-data.sql")
-	void userTest {
+	void userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -4148,7 +4148,7 @@ Java 7.
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
 	)}
-	void userTest {
+	void userTest() {
 		// execute code that uses the test schema and test data
 	}
 ----
@@ -4174,7 +4174,7 @@ following example shows:
 		config = @SqlConfig(transactionMode = ISOLATED),
 		executionPhase = AFTER_TEST_METHOD
 	)
-	void userTest {
+	void userTest() {
 		// execute code that needs the test data to be committed
 		// to the database outside of the test's transaction
 	}
