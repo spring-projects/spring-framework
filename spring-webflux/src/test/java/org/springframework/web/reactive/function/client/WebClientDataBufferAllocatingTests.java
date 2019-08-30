@@ -166,6 +166,25 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		});
 	}
 
+	@ParameterizedDataBufferAllocatingTest
+	public void releaseBody(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		this.server.enqueue(new MockResponse()
+				.setResponseCode(200)
+				.setHeader("Content-Type", "text/plain")
+				.setBody("foo bar"));
+
+		Mono<Void> result  = this.webClient.get()
+				.exchange()
+				.flatMap(ClientResponse::releaseBody);
+
+
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+	}
+
 
 	private void testOnStatus(Throwable expected,
 			Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {

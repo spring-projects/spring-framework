@@ -41,14 +41,26 @@ import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
  * Represents an HTTP response, as returned by {@link WebClient} and also
- * {@link ExchangeFunction}. Provides access to the response status and headers,
- * and also methods to consume the response body.
+ * {@link ExchangeFunction}. Provides access to the response status and
+ * headers, and also methods to consume the response body.
  *
- * <p><strong>NOTE:</strong> When given access to a {@link ClientResponse},
+ * <p><strong>NOTE:</strong> When using a {@link ClientResponse}
  * through the {@code WebClient}
  * {@link WebClient.RequestHeadersSpec#exchange() exchange()} method,
- * you must always use one of the body or toEntity methods to ensure resources
- * are released and avoid potential issues with HTTP connection pooling.
+ * you have to make sure that the body is consumed or released by using
+ * one of the following methods:
+ * <ul>
+ * <li>{@link #body(BodyExtractor)}</li>
+ * <li>{@link #bodyToMono(Class)} or
+ *     {@link #bodyToMono(ParameterizedTypeReference)}</li>
+ * <li>{@link #bodyToFlux(Class)} or
+ *     {@link #bodyToFlux(ParameterizedTypeReference)}</li>
+ * <li>{@link #toEntity(Class)} or
+ *     {@link #toEntity(ParameterizedTypeReference)}</li>
+ * <li>{@link #toEntityList(Class)} or
+ *     {@link #toEntityList(ParameterizedTypeReference)}</li>
+ * <li>{@link #releaseBody()}</li>
+ * </ul>
  * You can use {@code bodyToMono(Void.class)} if no response content is
  * expected. However keep in mind that if the response does have content, the
  * connection will be closed and will not be placed back in the pool.
@@ -131,6 +143,14 @@ public interface ClientResponse {
 	 * @return a flux containing the body of the given type {@code T}
 	 */
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
+
+	/**
+	 * Releases the body of this response.
+	 * @return a completion signal
+	 * @since 5.2
+	 * @see org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)
+	 */
+	Mono<Void> releaseBody();
 
 	/**
 	 * Return this response as a delayed {@code ResponseEntity}.
