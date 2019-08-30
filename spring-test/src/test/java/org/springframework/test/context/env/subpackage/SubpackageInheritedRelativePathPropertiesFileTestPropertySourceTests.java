@@ -17,7 +17,7 @@
 package org.springframework.test.context.env.subpackage;
 
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.env.ExplicitPropertiesFileTestPropertySourceTests;
+import org.springframework.test.context.env.ExplicitPropertiesFileInClasspathTestPropertySourceTests;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
@@ -28,7 +28,7 @@ import org.springframework.test.context.env.ExplicitPropertiesFileTestPropertySo
  * @since 4.1
  */
 class SubpackageInheritedRelativePathPropertiesFileTestPropertySourceTests extends
-		ExplicitPropertiesFileTestPropertySourceTests {
+		ExplicitPropertiesFileInClasspathTestPropertySourceTests {
 
 	/* all tests are in superclass */
 
