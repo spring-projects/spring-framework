@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,33 +54,41 @@ public abstract class TestContextResourceUtils {
 	 * <ul>
 	 * <li>A plain path &mdash; for example, {@code "context.xml"} &mdash; will
 	 * be treated as a classpath resource that is relative to the package in
-	 * which the specified class is defined.
+	 * which the specified class is defined. Such a path will be prepended with
+	 * the {@code classpath:} prefix and the path to the package for the class.
 	 * <li>A path starting with a slash will be treated as an absolute path
 	 * within the classpath, for example: {@code "/org/example/schema.sql"}.
-	 * <li>A path which is prefixed with a URL protocol (e.g.,
-	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
-	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
-	 * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.
+	 * Such a path will be prepended with the {@code classpath:} prefix.
+	 * <li>A path which is already prefixed with a URL protocol (e.g.,
+	 * {@code classpath:}, {@code file:}, {@code http:}, etc.) will not have its
+	 * protocol modified.
 	 * </ul>
+	 * <p>Each path will then be {@linkplain StringUtils#cleanPath cleaned}.
 	 * @param clazz the class with which the paths are associated
 	 * @param paths the paths to be converted
 	 * @return a new array of converted resource paths
 	 * @see #convertToResources
+	 * @see ResourceUtils#CLASSPATH_URL_PREFIX
+	 * @see ResourceUtils#FILE_URL_PREFIX
 	 */
 	public static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {
 		String[] convertedPaths = new String[paths.length];
 		for (int i = 0; i < paths.length; i++) {
 			String path = paths[i];
+			// Absolute path
 			if (path.startsWith(SLASH)) {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
+			// Relative path
 			else if (!ResourcePatternUtils.isUrl(path)) {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +
-						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
+						ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path;
 			}
+			// URL
 			else {
-				convertedPaths[i] = StringUtils.cleanPath(path);
+				convertedPaths[i] = path;
 			}
+			convertedPaths[i] = StringUtils.cleanPath(convertedPaths[i]);
 		}
 		return convertedPaths;
 	}
