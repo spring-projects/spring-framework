@@ -65,8 +65,8 @@ request and response objects.
 The following example shows how to setup a server from the Spring configuration of your application or
 some subset of it:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = WebConfig.class) // <1>
@@ -80,6 +80,25 @@ some subset of it:
 		@Before
 		public void setUp() {
 			client = WebTestClient.bindToApplicationContext(context).build(); // <3>
+		}
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RunWith(SpringRunner::class.java)
+	@ContextConfiguration(classes = WebConfig::class.java) // <1>
+	class MyTests {
+
+		@Autowired
+		private lateinit var context: ApplicationContext // <2>
+
+		private var client: WebTestClient? = null
+
+		@Before
+		public fun setUp() {
+			client = WebTestClient.bindToApplicationContext(context).build() // <3>
 		}
 	}
 ----
@@ -100,10 +119,16 @@ using mock request and response objects.
 
 The following server setup option lets you connect to a running server:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build()
 ----
 
 
@@ -116,13 +141,22 @@ options, including base URL, default headers, client filters, and others. These 
 are readily available following `bindToServer`. For all others, you need to use
 `configureClient()` to transition from server to client configuration, as follows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client = WebTestClient.bindToController(new TestController())
 			.configureClient()
 			.baseUrl("/test")
 			.build();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client = WebTestClient.bindToController(TestController())
+			.configureClient()
+			.baseUrl("/test")
+			.build()
 ----
 
 
@@ -137,8 +171,19 @@ up to the point of performing a request by using `exchange()`. What follows afte
 
 Typically, you start by asserting the response status and headers, as follows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	client.get().uri("/persons/1")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(MediaType.APPLICATION_JSON)
+			// ...
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
 ----
 	client.get().uri("/persons/1")
 			.accept(MediaType.APPLICATION_JSON)
@@ -156,13 +201,22 @@ Then you specify how to decode and consume the response body:
 
 Then you can use built-in assertions for the body. The following example shows one way to do so:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client.get().uri("/persons")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBodyList(Person.class).hasSize(3).contains(person);
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client.get().uri("/persons")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBodyList(Person.class).hasSize(3).contains(person)
 ----
 
 You can also go beyond the built-in assertions and create your own, as the following example shows:
@@ -200,8 +254,8 @@ instead of `Class<T>`.
 If the response has no content (or you do not care if it does) use `Void.class`, which ensures
 that resources are released. The following example shows how to do so:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client.get().uri("/persons/123")
 			.exchange()
@@ -209,16 +263,35 @@ that resources are released. The following example shows how to do so:
 			.expectBody(Void.class);
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client.get().uri("/persons/123")
+			.exchange()
+			.expectStatus().isNotFound()
+			.expectBody(Void::class.java)
+----
+
 Alternatively, if you want to assert there is no response content, you can use code similar to the following:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client.post().uri("/persons")
 			.body(personMono, Person.class)
 			.exchange()
 			.expectStatus().isCreated()
 			.expectBody().isEmpty();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client.post().uri("/persons")
+			.body(personMono, Person.class)
+			.exchange()
+			.expectStatus().isCreated()
+			.expectBody().isEmpty()
 ----
 
 
@@ -230,8 +303,18 @@ When you use `expectBody()`, the response is consumed as a `byte[]`. This is use
 raw content assertions. For example, you can use
 https://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	client.get().uri("/persons/1")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody()
+			.json("{\"name\":\"Jane\"}")
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
 ----
 	client.get().uri("/persons/1")
 			.exchange()
@@ -242,8 +325,8 @@ https://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follow
 
 You can also use https://github.com/jayway/JsonPath[JSONPath] expressions, as follows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	client.get().uri("/persons")
 			.exchange()
@@ -251,6 +334,17 @@ You can also use https://github.com/jayway/JsonPath[JSONPath] expressions, as fo
 			.expectBody()
 			.jsonPath("$[0].name").isEqualTo("Jane")
 			.jsonPath("$[1].name").isEqualTo("Jason");
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	client.get().uri("/persons")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody()
+			.jsonPath("$[0].name").isEqualTo("Jane")
+			.jsonPath("$[1].name").isEqualTo("Jason")
 ----
 
 
@@ -262,8 +356,8 @@ To test infinite streams (for example, `"text/event-stream"` or `"application/st
 you need to exit the chained API (by using `returnResult`), immediately after the response status
 and header assertions, as the following example shows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	FluxExchangeResult<MyEvent> result = client.get().uri("/events")
 			.accept(TEXT_EVENT_STREAM)
@@ -273,12 +367,23 @@ and header assertions, as the following example shows:
 
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val result = client.get().uri("/events")
+			.accept(TEXT_EVENT_STREAM)
+			.exchange()
+			.expectStatus().isOk()
+			.returnResult(MyEvent.class) as FluxExchangeResult<MyEvent>
+
+----
+
 Now you can consume the `Flux<T>`, assert decoded objects as they come, and then
 cancel at some point when test objectives are met. We recommend using the `StepVerifier`
 from the `reactor-test` module to do that, as the following example shows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Flux<Event> eventFux = result.getResponseBody();
 
@@ -288,6 +393,19 @@ from the `reactor-test` module to do that, as the following example shows:
 			.consumeNextWith(p -> ...)
 			.thenCancel()
 			.verify();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val eventFux = result.getResponseBody()
+
+	StepVerifier.create(eventFlux)
+			.expectNext(person)
+			.expectNextCount(4)
+			.consumeNextWith(p -> ...)
+			.thenCancel()
+			.verify()
 ----
 
 
