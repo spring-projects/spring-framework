@@ -114,7 +114,7 @@ public abstract class TestPropertySourceUtils {
 				logger.trace(String.format("Processing locations for TestPropertySource attributes %s", attrs));
 			}
 			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
-					attrs.getDeclaringClass(), attrs.getLocations());
+					attrs.getDeclaringClass(), true, attrs.getLocations());
 			locations.addAll(0, Arrays.asList(locationsArray));
 			if (!attrs.isInheritLocations()) {
 				break;

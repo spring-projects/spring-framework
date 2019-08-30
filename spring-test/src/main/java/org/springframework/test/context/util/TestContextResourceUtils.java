@@ -18,6 +18,7 @@ package org.springframework.test.context.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +47,22 @@ public abstract class TestContextResourceUtils {
 
 	private static final String SLASH = "/";
 
+	private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{[^\\}]+\\}.*");
+
+
+	/**
+	 * Convert the supplied paths to classpath resource paths.
+	 *
+	 * <p>Delegates to {@link #convertToClasspathResourcePaths(Class, boolean, String...)}
+	 * with {@code false} supplied for the {@code preservePlaceholders} flag.
+	 * @param clazz the class with which the paths are associated
+	 * @param paths the paths to be converted
+	 * @return a new array of converted resource paths
+	 * @see #convertToResources
+	 */
+	public static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {
+		return convertToClasspathResourcePaths(clazz, false, paths);
+	}
 
 	/**
 	 * Convert the supplied paths to classpath resource paths.
@@ -63,18 +80,23 @@ public abstract class TestContextResourceUtils {
 	 * {@code classpath:}, {@code file:}, {@code http:}, etc.) will not have its
 	 * protocol modified.
 	 * </ul>
-	 * <p>Each path will then be {@linkplain StringUtils#cleanPath cleaned}.
+	 * <p>Each path will then be {@linkplain StringUtils#cleanPath cleaned},
+	 * unless the {@code preservePlaceholders} flag is {@code true} and the path
+	 * contains one or more placeholders in the form <code>${placeholder.name}</code>.
 	 * @param clazz the class with which the paths are associated
+	 * @param preservePlaceholders {@code true} if placeholders should be preserved
 	 * @param paths the paths to be converted
 	 * @return a new array of converted resource paths
+	 * @since 5.2
 	 * @see #convertToResources
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX
 	 * @see ResourceUtils#FILE_URL_PREFIX
 	 */
-	public static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {
+	public static String[] convertToClasspathResourcePaths(Class<?> clazz, boolean preservePlaceholders, String... paths) {
 		String[] convertedPaths = new String[paths.length];
 		for (int i = 0; i < paths.length; i++) {
 			String path = paths[i];
+
 			// Absolute path
 			if (path.startsWith(SLASH)) {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
@@ -88,7 +110,10 @@ public abstract class TestContextResourceUtils {
 			else {
 				convertedPaths[i] = path;
 			}
-			convertedPaths[i] = StringUtils.cleanPath(convertedPaths[i]);
+
+			if (!(preservePlaceholders && PLACEHOLDER_PATTERN.matcher(convertedPaths[i]).matches())) {
+				convertedPaths[i] = StringUtils.cleanPath(convertedPaths[i]);
+			}
 		}
 		return convertedPaths;
 	}

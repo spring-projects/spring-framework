@@ -18,7 +18,6 @@ package org.springframework.test.context.env;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
@@ -135,9 +134,8 @@ class ExplicitPropertiesFileTestPropertySourceTests {
 		}
 
 		@Nested
-		@TestPropertySource("file:${user.dir}/../spring-test/src/test/resources/org/springframework/test/context/env/explicit.properties")
-		@Disabled("Currently not supported (see https://github.com/spring-projects/spring-framework/issues/23544)")
 		@DisplayName("with placeholders followed immediately by relative paths")
+		@TestPropertySource("file:${user.dir}/../spring-test/src/test/resources/${current.test.package}/../env/explicit.properties")
 		class PlaceholdersFollowedByRelativePathsTests extends AbstractExplicitPropertiesFileTests {
 		}
 
