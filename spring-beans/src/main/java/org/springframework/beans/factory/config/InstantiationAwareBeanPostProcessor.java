@@ -89,6 +89,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * instances being invoked on this bean instance.
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see #postProcessBeforeInstantiation
+	 * InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation() 后置处理器的第五次调用
+	 * 用来判断你的bean是否需要完成属性填充
 	 */
 	default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;

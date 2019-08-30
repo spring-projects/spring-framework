@@ -26,6 +26,6 @@ public class MyComponentInitWrapper2 implements BeanPostProcessor, Ordered {
 
 	@Override
 	public int getOrder() {
-		return 2;
+		return 1;
 	}
 }

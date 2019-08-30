@@ -1,6 +1,5 @@
 package com.atlwj.demo.aop.config;
 
-import com.atlwj.demo.aop.api.CountingBeforeAdvice;
 import com.atlwj.demo.aop.service.Calc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -17,8 +16,6 @@ public class AopConfig {
 		ApplicationContext ioc = new AnnotationConfigApplicationContext(AopConfig.class);
 		Calc bean = ioc.getBean(Calc.class);
 		bean.div(4,2);
-
-
 	}
 
 }

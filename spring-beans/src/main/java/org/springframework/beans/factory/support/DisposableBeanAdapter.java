@@ -209,6 +209,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * Search for all DestructionAwareBeanPostProcessors in the List.
 	 * @param processors the List to search
 	 * @return the filtered List of DestructionAwareBeanPostProcessors
+	 * 后置处理器的第9次执行。DestructionAwareBeanPostProcessor.requiresDestruction()
+	 * 用来判断当前的bean是否需要被销毁
 	 */
 	@Nullable
 	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> processors, Object bean) {
@@ -218,7 +220,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			for (BeanPostProcessor processor : processors) {
 				if (processor instanceof DestructionAwareBeanPostProcessor) {
 					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
+					/**
+					 * 	 后置处理器的第9次执行。DestructionAwareBeanPostProcessor.requiresDestruction()
+					 * 	 用来判断当前的bean是否需要被销毁
+					 */
 					if (dabpp.requiresDestruction(bean)) {
+						System.out.println("DestructionAwareBeanPostProcessor#requiresDestruction...后置处理器的第九次调用，用来判断当前bean是否需要被销毁。");
 						filteredPostProcessors.add(dabpp);
 					}
 				}

@@ -135,7 +135,9 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			// 设置序列化ID
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
-			// 加载bd
+			/**
+			 * 加载bd
+			 */
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;

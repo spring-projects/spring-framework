@@ -2,6 +2,9 @@ package com.atlwj.demo.ioc.xml.ext.extthird;
 
 import java.util.Arrays;
 
+/**
+ * FactoryBean 场景:mybatis-spring
+ */
 public class Dog {
 	// 主人
 	private String hostMan;

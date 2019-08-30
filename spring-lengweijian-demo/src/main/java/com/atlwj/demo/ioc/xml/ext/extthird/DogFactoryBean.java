@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component;
  * 		2.狗狗的孩子：黄颜色的叫smallYelloDog,黑颜色的叫smallBlackDog
  * 	    3.狗狗的主人：小孩叫lucy，lucy的父母叫lucyParents	.
  * 	    4.狗狗的性格：家里没人的时候就拆家，没有人的时候就喜欢睡觉。
+ *
+ * 	    go
  */
 @Component
 public class DogFactoryBean implements FactoryBean<Dog> {
-
 
 	@Override
 	public Dog getObject() throws Exception {

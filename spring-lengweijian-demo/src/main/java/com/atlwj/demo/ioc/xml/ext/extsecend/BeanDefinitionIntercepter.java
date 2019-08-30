@@ -19,8 +19,8 @@ public class BeanDefinitionIntercepter implements BeanFactoryPostProcessor {
 			if ("cat".equals(beanName)) {
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				System.out.println("修改cat的x属性值");
-				beanDefinition.getPropertyValues().add("color", "red");
-				beanDefinition.getPropertyValues().add("nick", "tom2");
+				beanDefinition.getPropertyValues().add("color", "black");
+				beanDefinition.getPropertyValues().add("nick", "tom3");
 			}
 		}
 		System.out.println("******调用BeanFactoryPostProcessor结束");

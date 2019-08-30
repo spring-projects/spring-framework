@@ -74,6 +74,7 @@ public class PersistenceContextTransactionTests {
 				return factory;
 			}
 		};
+
 		pabpp.postProcessPropertyValues(null, null, bean, "bean");
 
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());

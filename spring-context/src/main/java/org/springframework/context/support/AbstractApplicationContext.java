@@ -545,7 +545,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Register bean processors that intercept bean creation.
 				/**
-				 * 这个方法也重要，所以也是绿色。这里执行了bean的后置处理器。
+				 * 这个方法也重要，所以也是绿色。这里注册了bean的后置处理器。什么意思？就是将我们的后置处理器分三类，（三种优先级接口），
+				 * 放进beanPostProcessors里面存储
 				 */
 				registerBeanPostProcessors(beanFactory);
 
@@ -657,6 +658,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 刷新 BeanFactory
 		refreshBeanFactory();
 		// 获取 BeanFactory
+		// 这里边有6个内置的处理器和我们自定义的配置类
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
@@ -729,6 +731,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		// 执行BeanFactoryPostProcessors
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime

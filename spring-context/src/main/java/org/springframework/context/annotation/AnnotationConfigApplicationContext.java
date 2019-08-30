@@ -77,7 +77,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
 		super(beanFactory);
+		// 创建基于注解版的bdr
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		// 创建classpath的bds
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 

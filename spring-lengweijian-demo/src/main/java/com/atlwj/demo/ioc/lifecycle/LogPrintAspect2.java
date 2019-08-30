@@ -1,8 +1,11 @@
-package com.atlwj.demo.aop.aspect;
+package com.atlwj.demo.ioc.lifecycle;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -63,19 +66,19 @@ import java.util.Arrays;
  *
  *
 **/
-@Aspect
-@Component
-public class LogPrintAspect {
+//@Aspect
+//@Component
+public class LogPrintAspect2 {
 
-	@Pointcut("execution(public * *(..))")
+	@Pointcut("execution(* com.atlwj.demo.ioc.lifecycle.*.dis*(..))")
 	public void pointCut(){
 
 	}
 
-//	@Before(value = "pointCut()")
-//	public void before(JoinPoint joinPoint){
-//		System.out.printf("方法：%s 执行之前打印，参数列表为：%s",joinPoint.getSignature().getName(), Arrays.asList(joinPoint.getArgs()));
-//	}
+	@Before(value = "pointCut()")
+	public void before(JoinPoint joinPoint){
+		System.out.printf("方法：%s 执行之前打印",joinPoint.getSignature().getName());
+	}
 //
 //	@AfterReturning(value = "pointCut()",returning = "returnvalue")
 //	public void returnValue(JoinPoint joinPoint,Object returnvalue){
@@ -87,11 +90,11 @@ public class LogPrintAspect {
 //		System.out.printf("方法：%s 执行结束，异常信息为：%s",joinPoint.getSignature().getName(),ex.getMessage());
 //	}
 
-	@Around(value = "pointCut()")
-	public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-		System.out.println("before.....around....");
-		Object proceed = proceedingJoinPoint.proceed();
-		System.out.println("after.....around....");
-		return proceed;
-	}
+//	@Around(value = "pointCut()")
+//	public void around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+//		System.out.println("before.....around....");
+//		Object proceed = proceedingJoinPoint.proceed();
+//		System.out.println("after.....around....");
+//		return;
+//	}
 }
