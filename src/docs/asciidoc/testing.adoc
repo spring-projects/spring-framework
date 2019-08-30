@@ -1017,7 +1017,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 
 		@Test
 		@Sql("/user-test-data-001.sql")
-		void standardUserProfile {
+		void standardUserProfile() {
 			// execute code that relies on test data set 001
 		}
 	}
@@ -1036,7 +1036,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 		@Test
 		@Sql("/user-test-data-001.sql")
 		@SqlMergeMode(MERGE) <1>
-		void standardUserProfile {
+		void standardUserProfile() {
 			// execute code that relies on test data set 001
 		}
 	}
@@ -4031,7 +4031,7 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 [subs="verbatim,quotes"]
 ----
 	@Test
-	void databaseTest {
+	void databaseTest() {
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.addScripts(
 				new ClassPathResource("test-schema.sql"),
@@ -4085,7 +4085,7 @@ within a JUnit Jupiter based integration test class:
 	class DatabaseTests {
 
 		@Test
-		void emptySchemaTest {
+		void emptySchemaTest() {
 			// execute code that uses the test schema without any test data
 		}
 
