@@ -18,7 +18,10 @@ package org.springframework.test.context.cache;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -47,6 +50,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  */
 @SpringJUnitConfig(locations = "../junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SpringExtensionContextCacheTests {
 
 	private static ApplicationContext dirtiedApplicationContext;
@@ -68,6 +72,7 @@ class SpringExtensionContextCacheTests {
 
 	@Test
 	@DirtiesContext
+	@Order(1)
 	void dirtyContext() {
 		assertContextCacheStatistics("dirtyContext()", 1, 0, 1);
 		assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
@@ -75,6 +80,7 @@ class SpringExtensionContextCacheTests {
 	}
 
 	@Test
+	@Order(2)
 	void verifyContextDirty() {
 		assertContextCacheStatistics("verifyContextWasDirtied()", 1, 0, 2);
 		assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
@@ -83,6 +89,7 @@ class SpringExtensionContextCacheTests {
 	}
 
 	@Test
+	@Order(3)
 	void verifyContextNotDirty() {
 		assertContextCacheStatistics("verifyContextWasNotDirtied()", 1, 1, 2);
 		assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
