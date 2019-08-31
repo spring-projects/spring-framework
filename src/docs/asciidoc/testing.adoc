@@ -3434,8 +3434,8 @@ integration test with `@Configuration` classes instead of XML:
 					.setType(EmbeddedDatabaseType.HSQL)
 					.addScript("classpath:com/bank/config/sql/schema.sql")
 					.build()
+		}
 	}
-}
 ----
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
