@@ -608,10 +608,10 @@ public class HttpHeadersTests {
 
 		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
 
-		assertArrayEquals(expectedKeys, headers.entrySet().stream().map(Entry::getKey).toArray());
+		assertThat(headers.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 
 		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
-		assertArrayEquals(expectedKeys, readOnlyHttpHeaders.entrySet().stream().map(Entry::getKey).toArray());
+		assertThat(readOnlyHttpHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 	}
 
 }
