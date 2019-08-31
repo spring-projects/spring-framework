@@ -95,7 +95,7 @@ configure(allprojects) { project ->
 
 	compileJava.options*.compilerArgs = commonCompilerArgs +
 			["-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes",
-			 "-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
+			 "-Xlint:deprecation", "-Xlint:unchecked"] //"-Werror" 警告不当错误
 
 	compileTestJava.options*.compilerArgs = commonCompilerArgs +
 			["-Xlint:-varargs", "-Xlint:-fallthrough", "-Xlint:-rawtypes",

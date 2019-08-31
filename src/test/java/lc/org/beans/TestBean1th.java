@@ -1,11 +1,13 @@
 package lc.org.beans;
 
+import org.springframework.aop.framework.AopContext;
+
 /**
  * @author : liuc
  * @date : 2019/4/8 10:54
  * @description :
  */
-public class TestBean1th {
+public class TestBean1th implements ITestBean{
 
 	private String name = "lc";
 
@@ -46,13 +48,18 @@ public class TestBean1th {
 		return "this is a TestBean1th Object";
 	}
 
+	@Override
 	public void test(){
-		System.out.println("this is a test method");
+		System.out.println("this is a test method...");
 	}
 
 	public void test2(){
 		System.out.println("this is a 2 test method");
-		testBean2th.test();
+		//((TestBean1th) AopContext.currentProxy()).test();
+		//this.test();
+		if(testBean2th != null ){
+			testBean2th.test();
+		}
 	}
 
 	public void t(){

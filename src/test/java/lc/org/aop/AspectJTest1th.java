@@ -13,9 +13,23 @@ import org.springframework.core.annotation.Order;
 @Order(2)
 public class AspectJTest1th {
 
-	@Pointcut("execution(* lc.org.bean.*.test*())")
-	public void test(){
+	@DeclareParents(value = "lc.org.beans.TestBean1th",defaultImpl = AopBean.class)
+	public IAopBean aopBean;
 
+	@Pointcut(value = "execution(* lc.org.beans.*.test())")
+	public void test(){
+		System.out.println("point cut");
+	}
+
+	@Before("test()")
+	public void beforeTest(){
+		System.out.println("before.....");
+	}
+
+	@Before("test()")
+	@After("test()")
+	public void afterTest(){
+		System.out.println("after.....");
 	}
 
 	@Around("test()")
@@ -30,16 +44,4 @@ public class AspectJTest1th {
 		System.out.println("around after....");
 		return o;
 	}
-
-	@Before("test()")
-	public void beforeTest(){
-		System.out.println("before.....");
-	}
-
-	@After("test()")
-	public void afterTest(){
-		System.out.println("after.....");
-	}
-
-
 }

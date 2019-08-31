@@ -312,6 +312,7 @@ public abstract class AopUtils {
 				eligibleAdvisors.add(candidate);
 			}
 		}
+		//是否有IntroductionAdvisor增强
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
 		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor) {

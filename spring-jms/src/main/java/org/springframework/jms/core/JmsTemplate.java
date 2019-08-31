@@ -713,6 +713,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
+	// destination 是一个队列
 	public Message receive(Destination destination) throws JmsException {
 		return receiveSelected(destination, null);
 	}

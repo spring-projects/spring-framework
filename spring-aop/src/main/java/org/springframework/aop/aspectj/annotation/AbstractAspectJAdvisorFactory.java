@@ -130,6 +130,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
+		// ASPECTJ_ANNOTATION_CLASSES 为 {Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class}
+		// 根据之前的逻辑，此处不会有pointcut注解的方法了
+		// 注意，例如你一个方法上同时加了Before或者After，那么只有before会生效，也就是说对于一个方法只会有一种增强有效
 		for (Class<?> clazz : ASPECTJ_ANNOTATION_CLASSES) {
 			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
 			if (foundAnnotation != null) {
@@ -143,6 +146,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {
+			// 构造器里面做了一些处理
 			return new AspectJAnnotation<>(result);
 		}
 		else {

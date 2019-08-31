@@ -180,6 +180,7 @@ public abstract class PropertiesLoaderUtils {
 		Properties props = new Properties();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
+			System.out.println(url.getPath());
 			URLConnection con = url.openConnection();
 			ResourceUtils.useCachesIfNecessary(con);
 			InputStream is = con.getInputStream();

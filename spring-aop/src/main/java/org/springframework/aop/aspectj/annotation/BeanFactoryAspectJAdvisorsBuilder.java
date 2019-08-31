@@ -92,6 +92,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {
+						//可以自定义过滤
 						if (!isEligibleBean(beanName)) {
 							continue;
 						}

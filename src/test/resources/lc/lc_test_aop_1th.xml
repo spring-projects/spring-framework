@@ -14,7 +14,7 @@
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context-3.0.xsd"
 	   	>
-	<aop:aspectj-autoproxy/>
+	<aop:aspectj-autoproxy expose-proxy="true" />
 	<bean id="testBean1th" class="lc.org.beans.TestBean1th">
 		<property name="testBean2th" ref="testBean2th"/>
 	</bean>

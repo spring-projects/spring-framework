@@ -123,6 +123,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		List<Advisor> advisors = new ArrayList<>();
 		for (Method method : getAdvisorMethods(aspectClass)) {
+			//创建方法为 Around, Before, After, AfterReturning, AfterThrowing的 advisor :
+			// 类型为InstantiationModelAwarePointcutAdvisorImpl
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
 				advisors.add(advisor);
@@ -137,6 +139,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		// Find introduction fields.
 		for (Field field : aspectClass.getDeclaredFields()) {
+			//创建属性为 DeclareParents 的advisor
+			// 类型为：DeclareParentsAdvisor
 			Advisor advisor = getDeclareParentsAdvisor(field);
 			if (advisor != null) {
 				advisors.add(advisor);
@@ -150,10 +154,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		final List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithMethods(aspectClass, method -> {
 			// Exclude pointcuts
+			// 排除了pointcut方法
 			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
 				methods.add(method);
 			}
 		}, ReflectionUtils.USER_DECLARED_METHODS);
+		//方法进行了排序，Around, Before, After, AfterReturning, AfterThrowing
 		methods.sort(METHOD_COMPARATOR);
 		return methods;
 	}

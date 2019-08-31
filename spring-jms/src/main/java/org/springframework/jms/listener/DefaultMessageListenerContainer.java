@@ -1071,6 +1071,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			boolean messageReceived = false;
 			try {
+				// 根据每个任务设置的最大处理消息数量而做不同处理
+				// 小于0默认为无限制，一直接受消息
 				if (maxMessagesPerTask < 0) {
 					messageReceived = executeOngoingLoop();
 				}
@@ -1149,14 +1151,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				synchronized (lifecycleMonitor) {
 					boolean interrupted = false;
 					boolean wasWaiting = false;
+					// 如果当前任务已经处于激活状态但是却给了暂时终止的命令
 					while ((active = isActive()) && !isRunning()) {
 						if (interrupted) {
 							throw new IllegalStateException("Thread was interrupted while waiting for " +
 									"a restart of the listener container, but container is still stopped");
 						}
 						if (!wasWaiting) {
+							// 如果并非处于等待状态则说明是第一次执行，需要将激活任务数量减少
 							decreaseActiveInvokerCount();
 						}
+						// 开始进入等待状态，等待任务的恢复命令
 						wasWaiting = true;
 						try {
 							lifecycleMonitor.wait();

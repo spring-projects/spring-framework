@@ -12,12 +12,17 @@ import org.aspectj.lang.annotation.*;
 //@Order(1)
 public class AspectJTest1th2 {
 
-	@Pointcut("execution(* lc.org.bean.*.test*())")
+	@Pointcut("execution(* lc.org.beans.*.test())")
 	public void test(){
 
 	}
 
-	@Around("test()")
+	public void noPointcut(){
+
+	}
+	//@Around("noPointcut()") //报错，解析pointcut时找不到pointcut引用，将无法创建bean
+	//@Around("test()")
+	@Around("lc.org.aop.AspectJTest1th.test()")
 	public Object aroundTest(ProceedingJoinPoint p){
 		System.out.println("around before 2....");
 		Object o = null;
