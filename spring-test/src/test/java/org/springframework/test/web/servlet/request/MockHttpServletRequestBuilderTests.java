@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.web.Person;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -346,6 +347,26 @@ public class MockHttpServletRequestBuilderTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getInputStream());
 
 		assertThat(result).isEqualTo(body);
+	}
+
+	@Test
+	public void jsonBody() throws IOException {
+		Person person = new Person();
+		person.setName("Spring Boot");
+		person.setSomeBoolean(true);
+		this.builder.content(person);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		byte[] result = FileCopyUtils.copyToByteArray(request.getInputStream());
+
+		String json = "{\n" +
+				"  \"name\" : \"Spring Boot\",\n" +
+				"  \"someDouble\" : 0.0,\n" +
+				"  \"someBoolean\" : true\n" +
+				"}";
+
+		assertThat(result).isEqualTo(json.getBytes());
+		assertThat(request.getContentType()).isEqualTo("application/json");
 	}
 
 	@Test
