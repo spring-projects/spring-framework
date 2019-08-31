@@ -81,7 +81,7 @@ public interface HandlerInterceptor {
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can decide to abort the execution chain,
-	 * typically sending a HTTP error or writing a custom response.
+	 * typically sending an HTTP error or writing a custom response.
 	 * <p><strong>Note:</strong> special considerations apply for asynchronous
 	 * request processing. For more details see
 	 * {@link org.springframework.web.servlet.AsyncHandlerInterceptor}.
