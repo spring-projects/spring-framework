@@ -17,7 +17,7 @@ related to use of the `WebTestClient`.
 == Setup
 
 To create a `WebTestClient` you must choose one of several server setup options.
-Effectively you're either configuring the WebFlux application to bind to, or using
+Effectively you're either configuring the WebFlux application to bind to or using
 a URL to connect to a running server.
 
 
@@ -73,22 +73,19 @@ request and response objects.
 [[webtestclient-context-config]]
 === Bind to `ApplicationContext`
 
-The following example shows how to setup a server from the Spring configuration of your application or
-some subset of it:
+The following example shows how to set up a server from the Spring configuration of your
+application or some subset of it:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	@SpringJUnitConfig(WebConfig.class) // <1>
-	public class MyTests {
+	class MyTests {
 
-		@Autowired
-		private ApplicationContext context; // <2>
-
-		private WebTestClient client;
+		WebTestClient client;
 
 		@BeforeEach
-		public void setUp() {
+		void setUp(ApplicationContext context) {  // <2>
 			client = WebTestClient.bindToApplicationContext(context).build(); // <3>
 		}
 	}
@@ -103,13 +100,10 @@ some subset of it:
 	@SpringJUnitConfig(WebConfig::class) // <1>
 	class MyTests {
 
-		@Autowired
-		lateinit var context: ApplicationContext // <2>
-
 		lateinit var client: WebTestClient
 
 		@BeforeEach
-		fun setUp() {
+		fun setUp(context: ApplicationContext) { // <2>
 			client = WebTestClient.bindToApplicationContext(context).build() // <3>
 		}
 	}
@@ -321,10 +315,10 @@ Alternatively, if you want to assert there is no response content, you can use c
 .Kotlin
 ----
 	client.post().uri("/persons")
-	.bodyValue(person)
-	.exchange()
-	.expectStatus().isCreated()
-	.expectBody().isEmpty()
+			.bodyValue(person)
+			.exchange()
+			.expectStatus().isCreated()
+			.expectBody().isEmpty()
 ----
 
 

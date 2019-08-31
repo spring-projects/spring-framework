@@ -3570,10 +3570,10 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 .Kotlin
 ----
 	@SpringJUnitConfig(
-		TransferServiceConfig::class,
-		StandaloneDataConfig::class,
-		JndiDataConfig::class,
-		DefaultDataConfig::class)
+			TransferServiceConfig::class,
+			StandaloneDataConfig::class,
+			JndiDataConfig::class,
+			DefaultDataConfig::class)
 	@ActiveProfiles("dev")
 	abstract class AbstractIntegrationTest {
 	}
@@ -3655,8 +3655,8 @@ The following example demonstrates how to implement and register a custom
 ----
 	// "dev" profile overridden programmatically via a custom resolver
 	@ActiveProfiles(
-		resolver = OperatingSystemActiveProfilesResolver.class,
-		inheritProfiles = false)
+			resolver = OperatingSystemActiveProfilesResolver.class,
+			inheritProfiles = false)
 	class TransferServiceTest extends AbstractIntegrationTest {
 		// test body
 	}
@@ -4046,7 +4046,6 @@ The following example shows how to explicitly declare a resource base path with
 
 	// classpath resource
 	@ContextConfiguration("/spring/test-servlet-config.xml")
-
 	class WacTests {
 		//...
 	}
@@ -4084,7 +4083,6 @@ annotations by specifying a Spring resource prefix:
 
 	// file system resource
 	@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
-
 	class WacTests {
 		//...
 	}
@@ -5576,8 +5574,9 @@ In the scenario presented in the preceding example, the `test-schema.sql` script
 different syntax for single-line comments.
 
 The following example is identical to the preceding example, except that the `@Sql`
-declarations are grouped together within `@SqlGroup`, for compatibility with Java 6 and
-Java 7.
+declarations are grouped together within `@SqlGroup`. With Java 8 and above, the use of
+`@SqlGroup` is optional, but you may need to use `@SqlGroup` for compatibility with
+other JVM languages such as Kotlin.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -5632,7 +5631,17 @@ following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// Repeatable annotations with non-SOURCE retention are not yet supported by Kotlin
+	@Test
+	@SqlGroup(
+		Sql("create-test-data.sql",
+			config = SqlConfig(transactionMode = ISOLATED)),
+		Sql("delete-test-data.sql",
+			config = SqlConfig(transactionMode = ISOLATED),
+			executionPhase = AFTER_TEST_METHOD))
+	fun userTest() {
+		// execute code that needs the test data to be committed
+		// to the database outside of the test's transaction
+	}
 ----
 
 Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
@@ -7753,8 +7762,7 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 				.build();
 	}
 ----
-
-[source,kotlin,indent=0,subs="verbatim,quotes",role="seconday"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	lateinit var driver: WebDriver
@@ -8027,7 +8035,7 @@ We can also specify additional configuration options, as follows:
 				// the following will use MockMvc for example.com and example.org as well
 				.useMockMvcForHosts("example.com","example.org")
 				.build();
-}
+	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -8353,25 +8361,28 @@ include::testing-webtestclient.adoc[leveloffset=+2]
 == Further Resources
 See the following resources for more information about testing:
 
-* https://www.junit.org/[JUnit]: "`A programmer-oriented testing framework for Java`".
-  Used by the Spring Framework in its test suite.
+* https://www.junit.org/[JUnit]: "`A programmer-friendly testing framework for Java`".
+  Used by the Spring Framework in its test suite and supported in the
+  <<testcontext-framework, Spring TestContext Framework>>.
 * https://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
-  for annotations, test groups, data-driven testing, distributed testing, and other features.
+  for test groups, data-driven testing, distributed testing, and other features. Supported
+  in the <<testcontext-framework, Spring TestContext Framework>>
 * https://joel-costigliola.github.io/assertj/[AssertJ]: "`Fluent assertions for Java`",
   including support for Java 8 lambdas, streams, and other features.
 * https://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
 * http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
   technique for improving the design of code within test-driven development.
 * https://mockito.github.io[Mockito]: Java mock library based on the
-  http://xunitpatterns.com/Test%20Spy.html[Test Spy] pattern.
+  http://xunitpatterns.com/Test%20Spy.html[Test Spy] pattern. Used by the Spring Framework
+  in its test suite.
 * https://easymock.org/[EasyMock]: Java library "`that provides Mock Objects for
-  interfaces (and objects through the class extension) by generating them on the fly
-  using Java's proxy mechanism.`" Used by the Spring Framework in its test suite.
-* https://jmock.org/[JMock]: Library that supports test-driven development of Java
-  code with mock objects.
-* https://www.dbunit.org/[DbUnit]: JUnit extension (also usable with Ant and
-  Maven) that is targeted at database-driven projects and, among other things, puts your
-  database into a known state between test runs.
+  interfaces (and objects through the class extension) by generating them on the fly using
+  Java's proxy mechanism.`"
+* https://jmock.org/[JMock]: Library that supports test-driven development of Java code
+  with mock objects.
+* https://www.dbunit.org/[DbUnit]: JUnit extension (also usable with Ant and Maven) that
+  is targeted at database-driven projects and, among other things, puts your database into
+  a known state between test runs.
 * https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
 * https://github.com/Ninja-Squad/springmockk[SpringMockK]: Support for Spring Boot
   integration tests written in Kotlin using https://mockk.io/[MockK] instead of Mockito.
