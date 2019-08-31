@@ -122,6 +122,7 @@ configure(allprojects.findAll { (it.name != "framework-bom") } ) { project ->
 	}
 
 	dependencies {
+        compile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.junit.jupiter:junit-jupiter-api")
 		testCompile("org.junit.jupiter:junit-jupiter-params")
 		testCompile("org.mockito:mockito-core:3.0.0") {
