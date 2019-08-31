@@ -32,6 +32,7 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class HttpHeadersTests {
 
@@ -555,6 +557,22 @@ public class HttpHeadersTests {
 		headers.setBearerAuth(token);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertEquals("Bearer foo", authorization);
+	}
+
+	@Test
+	public void readOnlyHttpHeadersRetainEntrySetOrder() {
+		headers.add("aardvark", "enigma");
+		headers.add("beaver", "enigma");
+		headers.add("cat", "enigma");
+		headers.add("dog", "enigma");
+		headers.add("elephant", "enigma");
+
+		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
+
+		assertArrayEquals(expectedKeys, headers.entrySet().stream().map(Entry::getKey).toArray());
+
+		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		assertArrayEquals(expectedKeys, readOnlyHttpHeaders.entrySet().stream().map(Entry::getKey).toArray());
 	}
 
 }
