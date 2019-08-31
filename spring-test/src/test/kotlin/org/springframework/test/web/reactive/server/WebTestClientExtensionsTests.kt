@@ -40,24 +40,24 @@ class WebTestClientExtensionsTests {
 
 
 	@Test
-	fun `RequestBodySpec#bodyWithType with Publisher and reified type parameters`() {
+	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<Foo>>()
-		requestBodySpec.bodyWithType(body)
+		requestBodySpec.body(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	@ExperimentalCoroutinesApi
-	fun `RequestBodySpec#bodyWithType with Flow and reified type parameters`() {
+	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<Foo>>()
-		requestBodySpec.bodyWithType(body)
+		requestBodySpec.body(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
-	fun `RequestBodySpec#bodyWithType with CompletableFuture and reified type parameters`() {
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
 		val body = mockk<CompletableFuture<Foo>>()
-		requestBodySpec.bodyWithType<Foo>(body)
+		requestBodySpec.body<Foo>(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
