@@ -27,12 +27,16 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
+import net.sourceforge.htmlunit.corejs.javascript.json.JsonParser;
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +44,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -260,6 +265,25 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
 		this.content = content.getBytes(StandardCharsets.UTF_8);
+		return this;
+	}
+
+	/**
+	 * Set the request body as a UTF-8 string and
+	 * Tries to convert the object to a JSON object.
+	 * Automatically sets the content type to application/json.
+	 * @param content the body content that will be converted to json
+	 */
+	public MockHttpServletRequestBuilder content(Object content) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+		ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
+		try {
+			this.content = objectWriter.writeValueAsString(content).getBytes(StandardCharsets.UTF_8);
+			this.contentType = MediaType.APPLICATION_JSON_VALUE;
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 		return this;
 	}
 
