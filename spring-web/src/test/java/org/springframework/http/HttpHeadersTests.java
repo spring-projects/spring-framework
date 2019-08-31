@@ -32,6 +32,7 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.junit.jupiter.api.Test;
@@ -595,6 +596,22 @@ public class HttpHeadersTests {
 		assertThat(headers.isEmpty()).isTrue();
 		headers.add(headerName, headerValue);
 		assertThat(headers.get(headerName).get(0)).isEqualTo(headerValue);
+	}
+
+	@Test
+	public void readOnlyHttpHeadersRetainEntrySetOrder() {
+		headers.add("aardvark", "enigma");
+		headers.add("beaver", "enigma");
+		headers.add("cat", "enigma");
+		headers.add("dog", "enigma");
+		headers.add("elephant", "enigma");
+
+		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
+
+		assertArrayEquals(expectedKeys, headers.entrySet().stream().map(Entry::getKey).toArray());
+
+		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		assertArrayEquals(expectedKeys, readOnlyHttpHeaders.entrySet().stream().map(Entry::getKey).toArray());
 	}
 
 }
