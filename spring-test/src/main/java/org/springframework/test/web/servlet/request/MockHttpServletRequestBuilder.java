@@ -269,10 +269,9 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the request body as a UTF-8 string and
-	 * Tries to convert the object to a JSON object.
+	 * Set the request body as a UTF-8 formatted JSON object.
 	 * Automatically sets the content type to application/json.
-	 * @param content the body content that will be converted to json
+	 * @param content the object that will be converted to json
 	 */
 	public MockHttpServletRequestBuilder content(Object content) {
 		ObjectMapper mapper = new ObjectMapper();
