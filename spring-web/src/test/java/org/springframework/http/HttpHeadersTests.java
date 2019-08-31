@@ -514,7 +514,6 @@ public class HttpHeadersTests {
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 
 		headers.clear();
-		ZonedDateTime otherDate = ZonedDateTime.of(2010, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
 		headers.add(HttpHeaders.DATE, "Fri, 02 Jun 2017 02:22:00 GMT");
 		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
