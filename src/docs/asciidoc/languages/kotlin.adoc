@@ -130,7 +130,7 @@ since the later requires a reference to the outer class.
 == Annotations
 
 The Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
-to determine if a HTTP parameter is required without having to explicitly
+to determine if an HTTP parameter is required without having to explicitly
 define the `required` attribute. That means `@RequestParam name: String?` is treated
 as not required and, conversely, `@RequestParam name: String` is treated as being required.
 This feature is also supported on the Spring Messaging `@Header` annotation.

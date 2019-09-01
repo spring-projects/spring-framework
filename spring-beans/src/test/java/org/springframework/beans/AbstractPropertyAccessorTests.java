@@ -1909,7 +1909,7 @@ public abstract class AbstractPropertyAccessorTests {
 
 	@SuppressWarnings("unused")
 	private static class DifferentTestBean extends TestBean {
-		// class to test naming of beans in a error message
+		// class to test naming of beans in an error message
 	}
 
 	@SuppressWarnings("unused")

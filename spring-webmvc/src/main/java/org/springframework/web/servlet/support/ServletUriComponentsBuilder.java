@@ -70,7 +70,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 
-	// Factory methods based on a HttpServletRequest
+	// Factory methods based on an HttpServletRequest
 
 	/**
 	 * Prepare a builder from the host, port, scheme, and context path of the
