@@ -127,7 +127,7 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.37"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.22') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.24') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
