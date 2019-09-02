@@ -86,6 +86,7 @@ configure(allprojects.findAll { (it.name != "framework-bom") } ) { project ->
 			kotlinOptions {
 				jvmTarget = "1.8"
 				freeCompilerArgs = ["-Xjsr305=strict"]
+				allWarningsAsErrors = true
 			}
 		}
 		compileTestKotlin {
