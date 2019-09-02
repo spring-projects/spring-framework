@@ -231,7 +231,7 @@ configure(allprojects) { project ->
 
 			dependency "com.ibm.websphere:uow:6.0.2.17"
 			dependency "com.jamonapi:jamon:2.81"
-			dependency "joda-time:joda-time:2.10.2"
+			dependency "joda-time:joda-time:2.10.3"
 			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.4"
 			dependency "org.javamoney:moneta:1.3"
 
