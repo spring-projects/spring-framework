@@ -562,6 +562,14 @@ class DefaultWebClient implements WebClient {
 							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
 		}
 
+		@Override
+		public Mono<ResponseEntity<Void>> toBodilessEntity() {
+			return this.responseMono.flatMap(response ->
+					WebClientUtils.toEntity(response, handleBodyMono(response, Mono.<Void>empty()))
+							.doOnNext(entity -> response.releaseBody()) // body is drained in other cases
+			);
+		}
+
 
 		private static class StatusHandler {
 

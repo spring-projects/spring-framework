@@ -292,6 +292,62 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	void exchangeBodilessEntity(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
+
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.flatMap(ClientResponse::toBodilessEntity);
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+					assertThat(entity.getHeaders().getContentLength()).isEqualTo(31);
+					assertThat(entity.getBody()).isNull();
+				})
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
+	void retrieveBodilessEntity(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
+
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toBodilessEntity();
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+					assertThat(entity.getHeaders().getContentLength()).isEqualTo(31);
+					assertThat(entity.getBody()).isNull();
+				})
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
 	void retrieveEntityWithServerError(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -302,6 +358,29 @@ class WebClientIntegrationTests {
 				.uri("/").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.toEntity(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientResponseException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
+	void retrieveBodilessEntityWithServerError(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
+				.uri("/").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toBodilessEntity();
 
 		StepVerifier.create(result)
 				.expectError(WebClientResponseException.class)

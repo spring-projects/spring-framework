@@ -59,6 +59,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
  *     {@link #toEntity(ParameterizedTypeReference)}</li>
  * <li>{@link #toEntityList(Class)} or
  *     {@link #toEntityList(ParameterizedTypeReference)}</li>
+*  <li>{@link #toBodilessEntity()}</li>
  * <li>{@link #releaseBody()}</li>
  * </ul>
  * You can use {@code bodyToMono(Void.class)} if no response content is
@@ -183,6 +184,15 @@ public interface ClientResponse {
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
+
+	/**
+	 * Return this response as a delayed {@code ResponseEntity} containing
+	 * status and headers, but no body. Calling this method will
+	 * {@linkplain #releaseBody() release} the body of the response.
+	 * @return {@code Mono} with the bodiless {@code ResponseEntity}
+	 * @since 5.2
+	 */
+	Mono<ResponseEntity<Void>> toBodilessEntity();
 
 	/**
 	 * Creates a {@link WebClientResponseException} based on the status code,

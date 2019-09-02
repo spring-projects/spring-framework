@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -34,6 +35,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -181,6 +183,29 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 
 
 		StepVerifier.create(result)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	public void exchangeToBodilessEntity(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		this.server.enqueue(new MockResponse()
+				.setResponseCode(201)
+				.setHeader("Foo", "bar")
+				.setBody("foo bar"));
+
+		Mono<ResponseEntity<Void>> result  = this.webClient.get()
+				.exchange()
+				.flatMap(ClientResponse::toBodilessEntity);
+
+		StepVerifier.create(result)
+				.assertNext(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+					assertThat(entity.getHeaders()).containsEntry("Foo", Collections.singletonList("bar"));
+					assertThat(entity.getBody()).isNull();
+				})
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 	}

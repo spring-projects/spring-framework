@@ -44,8 +44,7 @@ abstract class WebClientUtils {
 			int status = response.rawStatusCode();
 			return bodyMono
 					.map(body -> createEntity(body, headers, status))
-					.switchIfEmpty(Mono.defer(
-							() -> Mono.just(createEntity(null, headers, status))));
+					.switchIfEmpty(Mono.fromCallable( () -> createEntity(null, headers, status)));
 		});
 	}
 
@@ -62,7 +61,7 @@ abstract class WebClientUtils {
 		});
 	}
 
-	private static  <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
+	public static  <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
 		HttpStatus resolvedStatus = HttpStatus.resolve(status);
 		return resolvedStatus != null
 				? new ResponseEntity<>(body, headers, resolvedStatus)
