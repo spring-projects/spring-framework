@@ -506,7 +506,7 @@ public abstract class DataBufferUtils {
 
 		private final AtomicBoolean reading = new AtomicBoolean();
 
-		private final AtomicBoolean canceled = new AtomicBoolean();
+		private final AtomicBoolean disposed = new AtomicBoolean();
 
 		public ReadCompletionHandler(AsynchronousFileChannel channel,
 				FluxSink<DataBuffer> sink, long position, DataBufferFactory dataBufferFactory, int bufferSize) {
@@ -519,7 +519,9 @@ public abstract class DataBufferUtils {
 		}
 
 		public void read() {
-			if (this.sink.requestedFromDownstream() > 0 && this.reading.compareAndSet(false, true)) {
+			if (this.sink.requestedFromDownstream() > 0 &&
+					isNotDisposed() &&
+					this.reading.compareAndSet(false, true)) {
 				DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, this.bufferSize);
 				this.channel.read(byteBuffer, this.position.get(), dataBuffer, this);
@@ -528,34 +530,38 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void completed(Integer read, DataBuffer dataBuffer) {
-			this.reading.set(false);
-			if (!isCanceled()) {
+			if (isNotDisposed()) {
 				if (read != -1) {
 					this.position.addAndGet(read);
 					dataBuffer.writePosition(read);
 					this.sink.next(dataBuffer);
+					this.reading.set(false);
 					read();
 				}
 				else {
 					release(dataBuffer);
 					closeChannel(this.channel);
-					this.sink.complete();
+					if (this.disposed.compareAndSet(false, true)) {
+						this.sink.complete();
+					}
+					this.reading.set(false);
 				}
 			}
 			else {
 				release(dataBuffer);
 				closeChannel(this.channel);
+				this.reading.set(false);
 			}
 		}
 
 		@Override
 		public void failed(Throwable exc, DataBuffer dataBuffer) {
-			this.reading.set(false);
 			release(dataBuffer);
 			closeChannel(this.channel);
-			if (!isCanceled()) {
+			if (this.disposed.compareAndSet(false, true)) {
 				this.sink.error(exc);
 			}
+			this.reading.set(false);
 		}
 
 		public void request(long n) {
@@ -563,15 +569,15 @@ public abstract class DataBufferUtils {
 		}
 
 		public void cancel() {
-			if (this.canceled.compareAndSet(false, true)) {
+			if (this.disposed.compareAndSet(false, true)) {
 				if (!this.reading.get()) {
 					closeChannel(this.channel);
 				}
 			}
 		}
 
-		private boolean isCanceled() {
-			return this.canceled.get();
+		private boolean isNotDisposed() {
+			return !this.disposed.get();
 		}
 
 	}

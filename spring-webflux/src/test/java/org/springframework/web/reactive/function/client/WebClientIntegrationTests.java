@@ -18,7 +18,9 @@ package org.springframework.web.reactive.function.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
@@ -406,7 +408,6 @@ public class WebClientIntegrationTests {
 		prepareResponse(response -> {});
 
 		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
-		byte[] expected = Files.readAllBytes(resource.getFile().toPath());
 		Flux<DataBuffer> body = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096);
 
 		Mono<Void> result = this.webClient.post()
@@ -415,18 +416,21 @@ public class WebClientIntegrationTests {
 				.retrieve()
 				.bodyToMono(Void.class);
 
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 
 		expectRequest(request -> {
-			ByteArrayOutputStream actual = new ByteArrayOutputStream();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {
-				request.getBody().copyTo(actual);
+				request.getBody().copyTo(bos);
+				String actual = bos.toString("UTF-8");
+				String expected = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+				assertEquals(expected, actual);
 			}
 			catch (IOException ex) {
-				throw new IllegalStateException(ex);
+				throw new UncheckedIOException(ex);
 			}
-			assertEquals(expected.length, actual.size());
-			assertEquals(hash(expected), hash(actual.toByteArray()));
 		});
 	}
 
