@@ -93,7 +93,7 @@ configure(allprojects) { project ->
 			dependency "org.yaml:snakeyaml:1.24"
 
 			dependency "com.h2database:h2:1.4.199"
-			dependency "com.github.ben-manes.caffeine:caffeine:2.7.0"
+			dependency "com.github.ben-manes.caffeine:caffeine:2.8.0"
 			dependency "com.github.librepdf:openpdf:1.2.21"
 			dependency "com.rometools:rome:1.12.1"
 			dependency "commons-io:commons-io:2.5"
