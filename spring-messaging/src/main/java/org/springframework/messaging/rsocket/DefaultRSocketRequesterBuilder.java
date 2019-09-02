@@ -136,6 +136,12 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	}
 
 	@Override
+	public RSocketRequester.Builder apply(Consumer<RSocketRequester.Builder> configurer) {
+		configurer.accept(this);
+		return this;
+	}
+
+	@Override
 	public Mono<RSocketRequester> connectTcp(String host, int port) {
 		return connect(TcpClientTransport.create(host, port));
 	}

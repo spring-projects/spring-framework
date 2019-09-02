@@ -18,6 +18,7 @@ package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -130,6 +131,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		@Override
 		public RequestSpec metadata(Object metadata, MimeType mimeType) {
 			this.metadataEncoder.metadata(metadata, mimeType);
+			return this;
+		}
+
+		@Override
+		public RequestSpec metadata(Consumer<RequestSpec> configurer) {
+			configurer.accept(this);
 			return this;
 		}
 

@@ -198,6 +198,14 @@ public interface RSocketRequester {
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 
 		/**
+		 * Configure this builder through a {@code Consumer}. This enables
+		 * libraries such as Spring Security to provide shortcuts for applying
+		 * a set of related customizations.
+		 * @param configurer the configurer to apply
+		 */
+		RSocketRequester.Builder apply(Consumer<RSocketRequester.Builder> configurer);
+
+		/**
 		 * Connect to the server over TCP.
 		 * @param host the server host
 		 * @param port the server port
@@ -239,6 +247,15 @@ public interface RSocketRequester {
 		 * @param mimeType the mime type that describes the metadata
 		 */
 		RequestSpec metadata(Object metadata, MimeType mimeType);
+
+		/**
+		 * Append additional metadata entries through a {@code Consumer}.
+		 * This enables libraries such as Spring Security to provide shortcuts
+		 * for applying a set of customizations.
+		 * @param configurer the configurer to apply
+		 * @throws IllegalArgumentException if not using composite metadata.
+		 */
+		RequestSpec metadata(Consumer<RequestSpec> configurer);
 
 		/**
 		 * Provide payload data for the request. This can be one of:
