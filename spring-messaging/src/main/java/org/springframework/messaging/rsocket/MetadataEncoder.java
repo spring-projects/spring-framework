@@ -167,11 +167,14 @@ final class MetadataEncoder {
 					CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
 							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
-				this.metadata.forEach((value, mimeType) ->
-						CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
-								mimeType.toString(), PayloadUtils.asByteBuf(encodeEntry(value, mimeType))));
+				this.metadata.forEach((value, mimeType) -> {
+					ByteBuf metadata = (value instanceof ByteBuf ?
+							(ByteBuf) value : PayloadUtils.asByteBuf(encodeEntry(value, mimeType)));
+					CompositeMetadataFlyweight.encodeAndAddMetadata(
+							composite, this.allocator, mimeType.toString(), metadata);
+				});
 				return asDataBuffer(composite);
-			}
+				}
 			catch (Throwable ex) {
 				composite.release();
 				throw ex;
@@ -179,7 +182,8 @@ final class MetadataEncoder {
 		}
 		else if (this.route != null) {
 			Assert.isTrue(this.metadata.isEmpty(), "Composite metadata required for route and other entries");
-			return this.metadataMimeType.toString().equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString()) ?
+			String routingMimeType = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString();
+			return this.metadataMimeType.toString().equals(routingMimeType) ?
 					asDataBuffer(encodeRoute()) :
 					encodeEntry(this.route, this.metadataMimeType);
 		}
@@ -202,8 +206,8 @@ final class MetadataEncoder {
 
 	@SuppressWarnings("unchecked")
 	private <T> DataBuffer encodeEntry(Object metadata, MimeType mimeType) {
-		if (metadata instanceof DataBuffer) {
-			return (DataBuffer) metadata;
+		if (metadata instanceof ByteBuf) {
+			return asDataBuffer((ByteBuf) metadata);
 		}
 		ResolvableType type = ResolvableType.forInstance(metadata);
 		Encoder<T> encoder = this.strategies.encoder(type, mimeType);
