@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import io.netty.buffer.PooledByteBufAllocator;
@@ -50,6 +51,8 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	private final List<LeakAwareDataBuffer> created = new ArrayList<>();
 
+	private final AtomicBoolean trackCreated = new AtomicBoolean(true);
+
 
 	/**
 	 * Creates a new {@code LeakAwareDataBufferFactory} by wrapping a
@@ -75,6 +78,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	 * method.
 	 */
 	public void checkForLeaks() {
+		this.trackCreated.set(false);
 		Instant start = Instant.now();
 		while (true) {
 			if (this.created.stream().noneMatch(LeakAwareDataBuffer::isAllocated)) {
@@ -112,7 +116,9 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	@NotNull
 	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
-		this.created.add(dataBuffer);
+		if (this.trackCreated.get()) {
+			this.created.add(dataBuffer);
+		}
 		return dataBuffer;
 	}
 
