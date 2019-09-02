@@ -38,7 +38,7 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.5.1"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.12.0') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.12.1') {
 				entry 'log4j-api'
 				entry 'log4j-core'
 				entry 'log4j-slf4j-impl'
