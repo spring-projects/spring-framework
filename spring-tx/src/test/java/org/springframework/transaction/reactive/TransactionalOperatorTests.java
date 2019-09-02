@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.reactive;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,6 +46,19 @@ public class TransactionalOperatorTests {
 				.verifyComplete();
 		assertThat(tm.commit).isTrue();
 		assertThat(tm.rollback).isFalse();
+	}
+
+	@Test
+	public void monoSubscriptionNotCancelled() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Mono.just(true).doOnCancel(() -> cancelled.set(true)).as(operator::transactional)
+				.as(StepVerifier::create)
+				.expectNext(true)
+				.verifyComplete();
+		assertThat(tm.commit).isTrue();
+		assertThat(tm.rollback).isFalse();
+		assertThat(cancelled).isFalse();
 	}
 
 	@Test

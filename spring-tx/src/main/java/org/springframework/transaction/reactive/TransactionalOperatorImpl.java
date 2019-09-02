@@ -71,6 +71,21 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 		return this.transactionManager;
 	}
 
+	@Override
+	public <T> Mono<T> transactional(Mono<T> mono) {
+		return TransactionContextManager.currentContext().flatMap(context -> {
+			Mono<ReactiveTransaction> status = this.transactionManager.getReactiveTransaction(this.transactionDefinition);
+			// This is an around advice: Invoke the next interceptor in the chain.
+			// This will normally result in a target object being invoked.
+			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
+			// through usingWhen.
+			return status.flatMap(it -> Mono.usingWhen(Mono.just(it), ignore -> mono,
+					this.transactionManager::commit, s -> Mono.empty())
+					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
+		})
+		.subscriberContext(TransactionContextManager.getOrCreateContext())
+		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+	}
 
 	@Override
 	public <T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException {
