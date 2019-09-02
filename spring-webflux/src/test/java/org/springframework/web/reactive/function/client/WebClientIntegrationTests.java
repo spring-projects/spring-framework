@@ -18,11 +18,13 @@ package org.springframework.web.reactive.function.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
@@ -565,7 +567,6 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> {});
 
 		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
-		byte[] expected = Files.readAllBytes(resource.getFile().toPath());
 		Flux<DataBuffer> body = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096);
 
 		Mono<Void> result = this.webClient.post()
@@ -574,18 +575,21 @@ class WebClientIntegrationTests {
 				.retrieve()
 				.bodyToMono(Void.class);
 
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 
 		expectRequest(request -> {
-			ByteArrayOutputStream actual = new ByteArrayOutputStream();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {
-				request.getBody().copyTo(actual);
+				request.getBody().copyTo(bos);
+				String actual = bos.toString("UTF-8");
+				String expected = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+				assertThat(actual).isEqualTo(expected);
 			}
 			catch (IOException ex) {
-				throw new IllegalStateException(ex);
+				throw new UncheckedIOException(ex);
 			}
-			assertThat(actual.size()).isEqualTo(expected.length);
-			assertThat(hash(actual.toByteArray())).isEqualTo(hash(expected));
 		});
 	}
 
