@@ -24,7 +24,7 @@ ext {
 	}
 }
 
-configure(subprojects) { project ->
+configure(allprojects) { project ->
 	apply plugin: "io.spring.dependency-management"
 
 	dependencyManagement {
