@@ -19,6 +19,7 @@ import java.util.Map;
 
 import io.rsocket.Payload;
 
+import org.springframework.core.codec.DecodingException;
 import org.springframework.util.MimeType;
 
 /**
@@ -45,6 +46,8 @@ public interface MetadataExtractor {
 	 * @param payload the payload whose metadata should be read
 	 * @param metadataMimeType the metadata MimeType for the connection.
 	 * @return name values pairs extracted from the metadata
+	 * @throws DecodingException if the metadata cannot be decoded
+	 * @throws IllegalArgumentException if routing metadata cannot be decoded
 	 */
 	Map<String, Object> extract(Payload payload, MimeType metadataMimeType);
 

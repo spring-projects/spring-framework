@@ -15,11 +15,11 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -28,6 +28,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
 import io.rsocket.metadata.CompositeMetadata;
+import io.rsocket.metadata.RoutingMetadata;
 import io.rsocket.metadata.WellKnownMimeType;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,6 +37,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
@@ -166,14 +168,19 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 	}
 
 	private void extractEntry(ByteBuf content, @Nullable String mimeType, Map<String, Object> result) {
+		if (content.readableBytes() == 0) {
+			return;
+		}
 		EntryExtractor<?> extractor = this.registrations.get(mimeType);
 		if (extractor != null) {
 			extractor.extract(content, result);
 			return;
 		}
 		if (mimeType != null && mimeType.equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString())) {
-			// TODO: use rsocket-core API when available
-			result.put(MetadataExtractor.ROUTE_KEY, content.toString(StandardCharsets.UTF_8));
+			Iterator<String> iterator = new RoutingMetadata(content).iterator();
+			if (iterator.hasNext()) {
+				result.put(MetadataExtractor.ROUTE_KEY, iterator.next());
+			}
 		}
 	}
 

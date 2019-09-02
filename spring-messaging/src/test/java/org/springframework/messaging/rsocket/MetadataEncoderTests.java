@@ -23,6 +23,7 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.metadata.CompositeMetadata;
+import io.rsocket.metadata.RoutingMetadata;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.Test;
 
@@ -63,8 +64,7 @@ public class MetadataEncoderTests {
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
 		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
-		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
-
+		assertRoute("toA", entry.getContent());
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
@@ -82,7 +82,7 @@ public class MetadataEncoderTests {
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
 		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
-		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
+		assertRoute("toA", entry.getContent());
 
 		assertThat(iterator.hasNext()).isTrue();
 		entry = iterator.next();
@@ -102,7 +102,7 @@ public class MetadataEncoderTests {
 						.route("toA")
 						.encode();
 
-		assertThat(dumpString(buffer)).isEqualTo("toA");
+		assertRoute("toA", ((NettyDataBuffer) buffer).getNativeBuffer());
 	}
 
 	@Test
@@ -196,11 +196,18 @@ public class MetadataEncoderTests {
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
 		assertThat(entry.getMimeType()).isEqualTo(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
-		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
+		assertRoute("toA", entry.getContent());
 
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
+
+	private void assertRoute(String route, ByteBuf metadata) {
+		Iterator<String> tags = new RoutingMetadata(metadata).iterator();
+		assertThat(tags.hasNext()).isTrue();
+		assertThat(tags.next()).isEqualTo(route);
+		assertThat(tags.hasNext()).isFalse();
+	}
 
 	private String dumpString(DataBuffer buffer) {
 		return DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8);

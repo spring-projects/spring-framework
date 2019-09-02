@@ -15,16 +15,17 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
 import io.rsocket.metadata.CompositeMetadataFlyweight;
+import io.rsocket.metadata.TaggingMetadataFlyweight;
 import io.rsocket.metadata.WellKnownMimeType;
 
 import org.springframework.core.ResolvableType;
@@ -161,25 +162,15 @@ final class MetadataEncoder {
 	public DataBuffer encode() {
 		if (this.isComposite) {
 			CompositeByteBuf composite = this.allocator.compositeBuffer();
-			if (this.route != null) {
-				CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
-						WellKnownMimeType.MESSAGE_RSOCKET_ROUTING,
-						PayloadUtils.asByteBuf(bufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8))));
-			}
 			try {
-				this.metadata.forEach((value, mimeType) -> {
-					DataBuffer buffer = encodeEntry(value, mimeType);
-					CompositeMetadataFlyweight.encodeAndAddMetadata(
-							composite, this.allocator, mimeType.toString(), PayloadUtils.asByteBuf(buffer));
-				});
-				if (bufferFactory() instanceof NettyDataBufferFactory) {
-					return ((NettyDataBufferFactory) bufferFactory()).wrap(composite);
+				if (this.route != null) {
+					CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
-				else {
-					DataBuffer buffer = bufferFactory().wrap(composite.nioBuffer());
-					composite.release();
-					return buffer;
-				}
+				this.metadata.forEach((value, mimeType) ->
+						CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+								mimeType.toString(), PayloadUtils.asByteBuf(encodeEntry(value, mimeType))));
+				return asDataBuffer(composite);
 			}
 			catch (Throwable ex) {
 				composite.release();
@@ -189,7 +180,7 @@ final class MetadataEncoder {
 		else if (this.route != null) {
 			Assert.isTrue(this.metadata.isEmpty(), "Composite metadata required for route and other entries");
 			return this.metadataMimeType.toString().equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString()) ?
-					bufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8)) :
+					asDataBuffer(encodeRoute()) :
 					encodeEntry(this.route, this.metadataMimeType);
 		}
 		else {
@@ -204,6 +195,11 @@ final class MetadataEncoder {
 		}
 	}
 
+	private ByteBuf encodeRoute() {
+		return TaggingMetadataFlyweight.createRoutingMetadata(
+				this.allocator, Collections.singletonList(this.route)).getContent();
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> DataBuffer encodeEntry(Object metadata, MimeType mimeType) {
 		if (metadata instanceof DataBuffer) {
@@ -215,4 +211,14 @@ final class MetadataEncoder {
 		return encoder.encodeValue((T) metadata, bufferFactory(), type, mimeType, Collections.emptyMap());
 	}
 
+	private DataBuffer asDataBuffer(ByteBuf byteBuf) {
+		if (bufferFactory() instanceof NettyDataBufferFactory) {
+			return ((NettyDataBufferFactory) bufferFactory()).wrap(byteBuf);
+		}
+		else {
+			DataBuffer buffer = bufferFactory().wrap(byteBuf.nioBuffer());
+			byteBuf.release();
+			return buffer;
+		}
+	}
 }
