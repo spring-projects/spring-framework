@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation
 
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.context.support.registerBean
@@ -34,9 +34,9 @@ class AnnotationConfigApplicationContextExtensionsTests {
 		val applicationContext = AnnotationConfigApplicationContext {
 			registerBean<Foo>()
 		}
+		assertThat(applicationContext).isNotNull()
 		applicationContext.refresh()
-		assertNotNull(applicationContext)
-		assertNotNull(applicationContext.getBean<Foo>())
+		applicationContext.getBean<Foo>()
 	}
 
 	class Foo

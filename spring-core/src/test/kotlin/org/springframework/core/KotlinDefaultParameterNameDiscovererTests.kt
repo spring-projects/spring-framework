@@ -16,7 +16,7 @@
 
 package org.springframework.core
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class KotlinDefaultParameterNameDiscovererTests {
@@ -31,6 +31,6 @@ class KotlinDefaultParameterNameDiscovererTests {
 	fun getParameterNamesOnEnum() {
 		val constructor = MyEnum::class.java.declaredConstructors[0]
 		val actualParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertEquals(2, actualParams!!.size)
+		assertThat(actualParams!!.size).isEqualTo(2)
 	}
 }

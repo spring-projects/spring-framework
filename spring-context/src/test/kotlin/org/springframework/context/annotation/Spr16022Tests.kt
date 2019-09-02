@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
@@ -39,11 +39,11 @@ class Spr16022Tests {
 
 	private fun assert(context: BeanFactory) {
 		val bean1 = context.getBean<MultipleConstructorsTestBean>("bean1")
-		assertEquals(0, bean1.foo)
+		assertThat(bean1.foo).isEqualTo(0)
 		val bean2 = context.getBean<MultipleConstructorsTestBean>("bean2")
-		assertEquals(1, bean2.foo)
+		assertThat(bean2.foo).isEqualTo(1)
 		val bean3 = context.getBean<MultipleConstructorsTestBean>("bean3")
-		assertEquals(3, bean3.foo)
+		assertThat(bean3.foo).isEqualTo(3)
 
 	}
 

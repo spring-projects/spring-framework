@@ -16,10 +16,9 @@
 
 package org.springframework.test.web.servlet
 
+import org.assertj.core.api.Assertions.*
 import org.hamcrest.CoreMatchers
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
@@ -81,8 +80,8 @@ class MockMvcExtensionsTests {
 		}.andDo {
 			handle(handler)
 		}
-		assertTrue(matcherInvoked)
-		assertTrue(handlerInvoked)
+		assertThat(matcherInvoked).isTrue()
+		assertThat(handlerInvoked).isTrue()
 	}
 
 	@Test
@@ -125,21 +124,20 @@ class MockMvcExtensionsTests {
 		mockMvc.get("/person/$name") {
 			accept = APPLICATION_JSON
 		}.andExpect {
-			assertThrows<AssertionError> { content { contentType(APPLICATION_ATOM_XML) } }
-			assertThrows<AssertionError> { content { string("Wrong") } }
-			assertThrows<AssertionError> { jsonPath("name", CoreMatchers.`is`("Wrong")) }
-			assertThrows<AssertionError> { content { json("""{"name":"wrong"}""") } }
-			assertThrows<AssertionError> { jsonPath("name") { value("wrong") } }
-			assertThrows<AssertionError> { cookie { value("name", "wrong") } }
-			assertThrows<AssertionError> { flash { attribute<String>("name", "wrong") } }
-			assertThrows<AssertionError> { header { stringValues("name", "wrong") } }
-			assertThrows<AssertionError> { model { attributeExists("name", "wrong") } }
-			assertThrows<AssertionError> { redirectedUrl("wrong/Url") }
-			assertThrows<AssertionError> { redirectedUrlPattern("wrong/Url") }
-			assertThrows<AssertionError> { redirectedUrlPattern("wrong/Url") }
-			assertThrows<AssertionError> { status { isAccepted } }
-			assertThrows<AssertionError> { view { name("wrongName") } }
-			assertThrows<AssertionError> { jsonPath("name") { value("wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { content { contentType(APPLICATION_ATOM_XML) } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { content { string("Wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name", CoreMatchers.`is`("Wrong")) }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { content { json("""{"name":"wrong"}""") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name") { value("wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { cookie { value("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { flash { attribute<String>("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { header { stringValues("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { model { attributeExists("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrl("wrong/Url") }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrlPattern("wrong/Url") }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { status { isAccepted } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { view { name("wrongName") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name") { value("wrong") } }
 		}
 	}
 
@@ -149,7 +147,7 @@ class MockMvcExtensionsTests {
 			accept = APPLICATION_XML
 		}.andExpect {
 			status { isOk }
-			assertThrows<AssertionError> { xpath("//wrong") { nodeCount(1) } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { xpath("//wrong") { nodeCount(1) } }
 		}.andDo {
 			print()
 		}

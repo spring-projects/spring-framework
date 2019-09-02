@@ -16,8 +16,9 @@
 
 package org.springframework.context.annotation
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.fail
+
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException
@@ -26,12 +27,8 @@ class KotlinConfigurationClassTests {
 
 	@Test
 	fun `Final configuration with default proxyBeanMethods value`() {
-		try {
+		assertThatExceptionOfType(BeanDefinitionParsingException::class.java).isThrownBy {
 			AnnotationConfigApplicationContext(FinalConfigurationWithProxy::class.java)
-			fail("should have thrown a BeanDefinitionParsingException")			
-		}
-		catch (e: BeanDefinitionParsingException) {
-			// expected
 		}
 	}
 
@@ -39,7 +36,7 @@ class KotlinConfigurationClassTests {
 	fun `Final configuration with proxyBeanMethods set to false`() {
 		val context = AnnotationConfigApplicationContext(FinalConfigurationWithoutProxy::class.java)
 		val foo = context.getBean<Foo>()
-		assertEquals(foo, context.getBean<Bar>().foo)
+		assertThat(context.getBean<Bar>().foo).isEqualTo(foo)
 	}
 
 

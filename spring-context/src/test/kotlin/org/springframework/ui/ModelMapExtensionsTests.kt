@@ -16,8 +16,7 @@
 
 package org.springframework.ui
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
@@ -31,8 +30,8 @@ class ModelMapExtensionsTests {
 	fun setAttribute() {
 		val model = ModelMap()
 		model["foo"] = "bing"
-		assertTrue(model.containsAttribute("foo"))
-		assertEquals("bing", model["foo"])
+		assertThat(model.containsAttribute("foo"))
+		assertThat(model["foo"]).isEqualTo("bing")
 	}
 
 }

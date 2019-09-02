@@ -16,10 +16,9 @@
 
 package org.springframework.core
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert.assertThat
 import org.springframework.util.ReflectionUtils
 
 /**
@@ -33,21 +32,21 @@ class KotlinReflectionParameterNameDiscovererTests {
 	fun getParameterNamesOnInterface() {
 		val method = ReflectionUtils.findMethod(MessageService::class.java,"sendMessage", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams, `is`(arrayOf("message")))
+		assertThat(actualParams).contains("message")
 	}
 
 	@Test
 	fun getParameterNamesOnClass() {
 		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java,"sendMessage", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams, `is`(arrayOf("message")))
+		assertThat(actualParams).contains("message")
 	}
 
 	@Test
 	fun getParameterNamesOnExtensionMethod() {
 		val method = ReflectionUtils.findMethod(UtilityClass::class.java, "identity", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)!!
-		assertThat(actualParams, `is`(arrayOf("\$receiver")))
+		assertThat(actualParams).contains("\$receiver")
 	}
 
 	interface MessageService {

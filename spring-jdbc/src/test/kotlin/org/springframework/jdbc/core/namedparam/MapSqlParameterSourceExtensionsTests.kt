@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.core.namedparam
 
+import org.assertj.core.api.Assertions.assertThat
 import java.sql.JDBCType
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
@@ -32,24 +32,24 @@ class MapSqlParameterSourceExtensionsTests {
 	fun `setter with value`() {
 		val source = MapSqlParameterSource()
 		source["foo"] = 2
-		assertEquals(2, source.getValue("foo"))
+		assertThat(source.getValue("foo")).isEqualTo(2)
 	}
 
 	@Test
 	fun `setter with value and type`() {
 		val source = MapSqlParameterSource()
 		source["foo", JDBCType.INTEGER.vendorTypeNumber] = 2
-		assertEquals(2, source.getValue("foo"))
-		assertEquals(JDBCType.INTEGER.vendorTypeNumber, source.getSqlType("foo"))
+		assertThat(source.getValue("foo")).isEqualTo(2)
+		assertThat(source.getSqlType("foo")).isEqualTo(JDBCType.INTEGER.vendorTypeNumber)
 	}
 
 	@Test
 	fun `setter with value, type and type name`() {
 		val source = MapSqlParameterSource()
 		source["foo", JDBCType.INTEGER.vendorTypeNumber, "INT"] = 2
-		assertEquals(2, source.getValue("foo"))
-		assertEquals(JDBCType.INTEGER.vendorTypeNumber, source.getSqlType("foo"))
-		assertEquals("INT", source.getTypeName("foo"))
+		assertThat(source.getValue("foo")).isEqualTo(2)
+		assertThat(source.getSqlType("foo")).isEqualTo(JDBCType.INTEGER.vendorTypeNumber)
+		assertThat(source.getTypeName("foo")).isEqualTo("INT")
 	}
 
 }

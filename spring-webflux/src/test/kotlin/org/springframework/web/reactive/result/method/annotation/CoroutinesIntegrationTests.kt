@@ -17,14 +17,12 @@
 package org.springframework.web.reactive.result.method.annotation
 
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.fail
+import org.assertj.core.api.Assertions.*
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
@@ -37,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.config.EnableWebFlux
 
-@ExperimentalCoroutinesApi
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 	override fun initApplicationContext(): ApplicationContext {
@@ -53,8 +50,8 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		val entity = performGet<String>("/suspend", HttpHeaders.EMPTY, String::class.java)
-		assertEquals(HttpStatus.OK, entity.statusCode)
-		assertEquals("foo", entity.body)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("foo")
 	}
 
 	@ParameterizedHttpServerTest
@@ -62,8 +59,8 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		val entity = performGet<String>("/deferred", HttpHeaders.EMPTY, String::class.java)
-		assertEquals(HttpStatus.OK, entity.statusCode)
-		assertEquals("foo", entity.body)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("foo")
 	}
 
 	@ParameterizedHttpServerTest
@@ -71,8 +68,8 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		val entity = performGet<String>("/flow", HttpHeaders.EMPTY, String::class.java)
-		assertEquals(HttpStatus.OK, entity.statusCode)
-		assertEquals("foobar", entity.body)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("foobar")
 	}
 
 	@ParameterizedHttpServerTest
@@ -80,19 +77,16 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		val entity = performGet<String>("/suspending-flow", HttpHeaders.EMPTY, String::class.java)
-		assertEquals(HttpStatus.OK, entity.statusCode)
-		assertEquals("foobar", entity.body)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("foobar")
 	}
 
 	@ParameterizedHttpServerTest
 	fun `Suspending handler method throwing exception`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		try {
+		assertThatExceptionOfType(HttpServerErrorException.InternalServerError::class.java).isThrownBy {
 			performGet<String>("/error", HttpHeaders.EMPTY, String::class.java)
-			fail("should have thrown an HttpServerErrorException.InternalServerError")
-		} catch (e: HttpServerErrorException.InternalServerError) {
-			// expected
 		}
 	}
 
@@ -100,11 +94,8 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Handler method returning Flow throwing exception`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		try {
+		assertThatExceptionOfType(HttpServerErrorException.InternalServerError::class.java).isThrownBy {
 			performGet<String>("/flow-error", HttpHeaders.EMPTY, String::class.java)
-			fail("should have thrown an HttpServerErrorException.InternalServerError")
-		} catch (e: HttpServerErrorException.InternalServerError) {
-			// expected
 		}
 	}
 

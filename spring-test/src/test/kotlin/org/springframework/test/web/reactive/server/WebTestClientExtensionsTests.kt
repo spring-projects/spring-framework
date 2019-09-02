@@ -20,7 +20,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -80,7 +80,7 @@ class WebTestClientExtensionsTests {
 		WebTestClient
 				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().consumeWith { assertEquals("foo", it.responseBody) }
+				.get().uri("/").exchange().expectBody<String>().consumeWith { assertThat(it.responseBody).isEqualTo("foo") }
 	}
 
 	@Test
@@ -88,7 +88,7 @@ class WebTestClientExtensionsTests {
 		WebTestClient
 				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertEquals("foo", responseBody) }
+				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertThat(responseBody).isEqualTo("foo") }
 	}
 
 	@Test

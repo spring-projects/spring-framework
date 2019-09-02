@@ -16,8 +16,7 @@
 
 package org.springframework.ui
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
@@ -31,7 +30,7 @@ class ModelExtensionsTests {
 	fun setAttribute() {
 		val model:Model = ConcurrentModel()
 		model["foo"] = "bing"
-		assertTrue(model.containsAttribute("foo"))
-		assertEquals("bing", model.asMap()["foo"])
+		assertThat(model.containsAttribute("foo")).isTrue()
+		assertThat(model.asMap()["foo"]).isEqualTo("bing")
 	}
 }

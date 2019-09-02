@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.function
 
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.fail
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
@@ -38,7 +36,7 @@ class RouterFunctionDslTests {
 		val servletRequest = MockHttpServletRequest()
 		servletRequest.addHeader("bar", "bar")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
@@ -46,7 +44,7 @@ class RouterFunctionDslTests {
 		val servletRequest = MockHttpServletRequest("GET", "/content")
 		servletRequest.addHeader(ACCEPT, APPLICATION_ATOM_XML_VALUE)
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
@@ -54,7 +52,7 @@ class RouterFunctionDslTests {
 		val servletRequest = MockHttpServletRequest("POST", "/api/foo/")
 		servletRequest.addHeader(ACCEPT, APPLICATION_JSON_VALUE)
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
@@ -62,35 +60,35 @@ class RouterFunctionDslTests {
 		val servletRequest = MockHttpServletRequest("GET", "/content")
 		servletRequest.addHeader(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE)
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
 	fun resourceByPath() {
 		val servletRequest = MockHttpServletRequest("GET", "/org/springframework/web/servlet/function/response.txt")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
 	fun method() {
 		val servletRequest = MockHttpServletRequest("PATCH", "/")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
 	fun path() {
 		val servletRequest = MockHttpServletRequest("GET", "/baz")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
 	fun resource() {
 		val servletRequest = MockHttpServletRequest("GET", "/response.txt")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
 	}
 
 	@Test
@@ -100,24 +98,20 @@ class RouterFunctionDslTests {
 		servletRequest.addHeader(ACCEPT, APPLICATION_PDF_VALUE)
 		servletRequest.addHeader(CONTENT_TYPE, APPLICATION_PDF_VALUE)
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertFalse(sampleRouter().route(request).isPresent)
+		assertThat(sampleRouter().route(request).isPresent).isFalse()
 	}
 
 	@Test
 	fun rendering() {
 		val servletRequest = MockHttpServletRequest("GET", "/rendering")
 		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertTrue(sampleRouter().route(request).get().handle(request) is RenderingResponse)
+		assertThat(sampleRouter().route(request).get().handle(request) is RenderingResponse).isTrue()
 	}
 
 	@Test
 	fun emptyRouter() {
-		try {
+		assertThatExceptionOfType(IllegalStateException::class.java).isThrownBy {
 			router { }
-			fail("should have thrown an IllegalStateException")
-		}
-		catch (e: IllegalStateException) {
-			// expected
 		}
 	}
 

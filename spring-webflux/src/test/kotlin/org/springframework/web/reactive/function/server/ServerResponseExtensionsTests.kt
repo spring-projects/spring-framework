@@ -23,7 +23,7 @@ import io.reactivex.Flowable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -145,7 +145,7 @@ class ServerResponseExtensionsTests {
 		val builder = mockk<ServerResponse.HeadersBuilder<*>>()
 		every { builder.build() } returns Mono.just(response)
 		runBlocking {
-			assertEquals(response, builder.buildAndAwait())
+			assertThat(builder.buildAndAwait()).isEqualTo(response)
 		}
 	}
 

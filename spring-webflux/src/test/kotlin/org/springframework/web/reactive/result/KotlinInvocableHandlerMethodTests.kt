@@ -19,9 +19,7 @@ package org.springframework.web.reactive.result
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -83,7 +81,7 @@ class KotlinInvocableHandlerMethodTests {
 		val result = invoke(CoroutinesController(), method)
 
 		assertHandlerResultValue(result, "created")
-		assertThat<HttpStatus>(this.exchange.response.statusCode, `is`(HttpStatus.CREATED))
+		assertThat(this.exchange.response.statusCode).isSameAs(HttpStatus.CREATED)
 	}
 
 	@Test
@@ -96,7 +94,7 @@ class KotlinInvocableHandlerMethodTests {
 		StepVerifier.create(result)
 				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).verifyComplete() }
 				.verifyComplete()
-		assertEquals("bar", this.exchange.response.headers.getFirst("foo"))
+		assertThat(this.exchange.response.headers.getFirst("foo")).isEqualTo("bar")
 	}
 
 	private fun invoke(handler: Any, method: Method, vararg providedArgs: Any?): Mono<HandlerResult> {

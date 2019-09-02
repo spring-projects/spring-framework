@@ -16,9 +16,9 @@
 
 package org.springframework.web.method.annotation
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.fail
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -94,43 +94,39 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	fun resolveNullableRequiredWithParameter() {
 		request.addParameter("name", "123")
 		var result = resolver.resolveArgument(nullableParamRequired, null, webRequest, binderFactory)
-		assertEquals("123", result)
+		assertThat(result).isEqualTo("123")
 	}
 
 	@Test
 	fun resolveNullableRequiredWithoutParameter() {
 		var result = resolver.resolveArgument(nullableParamRequired, null, webRequest, binderFactory)
-		assertNull(result)
+		assertThat(result).isNull()
 	}
 
 	@Test
 	fun resolveNullableNotRequiredWithParameter() {
 		request.addParameter("name", "123")
 		var result = resolver.resolveArgument(nullableParamNotRequired, null, webRequest, binderFactory)
-		assertEquals("123", result)
+		assertThat(result).isEqualTo("123")
 	}
 
 	@Test
 	fun resolveNullableNotRequiredWithoutParameter() {
 		var result = resolver.resolveArgument(nullableParamNotRequired, null, webRequest, binderFactory)
-		assertNull(result)
+		assertThat(result).isNull()
 	}
 
 	@Test
 	fun resolveNonNullableRequiredWithParameter() {
 		request.addParameter("name", "123")
 		var result = resolver.resolveArgument(nonNullableParamRequired, null, webRequest, binderFactory)
-		assertEquals("123", result)
+		assertThat(result).isEqualTo("123")
 	}
 
 	@Test
 	fun resolveNonNullableRequiredWithoutParameter() {
-		try {
+		assertThatExceptionOfType(MissingServletRequestParameterException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableParamRequired, null, webRequest, binderFactory)
-			fail("should have thrown a MissingServletRequestParameterException")
-		}
-		catch (e: MissingServletRequestParameterException) {
-			// expected
 		}
 	}
 
@@ -138,17 +134,13 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	fun resolveNonNullableNotRequiredWithParameter() {
 		request.addParameter("name", "123")
 		var result = resolver.resolveArgument(nonNullableParamNotRequired, null, webRequest, binderFactory)
-		assertEquals("123", result)
+		assertThat(result).isEqualTo("123")
 	}
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutParameter() {
-		try {
+		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableParamNotRequired, null, webRequest, binderFactory) as String
-			fail("should have thrown a TypeCastException")
-		}
-		catch (e: TypeCastException) {
-			// expected
 		}
 	}
 
@@ -160,7 +152,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		webRequest = ServletWebRequest(request)
 
 		var result = resolver.resolveArgument(nullableMultipartParamRequired, null, webRequest, binderFactory)
-		assertEquals(expected, result)
+		assertThat(result).isEqualTo(expected)
 	}
 
 	@Test
@@ -169,7 +161,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamRequired, null, webRequest, binderFactory)
-		assertNull(result)
+		assertThat(result).isNull()
 	}
 
 	@Test
@@ -180,7 +172,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		webRequest = ServletWebRequest(request)
 
 		var result = resolver.resolveArgument(nullableMultipartParamNotRequired, null, webRequest, binderFactory)
-		assertEquals(expected, result)
+		assertThat(result).isEqualTo(expected)
 	}
 
 	@Test
@@ -189,7 +181,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamNotRequired, null, webRequest, binderFactory)
-		assertNull(result)
+		assertThat(result).isNull()
 	}
 
 	@Test
@@ -200,7 +192,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		webRequest = ServletWebRequest(request)
 
 		var result = resolver.resolveArgument(nonNullableMultipartParamRequired, null, webRequest, binderFactory)
-		assertEquals(expected, result)
+		assertThat(result).isEqualTo(expected)
 	}
 
 	@Test
@@ -208,12 +200,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		request.method = HttpMethod.POST.name
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
-		try {
+		assertThatExceptionOfType(MissingServletRequestPartException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableMultipartParamRequired, null, webRequest, binderFactory)
-			fail("should have thrown a MissingServletRequestPartException")
-		}
-		catch (e: MissingServletRequestPartException) {
-			// expected
 		}
 	}
 
@@ -225,7 +213,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		webRequest = ServletWebRequest(request)
 
 		var result = resolver.resolveArgument(nonNullableMultipartParamNotRequired, null, webRequest, binderFactory)
-		assertEquals(expected, result)
+		assertThat(result).isEqualTo(expected)
 	}
 
 	@Test
@@ -233,12 +221,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		request.method = HttpMethod.POST.name
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
-		try {
+		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableMultipartParamNotRequired, null, webRequest, binderFactory) as MultipartFile
-			fail("should have thrown a TypeCastException")
-		}
-		catch (e: TypeCastException) {
-			// expected
 		}
 	}
 

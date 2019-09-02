@@ -1,12 +1,27 @@
+/*
+ * Copyright 2002-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.messaging.rsocket
 
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.reactivestreams.Publisher
@@ -20,7 +35,6 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Sebastien Deleuze
  */
-@ExperimentalCoroutinesApi
 class RSocketRequesterExtensionsTests {
 
 	private val stringTypeRefMatcher: (ParameterizedTypeReference<*>) -> Boolean  = { it.type == String::class.java }
@@ -31,7 +45,7 @@ class RSocketRequesterExtensionsTests {
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connect(any()) } returns Mono.just(requester)
 		runBlocking {
-			assertEquals(requester, builder.connectAndAwait(mockk()))
+			assertThat(builder.connectAndAwait(mockk())).isEqualTo(requester)
 		}
 	}
 
@@ -42,7 +56,7 @@ class RSocketRequesterExtensionsTests {
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connectTcp(host, anyInt()) } returns Mono.just(requester)
 		runBlocking {
-			assertEquals(requester, builder.connectTcpAndAwait(host, 0))
+			assertThat(builder.connectTcpAndAwait(host, 0)).isEqualTo(requester)
 		}
 	}
 
@@ -52,7 +66,7 @@ class RSocketRequesterExtensionsTests {
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connectWebSocket(any()) } returns Mono.just(requester)
 		runBlocking {
-			assertEquals(requester, builder.connectWebSocketAndAwait(mockk()))
+			assertThat(builder.connectWebSocketAndAwait(mockk())).isEqualTo(requester)
 		}
 	}
 
@@ -62,7 +76,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<Publisher<String>>()
 		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.dataWithType(data))
+		assertThat(requestSpec.dataWithType(data)).isEqualTo(responseSpec)
 	}
 
 	@Test
@@ -71,7 +85,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<Flow<String>>()
 		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.dataWithType(data))
+		assertThat(requestSpec.dataWithType(data)).isEqualTo(responseSpec)
 	}
 
 	@Test
@@ -80,7 +94,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<CompletableFuture<String>>()
 		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.dataWithType<String>(data))
+		assertThat(requestSpec.dataWithType<String>(data)).isEqualTo(responseSpec)
 	}
 
 	@Test
@@ -88,7 +102,7 @@ class RSocketRequesterExtensionsTests {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { requestSpec.data(any()) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.data(mockk()))
+		assertThat(requestSpec.data(mockk())).isEqualTo(responseSpec)
 	}
 
 	@Test
@@ -106,7 +120,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { responseSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		runBlocking {
-			assertEquals(response, responseSpec.retrieveAndAwait<String>())
+			assertThat(responseSpec.retrieveAndAwait<String>()).isEqualTo(response)
 		}
 	}
 
@@ -115,7 +129,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { responseSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		runBlocking {
-			assertEquals(listOf("foo", "bar"), responseSpec.retrieveFlow<String>().toList())
+			assertThat(responseSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
 		}
 	}
 
@@ -124,7 +138,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { responseSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		runBlocking {
-			assertEquals("foo", responseSpec.retrieveMono<String>().block())
+			assertThat(responseSpec.retrieveMono<String>().block()).isEqualTo("foo")
 		}
 	}
 
@@ -133,7 +147,7 @@ class RSocketRequesterExtensionsTests {
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { responseSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		runBlocking {
-			assertEquals(listOf("foo", "bar"), responseSpec.retrieveFlux<String>().collectList().block())
+			assertThat(responseSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
 		}
 	}
 

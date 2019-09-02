@@ -21,8 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.codec.multipart.Part
@@ -63,7 +62,7 @@ class ServerRequestExtensionsTests {
 	fun awaitBody() {
 		every { request.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
-			assertEquals("foo", request.awaitBody<String>())
+			assertThat(request.awaitBody<String>()).isEqualTo("foo")
 		}
 	}
 
@@ -71,7 +70,7 @@ class ServerRequestExtensionsTests {
 	fun awaitBodyOrNull() {
 		every { request.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
-			assertNull(request.awaitBodyOrNull<String>())
+			assertThat(request.awaitBodyOrNull<String>()).isNull()
 		}
 	}
 
@@ -80,7 +79,7 @@ class ServerRequestExtensionsTests {
 		val map = mockk<MultiValueMap<String, String>>()
 		every { request.formData() } returns Mono.just(map)
 		runBlocking {
-			assertEquals(map, request.awaitFormData())
+			assertThat(request.awaitFormData()).isEqualTo(map)
 		}
 	}
 
@@ -89,7 +88,7 @@ class ServerRequestExtensionsTests {
 		val map = mockk<MultiValueMap<String, Part>>()
 		every { request.multipartData() } returns Mono.just(map)
 		runBlocking {
-			assertEquals(map, request.awaitMultipartData())
+			assertThat(request.awaitMultipartData()).isEqualTo(map)
 		}
 	}
 
@@ -98,7 +97,7 @@ class ServerRequestExtensionsTests {
 		val principal = mockk<Principal>()
 		every { request.principal() } returns Mono.just(principal)
 		runBlocking {
-			assertEquals(principal, request.awaitPrincipal())
+			assertThat(request.awaitPrincipal()).isEqualTo(principal)
 		}
 	}
 
@@ -107,7 +106,7 @@ class ServerRequestExtensionsTests {
 		val session = mockk<WebSession>()
 		every { request.session() } returns Mono.just(session)
 		runBlocking {
-			assertEquals(session, request.awaitSession())
+			assertThat(request.awaitSession()).isEqualTo(session)
 		}
 	}
 

@@ -16,7 +16,6 @@
 
 package org.springframework.context.support
 
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.getBean
 
@@ -32,7 +31,7 @@ class GenericApplicationContextExtensionsTests {
 		val context = GenericApplicationContext()
 		context.registerBean<BeanA>()
 		context.refresh()
-		assertNotNull(context.getBean<BeanA>())
+		context.getBean<BeanA>()
 	}
 
 	@Test
@@ -40,7 +39,7 @@ class GenericApplicationContextExtensionsTests {
 		val context = GenericApplicationContext()
 		context.registerBean<BeanA>("a")
 		context.refresh()
-		assertNotNull(context.getBean("a"))
+		context.getBean("a")
 	}
 
 	@Test
@@ -48,7 +47,7 @@ class GenericApplicationContextExtensionsTests {
 		val context = GenericApplicationContext()
 		context.registerBean { BeanA() }
 		context.refresh()
-		assertNotNull(context.getBean<BeanA>())
+		context.getBean<BeanA>()
 	}
 
 	@Test
@@ -56,7 +55,7 @@ class GenericApplicationContextExtensionsTests {
 		val context = GenericApplicationContext()
 		context.registerBean("a") { BeanA() }
 		context.refresh()
-		assertNotNull(context.getBean("a"))
+		context.getBean("a")
 	}
 
 	@Test
@@ -65,8 +64,8 @@ class GenericApplicationContextExtensionsTests {
 		context.registerBean<BeanA>()
 		context.registerBean { BeanB(it.getBean<BeanA>()) }
 		context.refresh()
-		assertNotNull(context.getBean<BeanA>())
-		assertNotNull(context.getBean<BeanB>())
+		context.getBean<BeanA>()
+		context.getBean<BeanB>()
 	}
 
 	@Test
@@ -75,8 +74,8 @@ class GenericApplicationContextExtensionsTests {
 		context.registerBean<BeanA>("a")
 		context.registerBean("b") { BeanB(it.getBean<BeanA>()) }
 		context.refresh()
-		assertNotNull(context.getBean("a"))
-		assertNotNull(context.getBean("b"))
+		context.getBean("a")
+		context.getBean("b")
 	}
 
 	class BeanA

@@ -16,9 +16,8 @@
 
 package org.springframework.context.support
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -45,10 +44,10 @@ class BeanDefinitionDslTests {
 			refresh()
 		}
 		
-		assertNotNull(context.getBean<Foo>())
-		assertNotNull(context.getBean<Bar>("bar"))
-		assertTrue(context.isPrototype("bar"))
-		assertNotNull(context.getBean<Baz>())
+		context.getBean<Foo>()
+		context.getBean<Bar>("bar")
+		assertThat(context.isPrototype("bar")).isTrue()
+		context.getBean<Baz>()
 	}
 
 	@Test
@@ -72,13 +71,9 @@ class BeanDefinitionDslTests {
 			refresh()
 		}
 
-		assertNotNull(context.getBean<Foo>())
-		assertNotNull(context.getBean<Bar>("bar"))
-		try { 
-			context.getBean<Baz>()
-			fail("Expect NoSuchBeanDefinitionException to be thrown")
-		}
-		catch(ex: NoSuchBeanDefinitionException) { null }
+		context.getBean<Foo>()
+		context.getBean<Bar>("bar")
+		assertThatExceptionOfType(NoSuchBeanDefinitionException::class.java).isThrownBy { context.getBean<Baz>() }
 	}
 
 	@Test
@@ -100,14 +95,10 @@ class BeanDefinitionDslTests {
 			refresh()
 		}
 
-		assertNotNull(context.getBean<Foo>())
-		assertNotNull(context.getBean<Bar>("bar"))
-		assertEquals("foofoo", context.getBean<FooFoo>().name)
-		try {
-			context.getBean<Baz>()
-			fail("Expect NoSuchBeanDefinitionException to be thrown")
-		}
-		catch(ex: NoSuchBeanDefinitionException) { null }
+		context.getBean<Foo>()
+		context.getBean<Bar>("bar")
+		assertThat(context.getBean<FooFoo>().name).isEqualTo("foofoo")
+		assertThatExceptionOfType(NoSuchBeanDefinitionException::class.java).isThrownBy { context.getBean<Baz>() }
 	}
 
 	@Test  // SPR-16412
@@ -126,7 +117,7 @@ class BeanDefinitionDslTests {
 		}
 
 		for (i in 1..5) {
-			assertNotNull(context.getBean("string$i"))
+			context.getBean("string$i")
 		}
 	}
 
@@ -144,7 +135,7 @@ class BeanDefinitionDslTests {
 		}
 
 		val barbar = context.getBean<BarBar>()
-		assertEquals(2, barbar.foos.size)
+		assertThat(barbar.foos.size).isEqualTo(2)
 	}
 
 	@Test  // SPR-17292

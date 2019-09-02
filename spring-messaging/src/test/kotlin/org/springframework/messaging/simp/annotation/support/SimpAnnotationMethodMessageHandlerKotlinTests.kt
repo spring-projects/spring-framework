@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.annotation.support
 
 import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
 import java.util.Collections
 import java.util.HashMap
 
@@ -36,7 +37,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Controller
 
-import org.junit.jupiter.api.Assertions.*
 import org.springframework.messaging.MessageHandlingException
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 
@@ -70,8 +70,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeader", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertEquals("bar", testController.header)
+        assertThat(testController.exception).isNull()
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -79,8 +79,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeader", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertNull(testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isNull()
     }
 
     @Test
@@ -88,7 +88,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeader", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertEquals("bar", testController.header)
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -96,8 +96,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeader", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNotNull(testController.exception)
-        assertTrue(testController.exception is MessageHandlingException)
+        assertThat(testController.exception).isNotNull()
+        assertThat(testController.exception).isInstanceOf(MessageHandlingException::class.java)
     }
 
     @Test
@@ -105,8 +105,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertEquals("bar", testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -114,8 +114,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeaderNotRequired", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertNull(testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isNull()
     }
 
     @Test
@@ -123,7 +123,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertEquals("bar", testController.header)
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -131,8 +131,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeaderNotRequired", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNotNull(testController.exception)
-        assertTrue(testController.exception is IllegalArgumentException)
+        assertThat(testController.exception).isNotNull()
+		assertThat(testController.exception).isInstanceOf(IllegalArgumentException::class.java)
     }
 
     private fun createMessage(destination: String, headers: Map<String, String?>): Message<ByteArray> {
