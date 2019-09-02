@@ -30,7 +30,6 @@ import org.springframework.test.web.reactive.server.WebTestClient.*
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*>
 		= body(publisher, object : ParameterizedTypeReference<T>() {})
 
@@ -125,6 +124,5 @@ inline fun <reified E : Any> ResponseSpec.expectBodyList(): ListBodySpec<E> =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> ResponseSpec.returnResult(): FluxExchangeResult<T> =
 		returnResult(object : ParameterizedTypeReference<T>() {})
