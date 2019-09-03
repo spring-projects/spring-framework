@@ -66,10 +66,10 @@ public abstract class AbstractMockWebServerTests {
 					assertThat(request.getHeader("Host"))
 							.contains("localhost:" + port);
 					MockResponse response = new MockResponse()
-							.setHeaders(request.getHeaders())
 							.setHeader("Content-Length", request.getBody().size())
 							.setResponseCode(200)
 							.setBody(request.getBody());
+					response.headers(request.getHeaders());
 					request.getBody().flush();
 					return response;
 				}
