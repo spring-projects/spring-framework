@@ -340,7 +340,6 @@ configure([rootProject] + javaProjects) { project ->
 		testCompile("org.mockito:mockito-core")
 		testCompile("org.mockito:mockito-junit-jupiter")
 		testCompile("io.mockk:mockk")
-		testCompile("org.hamcrest:hamcrest")
 		testCompile("org.assertj:assertj-core")
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntime("org.junit.platform:junit-platform-launcher")
@@ -415,4 +414,3 @@ configure(rootProject) {
 		}
 	}
 }
-
