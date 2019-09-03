@@ -347,6 +347,8 @@ configure([rootProject] + javaProjects) { project ->
 		testRuntime("org.apache.logging.log4j:log4j-core")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl")
 		testRuntime("org.apache.logging.log4j:log4j-jul")
+		// Hamcrest is needed at test runtime by third-party libraries
+		testRuntime("org.hamcrest:hamcrest")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
