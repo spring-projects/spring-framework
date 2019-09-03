@@ -208,7 +208,7 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append("; filename*=");
-				sb.append(encodeHeaderFieldParam(this.filename, this.charset));
+				sb.append(encodeFilename(this.filename, this.charset));
 			}
 		}
 		if (this.size != null) {
@@ -274,15 +274,23 @@ public final class ContentDisposition {
 				String attribute = part.substring(0, eqIndex);
 				String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
 						part.substring(eqIndex + 2, part.length() - 1) :
-						part.substring(eqIndex + 1, part.length()));
+						part.substring(eqIndex + 1));
 				if (attribute.equals("name") ) {
 					name = value;
 				}
 				else if (attribute.equals("filename*") ) {
-					filename = decodeHeaderFieldParam(value);
-					charset = Charset.forName(value.substring(0, value.indexOf('\'')));
-					Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-							"Charset should be UTF-8 or ISO-8859-1");
+					int idx1 = value.indexOf('\'');
+					int idx2 = value.indexOf('\'', idx1 + 1);
+					if (idx1 != -1 && idx2 != -1) {
+						charset = Charset.forName(value.substring(0, idx1));
+						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+								"Charset should be UTF-8 or ISO-8859-1");
+						filename = decodeFilename(value.substring(idx2 + 1), charset);
+					}
+					else {
+						// US ASCII
+						filename = decodeFilename(value, StandardCharsets.US_ASCII);
+					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
 					filename = value;
@@ -362,22 +370,15 @@ public final class ContentDisposition {
 	/**
 	 * Decode the given header field param as described in RFC 5987.
 	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
-	 * @param input the header field param
+	 * @param filename the filename
+	 * @param charset the charset for the filename
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String decodeHeaderFieldParam(String input) {
-		Assert.notNull(input, "Input String should not be null");
-		int firstQuoteIndex = input.indexOf('\'');
-		int secondQuoteIndex = input.indexOf('\'', firstQuoteIndex + 1);
-		// US_ASCII
-		if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
-			return input;
-		}
-		Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-				"Charset should be UTF-8 or ISO-8859-1");
-		byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
+	private static String decodeFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'input' String` should not be null");
+		Assert.notNull(charset, "'charset' should not be null");
+		byte[] value = filename.getBytes(charset);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		int index = 0;
 		while (index < value.length) {
@@ -417,7 +418,7 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String encodeHeaderFieldParam(String input, Charset charset) {
+	private static String encodeFilename(String input, Charset charset) {
 		Assert.notNull(input, "Input String should not be null");
 		Assert.notNull(charset, "Charset should not be null");
 		if (StandardCharsets.US_ASCII.equals(charset)) {

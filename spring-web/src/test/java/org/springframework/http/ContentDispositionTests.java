@@ -16,15 +16,11 @@
 
 package org.springframework.http;
 
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
-
-import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -72,6 +68,30 @@ public class ContentDispositionTests {
 						.name("name")
 						.filename("中文.txt", StandardCharsets.UTF_8)
 						.build());
+	}
+
+	@Test
+	public void parseEncodedFilenameWithoutCharset() {
+		assertThat(parse("form-data; name=\"name\"; filename*=test.txt"))
+				.isEqualTo(ContentDisposition.builder("form-data")
+						.name("name")
+						.filename("test.txt")
+						.build());
+	}
+
+	@Test
+	public void parseEncodedFilenameWithInvalidCharset() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-16''test.txt"));
+	}
+
+	@Test
+	public void parseEncodedFilenameWithInvalidName() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A"));
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A.txt"));
 	}
 
 	@Test // gh-23077
@@ -147,7 +167,7 @@ public class ContentDispositionTests {
 
 
 	@Test
-	public void headerValue() {
+	public void format() {
 		assertThat(
 				ContentDisposition.builder("form-data")
 						.name("foo")
@@ -158,7 +178,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void headerValueWithEncodedFilename() {
+	public void formatWithEncodedFilename() {
 		assertThat(
 				ContentDisposition.builder("form-data")
 						.name("name")
@@ -167,67 +187,25 @@ public class ContentDispositionTests {
 				.isEqualTo("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt");
 	}
 
-	@Test  // SPR-14547
-	public void encodeHeaderFieldParam() {
-		Method encode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"encodeHeaderFieldParam", String.class, Charset.class);
-		ReflectionUtils.makeAccessible(encode);
-
-		String result = (String)ReflectionUtils.invokeMethod(encode, null, "test.txt",
-				StandardCharsets.US_ASCII);
-		assertThat(result).isEqualTo("test.txt");
-
-		result = (String)ReflectionUtils.invokeMethod(encode, null, "中文.txt", StandardCharsets.UTF_8);
-		assertThat(result).isEqualTo("UTF-8''%E4%B8%AD%E6%96%87.txt");
+	@Test
+	public void formatWithEncodedFilenameUsingUsAscii() {
+		assertThat(
+				ContentDisposition.builder("form-data")
+						.name("name")
+						.filename("test.txt", StandardCharsets.US_ASCII)
+						.build()
+						.toString())
+				.isEqualTo("form-data; name=\"name\"; filename=\"test.txt\"");
 	}
 
 	@Test
-	public void encodeHeaderFieldParamInvalidCharset() {
-		Method encode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"encodeHeaderFieldParam", String.class, Charset.class);
-		ReflectionUtils.makeAccessible(encode);
+	public void formatWithEncodedFilenameUsingInvalidCharset() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				ReflectionUtils.invokeMethod(encode, null, "test", StandardCharsets.UTF_16));
-	}
-
-	@Test  // SPR-14408
-	public void decodeHeaderFieldParam() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-
-		String result = (String)ReflectionUtils.invokeMethod(decode, null, "test.txt");
-		assertThat(result).isEqualTo("test.txt");
-
-		result = (String)ReflectionUtils.invokeMethod(decode, null, "UTF-8''%E4%B8%AD%E6%96%87.txt");
-		assertThat(result).isEqualTo("中文.txt");
-	}
-
-	@Test
-	public void decodeHeaderFieldParamInvalidCharset() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ReflectionUtils.invokeMethod(decode, null, "UTF-16''test"));
-	}
-
-	@Test
-	public void decodeHeaderFieldParamShortInvalidEncodedFilename() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ReflectionUtils.invokeMethod(decode, null, "UTF-8''%A"));
-	}
-
-	@Test
-	public void decodeHeaderFieldParamLongerInvalidEncodedFilename() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ReflectionUtils.invokeMethod(decode, null, "UTF-8''%A.txt"));
+				ContentDisposition.builder("form-data")
+						.name("name")
+						.filename("test.txt", StandardCharsets.UTF_16)
+						.build()
+						.toString());
 	}
 
 }
