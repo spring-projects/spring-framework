@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -137,7 +136,7 @@ public class HandlerMethodMappingTests {
 		result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
 		assertThat(result.block()).isNull();
-		assertThat(this.mapping.getMappingRegistry().getMappings().keySet()).isNotEqualTo(Matchers.contains(key));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet()).doesNotContain(key);
 	}
 
 
