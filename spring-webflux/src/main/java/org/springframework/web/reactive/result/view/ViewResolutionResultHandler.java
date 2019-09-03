@@ -162,7 +162,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 
 		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				void.class.equals(type) || View.class.isAssignableFrom(type) ||
+				Void.class.equals(type) || void.class.equals(type) || View.class.isAssignableFrom(type) ||
 				!BeanUtils.isSimpleProperty(type));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,17 @@ import org.springframework.tests.sample.objects.TestObject;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link ClassUtils}.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Sam Brannen
  */
 public class ClassUtilsTests {
 
-	private ClassLoader classLoader = getClass().getClassLoader();
+	private final ClassLoader classLoader = getClass().getClassLoader();
 
 
 	@Before
@@ -382,6 +385,42 @@ public class ClassUtilsTests {
 		assertEquals(List.class, ClassUtils.determineCommonAncestor(ArrayList.class, List.class));
 		assertNull(ClassUtils.determineCommonAncestor(List.class, String.class));
 		assertNull(ClassUtils.determineCommonAncestor(String.class, List.class));
+	}
+
+	@Test
+	public void isPrimitiveWrapper() {
+		assertTrue(ClassUtils.isPrimitiveWrapper(Boolean.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Character.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Byte.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Short.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Integer.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Long.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Float.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Double.class));
+		assertTrue(ClassUtils.isPrimitiveWrapper(Void.class));
+	}
+
+	@Test
+	public void isPrimitiveOrWrapper() {
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(boolean.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(char.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(byte.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(short.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(int.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(long.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(float.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(double.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(void.class));
+
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Boolean.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Character.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Byte.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Short.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Integer.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Long.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Float.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Double.class));
+		assertTrue(ClassUtils.isPrimitiveOrWrapper(Void.class));
 	}
 
 
