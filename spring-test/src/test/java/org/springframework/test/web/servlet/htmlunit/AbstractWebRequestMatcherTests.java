@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.2
  */
-public class AbstractWebRequestMatcherTests {
+abstract class AbstractWebRequestMatcherTests {
 
 	protected void assertMatches(WebRequestMatcher matcher, String url) throws MalformedURLException {
 		assertThat(matcher.matches(new WebRequest(new URL(url)))).isTrue();
