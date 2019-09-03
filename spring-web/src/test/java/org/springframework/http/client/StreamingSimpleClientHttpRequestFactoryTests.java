@@ -43,6 +43,7 @@ public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRe
 	}
 
 	@Test  // SPR-8809
+	@Disabled("hangs indefinitely")
 	public void interceptor() throws Exception {
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
