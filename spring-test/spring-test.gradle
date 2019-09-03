@@ -54,7 +54,6 @@ dependencies {
 		exclude group: "junit", module: "junit"
 	}
 	testCompile("org.junit.platform:junit-platform-testkit")
-	testCompile("org.junit.jupiter:junit-jupiter-params")
 	testCompile("com.fasterxml.jackson.core:jackson-databind")
 	testCompile("com.thoughtworks.xstream:xstream")
 	testCompile("com.rometools:rome")
@@ -65,7 +64,6 @@ dependencies {
 	testCompile("org.apache.httpcomponents:httpclient")
 	testCompile("io.projectreactor.netty:reactor-netty")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner")
-	testRuntime("org.junit.jupiter:junit-jupiter-engine")
 	testRuntime("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
