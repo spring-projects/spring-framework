@@ -114,7 +114,12 @@ public class ViewResolutionResultHandlerTests {
 	private void testSupports(MethodParameter returnType, boolean supports) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertThat(resultHandler.supports(handlerResult)).isEqualTo(supports);
+		if (supports) {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should be supported").isEqualTo(supports);
+		}
+		else {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should not be supported").isNotEqualTo(supports);
+		}
 	}
 
 	@Test
