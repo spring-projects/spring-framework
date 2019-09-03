@@ -222,6 +222,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.getType(name, allowFactoryBeanInit);
+	}
+
+	@Override
 	public String[] getAliases(String name) {
 		return this.beanFactory.getAliases(name);
 	}

@@ -1178,6 +1178,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
+		return getBeanFactory().getType(name, allowFactoryBeanInit);
+	}
+
+	@Override
 	public String[] getAliases(String name) {
 		return getBeanFactory().getAliases(name);
 	}

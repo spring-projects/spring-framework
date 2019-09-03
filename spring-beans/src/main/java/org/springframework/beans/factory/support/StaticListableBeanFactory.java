@@ -287,6 +287,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+		return getType(name, true);
+	}
+
+	@Override
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 
 		Object bean = this.beans.get(beanName);
