@@ -21,6 +21,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
 import io.vavr.control.Try;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -41,6 +44,7 @@ import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.reactive.TransactionContextManager;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.util.Assert;
@@ -322,6 +326,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			final InvocationCallback invocation) throws Throwable {
 
 		if (this.reactiveAdapterRegistry != null) {
+			if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
+				throw new TransactionUsageException("Annotated transactions on suspending functions are not supported," +
+						" use TransactionalOperator.transactional extensions instead.");
+			}
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(method.getReturnType());
 			if (adapter != null) {
 				return new ReactiveTransactionSupport(adapter).invokeWithinTransaction(method, targetClass, invocation);
@@ -806,6 +814,17 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					status.setRollbackOnly();
 				}
 			});
+		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		static private boolean isSuspend(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			return function != null && function.isSuspend();
 		}
 	}
 

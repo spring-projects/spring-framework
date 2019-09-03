@@ -574,6 +574,12 @@ class UserHandler(builder: WebClient.Builder) {
 }
 ----
 
+=== Transactions
+
+Transactions on Coroutines are supported via the programmatic variant of the Reactive
+transaction management provided as of Spring Framework 5.2. `TransactionalOperator.transactional`
+extensions with suspending lambda and Kotlin `Flow` parameter are provided for that purpose.
+
 [[kotlin-spring-projects-in-kotlin]]
 == Spring Projects in Kotlin
 
