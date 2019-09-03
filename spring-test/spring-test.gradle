@@ -74,22 +74,21 @@ dependencies {
 
 task junit(type: Test) {
 	description = "Runs JUnit 4 and JUnit Jupiter tests."
-	systemProperty("testGroups", project.properties.get("testGroups"))
 	useJUnitPlatform {
 		excludeTags "failing-test-case"
 	}
 	include(["**/*Tests.class", "**/*Test.class"])
 	exclude(["**/testng/**/*.*"])
+	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
 
 task testNG(type: Test) {
 	description = "Runs TestNG tests."
-	systemProperty("testGroups", project.properties.get("testGroups"))
 	useTestNG()
-	scanForTestClasses = false
 	include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
+	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 	// testLogging.showStandardStreams = true
 	// forkEvery 1

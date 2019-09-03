@@ -317,16 +317,11 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	test {
+		useJUnitPlatform()
+		include(["**/*Tests.class", "**/*Test.class"])
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		systemProperty("io.netty.leakDetection.level", "paranoid")
-		useJUnitPlatform()
-		scanForTestClasses = false
-		include(["**/*Tests.class", "**/*Test.class"])
-		// Since we set scanForTestClasses to false, we need to filter out inner
-		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
-		// run MyTests by itself will fail if MyTests contains any inner classes.
-		exclude(["**/Abstract*.class", '**/*$*'])
 	}
 
 	checkstyle {
