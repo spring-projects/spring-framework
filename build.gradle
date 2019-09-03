@@ -318,6 +318,7 @@ configure([rootProject] + javaProjects) { project ->
 
 	test {
 		useJUnitPlatform()
+		scanForTestClasses = false
 		include(["**/*Tests.class", "**/*Test.class"])
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
