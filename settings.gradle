@@ -5,6 +5,8 @@ pluginManagement {
 	}
 }
 
+enableFeaturePreview("GRADLE_METADATA")
+
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"
