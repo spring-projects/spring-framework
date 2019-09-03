@@ -18,6 +18,10 @@ package org.springframework.util;
 
 import java.io.Externalizable;
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -31,6 +35,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.tests.sample.objects.DerivedTestObject;
 import org.springframework.tests.sample.objects.ITestInterface;
@@ -383,42 +389,38 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.determineCommonAncestor(String.class, List.class)).isNull();
 	}
 
-	@Test
-	public void isPrimitiveWrapper() {
-		assertThat(ClassUtils.isPrimitiveWrapper(Boolean.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Character.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Byte.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Short.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Integer.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Long.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Float.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Double.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveWrapper(Void.class)).isTrue();
+	@ParameterizedTest
+	@WrapperTypes
+	void isPrimitiveWrapper(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveWrapper(type)).isTrue();
 	}
 
-	@Test
-	public void isPrimitiveOrWrapper() {
-		assertThat(ClassUtils.isPrimitiveOrWrapper(boolean.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(char.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(byte.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(short.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(int.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(long.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(float.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(double.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(void.class)).isTrue();
-
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Boolean.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Character.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Byte.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Short.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Integer.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Long.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Float.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Double.class)).isTrue();
-		assertThat(ClassUtils.isPrimitiveOrWrapper(Void.class)).isTrue();
+	@ParameterizedTest
+	@PrimitiveTypes
+	void isPrimitiveOrWrapperWithPrimitive(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveOrWrapper(type)).isTrue();
 	}
 
+	@ParameterizedTest
+	@WrapperTypes
+	void isPrimitiveOrWrapperWithWrapper(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveOrWrapper(type)).isTrue();
+	}
+
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueSource(classes = { Boolean.class, Character.class, Byte.class, Short.class,
+		Integer.class, Long.class, Float.class, Double.class, Void.class })
+	@interface WrapperTypes {
+	}
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueSource(classes = { boolean.class, char.class, byte.class, short.class,
+		int.class, long.class, float.class, double.class, void.class })
+	@interface PrimitiveTypes {
+	}
 
 	public static class InnerClass {
 
