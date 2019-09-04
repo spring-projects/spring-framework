@@ -42,7 +42,7 @@ public interface AnnotationFilter {
 
 	/**
 	 * {@link AnnotationFilter} that always matches and can be used when no
-	 * relevant annotation types are expected to present at all.
+	 * relevant annotation types are expected to be present at all.
 	 */
 	AnnotationFilter ALL = new AnnotationFilter() {
 		@Override
