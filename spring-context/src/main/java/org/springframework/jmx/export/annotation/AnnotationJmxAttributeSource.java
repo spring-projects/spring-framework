@@ -35,7 +35,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
-import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -168,7 +167,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 			Class<? extends Annotation> containerAnnotationType) {
 
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY,
-				RepeatableContainers.of(annotationType, containerAnnotationType), AnnotationFilter.PLAIN)
+				RepeatableContainers.of(annotationType, containerAnnotationType))
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(MergedAnnotation::withNonMergedAttributes)

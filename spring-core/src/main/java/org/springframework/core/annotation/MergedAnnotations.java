@@ -53,7 +53,6 @@ import org.springframework.lang.Nullable;
  *
  *     &#064;AliasFor(attribute = "value")
  *     String[] path() default {};
- *
  * }
  * </pre>
  *
@@ -303,7 +302,24 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * element annotations
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
-		return from(element, searchStrategy, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
+		return from(element, searchStrategy, RepeatableContainers.standardRepeatables());
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotations} instance containing all
+	 * annotations and meta-annotations from the specified element and,
+	 * depending on the {@link SearchStrategy}, related inherited elements.
+	 * @param element the source element
+	 * @param searchStrategy the search strategy to use
+	 * @param repeatableContainers the repeatable containers that may be used by
+	 * the element annotations or the meta-annotations
+	 * @return a {@link MergedAnnotations} instance containing the merged
+	 * element annotations
+	 */
+	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+			RepeatableContainers repeatableContainers) {
+
+		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -333,7 +349,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @see #from(Object, Annotation...)
 	 */
 	static MergedAnnotations from(Annotation... annotations) {
-		return from(null, annotations);
+		return from(annotations, annotations);
 	}
 
 	/**
@@ -347,8 +363,23 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @see #from(Annotation...)
 	 * @see #from(AnnotatedElement)
 	 */
-	static MergedAnnotations from(@Nullable Object source, Annotation... annotations) {
-		return from(source, annotations, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
+	static MergedAnnotations from(Object source, Annotation... annotations) {
+		return from(source, annotations, RepeatableContainers.standardRepeatables());
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotations} instance from the specified
+	 * annotations.
+	 * @param source the source for the annotations. This source is used only
+	 * for information and logging. It does not need to <em>actually</em>
+	 * contain the specified annotations, and it will not be searched.
+	 * @param annotations the annotations to include
+	 * @param repeatableContainers the repeatable containers that may be used by
+	 * meta-annotations
+	 * @return a {@link MergedAnnotations} instance containing the annotations
+	 */
+	static MergedAnnotations from(Object source, Annotation[] annotations, RepeatableContainers repeatableContainers) {
+		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -364,7 +395,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * annotations considered
 	 * @return a {@link MergedAnnotations} instance containing the annotations
 	 */
-	static MergedAnnotations from(@Nullable Object source, Annotation[] annotations,
+	static MergedAnnotations from(Object source, Annotation[] annotations,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
 		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
