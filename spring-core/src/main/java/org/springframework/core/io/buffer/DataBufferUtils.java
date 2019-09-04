@@ -320,7 +320,7 @@ public abstract class DataBufferUtils {
 	 * writing errors and the completion signal
 	 */
 	public static Flux<DataBuffer> write(
-			Publisher<DataBuffer> source, AsynchronousFileChannel channel, long position) {
+			Publisher<? extends DataBuffer> source, AsynchronousFileChannel channel, long position) {
 
 		Assert.notNull(source, "'source' must not be null");
 		Assert.notNull(channel, "'channel' must not be null");
@@ -332,7 +332,18 @@ public abstract class DataBufferUtils {
 			sink.onDispose(handler);
 			flux.subscribe(handler);
 		});
+
+
 	}
+
+	public void handle() {
+		Number n = 5;
+		inspect(n);
+	}
+
+	public <U extends Number> void inspect(U u){
+	}
+
 
 	/**
 	 * Write the given stream of {@link DataBuffer DataBuffers} to the given
@@ -409,7 +420,7 @@ public abstract class DataBufferUtils {
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux whose maximum byte count is {@code maxByteCount}
 	 */
-	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+	public static Flux<DataBuffer> takeUntilByteCount(Publisher<? extends DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 
@@ -440,7 +451,7 @@ public abstract class DataBufferUtils {
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux with the remaining part of the given publisher
 	 */
-	public static Flux<DataBuffer> skipUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+	public static Flux<DataBuffer> skipUntilByteCount(Publisher<? extends DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 
@@ -520,7 +531,8 @@ public abstract class DataBufferUtils {
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
-	public static Mono<DataBuffer> join(Publisher<DataBuffer> dataBuffers) {
+	@SuppressWarnings("unchecked")
+	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
 		if (dataBuffers instanceof Mono) {
