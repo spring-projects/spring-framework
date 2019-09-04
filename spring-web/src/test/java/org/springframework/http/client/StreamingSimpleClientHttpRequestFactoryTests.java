@@ -43,7 +43,7 @@ public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRe
 	}
 
 	@Test  // SPR-8809
-	@Disabled("hangs indefinitely")
+	@Disabled("response.close() hangs indefinitely since upgrading from okhttp3 3.14.2 to 4.1.0")
 	public void interceptor() throws Exception {
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
