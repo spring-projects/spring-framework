@@ -149,7 +149,7 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependencySet(group: 'com.squareup.okhttp3', version: '4.1.0') {
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.2') {
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
