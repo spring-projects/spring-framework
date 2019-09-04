@@ -80,8 +80,11 @@ final class PostProcessorRegistrationDelegate {
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
 			// PriorityOrdered, Ordered, and the rest.
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
+			List<BeanDefinitionRegistryPostProcessor> orderedRegistryProcessors = new ArrayList<>();
 
-			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			// Find the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered and Ordered.
+			// The currentRegistryProcessors records the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered
+			// The orderedRegistryProcessors records the BeanDefinitionRegistryPostProcessors that implement Ordered
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
@@ -89,24 +92,23 @@ final class PostProcessorRegistrationDelegate {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
+				else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+					orderedRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+					processedBeans.add(ppName);
+				}
 			}
+
+			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
-			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
-			for (String ppName : postProcessorNames) {
-				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
-					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
-					processedBeans.add(ppName);
-				}
-			}
-			sortPostProcessors(currentRegistryProcessors, beanFactory);
-			registryProcessors.addAll(currentRegistryProcessors);
-			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
-			currentRegistryProcessors.clear();
+			sortPostProcessors(orderedRegistryProcessors, beanFactory);
+			registryProcessors.addAll(orderedRegistryProcessors);
+			invokeBeanDefinitionRegistryPostProcessors(orderedRegistryProcessors, registry);
+			orderedRegistryProcessors.clear();
 
 			// Finally, invoke all other BeanDefinitionRegistryPostProcessors until no further ones appear.
 			boolean reiterate = true;
