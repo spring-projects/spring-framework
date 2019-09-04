@@ -327,8 +327,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		if (this.reactiveAdapterRegistry != null) {
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
-				throw new TransactionUsageException("Annotated transactions on suspending functions are not supported," +
-						" use TransactionalOperator.transactional extensions instead.");
+				throw new TransactionUsageException("Unsupported annotated transaction on suspending function detected: "
+						+ method + ". Use TransactionalOperator.transactional extensions instead.");
 			}
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(method.getReturnType());
 			if (adapter != null) {
