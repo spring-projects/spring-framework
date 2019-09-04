@@ -1811,6 +1811,7 @@ public class AnnotationUtilsTests {
 
 	public static class ImplementsInterfaceWithGenericAnnotatedMethod implements InterfaceWithGenericAnnotatedMethod<String> {
 
+		@Override
 		public void foo(String t) {
 		}
 	}
@@ -1823,6 +1824,7 @@ public class AnnotationUtilsTests {
 
 	public static class ExtendsBaseClassWithGenericAnnotatedMethod extends BaseClassWithGenericAnnotatedMethod<String> {
 
+		@Override
 		public void foo(String t) {
 		}
 	}

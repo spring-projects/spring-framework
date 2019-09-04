@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Socket;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;

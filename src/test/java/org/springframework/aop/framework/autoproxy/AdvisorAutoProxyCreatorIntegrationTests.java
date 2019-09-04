@@ -16,10 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -27,6 +23,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
@@ -40,6 +37,8 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for auto proxy creation by advisor recognition working in

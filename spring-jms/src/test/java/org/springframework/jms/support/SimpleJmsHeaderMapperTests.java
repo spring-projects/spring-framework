@@ -18,6 +18,7 @@ package org.springframework.jms.support;
 
 import java.util.Date;
 import java.util.Map;
+
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;

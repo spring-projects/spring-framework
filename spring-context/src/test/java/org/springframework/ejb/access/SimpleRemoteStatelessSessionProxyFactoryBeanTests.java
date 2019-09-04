@@ -18,6 +18,7 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;

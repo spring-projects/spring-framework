@@ -16,18 +16,19 @@
 
 package org.springframework.util.xml;
 
+import java.io.StringWriter;
+
+import javax.xml.stream.XMLEventFactory;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
-import java.io.StringWriter;
-
-import static org.junit.Assert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.junit.Assert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 public class XMLEventStreamWriterTests {
 

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.client;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;

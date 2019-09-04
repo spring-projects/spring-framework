@@ -18,6 +18,7 @@ package org.springframework.jms.listener.adapter;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+
 import javax.jms.BytesMessage;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;

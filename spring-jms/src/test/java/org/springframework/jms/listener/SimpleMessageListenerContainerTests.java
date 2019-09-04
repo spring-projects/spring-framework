@@ -18,6 +18,7 @@ package org.springframework.jms.listener;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
