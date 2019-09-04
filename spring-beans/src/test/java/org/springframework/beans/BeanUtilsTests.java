@@ -26,9 +26,10 @@ import java.time.DayOfWeek;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -53,22 +54,22 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 19.05.2003
  */
-public class BeanUtilsTests {
+class BeanUtilsTests {
 
 	@Test
-	public void testInstantiateClassGivenInterface() {
+	void testInstantiateClassGivenInterface() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(List.class));
 	}
 
 	@Test
-	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
+	void testInstantiateClassGivenClassWithoutDefaultConstructor() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(CustomDateEditor.class));
 	}
 
 	@Test  // gh-22531
-	public void testInstantiateClassWithOptionalNullableType() throws NoSuchMethodException {
+	void testInstantiateClassWithOptionalNullableType() throws NoSuchMethodException {
 		Constructor<BeanWithNullableTypes> ctor = BeanWithNullableTypes.class.getDeclaredConstructor(
 				Integer.class, Boolean.class, String.class);
 		BeanWithNullableTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
@@ -78,7 +79,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test  // gh-22531
-	public void testInstantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
+	void testInstantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
 		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
 		assertThat(bean.getCounter()).isEqualTo(0);
@@ -87,14 +88,14 @@ public class BeanUtilsTests {
 	}
 
 	@Test // gh-22531
-	public void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
+	void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
 	}
 
 	@Test
-	public void testGetPropertyDescriptors() throws Exception {
+	void testGetPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
 		assertThat(descriptors).as("Descriptors should not be null").isNotNull();
@@ -102,7 +103,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testBeanPropertyIsArray() {
+	void testBeanPropertyIsArray() {
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
 		for (PropertyDescriptor descriptor : descriptors) {
 			if ("containedBeans".equals(descriptor.getName())) {
@@ -113,12 +114,12 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testFindEditorByConvention() {
+	void testFindEditorByConvention() {
 		assertThat(BeanUtils.findEditorByConvention(Resource.class).getClass()).isEqualTo(ResourceEditor.class);
 	}
 
 	@Test
-	public void testCopyProperties() throws Exception {
+	void testCopyProperties() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -134,7 +135,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithDifferentTypes1() throws Exception {
+	void testCopyPropertiesWithDifferentTypes1() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -150,7 +151,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithDifferentTypes2() throws Exception {
+	void testCopyPropertiesWithDifferentTypes2() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -166,7 +167,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithEditable() throws Exception {
+	void testCopyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
@@ -184,7 +185,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithIgnore() throws Exception {
+	void testCopyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
@@ -202,7 +203,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithIgnoredNonExistingProperty() {
+	void testCopyPropertiesWithIgnoredNonExistingProperty() {
 		NameAndSpecialProperty source = new NameAndSpecialProperty();
 		source.setName("name");
 		TestBean target = new TestBean();
@@ -211,7 +212,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testCopyPropertiesWithInvalidProperty() {
+	void testCopyPropertiesWithInvalidProperty() {
 		InvalidProperty source = new InvalidProperty();
 		source.setName("name");
 		source.setFlag1(true);
@@ -224,39 +225,39 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testResolveSimpleSignature() throws Exception {
+	void testResolveSimpleSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
 	@Test
-	public void testResolveInvalidSignatureEndParen() {
+	void testResolveInvalidSignatureEndParen() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class));
 	}
 
 	@Test
-	public void testResolveInvalidSignatureStartParen() {
+	void testResolveInvalidSignatureStartParen() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class));
 	}
 
 	@Test
-	public void testResolveWithAndWithoutArgList() throws Exception {
+	void testResolveWithAndWithoutArgList() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse");
 		assertThat(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class)).isNull();
 	}
 
 	@Test
-	public void testResolveTypedSignature() throws Exception {
+	void testResolveTypedSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse(java.lang.String, int)");
 	}
 
 	@Test
-	public void testResolveOverloadedSignature() throws Exception {
+	void testResolveOverloadedSignature() throws Exception {
 		// test resolve with no args
 		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded");
 		assertSignatureEquals(desiredMethod, "overloaded()");
@@ -271,7 +272,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testResolveSignatureWithArray() throws Exception {
+	void testResolveSignatureWithArray() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", String[].class);
 		assertSignatureEquals(desiredMethod, "doSomethingWithAnArray(java.lang.String[])");
 
@@ -280,7 +281,7 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testSPR6063() {
+	void testSPR6063() {
 		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
 		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
@@ -292,57 +293,36 @@ public class BeanUtilsTests {
 		}
 	}
 
-	@Test
-	public void isSimpleValueType() {
-		Stream.of(
-
-				boolean.class, char.class, byte.class, short.class, int.class,
-				long.class, float.class, double.class,
-
-				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
-				Long.class, Float.class, Double.class,
-
-				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class
-
-		).forEach(this::assertIsSimpleValueType);
-
-		Stream.of(int[].class, Object.class, List.class, void.class, Void.class)
-			.forEach(this::assertIsNotSimpleValueType);
-	}
-
-	@Test
-	public void isSimpleProperty() {
-		Stream.of(
-
-				boolean.class, char.class, byte.class, short.class, int.class,
-				long.class, float.class, double.class,
-
-				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
-				Long.class, Float.class, Double.class,
-
-				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
-
-				boolean[].class, Boolean[].class, Date[].class
-
-		).forEach(this::assertIsSimpleProperty);
-
-		Stream.of(Object.class, List.class, void.class, Void.class)
-			.forEach(this::assertIsNotSimpleProperty);
-	}
-
-	private void assertIsSimpleValueType(Class<?> type) {
+	@ParameterizedTest
+	@ValueSource(classes = {
+		boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class,
+		Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
+		DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class
+	})
+	void isSimpleValueType(Class<?> type) {
 		assertThat(BeanUtils.isSimpleValueType(type)).as("Type [" + type.getName() + "] should be a simple value type").isTrue();
 	}
 
-	private void assertIsNotSimpleValueType(Class<?> type) {
+	@ParameterizedTest
+	@ValueSource(classes = { int[].class, Object.class, List.class, void.class, Void.class })
+	void isNotSimpleValueType(Class<?> type) {
 		assertThat(BeanUtils.isSimpleValueType(type)).as("Type [" + type.getName() + "] should not be a simple value type").isFalse();
 	}
 
-	private void assertIsSimpleProperty(Class<?> type) {
+	@ParameterizedTest
+	@ValueSource(classes = {
+		boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class,
+		Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
+		DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
+		boolean[].class, Boolean[].class, Date[].class
+	})
+	void isSimpleProperty(Class<?> type) {
 		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should be a simple property").isTrue();
 	}
 
-	private void assertIsNotSimpleProperty(Class<?> type) {
+	@ParameterizedTest
+	@ValueSource(classes = { Object.class, List.class, void.class, Void.class })
+	void isNotSimpleProperty(Class<?> type) {
 		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should not be a simple property").isFalse();
 	}
 
