@@ -20,7 +20,13 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
+import java.time.DayOfWeek;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Harrop
  * @author Chris Beams
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 19.05.2003
  */
 public class BeanUtilsTests {
@@ -283,6 +290,60 @@ public class BeanUtilsTests {
 				assertThat(propertyDescriptor.getPropertyType()).as(propertyDescriptor.getName() + " has unexpected type").isEqualTo(keyDescr.getPropertyType());
 			}
 		}
+	}
+
+	@Test
+	public void isSimpleValueType() {
+		Stream.of(
+
+				boolean.class, char.class, byte.class, short.class, int.class,
+				long.class, float.class, double.class,
+
+				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
+				Long.class, Float.class, Double.class,
+
+				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class
+
+		).forEach(this::assertIsSimpleValueType);
+
+		Stream.of(int[].class, Object.class, List.class, void.class, Void.class)
+			.forEach(this::assertIsNotSimpleValueType);
+	}
+
+	@Test
+	public void isSimpleProperty() {
+		Stream.of(
+
+				boolean.class, char.class, byte.class, short.class, int.class,
+				long.class, float.class, double.class,
+
+				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
+				Long.class, Float.class, Double.class,
+
+				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
+
+				boolean[].class, Boolean[].class, Date[].class
+
+		).forEach(this::assertIsSimpleProperty);
+
+		Stream.of(Object.class, List.class, void.class, Void.class)
+			.forEach(this::assertIsNotSimpleProperty);
+	}
+
+	private void assertIsSimpleValueType(Class<?> type) {
+		assertThat(BeanUtils.isSimpleValueType(type)).as("Type [" + type.getName() + "] should be a simple value type").isTrue();
+	}
+
+	private void assertIsNotSimpleValueType(Class<?> type) {
+		assertThat(BeanUtils.isSimpleValueType(type)).as("Type [" + type.getName() + "] should not be a simple value type").isFalse();
+	}
+
+	private void assertIsSimpleProperty(Class<?> type) {
+		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should be a simple property").isTrue();
+	}
+
+	private void assertIsNotSimpleProperty(Class<?> type) {
+		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should not be a simple property").isFalse();
 	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {

@@ -160,9 +160,11 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			type = result.getReturnType().getGeneric().toClass();
 		}
 
-		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
-				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				void.class == type || Void.class == type || View.class.isAssignableFrom(type) ||
+		return (CharSequence.class.isAssignableFrom(type) ||
+				Rendering.class.isAssignableFrom(type) ||
+				Model.class.isAssignableFrom(type) ||
+				Map.class.isAssignableFrom(type) ||
+				View.class.isAssignableFrom(type) ||
 				!BeanUtils.isSimpleProperty(type));
 	}
 
