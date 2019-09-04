@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -705,8 +705,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
-		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(new DescriptiveResource(
-			"Groovy"));
+		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(
+				new DescriptiveResource("Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {

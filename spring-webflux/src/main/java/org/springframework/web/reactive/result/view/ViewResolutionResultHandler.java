@@ -81,8 +81,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
-		implements HandlerResultHandler, Ordered {
+public class ViewResolutionResultHandler extends HandlerResultHandlerSupport implements HandlerResultHandler, Ordered {
 
 	private static final Object NO_VALUE = new Object();
 
@@ -145,6 +144,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return this.defaultViews;
 	}
 
+
 	@Override
 	public boolean supports(HandlerResult result) {
 		if (hasModelAnnotation(result.getReturnTypeSource())) {
@@ -162,12 +162,8 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 
 		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				Void.class.equals(type) || void.class.equals(type) || View.class.isAssignableFrom(type) ||
+				void.class == type || Void.class == type || View.class.isAssignableFrom(type) ||
 				!BeanUtils.isSimpleProperty(type));
-	}
-
-	private boolean hasModelAnnotation(MethodParameter parameter) {
-		return parameter.hasMethodAnnotation(ModelAttribute.class);
 	}
 
 	@Override
@@ -249,6 +245,11 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					updateBindingResult(bindingContext, exchange);
 					return viewsMono.flatMap(views -> render(views, model.asMap(), bindingContext, exchange));
 				});
+	}
+
+
+	private boolean hasModelAnnotation(MethodParameter parameter) {
+		return parameter.hasMethodAnnotation(ModelAttribute.class);
 	}
 
 	/**

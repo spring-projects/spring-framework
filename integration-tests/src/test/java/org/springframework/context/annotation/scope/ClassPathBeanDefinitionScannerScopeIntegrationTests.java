@@ -58,7 +58,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		MockHttpServletRequest oldRequestWithSession = new MockHttpServletRequest();
 		oldRequestWithSession.setSession(new MockHttpSession());
 		this.oldRequestAttributesWithSession = new ServletRequestAttributes(oldRequestWithSession);
@@ -69,7 +69,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
