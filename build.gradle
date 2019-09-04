@@ -14,7 +14,6 @@ plugins {
 	id "org.jetbrains.kotlin.jvm" version "1.2.71" apply false
 	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
-	id "com.jfrog.artifactory" version '4.9.8' apply false
 }
 
 ext {

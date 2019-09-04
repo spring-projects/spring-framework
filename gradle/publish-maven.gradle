@@ -1,5 +1,4 @@
 apply plugin: "propdeps-maven"
-apply plugin: 'com.jfrog.artifactory'
 
 install {
 	repositories.mavenInstaller {
@@ -58,11 +57,4 @@ def customizePom(pom, gradleProject) {
 			}
 		}
 	}
-}
-
-artifactoryPublish {
-	dependsOn install
-	publishConfigs('archives', 'published')
-	publishArtifacts = true
-	publishPom = true
 }
