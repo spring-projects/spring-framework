@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,14 @@ package org.springframework.beans;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -32,7 +38,12 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link BeanUtils}.
@@ -40,6 +51,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 19.05.2003
  */
 public class BeanUtilsTests {
@@ -275,6 +287,60 @@ public class BeanUtilsTests {
 		}
 	}
 
+	@Test
+	public void isSimpleValueType() {
+		Stream.of(
+
+				boolean.class, char.class, byte.class, short.class, int.class,
+				long.class, float.class, double.class,
+
+				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
+				Long.class, Float.class, Double.class,
+
+				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class
+
+		).forEach(this::assertIsSimpleValueType);
+
+		Stream.of(int[].class, Object.class, List.class, void.class, Void.class)
+			.forEach(this::assertIsNotSimpleValueType);
+	}
+
+	@Test
+	public void isSimpleProperty() {
+		Stream.of(
+
+				boolean.class, char.class, byte.class, short.class, int.class,
+				long.class, float.class, double.class,
+
+				Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
+				Long.class, Float.class, Double.class,
+
+				DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
+
+				boolean[].class, Boolean[].class, Date[].class
+
+		).forEach(this::assertIsSimpleProperty);
+
+		Stream.of(Object.class, List.class, void.class, Void.class)
+			.forEach(this::assertIsNotSimpleProperty);
+	}
+
+	private void assertIsSimpleValueType(Class<?> type) {
+		assertTrue("Type [" + type.getName() + "] should be a simple value type", BeanUtils.isSimpleValueType(type));
+	}
+
+	private void assertIsNotSimpleValueType(Class<?> type) {
+		assertFalse("Type [" + type.getName() + "] should not be a simple value type", BeanUtils.isSimpleValueType(type));
+	}
+
+	private void assertIsSimpleProperty(Class<?> type) {
+		assertTrue("Type [" + type.getName() + "] should be a simple property", BeanUtils.isSimpleProperty(type));
+	}
+
+	private void assertIsNotSimpleProperty(Class<?> type) {
+		assertFalse("Type [" + type.getName() + "] should not be a simple property", BeanUtils.isSimpleProperty(type));
+	}
+
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
 	}
@@ -445,6 +511,7 @@ public class BeanUtilsTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class BeanWithSingleNonDefaultConstructor {
 
 		private final String name;
