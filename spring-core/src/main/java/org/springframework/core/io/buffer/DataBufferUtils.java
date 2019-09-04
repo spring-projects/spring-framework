@@ -336,15 +336,6 @@ public abstract class DataBufferUtils {
 
 	}
 
-	public void handle() {
-		Number n = 5;
-		inspect(n);
-	}
-
-	public <U extends Number> void inspect(U u){
-	}
-
-
 	/**
 	 * Write the given stream of {@link DataBuffer DataBuffers} to the given
 	 * file {@link Path}. The optional {@code options} parameter specifies
