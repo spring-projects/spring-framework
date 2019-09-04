@@ -17,6 +17,7 @@
 package org.springframework.jms.core;
 
 import java.util.Map;
+
 import javax.jms.Destination;
 
 import org.springframework.lang.Nullable;

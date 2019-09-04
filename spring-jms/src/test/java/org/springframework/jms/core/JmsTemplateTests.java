@@ -19,6 +19,7 @@ package org.springframework.jms.core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;

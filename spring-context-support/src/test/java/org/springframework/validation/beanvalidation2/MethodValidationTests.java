@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation2;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.Max;

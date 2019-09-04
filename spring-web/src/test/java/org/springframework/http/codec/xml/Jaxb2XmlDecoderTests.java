@@ -19,6 +19,7 @@ package org.springframework.http.codec.xml;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.XMLEvent;
 

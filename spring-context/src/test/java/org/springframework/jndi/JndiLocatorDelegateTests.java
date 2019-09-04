@@ -17,6 +17,7 @@
 package org.springframework.jndi;
 
 import java.lang.reflect.Field;
+
 import javax.naming.spi.NamingManager;
 
 import org.junit.jupiter.api.Test;

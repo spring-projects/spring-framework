@@ -19,6 +19,7 @@ package org.springframework.web.socket.server.support;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link WebSocketHttpRequestHandler}.

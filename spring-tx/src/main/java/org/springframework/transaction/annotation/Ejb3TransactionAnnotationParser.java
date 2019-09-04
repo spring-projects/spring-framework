@@ -18,6 +18,7 @@ package org.springframework.transaction.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
+
 import javax.ejb.ApplicationException;
 import javax.ejb.TransactionAttributeType;
 

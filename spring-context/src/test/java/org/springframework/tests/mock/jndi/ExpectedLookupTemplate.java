@@ -18,6 +18,7 @@ package org.springframework.tests.mock.jndi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiTemplate;

@@ -16,6 +16,7 @@
 
 package org.springframework.core.type;
 
+import example.type.AnnotationTypeFilterTestsTypes;
 import example.type.InheritedAnnotation;
 import example.type.NonInheritedAnnotation;
 import org.junit.jupiter.api.Test;

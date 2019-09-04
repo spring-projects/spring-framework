@@ -17,6 +17,7 @@
 package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
+
 import javax.management.DynamicMBean;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;

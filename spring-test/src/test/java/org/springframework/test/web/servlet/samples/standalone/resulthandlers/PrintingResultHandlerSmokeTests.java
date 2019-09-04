@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.samples.standalone.resulthandlers;
 
 import java.io.StringWriter;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 

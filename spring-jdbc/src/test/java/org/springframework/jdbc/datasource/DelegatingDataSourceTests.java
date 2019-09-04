@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;

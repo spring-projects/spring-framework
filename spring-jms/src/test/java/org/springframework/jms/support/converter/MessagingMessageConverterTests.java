@@ -17,6 +17,7 @@
 package org.springframework.jms.support.converter;
 
 import java.io.Serializable;
+
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;

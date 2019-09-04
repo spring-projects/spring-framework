@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Priority;
 
 import org.junit.jupiter.api.Test;

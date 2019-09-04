@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.vendor;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
