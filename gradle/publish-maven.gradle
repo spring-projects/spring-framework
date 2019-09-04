@@ -61,6 +61,7 @@ def customizePom(pom, gradleProject) {
 }
 
 artifactoryPublish {
+	dependsOn install
 	publishConfigs('archives', 'published')
 	publishArtifacts = true
 	publishPom = true
