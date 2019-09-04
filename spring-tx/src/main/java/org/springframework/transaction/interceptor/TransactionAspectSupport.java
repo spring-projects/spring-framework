@@ -854,15 +854,22 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						createTransactionIfNecessary(tm, txAttr, joinpointIdentification).flatMap(it -> {
 							try {
 								// Need re-wrapping until we get hold of the exception through usingWhen.
-								return Mono.<Object, ReactiveTransactionInfo>usingWhen(Mono.just(it), txInfo -> {
-									try {
-										return (Mono<?>) invocation.proceedWithInvocation();
-									}
-									catch (Throwable ex) {
-										return Mono.error(ex);
-									}
-								}, this::commitTransactionAfterReturning, txInfo -> Mono.empty())
-										.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
+								return Mono
+										.<Object, ReactiveTransactionInfo>usingWhen(
+												Mono.just(it),
+												txInfo -> {
+													try {
+														return (Mono<?>) invocation.proceedWithInvocation();
+													}
+													catch (Throwable ex) {
+														return Mono.error(ex);
+													}
+												},
+												this::commitTransactionAfterReturning,
+												(txInfo, err) -> Mono.empty(),
+												this::commitTransactionAfterReturning)
+										.onErrorResume(ex ->
+												completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
 							}
 							catch (Throwable ex) {
 								// target invocation exception
@@ -877,15 +884,22 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					createTransactionIfNecessary(tm, txAttr, joinpointIdentification).flatMapMany(it -> {
 						try {
 							// Need re-wrapping until we get hold of the exception through usingWhen.
-							return Flux.usingWhen(Mono.just(it), txInfo -> {
-								try {
-									return this.adapter.toPublisher(invocation.proceedWithInvocation());
-								}
-								catch (Throwable ex) {
-									return Mono.error(ex);
-								}
-							}, this::commitTransactionAfterReturning, txInfo -> Mono.empty())
-									.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
+							return Flux
+									.usingWhen(
+											Mono.just(it),
+											txInfo -> {
+												try {
+													return this.adapter.toPublisher(invocation.proceedWithInvocation());
+												}
+												catch (Throwable ex) {
+													return Mono.error(ex);
+												}
+											},
+											this::commitTransactionAfterReturning,
+											(txInfo, ex) -> Mono.empty(),
+											this::commitTransactionAfterReturning)
+									.onErrorResume(ex ->
+											completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
 						}
 						catch (Throwable ex) {
 							// target invocation exception
