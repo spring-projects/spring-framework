@@ -87,18 +87,16 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 }
 
-task testNG(type: Test) {
-	description = "Runs TestNG tests."
-	useTestNG()
+task junit4(type: Test) {
+	description = "Runs JUnit 4 tests."
+	useJUnit()
+	systemProperty("testGroups", project.properties.get("testGroups"))
 	scanForTestClasses = false
-	include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
-	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
-	// testLogging.showStandardStreams = true
-	// forkEvery 1
-	reports.junitXml.destination = file("$buildDir/test-results")
+	include(["**/*Tests.class", "**/*Test.class"])
+	exclude(["**/Abstract*.class", "**/testng/**/*.*", "**/jupiter/**/*.*"])
 }
 
-task testJUnitJupiter(type: Test) {
+task junitJupiter(type: Test) {
 	description = "Runs JUnit Jupiter tests."
 	useJUnitPlatform {
 		includeEngines "junit-jupiter"
@@ -107,25 +105,32 @@ task testJUnitJupiter(type: Test) {
 	filter {
 		includeTestsMatching "org.springframework.test.context.junit.jupiter.*"
 	}
-	reports.junitXml.destination = file("$buildDir/test-results")
+	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
 
-test {
-	description = "Runs JUnit 4 tests."
-	dependsOn testJUnitJupiter, testNG
-	useJUnit()
+task testNG(type: Test) {
+	description = "Runs TestNG tests."
+	useTestNG()
+	systemProperty("testGroups", project.properties.get("testGroups"))
 	scanForTestClasses = false
-	include(["**/*Tests.class", "**/*Test.class"])
-	exclude(["**/testng/**/*.*", "**/jupiter/**/*.*"])
-	reports.junitXml.destination = file("$buildDir/test-results")
+	include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
+	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
+	// testLogging.showStandardStreams = true
+	// forkEvery 1
+}
+
+test {
+	description = "Runs all tests."
+	dependsOn junit4, junitJupiter, testNG
+	exclude(["**/*.*"])
 }
 
 task aggregateTestReports(type: TestReport) {
 	description = "Aggregates JUnit and TestNG test reports."
 	destinationDir = test.reports.html.destination
-	reportOn test, testJUnitJupiter, testNG
+	reportOn junit4, junitJupiter, testNG
 }
 
 check.dependsOn aggregateTestReports
