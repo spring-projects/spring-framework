@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -125,11 +124,10 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	}
 
 	static Stream<HttpServer> httpServers() {
-		File base = new File(System.getProperty("java.io.tmpdir"));
 		return Stream.of(
 				new JettyHttpServer(),
 				new ReactorHttpServer(),
-				new TomcatHttpServer(base.getAbsolutePath()),
+				new TomcatHttpServer(),
 				new UndertowHttpServer()
 		);
 	}

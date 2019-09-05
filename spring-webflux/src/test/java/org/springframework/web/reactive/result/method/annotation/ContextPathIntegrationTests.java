@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.io.File;
 
 import org.junit.jupiter.api.Test;
 
@@ -84,8 +83,7 @@ public class ContextPathIntegrationTests {
 		context.register(WebAppConfig.class);
 		context.refresh();
 
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		TomcatHttpServer server = new TomcatHttpServer(base.getAbsolutePath());
+		TomcatHttpServer server = new TomcatHttpServer();
 		server.setContextPath("/app");
 		server.setServletMapping("/api/*");
 

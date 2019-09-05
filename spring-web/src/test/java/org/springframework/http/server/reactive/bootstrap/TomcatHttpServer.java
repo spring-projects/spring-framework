@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,15 @@ public class TomcatHttpServer extends AbstractHttpServer {
 
 	private Tomcat tomcatServer;
 
+
+	/**
+	 * Create a new Tomcat HTTP server using the {@code java.io.tmpdir} JVM
+	 * system property as the {@code baseDir}.
+	 * @since 5.2
+	 */
+	public TomcatHttpServer() {
+		this(new File(System.getProperty("java.io.tmpdir")).getAbsolutePath());
+	}
 
 	public TomcatHttpServer(String baseDir) {
 		this(baseDir, null);
