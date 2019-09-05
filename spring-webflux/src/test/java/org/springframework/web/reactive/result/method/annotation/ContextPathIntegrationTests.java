@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.result.method.annotation;
 
+package org.springframework.web.reactive.result.method.annotation;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,18 +38,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ContextPathIntegrationTests {
-
+class ContextPathIntegrationTests {
 
 	@Test
-	public void multipleWebFluxApps() throws Exception {
-		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext();
-		context1.register(WebAppConfig.class);
-		context1.refresh();
-
-		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext();
-		context2.register(WebAppConfig.class);
-		context2.refresh();
+	void multipleWebFluxApps() throws Exception {
+		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(WebAppConfig.class);
+		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(WebAppConfig.class);
 
 		HttpHandler webApp1Handler = WebHttpHandlerBuilder.applicationContext(context1).build();
 		HttpHandler webApp2Handler = WebHttpHandlerBuilder.applicationContext(context2).build();
@@ -78,10 +72,8 @@ public class ContextPathIntegrationTests {
 	}
 
 	@Test
-	public void servletPathMapping() throws Exception {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(WebAppConfig.class);
-		context.refresh();
+	void servletPathMapping() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebAppConfig.class);
 
 		TomcatHttpServer server = new TomcatHttpServer();
 		server.setContextPath("/app");
@@ -94,11 +86,8 @@ public class ContextPathIntegrationTests {
 		server.start();
 
 		try {
-			RestTemplate restTemplate = new RestTemplate();
-			String actual;
-
 			String url = "http://localhost:" + server.getPort() + "/app/api/test";
-			actual = restTemplate.getForObject(url, String.class);
+			String actual = new RestTemplate().getForObject(url, String.class);
 			assertThat(actual).isEqualTo("Tested in /app/api");
 		}
 		finally {
@@ -107,13 +96,12 @@ public class ContextPathIntegrationTests {
 	}
 
 
-
 	@EnableWebFlux
 	@Configuration
 	static class WebAppConfig {
 
 		@Bean
-		public TestController testController() {
+		TestController testController() {
 			return new TestController();
 		}
 	}
@@ -123,7 +111,7 @@ public class ContextPathIntegrationTests {
 	static class TestController {
 
 		@GetMapping("/test")
-		public String handle(ServerHttpRequest request) {
+		String handle(ServerHttpRequest request) {
 			return "Tested in " + request.getPath().contextPath().value();
 		}
 	}
