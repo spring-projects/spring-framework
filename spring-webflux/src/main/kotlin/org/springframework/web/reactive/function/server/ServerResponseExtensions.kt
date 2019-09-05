@@ -50,7 +50,7 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
 		body(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Coroutines variant of [ServerResponse.BodyBuilder.body] with an [Any] parameter.
+ * Coroutines variant of [ServerResponse.BodyBuilder.bodyValue].
  *
  * Set the body of the response to the given {@code Object} and return it.
  * This convenience method combines [body] and
@@ -60,7 +60,7 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
  * @throws IllegalArgumentException if `body` is a [Publisher] or an
  * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance],
  */
-suspend fun ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
+suspend fun ServerResponse.BodyBuilder.bodyValueAndAwait(body: Any): ServerResponse =
 		bodyValue(body).awaitSingle()
 
 /**

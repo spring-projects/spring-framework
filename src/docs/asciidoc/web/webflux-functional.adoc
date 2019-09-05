@@ -351,7 +351,7 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 		suspend fun getPerson(request: ServerRequest): ServerResponse { // <3>
 			val personId = request.pathVariable("id").toInt()
-			return repository.getPerson(personId)?.let { ok().contentType(APPLICATION_JSON).bodyAndAwait(it) }
+			return repository.getPerson(personId)?.let { ok().contentType(APPLICATION_JSON).bodyValueAndAwait(it) }
 					?: ServerResponse.notFound().buildAndAwait()
 
 		}
@@ -477,7 +477,7 @@ header:
 ----
 	val route = coRouter {
 		(GET("/hello-world") and accept(MediaType.TEXT_PLAIN)).invoke {
-			ServerResponse.ok().bodyAndAwait("Hello World")
+			ServerResponse.ok().bodyValueAndAwait("Hello World")
 		}
 	}
 ----

@@ -69,7 +69,7 @@ class ServerResponseExtensionsTests {
 		val body = "foo"
 		every { bodyBuilder.bodyValue(ofType<String>()) } returns Mono.just(response)
 		runBlocking {
-			bodyBuilder.bodyAndAwait(body)
+			bodyBuilder.bodyValueAndAwait(body)
 		}
 		verify {
 			bodyBuilder.bodyValue(ofType<String>())
