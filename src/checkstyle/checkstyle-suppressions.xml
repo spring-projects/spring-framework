@@ -62,9 +62,7 @@
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]ExpectedExceptionSpringRunnerTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]StandardJUnit4FeaturesTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
-	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]support[\\/]ContextLoaderUtilsContextHierarchyTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/]transaction[\\/]programmatic/ProgrammaticTxMgmtTestNGTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
-	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]transaction[\\/]programmatic[\\/]ProgrammaticTxMgmtTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
 	<suppress files="ContentRequestMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
 	<suppress files="ContentResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
