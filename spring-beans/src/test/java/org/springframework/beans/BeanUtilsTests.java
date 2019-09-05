@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -297,7 +298,7 @@ class BeanUtilsTests {
 	@ValueSource(classes = {
 		boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class,
 		Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
-		DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class
+		DayOfWeek.class, String.class, LocalDateTime.class, Date.class, URI.class, URL.class, Locale.class, Class.class
 	})
 	void isSimpleValueType(Class<?> type) {
 		assertThat(BeanUtils.isSimpleValueType(type)).as("Type [" + type.getName() + "] should be a simple value type").isTrue();
@@ -313,8 +314,8 @@ class BeanUtilsTests {
 	@ValueSource(classes = {
 		boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class,
 		Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
-		DayOfWeek.class, String.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
-		boolean[].class, Boolean[].class, Date[].class
+		DayOfWeek.class, String.class, LocalDateTime.class, Date.class, URI.class, URL.class, Locale.class, Class.class,
+		boolean[].class, Boolean[].class, LocalDateTime[].class, Date[].class
 	})
 	void isSimpleProperty(Class<?> type) {
 		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should be a simple property").isTrue();
