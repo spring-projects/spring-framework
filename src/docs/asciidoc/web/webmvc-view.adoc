@@ -793,10 +793,11 @@ The following example shows how to do so:
 	}
 ----
 
-NOTE: Setting the `sharedEngine` property to `false` is required when you use non-thread-safe
+NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or
-React running on Nashorn. In that case, Java 8u60 or greater is required, due
-to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
+React running on Nashorn. In that case, Java SE 8 update 60 is required, due to
+https://bugs.openjdk.java.net/browse/JDK-8076099[this bug], but it is generally
+recommended to use a recent Java SE patch release in any case.
 
 `polyfill.js` defines only the `window` object needed by Handlebars to run properly, as follows:
 
