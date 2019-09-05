@@ -609,7 +609,7 @@ public abstract class BeanUtils {
 	 * @see #isSimpleProperty(Class)
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
-		return (type != void.class && type != Void.class &&
+		return (Void.class != type && void.class != type &&
 				(ClassUtils.isPrimitiveOrWrapper(type) ||
 				Enum.class.isAssignableFrom(type) ||
 				CharSequence.class.isAssignableFrom(type) ||
