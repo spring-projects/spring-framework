@@ -88,10 +88,8 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 			Mono<Integer> requestSizeMono = request.getBody().
 					reduce(0, (integer, dataBuffer) -> integer +
 							dataBuffer.readableByteCount()).
-					doOnSuccessOrError((size, throwable) -> {
-						assertThat(throwable).isNull();
-						assertThat(size).isEqualTo(REQUEST_SIZE);
-					});
+					doOnNext(size -> assertThat(size).isEqualTo(REQUEST_SIZE)).
+					doOnError(throwable -> assertThat(throwable).isNull());
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);
 
@@ -112,4 +110,5 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 		}
 
 	}
+
 }
