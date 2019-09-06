@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,8 +28,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the model.
@@ -38,6 +38,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * {@link MockMvcResultMatchers#model}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class ModelResultMatchers {
@@ -54,7 +55,7 @@ public class ModelResultMatchers {
 	 * Assert a model attribute value with the given Hamcrest {@link Matcher}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ResultMatcher attribute(final String name, final Matcher<T> matcher) {
+	public <T> ResultMatcher attribute(String name, Matcher<T> matcher) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			assertThat("Model attribute '" + name + "'", (T) mav.getModel().get(name), matcher);
@@ -64,7 +65,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert a model attribute value.
 	 */
-	public ResultMatcher attribute(final String name, final Object value) {
+	public ResultMatcher attribute(String name, Object value) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			assertEquals("Model attribute '" + name + "'", value, mav.getModel().get(name));
@@ -74,11 +75,11 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attributes exist.
 	 */
-	public ResultMatcher attributeExists(final String... names) {
+	public ResultMatcher attributeExists(String... names) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
-				assertTrue("Model attribute '" + name + "' does not exist", mav.getModel().get(name) != null);
+				assertNotNull("Model attribute '" + name + "' does not exist", mav.getModel().get(name));
 			}
 		};
 	}
@@ -86,7 +87,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attributes do not exist.
 	 */
-	public ResultMatcher attributeDoesNotExist(final String... names) {
+	public ResultMatcher attributeDoesNotExist(String... names) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
@@ -98,7 +99,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attribute(s) have errors.
 	 */
-	public ResultMatcher attributeErrorCount(final String name, final int expectedCount) {
+	public ResultMatcher attributeErrorCount(String name, int expectedCount) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			Errors errors = getBindingResult(mav, name);
@@ -110,7 +111,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attribute(s) have errors.
 	 */
-	public ResultMatcher attributeHasErrors(final String... names) {
+	public ResultMatcher attributeHasErrors(String... names) {
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			for (String name : names) {
@@ -123,7 +124,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attribute(s) do not have errors.
 	 */
-	public ResultMatcher attributeHasNoErrors(final String... names) {
+	public ResultMatcher attributeHasNoErrors(String... names) {
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			for (String name : names) {
@@ -137,12 +138,12 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attribute field(s) have errors.
 	 */
-	public ResultMatcher attributeHasFieldErrors(final String name, final String... fieldNames) {
+	public ResultMatcher attributeHasFieldErrors(String name, String... fieldNames) {
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
 			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
-			for (final String fieldName : fieldNames) {
+			for (String fieldName : fieldNames) {
 				boolean hasFieldErrors = result.hasFieldErrors(fieldName);
 				assertTrue("No errors for field '" + fieldName + "' of attribute '" + name + "'", hasFieldErrors);
 			}
@@ -153,17 +154,15 @@ public class ModelResultMatchers {
 	 * Assert a field error code for a model attribute using exact String match.
 	 * @since 4.1
 	 */
-	public ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName, final String error) {
+	public ResultMatcher attributeHasFieldErrorCode(String name, String fieldName, String error) {
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
 			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
 			FieldError fieldError = result.getFieldError(fieldName);
-			if (fieldError == null) {
-				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
-			}
+			assertNotNull("No errors for field '" + fieldName + "' of attribute '" + name + "'", fieldError);
 			String code = fieldError.getCode();
-			assertTrue("Expected error code '" + error + "' but got '" + code + "'", error.equals(code));
+			assertEquals("Field error code", error, code);
 		};
 	}
 
@@ -171,17 +170,15 @@ public class ModelResultMatchers {
 	 * Assert a field error code for a model attribute using a {@link org.hamcrest.Matcher}.
 	 * @since 4.1
 	 */
-	public <T> ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName,
-			final Matcher<? super String> matcher) {
+	public <T> ResultMatcher attributeHasFieldErrorCode(String name, String fieldName,
+			Matcher<? super String> matcher) {
 
 		return mvcResult -> {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
-			assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
 			FieldError fieldError = result.getFieldError(fieldName);
-			if (fieldError == null) {
-				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
-			}
+			assertNotNull("No errors for field '" + fieldName + "' of attribute '" + name + "'", fieldError);
 			String code = fieldError.getCode();
 			assertThat("Field name '" + fieldName + "' of attribute '" + name + "'", code, matcher);
 		};
@@ -190,7 +187,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the total number of errors in the model.
 	 */
-	public <T> ResultMatcher errorCount(final int expectedCount) {
+	public <T> ResultMatcher errorCount(int expectedCount) {
 		return result -> {
 			int actualCount = getErrorCount(getModelAndView(result).getModelMap());
 			assertEquals("Binding/validation error count", expectedCount, actualCount);
@@ -224,7 +221,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the number of model attributes.
 	 */
-	public <T> ResultMatcher size(final int size) {
+	public <T> ResultMatcher size(int size) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			int actual = 0;
@@ -239,17 +236,13 @@ public class ModelResultMatchers {
 
 	private ModelAndView getModelAndView(MvcResult mvcResult) {
 		ModelAndView mav = mvcResult.getModelAndView();
-		if (mav == null) {
-			fail("No ModelAndView found");
-		}
+		assertNotNull("No ModelAndView found", mav);
 		return mav;
 	}
 
 	private BindingResult getBindingResult(ModelAndView mav, String name) {
 		BindingResult result = (BindingResult) mav.getModel().get(BindingResult.MODEL_KEY_PREFIX + name);
-		if (result == null) {
-			fail("No BindingResult for attribute: " + name);
-		}
+		assertNotNull("No BindingResult for attribute: " + name, result);
 		return result;
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @author Stephane Nicoll
  * @since 3.0
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	@Override
@@ -35,7 +35,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 	}
 
 
-	private class StringToEnum<T extends Enum> implements Converter<String, T> {
+	private static class StringToEnum<T extends Enum> implements Converter<String, T> {
 
 		private final Class<T> enumType;
 

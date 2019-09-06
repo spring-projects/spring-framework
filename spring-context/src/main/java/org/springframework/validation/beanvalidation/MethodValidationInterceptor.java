@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -128,8 +129,23 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 	private boolean isFactoryBeanMetadataMethod(Method method) {
 		Class<?> clazz = method.getDeclaringClass();
-		return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
-				!method.getName().equals("getObject"));
+
+		// Call from interface-based proxy handle, allowing for an efficient check?
+		if (clazz.isInterface()) {
+			return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
+					!method.getName().equals("getObject"));
+		}
+
+		// Call from CGLIB proxy handle, potentially implementing a FactoryBean method?
+		Class<?> factoryBeanType = null;
+		if (SmartFactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = SmartFactoryBean.class;
+		}
+		else if (FactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = FactoryBean.class;
+		}
+		return (factoryBeanType != null && !method.getName().equals("getObject") &&
+				ClassUtils.hasMethod(factoryBeanType, method.getName(), method.getParameterTypes()));
 	}
 
 	/**

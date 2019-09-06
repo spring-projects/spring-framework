@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -30,7 +30,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -42,7 +42,7 @@ public class DefaultServerRequestBuilderTests {
 
 	@Test
 	public void from() {
-		MockServerHttpRequest request = MockServerHttpRequest.post("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.post("https://example.com")
 				.header("foo", "bar")
 				.build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -61,11 +61,11 @@ public class DefaultServerRequestBuilderTests {
 				.body(body)
 				.build();
 
-		assertEquals(HttpMethod.HEAD, result.method());
-		assertEquals(1, result.headers().asHttpHeaders().size());
-		assertEquals("baar", result.headers().asHttpHeaders().getFirst("foo"));
-		assertEquals(1, result.cookies().size());
-		assertEquals("quux", result.cookies().getFirst("baz").getValue());
+		assertThat(result.method()).isEqualTo(HttpMethod.HEAD);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(1);
+		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
+		assertThat(result.cookies().size()).isEqualTo(1);
+		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
 				.expectNext("baz")

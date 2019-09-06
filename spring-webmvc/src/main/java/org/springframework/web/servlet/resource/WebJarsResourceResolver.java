@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.webjars.WebJarAssetLocator;
@@ -35,13 +36,13 @@ import org.springframework.lang.Nullable;
  *
  * <p>This also resolves resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
  *
- * <p>This resolver requires the "org.webjars:webjars-locator" library on classpath,
- * and is automatically registered if that library is present.
+ * <p>This resolver requires the {@code org.webjars:webjars-locator-core} library
+ * on the classpath and is automatically registered if that library is present.
  *
  * @author Brian Clozel
  * @since 4.2
  * @see org.springframework.web.servlet.config.annotation.ResourceChainRegistration
- * @see <a href="http://www.webjars.org">webjars.org</a>
+ * @see <a href="https://www.webjars.org">webjars.org</a>
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 

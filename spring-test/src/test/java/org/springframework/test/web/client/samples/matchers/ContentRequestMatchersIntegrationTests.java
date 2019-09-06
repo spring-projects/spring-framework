@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -31,10 +31,10 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Examples of defining expectations on request content and content type.
@@ -51,7 +51,7 @@ public class ContentRequestMatchersIntegrationTests {
 	private RestTemplate restTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
@@ -66,7 +66,7 @@ public class ContentRequestMatchersIntegrationTests {
 
 	@Test
 	public void contentType() throws Exception {
-		this.mockServer.expect(content().contentType("application/json;charset=UTF-8")).andRespond(withSuccess());
+		this.mockServer.expect(content().contentType("application/json")).andRespond(withSuccess());
 		executeAndVerify(new Person());
 	}
 
@@ -78,7 +78,7 @@ public class ContentRequestMatchersIntegrationTests {
 		}
 		catch (AssertionError error) {
 			String message = error.getMessage();
-			assertTrue(message, message.startsWith("Content type expected:<application/json;charset=UTF-8>"));
+			assertThat(message.startsWith("Content type expected:<application/json;charset=UTF-8>")).as(message).isTrue();
 		}
 	}
 

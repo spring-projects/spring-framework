@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel.standard;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -69,7 +71,7 @@ public class SpelExpression implements Expression {
 
 	// Count of many times as the expression been interpreted - can trigger compilation
 	// when certain limit reached
-	private volatile int interpretedCount = 0;
+	private final AtomicInteger interpretedCount = new AtomicInteger(0);
 
 	// The number of times compilation was attempted and failed - enables us to eventually
 	// give up trying to compile it when it just doesn't seem to be possible.
@@ -124,7 +126,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -159,7 +161,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -178,7 +180,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Object getValue(Object rootObject) throws EvaluationException {
+	public Object getValue(@Nullable Object rootObject) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
 				return this.compiledAst.getValue(rootObject, getEvaluationContext());
@@ -186,7 +188,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -206,7 +208,7 @@ public class SpelExpression implements Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T getValue(Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(@Nullable Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
 				Object result = this.compiledAst.getValue(rootObject, getEvaluationContext());
@@ -221,7 +223,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -251,7 +253,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -286,7 +288,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -304,7 +306,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 
 		if (this.compiledAst != null) {
@@ -314,7 +316,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -333,7 +335,7 @@ public class SpelExpression implements Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> expectedResultType)
+	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");
@@ -351,7 +353,7 @@ public class SpelExpression implements Expression {
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-					this.interpretedCount = 0;
+					this.interpretedCount.set(0);
 					this.compiledAst = null;
 				}
 				else {
@@ -375,7 +377,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Class<?> getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(@Nullable Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
@@ -390,7 +392,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
 		return (typeDescriptor != null ? typeDescriptor.getType() : null);
@@ -404,7 +406,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
+	public TypeDescriptor getValueTypeDescriptor(@Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
@@ -420,7 +422,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject)
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");
@@ -429,7 +431,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public boolean isWritable(Object rootObject) throws EvaluationException {
+	public boolean isWritable(@Nullable Object rootObject) throws EvaluationException {
 		return this.ast.isWritable(
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration));
 	}
@@ -441,13 +443,13 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public boolean isWritable(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 		return this.ast.isWritable(new ExpressionState(context, toTypedValue(rootObject), this.configuration));
 	}
 
 	@Override
-	public void setValue(Object rootObject, @Nullable Object value) throws EvaluationException {
+	public void setValue(@Nullable Object rootObject, @Nullable Object value) throws EvaluationException {
 		this.ast.setValue(
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration), value);
 	}
@@ -459,7 +461,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public void setValue(EvaluationContext context, Object rootObject, @Nullable Object value)
+	public void setValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Object value)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");
@@ -473,17 +475,17 @@ public class SpelExpression implements Expression {
 	 * @param expressionState the expression state used to determine compilation mode
 	 */
 	private void checkCompile(ExpressionState expressionState) {
-		this.interpretedCount++;
+		this.interpretedCount.incrementAndGet();
 		SpelCompilerMode compilerMode = expressionState.getConfiguration().getCompilerMode();
 		if (compilerMode != SpelCompilerMode.OFF) {
 			if (compilerMode == SpelCompilerMode.IMMEDIATE) {
-				if (this.interpretedCount > 1) {
+				if (this.interpretedCount.get() > 1) {
 					compileExpression();
 				}
 			}
 			else {
 				// compilerMode = SpelCompilerMode.MIXED
-				if (this.interpretedCount > INTERPRETED_COUNT_THRESHOLD) {
+				if (this.interpretedCount.get() > INTERPRETED_COUNT_THRESHOLD) {
 					compileExpression();
 				}
 			}
@@ -524,7 +526,7 @@ public class SpelExpression implements Expression {
 	 */
 	public void revertToInterpreted() {
 		this.compiledAst = null;
-		this.interpretedCount = 0;
+		this.interpretedCount.set(0);
 		this.failedAttempts = 0;
 	}
 

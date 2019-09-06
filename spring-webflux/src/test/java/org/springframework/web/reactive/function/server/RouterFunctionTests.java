@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,16 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
  * @author Arjen Poutsma
  */
-@SuppressWarnings("unchecked")
 public class RouterFunctionTests {
 
 	@Test
@@ -36,7 +35,7 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> routerFunction2 = request -> Mono.just(handlerFunction);
 
 		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
@@ -56,7 +55,7 @@ public class RouterFunctionTests {
 				request -> Mono.just(handlerFunction);
 
 		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -73,7 +72,7 @@ public class RouterFunctionTests {
 		RequestPredicate requestPredicate = request -> true;
 
 		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -101,7 +100,7 @@ public class RouterFunctionTests {
 						});
 
 		RouterFunction<EntityResponse<Mono<Integer>>> result = routerFunction.filter(filterFunction);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<EntityResponse<Mono<Integer>>> responseMono =
@@ -109,12 +108,12 @@ public class RouterFunctionTests {
 
 		StepVerifier.create(responseMono)
 				.consumeNextWith(
-						serverResponse -> {
+						serverResponse ->
 							StepVerifier.create(serverResponse.entity())
 									.expectNext(42)
 									.expectComplete()
-									.verify();
-						})
+									.verify()
+						)
 				.expectComplete()
 				.verify();
 	}

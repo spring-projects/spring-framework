@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,8 +105,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		Class<?> rawClass = elementType.getRawClass();
-		if (rawClass == null || !MultiValueMap.class.isAssignableFrom(rawClass)) {
+		if (!MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
 		if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
@@ -128,20 +127,19 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		mediaType = getMediaType(mediaType);
 		message.getHeaders().setContentType(mediaType);
 
-		Charset charset = mediaType.getCharset();
-		Assert.notNull(charset, "No charset"); // should never occur
+		Charset charset = mediaType.getCharset() != null ? mediaType.getCharset() : getDefaultCharset();
 
 		return Mono.from(inputStream).flatMap(form -> {
 			logFormData(form, hints);
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);
-			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer); // wrapping only, no allocation
 			message.getHeaders().setContentLength(byteBuffer.remaining());
 			return message.writeWith(Mono.just(buffer));
 		});
 	}
 
-	private MediaType getMediaType(@Nullable MediaType mediaType) {
+	protected MediaType getMediaType(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
 			return DEFAULT_FORM_DATA_MEDIA_TYPE;
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,18 +25,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.0.5
  */
 public abstract class AbstractSchedulingTaskExecutorTests {
@@ -48,14 +50,14 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	private volatile Object outcome;
 
 
-	@Before
+	@BeforeEach
 	public void initExecutor() {
 		executor = buildExecutor();
 	}
 
 	protected abstract AsyncListenableTaskExecutor buildExecutor();
 
-	@After
+	@AfterEach
 	public void shutdownExecutor() throws Exception {
 		if (executor instanceof DisposableBean) {
 			((DisposableBean) executor).destroy();
@@ -83,32 +85,28 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestTask task = new TestTask(1);
 		Future<?> future = executor.submit(task);
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertNull(result);
+		assertThat(result).isNull();
 		assertThreadNamePrefix(task);
 	}
 
-	@Test(expected = ExecutionException.class)
+	@Test
 	public void submitFailingRunnable() throws Exception {
 		TestTask task = new TestTask(0);
 		Future<?> future = executor.submit(task);
-		try {
-			future.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (ExecutionException ex) {
-			assertTrue(future.isDone());
-			throw ex;
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				future.get(1000, TimeUnit.MILLISECONDS));
+		assertThat(future.isDone()).isTrue();
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitRunnableWithGetAfterShutdown() throws Exception {
-		TestTask task1 = new TestTask(-1);
-		Future<?> future1 = executor.submit(task1);
-		TestTask task2 = new TestTask(-1);
-		Future<?> future2 = executor.submit(task2);
+		Future<?> future1 = executor.submit(new TestTask(-1));
+		Future<?> future2 = executor.submit(new TestTask(-1));
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+			future1.get(1000, TimeUnit.MILLISECONDS);
+			future2.get(1000, TimeUnit.MILLISECONDS);
+		});
 	}
 
 	@Test
@@ -122,7 +120,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(future::isDone);
-		assertNull(outcome);
+		assertThat(outcome).isNull();
 		assertThreadNamePrefix(task);
 	}
 
@@ -137,18 +135,27 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertSame(RuntimeException.class, outcome.getClass());
+		assertThat(outcome.getClass()).isSameAs(RuntimeException.class);
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitListenableRunnableWithGetAfterShutdown() throws Exception {
-		TestTask task1 = new TestTask(-1);
-		ListenableFuture<?> future1 = executor.submitListenable(task1);
-		TestTask task2 = new TestTask(-1);
-		ListenableFuture<?> future2 = executor.submitListenable(task2);
+		ListenableFuture<?> future1 = executor.submitListenable(new TestTask(-1));
+		ListenableFuture<?> future2 = executor.submitListenable(new TestTask(-1));
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+
+		try {
+			future1.get(1000, TimeUnit.MILLISECONDS);
+		}
+		catch (Exception ex) {
+			/* ignore */
+		}
+		Awaitility.await()
+			.atMost(4, TimeUnit.SECONDS)
+			.pollInterval(10, TimeUnit.MILLISECONDS)
+			.untilAsserted(() ->
+				assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+					future2.get(1000, TimeUnit.MILLISECONDS)));
 	}
 
 	@Test
@@ -156,26 +163,36 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task = new TestCallable(1);
 		Future<String> future = executor.submit(task);
 		String result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertEquals(THREAD_NAME_PREFIX, result.substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(result.substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
-	@Test(expected = ExecutionException.class)
+	@Test
 	public void submitFailingCallable() throws Exception {
 		TestCallable task = new TestCallable(0);
 		Future<String> future = executor.submit(task);
-		future.get(1000, TimeUnit.MILLISECONDS);
-		assertTrue(future.isDone());
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				future.get(1000, TimeUnit.MILLISECONDS));
+		assertThat(future.isDone()).isTrue();
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitCallableWithGetAfterShutdown() throws Exception {
-		TestCallable task1 = new TestCallable(-1);
-		Future<?> future1 = executor.submit(task1);
-		TestCallable task2 = new TestCallable(-1);
-		Future<?> future2 = executor.submit(task2);
+		Future<?> future1 = executor.submit(new TestCallable(-1));
+		Future<?> future2 = executor.submit(new TestCallable(-1));
 		shutdownExecutor();
-		future1.get(1000, TimeUnit.MILLISECONDS);
-		future2.get(1000, TimeUnit.MILLISECONDS);
+
+		try {
+			future1.get(1000, TimeUnit.MILLISECONDS);
+		}
+		catch (Exception ex) {
+			/* ignore */
+		}
+		Awaitility.await()
+			.atMost(4, TimeUnit.SECONDS)
+			.pollInterval(10, TimeUnit.MILLISECONDS)
+			.untilAsserted(() ->
+				assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+					future2.get(1000, TimeUnit.MILLISECONDS)));
 	}
 
 	@Test
@@ -189,7 +206,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(outcome.toString().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	@Test
@@ -204,23 +221,23 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertSame(RuntimeException.class, outcome.getClass());
+		assertThat(outcome.getClass()).isSameAs(RuntimeException.class);
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitListenableCallableWithGetAfterShutdown() throws Exception {
-		TestCallable task1 = new TestCallable(-1);
-		ListenableFuture<?> future1 = executor.submitListenable(task1);
-		TestCallable task2 = new TestCallable(-1);
-		ListenableFuture<?> future2 = executor.submitListenable(task2);
+		ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(-1));
+		ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(-1));
 		shutdownExecutor();
-		future1.get(1000, TimeUnit.MILLISECONDS);
-		future2.get(1000, TimeUnit.MILLISECONDS);
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+			future1.get(1000, TimeUnit.MILLISECONDS);
+			future2.get(1000, TimeUnit.MILLISECONDS);
+		});
 	}
 
 
 	private void assertThreadNamePrefix(TestTask task) {
-		assertEquals(THREAD_NAME_PREFIX, task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	private void await(TestTask task) {
@@ -234,7 +251,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
-		assertEquals("latch did not count down,", 0, latch.getCount());
+		assertThat(latch.getCount()).as("latch did not count down,").isEqualTo(0);
 	}
 
 

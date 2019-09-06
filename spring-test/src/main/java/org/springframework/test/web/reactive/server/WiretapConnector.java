@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -192,8 +192,8 @@ class WiretapConnector implements ClientHttpConnector {
 					//noinspection ConstantConditions
 					(this.publisher != null ? this.publisher : this.publisherNested)
 							.onErrorMap(ex -> new IllegalStateException(
-									"Content was not been consumed and " +
-											"an error was raised on attempt to produce it:", ex))
+									"Content has not been consumed, and " +
+											"an error was raised while attempting to produce it.", ex))
 							.subscribe();
 				}
 				return this.content;

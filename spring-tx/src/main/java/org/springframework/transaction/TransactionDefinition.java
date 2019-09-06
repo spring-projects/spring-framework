@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.transaction;
-
-import java.sql.Connection;
 
 import org.springframework.lang.Nullable;
 
@@ -150,7 +148,7 @@ public interface TransactionDefinition {
 	 * retrieved an invalid row.
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
 	 */
-	int ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
+	int ISOLATION_READ_UNCOMMITTED = 1;  // same as java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
 
 	/**
 	 * Indicates that dirty reads are prevented; non-repeatable reads and
@@ -159,7 +157,7 @@ public interface TransactionDefinition {
 	 * with uncommitted changes in it.
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 */
-	int ISOLATION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
+	int ISOLATION_READ_COMMITTED = 2;  // same as java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 	/**
 	 * Indicates that dirty reads and non-repeatable reads are prevented;
@@ -170,7 +168,7 @@ public interface TransactionDefinition {
 	 * getting different values the second time (a "non-repeatable read").
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
 	 */
-	int ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
+	int ISOLATION_REPEATABLE_READ = 4;  // same as java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 	/**
 	 * Indicates that dirty reads, non-repeatable reads and phantom reads
@@ -183,7 +181,7 @@ public interface TransactionDefinition {
 	 * in the second read.
 	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
 	 */
-	int ISOLATION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;
+	int ISOLATION_SERIALIZABLE = 8;  // same as java.sql.Connection.TRANSACTION_SERIALIZABLE;
 
 
 	/**
@@ -197,11 +195,14 @@ public interface TransactionDefinition {
 	 * Return the propagation behavior.
 	 * <p>Must return one of the {@code PROPAGATION_XXX} constants
 	 * defined on {@link TransactionDefinition this interface}.
+	 * <p>The default is {@link #PROPAGATION_REQUIRED}.
 	 * @return the propagation behavior
 	 * @see #PROPAGATION_REQUIRED
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
 	 */
-	int getPropagationBehavior();
+	default int getPropagationBehavior() {
+		return PROPAGATION_REQUIRED;
+	}
 
 	/**
 	 * Return the isolation level.
@@ -214,13 +215,16 @@ public interface TransactionDefinition {
 	 * "true" on your transaction manager if you'd like isolation level declarations
 	 * to get rejected when participating in an existing transaction with a different
 	 * isolation level.
-	 * <p>Note that a transaction manager that does not support custom isolation levels
-	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
+	 * <p>The default is {@link #ISOLATION_DEFAULT}. Note that a transaction manager
+	 * that does not support custom isolation levels will throw an exception when
+	 * given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @return the isolation level
 	 * @see #ISOLATION_DEFAULT
 	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
 	 */
-	int getIsolationLevel();
+	default int getIsolationLevel() {
+		return ISOLATION_DEFAULT;
+	}
 
 	/**
 	 * Return the transaction timeout.
@@ -230,9 +234,12 @@ public interface TransactionDefinition {
 	 * transactions.
 	 * <p>Note that a transaction manager that does not support timeouts will throw
 	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
+	 * <p>The default is {@link #TIMEOUT_DEFAULT}.
 	 * @return the transaction timeout
 	 */
-	int getTimeout();
+	default int getTimeout() {
+		return TIMEOUT_DEFAULT;
+	}
 
 	/**
 	 * Return whether to optimize as a read-only transaction.
@@ -247,10 +254,13 @@ public interface TransactionDefinition {
 	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
 	 * @return {@code true} if the transaction is to be optimized as read-only
+	 * ({@code false} by default)
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
-	boolean isReadOnly();
+	default boolean isReadOnly() {
+		return false;
+	}
 
 	/**
 	 * Return the name of this transaction. Can be {@code null}.
@@ -258,11 +268,27 @@ public interface TransactionDefinition {
 	 * transaction monitor, if applicable (for example, WebLogic's).
 	 * <p>In case of Spring's declarative transactions, the exposed name will be
 	 * the {@code fully-qualified class name + "." + method name} (by default).
-	 * @return the name of this transaction
+	 * @return the name of this transaction ({@code null} by default}
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
 	@Nullable
-	String getName();
+	default String getName() {
+		return null;
+	}
+
+
+	// Static builder methods
+
+	/**
+	 * Return an unmodifiable {@code TransactionDefinition} with defaults.
+	 * <p>For customization purposes, use the modifiable
+	 * {@link org.springframework.transaction.support.DefaultTransactionDefinition}
+	 * instead.
+	 * @since 5.2
+	 */
+	static TransactionDefinition withDefaults() {
+		return StaticTransactionDefinition.INSTANCE;
+	}
 
 }

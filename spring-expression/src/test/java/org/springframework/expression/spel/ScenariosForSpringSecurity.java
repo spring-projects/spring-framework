@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,12 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
@@ -36,7 +35,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 ///CLOVER:OFF
 /**
@@ -48,24 +47,17 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 	@Test
 	public void testScenario01_Roles() throws Exception {
-		try {
-			SpelExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			Expression expr = parser.parseRaw("hasAnyRole('MANAGER','TELLER')");
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		Expression expr = parser.parseRaw("hasAnyRole('MANAGER','TELLER')");
 
-			ctx.setRootObject(new Person("Ben"));
-			Boolean value = expr.getValue(ctx,Boolean.class);
-			assertFalse(value);
+		ctx.setRootObject(new Person("Ben"));
+		Boolean value = expr.getValue(ctx,Boolean.class);
+		assertThat((boolean) value).isFalse();
 
-			ctx.setRootObject(new Manager("Luke"));
-			value = expr.getValue(ctx,Boolean.class);
-			assertTrue(value);
-
-		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected SpelException: " + ee.getMessage());
-		}
+		ctx.setRootObject(new Manager("Luke"));
+		value = expr.getValue(ctx,Boolean.class);
+		assertThat((boolean) value).isTrue();
 	}
 
 	@Test
@@ -81,11 +73,11 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		ctx.setRootObject(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
 		expr = parser.parseRaw("p.name == principal.name");
@@ -96,11 +88,11 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		pAccessor.setPerson(new Person("Andy"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		pAccessor.setPerson(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 	}
 
 	@Test
@@ -117,12 +109,12 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		ctx.setRootObject(new Manager("Luke"));
 		ctx.setVariable("a",1.043d);
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 	}
 
 	// Here i'm going to change which hasRole() executes and make it one of my own Java methods
@@ -143,7 +135,7 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 //			ctx.setRootObject(new Manager("Luke"));
 //			ctx.setVariable("a",1.043d);

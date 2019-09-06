@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,10 @@ package org.springframework.beans;
 
 import java.beans.IntrospectionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests for {@link ExtendedBeanInfoTests}.
@@ -38,7 +38,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public void setFoo(String s) { }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), notNullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNotNull();
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(int i, String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), notNullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNotNull();
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			void setBar(String s) { }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C setBar() { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C set(String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 }

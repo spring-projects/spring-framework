@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.MethodParameter;
@@ -52,10 +53,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
@@ -89,9 +88,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatus");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("Null return value + @ResponseStatus should result in 'request handled'",
-				this.mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
+		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + @ResponseStatus should result in 'request handled'").isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 	}
 
 	@Test
@@ -99,9 +97,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "composedResponseStatus");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("Null return value + @ComposedResponseStatus should result in 'request handled'",
-				this.mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
+		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + @ComposedResponseStatus should result in 'request handled'").isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 	}
 
 	@Test
@@ -109,8 +106,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseStatusHandler(), "handle");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue(this.mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
+		assertThat(this.mavContainer.isRequestHandled()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 	}
 
 	@Test
@@ -121,8 +118,7 @@ public class ServletInvocableHandlerMethodTests {
 				getHandlerMethod(new Handler(), "httpServletResponse", HttpServletResponse.class);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("Null return value + HttpServletResponse arg should result in 'request handled'",
-				this.mavContainer.isRequestHandled());
+		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + HttpServletResponse arg should result in 'request handled'").isTrue();
 	}
 
 	@Test
@@ -134,8 +130,7 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("Null return value + 'not modified' request should result in 'request handled'",
-				this.mavContainer.isRequestHandled());
+		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + 'not modified' request should result in 'request handled'").isTrue();
 	}
 
 	@Test  // SPR-9159
@@ -143,18 +138,18 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatusWithReason");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("When a status reason w/ used, the request is handled", this.mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
-		assertEquals("400 Bad Request", this.response.getErrorMessage());
+		assertThat(this.mavContainer.isRequestHandled()).as("When a status reason w/ used, the request is handled").isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(this.response.getErrorMessage()).isEqualTo("400 Bad Request");
 	}
 
-	@Test(expected = HttpMessageNotWritableException.class)
+	@Test
 	public void invokeAndHandle_Exception() throws Exception {
 		this.returnValueHandlers.addHandler(new ExceptionRaisingReturnValueHandler());
 
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "handle");
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
-		fail("Expected exception");
+		assertThatExceptionOfType(HttpMessageNotWritableException.class).isThrownBy(() ->
+				handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer));
 	}
 
 	@Test
@@ -167,14 +162,14 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "dynamicReturnValue", String.class);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertNotNull(this.mavContainer.getView());
-		assertEquals(RedirectView.class, this.mavContainer.getView().getClass());
+		assertThat(this.mavContainer.getView()).isNotNull();
+		assertThat(this.mavContainer.getView().getClass()).isEqualTo(RedirectView.class);
 
 		// Invoke with a request parameter (RedirectView return value)
 		this.request.setParameter("param", "value");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals("view", this.mavContainer.getViewName());
+		assertThat(this.mavContainer.getViewName()).isEqualTo("view");
 	}
 
 	@Test
@@ -216,8 +211,9 @@ public class ServletInvocableHandlerMethodTests {
 
 		handlerMethod = handlerMethod.wrapConcurrentResult(result);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
-		assertEquals((result != null ? result.toString() : ""), this.response.getContentAsString());
-		assertEquals(expectedReturnType, handlerMethod.getReturnValueType(result).getParameterType());
+		Object expected = (result != null ? result.toString() : "");
+		assertThat(this.response.getContentAsString()).isEqualTo(expected);
+		assertThat(handlerMethod.getReturnValueType(result).getParameterType()).isEqualTo(expectedReturnType);
 	}
 
 	@Test
@@ -227,7 +223,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>("bar", HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals("bar", this.response.getContentAsString());
+		assertThat(this.response.getContentAsString()).isEqualTo("bar");
 	}
 
 	@Test  // SPR-12287
@@ -237,8 +233,8 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>(HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	@Test
@@ -248,8 +244,8 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	@Test
@@ -261,8 +257,8 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	@Test
@@ -272,8 +268,8 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	@Test
@@ -290,8 +286,8 @@ public class ServletInvocableHandlerMethodTests {
 		hm = hm.wrapConcurrentResult(result);
 		hm.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("[[\"foo1\",\"bar1\"],[\"foo2\",\"bar2\"]]", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("[[\"foo1\",\"bar1\"],[\"foo2\",\"bar2\"]]");
 	}
 
 	@Test // SPR-15478
@@ -308,8 +304,8 @@ public class ServletInvocableHandlerMethodTests {
 		hm = hm.wrapConcurrentResult(result);
 		hm.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("[{\"value\":\"foo\"},{\"value\":\"bar\"}]", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("[{\"value\":\"foo\"},{\"value\":\"bar\"}]");
 	}
 
 	@Test  // SPR-12287 (16/Oct/14 comments)
@@ -318,8 +314,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleRawType");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	private ServletInvocableHandlerMethod getHandlerMethod(Object controller,

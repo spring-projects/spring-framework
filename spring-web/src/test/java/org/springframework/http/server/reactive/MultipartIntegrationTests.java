@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -33,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -40,27 +40,29 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return new HttpWebHandlerAdapter(new CheckRequestHandler());
 	}
 
-	@Test
-	public void getFormParts() throws Exception {
+	@ParameterizedHttpServerTest
+	void getFormParts(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<MultiValueMap<String, Object>> request = RequestEntity
 				.post(new URI("http://localhost:" + port + "/form-parts"))
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.body(generateBody());
 		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	private MultiValueMap<String, Object> generateBody() {
@@ -76,7 +78,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	}
 
 
-	public static class CheckRequestHandler implements WebHandler {
+	static class CheckRequestHandler implements WebHandler {
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
@@ -90,34 +92,36 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 			return exchange
 					.getMultipartData()
 					.doOnNext(parts -> {
-						assertEquals(2, parts.size());
-						assertTrue(parts.containsKey("fooPart"));
+						assertThat(parts.size()).isEqualTo(2);
+						assertThat(parts.containsKey("fooPart")).isTrue();
 						assertFooPart(parts.getFirst("fooPart"));
-						assertTrue(parts.containsKey("barPart"));
+						assertThat(parts.containsKey("barPart")).isTrue();
 						assertBarPart(parts.getFirst("barPart"));
 					})
 					.then();
 		}
 
 		private void assertFooPart(Part part) {
-			assertEquals("fooPart", part.name());
-			assertTrue(part instanceof FilePart);
-			assertEquals("foo.txt", ((FilePart) part).filename());
+			assertThat(part.name()).isEqualTo("fooPart");
+			boolean condition = part instanceof FilePart;
+			assertThat(condition).isTrue();
+			assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
 
 			StepVerifier.create(DataBufferUtils.join(part.content()))
 					.consumeNextWith(buffer -> {
-						assertEquals(12, buffer.readableByteCount());
+						assertThat(buffer.readableByteCount()).isEqualTo(12);
 						byte[] byteContent = new byte[12];
 						buffer.read(byteContent);
-						assertEquals("Lorem Ipsum.", new String(byteContent));
+						assertThat(new String(byteContent)).isEqualTo("Lorem Ipsum.");
 					})
 					.verifyComplete();
 		}
 
 		private void assertBarPart(Part part) {
-			assertEquals("barPart", part.name());
-			assertTrue(part instanceof FormFieldPart);
-			assertEquals("bar", ((FormFieldPart) part).value());
+			assertThat(part.name()).isEqualTo("barPart");
+			boolean condition = part instanceof FormFieldPart;
+			assertThat(condition).isTrue();
+			assertThat(((FormFieldPart) part).value()).isEqualTo("bar");
 		}
 	}
 

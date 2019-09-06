@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockFilterChain;
@@ -32,7 +32,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -52,7 +52,7 @@ public class ResourceUrlProviderJavaConfigTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
@@ -79,8 +79,7 @@ public class ResourceUrlProviderJavaConfigTests {
 		this.request.setServletPath("/index");
 		this.filterChain.doFilter(this.request, this.response);
 
-		assertEquals("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css",
-				resolvePublicResourceUrlPath("/myapp/resources/foo.css"));
+		assertThat(resolvePublicResourceUrlPath("/myapp/resources/foo.css")).isEqualTo("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test
@@ -89,8 +88,7 @@ public class ResourceUrlProviderJavaConfigTests {
 		this.request.setServletPath("/myservlet");
 		this.filterChain.doFilter(this.request, this.response);
 
-		assertEquals("/myapp/myservlet/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css",
-				resolvePublicResourceUrlPath("/myapp/myservlet/resources/foo.css"));
+		assertThat(resolvePublicResourceUrlPath("/myapp/myservlet/resources/foo.css")).isEqualTo("/myapp/myservlet/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test
@@ -99,7 +97,7 @@ public class ResourceUrlProviderJavaConfigTests {
 		this.request.setServletPath("/myservlet");
 		this.filterChain.doFilter(this.request, this.response);
 
-		assertEquals("/myapp/myservlet/index", resolvePublicResourceUrlPath("/myapp/myservlet/index"));
+		assertThat(resolvePublicResourceUrlPath("/myapp/myservlet/index")).isEqualTo("/myapp/myservlet/index");
 	}
 
 

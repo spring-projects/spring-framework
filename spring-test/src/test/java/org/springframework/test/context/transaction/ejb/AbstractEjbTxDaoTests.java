@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,17 +20,18 @@ import javax.ejb.EJB;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.junit.After;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.ejb.dao.TestEntityDao;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for all tests involving EJB transaction support in the
@@ -40,9 +41,11 @@ import static org.junit.Assert.*;
  * @author Xavier Detant
  * @since 4.0.1
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SpringJUnitConfig
+@Transactional
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public abstract class AbstractEjbTxDaoTests extends AbstractTransactionalJUnit4SpringContextTests {
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+abstract class AbstractEjbTxDaoTests {
 
 	protected static final String TEST_NAME = "test-name";
 
@@ -54,15 +57,15 @@ public abstract class AbstractEjbTxDaoTests extends AbstractTransactionalJUnit4S
 
 
 	@Test
-	public void test1InitialState() {
+	void test1InitialState() {
 		int count = dao.getCount(TEST_NAME);
-		assertEquals("New TestEntity should have count=0.", 0, count);
+		assertThat(count).as("New TestEntity should have count=0.").isEqualTo(0);
 	}
 
 	@Test
-	public void test2IncrementCount1() {
+	void test2IncrementCount1() {
 		int count = dao.incrementCount(TEST_NAME);
-		assertEquals("Expected count=1 after first increment.", 1, count);
+		assertThat(count).as("Expected count=1 after first increment.").isEqualTo(1);
 	}
 
 	/**
@@ -71,16 +74,16 @@ public abstract class AbstractEjbTxDaoTests extends AbstractTransactionalJUnit4S
 	 * expected that the previous increment has been persisted in the database.
 	 */
 	@Test
-	public void test3IncrementCount2() {
+	void test3IncrementCount2() {
 		int count = dao.getCount(TEST_NAME);
-		assertEquals("Expected count=1 after test2IncrementCount1().", 1, count);
+		assertThat(count).as("Expected count=1 after test2IncrementCount1().").isEqualTo(1);
 
 		count = dao.incrementCount(TEST_NAME);
-		assertEquals("Expected count=2 now.", 2, count);
+		assertThat(count).as("Expected count=2 now.").isEqualTo(2);
 	}
 
-	@After
-	public void synchronizePersistenceContext() {
+	@AfterEach
+	void synchronizePersistenceContext() {
 		em.flush();
 	}
 

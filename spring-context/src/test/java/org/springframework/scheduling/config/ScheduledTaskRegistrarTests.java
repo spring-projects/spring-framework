@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,10 @@ package org.springframework.scheduling.config;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ScheduledTaskRegistrar}.
@@ -38,10 +38,10 @@ public class ScheduledTaskRegistrarTests {
 
 	@Test
 	public void emptyTaskLists() {
-		assertTrue(this.taskRegistrar.getTriggerTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getCronTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getFixedRateTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getFixedDelayTaskList().isEmpty());
+		assertThat(this.taskRegistrar.getTriggerTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getCronTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getFixedRateTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getFixedDelayTaskList().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -50,8 +50,8 @@ public class ScheduledTaskRegistrarTests {
 		List<TriggerTask> triggerTaskList = Collections.singletonList(mockTriggerTask);
 		this.taskRegistrar.setTriggerTasksList(triggerTaskList);
 		List<TriggerTask> retrievedList = this.taskRegistrar.getTriggerTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockTriggerTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockTriggerTask);
 	}
 
 	@Test
@@ -60,8 +60,8 @@ public class ScheduledTaskRegistrarTests {
 		List<CronTask> cronTaskList = Collections.singletonList(mockCronTask);
 		this.taskRegistrar.setCronTasksList(cronTaskList);
 		List<CronTask> retrievedList = this.taskRegistrar.getCronTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockCronTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockCronTask);
 	}
 
 	@Test
@@ -70,8 +70,8 @@ public class ScheduledTaskRegistrarTests {
 		List<IntervalTask> fixedRateTaskList = Collections.singletonList(mockFixedRateTask);
 		this.taskRegistrar.setFixedRateTasksList(fixedRateTaskList);
 		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedRateTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockFixedRateTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockFixedRateTask);
 	}
 
 	@Test
@@ -80,8 +80,8 @@ public class ScheduledTaskRegistrarTests {
 		List<IntervalTask> fixedDelayTaskList = Collections.singletonList(mockFixedDelayTask);
 		this.taskRegistrar.setFixedDelayTasksList(fixedDelayTaskList);
 		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedDelayTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockFixedDelayTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockFixedDelayTask);
 	}
 
 }

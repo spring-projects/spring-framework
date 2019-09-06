@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,10 @@ package org.springframework.http;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -34,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * <pre class="code">
  * MyRequest body = ...
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity
- *     .post(new URI(&quot;http://example.com/bar&quot;))
+ *     .post(new URI(&quot;https://example.com/bar&quot;))
  *     .accept(MediaType.APPLICATION_JSON)
  *     .body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
@@ -43,7 +46,7 @@ import org.springframework.util.ObjectUtils;
  * <p>If you would like to provide a URI template with variables, consider using
  * {@link org.springframework.web.util.UriTemplate}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;).expand(&quot;bar&quot;);
+ * URI uri = new UriTemplate(&quot;https://example.com/{foo}&quot;).expand(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -314,6 +317,27 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		B header(String headerName, String... headerValues);
 
 		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing HttpHeaders to copy from
+		 * @return this builder
+		 * @since 5.2
+		 * @see HttpHeaders#add(String, String)
+		 */
+		B headers(@Nullable HttpHeaders headers);
+
+		/**
+		 * Manipulate this entity's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 * @since 5.2
+		 */
+		B headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
@@ -326,6 +350,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @param acceptableCharsets the acceptable charsets
 		 */
 		B acceptCharset(Charset... acceptableCharsets);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(ZonedDateTime ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(Instant ifModifiedSince);
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
@@ -415,6 +453,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
+		public BodyBuilder headers(@Nullable HttpHeaders headers) {
+			if (headers != null) {
+				this.headers.putAll(headers);
+			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+			headersConsumer.accept(this.headers);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder accept(MediaType... acceptableMediaTypes) {
 			this.headers.setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
@@ -435,6 +487,18 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder contentType(MediaType contentType) {
 			this.headers.setContentType(contentType);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(ZonedDateTime ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(Instant ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
 			return this;
 		}
 

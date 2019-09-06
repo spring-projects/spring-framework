@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,9 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
@@ -88,7 +88,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
-	private final Map<String, Object> variables = new HashMap<>();
+	private final Map<String, Object> variables = new ConcurrentHashMap<>();
 
 
 	/**
@@ -103,12 +103,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * @param rootObject the root object to use
 	 * @see #setRootObject
 	 */
-	public StandardEvaluationContext(Object rootObject) {
+	public StandardEvaluationContext(@Nullable Object rootObject) {
 		this.rootObject = new TypedValue(rootObject);
 	}
 
 
-	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
+	public void setRootObject(@Nullable Object rootObject, TypeDescriptor typeDescriptor) {
 		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 
@@ -229,12 +229,22 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	public void setVariable(String name, @Nullable Object value) {
-		this.variables.put(name, value);
+	public void setVariable(@Nullable String name, @Nullable Object value) {
+		// For backwards compatibility, we ignore null names here...
+		// And since ConcurrentHashMap cannot store null values, we simply take null
+		// as a remove from the Map (with the same result from lookupVariable below).
+		if (name != null) {
+			if (value != null) {
+				this.variables.put(name, value);
+			}
+			else {
+				this.variables.remove(name);
+			}
+		}
 	}
 
-	public void setVariables(Map<String,Object> variables) {
-		this.variables.putAll(variables);
+	public void setVariables(Map<String, Object> variables) {
+		variables.forEach(this::setVariable);
 	}
 
 	public void registerFunction(String name, Method method) {

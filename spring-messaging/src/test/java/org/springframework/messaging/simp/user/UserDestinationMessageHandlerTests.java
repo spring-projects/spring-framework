@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.messaging.simp.user;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -33,9 +33,11 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
 
 /**
  * Unit tests for
@@ -52,7 +54,7 @@ public class UserDestinationMessageHandlerTests {
 	private SubscribableChannel brokerChannel;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registry = mock(SimpUserRegistry.class);
 		this.brokerChannel = mock(SubscribableChannel.class);
@@ -70,7 +72,7 @@ public class UserDestinationMessageHandlerTests {
 		Mockito.verify(this.brokerChannel).send(captor.capture());
 
 		Message message = captor.getValue();
-		assertEquals("/queue/foo-user123", SimpMessageHeaderAccessor.getDestination(message.getHeaders()));
+		assertThat(SimpMessageHeaderAccessor.getDestination(message.getHeaders())).isEqualTo("/queue/foo-user123");
 	}
 
 	@Test
@@ -82,14 +84,14 @@ public class UserDestinationMessageHandlerTests {
 		Mockito.verify(this.brokerChannel).send(captor.capture());
 
 		Message message = captor.getValue();
-		assertEquals("/queue/foo-user123", SimpMessageHeaderAccessor.getDestination(message.getHeaders()));
+		assertThat(SimpMessageHeaderAccessor.getDestination(message.getHeaders())).isEqualTo("/queue/foo-user123");
 	}
 
 	@Test
 	public void handleMessage() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
-		when(this.registry.getUser("joe")).thenReturn(simpUser);
+		given(this.registry.getUser("joe")).willReturn(simpUser);
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -97,8 +99,8 @@ public class UserDestinationMessageHandlerTests {
 		Mockito.verify(this.brokerChannel).send(captor.capture());
 
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(captor.getValue());
-		assertEquals("/queue/foo-user123", accessor.getDestination());
-		assertEquals("/user/queue/foo", accessor.getFirstNativeHeader(ORIGINAL_DESTINATION));
+		assertThat(accessor.getDestination()).isEqualTo("/queue/foo-user123");
+		assertThat(accessor.getFirstNativeHeader(ORIGINAL_DESTINATION)).isEqualTo("/user/queue/foo");
 	}
 
 	@Test
@@ -112,8 +114,8 @@ public class UserDestinationMessageHandlerTests {
 
 		Message message = captor.getValue();
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("/topic/unresolved", accessor.getDestination());
-		assertEquals("/user/joe/queue/foo", accessor.getFirstNativeHeader(ORIGINAL_DESTINATION));
+		assertThat(accessor.getDestination()).isEqualTo("/topic/unresolved");
+		assertThat(accessor.getFirstNativeHeader(ORIGINAL_DESTINATION)).isEqualTo("/user/joe/queue/foo");
 
 		// Should ignore our own broadcast to brokerChannel
 
@@ -125,7 +127,7 @@ public class UserDestinationMessageHandlerTests {
 	public void handleMessageFromBrokerWithActiveSession() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
-		when(this.registry.getUser("joe")).thenReturn(simpUser);
+		given(this.registry.getUser("joe")).willReturn(simpUser);
 
 		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
@@ -141,12 +143,12 @@ public class UserDestinationMessageHandlerTests {
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());
-		assertNotNull(captor.getValue());
+		assertThat(captor.getValue()).isNotNull();
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(captor.getValue());
-		assertEquals("/queue/foo-user123", headers.getDestination());
-		assertEquals("/user/queue/foo", headers.getFirstNativeHeader(ORIGINAL_DESTINATION));
-		assertEquals("customHeaderValue", headers.getFirstNativeHeader("customHeader"));
-		assertArrayEquals(payload, (byte[]) captor.getValue().getPayload());
+		assertThat(headers.getDestination()).isEqualTo("/queue/foo-user123");
+		assertThat(headers.getFirstNativeHeader(ORIGINAL_DESTINATION)).isEqualTo("/user/queue/foo");
+		assertThat(headers.getFirstNativeHeader("customHeader")).isEqualTo("customHeaderValue");
+		assertThat((byte[]) captor.getValue().getPayload()).isEqualTo(payload);
 	}
 
 	@Test

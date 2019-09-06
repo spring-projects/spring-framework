@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,7 +42,7 @@ import org.springframework.web.util.JavaScriptUtils;
 /**
  * An HTTP {@link TransportHandler} that uses a famous browser
  * {@code document.domain technique}. See <a href=
- * "http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
+ * "https://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
  * stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  * for details.
  *
@@ -54,7 +54,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	private static final String PARTIAL_HTML_CONTENT;
 
 	// Safari needs at least 1024 bytes to parse the website.
-	// http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+	// https://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
 	private static final int MINIMUM_PARTIAL_HTML_CONTENT_LENGTH = 1024;
 
 

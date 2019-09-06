@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,7 @@ import java.io.IOException;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -30,8 +29,11 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test suite for {@link ProtobufJsonFormatHttpMessageConverter}.
@@ -42,23 +44,12 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("deprecation")
 public class ProtobufJsonFormatHttpMessageConverterTests {
 
-	private ProtobufHttpMessageConverter converter;
+	private final ExtensionRegistryInitializer registryInitializer = mock(ExtensionRegistryInitializer.class);
 
-	private ExtensionRegistry extensionRegistry;
+	private final ProtobufHttpMessageConverter converter = new ProtobufJsonFormatHttpMessageConverter(
+			JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
 
-	private ExtensionRegistryInitializer registryInitializer;
-
-	private Msg testMsg;
-
-
-	@Before
-	public void setup() {
-		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
-		this.extensionRegistry = mock(ExtensionRegistry.class);
-		this.converter = new ProtobufJsonFormatHttpMessageConverter(
-				JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
-		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
-	}
+	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 
 
 	@Test
@@ -69,29 +60,29 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 	@Test
 	public void extensionRegistryInitializerNull() {
 		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistryInitializer)null);
-		assertNotNull(converter);
+		assertThat(converter).isNotNull();
 	}
 
 	@Test
 	public void extensionRegistryInitializer() {
 		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistry)null);
-		assertNotNull(converter);
+		assertThat(converter).isNotNull();
 	}
 
 	@Test
 	public void canRead() {
-		assertTrue(this.converter.canRead(Msg.class, null));
-		assertTrue(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF));
-		assertTrue(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON));
-		assertTrue(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN));
+		assertThat(this.converter.canRead(Msg.class, null)).isTrue();
+		assertThat(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
+		assertThat(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.converter.canWrite(Msg.class, null));
-		assertTrue(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF));
-		assertTrue(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON));
-		assertTrue(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN));
+		assertThat(this.converter.canWrite(Msg.class, null)).isTrue();
+		assertThat(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
+		assertThat(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
 
 	@Test
@@ -100,7 +91,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(ProtobufHttpMessageConverter.PROTOBUF);
 		Message result = this.converter.read(Msg.class, inputMessage);
-		assertEquals(this.testMsg, result);
+		assertThat(result).isEqualTo(this.testMsg);
 	}
 
 	@Test
@@ -108,7 +99,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		byte[] body = this.testMsg.toByteArray();
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		Message result = this.converter.read(Msg.class, inputMessage);
-		assertEquals(this.testMsg, result);
+		assertThat(result).isEqualTo(this.testMsg);
 	}
 
 	@Test
@@ -116,22 +107,22 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MediaType contentType = ProtobufHttpMessageConverter.PROTOBUF;
 		this.converter.write(this.testMsg, contentType, outputMessage);
-		assertEquals(contentType, outputMessage.getHeaders().getContentType());
-		assertTrue(outputMessage.getBodyAsBytes().length > 0);
+		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
+		assertThat(outputMessage.getBodyAsBytes().length > 0).isTrue();
 		Message result = Msg.parseFrom(outputMessage.getBodyAsBytes());
-		assertEquals(this.testMsg, result);
+		assertThat(result).isEqualTo(this.testMsg);
 
 		String messageHeader =
 				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER);
-		assertEquals("Msg", messageHeader);
+		assertThat(messageHeader).isEqualTo("Msg");
 		String schemaHeader =
 				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER);
-		assertEquals("sample.proto", schemaHeader);
+		assertThat(schemaHeader).isEqualTo("sample.proto");
 	}
 
 	@Test
 	public void defaultContentType() throws Exception {
-		assertEquals(ProtobufHttpMessageConverter.PROTOBUF, this.converter.getDefaultContentType(this.testMsg));
+		assertThat(this.converter.getDefaultContentType(this.testMsg)).isEqualTo(ProtobufHttpMessageConverter.PROTOBUF);
 	}
 
 	@Test
@@ -139,7 +130,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MediaType contentType = ProtobufHttpMessageConverter.PROTOBUF;
 		this.converter.write(this.testMsg, contentType, outputMessage);
-		assertEquals(-1, outputMessage.getHeaders().getContentLength());
+		assertThat(outputMessage.getHeaders().getContentLength()).isEqualTo(-1);
 	}
 
 }

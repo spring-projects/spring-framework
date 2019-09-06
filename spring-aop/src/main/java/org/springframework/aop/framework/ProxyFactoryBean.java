@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -395,9 +395,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 						logger.debug("Bean with name '" + finalName + "' concluding interceptor chain " +
 								"is not an advisor class: treating it as a target or TargetSource");
 					}
-					String[] newNames = new String[this.interceptorNames.length - 1];
-					System.arraycopy(this.interceptorNames, 0, newNames, 0, newNames.length);
-					this.interceptorNames = newNames;
+					this.interceptorNames = Arrays.copyOf(this.interceptorNames, this.interceptorNames.length - 1);
 				}
 			}
 		}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,10 +44,10 @@ import org.springframework.web.util.UriTemplate;
  * use, current locale, binding errors, etc. Provides easy access to localized
  * messages and Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within FreeMarker templates,
+ * <p>Suitable for exposition to views, and usage within FreeMarker templates
  * and tag libraries.
  *
- * <p>Can be instantiated manually, or automatically exposed to views as model
+ * <p>Can be instantiated manually or automatically exposed to views as a model
  * attribute via AbstractView's "requestContextAttribute" property.
  *
  * @author Rossen Stoyanchev

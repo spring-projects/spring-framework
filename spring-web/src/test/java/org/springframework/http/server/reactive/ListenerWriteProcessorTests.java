@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static junit.framework.TestCase.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link AbstractListenerWriteProcessor}.
@@ -43,11 +44,11 @@ public class ListenerWriteProcessorTests {
 	private final TestSubscription subscription = new TestSubscription();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.processor.subscribe(this.resultSubscriber);
 		this.processor.onSubscribe(this.subscription);
-		assertEquals(1, subscription.getDemand());
+		assertThat(subscription.getDemand()).isEqualTo(1);
 	}
 
 
@@ -62,9 +63,9 @@ public class ListenerWriteProcessorTests {
 		// Send error while item cached
 		this.processor.onError(new IllegalStateException());
 
-		assertNotNull("Error should flow to result publisher", this.resultSubscriber.getError());
-		assertEquals(1, this.processor.getDiscardedBuffers().size());
-		assertSame(buffer, this.processor.getDiscardedBuffers().get(0));
+		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
+		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(1);
+		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
 	}
 
 	@Test // SPR-17410
@@ -78,9 +79,9 @@ public class ListenerWriteProcessorTests {
 		DataBuffer buffer = mock(DataBuffer.class);
 		this.processor.onNext(buffer);
 
-		assertNotNull("Error should flow to result publisher", this.resultSubscriber.getError());
-		assertEquals(1, this.processor.getDiscardedBuffers().size());
-		assertSame(buffer, this.processor.getDiscardedBuffers().get(0));
+		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
+		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(1);
+		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
 	}
 
 	@Test // SPR-17410
@@ -95,10 +96,10 @@ public class ListenerWriteProcessorTests {
 		DataBuffer buffer2 = mock(DataBuffer.class);
 		this.processor.onNext(buffer2);
 
-		assertNotNull("Error should flow to result publisher", this.resultSubscriber.getError());
-		assertEquals(2, this.processor.getDiscardedBuffers().size());
-		assertSame(buffer2, this.processor.getDiscardedBuffers().get(0));
-		assertSame(buffer1, this.processor.getDiscardedBuffers().get(1));
+		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
+		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(2);
+		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer2);
+		assertThat(this.processor.getDiscardedBuffers().get(1)).isSameAs(buffer1);
 	}
 
 

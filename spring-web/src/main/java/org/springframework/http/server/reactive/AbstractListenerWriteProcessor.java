@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -241,7 +241,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * to discard in-flight data that was in
 	 * the process of being written when the error took place.
 	 * @param data the data to be released
-	 * @since 5.1.2
+	 * @since 5.0.11
 	 */
 	protected abstract void discardData(T data);
 
@@ -376,6 +376,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 
@@ -383,6 +387,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 

@@ -1,92 +1,112 @@
-/*
- * Copyright 2002-2017 the original author or authors.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+/**
+ * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
  */
-
 task api(type: Javadoc) {
 	group = "Documentation"
 	description = "Generates aggregated Javadoc API documentation."
 	title = "${rootProject.description} ${version} API"
 
 	dependsOn {
-		subprojects.collect {
+		moduleProjects.collect {
 			it.tasks.getByName("jar")
 		}
 	}
-	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-	options.author = true
-	options.header = rootProject.description
-	options.use = true
-	options.overview = "src/docs/api/overview.html"
-	options.stylesheetFile = file("src/docs/api/stylesheet.css")
-	options.splitIndex = true
-	options.links(project.ext.javadocLinks)
-	options.addStringOption('Xdoclint:none', '-quiet')
-
-	source subprojects.collect { project ->
-		project.sourceSets.main.allJava
-	}
-
-	maxMemory = "1024m"
-	destinationDir = new File(buildDir, "api")
-
 	doFirst {
 		classpath = files(
 				// ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 		)
-		classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
+
+	options {
+		encoding = "UTF-8"
+		memberLevel = JavadocMemberLevel.PROTECTED
+		author = true
+		header = rootProject.description
+		use = true
+		overview = "src/docs/api/overview.html"
+		stylesheetFile = file("src/docs/api/stylesheet.css")
+		splitIndex = true
+		links(project.ext.javadocLinks)
+		addStringOption('Xdoclint:none', '-quiet')
+		if(JavaVersion.current().isJava9Compatible()) {
+			addBooleanOption('html5', true)
+		}
+	}
+	source moduleProjects.collect { project ->
+		project.sourceSets.main.allJava
+	}
+	maxMemory = "1024m"
+	destinationDir = file("$buildDir/docs/javadoc")
 }
 
+/**
+ * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
+ */
 dokka {
 	dependsOn {
 		tasks.getByName("api")
 	}
 	doFirst {
-		classpath = subprojects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-		classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
-
+		classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+		sourceDirs = files(moduleProjects
+				.findAll {
+					it.pluginManager.hasPlugin("kotlin")
+				}
+				.collect { project ->
+					def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+					kotlinDirs -= project.sourceSets.main.java.srcDirs
+				})
 	}
 	moduleName = "spring-framework"
 	outputFormat = "html"
 	outputDirectory = "$buildDir/docs/kdoc"
 
-	sourceDirs = files(subprojects.collect { project ->
-		def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-		kotlinDirs -= project.sourceSets.main.java.srcDirs
-	})
 	externalDocumentationLink {
 		url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-		packageListUrl = new File(buildDir, "api/package-list").toURI().toURL()
+		packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
 	}
 	externalDocumentationLink {
-		url = new URL("http://projectreactor.io/docs/core/release/api/")
+		url = new URL("https://projectreactor.io/docs/core/release/api/")
 	}
 	externalDocumentationLink {
-		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+	}
+	externalDocumentationLink {
+		url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
 	}
 }
 
+task downloadResources(type: Download) {
+	def version = "0.1.2.RELEASE"
+	src "https://repo.spring.io/release/io/spring/docresources/" +
+			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
+	dest project.file("$buildDir/docs/spring-doc-resources.zip")
+	onlyIfModified true
+	useETag "all"
+}
+
+task extractDocResources(type: Copy, dependsOn: downloadResources) {
+	from project.zipTree(downloadResources.dest);
+	into "$buildDir/docs/spring-docs-resources/"
+}
+
+/**
+ * Produce the Spring Framework Reference documentation
+ * from "src/docs/asciidoc" into  "build/asciidoc/html5"
+ */
 asciidoctor {
 	sources {
 		include '*.adoc'
 	}
+	outputDir "$buildDir/docs/ref-docs/"
 	resources {
 		from(sourceDir) {
-			include 'images/*', 'stylesheets/*', 'tocbot-3.0.2/*'
+			include 'images/*', 'css/**', 'js/**'
 		}
+		from "$buildDir/docs/spring-docs-resources/"
 	}
 	logDocuments = true
 	backends = ["html5"]
@@ -98,63 +118,69 @@ asciidoctor {
 	attributes  'icons': 'font',
 			'idprefix': '',
 			'idseparator': '-',
-			docinfo: '',
-			revnumber: project.version,
-			sectanchors: '',
-			sectnums: '',
-			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
-			stylesdir: 'stylesheets/',
-			stylesheet: 'main.css',
+			'docinfo': 'shared',
+			'revnumber': project.version,
+			'sectanchors': '',
+			'sectnums': '',
+			'source-highlighter=highlight.js',
+			'highlightjsdir=js/highlight',
+			'highlightjs-theme=atom-one-dark-reasonable',
+			stylesdir: "css/",
+			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
 
 }
 
+asciidoctor.dependsOn extractDocResources
+
+/**
+ * Zip all docs (API and reference) into a single archive
+ */
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	group = "Distribution"
-	baseName = "spring-framework"
-	classifier = "docs"
-	description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://docs.spring.io/spring-framework/docs."
+	description = "Builds -${archiveClassifier} archive containing api and reference " +
+			"for deployment at https://docs.spring.io/spring-framework/docs."
 
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("docs")
 	from("src/dist") {
 		include "changelog.txt"
 	}
-
 	from (api) {
 		into "javadoc-api"
 	}
-
 	from ("$asciidoctor.outputDir/html5") {
 		into "spring-framework-reference"
 	}
-
 	from ("$asciidoctor.outputDir/pdf") {
 		into "spring-framework-reference/pdf"
 	}
-
 	from (dokka) {
 		into "kdoc-api"
 	}
 }
 
+/**
+ * Zip all Spring Framework schemas into a single archive
+ */
 task schemaZip(type: Zip) {
 	group = "Distribution"
-	baseName = "spring-framework"
-	classifier = "schema"
-	description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at http://springframework.org/schema."
-	duplicatesStrategy 'exclude'
-	moduleProjects.each { subproject ->
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("schema")
+	description = "Builds -${archiveClassifier} archive containing all " +
+			"XSDs for deployment at https://springframework.org/schema."
+	duplicatesStrategy DuplicatesStrategy.EXCLUDE
+	moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
-		subproject.sourceSets.main.resources.find {
+		module.sourceSets.main.resources.find {
 			it.path.endsWith("META-INF/spring.schemas")
 		}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
 			assert shortName != key
-			File xsdFile = subproject.sourceSets.main.resources.find {
+			File xsdFile = module.sourceSets.main.resources.find {
 				it.path.endsWith(schemas.get(key))
 			}
 			assert xsdFile != null
@@ -165,15 +191,19 @@ task schemaZip(type: Zip) {
 	}
 }
 
+/**
+ * Create a distribution zip with everything:
+ * docs, schemas, jars, source jars, javadoc jars
+ */
 task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 
 	group = "Distribution"
-	baseName = "spring-framework"
-	classifier = "dist"
-	description = "Builds -${classifier} archive, containing all jars and docs, " +
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("dist")
+	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
 			"suitable for community download page."
 
-	ext.baseDir = "${baseName}-${project.version}";
+	ext.baseDir = "${archiveBaseName}-${project.version}";
 
 	from("src/docs/dist") {
 		include "readme.txt"
@@ -191,49 +221,17 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		into "${baseDir}/schema"
 	}
 
-	moduleProjects.each { subproject ->
+	moduleProjects.each { module ->
 		into ("${baseDir}/libs") {
-			from subproject.jar
-			if (subproject.tasks.findByPath("sourcesJar")) {
-				from subproject.sourcesJar
+			from module.jar
+			if (module.tasks.findByPath("sourcesJar")) {
+				from module.sourcesJar
 			}
-			if (subproject.tasks.findByPath("javadocJar")) {
-				from subproject.javadocJar
-			}
-		}
-	}
-}
-
-distZip.mustRunAfter subprojects.test
-
-// Create a distribution that contains all dependencies (required and optional).
-// Not published by default; only for use when building from source.
-task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
-	group = "Distribution"
-	baseName = "spring-framework"
-	classifier = "dist-with-deps"
-	description = "Builds -${classifier} archive, containing everything " +
-			"in the -${distZip.classifier} archive plus all runtime dependencies."
-
-	from zipTree(distZip.archivePath)
-
-	gradle.taskGraph.whenReady { taskGraph ->
-		if (taskGraph.hasTask(":${zipTask.name}")) {
-			def projectNames = rootProject.subprojects*.name
-			def artifacts = new HashSet()
-			subprojects.each { subproject ->
-				(subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts +
-						subproject.configurations.optional.resolvedConfiguration.resolvedArtifacts).each { artifact ->
-					def dependency = artifact.moduleVersion.id
-					if (!projectNames.contains(dependency.name)) {
-						artifacts << artifact.file
-					}
-				}
-			}
-
-			zipTask.from(artifacts) {
-				into "${distZip.baseDir}/deps"
+			if (module.tasks.findByPath("javadocJar")) {
+				from module.javadocJar
 			}
 		}
 	}
 }
+
+distZip.mustRunAfter moduleProjects.check

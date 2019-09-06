@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,7 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.test.context.cache.ClassLevelDirtiesContextTests;
-import org.springframework.test.context.cache.SpringRunnerContextCacheTests;
-import org.springframework.test.context.jdbc.RequiresNewTransactionSqlScriptsTests;
+
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
@@ -42,7 +40,6 @@ import org.springframework.test.context.junit4.profile.annotation.DevProfileReso
 import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DevProfileResolverXmlConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
-import org.springframework.test.context.transaction.programmatic.ProgrammaticTxMgmtTests;
 
 /**
  * JUnit test suite for tests involving {@link SpringRunner} and the
@@ -98,8 +95,6 @@ StandardJUnit4FeaturesTests.class,//
 	InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,//
 	CustomDefaultContextLoaderClassSpringRunnerTests.class,//
-	SpringRunnerContextCacheTests.class,//
-	ClassLevelDirtiesContextTests.class,//
 	ParameterizedDependencyInjectionTests.class,//
 	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
@@ -110,8 +105,6 @@ StandardJUnit4FeaturesTests.class,//
 	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
-	ProgrammaticTxMgmtTests.class,//
-	RequiresNewTransactionSqlScriptsTests.class,//
 	HibernateSessionFlushingTests.class //
 })
 public class SpringJUnit4TestSuite {

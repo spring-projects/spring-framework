@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -54,10 +54,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.web.method.ResolvableMethod.on;
 
@@ -76,7 +73,7 @@ public class ReactiveTypeHandlerTests {
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
@@ -99,14 +96,14 @@ public class ReactiveTypeHandlerTests {
 
 	@Test
 	public void supportsType() throws Exception {
-		assertTrue(this.handler.isReactiveType(Mono.class));
-		assertTrue(this.handler.isReactiveType(Single.class));
-		assertTrue(this.handler.isReactiveType(io.reactivex.Single.class));
+		assertThat(this.handler.isReactiveType(Mono.class)).isTrue();
+		assertThat(this.handler.isReactiveType(Single.class)).isTrue();
+		assertThat(this.handler.isReactiveType(io.reactivex.Single.class)).isTrue();
 	}
 
 	@Test
 	public void doesNotSupportType() throws Exception {
-		assertFalse(this.handler.isReactiveType(String.class));
+		assertThat(this.handler.isReactiveType(String.class)).isFalse();
 	}
 
 	@Test
@@ -193,9 +190,10 @@ public class ReactiveTypeHandlerTests {
 		testSseResponse(false);
 	}
 
-	private void testSseResponse(boolean expectSseEimtter) throws Exception {
+	private void testSseResponse(boolean expectSseEmitter) throws Exception {
 		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, forClass(String.class));
-		assertEquals(expectSseEimtter, emitter instanceof SseEmitter);
+		Object actual = emitter instanceof SseEmitter;
+		assertThat(actual).isEqualTo(expectSseEmitter);
 		resetRequest();
 	}
 
@@ -214,7 +212,7 @@ public class ReactiveTypeHandlerTests {
 		processor.onNext("baz");
 		processor.onComplete();
 
-		assertEquals("data:foo\n\ndata:bar\n\ndata:baz\n\n", emitterHandler.getValuesAsText());
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 
 	@Test
@@ -233,8 +231,7 @@ public class ReactiveTypeHandlerTests {
 		processor.onNext(ServerSentEvent.builder("baz").id("3").build());
 		processor.onComplete();
 
-		assertEquals("id:1\ndata:foo\n\nid:2\ndata:bar\n\nid:3\ndata:baz\n\n",
-				emitterHandler.getValuesAsText());
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("id:1\ndata:foo\n\nid:2\ndata:bar\n\nid:3\ndata:baz\n\n");
 	}
 
 	@Test
@@ -258,8 +255,8 @@ public class ReactiveTypeHandlerTests {
 		processor.onNext(bar2);
 		processor.onComplete();
 
-		assertEquals("application/stream+json", message.getHeaders().getContentType().toString());
-		assertEquals(Arrays.asList(bar1, "\n", bar2, "\n"), emitterHandler.getValues());
+		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/stream+json");
+		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
 	}
 
 	@Test
@@ -276,7 +273,7 @@ public class ReactiveTypeHandlerTests {
 		processor.onNext("the lazy dog");
 		processor.onComplete();
 
-		assertEquals("The quick brown fox jumps over the lazy dog", emitterHandler.getValuesAsText());
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("The quick brown fox jumps over the lazy dog");
 	}
 
 	@Test
@@ -306,7 +303,7 @@ public class ReactiveTypeHandlerTests {
 		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
 		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, forClass(String.class));
 		emitter.extendResponse(message);
-		assertEquals(expected, message.getHeaders().getContentType().toString());
+		assertThat(message.getHeaders().getContentType().toString()).isEqualTo(expected);
 		resetRequest();
 	}
 
@@ -315,15 +312,15 @@ public class ReactiveTypeHandlerTests {
 			ResolvableType elementType, Runnable produceTask, Object expected) throws Exception {
 
 		ResponseBodyEmitter emitter = handleValue(returnValue, asyncType, elementType);
-		assertNull(emitter);
+		assertThat(emitter).isNull();
 
-		assertTrue(this.servletRequest.isAsyncStarted());
-		assertFalse(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
+		assertThat(this.servletRequest.isAsyncStarted()).isTrue();
+		assertThat(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult()).isFalse();
 
 		produceTask.run();
 
-		assertTrue(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
-		assertEquals(expected, WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult());
+		assertThat(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult()).isTrue();
+		assertThat(WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult()).isEqualTo(expected);
 
 		resetRequest();
 	}

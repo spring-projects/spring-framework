@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,41 +16,46 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Andy Wilkinson
  */
 public class ImportVersusDirectRegistrationTests {
 
-	@Test(expected = NoSuchBeanDefinitionException.class)
+	@Test
 	public void thingIsNotAvailableWhenOuterConfigurationIsRegisteredDirectly() {
 		try (AnnotationConfigApplicationContext directRegistration = new AnnotationConfigApplicationContext()) {
 			directRegistration.register(AccidentalLiteConfiguration.class);
 			directRegistration.refresh();
-			directRegistration.getBean(Thing.class);
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+					directRegistration.getBean(Thing.class));
 		}
 	}
 
-	@Test(expected = NoSuchBeanDefinitionException.class)
+	@Test
 	public void thingIsNotAvailableWhenOuterConfigurationIsRegisteredWithClassName() {
 		try (AnnotationConfigApplicationContext directRegistration = new AnnotationConfigApplicationContext()) {
 			directRegistration.registerBeanDefinition("config",
 					new RootBeanDefinition(AccidentalLiteConfiguration.class.getName()));
 			directRegistration.refresh();
-			directRegistration.getBean(Thing.class);
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+					directRegistration.getBean(Thing.class));
 		}
 	}
 
-	@Test(expected = NoSuchBeanDefinitionException.class)
+	@Test
 	public void thingIsNotAvailableWhenOuterConfigurationIsImported() {
 		try (AnnotationConfigApplicationContext viaImport = new AnnotationConfigApplicationContext()) {
 			viaImport.register(Importer.class);
 			viaImport.refresh();
-			viaImport.getBean(Thing.class);
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+					viaImport.getBean(Thing.class));
 		}
 	}
 

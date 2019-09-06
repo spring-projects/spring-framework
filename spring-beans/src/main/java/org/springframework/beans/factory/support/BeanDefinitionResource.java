@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.AbstractResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +40,7 @@ class BeanDefinitionResource extends AbstractResource {
 
 	/**
 	 * Create a new BeanDefinitionResource.
-	 * @param beanDefinition the BeanDefinition objectto wrap
+	 * @param beanDefinition the BeanDefinition object to wrap
 	 */
 	public BeanDefinitionResource(BeanDefinition beanDefinition) {
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
@@ -80,7 +81,7 @@ class BeanDefinitionResource extends AbstractResource {
 	 * This implementation compares the underlying BeanDefinition.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BeanDefinitionResource &&
 				((BeanDefinitionResource) other).beanDefinition.equals(this.beanDefinition)));
 	}

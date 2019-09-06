@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -33,9 +33,11 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * Unit tests for {@link DispatcherHandler}.
@@ -51,10 +53,10 @@ public class DispatcherHandlerTests {
 	public void handlerMappingOrder() {
 		HandlerMapping hm1 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
 		HandlerMapping hm2 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
-		when(((Ordered) hm1).getOrder()).thenReturn(1);
-		when(((Ordered) hm2).getOrder()).thenReturn(2);
-		when((hm1).getHandler(any())).thenReturn(Mono.just((Supplier<String>) () -> "1"));
-		when((hm2).getHandler(any())).thenReturn(Mono.just((Supplier<String>) () -> "2"));
+		given(((Ordered) hm1).getOrder()).willReturn(1);
+		given(((Ordered) hm2).getOrder()).willReturn(2);
+		given((hm1).getHandler(any())).willReturn(Mono.just((Supplier<String>) () -> "1"));
+		given((hm2).getHandler(any())).willReturn(Mono.just((Supplier<String>) () -> "2"));
 
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBean("b2", HandlerMapping.class, () -> hm2);
@@ -67,7 +69,7 @@ public class DispatcherHandlerTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		dispatcherHandler.handle(exchange).block(Duration.ofSeconds(0));
-		assertEquals("1", exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5)));
+		assertThat(exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5))).isEqualTo("1");
 	}
 
 

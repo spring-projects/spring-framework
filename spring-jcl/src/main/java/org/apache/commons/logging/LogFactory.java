@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ package org.apache.commons.logging;
  * <p><b>Note that this Commons Logging variant is only meant to be used for
  * infrastructure logging purposes in the core framework and in extensions.</b>
  * It also serves as a common bridge for third-party libraries using the
- * Commons Logging API, e.g. Apache HttpClient, Castor and HtmlUnit, bringing
+ * Commons Logging API, e.g. Apache HttpClient, and HtmlUnit, bringing
  * them into the same consistent arrangement without any extra bridge jars.
  *
  * <p><b>For logging need in application code, prefer direct use of Log4j 2.x

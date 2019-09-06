@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -160,7 +160,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 				super.setSubscriptionId(value);
 			}
 		}
-		else if (StompCommand.CONNECT.equals(command)) {
+		else if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
 			protectPasscode();
 		}
 	}
@@ -243,7 +243,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		if (rawValues == null) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
@@ -424,6 +424,10 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		else if (StompCommand.CONNECT.equals(command)) {
 			Principal user = getUser();
 			return "CONNECT" + (user != null ? " user=" + user.getName() : "") + appendSession();
+		}
+		else if (StompCommand.STOMP.equals(command)) {
+			Principal user = getUser();
+			return "STOMP" + (user != null ? " user=" + user.getName() : "") + appendSession();
 		}
 		else if (StompCommand.CONNECTED.equals(command)) {
 			return "CONNECTED heart-beat=" + Arrays.toString(getHeartbeat()) + appendSession();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,7 +81,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
-		return (values != null ? values.get(0) : null);
+		return (values != null && !values.isEmpty() ? values.get(0) : null);
 	}
 
 	@Override
@@ -118,7 +118,11 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	@Override
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
-		this.targetMap.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
+		this.targetMap.forEach((key, values) -> {
+			if (values != null && !values.isEmpty()) {
+				singleValueMap.put(key, values.get(0));
+			}
+		});
 		return singleValueMap;
 	}
 
@@ -221,7 +225,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return this.targetMap.equals(obj);
 	}
 

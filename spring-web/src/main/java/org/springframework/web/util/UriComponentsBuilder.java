@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +100,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
 
 	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
+
+	private static final Object[] EMPTY_VALUES = new Object[0];
 
 
 	@Nullable
@@ -294,7 +297,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Create a new {@code UriComponents} object from the URI associated with
 	 * the given HttpRequest while also overlaying with values from the headers
-	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
 	 * "Forwarded" is not found.
 	 * @param request the source request
@@ -385,15 +388,22 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
+		return buildInternal(encoded ?
+				EncodingHint.FULLY_ENCODED :
+				this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE);
+	}
+
+	private UriComponents buildInternal(EncodingHint hint) {
 		UriComponents result;
 		if (this.ssp != null) {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
-					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
+					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams,
+					hint == EncodingHint.FULLY_ENCODED);
 
-			result = this.encodeTemplate ? uric.encodeTemplate(this.charset) : uric;
+			result = hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric;
 		}
 		if (!this.uriVariables.isEmpty()) {
 			result = result.expand(name -> this.uriVariables.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
@@ -425,24 +435,34 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Override
 	public URI build(Object... uriVariables) {
-		return encode().buildAndExpand(uriVariables).toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
 	@Override
 	public URI build(Map<String, ?> uriVariables) {
-		return encode().buildAndExpand(uriVariables).toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
-
 	/**
-	 * Build a URI String. This is a shortcut method which combines calls
-	 * to {@link #build()}, then {@link UriComponents#encode()} and finally
-	 * {@link UriComponents#toUriString()}.
+	 * Build a URI String.
+	 * <p>Effectively, a shortcut for building, encoding, and returning the
+	 * String representation:
+	 * <pre class="code">
+	 * String uri = builder.build().encode().toUriString()
+	 * </pre>
+	 * <p>However if {@link #uriVariables(Map) URI variables} have been provided
+	 * then the URI template is pre-encoded separately from URI variables (see
+	 * {@link #encode()} for details), i.e. equivalent to:
+	 * <pre>
+	 * String uri = builder.encode().build().toUriString()
+	 * </pre>
 	 * @since 4.1
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return encode().build().toUriString();
+		return this.uriVariables.isEmpty() ?
+				build().encode().toUriString() :
+				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
 	}
 
 
@@ -679,6 +699,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #queryParam(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder queryParam(String name, Object... values) {
@@ -694,6 +715,22 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	/**
+	 * Append the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @since 5.2.0
+	 * @see #queryParam(String, Object...)
+	 */
+	@Override
+	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
+		return queryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**
@@ -716,6 +753,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParam(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
@@ -726,6 +764,20 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	/**
+	 * Set the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is removed.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParam(String, Object...)
+	 * @since 5.2.0
+	 */
+	@Override
+	public UriComponentsBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
+		return replaceQueryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**
@@ -782,7 +834,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	/**
 	 * Adapt this builder's scheme+host+port from the given headers, specifically
-	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>,
+	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>,
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
 	 * "Forwarded" is not found.
 	 * <p><strong>Note:</strong> this method uses values from forwarded headers,
@@ -1048,5 +1100,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			return builder;
 		}
 	}
+
+
+	private enum EncodingHint { ENCODE_TEMPLATE, FULLY_ENCODED, NONE }
 
 }

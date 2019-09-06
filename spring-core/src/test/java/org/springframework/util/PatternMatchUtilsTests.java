@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,38 +16,38 @@
 
 package org.springframework.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
  * @author Johan Gorter
  */
-public class PatternMatchUtilsTests {
+class PatternMatchUtilsTests {
 
 	@Test
-	public void testTrivial() {
-		assertEquals(false, PatternMatchUtils.simpleMatch((String) null, ""));
-		assertEquals(false, PatternMatchUtils.simpleMatch("1", null));
+	void trivial() {
+		assertThat(PatternMatchUtils.simpleMatch((String) null, "")).isEqualTo(false);
+		assertThat(PatternMatchUtils.simpleMatch("1", null)).isEqualTo(false);
 		doTest("*", "123", true);
 		doTest("123", "123", true);
 	}
 
 	@Test
-	public void testStartsWith() {
+	void startsWith() {
 		doTest("get*", "getMe", true);
 		doTest("get*", "setMe", false);
 	}
 
 	@Test
-	public void testEndsWith() {
+	void endsWith() {
 		doTest("*Test", "getMeTest", true);
 		doTest("*Test", "setMe", false);
 	}
 
 	@Test
-	public void testBetween() {
+	void between() {
 		doTest("*stuff*", "getMeTest", false);
 		doTest("*stuff*", "getstuffTest", true);
 		doTest("*stuff*", "stuffTest", true);
@@ -56,7 +56,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	@Test
-	public void testStartsEnds() {
+	void startsEnds() {
 		doTest("on*Event", "onMyEvent", true);
 		doTest("on*Event", "onEvent", true);
 		doTest("3*3", "3", false);
@@ -64,7 +64,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	@Test
-	public void testStartsEndsBetween() {
+	void startsEndsBetween() {
 		doTest("12*45*78", "12345678", true);
 		doTest("12*45*78", "123456789", false);
 		doTest("12*45*78", "012345678", false);
@@ -75,7 +75,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	@Test
-	public void testRidiculous() {
+	void ridiculous() {
 		doTest("*1*2*3*", "0011002001010030020201030", true);
 		doTest("1*2*3*4", "10300204", false);
 		doTest("1*2*3*3", "10300203", false);
@@ -84,7 +84,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	@Test
-	public void testPatternVariants() {
+	void patternVariants() {
 		doTest("*a", "*", false);
 		doTest("*a", "a", true);
 		doTest("*a", "b", false);
@@ -100,7 +100,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	private void doTest(String pattern, String str, boolean shouldMatch) {
-		assertEquals(shouldMatch, PatternMatchUtils.simpleMatch(pattern, str));
+		assertThat(PatternMatchUtils.simpleMatch(pattern, str)).isEqualTo(shouldMatch);
 	}
 
 }

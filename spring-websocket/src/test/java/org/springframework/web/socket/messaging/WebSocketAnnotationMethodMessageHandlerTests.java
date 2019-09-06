@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,8 @@ package org.springframework.web.socket.messaging;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -36,7 +35,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WebSocketAnnotationMethodMessageHandler}.
@@ -49,7 +48,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 	private StaticApplicationContext applicationContext;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.applicationContext = new StaticApplicationContext();
 		this.applicationContext.registerSingleton("controller", TestController.class);
@@ -74,7 +73,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		TestControllerAdvice controllerAdvice = this.applicationContext.getBean(TestControllerAdvice.class);
-		assertTrue(controllerAdvice.isExceptionHandled());
+		assertThat(controllerAdvice.isExceptionHandled()).isTrue();
 	}
 
 
