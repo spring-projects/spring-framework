@@ -57,7 +57,7 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
@@ -224,10 +224,10 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@ParameterizedRestTemplateTest
 	void patchForObject(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
-		setUpClient(clientHttpRequestFactory);
+		assumeFalse(clientHttpRequestFactory instanceof SimpleClientHttpRequestFactory,
+				"JDK client does not support the PATCH method");
 
-		// JDK client does not support the PATCH method
-		assumeFalse(this.clientHttpRequestFactory instanceof SimpleClientHttpRequestFactory);
+		setUpClient(clientHttpRequestFactory);
 
 		String s = template.patchForObject(baseUrl + "/{method}", helloWorld, String.class, "patch");
 		assertThat(s).as("Invalid content").isEqualTo(helloWorld);

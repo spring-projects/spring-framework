@@ -33,7 +33,7 @@ import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * @author Arjen Poutsma
@@ -51,10 +51,10 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@ParameterizedHttpServerTest
 	public void zeroCopy(HttpServer httpServer) throws Exception {
-		startServer(httpServer);
+		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer,
+			"Zero-copy only does not support servlet");
 
-		// Zero-copy only does not support servlet
-		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
+		startServer(httpServer);
 
 		URI url = new URI("http://localhost:" + port);
 		RequestEntity<?> request = RequestEntity.get(url).build();
