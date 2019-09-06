@@ -51,6 +51,8 @@ public class ForwardedHeaderFilterTests {
 	private static final String X_FORWARDED_PORT = "x-forwarded-port";
 	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
 	private static final String X_FORWARDED_SSL = "x-forwarded-ssl";
+	private static final String X_FORWARDED_FOR = "x-forwarded-for";
+	private static final String FORWARDED = "forwarded";
 
 
 	private final ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
@@ -70,6 +72,114 @@ public class ForwardedHeaderFilterTests {
 		this.filterChain = new MockFilterChain(new HttpServlet() {});
 	}
 
+	@Test
+	public void forwardedForEmpty() throws Exception {
+		this.request.addHeader(X_FORWARDED_FOR, "");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_ADDR);
+		assertThat(actual.getRemoteHost()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_HOST);
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void forwardedForSingleIdentifier() throws Exception {
+		this.request.addHeader(X_FORWARDED_FOR, "203.0.113.195");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void forwardedForMultipleIdentifiers() throws Exception {
+		this.request.addHeader(X_FORWARDED_FOR, "203.0.113.195, 70.41.3.18, 150.172.238.178");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void standardizedForwardedForIpV4Identifier() throws Exception {
+		this.request.addHeader(FORWARDED, "for=203.0.113.195");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void standardizedForwardedForIpV6Identifier() throws Exception {
+		this.request.addHeader(FORWARDED, "for=\"[2001:db8:cafe::17]\"");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe::17");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void standardizedForwardedForUnknownIdentifier() throws Exception {
+		this.request.addHeader(FORWARDED, "for=unknown");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("unknown");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void standardizedForwardedForObfuscatedIdentifier() throws Exception {
+		this.request.addHeader(FORWARDED, "for=_abc-12_d.e");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("_abc-12_d.e");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
+
+	@Test
+	public void standardizedForwardedForIpV4IdentifierWithPort() throws Exception {
+		this.request.addHeader(FORWARDED, "for=\"203.0.113.195:47011\"");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
+		assertThat(actual.getRemotePort()).isEqualTo(47011);
+	}
+
+	@Test
+	public void standardizedForwardedForIpV6IdentifierWithPort() throws Exception {
+		this.request.addHeader(FORWARDED, "For=\"[2001:db8:cafe::17]:47011\"");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe::17");
+		assertThat(actual.getRemotePort()).isEqualTo(47011);
+	}
+
+	@Test
+	public void standardizedForwardedForUnknownIdentifierWithPort() throws Exception {
+		this.request.addHeader(FORWARDED, "for=\"unknown:47011\"");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("unknown");
+		assertThat(actual.getRemotePort()).isEqualTo(47011);
+	}
+
+	@Test
+	public void standardizedForwardedForObfuscatedIdentifierWithPort() throws Exception {
+		this.request.addHeader(FORWARDED, "for=\"_abc-12_d.e:47011\"");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("_abc-12_d.e");
+		assertThat(actual.getRemotePort()).isEqualTo(47011);
+	}
+
+	@Test
+	public void standardizedForwardedForMultipleIdentifiers() throws Exception {
+		this.request.addHeader(FORWARDED, "for=203.0.113.195;proto=http, for=\"[2001:db8:cafe::17]\", for=unknown");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
+		assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+	}
 
 	@Test
 	public void contextPathEmpty() throws Exception {
@@ -220,11 +330,12 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void shouldFilter() {
-		testShouldFilter("Forwarded");
+		testShouldFilter(FORWARDED);
 		testShouldFilter(X_FORWARDED_HOST);
 		testShouldFilter(X_FORWARDED_PORT);
 		testShouldFilter(X_FORWARDED_PROTO);
 		testShouldFilter(X_FORWARDED_SSL);
+		testShouldFilter(X_FORWARDED_FOR);
 	}
 
 	private void testShouldFilter(String headerName) {
@@ -245,6 +356,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 		this.request.addHeader("foo", "bar");
+		this.request.addHeader(X_FORWARDED_FOR, "203.0.113.195");
 
 		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
 		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
@@ -254,10 +366,12 @@ public class ForwardedHeaderFilterTests {
 		assertThat(actual.getServerName()).isEqualTo("84.198.58.199");
 		assertThat(actual.getServerPort()).isEqualTo(443);
 		assertThat(actual.isSecure()).isTrue();
+		assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
 
 		assertThat(actual.getHeader(X_FORWARDED_PROTO)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_HOST)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_PORT)).isNull();
+		assertThat(actual.getHeader(X_FORWARDED_FOR)).isNull();
 		assertThat(actual.getHeader("foo")).isEqualTo("bar");
 	}
 
@@ -269,6 +383,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 		this.request.addHeader(X_FORWARDED_SSL, "on");
 		this.request.addHeader("foo", "bar");
+		this.request.addHeader(X_FORWARDED_FOR, "203.0.113.195");
 
 		this.filter.setRemoveOnly(true);
 		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
@@ -279,11 +394,14 @@ public class ForwardedHeaderFilterTests {
 		assertThat(actual.getServerName()).isEqualTo("localhost");
 		assertThat(actual.getServerPort()).isEqualTo(80);
 		assertThat(actual.isSecure()).isFalse();
+		assertThat(actual.getRemoteAddr()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_ADDR);
+		assertThat(actual.getRemoteHost()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_HOST);
 
 		assertThat(actual.getHeader(X_FORWARDED_PROTO)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_HOST)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_PORT)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_SSL)).isNull();
+		assertThat(actual.getHeader(X_FORWARDED_FOR)).isNull();
 		assertThat(actual.getHeader("foo")).isEqualTo("bar");
 	}
 
