@@ -70,9 +70,11 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
+	// 因解决单例循环依赖，允许提前暴露bean， 单例注册顺序 singletonFactories -> earlySingletonObjects -> singletonObjects
 	/** Cache of singleton objects: bean name --> bean instance */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
+	// 用于暂存单例实例，以供单例循环依赖时获取使用，但需区别刚创建的实例
 	/** Cache of singleton factories: bean name --> ObjectFactory */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
@@ -103,9 +105,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Map between containing bean names: bean name --> Set of bean names that the bean contains */
 	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
 
+	// 所有依赖 key 的 bean
 	/** Map between dependent bean names: bean name --> Set of dependent bean names */
 	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
 
+	// key 所依赖的 bean
 	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies */
 	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 
@@ -165,6 +169,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 *
+	 * 为解决循环依赖，提前暴露的实例会以 ObjectFactory 的形式存入 singletonFactories，只有 allowEarlyReference = true 才能取出，
+	 * 而调用一次之后，对象将会从 singletonFactories 转移至 earlySingletonObjects，此时若通过 allowEarlyReference = false 依然取出实例对象，说明存在循环依赖
+	 * 只有调用 addSingleton 后才会注入 singletonObjects 成为正式单例，
+	 * 而此情况发生在调用 getSingleton(String beanName, ObjectFactory<?> singletonFactory) 时，且在 ObjectFactory 进行单例的创建之后
+	 * （循环依赖时的递归创建及单例创建后的循环依赖检查都在单例的创建中进行）
+	 *
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
@@ -244,6 +255,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					}
 					afterSingletonCreation(beanName);
 				}
+				// 注册单例
 				if (newSingleton) {
 					addSingleton(beanName, singletonObject);
 				}
@@ -389,6 +401,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 注册 dependentBeanName 依赖于 beanName
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
 	 * @param beanName the name of the bean
@@ -413,6 +426,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 检查 dependentBeanName 是否依赖于 beanName
 	 * Determine whether the specified dependent bean has been registered as
 	 * dependent on the given bean or on any of its transitive dependencies.
 	 * @param beanName the name of the bean to check
@@ -437,6 +451,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (dependentBeans.contains(dependentBeanName)) {
 			return true;
 		}
+		// 检查是否传递依赖
 		for (String transitiveDependency : dependentBeans) {
 			if (alreadySeen == null) {
 				alreadySeen = new HashSet<>();
@@ -550,6 +565,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param bean the bean instance to destroy
 	 */
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
+		// 注销依赖于此 bean 的 bean
 		// Trigger destruction of dependent beans first...
 		Set<String> dependencies;
 		synchronized (this.dependentBeanMap) {
@@ -575,6 +591,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			}
 		}
 
+		// 注销此 bean 依赖的 bean
 		// Trigger destruction of contained beans...
 		Set<String> containedBeans;
 		synchronized (this.containedBeanMap) {
