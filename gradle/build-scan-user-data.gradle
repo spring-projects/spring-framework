@@ -44,13 +44,17 @@ void addGitMetadata() {
 
 void addCiMetadata() {
 	def ciBuild = 'CI BUILD'
-	if (System.getenv('bamboo.resultsUrl')) {
-		buildScan.link ciBuild, System.getenv('bamboo.resultsUrl')
+	if (isBamboo()) {
+		buildScan.link ciBuild, System.getenv('bamboo_resultsUrl')
 	}
 }
 
 boolean isCi() {
-	System.getenv('bamboo.resultsUrl')
+	isBamboo()
+}
+
+boolean isBamboo() {
+	System.getenv('bamboo_resultsUrl')
 }
 
 String execAndGetStdout(String... args) {
