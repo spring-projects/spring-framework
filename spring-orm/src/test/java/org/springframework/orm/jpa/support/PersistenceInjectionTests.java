@@ -31,7 +31,6 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -337,7 +336,6 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	@Test
-	@Disabled
 	public void testPersistenceUnitsFromJndi() {
 		EntityManager mockEm = mock(EntityManager.class);
 		given(mockEmf.createEntityManager()).willReturn(mockEm);

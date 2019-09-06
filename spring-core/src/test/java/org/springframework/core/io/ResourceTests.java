@@ -27,13 +27,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.tests.TestGroup.CI;
 
 /**
  * Unit tests for various {@link Resource} implementations.
@@ -218,10 +219,10 @@ class ResourceTests {
 		assertThat(relative).isEqualTo(new UrlResource("file:dir/subdir"));
 	}
 
-	@Disabled
-	@Test // this test is quite slow. TODO: re-enable with JUnit categories
+	@Test
+	@EnabledForTestGroups(CI)
 	void testNonFileResourceExists() throws Exception {
-		Resource resource = new UrlResource("https://www.springframework.org");
+		Resource resource = new UrlResource("https://spring.io/");
 		assertThat(resource.exists()).isTrue();
 	}
 

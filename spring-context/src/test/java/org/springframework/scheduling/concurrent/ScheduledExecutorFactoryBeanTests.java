@@ -20,7 +20,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.NoOpRunnable;
@@ -142,8 +141,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		verify(runnable, atLeast(2)).run();
 	}
 
-	@Disabled
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 
@@ -162,8 +161,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		verify(runnable, never()).run();
 	}
 
-	@Disabled
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();
