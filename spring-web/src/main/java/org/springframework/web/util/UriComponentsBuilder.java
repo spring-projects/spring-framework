@@ -97,9 +97,13 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
 					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 
-	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
+	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("(?i:host)=\"?([^;,\"]+)\"?");
 
-	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
+	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("(?i:proto)=\"?([^;,\"]+)\"?");
+
+	private static final Pattern FORWARDED_FOR_PATTERN = Pattern.compile("(?i:for)=\"?([^;,\"]+)\"?");
+
+	private static final String FORWARDED_FOR_NUMERIC_PORT_PATTERN = "^(\\d{1,5})$";
 
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
@@ -724,6 +728,33 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
+	 * Adapt this builders's host+port from the "for" parameter of the "Forwarded"
+	 * header or from "X-Forwarded-For" if "Forwarded" is not found. If neither
+	 * "Forwarded" nor "X-Forwarded-For" is found no changes are made to the
+	 * builder.
+	 * @param headers the HTTP headers to consider
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder adaptFromForwardedForHeader(HttpHeaders headers) {
+		String forwardedHeader = headers.getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
+			Matcher matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				adaptForwardedForHost(matcher.group(1).trim());
+			}
+		}
+		else {
+			String forHeader = headers.getFirst("X-Forwarded-For");
+			if (StringUtils.hasText(forHeader)) {
+				String forwardedForToUse = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
+				host(forwardedForToUse);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Adapt this builder's scheme+host+port from the given headers, specifically
 	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>,
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
@@ -806,6 +837,24 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		else {
 			host(hostToUse);
 			port(null);
+		}
+	}
+
+	private void adaptForwardedForHost(String hostToUse) {
+		String hostName = hostToUse;
+		int portSeparatorIdx = hostToUse.lastIndexOf(':');
+		if (portSeparatorIdx > hostToUse.lastIndexOf(']')) {
+			String hostPort = hostToUse.substring(portSeparatorIdx + 1);
+			// check if port is not obfuscated
+			if (hostPort.matches(FORWARDED_FOR_NUMERIC_PORT_PATTERN)) {
+				port(Integer.parseInt(hostPort));
+			}
+			hostName = hostToUse.substring(0, portSeparatorIdx);
+		}
+		if (hostName.matches(HOST_IPV6_PATTERN)) {
+			host(hostName.substring(hostName.indexOf('[') + 1, hostName.indexOf(']')));
+		} else {
+			host(hostName);
 		}
 	}
 

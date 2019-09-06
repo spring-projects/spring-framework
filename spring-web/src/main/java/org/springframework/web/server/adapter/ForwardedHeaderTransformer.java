@@ -16,11 +16,13 @@
 
 package org.springframework.web.server.adapter;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -50,8 +53,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
+	private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
+	private static final String FORWARDED_HEADER = "Forwarded";
+	private static final Pattern FORWARDED_FOR_PATTERN = Pattern.compile("(?i:^[^,]*for=.+)");
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -60,6 +66,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
 	}
 
 
@@ -99,6 +106,27 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 				if (prefix != null) {
 					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
+				}
+				InetSocketAddress remoteAddress = request.getRemoteAddress();
+				HttpHeaders headers = request.getHeaders();
+				boolean hasForwardedFor = StringUtils.hasText(headers.getFirst(X_FORWARDED_FOR_HEADER)) ||
+						(StringUtils.hasText(headers.getFirst(FORWARDED_HEADER)) &&
+								FORWARDED_FOR_PATTERN.matcher(headers.getFirst(FORWARDED_HEADER)).matches());
+				if (hasForwardedFor) {
+					String originalRemoteHost = ((remoteAddress != null) ? remoteAddress.getHostName() : null);
+					int originalRemotePort = ((remoteAddress != null) ? remoteAddress.getPort() : -1);
+					UriComponents remoteUriComponents = UriComponentsBuilder.newInstance()
+							.host(originalRemoteHost)
+							.port(originalRemotePort)
+							.adaptFromForwardedForHeader(headers)
+							.build();
+					String remoteHost = remoteUriComponents.getHost();
+					int remotePort = (remoteUriComponents.getPort() != -1 ? remoteUriComponents.getPort() : 0);
+					if (remoteHost != null) {
+						builder.remoteAddress(InetSocketAddress.createUnresolved(remoteHost, remotePort));
+					}
+				} else {
+					builder.remoteAddress(remoteAddress);
 				}
 			}
 			removeForwardedHeaders(builder);
