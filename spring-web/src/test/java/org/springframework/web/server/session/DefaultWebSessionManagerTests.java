@@ -19,6 +19,7 @@ package org.springframework.web.server.session;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -134,6 +136,25 @@ class DefaultWebSessionManagerTests {
 
 		assertThat(actual).isNotNull();
 		assertThat(actual.getId()).isEqualTo(this.updateSession.getId());
+	}
+
+	@Test
+	void shouldNotCancelSubscription() {
+		String sessionId = "some-session-id";
+
+		WebSession webSession = mock(WebSession.class);
+		given(webSession.getId()).willReturn(sessionId);
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange))
+				.willReturn(Collections.singletonList(sessionId));
+		AtomicBoolean isCancelled = new AtomicBoolean(false);
+		given(this.sessionStore.retrieveSession(sessionId))
+				.willReturn(Mono.just(webSession).doOnCancel(() -> isCancelled.set(true)));
+
+		WebSession actual = this.sessionManager.getSession(this.exchange).block();
+
+		assertThat(isCancelled.get()).isFalse();
+		assertThat(actual).isNotNull();
+		assertThat(actual.getId()).isEqualTo(sessionId);
 	}
 
 }

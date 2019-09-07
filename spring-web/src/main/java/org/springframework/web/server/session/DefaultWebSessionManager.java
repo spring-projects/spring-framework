@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.server.session;
 
 import java.util.List;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
@@ -84,9 +83,10 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
-		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
-				.concatMap(this.sessionStore::retrieveSession)
-				.next();
+		return getSessionIdResolver().resolveSessionIds(exchange).stream()
+				.reduce((first, second) -> second)
+				.map(this.sessionStore::retrieveSession)
+				.orElseGet(Mono::empty);
 	}
 
 	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
