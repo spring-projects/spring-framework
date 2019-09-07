@@ -24,10 +24,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Object to represent a SQL parameter definition.
+ * Object to represent an SQL parameter definition.
  *
  * <p>Parameters may be anonymous, in which case "name" is {@code null}.
- * However, all parameters must define a SQL type according to {@link java.sql.Types}.
+ * However, all parameters must define an SQL type according to {@link java.sql.Types}.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
