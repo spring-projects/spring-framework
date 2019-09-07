@@ -224,8 +224,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					 * 	 后置处理器的第9次执行。DestructionAwareBeanPostProcessor.requiresDestruction()
 					 * 	 用来判断当前的bean是否需要被销毁
 					 */
+					System.out.println("DestructionAwareBeanPostProcessor#requiresDestruction...后置处理器的第九次调用，用来判断当前bean是否需要被销毁。");
 					if (dabpp.requiresDestruction(bean)) {
-						System.out.println("DestructionAwareBeanPostProcessor#requiresDestruction...后置处理器的第九次调用，用来判断当前bean是否需要被销毁。");
 						filteredPostProcessors.add(dabpp);
 					}
 				}

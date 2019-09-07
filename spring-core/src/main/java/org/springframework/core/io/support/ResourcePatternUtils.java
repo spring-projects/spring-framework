@@ -60,9 +60,11 @@ public abstract class ResourcePatternUtils {
 	 */
 	public static ResourcePatternResolver getResourcePatternResolver(@Nullable ResourceLoader resourceLoader) {
 		if (resourceLoader instanceof ResourcePatternResolver) {
+			// 返回资源格式解析器ResourcePatternResolver.
 			return (ResourcePatternResolver) resourceLoader;
 		}
 		else if (resourceLoader != null) {
+			// 返回路径匹配资源格式解析器PathMatchingResourcePatternResolver
 			return new PathMatchingResourcePatternResolver(resourceLoader);
 		}
 		else {

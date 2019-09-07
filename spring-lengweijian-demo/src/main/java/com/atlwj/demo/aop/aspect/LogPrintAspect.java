@@ -67,7 +67,7 @@ import java.util.Arrays;
 @Component
 public class LogPrintAspect {
 
-	@Pointcut("execution(public * *(..))")
+	@Pointcut("execution(public * d*(..))")
 	public void pointCut(){
 
 	}

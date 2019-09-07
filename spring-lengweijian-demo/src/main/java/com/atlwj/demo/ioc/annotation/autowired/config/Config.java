@@ -16,7 +16,6 @@ import org.springframework.context.annotation.*;
  * 			    spring 5还支持使用@Nullable注解实现。
  * 				@Autowired 可以用在CONSTRUCTOR, METHOD,PARAMETER, FIELD。用法一样。
  *
- *
  */
 @Configuration
 @ComponentScan(value = "com.atlwj.demo.ioc.annotation.autowired")

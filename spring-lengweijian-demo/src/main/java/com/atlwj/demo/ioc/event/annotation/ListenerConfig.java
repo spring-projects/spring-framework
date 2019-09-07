@@ -21,7 +21,7 @@ public class ListenerConfig {
 
 		// 如果邮件内容以"亲爱的"开头，就不用充钱。
 		//bean.sendEmail(BLACK_LIST_03,"老铁，你好！");
-		bean.sendEmail(BLACK_LIST_03,"sss亲爱的sss，不要嘛！");
+		bean.sendEmail(BLACK_LIST_03,"亲爱的，不要嘛！");
 
 	}
 

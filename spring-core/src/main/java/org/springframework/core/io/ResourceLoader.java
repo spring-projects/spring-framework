@@ -43,7 +43,10 @@ import org.springframework.util.ResourceUtils;
  */
 public interface ResourceLoader {
 
-	/** Pseudo URL prefix for loading from the class path: "classpath:" */
+	/** Pseudo URL prefix for loading from the class path: "classpath:"
+	 *  类路径url前缀-----> classpath:
+	 *
+	 */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
 
@@ -65,6 +68,7 @@ public interface ResourceLoader {
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see Resource#exists()
 	 * @see Resource#getInputStream()
+	 * 根据特定的资源位置返回资源处理器
 	 */
 	Resource getResource(String location);
 
@@ -77,6 +81,8 @@ public interface ResourceLoader {
 	 * (only {@code null} if even the system ClassLoader isn't accessible)
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
+	 *
+	 * 通过这个资源加载器暴露类加载器.客户端需要直接访问这个类加载器才能管理ResourceLoader，而不是依赖当前线程的类加载器
 	 */
 	@Nullable
 	ClassLoader getClassLoader();

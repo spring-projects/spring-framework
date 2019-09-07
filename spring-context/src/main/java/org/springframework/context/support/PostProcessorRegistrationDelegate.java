@@ -188,6 +188,10 @@ final class PostProcessorRegistrationDelegate {
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 		// 1、拿到ioc容器中已经定义了内置后置处理器BeanPostProcessor。
+		// 默认情况下能获得三个类名: 问题？？？什么时候注册的？？ 这三个值是在AnnotationConfigApplicationContext创建过程中，创建AnnotatedBeanDefinitionReader时加入的
+		// org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+		// org.springframework.context.annotation.internalRequiredAnnotationProcessor
+		// org.springframework.context.annotation.internalCommonAnnotationProcessor
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
@@ -200,7 +204,6 @@ final class PostProcessorRegistrationDelegate {
 		// Ordered, and the rest.
 		// 通过PriorityOrdered，Ordered优先级接口将后置处理器进行分类处理。
 		// spring自定义的后置处理器分三类优先级处理PriorityOrdered\Ordered\
-
 		// PriorityOrdered
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
 		// internal spring内置

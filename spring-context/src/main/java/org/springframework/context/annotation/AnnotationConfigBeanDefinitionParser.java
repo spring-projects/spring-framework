@@ -47,11 +47,13 @@ public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParse
 		Object source = parserContext.extractSource(element);
 
 		// Obtain bean definitions for all relevant BeanPostProcessors.
+		// 从所有相应的后置处理器获取bd
 		Set<BeanDefinitionHolder> processorDefinitions =
 				AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(), source);
 
 		// Register component for the surrounding <context:annotation-config> element.
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
+		// 加入Deque队列
 		parserContext.pushContainingComponent(compDefinition);
 
 		// Nest the concrete beans in the surrounding component.

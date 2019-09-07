@@ -37,6 +37,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 * Get the fully qualified class names of all annotation types that
 	 * are <em>present</em> on the underlying class.
 	 * @return the annotation type names
+	 * 获取注解类型
 	 */
 	Set<String> getAnnotationTypes();
 
@@ -46,6 +47,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 * @param annotationName the fully qualified class name of the meta-annotation
 	 * type to look for
 	 * @return the meta-annotation type names, or an empty set if none found
+	 * 获取注解类型
 	 */
 	Set<String> getMetaAnnotationTypes(String annotationName);
 
@@ -85,6 +87,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 * @return a set of {@link MethodMetadata} for methods that have a matching
 	 * annotation. The return value will be an empty set if no methods match
 	 * the annotation type.
+	 * 获取被注解的方法元数据
 	 */
 	Set<MethodMetadata> getAnnotatedMethods(String annotationName);
 

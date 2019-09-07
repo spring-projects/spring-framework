@@ -3,6 +3,7 @@ package com.atlwj.demo.ioc.xml.aware;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 
 @ComponentScan("com.atlwj.demo.ioc.xml.aware")
 @Configurable

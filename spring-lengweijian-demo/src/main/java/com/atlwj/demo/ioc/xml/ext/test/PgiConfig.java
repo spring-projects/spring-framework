@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Configuration
 @ComponentScans(
-
 		@ComponentScan("com.atlwj.demo.ioc.xml.ext.test")
 )
 public class PgiConfig {

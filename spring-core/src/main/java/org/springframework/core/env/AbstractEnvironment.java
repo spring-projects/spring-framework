@@ -15,17 +15,10 @@
  */
 
 package org.springframework.core.env;
-
 import java.security.AccessControlException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.lang.Nullable;
@@ -378,6 +371,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertySources;
 	}
 
+	/**
+	 * 获取系统的属性
+	 * @return
+	 */
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
@@ -403,6 +400,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			};
 		}
 	}
+
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})

@@ -947,12 +947,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object getEarlyBeanReference(String beanName, RootBeanDefinition mbd, Object bean) {
 		Object exposedObject = bean;
+		// 如果当前bean是被合成的 && hasInstantiationAwareBeanPostProcessors == true
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 					System.out.println("SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference,后置处理器的第四次调用,得到一个提前暴露的对象");
+					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
+					// the purpose of resolving a circular reference.
 				}
 			}
 		}
@@ -1407,8 +1409,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					System.out.println("InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation..后置处理器的第五次调用,判断你的bean是否需要完成属性填充");
 					if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
-						System.out.println("InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation..后置处理器的第五次调用,判断你的bean是否需要完成属性填充");
 						continueWithPropertyPopulation = false;
 						break;
 					}

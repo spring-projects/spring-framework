@@ -7,9 +7,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-/**
- *
- */
+
 @Configuration
 @ComponentScans(
 		@ComponentScan(value = "com.atlwj.demo.ioc.javaconfig",includeFilters={

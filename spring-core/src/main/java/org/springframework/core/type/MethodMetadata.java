@@ -33,6 +33,7 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 
 	/**
 	 * Return the name of the method.
+	 * 返回方法的name
 	 */
 	String getMethodName();
 

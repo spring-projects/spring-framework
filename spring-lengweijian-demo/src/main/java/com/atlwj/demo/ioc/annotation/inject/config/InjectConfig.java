@@ -1,6 +1,5 @@
 package com.atlwj.demo.ioc.annotation.inject.config;
 
-import com.atlwj.demo.ioc.annotation.inject.controller.PersonController;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

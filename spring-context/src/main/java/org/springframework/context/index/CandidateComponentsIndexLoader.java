@@ -44,6 +44,7 @@ public class CandidateComponentsIndexLoader {
 	/**
 	 * The location to look for components.
 	 * <p>Can be present in multiple JAR files.
+	 * 加载组件的位置
 	 */
 	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
 
@@ -85,6 +86,11 @@ public class CandidateComponentsIndexLoader {
 		return cache.computeIfAbsent(classLoaderToUse, CandidateComponentsIndexLoader::doLoadIndex);
 	}
 
+	/**
+	 * 加载Index
+	 * @param classLoader
+	 * @return
+	 */
 	@Nullable
 	private static CandidateComponentsIndex doLoadIndex(ClassLoader classLoader) {
 		if (shouldIgnoreIndex) {
@@ -92,13 +98,16 @@ public class CandidateComponentsIndexLoader {
 		}
 
 		try {
+			// 在家资源路径。META-INF/spring.components
 			Enumeration<URL> urls = classLoader.getResources(COMPONENTS_RESOURCE_LOCATION);
 			if (!urls.hasMoreElements()) {
 				return null;
 			}
+			// 加载每个url的资源，放进result
 			List<Properties> result = new ArrayList<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
+				// 加载资源文件
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				result.add(properties);
 			}

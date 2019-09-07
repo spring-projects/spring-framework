@@ -93,7 +93,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		// 创建AnnotatedBeanDefinitionReader
 		// 创建ClassPathBeanDefinitionScanner
 		this();
-
+		// 注册bd
 		register(annotatedClasses);
 		// 刷新容器
 		refresh();

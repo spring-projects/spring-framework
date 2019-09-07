@@ -274,6 +274,7 @@ public class AnnotatedBeanDefinitionReader {
 		if (registry instanceof EnvironmentCapable) {
 			return ((EnvironmentCapable) registry).getEnvironment();
 		}
+		// 创建StandardEnvironment
 		return new StandardEnvironment();
 	}
 

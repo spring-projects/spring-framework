@@ -262,8 +262,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@Override
 	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+		// 获取资源格式解析器
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+		// 创建缓存元数据读取器工厂CachingMetadataReaderFactory
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		// 加载Index
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(this.resourcePatternResolver.getClassLoader());
 	}
 

@@ -130,13 +130,18 @@ public abstract class PropertiesLoaderUtils {
 	 * @throws IOException if loading failed
 	 */
 	public static void fillProperties(Properties props, Resource resource) throws IOException {
+		// 获取输入流
 		InputStream is = resource.getInputStream();
 		try {
+			// 获取文件名
 			String filename = resource.getFilename();
+			// 如果以.xml为后缀
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				// 加载xml文件
 				props.loadFromXML(is);
 			}
 			else {
+				// 加载其它文件
 				props.load(is);
 			}
 		}

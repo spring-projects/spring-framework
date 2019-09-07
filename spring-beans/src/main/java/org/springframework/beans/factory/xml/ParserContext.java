@@ -100,6 +100,7 @@ public final class ParserContext {
 	}
 
 	public void pushContainingComponent(CompositeComponentDefinition containingComponent) {
+		// 加入Deque队列
 		this.containingComponents.push(containingComponent);
 	}
 
