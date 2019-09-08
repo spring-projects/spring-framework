@@ -69,7 +69,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T body) {
-		return new DefaultEntityResponseBuilder<>(body, BodyInserters.fromObject(body));
+		return new DefaultEntityResponseBuilder<>(body, BodyInserters.fromValue(body));
 	}
 
 	/**

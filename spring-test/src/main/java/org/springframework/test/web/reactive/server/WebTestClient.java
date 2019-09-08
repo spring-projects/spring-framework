@@ -704,8 +704,8 @@ public interface WebTestClient {
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Shortcut for {@link #body(BodyInserter)} with an
-		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 * Shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
 		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
 		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */

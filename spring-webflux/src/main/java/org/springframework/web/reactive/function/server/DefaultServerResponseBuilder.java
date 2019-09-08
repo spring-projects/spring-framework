@@ -225,7 +225,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public Mono<ServerResponse> bodyValue(Object body) {
-		return initBuilder(body, BodyInserters.fromObject(body));
+		return initBuilder(body, BodyInserters.fromValue(body));
 	}
 
 	@Override

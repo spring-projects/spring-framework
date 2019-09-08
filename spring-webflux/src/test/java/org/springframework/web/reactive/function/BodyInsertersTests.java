@@ -117,7 +117,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofString() {
 		String body = "foo";
-		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -134,7 +134,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObject() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
@@ -148,7 +148,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObjectWithHints() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);

@@ -54,7 +54,7 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
  *
  * Set the body of the response to the given {@code Object} and return it.
  * This convenience method combines [body] and
- * [org.springframework.web.reactive.function.BodyInserters.fromObject].
+ * [org.springframework.web.reactive.function.BodyInserters.fromValue].
  * @param body the body of the response
  * @return the built response
  * @throws IllegalArgumentException if `body` is a [Publisher] or an

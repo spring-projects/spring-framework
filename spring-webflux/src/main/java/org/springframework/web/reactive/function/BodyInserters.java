@@ -77,6 +77,28 @@ public abstract class BodyInserters {
 	}
 
 	/**
+	 * Inserter to write the given value.
+	 * <p>Alternatively, consider using the {@code bodyValue(Object)} shortcuts on
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
+	 * @param body the value to write
+	 * @param <T> the type of the body
+	 * @return the inserter to write a single value
+	 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
+	 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
+	 * for which {@link #fromPublisher(Publisher, Class)} or
+	 * {@link #fromProducer(Object, Class)} should be used.
+	 * @see #fromPublisher(Publisher, Class)
+	 * @see #fromProducer(Object, Class)
+	 */
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromValue(T body) {
+		Assert.notNull(body, "'body' must not be null");
+		Assert.isNull(registry.getAdapter(body.getClass()), "'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
+		return (message, context) ->
+				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
+	}
+
+	/**
 	 * Inserter to write the given object.
 	 * <p>Alternatively, consider using the {@code bodyValue(Object)} shortcuts on
 	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
@@ -90,12 +112,11 @@ public abstract class BodyInserters {
 	 * {@link #fromProducer(Object, Class)} should be used.
 	 * @see #fromPublisher(Publisher, Class)
 	 * @see #fromProducer(Object, Class)
+	 * @deprecated As of Spring Framework 5.2, in favor of {@link #fromValue(T)}.
 	 */
+	@Deprecated
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
-		Assert.notNull(body, "'body' must not be null");
-		Assert.isNull(registry.getAdapter(body.getClass()), "'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
-		return (message, context) ->
-				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
+		return fromValue(body);
 	}
 
 	/**

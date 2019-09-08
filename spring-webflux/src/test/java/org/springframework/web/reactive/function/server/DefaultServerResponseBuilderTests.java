@@ -41,7 +41,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -315,7 +314,7 @@ public class DefaultServerResponseBuilderTests {
 
 		serverResponse = ServerResponse.ok()
 				.cookie(ResponseCookie.from("foo", "bar").build())
-				.body(BodyInserters.fromObject("body"));
+				.bodyValue("body");
 
 
 		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();

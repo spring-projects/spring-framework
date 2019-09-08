@@ -289,7 +289,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public RequestHeadersSpec<?> bodyValue(Object body) {
-			this.inserter = BodyInserters.fromObject(body);
+			this.inserter = BodyInserters.fromValue(body);
 			return this;
 		}
 
