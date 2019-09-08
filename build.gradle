@@ -187,7 +187,7 @@ configure(allprojects) { project ->
 				exclude group: "xerces", name: "xercesImpl"
 			}
 
-			dependency("junit:junit:4.13-beta-3") {
+			dependency("junit:junit:4.12") {
 				exclude group: "org.hamcrest", name: "hamcrest-core"
 			}
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
