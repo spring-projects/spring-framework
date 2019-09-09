@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -675,6 +676,32 @@ public class RestTemplateTests {
 		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 		template.exchange("https://example.com", POST, entity, Void.class);
 		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");
+
+		verify(response).close();
+	}
+
+	@Test
+	public void clientHttpRequestInitializerAndRequestInterceptorAreBothApplied() throws Exception {
+		ClientHttpRequestInitializer initializer = request ->
+			request.getHeaders().add("MyHeader", "MyInitializerValue");
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			request.getHeaders().add("MyHeader", "MyInterceptorValue");
+			return execution.execute(request, body);
+		};
+		template.setClientHttpRequestInitializers(Collections.singletonList(initializer));
+		template.setInterceptors(Collections.singletonList(interceptor));
+
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		given(converter.canWrite(String.class, contentType)).willReturn(true);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(POST, "https://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(contentType);
+		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
+		template.exchange("https://example.com", POST, entity, Void.class);
+		assertThat(requestHeaders.get("MyHeader")).contains("MyInterceptorValue", "MyInitializerValue");
 
 		verify(response).close();
 	}

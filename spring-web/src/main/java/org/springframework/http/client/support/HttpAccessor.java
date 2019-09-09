@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.http.client.support;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 
@@ -48,6 +52,8 @@ public abstract class HttpAccessor {
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+
+	private List<ClientHttpRequestInitializer> clientHttpRequestInitializers = new ArrayList<>();
 
 
 	/**
@@ -75,6 +81,28 @@ public abstract class HttpAccessor {
 
 
 	/**
+	 * Set the request initializers the this accessor should use.
+	 * <p>The initializers will get sorted according to their order
+	 * before the {@link ClientHttpRequest} is initialized.
+	 */
+	public void setClientHttpRequestInitializers(
+			List<ClientHttpRequestInitializer> clientHttpRequestInitializers) {
+		if (this.clientHttpRequestInitializers != clientHttpRequestInitializers) {
+			this.clientHttpRequestInitializers.clear();
+			this.clientHttpRequestInitializers.addAll(clientHttpRequestInitializers);
+			AnnotationAwareOrderComparator.sort(this.clientHttpRequestInitializers);
+		}
+	}
+
+	/**
+	 * Return the request initializers that this accessor uses.
+	 * <p>The returned {@link List} is active and may get appended to.
+	 */
+	public List<ClientHttpRequestInitializer> getClientHttpRequestInitializers() {
+		return this.clientHttpRequestInitializers;
+	}
+
+	/**
 	 * Create a new {@link ClientHttpRequest} via this template's {@link ClientHttpRequestFactory}.
 	 * @param url the URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc)
@@ -85,10 +113,16 @@ public abstract class HttpAccessor {
 	 */
 	protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {
 		ClientHttpRequest request = getRequestFactory().createRequest(url, method);
+		initialize(request);
 		if (logger.isDebugEnabled()) {
 			logger.debug("HTTP " + method.name() + " " + url);
 		}
 		return request;
+	}
+
+	private void initialize(ClientHttpRequest request) {
+		this.clientHttpRequestInitializers.forEach(
+				initializer -> initializer.initialize(request));
 	}
 
 }
