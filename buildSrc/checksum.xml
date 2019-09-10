@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dependency-verification version='1'>
+  <trust-requirement pgp='GROUP' checksum='NONE' />
+  <ignored-keys />
+  <trusted-keys>
+    <trusted-key id='beabcfbee059e4e5' group='com.github.siom79.japicmp' />
+    <trusted-key id='10066a9707090cf9' group='org.javassist' />
+  </trusted-keys>
+  <dependencies>
+    <dependency group='javax.activation' module='activation' version='1.1'>
+      <sha512>C0FF5BF3ACE7ACC1B31FCC109CEE48D9EB8F025AE15A31DC91ECA760933BDB97C93F05D61E95AF1E317859D72E5F179F897F5BF3DF0E3810F4212D43BACEE4BD</sha512>
+    </dependency>
+    <dependency group='me.champeau.gradle' module='japicmp-gradle-plugin' version='0.2.8'>
+      <sha512>7539000D0A0A996154A8A61C2F9B82D6EB57666134118E53CC85EFA1A3864812965A83C1A7E922369137FB32DE09DA7BF280B1252C82549C3E74357C1B928664</sha512>
+    </dependency>
+  </dependencies>
+</dependency-verification>

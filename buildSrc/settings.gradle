@@ -1,50 +1,10 @@
-pluginManagement {
-	repositories {
-		gradlePluginPortal()
-		maven { url 'https://repo.spring.io/plugins-release' }
-	}
-}
-
-enableFeaturePreview("GRADLE_METADATA")
-
-include "spring-aop"
-include "spring-aspects"
-include "spring-beans"
-include "spring-context"
-include "spring-context-support"
-include "spring-context-indexer"
-include "spring-core"
-include "kotlin-coroutines"
-project(':kotlin-coroutines').projectDir = file('spring-core/kotlin-coroutines')
-include "spring-expression"
-include "spring-instrument"
-include "spring-jcl"
-include "spring-jdbc"
-include "spring-jms"
-include "spring-messaging"
-include "spring-orm"
-include "spring-oxm"
-include "spring-test"
-include "spring-tx"
-include "spring-web"
-include "spring-webmvc"
-include "spring-webflux"
-include "spring-websocket"
-include "framework-bom"
-include "integration-tests"
-
-rootProject.name = "spring"
-rootProject.children.each {project ->
-	project.buildFileName = "${project.name}.gradle"
-}
-
 // See https://github.com/vlsi/vlsi-release-plugins
 // It is a  plugin that verifies checksums of all the resolved files (plugins, dependencies, ...)
 // By default the plugin generates an updated checksums to $rootDir/build/checksum/checksum.xml,
 // and you can make it update rootDir/checksum.xml by adding -PchecksumUpdate
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.28.0') {
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.26.0') {
       // Gradle ships kotlin-stdlib which is good enough
       exclude(group: "org.jetbrains.kotlin", module:"kotlin-stdlib")
     }
@@ -64,8 +24,8 @@ def expectedSha512 = [
     "okhttp-4.1.0.jar",
   "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7":
     "okio-2.2.2.jar",
-  "2ABC83FF0675D69697D4530D4853411761FE947E57EB8D68F6590DC2BFF0436906ADE619822EEE5F80B0DA28285FBE75FDCB50B67421DB7BF78B34CF6A613714":
-    "checksum-dependency-plugin-1.28.0.jar"
+  "2AB28DC6026A9CFC869C6287501D1002B8F2B61C7C3896B61A5616CE686DD41FD22EE9FD2D122111E4DABAA8359A4947C3F43B9DF29B1AFC8AA5D809A8188CAD":
+    "checksum-dependency-plugin-1.26.0.jar"
 ]
 
 def sha512(File file) {
