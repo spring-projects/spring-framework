@@ -112,7 +112,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		Descriptor desc = info.getMBeanDescriptor();
 
 		assertThat(desc.getFieldValue("log")).as("Logging should be set to true").isEqualTo("true");
-		assertThat(desc.getFieldValue("logFile")).as("Log file should be jmx.log").isEqualTo("jmx.log");
+		assertThat(desc.getFieldValue("logFile")).as("Log file should be build/jmx.log").isEqualTo("build/jmx.log");
 		assertThat(desc.getFieldValue("currencyTimeLimit")).as("Currency Time Limit should be 15").isEqualTo("15");
 		assertThat(desc.getFieldValue("persistPolicy")).as("Persist Policy should be OnUpdate").isEqualTo("OnUpdate");
 		assertThat(desc.getFieldValue("persistPeriod")).as("Persist Period should be 200").isEqualTo("200");
