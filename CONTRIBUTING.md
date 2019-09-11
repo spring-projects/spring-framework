@@ -63,11 +63,11 @@ You can contribute a source code change by submitting a pull request.
 [Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will also be reminded
 automatically when you submit a pull request.
 
-1. For all but the most trivial of contributions, please [create a ticket](#create-a-ticket).
-The purpose of the ticket is to understand and discuss the underlying issue or feature.
-We use the GitHub issue tracker as the preferred place of record for conversations and
-conclusions. In that sense discussions directly under a PR are more implementation detail
-oriented and transient in nature.
+1. Should you create a ticket first? The answer is no. Just create the pull request and use
+the description to provide context and motivation, as you would for an issue. If you want
+to start a discussion first or have already created an issue, once a pull request is created,
+we will close the issue as superseded by the pull request, and the discussion of the issue
+will continue under the pull request.
 
 1. Always check out the `master` branch and submit pull requests against it
 (for target version see [settings.gradle](settings.gradle)).
