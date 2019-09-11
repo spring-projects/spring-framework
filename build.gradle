@@ -12,7 +12,7 @@ plugins {
 	id 'org.asciidoctor.convert' version '1.5.8'
 	id 'io.spring.nohttp' version '0.0.3.RELEASE'
 	id 'de.undercouch.download' version '4.0.0'
-	id 'com.gradle.build-scan' version '2.4.1'
+	id 'com.gradle.build-scan' version '2.4.2'
 	id "com.jfrog.artifactory" version '4.9.8' apply false
 	id "io.freefair.aspectj" version "4.0.0" apply false
 	id "com.github.ben-manes.versions" version "0.24.0"
