@@ -19,7 +19,6 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.function.Supplier;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
