@@ -120,16 +120,14 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// Now cause it to throw an exception:
 		eContext.setVariable("bar", 1);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expr.getValue(eContext))
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> expr.getValue(eContext))
 			.isNotInstanceOf(SpelEvaluationException.class);
 
 		// If counter is 4 then the method got called twice!
 		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(3);
 
 		eContext.setVariable("bar", 4);
-		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() ->
-				expr.getValue(eContext));
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() -> expr.getValue(eContext));
 
 		// If counter is 5 then the method got called twice!
 		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(4);
@@ -150,8 +148,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expr.getValue(context))
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> expr.getValue(context))
 			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
 	}
 
@@ -167,8 +164,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 4);
-		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() ->
-				expr.getValue(context))
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() -> expr.getValue(context))
 			.satisfies(ex -> assertThat(ex.getCause().getClass().getName()).isEqualTo(
 					"org.springframework.expression.spel.testresources.Inventor$TestException"));
 	}
@@ -276,12 +272,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		final BytesService service = new BytesService();
 		byte[] bytes = new byte[100];
 		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
-		context.setBeanResolver((context1, beanName) -> {
-			if ("service".equals(beanName)) {
-				return service;
-			}
-			return null;
-		});
+		context.setBeanResolver((context1, beanName) -> ("service".equals(beanName) ? service : null));
 		Expression expression = parser.parseExpression("@service.handleBytes(#root)");
 		byte[] outBytes = expression.getValue(context, byte[].class);
 		assertThat(outBytes).isSameAs(bytes);
