@@ -7,23 +7,24 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
+import org.springframework.transaction.ReactiveTransaction
 
 /**
- * Coroutines variant of [TransactionalOperator.transactional] with a [Flow] parameter.
+ * Coroutines variant of [TransactionalOperator.transactional] as a [Flow] extension.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
 @ExperimentalCoroutinesApi
-fun <T : Any> TransactionalOperator.transactional(flow: Flow<T>): Flow<T> =
-		transactional(flow.asFlux()).asFlow()
+fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator): Flow<T> =
+		operator.transactional(asFlux()).asFlow()
 
 /**
-* Coroutines variant of [TransactionalOperator.transactional] with a suspending lambda
+* Coroutines variant of [TransactionalOperator.execute] with a suspending lambda
 * parameter.
 *
 * @author Sebastien Deleuze
 * @since 5.2
 */
-suspend fun <T : Any> TransactionalOperator.transactional(f: suspend () -> T?): T? =
-		transactional(mono(Dispatchers.Unconfined) { f() }).awaitFirstOrNull()
+suspend fun <T : Any> TransactionalOperator.executeAndAwait(f: suspend (ReactiveTransaction) -> T?): T? =
+		execute { status -> mono(Dispatchers.Unconfined) { f(status) } }.awaitFirstOrNull()
