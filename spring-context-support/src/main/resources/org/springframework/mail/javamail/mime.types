@@ -67,6 +67,8 @@ image/x-xbitmap				xbm
 image/x-xpixmap				xpm
 # Portable Network Graphics
 image/png				png
+# Scalable Vector Graphics
+image/svg+xml   svg
 # Image Exchange Format (RFC 1314)
 image/ief				ief
 # RGB
