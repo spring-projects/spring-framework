@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  * @author Mark Paluch
  */
-class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
+class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
 

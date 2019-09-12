@@ -27,7 +27,7 @@ import org.junit.jupiter.api.AfterEach;
  * @since 5.1.3
  * @see LeakAwareDataBufferFactory
  */
-public abstract class AbstractLeakCheckingTestCase {
+public abstract class AbstractLeakCheckingTests {
 
 	/**
 	 * The data buffer factory.

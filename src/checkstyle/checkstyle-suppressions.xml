@@ -4,6 +4,7 @@
 
 	<!-- global -->
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
 
 	<!-- spring-beans -->
@@ -24,6 +25,7 @@
 	<suppress files="ByteArrayEncoder" checks="SpringLambda" />
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
 	<suppress files="ResolvableType" checks="FinalClass" />
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]tests[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException" />
@@ -58,39 +60,27 @@
 	<suppress files="TransactionSystemException" checks="MutableException" />
 	<suppress files="TransactionTemplate" checks="EqualsHashCode" />
 
-	<!-- spring-test -->
-	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
+	<!-- spring-test - main and test -->
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/].+" checks="IllegalImport" id="bannedJUnit4Imports" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/].+" checks="IllegalImport" id="bannedTestNGImports" />
+	<!-- spring-test - main -->
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Helper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]client[\\/]match[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]reactive[\\/]server[\\/].+" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]servlet[\\/]result[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<!-- spring-test - test -->
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/].+TestNGTests" checks="IllegalImport" id="bannedTestNGImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/]web[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/](client|reactive|servlet)[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />	
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit4" checks="SpringJUnit5" />
+	<suppress files="ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.+WacTests|JUnit4SpringContextWebTests" checks="SpringJUnit5" />
+	<suppress files=".+TestSuite|ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.+WacTests|JUnit4SpringContextWebTests" checks="IllegalImport" id="bannedJUnit4Imports" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]ExpectedExceptionSpringRunnerTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]StandardJUnit4FeaturesTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/]transaction[\\/]programmatic/ProgrammaticTxMgmtTestNGTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
-	<suppress files="org[\\/]springframework[\\/]test[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="ContentRequestMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="ContentResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="CookieResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="DefaultWebTestClient" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="FlashAttributeResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="HandlerResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="HeaderAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="HeaderResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="JsonPathAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="JsonPathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="JsonPathRequestMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="JsonPathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="MockMvcResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="MockRestRequestMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="ModelResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="RequestResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="StatusAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="StatusResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="ViewResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="WebTestClient" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="XmlExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="XpathAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="XpathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="XpathRequestMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="XpathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
-	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit4" checks="SpringJUnit5" />
-	<suppress files="ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.*WacTests|JUnit4SpringContextWebTests" checks="SpringJUnit5" />
 
 	<!-- spring-web -->
 	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />

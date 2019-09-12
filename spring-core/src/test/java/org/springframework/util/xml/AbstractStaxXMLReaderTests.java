@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-abstract class AbstractStaxXMLReaderTestCase {
+abstract class AbstractStaxXMLReaderTests {
 
 	protected static XMLInputFactory inputFactory;
 

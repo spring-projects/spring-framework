@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.foo;
+package org.springframework.beans.factory.xml;
 
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
 
 public class ComponentFactoryBean implements FactoryBean<Component> {
+
 	private Component parent;
 	private List<Component> children;
 
@@ -51,4 +52,5 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
 	public boolean isSingleton() {
 		return true;
 	}
+
 }

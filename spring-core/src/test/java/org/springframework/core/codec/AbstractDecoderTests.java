@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractDecoderTestCase<D extends Decoder<?>> extends AbstractLeakCheckingTestCase {
+public abstract class AbstractDecoderTests<D extends Decoder<?>> extends AbstractLeakCheckingTests {
 
 	/**
 	 * The decoder to test.
@@ -52,10 +52,10 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>> extends Abst
 	protected D decoder;
 
 	/**
-	 * Construct a new {@code AbstractDecoderTestCase} for the given decoder.
+	 * Construct a new {@code AbstractDecoderTests} instance for the given decoder.
 	 * @param decoder the decoder
 	 */
-	protected AbstractDecoderTestCase(D decoder) {
+	protected AbstractDecoderTests(D decoder) {
 		Assert.notNull(decoder, "Encoder must not be null");
 
 		this.decoder = decoder;

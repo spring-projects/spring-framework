@@ -25,7 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
@@ -45,7 +45,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @since 5.1.3
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractEncoderTestCase<E extends Encoder<?>> extends AbstractLeakCheckingTestCase {
+public abstract class AbstractEncoderTests<E extends Encoder<?>> extends AbstractLeakCheckingTests {
 
 	/**
 	 * The encoder to test.
@@ -57,7 +57,7 @@ public abstract class AbstractEncoderTestCase<E extends Encoder<?>> extends Abst
 	 * Construct a new {@code AbstractEncoderTestCase} for the given parameters.
 	 * @param encoder the encoder
 	 */
-	protected AbstractEncoderTestCase(E encoder) {
+	protected AbstractEncoderTests(E encoder) {
 
 		Assert.notNull(encoder, "Encoder must not be null");
 

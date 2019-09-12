@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Clement
  */
-public class ScenariosForSpringSecurity extends AbstractExpressionTests {
+public class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testScenario01_Roles() throws Exception {

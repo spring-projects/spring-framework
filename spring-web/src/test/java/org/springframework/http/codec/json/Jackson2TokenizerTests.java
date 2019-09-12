@@ -34,7 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.DecodingException;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 
 import static java.util.Arrays.asList;
@@ -45,7 +45,7 @@ import static java.util.Collections.singletonList;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
+public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 	private JsonFactory jsonFactory;
 

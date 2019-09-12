@@ -14,52 +14,49 @@
  * limitations under the License.
  */
 
-package com.foo;
-
+package org.springframework.beans.factory.xml;
 
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * @author Costin Leau
  */
-public class ComponentBeanDefinitionParserTests {
+@TestInstance(Lifecycle.PER_CLASS)
+class ComponentBeanDefinitionParserTests {
 
-	private static DefaultListableBeanFactory bf;
+	private final DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
 
 	@BeforeAll
-	public static void setUpBeforeClass() throws Exception {
-		bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("com/foo/component-config.xml"));
+	void setUp() throws Exception {
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+			new ClassPathResource("component-config.xml", ComponentBeanDefinitionParserTests.class));
 	}
 
 	@AfterAll
-	public static void tearDownAfterClass() throws Exception {
+	void tearDown() {
 		bf.destroySingletons();
 	}
 
-	private Component getBionicFamily() {
-		return bf.getBean("bionic-family", Component.class);
-	}
-
 	@Test
-	public void testBionicBasic() throws Exception {
+	void testBionicBasic() {
 		Component cp = getBionicFamily();
 		assertThat("Bionic-1").isEqualTo(cp.getName());
 	}
 
 	@Test
-	public void testBionicFirstLevelChildren() throws Exception {
+	void testBionicFirstLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents();
 		assertThat(2).isEqualTo(components.size());
@@ -68,11 +65,17 @@ public class ComponentBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void testBionicSecondLevelChildren() throws Exception {
+	void testBionicSecondLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents().get(0).getComponents();
 		assertThat(2).isEqualTo(components.size());
 		assertThat("Karate-1").isEqualTo(components.get(0).getName());
 		assertThat("Sport-1").isEqualTo(components.get(1).getName());
 	}
+
+	private Component getBionicFamily() {
+		return bf.getBean("bionic-family", Component.class);
+	}
+
 }
+
