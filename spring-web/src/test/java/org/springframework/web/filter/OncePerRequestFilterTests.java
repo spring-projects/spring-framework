@@ -16,6 +16,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,7 +32,6 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -184,9 +184,10 @@ public class OncePerRequestFilterTests {
 
 		@Override
 		protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) {
+				FilterChain filterChain) throws ServletException, IOException {
 
 			this.didFilterNestedErrorDispatch = true;
+			super.doFilterNestedErrorDispatch(request, response, filterChain);
 		}
 	}
 
