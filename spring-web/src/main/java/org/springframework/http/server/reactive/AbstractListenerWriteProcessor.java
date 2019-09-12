@@ -322,6 +322,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					super.onSubscribe(processor, subscription);
 				}
 			}
+
+			@Override
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
+				// This can happen on (very early) completion notification from container..
+				processor.changeStateToComplete(this);
+			}
 		},
 
 		REQUESTED {
