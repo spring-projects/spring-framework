@@ -168,9 +168,10 @@ public class OncePerRequestFilterTests {
 
 		@Override
 		protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) {
+				FilterChain filterChain) throws ServletException, IOException {
 
 			this.didFilterNestedErrorDispatch = true;
+			super.doFilterNestedErrorDispatch(request, response, filterChain);
 		}
 	}
 

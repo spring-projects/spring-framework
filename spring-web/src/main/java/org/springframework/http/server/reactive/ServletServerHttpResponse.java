@@ -119,13 +119,24 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				this.response.addHeader(headerName, headerValue);
 			}
 		});
-		MediaType contentType = getHeaders().getContentType();
+		MediaType contentType = null;
+		try {
+			contentType = getHeaders().getContentType();
+		}
+		catch (Exception ex) {
+			String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+			this.response.setContentType(rawContentType);
+		}
 		if (this.response.getContentType() == null && contentType != null) {
 			this.response.setContentType(contentType.toString());
 		}
 		Charset charset = (contentType != null ? contentType.getCharset() : null);
 		if (this.response.getCharacterEncoding() == null && charset != null) {
 			this.response.setCharacterEncoding(charset.name());
+		}
+		long contentLength = getHeaders().getContentLength();
+		if (contentLength != -1) {
+			this.response.setContentLengthLong(contentLength);
 		}
 	}
 

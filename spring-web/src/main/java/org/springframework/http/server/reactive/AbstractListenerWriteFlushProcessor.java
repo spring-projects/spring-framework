@@ -246,6 +246,17 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					super.onSubscribe(processor, subscription);
 				}
 			}
+
+			@Override
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
+				// This can happen on (very early) completion notification from container..
+				if (processor.changeState(this, COMPLETED)) {
+					processor.resultPublisher.publishComplete();
+				}
+				else {
+					processor.state.get().onComplete(processor);
+				}
+			}
 		},
 
 		REQUESTED {
