@@ -1326,18 +1326,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 			@Override
 			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 					List<TypeDescriptor> argumentTypes) throws AccessException {
-				return new MethodExecutor() {
-					@Override
-					public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
-							throws AccessException {
-						try {
-							Method method = XYZ.class.getMethod("values");
-							Object value = method.invoke(target, arguments);
-							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-						}
-						catch (Exception ex) {
-							throw new AccessException(ex.getMessage(), ex);
-						}
+				return (context1, target, arguments) -> {
+					try {
+						Method method = XYZ.class.getMethod("values");
+						Object value = method.invoke(target, arguments);
+						return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+					}
+					catch (Exception ex) {
+						throw new AccessException(ex.getMessage(), ex);
 					}
 				};
 			}
