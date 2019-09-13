@@ -151,9 +151,9 @@ class ComponentScanAnnotationParser {
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
 							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
-					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
-					ParserStrategyUtils.invokeAwareMethods(
-							filter, this.environment, this.resourceLoader, this.registry);
+
+					TypeFilter filter = ParserStrategyUtils.instantiateClass(filterClass, TypeFilter.class,
+							this.environment, this.resourceLoader, this.registry);
 					typeFilters.add(filter);
 					break;
 				default:

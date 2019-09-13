@@ -46,6 +46,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see Configuration
  * @see ImportSelector
+ * @see ImportBeanDefinitionRegistrar
  * @see ImportResource
  */
 @Target(ElementType.TYPE)

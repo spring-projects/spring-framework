@@ -40,6 +40,15 @@ import org.springframework.core.type.AnnotationMetadata;
  * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}
  * </ul>
  *
+ * <p>Alternatively, the class may provide a single constructor with one or more of
+ * the following supported parameter types:
+ * <ul>
+ * <li>{@link org.springframework.core.env.Environment Environment}</li>
+ * <li>{@link org.springframework.beans.factory.BeanFactory BeanFactory}</li>
+ * <li>{@link java.lang.ClassLoader ClassLoader}</li>
+ * <li>{@link org.springframework.core.io.ResourceLoader ResourceLoader}</li>
+ * </ul>
+ *
  * <p>See implementations and associated unit tests for usage examples.
  *
  * @author Chris Beams
