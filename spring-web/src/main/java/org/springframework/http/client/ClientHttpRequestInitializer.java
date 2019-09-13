@@ -22,7 +22,7 @@ import org.springframework.http.client.support.HttpAccessor;
  * Callback interface for initializing a {@link ClientHttpRequest} prior to it
  * being used.
  *
- * <p> Typically used with {@link HttpAccessor} and subclasses such as
+ * <p>Typically used with {@link HttpAccessor} and subclasses such as
  * {@link org.springframework.web.client.RestTemplate RestTemplate} to apply
  * consistent settings or headers to each request.
  *

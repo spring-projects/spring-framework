@@ -38,10 +38,12 @@ import org.springframework.util.Assert;
  * such as the {@link ClientHttpRequestFactory} to operate on.
  *
  * <p>Not intended to be used directly.
- * See {@link org.springframework.web.client.RestTemplate} for an entry point.
+ *
+ * <p>See {@link org.springframework.web.client.RestTemplate} for an entry point.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  * @see ClientHttpRequestFactory
  * @see org.springframework.web.client.RestTemplate
@@ -53,7 +55,7 @@ public abstract class HttpAccessor {
 
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-	private List<ClientHttpRequestInitializer> clientHttpRequestInitializers = new ArrayList<>();
+	private final List<ClientHttpRequestInitializer> clientHttpRequestInitializers = new ArrayList<>();
 
 
 	/**
@@ -81,12 +83,14 @@ public abstract class HttpAccessor {
 
 
 	/**
-	 * Set the request initializers the this accessor should use.
-	 * <p>The initializers will get sorted according to their order
-	 * before the {@link ClientHttpRequest} is initialized.
+	 * Set the request initializers that this accessor should use.
+	 * <p>The initializers will get immediately sorted according to their
+	 * {@linkplain AnnotationAwareOrderComparator#sort(List) order}.
+	 * @since 5.2
 	 */
 	public void setClientHttpRequestInitializers(
 			List<ClientHttpRequestInitializer> clientHttpRequestInitializers) {
+
 		if (this.clientHttpRequestInitializers != clientHttpRequestInitializers) {
 			this.clientHttpRequestInitializers.clear();
 			this.clientHttpRequestInitializers.addAll(clientHttpRequestInitializers);
@@ -95,8 +99,13 @@ public abstract class HttpAccessor {
 	}
 
 	/**
-	 * Return the request initializers that this accessor uses.
-	 * <p>The returned {@link List} is active and may get appended to.
+	 * Get the request initializers that this accessor uses.
+	 * <p>The returned {@link List} is active and may be modified. Note,
+	 * however, that the initializers will not be resorted according to their
+	 * {@linkplain AnnotationAwareOrderComparator#sort(List) order} before the
+	 * {@link ClientHttpRequest} is initialized.
+	 * @since 5.2
+	 * @see #setClientHttpRequestInitializers(List)
 	 */
 	public List<ClientHttpRequestInitializer> getClientHttpRequestInitializers() {
 		return this.clientHttpRequestInitializers;
