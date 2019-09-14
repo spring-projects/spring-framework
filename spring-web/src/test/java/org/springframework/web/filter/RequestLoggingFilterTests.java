@@ -26,6 +26,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,8 +45,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RequestLoggingFilterTests {
 
-	private final MyRequestLoggingFilter filter = new MyRequestLoggingFilter();
+	private MyRequestLoggingFilter filter = new MyRequestLoggingFilter();
 
+	@BeforeEach
+	public void reset() {
+		filter = new MyRequestLoggingFilter();
+	}
+
+	@Test
+	public void method() throws Exception {
+		final MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		filter.setBeforeMessagePrefix("");
+		filter.setAfterMessagePrefix("");
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.startsWith("PATCH")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.startsWith("PATCH")).isTrue();
+	}
 
 	@Test
 	public void uri() throws Exception {
@@ -58,11 +81,11 @@ public class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage).isNotNull();
-		assertThat(filter.beforeRequestMessage.contains("uri=/hotel")).isTrue();
+		assertThat(filter.beforeRequestMessage.contains("/hotel")).isTrue();
 		assertThat(filter.beforeRequestMessage.contains("booking=42")).isFalse();
 
 		assertThat(filter.afterRequestMessage).isNotNull();
-		assertThat(filter.afterRequestMessage.contains("uri=/hotel")).isTrue();
+		assertThat(filter.afterRequestMessage.contains("/hotel")).isTrue();
 		assertThat(filter.afterRequestMessage.contains("booking=42")).isFalse();
 	}
 
@@ -79,10 +102,10 @@ public class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage).isNotNull();
-		assertThat(filter.beforeRequestMessage.contains("[uri=/hotels?booking=42]")).isTrue();
+		assertThat(filter.beforeRequestMessage.contains("/hotels?booking=42")).isTrue();
 
 		assertThat(filter.afterRequestMessage).isNotNull();
-		assertThat(filter.afterRequestMessage.contains("[uri=/hotels?booking=42]")).isTrue();
+		assertThat(filter.afterRequestMessage.contains("/hotels?booking=42")).isTrue();
 	}
 
 	@Test
@@ -96,10 +119,10 @@ public class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage).isNotNull();
-		assertThat(filter.beforeRequestMessage.contains("[uri=/hotels]")).isTrue();
+		assertThat(filter.beforeRequestMessage.contains("/hotels]")).isTrue();
 
 		assertThat(filter.afterRequestMessage).isNotNull();
-		assertThat(filter.afterRequestMessage.contains("[uri=/hotels]")).isTrue();
+		assertThat(filter.afterRequestMessage.contains("/hotels]")).isTrue();
 	}
 
 	@Test
@@ -115,10 +138,10 @@ public class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage).isNotNull();
-		assertThat(filter.beforeRequestMessage).isEqualTo("Before request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]");
+		assertThat(filter.beforeRequestMessage).isEqualTo("Before request [POST /hotels, headers=[Content-Type:\"application/json\", token:\"masked\"]]");
 
 		assertThat(filter.afterRequestMessage).isNotNull();
-		assertThat(filter.afterRequestMessage).isEqualTo("After request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]");
+		assertThat(filter.afterRequestMessage).isEqualTo("After request [POST /hotels, headers=[Content-Type:\"application/json\", token:\"masked\"]]");
 	}
 
 	@Test
