@@ -291,6 +291,51 @@ public class RequestLoggingFilterTests {
 		assertThat(filter.afterRequestMessage).doesNotContain("Hello World");
 	}
 
+	@Test
+	public void allOptions() throws Exception {
+		filter.setIncludeQueryString(true);
+		filter.setIncludeClientInfo(true);
+		filter.setIncludeHeaders(true);
+		filter.setIncludePayload(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		request.setQueryString("booking=42");
+		request.setRemoteAddr("4.2.2.2");
+		request.setSession(new MockHttpSession(null, "42"));
+		request.setRemoteUser("Arthur");
+		request.setContentType("application/json");
+		String requestBody = "{\"msg\": \"Hello World\"}";
+		request.setContent(requestBody.getBytes(StandardCharsets.UTF_8));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = (filterRequest, filterResponse) -> {
+			((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
+			String buf = FileCopyUtils.copyToString(filterRequest.getReader());
+			assertThat(buf).isEqualTo(requestBody);
+		};
+
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage)
+				.isEqualTo("Before request ["
+						+ "POST /hotels?booking=42"
+						+ ", client=4.2.2.2"
+						+ ", session=42"
+						+ ", user=Arthur"
+						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
+						+ "]");
+
+		assertThat(filter.afterRequestMessage)
+				.isEqualTo("After request ["
+						+ "POST /hotels?booking=42"
+						+ ", client=4.2.2.2"
+						+ ", session=42"
+						+ ", user=Arthur"
+						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
+						+ ", payload={\"msg\": \"Hello World\"}"
+						+ "]");
+	}
+
 
 	private static class MyRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
