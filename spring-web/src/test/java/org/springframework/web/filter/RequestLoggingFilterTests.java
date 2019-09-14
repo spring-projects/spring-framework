@@ -16,11 +16,9 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
@@ -50,6 +49,72 @@ public class RequestLoggingFilterTests {
 	@BeforeEach
 	public void reset() {
 		filter = new MyRequestLoggingFilter();
+	}
+
+	@Test
+	public void defaultPrefix() throws Exception {
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.startsWith(AbstractRequestLoggingFilter.DEFAULT_BEFORE_MESSAGE_PREFIX)).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.startsWith(AbstractRequestLoggingFilter.DEFAULT_AFTER_MESSAGE_PREFIX)).isTrue();
+	}
+
+	@Test
+	public void customPrefix() throws Exception {
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		filter.setBeforeMessagePrefix("Before prefix: ");
+		filter.setAfterMessagePrefix("After prefix: ");
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.startsWith("Before prefix: ")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.startsWith("After prefix: ")).isTrue();
+	}
+
+	@Test
+	public void defaultSuffix() throws Exception {
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.endsWith(AbstractRequestLoggingFilter.DEFAULT_BEFORE_MESSAGE_SUFFIX)).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.endsWith(AbstractRequestLoggingFilter.DEFAULT_AFTER_MESSAGE_SUFFIX)).isTrue();
+	}
+
+	@Test
+	public void customSuffix() throws Exception {
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		filter.setBeforeMessageSuffix("}");
+		filter.setAfterMessageSuffix(")");
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.endsWith("}")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.endsWith(")")).isTrue();
 	}
 
 	@Test
@@ -123,6 +188,61 @@ public class RequestLoggingFilterTests {
 
 		assertThat(filter.afterRequestMessage).isNotNull();
 		assertThat(filter.afterRequestMessage.contains("/hotels]")).isTrue();
+	}
+
+	@Test
+	public void client() throws Exception {
+		filter.setIncludeClientInfo(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		request.setRemoteAddr("4.2.2.2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("client=4.2.2.2")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("client=4.2.2.2")).isTrue();
+	}
+
+	@Test
+	public void session() throws Exception {
+		filter.setIncludeClientInfo(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpSession session = new MockHttpSession(null, "42");
+		request.setSession(session);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("session=42")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("session=42")).isTrue();
+	}
+
+	@Test
+	public void user() throws Exception {
+		filter.setIncludeClientInfo(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		request.setRemoteUser("Arthur");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("user=Arthur")).isTrue();
+
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("user=Arthur")).isTrue();
 	}
 
 	@Test
@@ -237,7 +357,7 @@ public class RequestLoggingFilterTests {
 	private static class NoOpFilterChain implements FilterChain {
 
 		@Override
-		public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+		public void doFilter(ServletRequest request, ServletResponse response) {
 		}
 	}
 
