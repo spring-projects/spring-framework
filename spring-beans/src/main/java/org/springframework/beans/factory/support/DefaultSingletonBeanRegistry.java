@@ -554,9 +554,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void clearSingletonCache() {
 		synchronized (this.singletonObjects) {
+			// 一级缓存clear
 			this.singletonObjects.clear();
+			// 三级缓存clear
 			this.singletonFactories.clear();
+			// 二级缓存clear
 			this.earlySingletonObjects.clear();
+			// 已经注册了的单实例bean的name clear
 			this.registeredSingletons.clear();
 			this.singletonsCurrentlyInDestruction = false;
 		}

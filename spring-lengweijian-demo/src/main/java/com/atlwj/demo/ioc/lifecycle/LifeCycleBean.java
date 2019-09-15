@@ -39,7 +39,7 @@ public class LifeCycleBean implements BeanNameAware, BeanFactoryAware, BeanClass
 
 	public void display() {
 
-		System.out.println("方法调用...");
+		System.out.println("display....方法调用...");
 
 	}
 

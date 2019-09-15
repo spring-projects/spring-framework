@@ -76,12 +76,12 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
 			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
-		// <1> 创建 DocumentBuilderFactory
+		// <1> 创建 DocumentBuilderFactory,DocumentBuilderFactory是用来解析xml的
 		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
-		// <2> 创建 DocumentBuilder
+		// <2> 创建 DocumentBuilder,DocumentBuilder用来解析xml文件的
 		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
 		// <3> 解析 XML InputSource 返回 Document 对象
 		return builder.parse(inputSource);
@@ -97,7 +97,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
 			throws ParserConfigurationException {
-		// 创建 DocumentBuilderFactory
+		// 创建 DocumentBuilderFactory,使用ServiceLoader来创建findServiceProvider
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		// 设置命名空间支持
 		factory.setNamespaceAware(namespaceAware);

@@ -469,6 +469,8 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 			String[] aliasesArray = StringUtils.toStringArray(aliases);
+
+			// 创建bdr并返回
 			return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 		}
 
@@ -518,10 +520,11 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		try {
+			//创建bd 返回的是GenericBeanDefinition，AbstractBeanDefinition是GenericBeanDefinition的父类
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
-
+			// 解析bd属性
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
-			// 提取 description
+			// 设置 description
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 			// 解析元数据 <meta />
 			parseMetaElements(ele, bd);
@@ -538,7 +541,7 @@ public class BeanDefinitionParserDelegate {
 
 			bd.setResource(this.readerContext.getResource());
 			bd.setSource(extractSource(ele));
-
+			// 解析完标签后，返回赋值完毕的bd AbstractBeanDefinition
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
@@ -567,7 +570,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String beanName,
 			@Nullable BeanDefinition containingBean, AbstractBeanDefinition bd) {
-
+		// 如果有singleton属性，报错。新版本已经改成scope属性了。
 		if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
 		}
@@ -657,6 +660,11 @@ public class BeanDefinitionParserDelegate {
 				parentName, className, this.readerContext.getBeanClassLoader());
 	}
 
+	/**
+	 * 解析元元素
+	 * @param ele
+	 * @param attributeAccessor
+	 */
 	public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -713,6 +721,9 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (isCandidateElement(node) && nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
+				/**
+				 * 解析<ConstructorArg />元素
+				 */
 				parseConstructorArgElement((Element) node, bd);
 			}
 		}
@@ -793,8 +804,11 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a constructor-arg element.
 	 */
 	public void parseConstructorArgElement(Element ele, BeanDefinition bd) {
+		// 获取index属性
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+		// 获取type属性
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
+		// 获取name属性
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
 			try {
@@ -1382,11 +1396,19 @@ public class BeanDefinitionParserDelegate {
 		if (namespaceUri == null) {
 			return null;
 		}
+		/**
+		 * 通过NamespaceHandlerResolver来resolve解析uri
+		 *
+		 */
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		/**
+		 * 创建ParserContext对象
+		 * 使用返回的NamespaceHandler进行标签的解析
+		 */
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

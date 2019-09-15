@@ -1092,6 +1092,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// 疑问：mbd.beforeInstantiationResolve什么时候为true ？？？
 		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
 			// Make sure bean class is actually resolved at this point.
+			// 如果mbd不是合成的&&是否有InstantiationAwareBeanPostProcessors被注册
 			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				// 判定目标对象的类型
 				Class<?> targetType = determineTargetType(beanName, mbd);

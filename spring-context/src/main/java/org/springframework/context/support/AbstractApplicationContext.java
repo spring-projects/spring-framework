@@ -521,7 +521,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
-			// 让子类刷新内置的bean工厂
+			// 让子类刷新内置的bean工厂,完成标签的解析赋值给AbstractBeanDefinition，并将beanName，beanDefinition缓存到单例池中。
+			// 注意，这里边还没有创建bean的实例。
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -621,7 +622,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
-		// 对属性进行必要的验证
+		// 对属性进行必要的验证，抛出异常
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -646,6 +647,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initPropertySources() {
 		// For subclasses: do nothing by default.
+		// spring这里默认并没有任何实现。由子类去实现，比如web环境下，会初始化一些servlet参数servletContextInitParams
 	}
 
 	/**

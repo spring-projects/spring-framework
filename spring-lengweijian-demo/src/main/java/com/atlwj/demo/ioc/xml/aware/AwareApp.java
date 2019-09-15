@@ -5,6 +5,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
 
+import java.util.Properties;
+
 @ComponentScan("com.atlwj.demo.ioc.xml.aware")
 @Configurable
 public class AwareApp {

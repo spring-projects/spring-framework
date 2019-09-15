@@ -85,10 +85,12 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.registry = registry;
 
 		// Determine ResourceLoader to use.
+		// 判断要使用的ResourceLoader
 		if (this.registry instanceof ResourceLoader) {
 			this.resourceLoader = (ResourceLoader) this.registry;
 		}
 		else {
+			// 否则返回默认的DefaultResourceLoader
 			this.resourceLoader = new PathMatchingResourcePatternResolver();
 		}
 
@@ -184,6 +186,10 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
 		for (Resource resource : resources) {
+			/**
+			 * 加载bd
+			 *
+			 */
 			counter += loadBeanDefinitions(resource);
 		}
 		return counter;
@@ -210,16 +216,20 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
 	 */
 	public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualResources) throws BeanDefinitionStoreException {
+		// 1.获取ResourceLoader资源加载器
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(
 					"Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
 		}
-
+		// ResourcePatternResolver资源格式解析器是专门解析类路径下的classpath*:的解析器
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			// Resource pattern matching available.
 			try {
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+				/**
+				 * 加载bd
+				 */
 				int loadCount = loadBeanDefinitions(resources);
 				if (actualResources != null) {
 					for (Resource resource : resources) {
@@ -236,10 +246,15 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 						"Could not resolve bean definition resource pattern [" + location + "]", ex);
 			}
 		}
+
+		// 如果是其它类型的解析器
 		else {
 			// Can only load single resources by absolute URL.
+			// 通过绝对路径的URL只能加载单个资源
 			Resource resource = resourceLoader.getResource(location);
-			// 加载bd
+			/**
+			 * 加载bd
+			 */
 			int loadCount = loadBeanDefinitions(resource);
 			if (actualResources != null) {
 				actualResources.add(resource);
@@ -256,6 +271,10 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		Assert.notNull(locations, "Location array must not be null");
 		int counter = 0;
 		for (String location : locations) {
+			/**
+			 * 便利每一个路径来加载bd
+			 *
+			 */
 			counter += loadBeanDefinitions(location);
 		}
 		return counter;

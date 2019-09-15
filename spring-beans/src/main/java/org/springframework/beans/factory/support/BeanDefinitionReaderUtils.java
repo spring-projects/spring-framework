@@ -152,6 +152,11 @@ public class BeanDefinitionReaderUtils {
 		// Register bean definition under primary name.
 		// 获取beanName = extConfig
 		String beanName = definitionHolder.getBeanName();
+
+		/**
+		 * 1) 获取beanDefinition
+		 * 2) 注册bd,默认实现是DefaultListableBeanFactory
+		 */
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.

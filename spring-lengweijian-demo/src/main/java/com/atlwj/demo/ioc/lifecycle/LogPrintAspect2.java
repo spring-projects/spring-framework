@@ -66,18 +66,18 @@ import java.util.Arrays;
  *
  *
 **/
-//@Aspect
-//@Component
+@Aspect
+@Component
 public class LogPrintAspect2 {
 
-	@Pointcut("execution(* com.atlwj.demo.ioc.lifecycle.*.dis*(..))")
+	@Pointcut("execution(* com.atlwj.demo.ioc.lifecycle.LifeCycleBean.*(..))")
 	public void pointCut(){
 
 	}
 
 	@Before(value = "pointCut()")
-	public void before(JoinPoint joinPoint){
-		System.out.printf("方法：%s 执行之前打印",joinPoint.getSignature().getName());
+	public void before(){
+		System.out.println("方法   执行之前打印");
 	}
 //
 //	@AfterReturning(value = "pointCut()",returning = "returnvalue")

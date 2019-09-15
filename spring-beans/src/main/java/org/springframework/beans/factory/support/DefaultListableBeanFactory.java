@@ -874,10 +874,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
+					/**
+					 * 将beanName和bd缓存到beanDefinitionMap单例池中
+					 */
 					this.beanDefinitionMap.put(beanName, beanDefinition);
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
+					// 缓存bdNames
 					this.beanDefinitionNames = updatedDefinitions;
 					if (this.manualSingletonNames.contains(beanName)) {
 						Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);

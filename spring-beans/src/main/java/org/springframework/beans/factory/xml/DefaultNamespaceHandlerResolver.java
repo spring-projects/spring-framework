@@ -89,6 +89,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader) {
+		// 查找映射文件的位置【META-INF/spring.handlers】
 		this(classLoader, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
@@ -116,25 +117,33 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
+		// 获取处理器映射器
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
+		// 如果为null，返回null
 		if (handlerOrClassName == null) {
 			return null;
 		}
+		// 获取handlerOrClassName类型de返回handlerOrClassName
 		else if (handlerOrClassName instanceof NamespaceHandler) {
 			return (NamespaceHandler) handlerOrClassName;
 		}
 		else {
 			String className = (String) handlerOrClassName;
 			try {
+				// 使用反射创建对象
 				Class<?> handlerClass = ClassUtils.forName(className, this.classLoader);
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
 							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 				}
+				//使用BeanUtils完成namespaceHandler实例化
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
+				// 执行namespaceHandler的init()
 				namespaceHandler.init();
+				// 缓存handlerMappings
 				handlerMappings.put(namespaceUri, namespaceHandler);
+				// 返回namespaceHandler
 				return namespaceHandler;
 			}
 			catch (ClassNotFoundException ex) {

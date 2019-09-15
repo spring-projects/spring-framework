@@ -87,6 +87,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	// 默认
 	public PluggableSchemaResolver(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
+		// META-INF/spring.schemas spring schema的映射路径默认是【META-INF/spring.schemas】
 		this.schemaMappingsLocation = DEFAULT_SCHEMA_MAPPINGS_LOCATION;
 	}
 

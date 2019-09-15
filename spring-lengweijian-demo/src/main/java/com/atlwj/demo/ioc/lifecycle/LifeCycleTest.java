@@ -3,9 +3,9 @@ package com.atlwj.demo.ioc.lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 //@EnableAspectJAutoProxy
-@Configuration
 @ComponentScan("com.atlwj.demo.ioc.lifecycle")
 public class LifeCycleTest {
 

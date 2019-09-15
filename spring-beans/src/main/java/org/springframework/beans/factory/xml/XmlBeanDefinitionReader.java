@@ -262,6 +262,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	protected EntityResolver getEntityResolver() {
 		if (this.entityResolver == null) {
 			// Determine default EntityResolver to use.
+			// 判断默认的要使用的实体解析器，默认是ResourceLoader
 			ResourceLoader resourceLoader = getResourceLoader();
 			if (resourceLoader != null) {
 				this.entityResolver = new ResourceEntityResolver(resourceLoader);
@@ -304,6 +305,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+		// EncodedResource可以对resource进行字符集的处理，处理完再加载bd
 		return loadBeanDefinitions(new EncodedResource(resource));
 	}
 
@@ -319,7 +321,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		if (logger.isInfoEnabled()) {
 			logger.info("Loading XML bean definitions from " + encodedResource);
 		}
-		// <1> 获取已经加载过的资源
+		// <1> 获取已经加载过的资源。Set<EncodedResource>已经进行字符集处理后的Resources
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 		if (currentResources == null) {
 			currentResources = new HashSet<>(4);
@@ -335,12 +337,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			try {
 				InputSource inputSource = new InputSource(inputStream);
 				if (encodedResource.getEncoding() != null) {
+					// 设置encodedResource的字符集给inputSource
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
-				// 核心逻辑部分，执行加载 BeanDefinition
+				/**
+				 * 设置完字符集之后，执行加载BeanDefinition
+				 *
+				 */
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
+				// 最后关闭inputStream
 				inputStream.close();
 			}
 		}
@@ -396,7 +403,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		try {
 			// <1> 获取 XML Document 实例
 			Document doc = doLoadDocument(inputSource, resource);
-			// <2> 根据 Document 实例，注册 Bean 信息
+			/**
+			 * <2>根据 Document 实例，注册 Bean 信息
+			 *
+			 */
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -447,7 +457,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #detectValidationMode
 	 */
 	protected int getValidationModeForResource(Resource resource) {
-		// <1> 获取指定的验证模式
+		// <1> 获取指定的验证模式VALIDATION_AUTO,默认是1
 		int validationModeToUse = getValidationMode();
 		// 首先，如果手动指定，则直接返回
 		if (validationModeToUse != VALIDATION_AUTO) {
@@ -516,9 +526,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * 注册BeanDefinition
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		// 创建bddr,BeanDefinitionDocumentReader可以用来注册bd
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		int countBefore = getRegistry().getBeanDefinitionCount();
-		// 注册bd
+		/**
+		 * 1) 先创建读取器上下文createReaderContext,
+		 * 2) 注册bd
+		 */
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
@@ -537,6 +551,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Create the {@link XmlReaderContext} to pass over to the document reader.
 	 */
 	public XmlReaderContext createReaderContext(Resource resource) {
+
+		// 获取命名空间的处理器解析器NamespaceHandlerResolver
+		// 创建xml读取器上下文XmlReaderContext
 		return new XmlReaderContext(resource, this.problemReporter, this.eventListener,
 				this.sourceExtractor, this, getNamespaceHandlerResolver());
 	}
@@ -547,6 +564,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		if (this.namespaceHandlerResolver == null) {
+			// 创建默认的命名空间处理器解析器,默认的映射文件的位置是每个jar包下的【META-INF/spring.handlers】
 			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();
 		}
 		return this.namespaceHandlerResolver;
@@ -559,7 +577,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
 		ClassLoader cl = (getResourceLoader() != null ? getResourceLoader().getClassLoader() : getBeanClassLoader());
-		// 创建默认的命名空间处理器解析器
+		/**
+		 * 创建默认的命名空间处理器解析器，默认的映射文件的位置是每个jar包下的【META-INF/spring.handlers】
+		 */
 		return new DefaultNamespaceHandlerResolver(cl);
 	}
 
