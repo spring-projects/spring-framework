@@ -5,6 +5,15 @@ pluginManagement {
 	}
 }
 
+buildCache {
+	local {
+		enabled = true
+	}
+	remote(HttpBuildCache) {
+		enabled = false
+	}
+}
+
 enableFeaturePreview("GRADLE_METADATA")
 
 include "spring-aop"
