@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.zip.CRC32;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -670,12 +669,6 @@ class WebClientIntegrationTests {
 				throw new UncheckedIOException(ex);
 			}
 		});
-	}
-
-	private static long hash(byte[] bytes) {
-		CRC32 crc = new CRC32();
-		crc.update(bytes, 0, bytes.length);
-		return crc.getValue();
 	}
 
 	@ParameterizedWebClientTest
