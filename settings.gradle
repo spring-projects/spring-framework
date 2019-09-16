@@ -5,6 +5,15 @@ pluginManagement {
 	}
 }
 
+buildCache {
+	local {
+		enabled = true
+	}
+	remote(HttpBuildCache) {
+		enabled = false
+	}
+}
+
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"
