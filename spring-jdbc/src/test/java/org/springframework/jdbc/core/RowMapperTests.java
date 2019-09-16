@@ -78,7 +78,6 @@ public class RowMapperTests {
 	@AfterEach
 	public void verifyClosed() throws Exception {
 		verify(resultSet).close();
-		// verify(connection).close();
 	}
 
 	@AfterEach
