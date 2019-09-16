@@ -220,6 +220,12 @@ public interface RSocketStrategies {
 		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 
 		/**
+		 * Apply the consumer to the {@link MetadataExtractorRegistry} in order
+		 * to register extra metadata entry extractors.
+		 */
+		Builder metadataExtractors(Consumer<MetadataExtractorRegistry> extractorRegistry);
+
+		/**
 		 * Build the {@code RSocketStrategies} instance.
 		 */
 		RSocketStrategies build();

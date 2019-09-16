@@ -15,6 +15,8 @@
  */
 package org.springframework.messaging.rsocket;
 
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -30,16 +32,20 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link RSocketStrategies}.
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-public class DefaultRSocketStrategiesTests {
+class DefaultRSocketStrategiesTests {
 
 	@Test
-	public void defaultSettings() {
+	void defaultSettings() {
 		RSocketStrategies strategies = RSocketStrategies.create();
 
 		assertThat(strategies.encoders()).hasSize(4).hasOnlyElementsOfTypes(
@@ -62,8 +68,7 @@ public class DefaultRSocketStrategiesTests {
 	}
 
 	@Test
-	public void explicitValues() {
-
+	void explicitValues() {
 		SimpleRouteMatcher matcher = new SimpleRouteMatcher(new AntPathMatcher());
 		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
 		ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
@@ -90,7 +95,7 @@ public class DefaultRSocketStrategiesTests {
 	}
 
 	@Test
-	public void copyConstructor() {
+	void copyConstructor() {
 		RSocketStrategies strategies1 = RSocketStrategies.create();
 		RSocketStrategies strategies2 = strategies1.mutate().build();
 
@@ -99,6 +104,14 @@ public class DefaultRSocketStrategiesTests {
 		assertThat(strategies1.routeMatcher()).isSameAs(strategies2.routeMatcher());
 		assertThat(strategies1.metadataExtractor()).isSameAs(strategies2.metadataExtractor());
 		assertThat(strategies1.reactiveAdapterRegistry()).isSameAs(strategies2.reactiveAdapterRegistry());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void applyMetadataExtractors() {
+		Consumer<MetadataExtractorRegistry> consumer = (Consumer<MetadataExtractorRegistry>) mock(Consumer.class);
+		RSocketStrategies strategies = RSocketStrategies.builder().metadataExtractors(consumer).build();
+		verify(consumer, times(1)).accept(any());
 	}
 
 }
