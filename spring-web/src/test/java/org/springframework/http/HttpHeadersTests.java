@@ -38,6 +38,7 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -557,6 +558,80 @@ public class HttpHeadersTests {
 		headers.setBearerAuth(token);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertEquals("Bearer foo", authorization);
+	}
+
+	@Test // https://github.com/spring-projects/spring-framework/issues/23633
+	public void keySetRemove() {
+		// Given
+		headers.add("Alpha", "apple");
+		headers.add("Bravo", "banana");
+		assertEquals(2, headers.size());
+		assertTrue("Alpha should be present", headers.containsKey("Alpha"));
+		assertTrue("Bravo should be present", headers.containsKey("Bravo"));
+		assertArrayEquals(new String[] {"Alpha", "Bravo"}, headers.keySet().toArray());
+
+		// When
+		boolean removed = headers.keySet().remove("Alpha");
+
+		// Then
+		assertTrue(removed);
+		assertFalse(headers.keySet().remove("Alpha"));
+		assertEquals(1, headers.size());
+		assertFalse("Alpha should have been removed", headers.containsKey("Alpha"));
+		assertTrue("Bravo should be present", headers.containsKey("Bravo"));
+		assertArrayEquals(new String[] {"Bravo"}, headers.keySet().toArray());
+		assertEquals(Collections.singletonMap("Bravo", Arrays.asList("banana")).entrySet(), headers.entrySet());
+	}
+
+	@Test
+	public void keySetOperations() {
+		headers.add("Alpha", "apple");
+		headers.add("Bravo", "banana");
+		assertEquals(2, headers.size());
+
+		// size()
+		assertEquals(2, headers.keySet().size());
+
+		// contains()
+		assertTrue("Alpha should be present", headers.keySet().contains("Alpha"));
+		assertTrue("alpha should be present", headers.keySet().contains("alpha"));
+		assertTrue("Bravo should be present", headers.keySet().contains("Bravo"));
+		assertTrue("BRAVO should be present", headers.keySet().contains("BRAVO"));
+		assertFalse("Charlie should not be present", headers.keySet().contains("Charlie"));
+
+		// toArray()
+		assertArrayEquals(new String[] {"Alpha", "Bravo"}, headers.keySet().toArray());
+
+		// spliterator() via stream()
+		assertEquals(Arrays.asList("Alpha", "Bravo"), headers.keySet().stream().collect(toList()));
+
+		// iterator()
+		List<String> results = new ArrayList<>();
+		headers.keySet().iterator().forEachRemaining(results::add);
+		assertEquals(Arrays.asList("Alpha", "Bravo"), results);
+
+		// remove()
+		assertTrue(headers.keySet().remove("Alpha"));
+		assertEquals(1, headers.size());
+		assertFalse(headers.keySet().remove("Alpha"));
+
+		// clear()
+		headers.keySet().clear();
+		assertEquals(0, headers.size());
+
+		// Unsupported operations
+		unsupported(() -> headers.keySet().add("x"));
+		unsupported(() -> headers.keySet().addAll(Collections.singleton("enigma")));
+	}
+
+	private static void unsupported(Runnable runnable) {
+		try {
+			runnable.run();
+			fail("should have thrown an UnsupportedOperationException");
+		}
+		catch (UnsupportedOperationException e) {
+			// expected
+		}
 	}
 
 	@Test
