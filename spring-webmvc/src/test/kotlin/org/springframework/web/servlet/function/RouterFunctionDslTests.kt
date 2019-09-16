@@ -56,6 +56,15 @@ class RouterFunctionDslTests {
 	}
 
 	@Test
+	fun acceptAndPOSTWithRequestPredicate() {
+		val servletRequest = MockHttpServletRequest("POST", "/api/bar/")
+		servletRequest.addHeader(ACCEPT, APPLICATION_JSON_VALUE)
+		servletRequest.addHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+		val request = DefaultServerRequest(servletRequest, emptyList())
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
+	}
+
+	@Test
 	fun contentType() {
 		val servletRequest = MockHttpServletRequest("GET", "/content")
 		servletRequest.addHeader(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE)
@@ -120,6 +129,7 @@ class RouterFunctionDslTests {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
 			POST("/foo/", ::handleFromClass)
+			POST("/bar/", contentType(APPLICATION_JSON), ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
 			PATCH("/foo/") {
 				ok().build()
@@ -148,10 +158,10 @@ class RouterFunctionDslTests {
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }
 	}
-}
 
-@Suppress("UNUSED_PARAMETER")
-private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+	@Suppress("UNUSED_PARAMETER")
+	private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+}
 
 @Suppress("UNUSED_PARAMETER")
 private fun handle(req: ServerRequest) = ServerResponse.ok().build()

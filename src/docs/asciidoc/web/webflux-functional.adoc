@@ -476,9 +476,9 @@ header:
 .Kotlin
 ----
 	val route = coRouter {
-		(GET("/hello-world") and accept(MediaType.TEXT_PLAIN)).invoke {
-			ServerResponse.ok().bodyValueAndAwait("Hello World")
-		}
+		GET("/hello-world", accept(TEXT_PLAIN)) {
+            ServerResponse.ok().bodyValueAndAwait("Hello World")
+        }
 	}
 ----
 
@@ -553,9 +553,9 @@ RouterFunction<ServerResponse> route = route()
 	val otherRoute: RouterFunction<ServerResponse> = coRouter {  }
 
 	val route = coRouter {
-		(GET("/person/{id}") and accept(APPLICATION_JSON)).invoke(handler::getPerson) // <1>
-		(GET("/person") and accept(APPLICATION_JSON)).invoke(handler::listPeople) // <2>
-		POST("/person").invoke(handler::createPerson) // <3>
+		GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
+		GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
+		POST("/person", handler::createPerson) // <3>
 	}.and(otherRoute) // <4>
 ----
 <1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
@@ -595,9 +595,9 @@ RouterFunction<ServerResponse> route = route()
 ----
 	val route = coRouter {
 		"/person".nest {
-			(GET("/{id}") and accept(APPLICATION_JSON)).invoke(handler::getPerson)
-			(GET("") and accept(APPLICATION_JSON)).invoke(handler::listPeople)
-			POST("/person").invoke(handler::createPerson)
+			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
+			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			POST("/person", handler::createPerson)
 		}
 	}
 ----
@@ -622,7 +622,7 @@ We can further improve by using the `nest` method together with `accept`:
 .Kotlin
 ----
 	val route = coRouter {
-		"/person".nest{
+		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
 				GET("", handler::listPeople)

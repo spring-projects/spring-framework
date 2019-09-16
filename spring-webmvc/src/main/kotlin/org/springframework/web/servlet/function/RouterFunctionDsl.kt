@@ -145,11 +145,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun String.nest(r: (RouterFunctionDsl.() -> Unit)) = path(this).nest(r)
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun GET(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.GET(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun GET(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.GET(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -160,11 +172,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun GET(pattern: String): RequestPredicate = RequestPredicates.GET(pattern)
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun HEAD(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.HEAD(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun HEAD(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.HEAD(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -175,11 +199,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun HEAD(pattern: String): RequestPredicate = RequestPredicates.HEAD(pattern)
 
 	/**
-	 * Route to the given handler function if the given `POST` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun POST(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.POST(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun POST(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.POST(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -190,11 +226,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun POST(pattern: String): RequestPredicate = RequestPredicates.POST(pattern)
 
 	/**
-	 * Route to the given handler function if the given `PUT` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun PUT(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.PUT(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PUT(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.PUT(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -205,11 +253,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun PUT(pattern: String): RequestPredicate = RequestPredicates.PUT(pattern)
 
 	/**
-	 * Route to the given handler function if the given `PATCH` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun PATCH(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.PATCH(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PATCH(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.PATCH(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -222,11 +282,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun PATCH(pattern: String): RequestPredicate = RequestPredicates.PATCH(pattern)
 
 	/**
-	 * Route to the given handler function if the given `DELETE` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun DELETE(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.DELETE(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun DELETE(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.DELETE(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**
@@ -239,11 +311,23 @@ class RouterFunctionDsl(private val init: (RouterFunctionDsl.() -> Unit)) {
 	fun DELETE(pattern: String): RequestPredicate = RequestPredicates.DELETE(pattern)
 
 	/**
-	 * Route to the given handler function if the given OPTIONS predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun OPTIONS(pattern: String, f: (ServerRequest) -> ServerResponse) {
 		builder.OPTIONS(pattern, HandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun OPTIONS(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> ServerResponse) {
+		builder.OPTIONS(pattern, predicate, HandlerFunction(f))
 	}
 
 	/**

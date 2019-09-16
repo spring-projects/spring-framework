@@ -16,10 +16,8 @@
 
 package org.springframework.web.reactive.function.server
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
@@ -58,6 +56,18 @@ class RouterFunctionDslTests {
 				.method(POST)
 				.uri(URI("/api/foo/"))
 				.header(ACCEPT, APPLICATION_JSON_VALUE)
+				.build()
+		StepVerifier.create(sampleRouter().route(request))
+				.expectNextCount(1)
+				.verifyComplete()
+	}
+
+	@Test
+	fun acceptAndPOSTWithRequestPredicate() {
+		val request = builder()
+				.method(POST)
+				.uri(URI("/api/bar/"))
+				.header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build()
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
@@ -135,6 +145,7 @@ class RouterFunctionDslTests {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
 			POST("/foo/", ::handleFromClass)
+			POST("/bar/", contentType(APPLICATION_JSON), ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
 			PATCH("/foo/") {
 				ok().build()
@@ -163,10 +174,10 @@ class RouterFunctionDslTests {
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }
 	}
-}
 
-@Suppress("UNUSED_PARAMETER")
-private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+	@Suppress("UNUSED_PARAMETER")
+	private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+}
 
 @Suppress("UNUSED_PARAMETER")
 private fun handle(req: ServerRequest) = ServerResponse.ok().build()
