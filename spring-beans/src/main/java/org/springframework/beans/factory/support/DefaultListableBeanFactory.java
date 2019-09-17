@@ -1035,7 +1035,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (String bdName : this.beanDefinitionNames) {
 			if (!beanName.equals(bdName)) {
 				BeanDefinition bd = this.beanDefinitionMap.get(bdName);
-				if (beanName.equals(bd.getParentName())) {
+				// Ensure bd is non-null due to potential concurrent modification
+				// of the beanDefinitionMap.
+				if (bd != null && beanName.equals(bd.getParentName())) {
 					resetBeanDefinition(bdName);
 				}
 			}

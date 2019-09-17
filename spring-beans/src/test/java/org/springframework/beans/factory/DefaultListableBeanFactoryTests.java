@@ -38,6 +38,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Priority;
 import javax.security.auth.Subject;
@@ -880,6 +881,32 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerAlias("test", "test2");
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
 		assertThat(lbf.getBean("test2")).isInstanceOf(NestedTestBean.class);
+	}
+
+	@Test // gh-23542
+	public void concurrentBeanDefinitionRemoval() {
+		final int MAX = 200;
+		lbf.setAllowBeanDefinitionOverriding(false);
+
+		// Register the bean definitions before invoking preInstantiateSingletons()
+		// to simulate realistic usage of an ApplicationContext; otherwise, the bean
+		// factory thinks it's an "empty" factory which causes this test to fail in
+		// an unrealistic manner.
+		IntStream.range(0, MAX).forEach(this::registerTestBean);
+		lbf.preInstantiateSingletons();
+
+		// This test is considered successful if the following does not result in an exception.
+		IntStream.range(0, MAX).parallel().forEach(this::removeTestBean);
+	}
+
+	private void registerTestBean(int i) {
+		String name = "test" + i;
+		lbf.registerBeanDefinition(name, new RootBeanDefinition(TestBean.class));
+	}
+
+	private void removeTestBean(int i) {
+		String name = "test" + i;
+		lbf.removeBeanDefinition(name);
 	}
 
 	@Test
