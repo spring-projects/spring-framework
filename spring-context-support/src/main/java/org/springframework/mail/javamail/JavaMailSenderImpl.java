@@ -17,10 +17,8 @@
 package org.springframework.mail.javamail;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -303,22 +301,6 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 
 	//---------------------------------------------------------------------
-	// Implementation of MailSender
-	//---------------------------------------------------------------------
-
-	@Override
-	public void send(SimpleMailMessage... simpleMessages) throws MailException {
-		List<MimeMessage> mimeMessages = new ArrayList<>(simpleMessages.length);
-		for (SimpleMailMessage simpleMessage : simpleMessages) {
-			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
-			simpleMessage.copyTo(message);
-			mimeMessages.add(message.getMimeMessage());
-		}
-		doSend(mimeMessages.toArray(new MimeMessage[0]), simpleMessages);
-	}
-
-
-	//---------------------------------------------------------------------
 	// Implementation of JavaMailSender
 	//---------------------------------------------------------------------
 
@@ -404,7 +386,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 					catch (Exception ex) {
 						// Effectively, all remaining messages failed...
 						for (int j = i; j < mimeMessages.length; j++) {
-							Object original = (originalMessages != null ? originalMessages[j] : mimeMessages[j]);
+							Object original = (originalMessages != null ? originalMessages[j] : resolveOriginal(mimeMessages[j]));
 							failedMessages.put(original, ex);
 						}
 						throw new MailSendException("Mail server connection failed", ex, failedMessages);
@@ -427,7 +409,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 					transport.sendMessage(mimeMessage, (addresses != null ? addresses : new Address[0]));
 				}
 				catch (Exception ex) {
-					Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);
+					Object original = (originalMessages != null ? originalMessages[i] : resolveOriginal(mimeMessage));
 					failedMessages.put(original, ex);
 				}
 			}
@@ -452,6 +434,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		if (!failedMessages.isEmpty()) {
 			throw new MailSendException(failedMessages);
 		}
+	}
+
+	private static Object resolveOriginal(MimeMessage mimeMessage) {
+		return mimeMessage instanceof SmartMimeMessage ? ((SmartMimeMessage) mimeMessage).getOriginalOrElseThis() : mimeMessage;
 	}
 
 	/**

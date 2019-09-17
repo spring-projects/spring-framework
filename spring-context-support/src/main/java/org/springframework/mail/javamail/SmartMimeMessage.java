@@ -21,6 +21,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.lang.Nullable;
+import org.springframework.mail.SimpleMailMessage;
 
 /**
  * Special subclass of the standard JavaMail {@link MimeMessage}, carrying a
@@ -45,6 +46,9 @@ class SmartMimeMessage extends MimeMessage {
 	@Nullable
 	private final FileTypeMap defaultFileTypeMap;
 
+	@Nullable
+	private SimpleMailMessage originalMessage;
+
 
 	/**
 	 * Create a new SmartMimeMessage.
@@ -60,6 +64,13 @@ class SmartMimeMessage extends MimeMessage {
 		this.defaultFileTypeMap = defaultFileTypeMap;
 	}
 
+	void setOriginalSimpleMailMessage(@Nullable SimpleMailMessage originalMessage) {
+		this.originalMessage = originalMessage;
+	}
+
+	Object getOriginalOrElseThis() {
+		return this.originalMessage != null ? this.originalMessage : this;
+	}
 
 	/**
 	 * Return the default encoding of this message, or {@code null} if none.
