@@ -62,7 +62,8 @@ fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).bui
  */
 class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 
-	private val builder = RouterFunctions.route()
+	@PublishedApi
+	internal val builder = RouterFunctions.route()
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -506,6 +507,83 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	}
 
 	/**
+	 * Merge externally defined router functions into this one.
+	 * @param routerFunction the router function to be added
+	 * @since 5.2
+	 */
+	fun add(routerFunction: RouterFunction<ServerResponse>) {
+		builder.add(routerFunction)
+	}
+
+	/**
+	 * Filters all routes created by this router with the given filter function. Filter
+	 * functions are typically used to address cross-cutting concerns, such as logging,
+	 * security, etc.
+	 * @param filterFunction the function to filter all routes built by this router
+	 * @since 5.2
+	 */
+	fun filter(filterFunction: (ServerRequest, (ServerRequest) -> Mono<ServerResponse>) -> Mono<ServerResponse>) {
+		builder.filter { request, next ->
+			filterFunction(request) {
+				next.handle(request)
+			}
+		}
+	}
+
+	/**
+	 * Filter the request object for all routes created by this builder with the given request
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param requestProcessor a function that transforms the request
+	 * @since 5.2
+	 */
+	fun before(requestProcessor: (ServerRequest) -> ServerRequest) {
+		builder.before(requestProcessor)
+	}
+
+	/**
+	 * Filter the response object for all routes created by this builder with the given response
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param responseProcessor a function that transforms the response
+	 * @since 5.2
+	 */
+	fun after(responseProcessor: (ServerRequest, ServerResponse) -> ServerResponse) {
+		builder.after(responseProcessor)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param predicate the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	fun onError(predicate: (Throwable) -> Boolean, responseProvider: (Throwable, ServerRequest) -> Mono<ServerResponse>) {
+		builder.onError(predicate, responseProvider)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param E the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	inline fun <reified E : Throwable> onError(noinline responseProvider: (Throwable, ServerRequest) -> Mono<ServerResponse>) {
+		builder.onError({it is E}, responseProvider)
+	}
+
+	/**
+	 * Return a composed routing function created from all the registered routes.
+	 * @since 5.1
+	 */
+	internal fun build(): RouterFunction<ServerResponse> {
+		init()
+		return builder.build()
+	}
+
+	/**
 	 * Create a builder with the status code and headers of the given response.
 	 * @param other the response to copy the status and headers from
 	 * @return the created builder
@@ -620,14 +698,5 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 */
 	fun unprocessableEntity(): ServerResponse.BodyBuilder =
 			ServerResponse.unprocessableEntity()
-
-	/**
-	 * Return a composed routing function created from all the registered routes.
-	 * @since 5.1
-	 */
-	internal fun build(): RouterFunction<ServerResponse> {
-		init()
-		return builder.build()
-	}
 
 }

@@ -751,17 +751,17 @@ For instance, consider the following example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-RouterFunction<ServerResponse> route = route()
-	.path("/person", b1 -> b1
-		.nest(accept(APPLICATION_JSON), b2 -> b2
-			.GET("/{id}", handler::getPerson)
-			.GET("", handler::listPeople)
-			.before(request -> ServerRequest.from(request) // <1>
-				.header("X-RequestHeader", "Value")
-				.build()))
-		.POST("/person", handler::createPerson))
-	.after((request, response) -> logResponse(response)) // <2>
-	.build();
+	RouterFunction<ServerResponse> route = route()
+		.path("/person", b1 -> b1
+			.nest(accept(APPLICATION_JSON), b2 -> b2
+				.GET("/{id}", handler::getPerson)
+				.GET("", handler::listPeople)
+				.before(request -> ServerRequest.from(request) // <1>
+					.header("X-RequestHeader", "Value")
+					.build()))
+			.POST("/person", handler::createPerson))
+		.after((request, response) -> logResponse(response)) // <2>
+		.build();
 ----
 <1> The `before` filter that adds a custom request header is only applied to the two GET routes.
 <2> The `after` filter that logs the response is applied to all routes, including the nested ones.
@@ -769,8 +769,23 @@ RouterFunction<ServerResponse> route = route()
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// TODO when https://github.com/spring-projects/spring-framework/issues/23526 will be fixed
+	val route = router {
+		"/person".nest {
+			GET("/{id}", handler::getPerson)
+			GET("", handler::listPeople)
+			before { // <1>
+				ServerRequest.from(it)
+						.header("X-RequestHeader", "Value").build()
+			}
+			POST("/person", handler::createPerson)
+			after { _, response -> // <2>
+				logResponse(response)
+			}
+		}
+	}
 ----
+<1> The `before` filter that adds a custom request header is only applied to the two GET routes.
+<2> The `after` filter that logs the response is applied to all routes, including the nested ones.
 
 
 The `filter` method on the router builder takes a `HandlerFilterFunction`: a
@@ -807,7 +822,23 @@ The following example shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// TODO when https://github.com/spring-projects/spring-framework/issues/23526 will be fixed
+	val securityManager: SecurityManager = ...
+
+	val route = router {
+			("/person" and accept(APPLICATION_JSON)).nest {
+				GET("/{id}", handler::getPerson)
+				GET("", handler::listPeople)
+				POST("/person", handler::createPerson)
+				filter { request, next ->
+					if (securityManager.allowAccessTo(request.path())) {
+						next(request)
+					}
+					else {
+						status(UNAUTHORIZED).build();
+					}
+				}
+			}
+		}
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.

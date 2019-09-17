@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
@@ -64,7 +65,8 @@ fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
  */
 class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 
-	private val builder = RouterFunctions.route()
+	@PublishedApi
+	internal val builder = RouterFunctions.route()
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -507,6 +509,80 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 			mono(Dispatchers.Unconfined) {
 				lookupFunction.invoke(it)
 			}
+		}
+	}
+
+	/**
+	 * Merge externally defined router functions into this one.
+	 * @param routerFunction the router function to be added
+	 * @since 5.2
+	 */
+	fun add(routerFunction: RouterFunction<ServerResponse>) {
+		builder.add(routerFunction)
+	}
+
+	/**
+	 * Filters all routes created by this router with the given filter function. Filter
+	 * functions are typically used to address cross-cutting concerns, such as logging,
+	 * security, etc.
+	 * @param filterFunction the function to filter all routes built by this router
+	 * @since 5.2
+	 */
+	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
+		builder.filter { serverRequest, handlerFunction ->
+			mono(Dispatchers.Unconfined) {
+				filterFunction(serverRequest) {
+					handlerFunction.handle(serverRequest).awaitFirst()
+				}
+			}
+		}
+	}
+
+	/**
+	 * Filter the request object for all routes created by this builder with the given request
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param requestProcessor a function that transforms the request
+	 * @since 5.2
+	 */
+	fun before(requestProcessor: (ServerRequest) -> ServerRequest) {
+		builder.before(requestProcessor)
+	}
+
+	/**
+	 * Filter the response object for all routes created by this builder with the given response
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param responseProcessor a function that transforms the response
+	 * @since 5.2
+	 */
+	fun after(responseProcessor: (ServerRequest, ServerResponse) -> ServerResponse) {
+		builder.after(responseProcessor)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param predicate the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	fun onError(predicate: (Throwable) -> Boolean, responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
+		builder.onError(predicate) { throwable, request ->
+			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+		}
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param E the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	inline fun <reified E : Throwable> onError(noinline responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
+		builder.onError({it is E}) { throwable, request ->
+			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
 		}
 	}
 

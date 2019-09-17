@@ -16,11 +16,13 @@
 
 package org.springframework.web.servlet.function
 
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
 import org.springframework.mock.web.test.MockHttpServletRequest
 
@@ -124,7 +126,6 @@ class RouterFunctionDslTests {
 		}
 	}
 
-
 	private fun sampleRouter() = router {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
@@ -157,6 +158,28 @@ class RouterFunctionDslTests {
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }
+		add(otherRouter)
+	}
+
+	private val otherRouter = router {
+		"/other" {
+			ok().build()
+		}
+		filter { request, next ->
+			next(request)
+		}
+		before {
+			it
+		}
+		after { _, response ->
+			response
+		}
+		onError({it is IllegalStateException}) { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
+		onError<IllegalStateException> { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
 	}
 
 	@Suppress("UNUSED_PARAMETER")
