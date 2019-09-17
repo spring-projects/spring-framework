@@ -109,8 +109,8 @@ public class ReactorResourceFactoryTests {
 		this.resourceFactory.destroy();
 
 		// Managed (destroy disposes)..
-		verify(this.connectionProvider).dispose();
-		verify(this.loopResources).dispose();
+		verify(this.connectionProvider).disposeLater();
+		verify(this.loopResources).disposeLater();
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 	}
 
