@@ -32,6 +32,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Semyon Danilov
  * @since 3.1
  * @see EnableTransactionManagement
  * @see TransactionManagementConfigurationSelector
@@ -44,9 +45,9 @@ public class AspectJTransactionManagementConfiguration extends AbstractTransacti
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationTransactionAspect transactionAspect() {
 		AnnotationTransactionAspect txAspect = AnnotationTransactionAspect.aspectOf();
-		if (this.txManager != null) {
-			txAspect.setTransactionManager(this.txManager);
-		}
+		// aspect is a singleton, so it must be cleared every time bean is created
+		txAspect.clearTransactionManagerCache();
+		txAspect.setTransactionManager(this.txManager);
 		return txAspect;
 	}
 

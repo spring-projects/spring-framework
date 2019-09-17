@@ -1,6 +1,15 @@
 description = "Spring Integration Tests"
 
+apply plugin: "io.freefair.aspectj"
 apply plugin: "org.springframework.build.test-sources"
+
+sourceSets.main.aspectj.srcDir "src/main/java"
+sourceSets.main.java.srcDirs = files()
+
+sourceSets.test.aspectj.srcDir "src/test/java"
+sourceSets.test.java.srcDirs = files()
+
+aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
 dependencies {
 	testCompile(project(":spring-aop"))
@@ -13,6 +22,7 @@ dependencies {
 	testCompile(project(":spring-test"))
 	testCompile(project(":spring-tx"))
 	testCompile(project(":spring-web"))
+	aspect(project(":spring-aspects"))
 	testCompile("javax.inject:javax.inject")
 	testCompile("javax.resource:javax.resource-api")
 	testCompile("javax.servlet:javax.servlet-api")

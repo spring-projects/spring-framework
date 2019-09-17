@@ -78,6 +78,7 @@ import org.springframework.util.StringUtils;
  * @author Stéphane Nicoll
  * @author Sam Brannen
  * @author Mark Paluch
+ * @author Semyon Danilov
  * @since 1.1
  * @see PlatformTransactionManager
  * @see ReactiveTransactionManager
@@ -437,7 +438,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Clear the cache.
 	 */
-	protected void clearTransactionManagerCache() {
+	public void clearTransactionManagerCache() {
 		this.transactionManagerCache.clear();
 		this.beanFactory = null;
 	}

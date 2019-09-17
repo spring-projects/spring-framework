@@ -31,6 +31,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
  * {@link org.springframework.transaction.annotation.Transactional} annotation.
  *
  * @author Juergen Hoeller
+ * @author Semyon Danilov
  * @since 5.1
  * @see EnableTransactionManagement
  * @see TransactionManagementConfigurationSelector
@@ -42,9 +43,9 @@ public class AspectJJtaTransactionManagementConfiguration extends AspectJTransac
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JtaAnnotationTransactionAspect jtaTransactionAspect() {
 		JtaAnnotationTransactionAspect txAspect = JtaAnnotationTransactionAspect.aspectOf();
-		if (this.txManager != null) {
-			txAspect.setTransactionManager(this.txManager);
-		}
+		// aspect is a singleton, so it must be cleared every time bean is created
+		txAspect.clearTransactionManagerCache();
+		txAspect.setTransactionManager(this.txManager);
 		return txAspect;
 	}
 
