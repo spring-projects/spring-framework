@@ -2358,7 +2358,6 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	@Disabled  // TODO re-enable when ConstructorResolver TODO sorted out
 	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	void prototypeCreationWithConstructorArgumentsIsFastEnough() {
 		Assume.notLogging(factoryLog);
@@ -2376,7 +2375,6 @@ class DefaultListableBeanFactoryTests {
 			assertThat(tb.getAge()).isEqualTo(99);
 		}
 		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
 		assertThat(sw.getTotalTimeMillis() < 3000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
