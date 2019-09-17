@@ -884,7 +884,7 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test // gh-23542
-	public void concurrentBeanDefinitionRemoval() {
+	void concurrentBeanDefinitionRemoval() {
 		final int MAX = 200;
 		lbf.setAllowBeanDefinitionOverriding(false);
 
