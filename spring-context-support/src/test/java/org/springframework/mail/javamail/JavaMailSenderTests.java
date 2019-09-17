@@ -38,14 +38,22 @@ import javax.mail.internet.MimeMessage;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.util.ObjectUtils;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.Answers.RETURNS_DEFAULTS;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * @author Juergen Hoeller
@@ -485,6 +493,55 @@ public class JavaMailSenderTests {
 			assertThat(((MessagingException) subEx).getMessage()).isEqualTo("failed");
 		}
 	}
+
+	@Test
+	public void decorateAnotherJavaMailSenderPipesEverySendInvocationToMimeMessageVarargMethod() {
+		JavaMailSender mailSender = mock(JavaMailSenderDecorator.class, withSettings().lenient()
+				.defaultAnswer(i -> MimeMessage.class.isAssignableFrom(i.getMethod().getReturnType()) ? new MimeMessage((Session) null) : RETURNS_DEFAULTS.answer(i)));
+
+		mailSender.send(new SimpleMailMessage());
+		verify(mailSender, times(1)).send((MimeMessage[]) notNull());
+
+		mailSender.send(new SimpleMailMessage(), new SimpleMailMessage());
+		verify(mailSender, times(1)).send((MimeMessage) notNull(), notNull());
+
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		mailSender.send(mimeMessage);
+		verify(mailSender, times(1)).send(new MimeMessage[] {mimeMessage});
+
+		MimeMessage[] preparedMessage = new MimeMessage[1];
+		mailSender.send(m -> preparedMessage[0] = m);
+		verify(mailSender, times(1)).send(preparedMessage);
+
+		MimeMessage[] preparedMessages = new MimeMessage[2];
+		mailSender.send(m1 -> preparedMessages[0] = m1, m2 -> preparedMessages[1] = m2);
+		verify(mailSender, times(1)).send(preparedMessages);
+	}
+
+	@Test
+	public void decorateExistingMailSender() {
+		MockJavaMailSender mockSender = new MockJavaMailSender();
+		mockSender.setHost("host");
+
+		List<MimeMessage> sent = new ArrayList<>();
+		JavaMailSenderDecorator decoratedMailSender = new JavaMailSenderDecorator(mockSender) {
+			@Override
+			public void send(MimeMessage ... mimeMessages) throws MailException {
+				sent.addAll(asList(mimeMessages));
+				decoratedMailSender.send(mimeMessages);
+			}
+		};
+
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo("you@mail.org");
+		decoratedMailSender.send(message);
+		assertThat(sent)
+			.hasSize(1)
+			.hasOnlyOneElementSatisfying(m ->
+				assertThat(message.getTo()).hasOnlyOneElementSatisfying(to -> assertThat(to).isEqualTo("you@mail.org")));
+	}
+
+
 
 	@Test
 	public void testConnection() throws MessagingException {
