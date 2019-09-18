@@ -66,7 +66,7 @@ suspend fun RSocketRequester.Builder.connectWebSocketAndAwait(uri: URI): RSocket
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer: Any): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer: Any): RSocketRequester.RequestSpec =
 		data(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
@@ -78,7 +78,7 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer:
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher: Publisher<T>): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher: Publisher<T>): RSocketRequester.RequestSpec =
 		data(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
@@ -90,58 +90,58 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flow<T>): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flow<T>): RSocketRequester.RequestSpec =
 		data(flow, object : ParameterizedTypeReference<T>() {})
 
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.send].
+ * Coroutines variant of [RSocketRequester.RequestSpec.send].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun RSocketRequester.ResponseSpec.sendAndAwait() {
+suspend fun RSocketRequester.RequestSpec.sendAndAwait() {
 	send().awaitFirstOrNull()
 }
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.retrieveMono].
+ * Coroutines variant of [RSocketRequester.RequestSpec.retrieveMono].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveAndAwait(): T =
+suspend inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveAndAwait(): T =
 		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.retrieveFlux].
+ * Coroutines variant of [RSocketRequester.RequestSpec.retrieveFlux].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
 @ExperimentalCoroutinesApi
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlow(): Flow<T> =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveFlow(): Flow<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {}).asFlow()
 
 /**
- * Extension for [RSocketRequester.ResponseSpec.retrieveMono] providing a `retrieveMono<Foo>()`
+ * Extension for [RSocketRequester.RequestSpec.retrieveMono] providing a `retrieveMono<Foo>()`
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveMono(): Mono<T> =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveMono(): Mono<T> =
 		retrieveMono(object : ParameterizedTypeReference<T>() {})
 
 
 /**
- * Extension for [RSocketRequester.ResponseSpec.retrieveFlux] providing a `retrieveFlux<Foo>()`
+ * Extension for [RSocketRequester.RequestSpec.retrieveFlux] providing a `retrieveFlux<Foo>()`
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlux(): Flux<T> =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveFlux(): Flux<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {})

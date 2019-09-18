@@ -231,22 +231,10 @@ public interface RSocketRequester {
 
 	}
 
-
 	/**
-	 * Spec for providing input data for an RSocket request.
+	 * Spec for providing input data for an RSocket request and triggering the exchange.
 	 */
-	interface RequestSpec {
-
-		/**
-		 * Use this to append additional metadata entries when using composite
-		 * metadata. An {@link IllegalArgumentException} is raised if this
-		 * method is used when not using composite metadata.
-		 * @param metadata an Object to be encoded with a suitable
-		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
-		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
-		 * @param mimeType the mime type that describes the metadata
-		 */
-		RequestSpec metadata(Object metadata, MimeType mimeType);
+	interface RequestSpec extends MetadataSpec<RequestSpec> {
 
 		/**
 		 * Append additional metadata entries through a {@code Consumer}.
@@ -255,7 +243,7 @@ public interface RSocketRequester {
 		 * @param configurer the configurer to apply
 		 * @throws IllegalArgumentException if not using composite metadata.
 		 */
-		RequestSpec metadata(Consumer<RequestSpec> configurer);
+		RequestSpec metadata(Consumer<MetadataSpec<?>> configurer);
 
 		/**
 		 * Provide payload data for the request. This can be one of:
@@ -268,7 +256,7 @@ public interface RSocketRequester {
 		 * @param data the Object value for the payload data
 		 * @return spec to declare the expected response
 		 */
-		ResponseSpec data(Object data);
+		RequestSpec data(Object data);
 
 		/**
 		 * Variant of {@link #data(Object)} that also accepts a hint for the
@@ -280,7 +268,7 @@ public interface RSocketRequester {
 		 * @param elementClass the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		ResponseSpec data(Object producer, Class<?> elementClass);
+		RequestSpec data(Object producer, Class<?> elementClass);
 
 		/**
 		 * Variant of {@link #data(Object, Class)} for when the type hint has
@@ -291,14 +279,7 @@ public interface RSocketRequester {
 		 * @param elementTypeRef the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		ResponseSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
-	}
-
-
-	/**
-	 * Spect to declare the type of request and expected response.
-	 */
-	interface ResponseSpec {
+		RequestSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Perform a {@link RSocket#fireAndForget fireAndForget}.
@@ -341,6 +322,25 @@ public interface RSocketRequester {
 		 * to have a generic type. See {@link ParameterizedTypeReference}.
 		 */
 		<T> Flux<T> retrieveFlux(ParameterizedTypeReference<T> dataTypeRef);
+	}
+
+	/**
+	 * Spec for specifying the metadata.
+	 *
+	 * @param <S> a self reference to the spec type
+	 */
+	interface MetadataSpec<S extends MetadataSpec<S>> {
+
+		/**
+		 * Use this to append additional metadata entries when using composite
+		 * metadata. An {@link IllegalArgumentException} is raised if this
+		 * method is used when not using composite metadata.
+		 * @param metadata an Object to be encoded with a suitable
+		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
+		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+		 * @param mimeType the mime type that describes the metadata
+		 */
+		S metadata(Object metadata, MimeType mimeType);
 	}
 
 }

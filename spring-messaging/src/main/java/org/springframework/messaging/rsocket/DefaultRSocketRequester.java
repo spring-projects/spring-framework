@@ -116,6 +116,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		private final MetadataEncoder metadataEncoder;
 
+		@Nullable
+		private Mono<Payload> payloadMono = Mono.empty();
+
+		@Nullable
+		private Flux<Payload> payloadFlux = null;
+
 
 		public DefaultRequestSpec(String route, Object... vars) {
 			this.metadataEncoder = new MetadataEncoder(metadataMimeType(), strategies);
@@ -135,24 +141,26 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@Override
-		public RequestSpec metadata(Consumer<RequestSpec> configurer) {
+		public RequestSpec metadata(Consumer<MetadataSpec<?>> configurer) {
 			configurer.accept(this);
 			return this;
 		}
 
 		@Override
-		public ResponseSpec data(Object data) {
+		public RequestSpec data(Object data) {
 			Assert.notNull(data, "'data' must not be null");
-			return toResponseSpec(data, ResolvableType.NONE);
+			createPayload(data, ResolvableType.NONE);
+			return this;
 		}
 
 		@Override
-		public ResponseSpec data(Object producer, Class<?> elementClass) {
+		public RequestSpec data(Object producer, Class<?> elementClass) {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementClass, "'elementClass' must not be null");
 			ReactiveAdapter adapter = getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
-			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
+			createPayload(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
+			return this;
 		}
 
 		@Nullable
@@ -161,15 +169,16 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@Override
-		public ResponseSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+		public RequestSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 			ReactiveAdapter adapter = getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
-			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forType(elementTypeRef));
+			createPayload(adapter.toPublisher(producer), ResolvableType.forType(elementTypeRef));
+			return this;
 		}
 
-		private ResponseSpec toResponseSpec(Object input, ResolvableType elementType) {
+		private void createPayload(Object input, ResolvableType elementType) {
 			ReactiveAdapter adapter = getAdapter(input.getClass());
 			Publisher<?> publisher;
 			if (input instanceof Publisher) {
@@ -179,31 +188,35 @@ final class DefaultRSocketRequester implements RSocketRequester {
 				publisher = adapter.toPublisher(input);
 			}
 			else {
-				Mono<Payload> payloadMono = Mono
+				this.payloadMono = Mono
 						.fromCallable(() -> encodeData(input, ResolvableType.forInstance(input), null))
 						.map(this::firstPayload)
 						.doOnDiscard(Payload.class, Payload::release)
 						.switchIfEmpty(emptyPayload());
-				return new DefaultResponseSpec(payloadMono);
+				this.payloadFlux = null;
+				return;
 			}
 
 			if (isVoid(elementType) || (adapter != null && adapter.isNoValue())) {
-				Mono<Payload> payloadMono = Mono.when(publisher).then(emptyPayload());
-				return new DefaultResponseSpec(payloadMono);
+				this.payloadMono = Mono.when(publisher).then(emptyPayload());
+				this.payloadFlux = null;
+				return;
 			}
 
 			Encoder<?> encoder = elementType != ResolvableType.NONE && !Object.class.equals(elementType.resolve()) ?
 					strategies.encoder(elementType, dataMimeType) : null;
 
 			if (adapter != null && !adapter.isMultiValue()) {
-				Mono<Payload> payloadMono = Mono.from(publisher)
+				this.payloadMono = Mono.from(publisher)
 						.map(value -> encodeData(value, elementType, encoder))
 						.map(this::firstPayload)
 						.switchIfEmpty(emptyPayload());
-				return new DefaultResponseSpec(payloadMono);
+				this.payloadFlux = null;
+				return;
 			}
 
-			Flux<Payload> payloadFlux = Flux.from(publisher)
+			this.payloadMono = null;
+			this.payloadFlux = Flux.from(publisher)
 					.map(value -> encodeData(value, elementType, encoder))
 					.switchOnFirst((signal, inner) -> {
 						DataBuffer data = signal.get();
@@ -217,7 +230,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 					})
 					.doOnDiscard(Payload.class, Payload::release)
 					.switchIfEmpty(emptyPayload());
-			return new DefaultResponseSpec(payloadFlux);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -244,26 +256,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		private Mono<Payload> emptyPayload() {
 			return Mono.fromCallable(() -> firstPayload(emptyDataBuffer));
-		}
-	}
-
-
-	private class DefaultResponseSpec implements ResponseSpec {
-
-		@Nullable
-		private final Mono<Payload> payloadMono;
-
-		@Nullable
-		private final Flux<Payload> payloadFlux;
-
-		DefaultResponseSpec(Mono<Payload> payloadMono) {
-			this.payloadMono = payloadMono;
-			this.payloadFlux = null;
-		}
-
-		DefaultResponseSpec(Flux<Payload> payloadFlux) {
-			this.payloadMono = null;
-			this.payloadFlux = payloadFlux;
 		}
 
 		@Override
@@ -325,5 +317,4 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			return PayloadUtils.retainDataAndReleasePayload(payload, bufferFactory());
 		}
 	}
-
 }

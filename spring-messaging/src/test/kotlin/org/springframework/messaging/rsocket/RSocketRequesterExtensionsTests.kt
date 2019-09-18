@@ -74,83 +74,78 @@ class RSocketRequesterExtensionsTests {
 	@Test
 	fun `dataWithType with Publisher`() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<Publisher<String>>()
-		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertThat(requestSpec.dataWithType(data)).isEqualTo(responseSpec)
+		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns requestSpec
+		assertThat(requestSpec.dataWithType(data)).isEqualTo(requestSpec)
 	}
 
 	@Test
 	fun `dataWithType with Flow`() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<Flow<String>>()
-		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertThat(requestSpec.dataWithType(data)).isEqualTo(responseSpec)
+		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns requestSpec
+		assertThat(requestSpec.dataWithType(data)).isEqualTo(requestSpec)
 	}
 
 	@Test
 	fun `dataWithType with CompletableFuture`() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		val data = mockk<CompletableFuture<String>>()
-		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertThat(requestSpec.dataWithType<String>(data)).isEqualTo(responseSpec)
+		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns requestSpec
+		assertThat(requestSpec.dataWithType<String>(data)).isEqualTo(requestSpec)
 	}
 
 	@Test
 	fun dataFlowWithoutType() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { requestSpec.data(any()) } returns responseSpec
-		assertThat(requestSpec.data(mockk())).isEqualTo(responseSpec)
+		every { requestSpec.data(any()) } returns requestSpec
+		assertThat(requestSpec.data(mockk())).isEqualTo(requestSpec)
 	}
 
 	@Test
 	fun sendAndAwait() {
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { responseSpec.send() } returns Mono.empty()
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		every { requestSpec.send() } returns Mono.empty()
 		runBlocking {
-			responseSpec.sendAndAwait()
+			requestSpec.sendAndAwait()
 		}
 	}
 
 	@Test
 	fun retrieveAndAwait() {
 		val response = "foo"
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { responseSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		every { requestSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		runBlocking {
-			assertThat(responseSpec.retrieveAndAwait<String>()).isEqualTo(response)
+			assertThat(requestSpec.retrieveAndAwait<String>()).isEqualTo(response)
 		}
 	}
 
 	@Test
 	@ExperimentalCoroutinesApi
 	fun retrieveFlow() {
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { responseSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		every { requestSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		runBlocking {
-			assertThat(responseSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
+			assertThat(requestSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
 		}
 	}
 
 	@Test
 	fun retrieveMono() {
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { responseSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		every { requestSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		runBlocking {
-			assertThat(responseSpec.retrieveMono<String>().block()).isEqualTo("foo")
+			assertThat(requestSpec.retrieveMono<String>().block()).isEqualTo("foo")
 		}
 	}
 
 	@Test
 	fun retrieveFlux() {
-		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
-		every { responseSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		every { requestSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		runBlocking {
-			assertThat(responseSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
+			assertThat(requestSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
 		}
 	}
-
 }
