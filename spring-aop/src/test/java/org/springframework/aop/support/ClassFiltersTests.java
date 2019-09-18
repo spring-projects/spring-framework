@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,39 +23,46 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
+ * Unit tests for {@link ClassFilters}.
+ *
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class ClassFiltersTests {
 
-	private ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
+	private final ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
 
-	private ClassFilter itbFilter = new RootClassFilter(ITestBean.class);
+	private final ClassFilter interfaceFilter = new RootClassFilter(ITestBean.class);
 
-	private ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
+	private final ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
+
 
 	@Test
-	public void testUnion() {
+	public void union() {
 		assertTrue(exceptionFilter.matches(RuntimeException.class));
 		assertFalse(exceptionFilter.matches(TestBean.class));
-		assertFalse(itbFilter.matches(Exception.class));
-		assertTrue(itbFilter.matches(TestBean.class));
-		ClassFilter union = ClassFilters.union(exceptionFilter, itbFilter);
+		assertFalse(interfaceFilter.matches(Exception.class));
+		assertTrue(interfaceFilter.matches(TestBean.class));
+		ClassFilter union = ClassFilters.union(exceptionFilter, interfaceFilter);
 		assertTrue(union.matches(RuntimeException.class));
 		assertTrue(union.matches(TestBean.class));
+		assertTrue(union.toString().matches("^.+UnionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+TestBean\\]$"));
 	}
 
 	@Test
-	public void testIntersection() {
+	public void intersection() {
 		assertTrue(exceptionFilter.matches(RuntimeException.class));
 		assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));
 		ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
 		assertFalse(intersection.matches(RuntimeException.class));
 		assertFalse(intersection.matches(TestBean.class));
 		assertTrue(intersection.matches(NestedRuntimeException.class));
+		assertTrue(intersection.toString().matches("^.+IntersectionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+NestedRuntimeException\\]$"));
 	}
 
 }

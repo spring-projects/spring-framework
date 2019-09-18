@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.aop.support;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.util.Assert;
@@ -28,6 +29,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 11.11.2003
  * @see MethodMatchers
  * @see Pointcuts
@@ -89,9 +91,9 @@ public abstract class ClassFilters {
 	@SuppressWarnings("serial")
 	private static class UnionClassFilter implements ClassFilter, Serializable {
 
-		private ClassFilter[] filters;
+		private final ClassFilter[] filters;
 
-		public UnionClassFilter(ClassFilter[] filters) {
+		UnionClassFilter(ClassFilter[] filters) {
 			this.filters = filters;
 		}
 
@@ -115,6 +117,12 @@ public abstract class ClassFilters {
 		public int hashCode() {
 			return ObjectUtils.nullSafeHashCode(this.filters);
 		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + Arrays.toString(this.filters);
+		}
+
 	}
 
 
@@ -124,9 +132,9 @@ public abstract class ClassFilters {
 	@SuppressWarnings("serial")
 	private static class IntersectionClassFilter implements ClassFilter, Serializable {
 
-		private ClassFilter[] filters;
+		private final ClassFilter[] filters;
 
-		public IntersectionClassFilter(ClassFilter[] filters) {
+		IntersectionClassFilter(ClassFilter[] filters) {
 			this.filters = filters;
 		}
 
@@ -150,6 +158,12 @@ public abstract class ClassFilters {
 		public int hashCode() {
 			return ObjectUtils.nullSafeHashCode(this.filters);
 		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + Arrays.toString(this.filters);
+		}
+
 	}
 
 }

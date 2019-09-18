@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 11.11.2003
  * @see ClassFilters
  * @see Pointcuts
@@ -155,6 +156,11 @@ public abstract class MethodMatchers {
 		public int hashCode() {
 			return 37 * this.mm1.hashCode() + this.mm2.hashCode();
 		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + this.mm1 + ", " + this.mm2;
+		}
 	}
 
 
@@ -228,6 +234,11 @@ public abstract class MethodMatchers {
 		public int hashCode() {
 			// Allow for matching with regular UnionMethodMatcher by providing same hash...
 			return super.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + this.cf1 + ", " + this.mm1 + ", " + this.cf2 + ", " + this.mm2;
 		}
 	}
 
@@ -310,6 +321,11 @@ public abstract class MethodMatchers {
 		@Override
 		public int hashCode() {
 			return 37 * this.mm1.hashCode() + this.mm2.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + this.mm1 + ", " + this.mm2;
 		}
 	}
 

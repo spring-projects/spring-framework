@@ -100,6 +100,14 @@ public class ControlFlowPointcutTests {
 		assertFalse(new ControlFlowPointcut(One.class, "getAge").hashCode() == new ControlFlowPointcut(One.class).hashCode());
 	}
 
+	@Test
+	public void testToString() {
+		assertEquals(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = null",
+			new ControlFlowPointcut(One.class).toString());
+		assertEquals(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = getAge",
+			new ControlFlowPointcut(One.class, "getAge").toString());
+	}
+
 	public class One {
 		int getAge(ITestBean proxied) {
 			return proxied.getAge();

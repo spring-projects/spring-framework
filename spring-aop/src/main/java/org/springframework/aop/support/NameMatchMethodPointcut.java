@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.List;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * Pointcut bean for simple method name matches, as alternative to regexp patterns.
- * Does not handle overloaded methods: all methods with a given name will be eligible.
+ * Pointcut bean for simple method name matches, as an alternative to regexp patterns.
+ * <p>Does not handle overloaded methods: all methods with a given name will be eligible.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -106,6 +106,11 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	@Override
 	public int hashCode() {
 		return this.mappedNames.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": " + this.mappedNames;
 	}
 
 }
