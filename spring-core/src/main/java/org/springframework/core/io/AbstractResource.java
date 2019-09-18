@@ -45,7 +45,7 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractResource implements Resource {
 
-	private static final LogAccessor logAccessor = new LogAccessor(AbstractResource.class);
+	private static volatile LogAccessor logAccessor;
 
 	/**
 	 * This implementation checks whether a File can be opened,
@@ -65,6 +65,9 @@ public abstract class AbstractResource implements Resource {
 				return true;
 			}
 			catch (Throwable isEx) {
+				if (logAccessor == null) {
+					logAccessor = new LogAccessor(AbstractResource.class);
+				}
 				logAccessor.debug(ex,
 						() -> "Could not close InputStream for resource: " + getDescription());
 				return false;
@@ -164,6 +167,9 @@ public abstract class AbstractResource implements Resource {
 				is.close();
 			}
 			catch (IOException ex) {
+				if (logAccessor == null) {
+					logAccessor = new LogAccessor(AbstractResource.class);
+				}
 				logAccessor.debug(ex,
 						() -> "Could not close InputStream for resource: " + getDescription());
 			}
