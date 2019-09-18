@@ -117,7 +117,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private final MetadataEncoder metadataEncoder;
 
 		@Nullable
-		private Mono<Payload> payloadMono = Mono.empty();
+		private Mono<Payload> payloadMono = emptyPayload();
 
 		@Nullable
 		private Flux<Payload> payloadFlux = null;
