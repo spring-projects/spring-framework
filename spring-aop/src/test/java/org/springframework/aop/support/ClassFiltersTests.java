@@ -26,30 +26,33 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link ClassFilters}.
+ *
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class ClassFiltersTests {
+class ClassFiltersTests {
 
-	private ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
+	private final ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
 
-	private ClassFilter itbFilter = new RootClassFilter(ITestBean.class);
+	private final ClassFilter interfaceFilter = new RootClassFilter(ITestBean.class);
 
-	private ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
+	private final ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
+
 
 	@Test
-	public void testUnion() {
+	void union() {
 		assertThat(exceptionFilter.matches(RuntimeException.class)).isTrue();
 		assertThat(exceptionFilter.matches(TestBean.class)).isFalse();
-		assertThat(itbFilter.matches(Exception.class)).isFalse();
-		assertThat(itbFilter.matches(TestBean.class)).isTrue();
-		ClassFilter union = ClassFilters.union(exceptionFilter, itbFilter);
+		assertThat(interfaceFilter.matches(Exception.class)).isFalse();
+		assertThat(interfaceFilter.matches(TestBean.class)).isTrue();
+		ClassFilter union = ClassFilters.union(exceptionFilter, interfaceFilter);
 		assertThat(union.matches(RuntimeException.class)).isTrue();
 		assertThat(union.matches(TestBean.class)).isTrue();
 	}
 
 	@Test
-	public void testIntersection() {
+	void intersection() {
 		assertThat(exceptionFilter.matches(RuntimeException.class)).isTrue();
 		assertThat(hasRootCauseFilter.matches(NestedRuntimeException.class)).isTrue();
 		ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
