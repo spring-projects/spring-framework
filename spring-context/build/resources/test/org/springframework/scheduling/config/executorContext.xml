@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/task https://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+	default-lazy-init="true">
+
+	<task:executor id="default"/>
+
+	<task:executor id="singleSize" pool-size="42"/>
+
+	<task:executor id="rangeWithBoundedQueue" pool-size="7-42" queue-capacity="11"/>
+
+	<task:executor id="rangeWithUnboundedQueue" pool-size="0-9" keep-alive="37"/>
+
+	<task:executor id="invalidPoolSize" pool-size="zzz"/>
+
+	<task:executor id="propertyPlaceholderWithSingleSize" pool-size="${size.single}"/>
+
+	<task:executor id="propertyPlaceholderWithRange" pool-size="${size.range}" queue-capacity="10"/>
+
+	<task:executor id="propertyPlaceholderWithRangeAndCoreThreadTimeout" pool-size="${size.rangeFromZero}"/>
+
+	<task:executor id="propertyPlaceholderWithInvalidPoolSize" pool-size="${size.invalid}"/>
+
+	<context:property-placeholder properties-ref="props"/>
+
+	<util:properties id="props">
+		<prop key="size.single">123</prop>
+		<prop key="size.range">5-25</prop>
+		<prop key="size.rangeFromZero">0-99</prop>
+		<prop key="size.invalid">22-abc</prop>
+	</util:properties>
+
+</beans>

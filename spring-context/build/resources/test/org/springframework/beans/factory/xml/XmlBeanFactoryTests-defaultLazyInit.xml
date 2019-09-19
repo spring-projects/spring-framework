@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-lazy-init="true">
+
+	<bean id="lazy-and-bad"
+		class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$BadInitializer"
+		init-method="init2"
+	/>
+
+	<bean id="init-and-ib"
+		class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$InitAndIB"
+		lazy-init="false"
+		init-method="customInit"
+		destroy-method="customDestroy"
+	/>
+
+	<bean id="prototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+
+</beans>

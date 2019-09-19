@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Test that inner bean for target means that we can use
+	autowire without ambiguity from target and proxy.
+	$Id: innerBeanTarget.xml,v 1.4 2006/08/20 19:08:40 jhoeller Exp $
+-->
+
+<beans>
+
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor">
+	</bean>
+
+	<bean id="testBean"
+		class="org.springframework.aop.framework.ProxyFactoryBean"
+	>
+			<property name="target">
+				<bean class="org.springframework.tests.sample.beans.TestBean">
+					<property name="name"><value>innerBeanTarget</value></property>
+				</bean>
+			</property>
+
+			<property name="interceptorNames">
+				<value>nopInterceptor</value>
+			</property>
+	</bean>
+
+	<!--
+		Autowire would fail if distinct target and proxy:
+		we expect just to have proxy
+	-->
+	<bean id="autowireCheck"
+		class="org.springframework.aop.framework.ProxyFactoryBeanTests$DependsOnITestBean"
+			autowire="constructor" />
+
+</beans>
+

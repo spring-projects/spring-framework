@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:test="http://www.springframework.org/schema/beans/test"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://www.springframework.org/schema/beans/test https://www.springframework.org/schema/beans/factory/xml/support/CustomNamespaceHandlerTests.xsd"
+	default-lazy-init="true">
+
+	<test:testBean id="testBean" name="Rob Harrop" age="23"/>
+
+	<bean id="customisedTestBean" class="org.springframework.tests.sample.beans.TestBean">
+		<test:set name="Rob Harrop" age="23"/>
+	</bean>
+
+	<bean id="debuggingTestBean" class="org.springframework.tests.sample.beans.TestBean">
+		<test:debug/>
+		<property name="name" value="Rob Harrop"/>
+		<property name="age" value="23"/>
+	</bean>
+
+	<bean id="debuggingTestBeanNoInstance" class="org.springframework.context.ApplicationListener">
+		<test:debug/>
+	</bean>
+
+	<bean id="chainedTestBean" class="org.springframework.tests.sample.beans.TestBean">
+		<test:debug/>
+		<test:nop/>
+		<property name="name" value="Rob Harrop"/>
+		<property name="age" value="23"/>
+	</bean>
+
+	<bean id="decorateWithAttribute" class="org.springframework.tests.sample.beans.TestBean" test:object-name="foo"/>
+
+	<util:list id="list.of.things">
+		<test:person name="Fiona Apple" age="20"/>
+		<test:person name="Harriet Wheeler" age="30"/>
+	</util:list>
+
+	<util:set id="set.of.things">
+		<test:person name="Fiona Apple" age="20"/>
+		<test:person name="Harriet Wheeler" age="30"/>
+	</util:set>
+
+	<util:map id="map.of.things">
+		<entry key="fiona.apple">
+			<test:person name="Fiona Apple" age="20"/>
+		</entry>
+		<entry key="harriet.wheeler">
+			<test:person name="Harriet Wheeler" age="30"/>
+		</entry>
+	</util:map>
+
+</beans>

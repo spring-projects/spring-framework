@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="target1" class="org.springframework.beans.factory.config.SetFactoryBean" lazy-init="true">
+		<property name="sourceSet">
+			<set>
+				<value>10</value>
+			</set>
+		</property>
+	</bean>
+
+	<!--
+		This will create a proxy that lazily fetches its target bean (with name "target").
+	-->
+	<bean id="proxy1" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces" value="java.util.Set"/>
+		<property name="targetSource">
+			<bean class="org.springframework.aop.target.LazyInitTargetSource">
+				<property name="targetBeanName" value="target1"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="target2" class="org.springframework.beans.factory.config.SetFactoryBean" lazy-init="true">
+		<property name="sourceSet">
+			<set>
+				<value>20</value>
+			</set>
+		</property>
+	</bean>
+
+	<!--
+		This will create a proxy that lazily fetches its target bean (with name "target").
+	-->
+	<bean id="proxy2" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="autodetectInterfaces" value="true"/>
+		<property name="targetSource">
+			<bean class="org.springframework.aop.target.LazyInitTargetSource">
+				<property name="targetBeanName" value="target2"/>
+				<property name="targetClass" value="java.util.Set"/>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

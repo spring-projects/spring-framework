@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="targetDependency" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>dependency</value></property>
+	</bean>
+
+	<!-- Simple target -->
+	<bean id="target" class="org.springframework.tests.sample.beans.DerivedTestBean" lazy-init="true">
+		<property name="name"><value>custom</value></property>
+		<property name="age"><value>666</value></property>
+		<property name="spouse"><ref bean="targetDependency"/></property>
+	</bean>
+
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
+
+	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade"/>
+
+	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="transactionAttributeSource">
+			<value>
+				org.springframework.tests.sample.beans.ITestBean.s*=PROPAGATION_MANDATORY
+				org.springframework.tests.sample.beans.AgeHolder.setAg*=PROPAGATION_REQUIRED
+				org.springframework.tests.sample.beans.ITestBean.set*= PROPAGATION_SUPPORTS , readOnly
+			</value>
+		</property>
+	</bean>
+
+	<bean id="proxyFactory1" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<value>org.springframework.tests.sample.beans.ITestBean</value>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>txInterceptor</value>
+				<value>target</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="baseProxyFactory" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		  abstract="true">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
+				<prop key="setAg*">  PROPAGATION_REQUIRED  ,  readOnly  </prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="proxyFactory2DynamicProxy" parent="baseProxyFactory">
+		<property name="target"><ref bean="target"/></property>
+	</bean>
+
+	<!--
+		Same as proxyFactory2DynamicProxy but forces the use of CGLIB.
+	-->
+	<bean id="proxyFactory2Cglib" parent="baseProxyFactory">
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="target"><ref bean="target"/></property>
+	</bean>
+
+	<bean id="proxyFactory2Lazy" parent="baseProxyFactory">
+		<property name="target">
+			<bean class="org.springframework.aop.target.LazyInitTargetSource">
+				<property name="targetBeanName"><idref bean="target"/></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="proxyFactory3" parent="baseProxyFactory">
+		<property name="target"><ref bean="target"/></property>
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="pointcut">
+			<ref bean="txnInvocationCounterPointcut"/>
+		</property>
+		<property name="preInterceptors">
+			<list>
+				<ref bean="preInvocationCounterInterceptor"/>
+			</list>
+		</property>
+		<property name="postInterceptors">
+			<list>
+				<ref bean="postInvocationCounterInterceptor"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean name="cglibNoInterfaces" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="target">
+			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">
+				<property name="dependency"><ref bean="targetDependency"/></property>
+			</bean>
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!--
+		The HotSwappableTargetSource is a Type 3 component.
+	-->
+	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
+		<constructor-arg><ref bean="target"/></constructor-arg>
+	</bean>
+
+	<bean id="hotSwapped" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<!-- Should automatically pick up the target source, rather than simple target -->
+		<property name="target"><ref bean="swapper"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
+				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
+			</props>
+		</property>
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="optimize"><value>false</value></property>
+	</bean>
+
+	<bean id="txnInvocationCounterPointcut"
+			class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"/>
+
+	<bean id="preInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
+
+	<bean id="postInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
+
+</beans>

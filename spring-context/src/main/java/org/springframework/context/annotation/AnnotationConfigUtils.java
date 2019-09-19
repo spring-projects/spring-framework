@@ -141,21 +141,25 @@ public class AnnotationConfigUtils {
 	 * that this registration was triggered from. May be {@code null}.
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
+	 * 返回一个装载了8个内置的处理器的容器，BeanDefinitionHolder类型
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
-		// 获取默认的DefaultListableBeanFactory
+		// 获取默认的DefaultListableBeanFactor
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+				// a.设置依赖比较器AnnotationAwareOrderComparator
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
 			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				// b.设置自动注入备选解析器ContextAnnotationAutowireCandidateResolver
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
 
+		// 创建一个有序的容器，里面是BeanDefinitionHolder，容量为8
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
 		// 注册内置的配置注解处理器
@@ -163,6 +167,8 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
+			// 第一个位置添加 org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -171,6 +177,8 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			// 第二个位置添加 org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 		// 注册内置的后置处理器
@@ -178,6 +186,8 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			// 第三个位置添加 org.springframework.context.annotation.internalRequiredAnnotationProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -188,6 +198,8 @@ public class AnnotationConfigUtils {
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			// 第四个位置添加 org.springframework.context.annotation.internalCommonAnnotationProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -197,6 +209,7 @@ public class AnnotationConfigUtils {
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
+
 				def.setBeanClass(ClassUtils.forName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME,
 						AnnotationConfigUtils.class.getClassLoader()));
 			}
@@ -205,6 +218,8 @@ public class AnnotationConfigUtils {
 						"Cannot load optional framework class: " + PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, ex);
 			}
 			def.setSource(source);
+			// 第六个位置添加 org.springframework.context.annotation.internalPersistenceAnnotationProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -213,6 +228,9 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
+
+			// 第七个位置添加 org.springframework.context.event.internalEventListenerProcessor
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
 
@@ -221,6 +239,9 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
+
+			// 第八个位置添加 org.springframework.context.event.internalEventListenerFactory
+			// 传进去一个RootBeanDefinition对象，调用registerPostProcessor()方法使用BeanDefinitionHolder来包装返回，add到beanDefs容器里
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
 		}
 

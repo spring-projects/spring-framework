@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="testBeanTarget" class="org.springframework.tests.sample.beans.TestBean" scope="request"/>
+
+	<bean id="testBean" class="org.springframework.aop.scope.ScopedProxyFactoryBean">
+		<property name="targetBeanName" value="testBeanTarget"/>
+		<property name="proxyTargetClass" value="false"/>
+	</bean>
+
+</beans>

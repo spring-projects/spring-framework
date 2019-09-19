@@ -49,6 +49,7 @@ public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParse
 		// Obtain bean definitions for all relevant BeanPostProcessors.
 		// 从所有相应的后置处理器获取bd
 		Set<BeanDefinitionHolder> processorDefinitions =
+				// 返回一个装载了8个内置的处理器的容器，BeanDefinitionHolder类型
 				AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(), source);
 
 		// Register component for the surrounding <context:annotation-config> element.

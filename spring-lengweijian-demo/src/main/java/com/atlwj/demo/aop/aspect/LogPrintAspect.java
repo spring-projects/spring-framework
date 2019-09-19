@@ -72,20 +72,20 @@ public class LogPrintAspect {
 
 	}
 
-//	@Before(value = "pointCut()")
-//	public void before(JoinPoint joinPoint){
-//		System.out.printf("方法：%s 执行之前打印，参数列表为：%s",joinPoint.getSignature().getName(), Arrays.asList(joinPoint.getArgs()));
-//	}
-//
-//	@AfterReturning(value = "pointCut()",returning = "returnvalue")
-//	public void returnValue(JoinPoint joinPoint,Object returnvalue){
-//		System.out.printf("方法：%s 执行结束，返回值为：%s",joinPoint.getSignature().getName(),returnvalue);
-//	}
-//
-//	@AfterThrowing(value = "pointCut()",throwing="ex")
-//	public void exceptionReturn(JoinPoint joinPoint,Exception ex){
-//		System.out.printf("方法：%s 执行结束，异常信息为：%s",joinPoint.getSignature().getName(),ex.getMessage());
-//	}
+	@Before(value = "pointCut()")
+	public void before(JoinPoint joinPoint){
+		System.out.printf("方法：%s 执行之前打印，参数列表为：%s",joinPoint.getSignature().getName(), Arrays.asList(joinPoint.getArgs()));
+	}
+
+	@AfterReturning(value = "pointCut()",returning = "returnvalue")
+	public void returnValue(JoinPoint joinPoint,Object returnvalue){
+		System.out.printf("方法：%s 执行结束，返回值为：%s",joinPoint.getSignature().getName(),returnvalue);
+	}
+
+	@AfterThrowing(value = "pointCut()",throwing="ex")
+	public void exceptionReturn(JoinPoint joinPoint,Exception ex){
+		System.out.printf("方法：%s 执行结束，异常信息为：%s",joinPoint.getSignature().getName(),ex.getMessage());
+	}
 
 	@Around(value = "pointCut()")
 	public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {

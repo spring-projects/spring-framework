@@ -3,12 +3,10 @@ package com.atlwj.demo.ioc.javaconfig.domain;
 public class User {
 	private String username;
 	private String character;
-	private Son son;
 
-	public User(String username, String character ,Son son) {
+	public User(String username, String character ) {
 		this.username = username;
 		this.character = character;
-		this.son = son;
 	}
 
 	public String getUsername() {
@@ -27,20 +25,12 @@ public class User {
 		this.character = character;
 	}
 
-	public Son getSon() {
-		return son;
-	}
-
-	public void setSon(Son son) {
-		this.son = son;
-	}
 
 	@Override
 	public String toString() {
 		return "User{" +
 				"username='" + username + '\'' +
-				", character='" + character + '\'' +
-				", son=" + son +
+				", character='" + character + '\''+
 				'}';
 	}
 }

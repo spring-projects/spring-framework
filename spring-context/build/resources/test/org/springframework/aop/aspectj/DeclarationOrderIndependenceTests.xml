@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:aop="http://www.springframework.org/schema/aop"
+     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+  <bean id="topsyTurvyAspect" class="org.springframework.aop.aspectj.TopsyTurvyAspect"/>
+ 
+  <bean id="topsyTurvyTarget" class="org.springframework.aop.aspectj.TopsyTurvyTargetImpl"/>
+
+  <aop:config>
+    <aop:aspect id="myAspect" ref="topsyTurvyAspect">
+      <aop:before pointcut-ref="pc1"
+                  method="before"/>
+      <aop:declare-parents
+        types-matching="*..TopsyTurvyTarget+"
+        implement-interface="java.io.Serializable"
+        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$SerializableMixin"/>
+      <aop:after-returning pointcut-ref="pc2" method="afterReturning"/>
+      <aop:pointcut id="pc1" expression="execution(* *..do*(..))"/>
+      <aop:around pointcut-ref="pc2"
+                  method="around"/>
+      <aop:pointcut id="pc2" expression="execution(* *..TopsyTurvyTarget+.get*(..))"/>
+      <aop:declare-parents
+        types-matching="*..TopsyTurvyTarget+"
+        implement-interface="org.springframework.beans.factory.BeanNameAware"
+        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$BeanNameAwareMixin"/>         
+    </aop:aspect>
+  </aop:config>
+ 
+</beans>

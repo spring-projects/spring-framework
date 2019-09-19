@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-lazy-init="true">
+
+	<bean name="beta" class="org.springframework.beans.factory.FactoryBeanTests$Beta" autowire="byType">
+        <property name="name" value="${myName}"/>
+	</bean>
+
+	<bean id="alpha" class="org.springframework.beans.factory.FactoryBeanTests$Alpha" autowire="byType"/>
+
+	<bean id="gamma" class="org.springframework.beans.factory.FactoryBeanTests$Gamma"/>
+
+  <bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean" autowire="constructor">
+    <property name="beta" ref="beta"/>
+  </bean>
+
+  <bean id="gammaFactory" factory-bean="betaFactory" factory-method="getGamma"/>
+
+  <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties">
+      <props>
+        <prop key="myName">yourName</prop>
+      </props>
+    </property>
+  </bean>
+
+</beans>

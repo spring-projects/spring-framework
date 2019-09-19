@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse">
+		<!-- Could use id and href -->
+			<ref bean="david"/>
+		</property>
+	</bean>
+
+	<bean id="david" class="org.springframework.tests.sample.beans.TestBean">
+		<description>
+			Simple bean, without any collections.
+		</description>
+		<property name="name">
+			<description>The name of the user</description>
+			<value>David</value>
+		</property>
+		<property name="age"><value>27</value></property>
+	</bean>
+
+	<bean id="rod" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="age"><value>32</value></property>
+		<property name="friends">
+			<description>List of Rod's friends</description>
+			<list>
+				<ref bean="jenny"/>
+				<ref bean="david"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="pJenny" class="org.springframework.tests.sample.beans.DerivedTestBean" scope="prototype">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse">
+			<ref bean="david"/>
+		</property>
+	</bean>
+
+	<bean id="pDavid" class="org.springframework.tests.sample.beans.DerivedTestBean" scope="prototype">
+		<property name="name"><value>David</value></property>
+		<property name="age"><value>27</value></property>
+		<property name="actualSpouse" value="Jen"/>
+	</bean>
+
+	<bean id="pRod" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="name"><value>Rod</value></property>
+		<property name="age"><value>32</value></property>
+		<property name="friends">
+			<list>
+				<ref bean="pJenny"/>
+				<ref bean="pDavid"/>
+			</list>
+		</property>
+	</bean>
+
+	<!--
+		Try setting a collection property to a single value
+	-->
+	<bean id="loner" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>loner</value></property>
+		<property name="age"><value>26</value></property>
+		<property name="friends">
+			<list>
+				<description>My List</description>
+				<ref bean="david"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">
+		<property name="jumble">
+			<list>
+				<ref bean="david"/>
+				<value>literal</value>
+				<ref bean="jenny"/>
+				<idref bean="rod"/>
+				<array>
+					<ref bean="david"/>
+					<value>literal2</value>
+				</array>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="jumble2" class="org.springframework.beans.factory.xml.MixedCollectionBean" lazy-init="true">
+		<property name="jumble">
+			<list>
+				<ref bean="david"/>
+				<value>literal</value>
+				<ref bean="jenny"/>
+				<idref bean="rod"/>
+				<idref bean="rod2"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="verbose" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>verbose</value></property>
+	</bean>
+
+	<bean id="verbose2" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><idref bean="verbose"/></property>
+	</bean>
+
+	<bean id="verbose3" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><idref bean="verbose"/></property>
+	</bean>
+
+	<bean id="emptyMap" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="map">
+			<map>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="literalMap" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="map">
+			<map>
+				<entry key="foo" value="bar"/>
+				<entry key="fi" value="fum"/>
+				<entry key="fa"><null/></entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="mixedMap" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="map">
+			<map value-type="java.lang.Integer">
+				<entry key-ref="fooKey">
+					<value type="java.lang.Integer">10</value>
+				</entry>
+				<entry>
+ 					<key>
+						<ref bean="jennyKey"/>
+					</key>
+					<ref bean="jenny"/>
+				</entry>
+				<entry>
+ 					<key>
+ 						<bean class="java.lang.Integer">
+ 							<constructor-arg value="5"/>
+						</bean>
+					</key>
+					<idref bean="david"/>
+				</entry>
+				<entry key="bar" value="100" value-type="java.lang.Long"/>
+				<entry key="baz" value="200"/>
+			</map>
+		</property>
+	</bean>
+
+	<!-- The <description> element below caused parsing exception prior to resolution of SPR-8563 -->
+	<bean id="mapWithDescriptionInEntry" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="map">
+			<map>
+				<entry key="e1">
+					<description>A map entry with a description</description>
+					<value>v1</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="fooKey" class="java.lang.String">
+		<constructor-arg value="foo"/>
+	</bean>
+
+	<bean id="jennyKey" class="java.lang.String">
+		<constructor-arg value="jenny"/>
+	</bean>
+
+	<bean id="pMixedMap" class="org.springframework.tests.sample.beans.HasMap" scope="prototype">
+		<property name="map">
+			<map>
+				<entry key="foo" value="bar"/>
+				<entry key="jenny" value-ref="pJenny"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="mixedMapWithList" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="map">
+			<map>
+				<entry>
+					<key><null/></key>
+					<value>bar</value>
+				</entry>
+				<entry key="jenny"><ref bean="jenny"/></entry>
+				<entry key="list">
+					<list>
+						<value>zero</value>
+						<map>
+							<entry key="fo"><value>bar</value></entry>
+							<entry key="jen"><ref bean="jenny"/></entry>
+						</map>
+						<list>
+							<ref bean="jenny"/>
+							<value>ba</value>
+						</list>
+						<null/>
+					</list>
+				</entry>
+				<entry key="map">
+					<map>
+						<entry key="foo"><value>bar</value></entry>
+						<entry key="jenny"><ref bean="jenny"/></entry>
+					</map>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="emptySet" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="set">
+			<set>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="set" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="set">
+			<set>
+				<value>bar</value>
+				<ref bean="jenny"/>
+				<null/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="concurrentSet" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="concurrentSet">
+			<set>
+				<value>bar</value>
+				<ref bean="jenny"/>
+				<null/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="identityMap" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="identityMap">
+			<map>
+				<entry key="foo" value="bar"/>
+				<entry key="jenny" value-ref="pJenny"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="emptyProps" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="props">
+			<props>
+			</props>
+		</property>
+	</bean>
+
+
+	<bean id="props" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="props">
+			<props>
+				<prop key="foo">bar</prop>
+				<prop key="2">TWO</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="propsViaMap" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="props">
+			<map>
+				<entry key="foo" value="bar"/>
+				<entry key="2" value="TWO"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="objectArray" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="objectArray">
+			<list>
+				<value>one</value>
+				<ref bean="jenny"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="integerArray" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="integerArray">
+			<list>
+				<value>0</value>
+				<value>1</value>
+				<value>2</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="classArray" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="classArray" value="java.lang.String,java.lang.Exception"/>
+	</bean>
+
+	<bean id="classList" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="classList" value="java.lang.String,java.lang.Exception"/>
+	</bean>
+
+	<bean id="listFactory" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>bar</value>
+				<value>jenny</value>
+			</list>
+		</property>
+		<property name="targetListClass">
+			<value>java.util.LinkedList</value>
+		</property>
+	</bean>
+
+	<bean id="pListFactory" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>bar</value>
+				<value>jenny</value>
+			</list>
+		</property>
+		<property name="targetListClass">
+			<value>java.util.LinkedList</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<bean id="setFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>bar</value>
+				<value>jenny</value>
+			</set>
+		</property>
+		<property name="targetSetClass">
+			<value>java.util.TreeSet</value>
+		</property>
+	</bean>
+
+	<bean id="pSetFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>bar</value>
+				<value>jenny</value>
+			</set>
+		</property>
+		<property name="targetSetClass">
+			<value>java.util.TreeSet</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<bean id="mapFactory" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="jen"><value>jenny</value></entry>
+			</map>
+		</property>
+		<property name="targetMapClass">
+			<value>java.util.TreeMap</value>
+		</property>
+	</bean>
+
+	<bean id="pMapFactory" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="jen"><value>jenny</value></entry>
+			</map>
+		</property>
+		<property name="targetMapClass">
+			<value>java.util.TreeMap</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<bean id="setAndMap" class="org.springframework.beans.factory.xml.XmlBeanCollectionTests$MapAndSet">
+		<constructor-arg>
+			<map>
+				<description>My Map</description>
+				<entry key="key1" value="val1"/>
+				<entry key="key2" value="val2"/>
+				<entry key="key3" value="val3"/>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="enumSetFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<description>My Set</description>
+				<value type="java.lang.String">ONE</value>
+				<value type="java.lang.String">TWO</value>
+			</set>
+		</property>
+	</bean>
+
+</beans>

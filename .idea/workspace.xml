@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d998b0a3-1023-41e5-986d-edf482d1f6ab" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigBeanDefinitionParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigBeanDefinitionParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/aop/aspect/LogPrintAspect.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/aop/aspect/LogPrintAspect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/ioc/javaconfig/config/RootAppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/ioc/javaconfig/config/RootAppConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/ioc/javaconfig/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring-lengweijian-demo/src/main/java/com/atlwj/demo/ioc/javaconfig/domain/User.java" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="spring" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="localRepository" value="$USER_HOME$/module/maven/maven-repository" />
+        <option name="mavenHome" value="$USER_HOME$/module/maven/maven-home/apache-maven-3.6.1" />
+        <option name="userSettingsFile" value="$USER_HOME$/module/maven/maven-home/apache-maven-3.6.1/conf/settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1QVCl9KCYenePvkdOYRkeS5V5nD" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1567499923776" />
+    <property name="go.gopath.indexing.explicitly.defined" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.vendoring.notification.had.been.shown" value="true" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.RootAppConfig">
+    <configuration name="Application" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atlwj.ioc.Application" />
+      <module name="spring-lengweijian-demo_test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atlwj.ioc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Config" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atlwj.demo.ioc.annotation.autowired.config.Config" />
+      <module name="spring-lengweijian-demo_main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atlwj.demo.ioc.annotation.autowired.config.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="InjectConfig" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atlwj.demo.ioc.annotation.inject.config.InjectConfig" />
+      <module name="spring-lengweijian-demo_main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atlwj.demo.ioc.annotation.inject.config.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LifeCycleTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atlwj.demo.ioc.lifecycle.LifeCycleTest" />
+      <module name="spring-lengweijian-demo_main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atlwj.demo.ioc.lifecycle.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RootAppConfig" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atlwj.demo.ioc.javaconfig.config.RootAppConfig" />
+      <module name="spring-lengweijian-demo_main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atlwj.demo.ioc.javaconfig.config.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.Config" />
+      <item itemvalue="Application.InjectConfig" />
+      <item itemvalue="Application.LifeCycleTest" />
+      <item itemvalue="Application.Application" />
+      <item itemvalue="Application.RootAppConfig" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.RootAppConfig" />
+        <item itemvalue="Application.Application" />
+        <item itemvalue="Application.LifeCycleTest" />
+        <item itemvalue="Application.InjectConfig" />
+        <item itemvalue="Application.Config" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d998b0a3-1023-41e5-986d-edf482d1f6ab" name="Default Changelist" comment="" />
+      <created>1567494528683</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1567494528683</updated>
+      <workItem from="1567494531070" duration="437000" />
+      <workItem from="1567499096534" duration="857000" />
+      <workItem from="1567846530168" duration="4142000" />
+      <workItem from="1567899936490" duration="1613000" />
+      <workItem from="1567993700251" duration="72000" />
+      <workItem from="1568105498874" duration="513000" />
+      <workItem from="1568162830109" duration="105000" />
+      <workItem from="1568195326992" duration="50000" />
+      <workItem from="1568197894928" duration="878000" />
+      <workItem from="1568249264333" duration="5388000" />
+      <workItem from="1568333863215" duration="383000" />
+      <workItem from="1568385669385" duration="453000" />
+      <workItem from="1568387391396" duration="221000" />
+      <workItem from="1568424879473" duration="58000" />
+      <workItem from="1568424969293" duration="623000" />
+      <workItem from="1568505735012" duration="9000" />
+      <workItem from="1568556139347" duration="5699000" />
+      <workItem from="1568561860124" duration="301000" />
+      <workItem from="1568879472822" duration="3035000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint type="java-line">
+          <url>file://$PROJECT_DIR$/spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java</url>
+          <line>1049</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint type="java-line">
+          <url>file://$PROJECT_DIR$/spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java</url>
+          <line>388</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint type="java-line">
+          <url>file://$PROJECT_DIR$/spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java</url>
+          <line>405</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint type="java-line">
+          <condition expression="beanName.equals(&quot;lifeCycle&quot;)" language="JAVA" />
+          <url>file://$PROJECT_DIR$/spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java</url>
+          <line>745</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="DlvErrorBreakpoint" />
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

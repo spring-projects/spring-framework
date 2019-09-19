@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+
+	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="defaultInstance">
+		<!-- No constructor-arg elements -->
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="defaultTestBean" factory-bean="default" factory-method="xgetTestBean"
+			init-method="haveBirthday" destroy-method="destroy"/>
+		
+
+</beans>

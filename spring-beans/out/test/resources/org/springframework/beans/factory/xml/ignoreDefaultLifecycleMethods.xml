@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-init-method="foo" default-destroy-method="bar">
+
+	<bean id="foo" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"/>
+
+</beans>

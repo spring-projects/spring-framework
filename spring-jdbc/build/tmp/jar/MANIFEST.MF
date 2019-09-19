@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: spring-jdbc
+Automatic-Module-Name: spring.jdbc
+Implementation-Version: 5.0.15.BUILD-SNAPSHOT
+Created-By: 1.8.0_211 (Oracle Corporation)
+

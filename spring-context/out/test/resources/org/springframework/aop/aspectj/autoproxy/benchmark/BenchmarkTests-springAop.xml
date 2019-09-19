@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<!--
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
+	-->
+
+	<aop:aspectj-autoproxy>
+		<!-- Explicit testing the whitespace body variant here -->
+	</aop:aspectj-autoproxy>
+
+	<bean class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor" >
+		<property name="advice" ref="multiplyReturnValueInterceptor" />
+		<property name="mappedName" value="getAge" />
+	</bean>
+
+	<bean id="multiplyReturnValueInterceptor"
+			class="org.springframework.aop.aspectj.autoproxy.benchmark.MultiplyReturnValueInterceptor" >
+		<property name="multiple" value="2" />
+	</bean>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.benchmark.TraceBeforeAdvice"
+			factory-method="advisor" />
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.benchmark.TraceAfterReturningAdvice"
+			factory-method="advisor" />
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.benchmark.TraceAspect"/>
+
+	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="adrian"/>
+		<property name="age" value="34"/>
+	</bean>
+
+</beans>

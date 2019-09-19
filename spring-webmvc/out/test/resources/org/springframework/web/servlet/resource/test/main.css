@@ -1,0 +1,9 @@
+
+@import url("bar.css?#iefix");
+@import url('bar.css#bla-normal');
+@import url(bar.css);
+
+@import "foo.css";
+@import 'foo.css';
+
+body { background: url("images/image.png?#iefix") }
