@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support;
+package org.springframework.aop.support.annotation;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link AnnotationMatchingPointcut}.
  *
  * @author Sam Brannen
- * @since 5.2
+ * @since 5.1.10
  */
 class AnnotationMatchingPointcutTests {
 
 	@Test
-	void classLevelPointCuts() {
+	void classLevelPointcuts() {
 		Pointcut pointcut1 = new AnnotationMatchingPointcut(Qualifier.class, true);
 		Pointcut pointcut2 = new AnnotationMatchingPointcut(Qualifier.class, true);
 		Pointcut pointcut3 = new AnnotationMatchingPointcut(Qualifier.class);
@@ -59,7 +59,7 @@ class AnnotationMatchingPointcutTests {
 	}
 
 	@Test
-	void methodLevelPointCuts() {
+	void methodLevelPointcuts() {
 		Pointcut pointcut1 = new AnnotationMatchingPointcut(null, Qualifier.class, true);
 		Pointcut pointcut2 = new AnnotationMatchingPointcut(null, Qualifier.class, true);
 		Pointcut pointcut3 = new AnnotationMatchingPointcut(null, Qualifier.class);
@@ -74,8 +74,7 @@ class AnnotationMatchingPointcutTests {
 		assertThat(pointcut3.getMethodMatcher().getClass()).isEqualTo(AnnotationMethodMatcher.class);
 
 		assertThat(pointcut1).isEqualTo(pointcut2);
-		// TODO Uncomment the following once AnnotationMethodMatcher.equals(Object) has been fixed.
-		// assertThat(pointcut1).isNotEqualTo(pointcut3);
+		assertThat(pointcut1).isNotEqualTo(pointcut3);
 		assertThat(pointcut1.hashCode()).isEqualTo(pointcut2.hashCode());
 		// #1 and #3 have equivalent hash codes even though equals() returns false.
 		assertThat(pointcut1.hashCode()).isEqualTo(pointcut3.hashCode());
@@ -83,7 +82,7 @@ class AnnotationMatchingPointcutTests {
 	}
 
 	@Test
-	void classLevelAndMethodLevelPointCuts() {
+	void classLevelAndMethodLevelPointcuts() {
 		Pointcut pointcut1 = new AnnotationMatchingPointcut(Qualifier.class, Qualifier.class, true);
 		Pointcut pointcut2 = new AnnotationMatchingPointcut(Qualifier.class, Qualifier.class, true);
 		Pointcut pointcut3 = new AnnotationMatchingPointcut(Qualifier.class, Qualifier.class);

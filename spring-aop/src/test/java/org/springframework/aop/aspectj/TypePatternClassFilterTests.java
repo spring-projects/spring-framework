@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rod Johnson
  * @author Rick Evans
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class TypePatternClassFilterTests {
 
@@ -91,6 +92,36 @@ public class TypePatternClassFilterTests {
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
 		assertThatIllegalStateException().isThrownBy(() ->
 				new TypePatternClassFilter().matches(String.class));
+	}
+
+	@Test
+	public void testEquals() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
+
+		assertThat(filter1).isEqualTo(filter2);
+		assertThat(filter1).isNotEqualTo(filter3);
+	}
+
+	@Test
+	public void testHashCode() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
+
+		assertThat(filter1.hashCode()).isEqualTo(filter2.hashCode());
+		assertThat(filter1.hashCode()).isNotEqualTo(filter3.hashCode());
+	}
+
+	@Test
+	public void testToString() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
+
+		assertThat(filter1.toString())
+			.isEqualTo("org.springframework.aop.aspectj.TypePatternClassFilter: org.springframework.tests.sample.beans.*");
+		assertThat(filter1.toString()).isEqualTo(filter2.toString());
 	}
 
 }
