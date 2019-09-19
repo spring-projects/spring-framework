@@ -14,6 +14,9 @@ its https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features
 https://spring.io/guides/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
 will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
+As of Spring Framework 5.2, most of the code samples of the reference documentation are
+provided in Kotlin in addition to Java.
+
 Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
