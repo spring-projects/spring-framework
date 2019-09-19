@@ -204,7 +204,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
-		public Builder metadataExtractors(Consumer<MetadataExtractorRegistry> consumer) {
+		public Builder metadataExtractorRegistry(Consumer<MetadataExtractorRegistry> consumer) {
 			this.metadataExtractors.add(consumer);
 			return this;
 		}

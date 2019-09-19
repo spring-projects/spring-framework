@@ -223,7 +223,7 @@ public interface RSocketStrategies {
 		 * Apply the consumer to the {@link MetadataExtractorRegistry} in order
 		 * to register extra metadata entry extractors.
 		 */
-		Builder metadataExtractors(Consumer<MetadataExtractorRegistry> extractorRegistry);
+		Builder metadataExtractorRegistry(Consumer<MetadataExtractorRegistry> consumer);
 
 		/**
 		 * Build the {@code RSocketStrategies} instance.
