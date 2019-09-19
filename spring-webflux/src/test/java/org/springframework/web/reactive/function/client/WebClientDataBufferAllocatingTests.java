@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
@@ -38,9 +39,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * WebClient integration tests focusing on data buffer management.
@@ -48,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTests {
 
 	private static final Duration DELAY = Duration.ofSeconds(5);
