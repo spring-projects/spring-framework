@@ -20,9 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.support.annotation.AnnotationClassFilter;
-import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.aop.support.annotation.AnnotationMethodMatcher;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
