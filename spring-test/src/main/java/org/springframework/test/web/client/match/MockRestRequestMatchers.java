@@ -258,4 +258,11 @@ public abstract class MockRestRequestMatchers {
 		return new XpathRequestMatchers(expression, namespaces, args);
 	}
 
+	/**
+	 * Access to response body matchers for form data parameters.
+	 */
+	public static FormDataRequestMatchers formData() {
+		return new FormDataRequestMatchers();
+	}
+
 }
