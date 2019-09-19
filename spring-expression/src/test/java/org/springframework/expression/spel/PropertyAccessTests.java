@@ -34,16 +34,19 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Tests accessing of properties.
+ * Unit tests for property access.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Joyce Zhan
+ * @author Sam Brannen
  */
 public class PropertyAccessTests extends AbstractExpressionTests {
 
@@ -252,6 +255,15 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertThat(parser.parseExpression("name.substring(1)").getValue(context, target)).isEqualTo("1");
 		assertThat(context.getRootObject().getValue()).isSameAs(target);
 		assertThat(context.getRootObject().getTypeDescriptor().getType()).isSameAs(Object.class);
+	}
+
+	@Test
+	void propertyAccessWithArrayIndexOutOfBounds() {
+		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+		Expression expression = parser.parseExpression("stringArrayOfThreeItems[3]");
+		assertThatExceptionOfType(SpelEvaluationException.class)
+			.isThrownBy(() -> expression.getValue(context, new Inventor()))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS));
 	}
 
 
