@@ -332,18 +332,18 @@ public class AnnotationConfigApplicationContextTests {
 	@Test
 	public void individualBeanWithFactoryBeanSupplier() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.registerBean("fb", TypedFactoryBean.class, TypedFactoryBean::new, bd -> bd.setLazyInit(true));
+		context.registerBean("fb", NonInstantiatedFactoryBean.class, NonInstantiatedFactoryBean::new, bd -> bd.setLazyInit(true));
 		context.refresh();
 
 		assertThat(context.getType("fb")).isEqualTo(String.class);
-		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
+		assertThat(context.getType("&fb")).isEqualTo(NonInstantiatedFactoryBean.class);
 	}
 
 	@Test
 	public void individualBeanWithFactoryBeanSupplierAndTargetType() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition();
-		bd.setInstanceSupplier(TypedFactoryBean::new);
+		bd.setInstanceSupplier(NonInstantiatedFactoryBean::new);
 		bd.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, String.class));
 		bd.setLazyInit(true);
 		context.registerBeanDefinition("fb", bd);
@@ -351,6 +351,42 @@ public class AnnotationConfigApplicationContextTests {
 
 		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(FactoryBean.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class).length).isEqualTo(1);
+		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class).length).isEqualTo(0);
+	}
+
+	@Test
+	public void individualBeanWithFactoryBeanObjectTypeAsTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition();
+		bd.setBeanClass(TypedFactoryBean.class);
+		bd.setTargetType(String.class);
+		context.registerBeanDefinition("fb", bd);
+		context.refresh();
+
+		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class).length).isEqualTo(1);
+		assertThat(context.getBeanNamesForType(TypedFactoryBean.class).length).isEqualTo(1);
+	}
+
+	@Test
+	public void individualBeanWithFactoryBeanObjectTypeAsTargetTypeAndLazy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition();
+		bd.setBeanClass(TypedFactoryBean.class);
+		bd.setTargetType(String.class);
+		bd.setLazyInit(true);
+		context.registerBeanDefinition("fb", bd);
+		context.refresh();
+
+		assertThat(context.getType("&fb")).isNull();
+		assertThat(context.getType("fb")).isEqualTo(String.class);
+		assertThat(context.getBean("&fb") instanceof FactoryBean);
+		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class).length).isEqualTo(1);
+		assertThat(context.getBeanNamesForType(TypedFactoryBean.class).length).isEqualTo(1);
 	}
 
 
@@ -426,11 +462,29 @@ public class AnnotationConfigApplicationContextTests {
 
 	static class BeanC {}
 
-	static class TypedFactoryBean implements FactoryBean<String> {
+	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 
-		public TypedFactoryBean() {
+		public NonInstantiatedFactoryBean() {
 			throw new IllegalStateException();
 		}
+
+		@Override
+		public String getObject() {
+			return "";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+	static class TypedFactoryBean implements FactoryBean<String> {
 
 		@Override
 		public String getObject() {

@@ -830,9 +830,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return result;
 		}
 
-		ResolvableType beanType = mbd.hasBeanClass() ?
-				ResolvableType.forClass(mbd.getBeanClass()) :
-				ResolvableType.NONE;
+		ResolvableType beanType =
+				(mbd.hasBeanClass() ? ResolvableType.forClass(mbd.getBeanClass()) : ResolvableType.NONE);
 
 		// For instance supplied beans try the target type and bean class
 		if (mbd.getInstanceSupplier() != null) {
@@ -2028,8 +2027,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		private boolean isFactoryBeanMethod(Method method) {
-			return method.getName().equals(this.factoryMethodName) &&
-					FactoryBean.class.isAssignableFrom(method.getReturnType());
+			return (method.getName().equals(this.factoryMethodName) &&
+					FactoryBean.class.isAssignableFrom(method.getReturnType()));
 		}
 
 		ResolvableType getResult() {
