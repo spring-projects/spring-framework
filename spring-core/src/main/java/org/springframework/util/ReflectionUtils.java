@@ -90,8 +90,9 @@ public abstract class ReflectionUtils {
 	// Exception handling
 
 	/**
-	 * Handle the given reflection exception. Should only be called if no
-	 * checked exception is expected to be thrown by the target method.
+	 * Handle the given reflection exception.
+	 * <p>Should only be called if no checked exception is expected to be thrown
+	 * by a target method, or if an error occurs while accessing a method or field.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
 	 * InvocationTargetException with such a root cause. Throws an
 	 * IllegalStateException with an appropriate message or
@@ -103,7 +104,7 @@ public abstract class ReflectionUtils {
 			throw new IllegalStateException("Method not found: " + ex.getMessage());
 		}
 		if (ex instanceof IllegalAccessException) {
-			throw new IllegalStateException("Could not access method: " + ex.getMessage());
+			throw new IllegalStateException("Could not access method or field: " + ex.getMessage());
 		}
 		if (ex instanceof InvocationTargetException) {
 			handleInvocationTargetException((InvocationTargetException) ex);
@@ -622,8 +623,6 @@ public abstract class ReflectionUtils {
 		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -644,9 +643,8 @@ public abstract class ReflectionUtils {
 		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
+		throw new IllegalStateException("Should never get here");
 	}
 
 	/**
