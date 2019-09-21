@@ -608,10 +608,11 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Set the field represented by the supplied {@link Field field object} on the
-	 * specified {@link Object target object} to the specified {@code value}.
-	 * In accordance with {@link Field#set(Object, Object)} semantics, the new value
+	 * Set the field represented by the supplied {@linkplain Field field object} on
+	 * the specified {@linkplain Object target object} to the specified {@code value}.
+	 * <p>In accordance with {@link Field#set(Object, Object)} semantics, the new value
 	 * is automatically unwrapped if the underlying field has a primitive type.
+	 * <p>This method does not support setting {@code static final} fields.
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
