@@ -50,7 +50,7 @@ transparently through RSocket across the network.
 === The Protocol
 
 One of the benefits of RSocket is that it has a well defined behavior on the wire and an
-easy to read http://rsocket.io/docs/Protocol[specification] along with some protocol
+easy to read https://rsocket.io/docs/Protocol[specification] along with some protocol
 https://github.com/rsocket/rsocket/tree/master/Extensions[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
 framework APIs. This section provides a succinct overview to establish some context.
@@ -177,7 +177,7 @@ This is the most basic way to connect with default settings:
 		.connectTcp("localhost", 7000);
 
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.connectWebSocket(URI.create("http://example.org:8080/rsocket"));
+		.connectWebSocket(URI.create("https://example.org:8080/rsocket"));
 ----
 
 The above is deferred. To actually connect and use the requester:
