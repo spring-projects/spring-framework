@@ -116,7 +116,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 			}
 		}
 		else {
-			extractEntry(payload.metadata(), metadataMimeType.toString(), result);
+			extractEntry(payload.metadata().slice(), metadataMimeType.toString(), result);
 		}
 		return result;
 	}
