@@ -22,6 +22,7 @@ import java.util.Objects;
  * A standard set of data size units.
  *
  * @author Stephane Nicoll
+ * @author Evgeniy Zubakhin
  * @since 5.1
  */
 public enum DataUnit {
@@ -49,7 +50,27 @@ public enum DataUnit {
 	/**
 	 * Terabytes.
 	 */
-	TERABYTES("TB", DataSize.ofTerabytes(1));
+	TERABYTES("TB", DataSize.ofTerabytes(1)),
+
+	/**
+	 * Kibibytes.
+	 */
+	KIBIBYTES("KiB", DataSize.ofKibibytes(1)),
+
+	/**
+	 * Mebibytes.
+	 */
+	MEBIBYTES("MiB", DataSize.ofMebibytes(1)),
+
+	/**
+	 * Gibibytes.
+	 */
+	GIBIBYTES("GiB", DataSize.ofGibibytes(1)),
+
+	/**
+	 * Tebibytes.
+	 */
+	TEBIBYTES("TiB", DataSize.ofTebibytes(1));
 
 
 	private final String suffix;
