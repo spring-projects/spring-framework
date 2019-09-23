@@ -17,8 +17,12 @@
 package org.springframework.jdbc.support;
 
 import java.sql.BatchUpdateException;
+import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,11 +34,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.when;
+
 
 /**
  * @author Rod Johnson
@@ -174,6 +182,47 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 		// Shouldn't custom translate this - invalid class
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				customTranslation.setExceptionClass(String.class));
+	}
+
+	@Test
+	public void testDataSourceMethodTranslation() throws SQLException {
+		DataSource ds = mock(DataSource.class);
+		Connection conn = mock(Connection.class);
+		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		when(ds.getConnection()).thenReturn(conn);
+		when(conn.getMetaData()).thenReturn(metaData);
+		when(metaData.getDatabaseProductName()).thenReturn("H2");
+		SQLErrorCodeSQLExceptionTranslator translator = new SQLErrorCodeSQLExceptionTranslator(ds);
+		SQLErrorCodes codes = translator.getSqlErrorCodes();
+		assertThat(codes).isNotNull();
+	}
+
+	@Test
+	public void testDataSourceMethodTranslationConnectionFailureRetried() throws SQLException {
+		DataSource ds = mock(DataSource.class);
+		Connection conn = mock(Connection.class);
+		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		when(ds.getConnection()).thenThrow(CannotGetJdbcConnectionException.class).thenReturn(conn);
+		when(conn.getMetaData()).thenReturn(metaData);
+		when(metaData.getDatabaseProductName()).thenReturn("H2");
+		SQLErrorCodeSQLExceptionTranslator translator = new SQLErrorCodeSQLExceptionTranslator(ds);
+		DataAccessException ex = translator.translate("task", "SQL", new SQLException("reason1", "01504", 23001));
+		assertThat(ex).isInstanceOf(DuplicateKeyException.class);
+	}
+
+	@Test
+	public void testDataSourceMethodTranslationConnectionFailureRetriedAndFallback() throws SQLException {
+		DataSource ds = mock(DataSource.class);
+		Connection conn = mock(Connection.class);
+		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		when(ds.getConnection()).thenThrow(CannotGetJdbcConnectionException.class).thenThrow(CannotGetJdbcConnectionException.class).thenReturn(conn);
+		when(conn.getMetaData()).thenReturn(metaData);
+		when(metaData.getDatabaseProductName()).thenReturn("H2");
+		SQLErrorCodeSQLExceptionTranslator translator = new SQLErrorCodeSQLExceptionTranslator(ds);
+		DataAccessException ex = translator.translate("task", "SQL", new SQLException("reason1", "01504", 23001));
+		assertThat(ex).isNotInstanceOf(DuplicateKeyException.class);
+		ex = translator.translate("task", "SQL", new SQLException("reason1", "01504", 23001));
+		assertThat(ex).isInstanceOf(DuplicateKeyException.class);
 	}
 
 }

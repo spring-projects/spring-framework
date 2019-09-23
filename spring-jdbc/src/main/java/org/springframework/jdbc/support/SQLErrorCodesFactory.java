@@ -29,6 +29,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -219,6 +220,11 @@ public class SQLErrorCodesFactory {
 					}
 					catch (MetaDataAccessException ex) {
 						logger.warn("Error while extracting database name - falling back to empty error codes", ex);
+						//returning null error codes will make sure that next time error codes are looked up,
+						//Spring will try to load the error code again
+						if(ex.getCause() != null && ex.getCause() instanceof CannotGetJdbcConnectionException) {
+							return null;
+						}
 					}
 					// Fallback is to return an empty SQLErrorCodes instance.
 					return new SQLErrorCodes();

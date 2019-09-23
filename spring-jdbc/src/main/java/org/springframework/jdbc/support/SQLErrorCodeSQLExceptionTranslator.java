@@ -78,6 +78,10 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	@Nullable
 	private SQLErrorCodes sqlErrorCodes;
 
+	/** Reference to the dataSource if SQLErrorCodeSQLExceptionTranslator is initialized via new SQLErrorCodeSQLExceptionTranslator(DataSource dataSource).**/
+	@Nullable
+	private DataSource dataSource;
+
 
 	/**
 	 * Constructor for use as a JavaBean.
@@ -97,6 +101,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(DataSource dataSource) {
 		this();
+		this.dataSource = dataSource;
 		setDataSource(dataSource);
 	}
 
@@ -184,6 +189,10 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		DataAccessException dae = customTranslate(task, sql, sqlEx);
 		if (dae != null) {
 			return dae;
+		}
+
+		if(this.sqlErrorCodes == null && this.dataSource != null) {
+			this.sqlErrorCodes = SQLErrorCodesFactory.getInstance().getErrorCodes(this.dataSource);
 		}
 
 		// Next, try the custom SQLException translator, if available.

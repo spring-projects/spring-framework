@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -245,13 +246,26 @@ public class SQLErrorCodesFactoryTests {
 
 	@Test
 	public void testGetFromDataSourceWithSQLException() throws Exception {
+		Connection connection = mock(Connection.class);
 		SQLException expectedSQLException = new SQLException();
 
 		DataSource dataSource = mock(DataSource.class);
-		given(dataSource.getConnection()).willThrow(expectedSQLException);
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.getMetaData()).willThrow(expectedSQLException);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
+	}
+
+	@Test
+	public void testGetFromDataSourceWithCannotGetJdbcConnectionException() throws Exception {
+		CannotGetJdbcConnectionException expectedException = new CannotGetJdbcConnectionException("Could not get jdbc connection", mock(SQLException.class));
+
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willThrow(expectedException);
+
+		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
+		assertThat(sec).isNull();
 	}
 
 	private void assertIsEmpty(SQLErrorCodes sec) {
