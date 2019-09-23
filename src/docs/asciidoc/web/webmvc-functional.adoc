@@ -51,15 +51,15 @@ as the following example shows:
 
 		// ...
 
-		public Mono<ServerResponse> listPeople(ServerRequest request) {
+		public ServerResponse listPeople(ServerRequest request) {
 			// ...
 		}
 
-		public Mono<ServerResponse> createPerson(ServerRequest request) {
+		public ServerResponse createPerson(ServerRequest request) {
 			// ...
 		}
 
-		public Mono<ServerResponse> getPerson(ServerRequest request) {
+		public ServerResponse getPerson(ServerRequest request) {
 			// ...
 		}
 	}
@@ -630,7 +630,7 @@ The following example shows a WebFlux Java configuration:
 .Kotlin
 ----
 	@Configuration
-	@EnableWebFlux
+	@EnableMvc
 	class WebConfig : WebMvcConfigurer {
 
 		@Bean
