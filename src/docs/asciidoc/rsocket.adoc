@@ -1,7 +1,7 @@
 [[rsocket]]
 = RSocket
 
-
+This section describes Spring Framework's support for the RSocket protocol.
 
 
 [[rsocket-overview]]
@@ -19,16 +19,16 @@ models:
 Once the initial connection is made, the "client" vs "server" distinction is lost as
 both sides become symmetrical and each side can initiate one of the above interactions.
 This is why in the protocol calls the participating sides "requester" and "responder"
-while the above interactions are called "requests" or "streams".
+while the above interactions are called "request streams" or simply "requests".
 
-Below are key features built into the protocol:
+These are the key features and benefits of the RSocket protocol:
 
 * https://www.reactive-streams.org/[Reactive Streams] semantics across network boundary --
 for streaming requests such as `Request-Stream` and `Channel`, back pressure signals
 travel between requester and responder, allowing a requester to slow down a responder at
 the source, hence reducing reliance on network layer congestion control, and the need
-for buffering at the network or any level.
-* Request throttling -- this feature is named "leasing" after the `LEASE` frame that
+for buffering at the network level or at any level.
+* Request throttling -- this feature is named "Leasing" after the `LEASE` frame that
 can be sent from each end to limit the total number of requests allowed by other end
 for a given time. Leases are renewed periodically.
 * Session resumption -- this is designed for loss of connectivity and requires some state
@@ -49,7 +49,7 @@ transparently through RSocket across the network.
 [[rsocket-protocol]]
 === The Protocol
 
-One of the benefits of RSocket is that it has a well defined behavior on the wire and an
+One of the benefits of RSocket is that it has well defined behavior on the wire and an
 easy to read https://rsocket.io/docs/Protocol[specification] along with some protocol
 https://github.com/rsocket/rsocket/tree/master/Extensions[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
@@ -58,7 +58,7 @@ framework APIs. This section provides a succinct overview to establish some cont
 **Connecting**
 
 Initially a client connects to a server via some low level streaming transport such
-as TCP or WebSocket and sends a `SETUP` frame to the server to define parameters for the
+as TCP or WebSocket and sends a `SETUP` frame to the server to set parameters for the
 connection.
 
 The server may reject the `SETUP` frame, but generally after it is sent (for the client)
@@ -146,10 +146,19 @@ The `spring-web` module contains `Encoder` and `Decoder` implementations such as
 CBOR/JSON, and Protobuf that RSocket applications will likely need. It also contains the
 `PathPatternParser` that can be plugged in for efficient route matching.
 
-Spring Security...
+Spring Boot 2.2 supports standing up an RSocket server over TCP or WebSocket, including
+the option to expose RSocket over WebSocket in a WebFlux server. There is also client
+support and auto-configuration for an `RSocketRequester.Builder` and `RSocketStrategies`.
+See the
+https://docs.spring.io/spring-boot/docs/2.2.0.BUILD-SNAPSHOT/reference/htmlsingle/#boot-features-rsocket[RSocket section]
+in the Spring Boot reference for more details.
 
-Spring Boot...
+Spring Security 5.2 provides RSocket support.
 
+Spring Integration 5.2 provides inbound and outbound gateways to interact with RSocket
+clients and servers. See the Spring Integration Reference Manual for more details.
+
+Spring Cloud Gateway supports RSocket connections.
 
 
 
