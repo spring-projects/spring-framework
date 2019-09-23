@@ -24,11 +24,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A data size, such as '12MB'.
+ * A data size, such as '12MB' or '42MiB'.
  *
- * <p>This class models a size in terms of bytes and is immutable and thread-safe.
+ * <p>This class models a size in terms of bytes (ISO 80000) and is immutable and thread-safe.
+ * <p>Be careful: this class does not work with decimal values.
  *
  * @author Stephane Nicoll
+ * @author Evgeniy Zubakhin
  * @since 5.1
  */
 public final class DataSize implements Comparable<DataSize> {
@@ -36,28 +38,47 @@ public final class DataSize implements Comparable<DataSize> {
 	/**
 	 * The pattern for parsing.
 	 */
-	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
+	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,3})$");
 
 	/**
 	 * Bytes per Kilobyte.
 	 */
-	private static long BYTES_PER_KB = 1024;
+	private static long BYTES_PER_KB = 1000;
 
 	/**
 	 * Bytes per Megabyte.
 	 */
-	private static long BYTES_PER_MB = BYTES_PER_KB * 1024;
+	private static long BYTES_PER_MB = BYTES_PER_KB * 1000;
 
 	/**
 	 * Bytes per Gigabyte.
 	 */
-	private static long BYTES_PER_GB = BYTES_PER_MB * 1024;
+	private static long BYTES_PER_GB = BYTES_PER_MB * 1000;
 
 	/**
 	 * Bytes per Terabyte.
 	 */
-	private static long BYTES_PER_TB = BYTES_PER_GB * 1024;
+	private static long BYTES_PER_TB = BYTES_PER_GB * 1000;
 
+	/**
+	 * Bytes per Kibibyte.
+	 */
+	private static long BYTES_PER_KIB = 1024;
+
+	/**
+	 * Bytes per Mebibyte.
+	 */
+	private static long BYTES_PER_MIB = BYTES_PER_KIB * 1024;
+
+	/**
+	 * Bytes per Gibibyte.
+	 */
+	private static long BYTES_PER_GIB = BYTES_PER_MIB * 1024;
+
+	/**
+	 * Bytes per Tebibyte.
+	 */
+	private static long BYTES_PER_TIB = BYTES_PER_GIB * 1024;
 
 	private final long bytes;
 
@@ -113,6 +134,42 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 	/**
+	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * @param kibibytes the number of kibibytes, positive or negative
+	 * @return a {@link DataSize}
+	 */
+	public static DataSize ofKibibytes(long kibibytes) {
+		return new DataSize(Math.multiplyExact(kibibytes, BYTES_PER_KIB));
+	}
+
+	/**
+	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * @param mebibytes the number of mebibytes, positive or negative
+	 * @return a {@link DataSize}
+	 */
+	public static DataSize ofMebibytes(long mebibytes) {
+		return new DataSize(Math.multiplyExact(mebibytes, BYTES_PER_MIB));
+	}
+
+	/**
+	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * @param gibibytes the number of gibibytes, positive or negative
+	 * @return a {@link DataSize}
+	 */
+	public static DataSize ofGibibytes(long gibibytes) {
+		return new DataSize(Math.multiplyExact(gibibytes, BYTES_PER_GIB));
+	}
+
+	/**
+	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * @param tebibytes the number of tebibytes, positive or negative
+	 * @return a {@link DataSize}
+	 */
+	public static DataSize ofTebibytes(long tebibytes) {
+		return new DataSize(Math.multiplyExact(tebibytes, BYTES_PER_TIB));
+	}
+
+	/**
 	 * Obtain a {@link DataSize} representing an amount in the specified {@link DataUnit}.
 	 * @param amount the amount of the size, measured in terms of the unit,
 	 * positive or negative
@@ -130,6 +187,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Examples:
 	 * <pre>
 	 * "12KB" -- parses as "12 kilobytes"
+	 * "42KiB" -- parses as "42 kibibytes"
 	 * "5MB"  -- parses as "5 megabytes"
 	 * "20"   -- parses as "20 bytes"
 	 * </pre>
@@ -151,6 +209,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Examples:
 	 * <pre>
 	 * "12KB" -- parses as "12 kilobytes"
+	 * "42KiB" -- parses as "42 kibibytes"
 	 * "5MB"  -- parses as "5 megabytes"
 	 * "20"   -- parses as "20 kilobytes" (where the {@code defaultUnit} is {@link DataUnit#KILOBYTES})
 	 * </pre>
@@ -222,6 +281,38 @@ public final class DataSize implements Comparable<DataSize> {
 	 */
 	public long toTerabytes() {
 		return this.bytes / BYTES_PER_TB;
+	}
+
+	/**
+	 * Return the number of kibibytes in this instance.
+	 * @return the number of kibibytes
+	 */
+	public long toKibibytes() {
+		return this.bytes / BYTES_PER_KIB;
+	}
+
+	/**
+	 * Return the number of mebibytes in this instance.
+	 * @return the number of mebibytes
+	 */
+	public long toMebibytes() {
+		return this.bytes / BYTES_PER_MIB;
+	}
+
+	/**
+	 * Return the number of gibibytes in this instance.
+	 * @return the number of gibibytes
+	 */
+	public long toGibibytes() {
+		return this.bytes / BYTES_PER_GIB;
+	}
+
+	/**
+	 * Return the number of tebibytes in this instance.
+	 * @return the number of tebibytes
+	 */
+	public long toTebibytes() {
+		return this.bytes / BYTES_PER_TIB;
 	}
 
 	@Override
