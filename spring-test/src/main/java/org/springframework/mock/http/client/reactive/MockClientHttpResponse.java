@@ -64,7 +64,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	}
 
 	public MockClientHttpResponse(int status) {
-		Assert.isTrue(status >= 100 && status < 600, "Status must be between 1xx and 5xx");
+		Assert.isTrue(status > 99 && status < 1000, "Status must be between 100 and 999");
 		this.status = status;
 	}
 

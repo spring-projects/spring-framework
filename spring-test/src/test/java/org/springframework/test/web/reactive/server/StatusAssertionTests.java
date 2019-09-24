@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,11 @@ public class StatusAssertionTests {
 		catch (AssertionError error) {
 			// Expected
 		}
+	}
+
+	@Test // gh-23630
+	public void isEqualToWithCustomStatus() {
+		statusAssertions(600).isEqualTo(600);
 	}
 
 	@Test
@@ -177,6 +182,10 @@ public class StatusAssertionTests {
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
+		return statusAssertions(status.value());
+	}
+
+	private StatusAssertions statusAssertions(int status) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
