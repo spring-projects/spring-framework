@@ -16,12 +16,17 @@
 
 package org.springframework.jmx;
 
+import java.net.BindException;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.opentest4j.TestAbortedException;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -51,6 +56,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  */
 public abstract class AbstractMBeanServerTests {
+
+	@RegisterExtension
+	TestExecutionExceptionHandler bindExceptionHandler = (context, throwable) -> {
+		// Abort test?
+		if (throwable instanceof BindException) {
+			throw new TestAbortedException("Failed to bind to MBeanServer", throwable);
+		}
+		// Else rethrow to conform to the contract of TestExecutionExceptionHandler
+		throw throwable;
+	};
 
 	protected MBeanServer server;
 
