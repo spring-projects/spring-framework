@@ -268,6 +268,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		String logPrefix = exchange.getLogPrefix();
 
 		if (isDisconnectedClientError(ex)) {
+			// Request handling error (e.g. remote call), if we manage to set the status..
+			if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
+				logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
+				return Mono.empty();
+			}
 			if (lostClientLogger.isTraceEnabled()) {
 				lostClientLogger.trace(logPrefix + "Client went away", ex);
 			}
