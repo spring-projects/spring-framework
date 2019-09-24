@@ -3,6 +3,7 @@ tagIde()
 tagCiOrLocal()
 addCiMetadata()
 addGitMetadata()
+addTestTaskMetadata()
 
 void tagOs() {
 	buildScan.tag System.getProperty('os.name')
@@ -46,6 +47,16 @@ void addCiMetadata() {
 	def ciBuild = 'CI BUILD'
 	if (isBamboo()) {
 		buildScan.link ciBuild, System.getenv('bamboo_resultsUrl')
+	}
+}
+
+void addTestTaskMetadata() {
+	allprojects {
+		tasks.withType(Test) { test ->
+			doFirst {
+				buildScan.value "Test#maxParallelForks[${test.path}]", test.maxParallelForks.toString()
+			}
+		}
 	}
 }
 
