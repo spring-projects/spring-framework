@@ -26,7 +26,6 @@ import io.netty.channel.ChannelOption;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
@@ -93,11 +92,6 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		else {
 			return new ReactorClientHttpConnector();
 		}
-	}
-
-	@AfterEach
-	void shutDown() throws InterruptedException {
-		waitForDataBufferRelease(Duration.ofSeconds(2));
 	}
 
 
