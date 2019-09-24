@@ -90,7 +90,7 @@
 			<property name="processJavadoc" value="true" />
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck">
-			<property name="groups" value="java,/^javax?\./,*,org.springframework" />
+			<property name="groups" value="java,javax,*,org.springframework" />
 			<property name="ordered" value="true" />
 			<property name="separated" value="true" />
 			<property name="option" value="bottom" />
