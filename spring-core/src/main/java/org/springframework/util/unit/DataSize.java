@@ -134,7 +134,7 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * Obtain a {@link DataSize} representing the specified number of kibibytes.
 	 * @param kibibytes the number of kibibytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
@@ -143,7 +143,7 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * Obtain a {@link DataSize} representing the specified number of mebibytes.
 	 * @param mebibytes the number of mebibytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
@@ -152,7 +152,7 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * Obtain a {@link DataSize} representing the specified number of gibibytes.
 	 * @param gibibytes the number of gibibytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
@@ -161,7 +161,7 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} representing the specified number of terabytes.
+	 * Obtain a {@link DataSize} representing the specified number of tebibytes.
 	 * @param tebibytes the number of tebibytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
