@@ -22,6 +22,9 @@ if (System.getenv('GRADLE_ENTERPRISE_URL')) {
 	apply from: "$rootDir/gradle/build-scan-user-data.gradle"
 	buildScan {
 		captureTaskInputFiles = true
+		obfuscation {
+			ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
+		}
 		publishAlways()
 		server = System.getenv('GRADLE_ENTERPRISE_URL')
 	}
