@@ -24,6 +24,8 @@ import javax.management.ObjectName;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.opentest4j.TestAbortedException;
@@ -58,14 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class AbstractMBeanServerTests {
 
 	@RegisterExtension
-	TestExecutionExceptionHandler bindExceptionHandler = (context, throwable) -> {
-		// Abort test?
-		if (throwable instanceof BindException) {
-			throw new TestAbortedException("Failed to bind to MBeanServer", throwable);
-		}
-		// Else rethrow to conform to the contract of TestExecutionExceptionHandler
-		throw throwable;
-	};
+	BindExceptionHandler bindExceptionHandler = new BindExceptionHandler();
 
 	protected MBeanServer server;
 
@@ -127,4 +122,36 @@ public abstract class AbstractMBeanServerTests {
 		assertThat(getServer().isRegistered(objectName)).as(message).isFalse();
 	}
 
+
+	private static class BindExceptionHandler implements TestExecutionExceptionHandler, LifecycleMethodExecutionExceptionHandler {
+
+		@Override
+		public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
+			handleBindException(throwable);
+		}
+
+		@Override
+		public void handleBeforeEachMethodExecutionException(ExtensionContext context, Throwable throwable)
+				throws Throwable {
+			handleBindException(throwable);
+		}
+
+		@Override
+		public void handleAfterEachMethodExecutionException(ExtensionContext context, Throwable throwable)
+				throws Throwable {
+			handleBindException(throwable);
+		}
+
+		private void handleBindException(Throwable throwable) throws Throwable {
+			// Abort test?
+			if (throwable instanceof BindException) {
+				throw new TestAbortedException("Failed to bind to MBeanServer", throwable);
+			}
+			// Else rethrow to conform to the contracts of TestExecutionExceptionHandler and LifecycleMethodExecutionExceptionHandler
+			throw throwable;
+		}
+
+	}
+
 }
+
