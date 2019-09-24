@@ -64,12 +64,12 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 	@BeforeAll
 	void setUpReactorResourceFactory() {
-		factory.afterPropertiesSet();
+		this.factory.afterPropertiesSet();
 	}
 
 	@AfterAll
 	void destroyReactorResourceFactory() {
-		factory.destroy();
+		this.factory.destroy();
 	}
 
 	private void setUp(DataBufferFactory bufferFactory) {
@@ -87,7 +87,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 		if (super.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) super.bufferFactory).getByteBufAllocator();
-			return new ReactorClientHttpConnector(factory, httpClient ->
+			return new ReactorClientHttpConnector(this.factory, httpClient ->
 					httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
 		}
 		else {
