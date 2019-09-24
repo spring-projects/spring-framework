@@ -95,7 +95,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			ServletContext servletContext = this.servletContext;
 			if (!isRunning() && servletContext != null) {
-				this.running = true;
 				try {
 					this.factory = (this.webSocketPolicy != null ?
 							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
@@ -109,6 +108,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 						return container.getAdapter();
 					});
 					this.factory.start();
+					this.running = true;
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to start WebSocketServerFactory", ex);
@@ -121,10 +121,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				this.running = false;
 				if (this.factory != null) {
 					try {
 						this.factory.stop();
+						this.running = false;
 					}
 					catch (Throwable ex) {
 						throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
@@ -203,11 +203,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private void startLazily(HttpServletRequest request) {
-		if (this.servletContext != null) {
+		if (isRunning()) {
 			return;
 		}
 		synchronized (this.lifecycleMonitor) {
-			if (this.servletContext == null) {
+			if (!isRunning()) {
 				this.servletContext = request.getServletContext();
 				start();
 			}

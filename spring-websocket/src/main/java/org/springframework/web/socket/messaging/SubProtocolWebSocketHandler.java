@@ -370,6 +370,9 @@ public class SubProtocolWebSocketHandler
 				if (logger.isDebugEnabled()) {
 					logger.debug("Terminating '" + session + "'", ex);
 				}
+				else if (logger.isWarnEnabled()) {
+					logger.debug("Terminating '" + session + "': " + ex.getMessage());
+				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());

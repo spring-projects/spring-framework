@@ -43,42 +43,42 @@ public final class DataSize implements Comparable<DataSize> {
 	/**
 	 * Bytes per Kilobyte.
 	 */
-	private static long BYTES_PER_KB = 1000;
+	private static final long BYTES_PER_KB = 1000;
 
 	/**
 	 * Bytes per Megabyte.
 	 */
-	private static long BYTES_PER_MB = BYTES_PER_KB * 1000;
+	private static final long BYTES_PER_MB = BYTES_PER_KB * 1000;
 
 	/**
 	 * Bytes per Gigabyte.
 	 */
-	private static long BYTES_PER_GB = BYTES_PER_MB * 1000;
+	private static final long BYTES_PER_GB = BYTES_PER_MB * 1000;
 
 	/**
 	 * Bytes per Terabyte.
 	 */
-	private static long BYTES_PER_TB = BYTES_PER_GB * 1000;
+	private static final long BYTES_PER_TB = BYTES_PER_GB * 1000;
 
 	/**
 	 * Bytes per Kibibyte.
 	 */
-	private static long BYTES_PER_KIB = 1024;
+	private static final long BYTES_PER_KIB = 1024;
 
 	/**
 	 * Bytes per Mebibyte.
 	 */
-	private static long BYTES_PER_MIB = BYTES_PER_KIB * 1024;
+	private static final long BYTES_PER_MIB = BYTES_PER_KIB * 1024;
 
 	/**
 	 * Bytes per Gibibyte.
 	 */
-	private static long BYTES_PER_GIB = BYTES_PER_MIB * 1024;
+	private static final long BYTES_PER_GIB = BYTES_PER_MIB * 1024;
 
 	/**
 	 * Bytes per Tebibyte.
 	 */
-	private static long BYTES_PER_TIB = BYTES_PER_GIB * 1024;
+	private static final long BYTES_PER_TIB = BYTES_PER_GIB * 1024;
 
 	private final long bytes;
 

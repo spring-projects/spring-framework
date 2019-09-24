@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
- * Base class for tests that read or write data buffers with a rule to check
+ * Base class for tests that read or write data buffers with an extension to check
  * that allocated buffers have been released.
  *
  * @author Arjen Poutsma
@@ -56,7 +56,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 public abstract class AbstractDataBufferAllocatingTests {
 
 	@RegisterExtension
-	AfterEachCallback leakDetector = context -> verifyAllocations();
+	AfterEachCallback leakDetector = context -> waitForDataBufferRelease(Duration.ofSeconds(2));
 
 	protected DataBufferFactory bufferFactory;
 
@@ -94,7 +94,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 	/**
 	 * Wait until allocations are at 0, or the given duration elapses.
 	 */
-	protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
+	private void waitForDataBufferRelease(Duration duration) throws InterruptedException {
 		Instant start = Instant.now();
 		while (true) {
 			try {

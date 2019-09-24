@@ -34,8 +34,8 @@ as the following example shows:
 .Java
 ----
 	import static org.springframework.http.MediaType.APPLICATION_JSON;
-    import static org.springframework.web.servlet.function.RequestPredicates.*;
-    import static org.springframework.web.servlet.function.RouterFunctions.route;
+	import static org.springframework.web.servlet.function.RequestPredicates.*;
+	import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 	PersonRepository repository = ...
 	PersonHandler handler = new PersonHandler(repository);
@@ -68,10 +68,12 @@ as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	import org.springframework.web.servlet.function.router
+
 	val repository: PersonRepository = ...
 	val handler = PersonHandler(repository)
 
-	val route = coRouter { // <1>
+	val route = router { // <1>
 		accept(APPLICATION_JSON).nest {
 			GET("/person/{id}", handler::getPerson)
 			GET("/person", handler::listPeople)
@@ -84,20 +86,20 @@ as the following example shows:
 
 		// ...
 
-		suspend fun listPeople(request: ServerRequest): ServerResponse {
+		fun listPeople(request: ServerRequest): ServerResponse {
 			// ...
 		}
 
-		suspend fun createPerson(request: ServerRequest): ServerResponse {
+		fun createPerson(request: ServerRequest): ServerResponse {
 			// ...
 		}
 
-		suspend fun getPerson(request: ServerRequest): ServerResponse {
+		fun getPerson(request: ServerRequest): ServerResponse {
 			// ...
 		}
 	}
 ----
-<1> Create router using Coroutines router DSL, a Reactive alternative is also available via `router { }`.
+<1> Create router using the router DSL.
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
@@ -213,7 +215,8 @@ HandlerFunction<ServerResponse> helloWorld =
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-val helloWorld = HandlerFunction<ServerResponse> { ServerResponse.ok().body("Hello World") }
+val helloWorld: (ServerRequest) -> ServerResponse =
+  { ServerResponse.ok().body("Hello World") }
 ----
 
 That is convenient, but in an application we need multiple functions, and multiple inline
@@ -236,27 +239,27 @@ public class PersonHandler {
 		this.repository = repository;
 	}
 
-    public ServerResponse listPeople(ServerRequest request) { // <1>
-        List<Person> people = repository.allPeople();
-        return ok().contentType(APPLICATION_JSON).body(people);
-    }
+	public ServerResponse listPeople(ServerRequest request) { // <1>
+		List<Person> people = repository.allPeople();
+		return ok().contentType(APPLICATION_JSON).body(people);
+	}
 
-    public ServerResponse createPerson(ServerRequest request) throws Exception { // <2>
-        Person person = request.body(Person.class);
-        repository.savePerson(person);
-        return ok().build();
-    }
+	public ServerResponse createPerson(ServerRequest request) throws Exception { // <2>
+		Person person = request.body(Person.class);
+		repository.savePerson(person);
+		return ok().build();
+	}
 
-    public ServerResponse getPerson(ServerRequest request) { // <3>
-        int personId = Integer.parseInt(request.pathVariable("id"));
-        Person person = repository.getPerson(personId);
-        if (person != null) {
-            return ok().contentType(APPLICATION_JSON).body(person))
-        }
-        else {
-            return ServerResponse.notFound().build();
-        }
-    }
+	public ServerResponse getPerson(ServerRequest request) { // <3>
+		int personId = Integer.parseInt(request.pathVariable("id"));
+		Person person = repository.getPerson(personId);
+		if (person != null) {
+			return ok().contentType(APPLICATION_JSON).body(person))
+		}
+		else {
+			return ServerResponse.notFound().build();
+		}
+	}
 
 }
 ----
@@ -344,7 +347,7 @@ apply validation to the request body. For example, given a custom Spring
 
 		// ...
 
-		suspend fun createPerson(request: ServerRequest): ServerResponse {
+		fun createPerson(request: ServerRequest): ServerResponse {
 			val person = request.body<Person>()
 			validate(person) // <2>
 			repository.savePerson(person)
@@ -352,8 +355,8 @@ apply validation to the request body. For example, given a custom Spring
 		}
 
 		private fun validate(person: Person) {
-			val errors: Errors = BeanPropertyBindingResult(person, "person");
-			validator.validate(person, errors);
+			val errors: Errors = BeanPropertyBindingResult(person, "person")
+			validator.validate(person, errors)
 			if (errors.hasErrors()) {
 				throw ServerWebInputException(errors.toString()) // <3>
 			}
@@ -411,10 +414,12 @@ header:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val route = coRouter {
+	import org.springframework.web.servlet.function.router
+
+	val route = router {
 		GET("/hello-world", accept(TEXT_PLAIN)) {
-            ServerResponse.ok().body("Hello World")
-        }
+			ServerResponse.ok().body("Hello World")
+		}
 	}
 ----
 
@@ -455,20 +460,20 @@ The following example shows the composition of four routes:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.servlet.function.RequestPredicates.*;
+	import static org.springframework.http.MediaType.APPLICATION_JSON;
+	import static org.springframework.web.servlet.function.RequestPredicates.*;
 
-PersonRepository repository = ...
-PersonHandler handler = new PersonHandler(repository);
+	PersonRepository repository = ...
+	PersonHandler handler = new PersonHandler(repository);
 
-RouterFunction<ServerResponse> otherRoute = ...
+	RouterFunction<ServerResponse> otherRoute = ...
 
-RouterFunction<ServerResponse> route = route()
-	.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
-	.GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
-	.POST("/person", handler::createPerson) // <3>
-	.add(otherRoute) // <4>
-	.build();
+	RouterFunction<ServerResponse> route = route()
+		.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
+		.GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
+		.POST("/person", handler::createPerson) // <3>
+		.add(otherRoute) // <4>
+		.build();
 ----
 <1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
@@ -482,13 +487,14 @@ RouterFunction<ServerResponse> route = route()
 .Kotlin
 ----
 	import org.springframework.http.MediaType.APPLICATION_JSON
+	import org.springframework.web.servlet.function.router
 
 	val repository: PersonRepository = ...
 	val handler = PersonHandler(repository);
 
-	val otherRoute: RouterFunction<ServerResponse> = coRouter {  }
+	val otherRoute = router {  }
 
-	val route = coRouter {
+	val route = router {
 		GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
 		GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
 		POST("/person", handler::createPerson) // <3>
@@ -529,7 +535,9 @@ RouterFunction<ServerResponse> route = route()
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val route = coRouter {
+	import org.springframework.web.servlet.function.router
+
+	val route = router {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 			GET("", accept(APPLICATION_JSON), handler::listPeople)
@@ -557,7 +565,9 @@ We can further improve by using the `nest` method together with `accept`:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val route = coRouter {
+	import org.springframework.web.servlet.function.router
+
+	val route = router {
 		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
@@ -694,6 +704,8 @@ For instance, consider the following example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	import org.springframework.web.servlet.function.router
+
 	val route = router {
 		"/person".nest {
 			GET("/{id}", handler::getPerson)
@@ -747,23 +759,25 @@ The following example shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	import org.springframework.web.servlet.function.router
+
 	val securityManager: SecurityManager = ...
 
 	val route = router {
-			("/person" and accept(APPLICATION_JSON)).nest {
-				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
-				POST("/person", handler::createPerson)
-				filter { request, next ->
-					if (securityManager.allowAccessTo(request.path())) {
-						next(request)
-					}
-					else {
-						status(UNAUTHORIZED).build();
-					}
+		("/person" and accept(APPLICATION_JSON)).nest {
+			GET("/{id}", handler::getPerson)
+			GET("", handler::listPeople)
+			POST("/person", handler::createPerson)
+			filter { request, next ->
+				if (securityManager.allowAccessTo(request.path())) {
+					next(request)
+				}
+				else {
+					status(UNAUTHORIZED).build();
 				}
 			}
 		}
+	}
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
