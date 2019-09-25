@@ -126,13 +126,13 @@ public class BeanDefinitionTests {
 		otherBd.setAbstract(true);
 		otherBd.setLazyInit(true);
 		boolean condition1 = !bd.equals(otherBd);
-		assertTrue(condition1);
+		assertThat(condition1).isTrue();
 		boolean condition = !otherBd.equals(bd);
-		assertTrue(condition);
+		assertThat(condition).isTrue();
 		otherBd.setParentName("parent");
-		assertTrue(bd.equals(otherBd));
-		assertTrue(otherBd.equals(bd));
-		assertTrue(bd.hashCode() == otherBd.hashCode());
+		assertThat(bd.equals(otherBd)).isTrue();
+		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
 	}
 
 	@Test
