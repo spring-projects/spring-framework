@@ -181,8 +181,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private MutablePropertyValues propertyValues;
 
-	@Nullable
-	private MethodOverrides methodOverrides;
+	private MethodOverrides methodOverrides = new MethodOverrides();
 
 	@Nullable
 	private String initMethodName;
@@ -903,9 +902,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
-		if (this.methodOverrides == null) {
-			this.methodOverrides = new MethodOverrides();
-		}
 		return this.methodOverrides;
 	}
 
@@ -914,7 +910,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @since 5.0.2
 	 */
 	public boolean hasMethodOverrides() {
-		return (this.methodOverrides != null && !this.methodOverrides.isEmpty());
+		return !this.methodOverrides.isEmpty();
 	}
 
 	/**
@@ -1098,10 +1094,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public void validate() throws BeanDefinitionValidationException {
 		if (hasMethodOverrides() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
-					"Cannot combine static factory method with method overrides: " +
-					"the static factory method must create the instance");
+					"Cannot combine factory method with container-generated method overrides: " +
+					"the factory method must create the concrete bean instance.");
 		}
-
 		if (hasBeanClass()) {
 			prepareMethodOverrides();
 		}
@@ -1113,14 +1108,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
-		// Check that lookup methods exists.
+		// Check that lookup methods exist and determine their overloaded status.
 		if (hasMethodOverrides()) {
-			Set<MethodOverride> overrides = getMethodOverrides().getOverrides();
-			synchronized (overrides) {
-				for (MethodOverride mo : overrides) {
-					prepareMethodOverride(mo);
-				}
-			}
+			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}
 

@@ -115,6 +115,27 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
+	public void genericBeanDefinitionEquality() {
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setParentName("parent");
+		bd.setScope("request");
+		bd.setAbstract(true);
+		bd.setLazyInit(true);
+		GenericBeanDefinition otherBd = new GenericBeanDefinition();
+		otherBd.setScope("request");
+		otherBd.setAbstract(true);
+		otherBd.setLazyInit(true);
+		boolean condition1 = !bd.equals(otherBd);
+		assertTrue(condition1);
+		boolean condition = !otherBd.equals(bd);
+		assertTrue(condition);
+		otherBd.setParentName("parent");
+		assertTrue(bd.equals(otherBd));
+		assertTrue(otherBd.equals(bd));
+		assertTrue(bd.hashCode() == otherBd.hashCode());
+	}
+
+	@Test
 	public void beanDefinitionHolderEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);

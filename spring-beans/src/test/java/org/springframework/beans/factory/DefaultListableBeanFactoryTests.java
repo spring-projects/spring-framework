@@ -857,6 +857,18 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void aliasChaining() {
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerAlias("testAlias", "testAlias2");
+		lbf.registerAlias("testAlias2", "testAlias3");
+		Object bean = lbf.getBean("test");
+		assertThat(lbf.getBean("testAlias")).isSameAs(bean);
+		assertThat(lbf.getBean("testAlias2")).isSameAs(bean);
+		assertThat(lbf.getBean("testAlias3")).isSameAs(bean);
+	}
+
+	@Test
 	void beanDefinitionOverriding() {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
@@ -864,6 +876,43 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerAlias("test", "test2");
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
 		assertThat(lbf.getBean("test2")).isInstanceOf(NestedTestBean.class);
+	}
+
+	@Test
+	void beanDefinitionOverridingNotAllowed() {
+		lbf.setAllowBeanDefinitionOverriding(false);
+		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
+		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
+		lbf.registerBeanDefinition("test", oldDef);
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
+				lbf.registerBeanDefinition("test", newDef))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("test");
+					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
+					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
+				});
+	}
+
+	@Test
+	void beanDefinitionOverridingWithAlias() {
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
+		assertThat(lbf.getBean("testAlias")).isInstanceOf(NestedTestBean.class);
+	}
+
+	@Test
+	void beanDefinitionOverridingWithConstructorArgumentMismatch() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(NestedTestBean.class);
+		bd1.getConstructorArgumentValues().addIndexedArgumentValue(1, "value1");
+		lbf.registerBeanDefinition("test", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NestedTestBean.class);
+		bd2.getConstructorArgumentValues().addIndexedArgumentValue(0, "value0");
+		lbf.registerBeanDefinition("test", bd2);
+		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
+		assertThat(lbf.getBean("test", NestedTestBean.class).getCompany()).isEqualTo("value0");
 	}
 
 	@Test
@@ -906,43 +955,6 @@ class DefaultListableBeanFactoryTests {
 	private void removeTestBean(int i) {
 		String name = "test" + i;
 		lbf.removeBeanDefinition(name);
-	}
-
-	@Test
-	void beanDefinitionOverridingNotAllowed() {
-		lbf.setAllowBeanDefinitionOverriding(false);
-		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
-		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
-		lbf.registerBeanDefinition("test", oldDef);
-		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
-				lbf.registerBeanDefinition("test", newDef))
-			.satisfies(ex -> {
-				assertThat(ex.getBeanName()).isEqualTo("test");
-				assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
-				assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
-			});
-	}
-
-	@Test
-	void beanDefinitionOverridingWithAlias() {
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
-		assertThat(lbf.getBean("testAlias")).isInstanceOf(NestedTestBean.class);
-	}
-
-	@Test
-	void aliasChaining() {
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		lbf.registerAlias("testAlias", "testAlias2");
-		lbf.registerAlias("testAlias2", "testAlias3");
-		Object bean = lbf.getBean("test");
-		assertThat(lbf.getBean("testAlias")).isSameAs(bean);
-		assertThat(lbf.getBean("testAlias2")).isSameAs(bean);
-		assertThat(lbf.getBean("testAlias3")).isSameAs(bean);
 	}
 
 	@Test

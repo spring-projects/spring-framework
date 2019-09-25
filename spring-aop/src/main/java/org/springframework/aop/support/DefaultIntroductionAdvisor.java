@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 11.11.2003
  */
-@SuppressWarnings({"serial" })
+@SuppressWarnings("serial")
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
 	private final Advice advice;

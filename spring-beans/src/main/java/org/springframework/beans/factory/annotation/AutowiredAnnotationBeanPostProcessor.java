@@ -256,7 +256,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
-		// Let's check for lookup methods here..
+		// Let's check for lookup methods here...
 		if (!this.lookupMethodsChecked.contains(beanName)) {
 			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {
 				try {
@@ -268,7 +268,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								Assert.state(this.beanFactory != null, "No BeanFactory available");
 								LookupOverride override = new LookupOverride(method, lookup.value());
 								try {
-									RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
+									RootBeanDefinition mbd = (RootBeanDefinition)
+											this.beanFactory.getMergedBeanDefinition(beanName);
 									mbd.getMethodOverrides().addOverride(override);
 								}
 								catch (NoSuchBeanDefinitionException ex) {
