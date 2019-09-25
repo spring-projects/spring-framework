@@ -139,6 +139,27 @@ class StopWatchTests {
 			.withMessage("Task info is not being kept!");
 	}
 
+	@Test
+	void validUsageAggregatesTasks() throws Exception {
+		stopWatch.setAggregateTasks(true);
+
+		stopWatch.start(name1);
+		Thread.sleep(duration1);
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
+		stopWatch.stop();
+		long firstDuration = stopWatch.getTaskInfo()[0].getTimeMillis();
+
+		stopWatch.start(name1);
+		Thread.sleep(duration2);
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
+		stopWatch.stop();
+
+		assertThat(stopWatch.getTaskCount()).isEqualTo(1);
+		assertThat(stopWatch.prettyPrint()).contains("100%");
+		assertThat(stopWatch.toString()).contains(name1);
+		assertThat(stopWatch.getTaskInfo()[0].getTimeMillis()).isGreaterThan(firstDuration);
+	}
+
 	private static long millisToNanos(long duration) {
 		return MILLISECONDS.toNanos(duration);
 	}

@@ -17,8 +17,8 @@
 package org.springframework.util;
 
 import java.text.NumberFormat;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
@@ -55,7 +55,9 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	private final List<TaskInfo> taskList = new LinkedList<>();
+	private boolean aggregateTasks = false;
+
+	private final Map<String, TaskInfo> taskList = new LinkedHashMap<>();
 
 	/** Start time of the current task. */
 	private long startTimeNanos;
@@ -114,6 +116,18 @@ public class StopWatch {
 		this.keepTaskList = keepTaskList;
 	}
 
+	/**
+	 * Configure whether the {@link TaskInfo} results should be aggregated.
+	 * <p>Set this to {@code true} when you are invoking timers with the same
+	 * name multiple times and wish for the results to be aggregated together,
+	 * as opposed to recording each invocation separately. Note that a value
+	 * of {@code true} also requires that {@code keepTaskList} is also set
+	 * to true.
+	 * <p>Default is {@code false}.
+	 */
+	public void setAggregateTasks(boolean aggregateTasks) {
+		this.aggregateTasks = aggregateTasks;
+	}
 
 	/**
 	 * Start an unnamed task.
@@ -157,7 +171,14 @@ public class StopWatch {
 		this.totalTimeNanos += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
 		if (this.keepTaskList) {
-			this.taskList.add(this.lastTaskInfo);
+			if (this.aggregateTasks && this.taskList.containsKey(this.currentTaskName)) {
+				long aggregatedTime = this.taskList.get(this.currentTaskName).timeNanos + lastTime;
+				TaskInfo updated = new TaskInfo(this.currentTaskName, aggregatedTime);
+				this.taskList.replace(this.currentTaskName, updated);
+				--this.taskCount;
+			} else {
+				this.taskList.put(this.currentTaskName, this.lastTaskInfo);
+			}
 		}
 		++this.taskCount;
 		this.currentTaskName = null;
@@ -267,7 +288,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return this.taskList.toArray(new TaskInfo[0]);
+		return this.taskList.values().toArray(new TaskInfo[0]);
 	}
 
 
