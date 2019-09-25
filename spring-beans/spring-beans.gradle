@@ -6,7 +6,7 @@ apply plugin: "kotlin"
 dependencies {
 	compile(project(":spring-core"))
 	optional("javax.inject:javax.inject")
-	optional("org.yaml:snakeyaml:1.24")
+	optional("org.yaml:snakeyaml")
 	optional("org.codehaus.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")

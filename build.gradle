@@ -84,18 +84,18 @@ configure(allprojects) { project ->
 			}
 
 			dependency "com.caucho:hessian:4.0.62"
-			dependency "com.fasterxml:aalto-xml:1.2.1"
+			dependency "com.fasterxml:aalto-xml:1.2.2"
 			dependency("com.fasterxml.woodstox:woodstox-core:5.2.0") {
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.5"
-			dependency "com.google.protobuf:protobuf-java-util:3.9.0"
+			dependency "com.google.protobuf:protobuf-java-util:3.10.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.1.13"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.0"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
@@ -104,11 +104,11 @@ configure(allprojects) { project ->
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.24"
+			dependency "org.yaml:snakeyaml:1.25"
 
 			dependency "com.h2database:h2:1.4.199"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.0"
-			dependency "com.github.librepdf:openpdf:1.2.21"
+			dependency "com.github.librepdf:openpdf:1.3.11"
 			dependency "com.rometools:rome:1.12.2"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.0"
@@ -128,7 +128,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.apache.poi:poi-ooxml:4.1.0"
 			dependency "org.beanshell:bsh:2.0b5"
-			dependency "org.freemarker:freemarker:2.3.28"
+			dependency "org.freemarker:freemarker:2.3.29"
 			dependency "org.hsqldb:hsqldb:2.5.0"
 			dependency "org.quartz-scheduler:quartz:2.3.1"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
