@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 11.11.2003
  */
-@SuppressWarnings({"serial" })
+@SuppressWarnings("serial")
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
 	private final Advice advice;
@@ -113,8 +113,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		for (Class<?> ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
 					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
-			 throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
-					 "does not implement interface [" + ifc.getName() + "] specified for introduction");
+			throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
+					"does not implement interface [" + ifc.getName() + "] specified for introduction");
 			}
 		}
 	}
