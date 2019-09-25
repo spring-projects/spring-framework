@@ -240,11 +240,11 @@ public class PeriodicTriggerTests {
 
 	private static class TestTriggerContext implements TriggerContext {
 
-		private final Date scheduled;
+		private Date scheduled;
 
-		private final Date actual;
+		private Date actual;
 
-		private final Date completion;
+		private Date completion;
 
 		TestTriggerContext(Date scheduled, Date actual, Date completion) {
 			this.scheduled = scheduled;
@@ -265,6 +265,12 @@ public class PeriodicTriggerTests {
 		@Override
 		public Date lastScheduledExecutionTime() {
 			return this.scheduled;
+		}
+
+		public void update(Date scheduled, Date actual, Date completion) {
+			this.scheduled = scheduled;
+			this.actual = actual;
+			this.completion = completion;
 		}
 	}
 

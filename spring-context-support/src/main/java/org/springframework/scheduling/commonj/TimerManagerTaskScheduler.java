@@ -28,6 +28,7 @@ import commonj.timers.TimerListener;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
@@ -62,6 +63,12 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		return new ReschedulingTimerListener(errorHandlingTask(task, true), trigger).schedule();
+	}
+
+	@Override
+	@Nullable
+	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger, TriggerContext triggerContext) {
+		return new ReschedulingTimerListener(errorHandlingTask(task, true), trigger, triggerContext).schedule();
 	}
 
 	@Override
@@ -166,13 +173,20 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 
 		private final Trigger trigger;
 
-		private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+		private final TriggerContext triggerContext;
 
 		private volatile Date scheduledExecutionTime = new Date();
 
 		public ReschedulingTimerListener(Runnable runnable, Trigger trigger) {
 			super(runnable);
 			this.trigger = trigger;
+			this.triggerContext = new SimpleTriggerContext();
+		}
+
+		public ReschedulingTimerListener(Runnable runnable, Trigger trigger, TriggerContext triggerContext) {
+			super(runnable);
+			this.trigger = trigger;
+			this.triggerContext = triggerContext;
 		}
 
 		@Nullable

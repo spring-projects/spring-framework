@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.util.Assert;
@@ -47,7 +48,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final Trigger trigger;
 
-	private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+	private final TriggerContext triggerContext;
 
 	private final ScheduledExecutorService executor;
 
@@ -66,6 +67,16 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		super(delegate, errorHandler);
 		this.trigger = trigger;
 		this.executor = executor;
+		this.triggerContext = new SimpleTriggerContext();
+	}
+
+	public ReschedulingRunnable(
+			Runnable delegate, Trigger trigger, TriggerContext triggerContext, ScheduledExecutorService executor, ErrorHandler errorHandler) {
+
+		super(delegate, errorHandler);
+		this.trigger = trigger;
+		this.executor = executor;
+		this.triggerContext = triggerContext;
 	}
 
 

@@ -35,6 +35,8 @@ public class CronTrigger implements Trigger {
 
 	private final CronSequenceGenerator sequenceGenerator;
 
+	private volatile boolean fixedRate = false;
+
 
 	/**
 	 * Build a {@link CronTrigger} from the pattern provided in the default time zone.
@@ -43,6 +45,19 @@ public class CronTrigger implements Trigger {
 	 */
 	public CronTrigger(String expression) {
 		this.sequenceGenerator = new CronSequenceGenerator(expression);
+	}
+
+	/**
+	 * Build a {@link CronTrigger} from the pattern provided in the default time zone.
+	 * @param expression a space-separated list of time fields, following cron
+	 * expression conventions
+	 * @param fixedRate flag indicating if scheduled time (true)
+	 * or completion time (false) is used for calculating next execution time.
+	 * Default value is false.
+	 */
+	public CronTrigger(String expression, boolean fixedRate) {
+		this.sequenceGenerator = new CronSequenceGenerator(expression);
+		this.fixedRate = fixedRate;
 	}
 
 	/**
@@ -55,6 +70,20 @@ public class CronTrigger implements Trigger {
 		this.sequenceGenerator = new CronSequenceGenerator(expression, timeZone);
 	}
 
+	/**
+	 * Build a {@link CronTrigger} from the pattern provided in the given time zone.
+	 * @param expression a space-separated list of time fields, following cron
+	 * expression conventions
+	 * @param timeZone a time zone in which the trigger times will be generated
+	 * @param fixedRate flag indicating if scheduled time (true)
+	 * or completion time (false) is used for calculating next execution time.
+	 * Default value is false.
+	 */
+	public CronTrigger(String expression, TimeZone timeZone, boolean fixedRate) {
+		this.sequenceGenerator = new CronSequenceGenerator(expression, timeZone);
+		this.fixedRate = fixedRate;
+	}
+
 
 	/**
 	 * Return the cron pattern that this trigger has been built with.
@@ -63,24 +92,45 @@ public class CronTrigger implements Trigger {
 		return this.sequenceGenerator.getExpression();
 	}
 
+	/**
+	 * Specify whether the next execution time should be measured between the
+	 * scheduled times rather than after actual completion times.
+	 */
+	public void setFixedRate(boolean fixedRate) {
+		this.fixedRate = fixedRate;
+	}
+
+	/**
+	 * Return whether this trigger uses fixed rate ({@code true}) or
+	 * fixed delay ({@code false}) behavior.
+	 */
+	public boolean isFixedRate() {
+		return this.fixedRate;
+	}
+
 
 	/**
 	 * Determine the next execution time according to the given trigger context.
 	 * <p>Next execution times are calculated based on the
 	 * {@linkplain TriggerContext#lastCompletionTime completion time} of the
 	 * previous execution; therefore, overlapping executions won't occur.
+	 * If {@linkplain CronTrigger#fixedRate fixed rate} is true,
+	 * next execution times are based on
+	 * {@linkplain TriggerContext#lastScheduledExecutionTime() scheduled time}.
 	 */
 	@Override
 	public Date nextExecutionTime(TriggerContext triggerContext) {
+		Date scheduled = triggerContext.lastScheduledExecutionTime();
+		if (this.fixedRate) {
+			if (scheduled == null) return this.sequenceGenerator.next(new Date());
+			else return this.sequenceGenerator.next(scheduled);
+		}
 		Date date = triggerContext.lastCompletionTime();
-		if (date != null) {
-			Date scheduled = triggerContext.lastScheduledExecutionTime();
-			if (scheduled != null && date.before(scheduled)) {
-				// Previous task apparently executed too early...
-				// Let's simply use the last calculated execution time then,
-				// in order to prevent accidental re-fires in the same second.
-				date = scheduled;
-			}
+		if (date != null && scheduled != null && date.before(scheduled)) {
+			// Previous task apparently executed too early...
+			// Let's simply use the last calculated execution time then,
+			// in order to prevent accidental re-fires in the same second.
+			date = scheduled;
 		}
 		else {
 			date = new Date();

@@ -31,6 +31,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
@@ -180,6 +181,24 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 				ErrorHandler errorHandler =
 						(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
 				return new ReschedulingRunnable(task, trigger, this.scheduledExecutor, errorHandler).schedule();
+			}
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	@Nullable
+	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger, TriggerContext triggerContext) {
+		try {
+			if (this.enterpriseConcurrentScheduler) {
+				return new EnterpriseConcurrentTriggerScheduler().schedule(decorateTask(task, true), trigger);
+			}
+			else {
+				ErrorHandler errorHandler =
+						(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
+				return new ReschedulingRunnable(task, trigger, triggerContext, this.scheduledExecutor, errorHandler).schedule();
 			}
 		}
 		catch (RejectedExecutionException ex) {

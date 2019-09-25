@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 3.0
  * @see TaskScheduler#schedule(Runnable, Trigger)
+ * @see TaskScheduler#schedule(Runnable, Trigger, TriggerContext)
  * @see org.springframework.scheduling.support.CronTrigger
  */
 public interface Trigger {

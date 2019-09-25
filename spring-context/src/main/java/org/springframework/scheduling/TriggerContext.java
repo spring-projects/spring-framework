@@ -50,4 +50,13 @@ public interface TriggerContext {
 	@Nullable
 	Date lastCompletionTime();
 
+	/**
+	 * Update the values of last <i>scheduled</i>, <i>actual</i> and completion times
+	 * @param lastScheduledExecutionTime last <i>scheduled</i> execution time
+	 * @param lastActualExecutionTime last <i>actual</i> execution time
+	 * @param lastCompletionTime last completion time
+	 */
+	@Nullable
+	void update(Date lastScheduledExecutionTime, Date lastActualExecutionTime, Date lastCompletionTime);
+
 }

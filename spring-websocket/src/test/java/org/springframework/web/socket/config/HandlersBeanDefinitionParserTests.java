@@ -32,6 +32,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
@@ -316,6 +317,11 @@ class TestTaskScheduler implements TaskScheduler {
 
 	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture schedule(Runnable task, Trigger trigger, TriggerContext triggerContext) {
 		return null;
 	}
 
