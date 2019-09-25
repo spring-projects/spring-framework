@@ -67,12 +67,12 @@ dependencies {
 	testCompile("org.junit.jupiter:junit-jupiter-params")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.11.1")
-	testCompile("com.rometools:rome:1.12.1")
+	testCompile("com.rometools:rome:1.12.2")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4j)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4j)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.9") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.10") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("io.projectreactor.netty:reactor-netty")

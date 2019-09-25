@@ -38,8 +38,8 @@ dependencies {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
-	optional("com.squareup.okhttp3:okhttp:3.14.2")
-	optional("org.apache.httpcomponents:httpclient:4.5.9") {
+	optional("com.squareup.okhttp3:okhttp:3.14.3")
+	optional("org.apache.httpcomponents:httpclient:4.5.10") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.apache.httpcomponents:httpasyncclient:4.1.4") {
@@ -58,7 +58,7 @@ dependencies {
 	optional("com.google.code.gson:gson:2.8.5")
 	optional("com.google.protobuf:protobuf-java-util:3.6.1")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("com.rometools:rome:1.12.1")
+	optional("com.rometools:rome:1.12.2")
 	optional("com.caucho:hessian:4.0.51")
 	optional("org.codehaus.groovy:groovy:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -75,7 +75,7 @@ dependencies {
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.14.2")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.14.3")
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.skyscreamer:jsonassert:1.5.0")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
@@ -83,5 +83,5 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 	testRuntime("javax.json:javax.json-api:1.1.4")
-	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.12")
+	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.13")
 }

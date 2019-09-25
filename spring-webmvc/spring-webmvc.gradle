@@ -22,7 +22,7 @@ dependencies {
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.xml.bind:jaxb-api:2.3.1")
 	optional("org.webjars:webjars-locator-core:0.37")
-	optional("com.rometools:rome:1.12.1")
+	optional("com.rometools:rome:1.12.2")
 	optional("com.github.librepdf:openpdf:1.2.21")
 	optional("org.apache.poi:poi-ooxml:4.1.0")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
@@ -50,12 +50,12 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	testCompile("org.apache.httpcomponents:httpclient:4.5.9") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.10") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("commons-fileupload:commons-fileupload:1.4")
 	testCompile("commons-io:commons-io:2.5")
-	testCompile("joda-time:joda-time:2.10.2")
+	testCompile("joda-time:joda-time:2.10.4")
 	testCompile("org.mozilla:rhino:1.7.10")
 	testCompile("dom4j:dom4j:1.6.1") {
 		exclude group: "xml-apis", module: "xml-apis"
