@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.client
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
@@ -103,7 +102,6 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 

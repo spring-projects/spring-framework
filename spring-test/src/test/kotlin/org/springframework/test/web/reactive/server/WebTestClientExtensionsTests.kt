@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server
 
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -47,7 +46,6 @@ class WebTestClientExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<Foo>>()
 		requestBodySpec.body(body)

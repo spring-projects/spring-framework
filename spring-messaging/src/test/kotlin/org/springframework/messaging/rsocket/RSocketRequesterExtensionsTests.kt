@@ -18,7 +18,6 @@ package org.springframework.messaging.rsocket
 
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -122,7 +121,6 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun retrieveFlow() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
 		every { requestSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")

@@ -19,7 +19,6 @@ package org.springframework.core
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +58,6 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
  * @since 5.2
  */
 @Suppress("UNCHECKED_CAST")
-@ExperimentalCoroutinesApi
 internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Any? {
 	val function = method.kotlinFunction!!
 	return if (function.isSuspend) {

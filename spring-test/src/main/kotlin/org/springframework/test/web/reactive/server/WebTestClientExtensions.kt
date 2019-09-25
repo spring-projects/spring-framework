@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.reactive.server
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -56,7 +55,6 @@ inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeaders
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeadersSpec<*> =
 		body(flow, object : ParameterizedTypeReference<T>() {})
 
