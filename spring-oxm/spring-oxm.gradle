@@ -22,7 +22,7 @@ task genJaxb {
 	ext.sourcesDir = "${genSourcesDir}/jaxb"
 	ext.classesDir = "${buildDir}/classes/jaxb"
 
-	inputs.files flightSchema
+	inputs.files(flightSchema).withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir classesDir
 
 	doLast() {
