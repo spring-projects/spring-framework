@@ -406,11 +406,15 @@ configure(rootProject) {
 	nohttp {
 		source.exclude "**/test-output/**"
 		whitelistFile = project.file("src/nohttp/whitelist.lines")
-		def projectDirURI = project.projectDir.toURI()
-		allprojects.forEach { p ->
-			def outURI = p.file("out").toURI()
-			def pattern = projectDirURI.relativize(outURI).path + "**"
-			source.exclude pattern
+		def rootPath = file(rootDir).toPath()
+		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
+		projectDirs.forEach { dir ->
+			[ 'bin', 'build', 'out', '.settings' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it/**" }
+			[ '.classpath', '.project' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it" }
 		}
 	}
 
