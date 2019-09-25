@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -408,7 +408,7 @@ public class ConstructorArgumentValues {
 		for (Map.Entry<Integer, ValueHolder> entry : this.indexedArgumentValues.entrySet()) {
 			ValueHolder vh1 = entry.getValue();
 			ValueHolder vh2 = that.indexedArgumentValues.get(entry.getKey());
-			if (!vh1.contentEquals(vh2)) {
+			if (vh2 == null || !vh1.contentEquals(vh2)) {
 				return false;
 			}
 		}
