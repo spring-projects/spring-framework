@@ -67,7 +67,7 @@ import java.util.Arrays;
 @Component
 public class LogPrintAspect {
 
-	@Pointcut("execution(public * d*(..))")
+	@Pointcut("execution(public * div(..))")
 	public void pointCut(){
 
 	}
@@ -76,6 +76,12 @@ public class LogPrintAspect {
 	public void before(JoinPoint joinPoint){
 		System.out.printf("方法：%s 执行之前打印，参数列表为：%s",joinPoint.getSignature().getName(), Arrays.asList(joinPoint.getArgs()));
 	}
+
+	@After(value = "pointCut()")
+	public void after(JoinPoint joinPoint){
+		System.out.printf("方法：%s 执行结束",joinPoint.getSignature().getName());
+	}
+
 
 	@AfterReturning(value = "pointCut()",returning = "returnvalue")
 	public void returnValue(JoinPoint joinPoint,Object returnvalue){
