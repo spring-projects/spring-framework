@@ -202,7 +202,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 	@Override
 	public String toString() {
-		return "ComposablePointcut: " + this.classFilter + ", " + this.methodMatcher;
+		return getClass().getName() + ": " + this.classFilter + ", " + this.methodMatcher;
 	}
 
 }
