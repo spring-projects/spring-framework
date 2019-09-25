@@ -115,6 +115,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				cookie.setSameSiteMode(httpCookie.getSameSite());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
 			}
 		}

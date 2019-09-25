@@ -19,13 +19,13 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Processor;
@@ -142,21 +142,19 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	@Override
 	protected void applyCookies() {
-		for (String name : getCookies().keySet()) {
-			for (ResponseCookie httpCookie : getCookies().get(name)) {
-				Cookie cookie = new Cookie(name, httpCookie.getValue());
-				if (!httpCookie.getMaxAge().isNegative()) {
-					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
-				}
-				if (httpCookie.getDomain() != null) {
-					cookie.setDomain(httpCookie.getDomain());
-				}
-				if (httpCookie.getPath() != null) {
-					cookie.setPath(httpCookie.getPath());
-				}
-				cookie.setSecure(httpCookie.isSecure());
-				cookie.setHttpOnly(httpCookie.isHttpOnly());
-				this.response.addCookie(cookie);
+
+		// Servlet Cookie doesn't support same site:
+		// https://github.com/eclipse-ee4j/servlet-api/issues/175
+
+		// For Jetty, starting 9.4.21+ we could adapt to HttpCookie:
+		// https://github.com/eclipse/jetty.project/issues/3040
+
+		// For Tomcat it seems to be a global option only:
+		// https://tomcat.apache.org/tomcat-8.5-doc/config/cookie-processor.html
+
+		for (List<ResponseCookie> cookies : getCookies().values()) {
+			for (ResponseCookie cookie : cookies) {
+				this.response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 			}
 		}
 	}

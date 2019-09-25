@@ -16,12 +16,13 @@
 
 package org.springframework.http;
 
-import java.time.Duration;
+import java.util.Arrays;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link ResponseCookie}.
@@ -30,40 +31,60 @@ import static org.junit.Assert.*;
 public class ResponseCookieTests {
 
 	@Test
-	public void defaultValues() {
+	public void basic() {
+
+		assertEquals("id=", ResponseCookie.from("id", null).build().toString());
 		assertEquals("id=1fWa", ResponseCookie.from("id", "1fWa").build().toString());
+
+		assertEquals(
+				"id=1fWa; Path=/path; Domain=abc; " +
+						"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+						"Secure; HttpOnly; SameSite=None",
+				ResponseCookie.from("id", "1fWa")
+						.domain("abc").path("/path").maxAge(0).httpOnly(true).secure(true).sameSite("None")
+						.build().toString());
 	}
 
 	@Test
-	public void httpOnlyStrictSecureWithDomainAndPath() {
-		assertEquals("id=1fWa; Path=/projects; Domain=spring.io; Secure; HttpOnly; SameSite=strict",
-				ResponseCookie.from("id", "1fWa").domain("spring.io").path("/projects")
-						.httpOnly(true).secure(true).sameSite("strict").build().toString());
+	public void nameChecks() {
+
+		Arrays.asList("id", "i.d.", "i-d", "+id", "i*d", "i$d", "#id")
+				.forEach(name -> {
+					ResponseCookie.from(name, "value").build();
+					// no exception..
+				});
+
+		Arrays.asList("\"id\"", "id\t", "i\td", "i d", "i;d", "{id}", "[id]", "\"", "id\u0091")
+				.forEach(name -> {
+					try {
+						ResponseCookie.from(name, "value").build();
+					}
+					catch (IllegalArgumentException ex) {
+						assertThat(ex.getMessage(), Matchers.containsString("RFC2616 token"));
+					}
+				});
 	}
 
 	@Test
-	public void maxAge() {
+	public void valueChecks() {
 
-		Duration maxAge = Duration.ofDays(365);
-		String expires = HttpHeaders.formatDate(System.currentTimeMillis() + maxAge.toMillis());
-		expires = expires.substring(0, expires.indexOf(":") + 1);
+		Arrays.asList("1fWa", "", null, "1f=Wa", "1f-Wa", "1f/Wa", "1.f.W.a.")
+				.forEach(value -> {
+					ResponseCookie.from("id", value).build();
+					// no exception..
+				});
 
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge).build().toString(), allOf(
-				startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires),
-				endsWith(" GMT")));
-
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge.getSeconds()).build().toString(), allOf(
-				startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires),
-				endsWith(" GMT")));
+		Arrays.asList("1f\tWa", "\t", "1f Wa", "1f;Wa", "\"1fWa", "1f\\Wa", "1f\"Wa", "\"", "1fWa\u0005", "1f\u0091Wa")
+				.forEach(value -> {
+					try {
+						ResponseCookie.from("id", value).build();
+					}
+					catch (IllegalArgumentException ex) {
+						assertThat(ex.getMessage(), Matchers.containsString("RFC2616 cookie value"));
+					}
+				});
 	}
 
-	@Test
-	public void maxAge0() {
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
-				ResponseCookie.from("id", "1fWa").maxAge(Duration.ofSeconds(0)).build().toString());
 
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
-				ResponseCookie.from("id", "1fWa").maxAge(0).build().toString());
-	}
 
 }
