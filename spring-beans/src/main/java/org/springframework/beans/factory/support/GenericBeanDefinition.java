@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.util.ObjectUtils;
 
 /**
  * GenericBeanDefinition is a one-stop shop for standard bean definition purposes.
@@ -81,7 +82,14 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public boolean equals(Object other) {
-		return (this == other || (other instanceof GenericBeanDefinition && super.equals(other)));
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof GenericBeanDefinition)) {
+			return false;
+		}
+		GenericBeanDefinition that = (GenericBeanDefinition) other;
+		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
 	}
 
 	@Override
