@@ -18,7 +18,7 @@ package org.springframework.mock.http.server.reactive;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -32,6 +32,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -101,8 +102,11 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values().stream().flatMap(Collection::stream)
-				.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
+		for (List<ResponseCookie> cookies : getCookies().values()) {
+			for (ResponseCookie cookie : cookies) {
+				getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString());
+			}
+		}
 	}
 
 	@Override
