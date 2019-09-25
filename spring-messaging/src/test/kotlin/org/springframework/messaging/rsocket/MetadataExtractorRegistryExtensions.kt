@@ -39,7 +39,6 @@ class MetadataExtractorRegistryExtensions {
 	@Test
 	fun `metadataToExtract with BiConsumer parameter`() {
 		val extractor = mockk<MetadataExtractorRegistry>(relaxed = true)
-		val name = "name"
 		val mimeType = MimeType.valueOf("application/json")
 		extractor.metadataToExtract<Map<String, String>>(mimeType) { jsonMap, outputMap ->
 			outputMap.putAll(jsonMap)
