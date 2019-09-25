@@ -82,25 +82,25 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	/**
 	 * Create a DefaultIntroductionAdvisor for the given advice.
 	 * @param advice the Advice to apply
-	 * @param intf the interface to introduce
+	 * @param ifc the interface to introduce
 	 */
-	public DefaultIntroductionAdvisor(DynamicIntroductionAdvice advice, Class<?> intf) {
+	public DefaultIntroductionAdvisor(DynamicIntroductionAdvice advice, Class<?> ifc) {
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
-		addInterface(intf);
+		addInterface(ifc);
 	}
 
 
 	/**
 	 * Add the specified interface to the list of interfaces to introduce.
-	 * @param intf the interface to introduce
+	 * @param ifc the interface to introduce
 	 */
-	public void addInterface(Class<?> intf) {
-		Assert.notNull(intf, "Interface must not be null");
-		if (!intf.isInterface()) {
-			throw new IllegalArgumentException("Specified class [" + intf.getName() + "] must be an interface");
+	public void addInterface(Class<?> ifc) {
+		Assert.notNull(ifc, "Interface must not be null");
+		if (!ifc.isInterface()) {
+			throw new IllegalArgumentException("Specified class [" + ifc.getName() + "] must be an interface");
 		}
-		this.interfaces.add(intf);
+		this.interfaces.add(ifc);
 	}
 
 	@Override
@@ -113,8 +113,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		for (Class<?> ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
 					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
-			throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
-					"does not implement interface [" + ifc.getName() + "] specified for introduction");
+				throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
+						"does not implement interface [" + ifc.getName() + "] specified for introduction");
 			}
 		}
 	}
