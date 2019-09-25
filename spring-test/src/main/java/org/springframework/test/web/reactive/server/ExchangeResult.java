@@ -155,7 +155,7 @@ public class ExchangeResult {
 
 
 	/**
-	 * Return the status of the executed request.
+	 * Return the HTTP status code as an {@link HttpStatus} enum value.
 	 */
 	public HttpStatus getStatus() {
 		return this.response.getStatusCode();
@@ -219,14 +219,10 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatusReason() + "\n" +
+				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n";
-	}
-
-	private String getStatusReason() {
-		return getStatus().getReasonPhrase();
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

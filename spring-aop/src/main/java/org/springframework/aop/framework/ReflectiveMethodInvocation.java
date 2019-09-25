@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	protected final Method method;
 
-	protected Object[] arguments = new Object[0];
+	protected Object[] arguments;
 
 	@Nullable
 	private final Class<?> targetClass;
@@ -158,7 +158,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
-		//	We start with an index of -1 and increment early.
+		// We start with an index of -1 and increment early.
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}

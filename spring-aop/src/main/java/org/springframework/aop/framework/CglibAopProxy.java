@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,10 +327,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
-				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
+				Method method = methods[x];
+				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
 						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
-				this.fixedInterceptorMap.put(methods[x].toString(), x);
+				this.fixedInterceptorMap.put(methods.toString(), x);
 			}
 
 			// Now copy both the callbacks from mainCallbacks
@@ -633,8 +634,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-			MethodInvocation invocation = new CglibMethodInvocation(proxy, this.target, method, args,
-					this.targetClass, this.adviceChain, methodProxy);
+			MethodInvocation invocation = new CglibMethodInvocation(
+					proxy, this.target, method, args, this.targetClass, this.adviceChain, methodProxy);
 			// If we get here, we need to create a MethodInvocation.
 			Object retVal = invocation.proceed();
 			retVal = processReturnType(proxy, this.target, method, retVal);
