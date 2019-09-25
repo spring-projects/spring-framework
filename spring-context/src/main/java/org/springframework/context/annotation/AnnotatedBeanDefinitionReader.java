@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Convenient adapter for programmatic registration of annotated bean classes.
- * This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
+ * Convenient adapter for programmatic registration of bean classes.
+ *
+ * <p>This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
  * the same resolution of annotations but for explicitly registered classes only.
  *
  * @author Juergen Hoeller
@@ -58,7 +59,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry.
-	 * If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
+	 * <p>If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
 	 * {@link StandardEnvironment} will be created and used.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
@@ -71,8 +72,8 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry and using
-	 * the given {@link Environment}.
+	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry,
+	 * using the given {@link Environment}.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
 	 * @param environment the {@code Environment} to use when evaluating bean definition
@@ -89,14 +90,14 @@ public class AnnotatedBeanDefinitionReader {
 
 
 	/**
-	 * Return the BeanDefinitionRegistry that this scanner operates on.
+	 * Get the BeanDefinitionRegistry that this reader operates on.
 	 */
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.registry;
 	}
 
 	/**
-	 * Set the Environment to use when evaluating whether
+	 * Set the {@code Environment} to use when evaluating whether
 	 * {@link Conditional @Conditional}-annotated component classes should be registered.
 	 * <p>The default is a {@link StandardEnvironment}.
 	 * @see #registerBean(Class, String, Class...)
@@ -106,7 +107,7 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Set the BeanNameGenerator to use for detected bean classes.
+	 * Set the {@code BeanNameGenerator} to use for detected bean classes.
 	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
@@ -114,7 +115,7 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Set the ScopeMetadataResolver to use for detected bean classes.
+	 * Set the {@code ScopeMetadataResolver} to use for registered component classes.
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
 	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
@@ -124,83 +125,83 @@ public class AnnotatedBeanDefinitionReader {
 
 
 	/**
-	 * Register one or more annotated classes to be processed.
+	 * Register one or more component classes to be processed.
 	 * <p>Calls to {@code register} are idempotent; adding the same
-	 * annotated class more than once has no additional effect.
-	 * @param annotatedClasses one or more annotated classes,
+	 * component class more than once has no additional effect.
+	 * @param componentClasses one or more component classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
-	public void register(Class<?>... annotatedClasses) {
-		for (Class<?> annotatedClass : annotatedClasses) {
-			registerBean(annotatedClass);
+	public void register(Class<?>... componentClasses) {
+		for (Class<?> componentClass : componentClasses) {
+			registerBean(componentClass);
 		}
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 */
-	public void registerBean(Class<?> annotatedClass) {
-		doRegisterBean(annotatedClass, null, null, null);
+	public void registerBean(Class<?> beanClass) {
+		doRegisterBean(beanClass, null, null, null);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations, using the given supplier for obtaining a new
 	 * instance (possibly declared as a lambda expression or method reference).
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean(annotatedClass, instanceSupplier, null, null);
+	public <T> void registerBean(Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
+		doRegisterBean(beanClass, instanceSupplier, null, null);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations, using the given supplier for obtaining a new
 	 * instance (possibly declared as a lambda expression or method reference).
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 * @param name an explicit name for the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean(annotatedClass, instanceSupplier, name, null);
+	public <T> void registerBean(Class<T> beanClass, String name, @Nullable Supplier<T> instanceSupplier) {
+		doRegisterBean(beanClass, instanceSupplier, name, null);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 * @param qualifiers specific qualifier annotations to consider,
 	 * in addition to qualifiers at the bean class level
 	 */
 	@SuppressWarnings("unchecked")
-	public void registerBean(Class<?> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean(annotatedClass, null, null, qualifiers);
+	public void registerBean(Class<?> beanClass, Class<? extends Annotation>... qualifiers) {
+		doRegisterBean(beanClass, null, null, qualifiers);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 * @param name an explicit name for the bean
 	 * @param qualifiers specific qualifier annotations to consider,
 	 * in addition to qualifiers at the bean class level
 	 */
 	@SuppressWarnings("unchecked")
-	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean(annotatedClass, null, name, qualifiers);
+	public void registerBean(Class<?> beanClass, String name, Class<? extends Annotation>... qualifiers) {
+		doRegisterBean(beanClass, null, name, qualifiers);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
+	 * @param beanClass the class of the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
 	 * @param name an explicit name for the bean
@@ -210,10 +211,10 @@ public class AnnotatedBeanDefinitionReader {
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
+	<T> void doRegisterBean(Class<T> beanClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
-		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}

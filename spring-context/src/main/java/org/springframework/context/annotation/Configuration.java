@@ -352,7 +352,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>The Spring <em>TestContext framework</em> available in the {@code spring-test} module
  * provides the {@code @ContextConfiguration} annotation which can accept an array of
- * {@code @Configuration} {@code Class} objects:
+ * <em>component class</em> references &mdash; typically {@code @Configuration} or
+ * {@code @Component} classes.
  *
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)
