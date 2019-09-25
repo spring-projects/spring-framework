@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,7 +40,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
 
-	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", Charset.forName("UTF-8"));
+	static final MediaType TEXT_EVENTSTREAM = new MediaType("text", "event-stream", Charset.forName("UTF-8"));
 
 
 	/**
@@ -68,7 +69,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(UTF8_TEXT_EVENTSTREAM);
+			headers.setContentType(TEXT_EVENTSTREAM);
 		}
 	}
 
@@ -112,7 +113,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * Send an SSE event prepared with the given builder. For example:
 	 * <pre>
 	 * // static import of SseEmitter
-	 *
 	 * SseEmitter emitter = new SseEmitter();
 	 * emitter.send(event().name("update").id("1").data(myObject));
 	 * </pre>
@@ -128,6 +128,11 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "SseEmitter@" + ObjectUtils.getIdentityHexString(this);
+	}
+
 
 	public static SseEventBuilder event() {
 		return new SseEventBuilderImpl();
@@ -140,16 +145,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	public interface SseEventBuilder {
 
 		/**
-		 * Add an SSE "comment" line.
-		 */
-		SseEventBuilder comment(String comment);
-
-		/**
-		 * Add an SSE "event" line.
-		 */
-		SseEventBuilder name(String eventName);
-
-		/**
 		 * Add an SSE "id" line.
 		 */
 		SseEventBuilder id(String id);
@@ -157,7 +152,17 @@ public class SseEmitter extends ResponseBodyEmitter {
 		/**
 		 * Add an SSE "event" line.
 		 */
+		SseEventBuilder name(String eventName);
+
+		/**
+		 * Add an SSE "retry" line.
+		 */
 		SseEventBuilder reconnectTime(long reconnectTimeMillis);
+
+		/**
+		 * Add an SSE "comment" line.
+		 */
+		SseEventBuilder comment(String comment);
 
 		/**
 		 * Add an SSE "data" line.
@@ -188,8 +193,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 		private StringBuilder sb;
 
 		@Override
-		public SseEventBuilder comment(String comment) {
-			append(":").append(comment != null ? comment : "").append("\n");
+		public SseEventBuilder id(String id) {
+			append("id:").append(id != null ? id : "").append("\n");
 			return this;
 		}
 
@@ -200,14 +205,14 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 
 		@Override
-		public SseEventBuilder id(String id) {
-			append("id:").append(id != null ? id : "").append("\n");
+		public SseEventBuilder reconnectTime(long reconnectTimeMillis) {
+			append("retry:").append(String.valueOf(reconnectTimeMillis)).append("\n");
 			return this;
 		}
 
 		@Override
-		public SseEventBuilder reconnectTime(long reconnectTimeMillis) {
-			append("retry:").append(String.valueOf(reconnectTimeMillis)).append("\n");
+		public SseEventBuilder comment(String comment) {
+			append(":").append(comment != null ? comment : "").append("\n");
 			return this;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,9 +141,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	/**
-	 * Create a new AutowiredAnnotationBeanPostProcessor
-	 * for Spring's standard {@link Autowired} annotation.
-	 * <p>Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
+	 * Create a new {@code AutowiredAnnotationBeanPostProcessor} for Spring's
+	 * standard {@link Autowired @Autowired} annotation.
+	 * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
+	 * if available.
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
@@ -239,7 +240,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
-		// Let's check for lookup methods here..
+		// Let's check for lookup methods here...
 		if (!this.lookupMethodsChecked.contains(beanName)) {
 			try {
 				ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
@@ -249,7 +250,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (lookup != null) {
 							LookupOverride override = new LookupOverride(method, lookup.value());
 							try {
-								RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+								RootBeanDefinition mbd = (RootBeanDefinition)
+										beanFactory.getMergedBeanDefinition(beanName);
 								mbd.getMethodOverrides().addOverride(override);
 							}
 							catch (NoSuchBeanDefinitionException ex) {
