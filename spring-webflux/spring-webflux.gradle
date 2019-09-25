@@ -55,3 +55,7 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 	testRuntime("com.sun.activation:javax.activation")
 }
+
+test {
+	maxParallelForks = 4
+}
