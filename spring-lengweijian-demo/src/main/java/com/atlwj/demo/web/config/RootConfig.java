@@ -8,9 +8,7 @@ import org.springframework.stereotype.Controller;
 
 
 /**
- * 不扫描controller
- *
- *
+ * root context
  */
 @Configurable
 @ComponentScans(

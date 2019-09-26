@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         mavenLocal()
-        maven {url "http://maven.oschina.net/content/groups/public/"}
+        maven { url "http://maven.oschina.net/content/groups/public/" }
         mavenCentral()
         jcenter()
     }
@@ -24,7 +24,7 @@ project.webAppDirName = "src/main/webapp"
 
 
 sourceSets {
-    main{
+    main {
         resources.srcDirs = ["src/main/java"]    //引入资源文件，打包时才会将配置文件植入war文件
     }
     main.compileClasspath += configurations.provided
@@ -59,31 +59,35 @@ dependencies {
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.38'
 
     // https://mvnrepository.com/artifact/com.mchange/c3p0
-    compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.2'
+//    compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.2'
 
     compile group: 'junit', name: 'junit', version: '4.12'
 
     compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
 
-    // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core
-    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.43'
-
     provided "javax.servlet:javax.servlet-api:4.+"
 
-    // https://mvnrepository.com/artifact/commons-logging/commons-logging
+    // log --------------start---------------------------
     compile group: 'commons-logging', name: 'commons-logging', version: '1.1.1'
-//
-//    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-//    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
-
-    // https://mvnrepository.com/artifact/log4j/log4j
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    // log --------------end---------------------------
 
+    // jackon ---------start---------------------
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
+    // jackon ---------end---------------------
 
+    // tomcat -------------start-----------------
     def tomcatVersion = '8.0.27'
-    tomcat    "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
             "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
             "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.43'
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '8.5.43'
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '8.5.43'
+    // tomcat -------------end-----------------
 
 }
 
