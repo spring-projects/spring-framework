@@ -8743,7 +8743,7 @@ This approach simplifies container instantiation, as only one class needs to be 
 with, rather than requiring you to remember a potentially large number of
 `@Configuration` classes during construction.
 
-TIP: As of Spring Framework 4.2, `@Import` also supports references regular component
+TIP: As of Spring Framework 4.2, `@Import` also supports references to regular component
 classes, analogous to the `AnnotationConfigApplicationContext.register` method.
 This is particularly useful if you want to avoid component scanning, by using a few
 configuration classes as entry points to explicitly define all your components.

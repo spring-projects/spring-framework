@@ -258,7 +258,7 @@ load the mapping files, and incurring that cost before running every test in eve
 fixture leads to slower overall test runs that reduce developer productivity.
 
 Test classes typically declare either an array of resource locations for XML or Groovy
-configuration metadata -- often in the classpath -- or an array of annotated classes that
+configuration metadata -- often in the classpath -- or an array of component classes that
 is used to configure the application. These locations or classes are the same as or
 similar to those specified in `web.xml` or other configuration files for production
 deployments.
@@ -436,12 +436,13 @@ specify a custom `TestContextBootstrapper`. See the section on
 `@ContextConfiguration` defines class-level metadata that is used to determine how to
 load and configure an `ApplicationContext` for integration tests. Specifically,
 `@ContextConfiguration` declares the application context resource `locations` or the
-annotated `classes` used to load the context.
+component `classes` used to load the context.
 
 Resource locations are typically XML configuration files or Groovy scripts located in the
-classpath, while annotated classes are typically `@Configuration` classes. However,
-resource locations can also refer to files and scripts in the file system, and annotated
-classes can be component classes, and so on.
+classpath, while component classes are typically `@Configuration` classes. However,
+resource locations can also refer to files and scripts in the file system, and component
+classes can be `@Component` classes, `@Service` classes, and so on. See
+<<testcontext-ctx-management-javaconfig-component-classes>> for further details.
 
 The following example shows a `@ContextConfiguration` annotation that refers to an XML
 file:
@@ -490,7 +491,7 @@ The following example shows a `@ContextConfiguration` annotation that refers to 
 <1> Referring to a class.
 
 
-As an alternative or in addition to declaring resource locations or annotated classes,
+As an alternative or in addition to declaring resource locations or component classes,
 you can use `@ContextConfiguration` to declare `ApplicationContextInitializer` classes.
 The following example shows such a case:
 
@@ -517,7 +518,7 @@ The following example shows such a case:
 You can optionally use `@ContextConfiguration` to declare the `ContextLoader` strategy as
 well. Note, however, that you typically do not need to explicitly configure the loader,
 since the default loader supports `initializers` and either resource `locations` or
-annotated `classes`.
+component `classes`.
 
 The following example uses both a location and a loader:
 
@@ -1633,7 +1634,7 @@ The following annotations are supported only when used in conjunction with the
 `@ExtendWith(SpringExtension.class)` from JUnit Jupiter with `@ContextConfiguration` from
 the Spring TestContext Framework. It can be used at the class level as a drop-in
 replacement for `@ContextConfiguration`. With regard to configuration options, the only
-difference between `@ContextConfiguration` and `@SpringJUnitConfig` is that annotated
+difference between `@ContextConfiguration` and `@SpringJUnitConfig` is that component
 classes may be declared with the `value` attribute in `@SpringJUnitConfig`.
 
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify a
@@ -1696,7 +1697,7 @@ and `@ContextConfiguration` for further details.
 `@WebAppConfiguration` from the Spring TestContext Framework. You can use it at the class
 level as a drop-in replacement for `@ContextConfiguration` and `@WebAppConfiguration`.
 With regard to configuration options, the only difference between `@ContextConfiguration`
-and `@SpringJUnitWebConfig` is that you can declare annotated classes by using the
+and `@SpringJUnitWebConfig` is that you can declare component classes by using the
 `value` attribute in `@SpringJUnitWebConfig`. In addition, you can override the `value`
 attribute from `@WebAppConfiguration` only by using the `resourcePath` attribute in
 `@SpringJUnitWebConfig`.
@@ -2215,13 +2216,13 @@ the `TestContextManager` with which the listener is registered. See <<testcontex
 
 `ContextLoader` is a strategy interface for loading an `ApplicationContext` for an
 integration test managed by the Spring TestContext Framework. You should implement
-`SmartContextLoader` instead of this interface to provide support for annotated classes,
+`SmartContextLoader` instead of this interface to provide support for component classes,
 active bean definition profiles, test property sources, context hierarchies, and
 `WebApplicationContext` support.
 
 `SmartContextLoader` is an extension of the `ContextLoader` interface introduced in
 Spring 3.1, superseding the original minimal `ContextLoader` SPI. Specifically, a
-`SmartContextLoader` can choose to process resource locations, annotated classes,
+`SmartContextLoader` can choose to process resource locations, component classes,
 or context initializers. Furthermore, a `SmartContextLoader` can set active bean
 definition profiles and test property sources in the context that it loads.
 
@@ -2238,9 +2239,9 @@ Spring provides the following implementations:
   the test class or on the presence of default locations or default configuration
   classes. A web `ContextLoader` is used only if `@WebAppConfiguration` is present on the
   test class. Groovy support is enabled only if Groovy is on the classpath.
-* `AnnotationConfigContextLoader`: Loads a standard `ApplicationContext` from annotated
+* `AnnotationConfigContextLoader`: Loads a standard `ApplicationContext` from component
   classes.
-* `AnnotationConfigWebContextLoader`: Loads a `WebApplicationContext` from annotated
+* `AnnotationConfigWebContextLoader`: Loads a `WebApplicationContext` from component
   classes.
 * `GenericGroovyXmlContextLoader`: Loads a standard `ApplicationContext` from resource
   locations that are either Groovy scripts or XML configuration files.
@@ -2589,14 +2590,14 @@ Test classes that use the TestContext framework do not need to extend any partic
 class or implement a specific interface to configure their application context. Instead,
 configuration is achieved by declaring the `@ContextConfiguration` annotation at the
 class level. If your test class does not explicitly declare application context resource
-locations or annotated classes, the configured `ContextLoader` determines how to load a
+locations or component classes, the configured `ContextLoader` determines how to load a
 context from a default location or default configuration classes. In addition to context
-resource locations and annotated classes, an application context can also be configured
+resource locations and component classes, an application context can also be configured
 through application context initializers.
 
 The following sections explain how to use Spring's `@ContextConfiguration` annotation to
 configure a test `ApplicationContext` by using XML configuration files, Groovy scripts,
-annotated classes (typically `@Configuration` classes), or context initializers.
+component classes (typically `@Configuration` classes), or context initializers.
 Alternatively, you can implement and configure your own custom `SmartContextLoader` for
 advanced use cases.
 
@@ -2828,12 +2829,12 @@ The following listing shows how to combine both in an integration test:
 =====
 
 [[testcontext-ctx-management-javaconfig]]
-===== Context Configuration with Annotated Classes
+===== Context Configuration with Component Classes
 
-To load an `ApplicationContext` for your tests by using annotated classes (see
+To load an `ApplicationContext` for your tests by using component classes (see
 <<core.adoc#beans-java, Java-based container configuration>>), you can annotate your test
 class with `@ContextConfiguration` and configure the `classes` attribute with an array
-that contains references to annotated classes. The following example shows how to do so:
+that contains references to component classes. The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -2845,7 +2846,7 @@ that contains references to annotated classes. The following example shows how t
 		// class body...
 	}
 ----
-<1> Specifying annotated classes.
+<1> Specifying component classes.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2857,23 +2858,27 @@ that contains references to annotated classes. The following example shows how t
 		// class body...
 	}
 ----
-<1> Specifying annotated classes.
+<1> Specifying component classes.
 
 
-.Annotated Classes
+[[testcontext-ctx-management-javaconfig-component-classes]]
+.Component Classes
 [TIP]
 ====
-The term "`annotated class`" can refer to any of the following:
+The term "`component class`" can refer to any of the following:
 
 * A class annotated with `@Configuration`.
 * A component (that is, a class annotated with `@Component`, `@Service`, `@Repository`, or other stereotype annotations).
 * A JSR-330 compliant class that is annotated with `javax.inject` annotations.
-* Any other class that contains `@Bean` methods.
+* Any class that contains `@Bean`-methods.
+* Any other class that is intended to be registered as a Spring component (i.e., a Spring
+  bean in the `ApplicationContext`), potentially taking advantage of automatic autowiring
+  of a single constructor without the use of Spring annotations.
 
 See the javadoc of
 {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`] and
 {api-spring-framework}/context/annotation/Bean.html[`@Bean`] for further information
-regarding the configuration and semantics of annotated classes, paying special attention
+regarding the configuration and semantics of component classes, paying special attention
 to the discussion of `@Bean` Lite Mode.
 ====
 
@@ -2952,10 +2957,10 @@ class:
 
 
 [[testcontext-ctx-management-mixed-config]]
-===== Mixing XML, Groovy Scripts, and Annotated Classes
+===== Mixing XML, Groovy Scripts, and Component Classes
 
 It may sometimes be desirable to mix XML configuration files, Groovy scripts, and
-annotated classes (typically `@Configuration` classes) to configure an
+component classes (typically `@Configuration` classes) to configure an
 `ApplicationContext` for your tests. For example, if you use XML configuration in
 production, you may decide that you want to use `@Configuration` classes to configure
 specific Spring-managed components for your tests, or vice versa.
@@ -3031,7 +3036,7 @@ order in which the initializers are invoked depends on whether they implement Sp
 
 
 You can also omit the declaration of XML configuration files, Groovy scripts, or
-annotated classes in `@ContextConfiguration` entirely and instead declare only
+component classes in `@ContextConfiguration` entirely and instead declare only
 `ApplicationContextInitializer` classes, which are then responsible for registering beans
 in the context -- for example, by programmatically loading bean definitions from XML
 files or configuration classes. The following example shows how to do so:
@@ -3067,18 +3072,18 @@ files or configuration classes. The following example shows how to do so:
 ===== Context Configuration Inheritance
 
 `@ContextConfiguration` supports boolean `inheritLocations` and `inheritInitializers`
-attributes that denote whether resource locations or annotated classes and context
+attributes that denote whether resource locations or component classes and context
 initializers declared by superclasses should be inherited. The default value for both
 flags is `true`. This means that a test class inherits the resource locations or
-annotated classes as well as the context initializers declared by any superclasses.
-Specifically, the resource locations or annotated classes for a test class are appended
+component classes as well as the context initializers declared by any superclasses.
+Specifically, the resource locations or component classes for a test class are appended
 to the list of resource locations or annotated classes declared by superclasses.
 Similarly, the initializers for a given test class are added to the set of initializers
 defined by test superclasses. Thus, subclasses have the option of extending the resource
-locations, annotated classes, or context initializers.
+locations, component classes, or context initializers.
 
 If the `inheritLocations` or `inheritInitializers` attribute in `@ContextConfiguration`
-is set to `false`, the resource locations or annotated classes and the context
+is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
@@ -3131,7 +3136,7 @@ another and use both its own configuration file and the superclass's configurati
 <2> Configuration file defined in the subclass.
 
 
-Similarly, in the next example, which uses annotated classes, the `ApplicationContext`
+Similarly, in the next example, which uses component classes, the `ApplicationContext`
 for `ExtendedTest` is loaded from the `BaseConfig` and `ExtendedConfig` classes, in that
 order. Beans defined in `ExtendedConfig` can, therefore, override (that is, replace)
 those defined in `BaseConfig`. The following example shows how one class can extend
@@ -4027,7 +4032,7 @@ framework's support for convention over configuration:
 
 If you annotate a test class with `@WebAppConfiguration` without specifying a resource
 base path, the resource path effectively defaults to `file:src/main/webapp`. Similarly,
-if you declare `@ContextConfiguration` without specifying resource `locations`, annotated
+if you declare `@ContextConfiguration` without specifying resource `locations`, component
 `classes`, or context `initializers`, Spring tries to detect the presence of your
 configuration by using conventions (that is, `WacTests-context.xml` in the same package
 as the `WacTests` class or static nested `@Configuration` classes).
@@ -4280,7 +4285,7 @@ either on an individual test class or within a test class hierarchy. If a contex
 hierarchy is declared on multiple classes within a test class hierarchy, you can also
 merge or override the context configuration for a specific, named level in the context
 hierarchy. When merging configuration for a given level in the hierarchy, the
-configuration resource type (that is, XML configuration files or annotated classes) must
+configuration resource type (that is, XML configuration files or component classes) must
 be consistent. Otherwise, it is perfectly acceptable to have different levels in a
 context hierarchy configured using different resource types.
 
