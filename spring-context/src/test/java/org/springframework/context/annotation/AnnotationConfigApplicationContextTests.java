@@ -382,7 +382,7 @@ public class AnnotationConfigApplicationContextTests {
 
 		assertThat(context.getType("&fb")).isNull();
 		assertThat(context.getType("fb")).isEqualTo(String.class);
-		assertThat(context.getBean("&fb") instanceof FactoryBean);
+		assertThat(context.getBean("&fb")).isInstanceOf(FactoryBean.class);
 		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
 		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class).length).isEqualTo(1);
