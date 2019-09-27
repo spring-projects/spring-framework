@@ -103,7 +103,7 @@ For kotlin versions 1.1+, the default behavior is the same as `-Xjsr305=warn`.
 The `strict` value is required to have Spring Framework API null-safety taken into account
 in Kotlin types inferred from Spring API but should be used with the knowledge that Spring
 API nullability declaration could evolve even between minor releases and that more checks may
-be added in the future).
+be added in the future.
 
 NOTE: Generic type arguments, varargs, and array elements nullability are not supported yet,
 but should be in an upcoming release. See https://github.com/Kotlin/KEEP/issues/79[this discussion]
@@ -392,7 +392,7 @@ project for more details.
 Kotlin https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] are Kotlin
 lightweight threads allowing to write non-blocking code in an imperative way. On language side,
 suspending functions provides an abstraction for asynchronous operations while on library side
-https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions likes
+https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions like
 https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html[`async { }`]
 and types like https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`].
 
@@ -427,7 +427,7 @@ Version `1.3.0` and above are supported.
 For return values, the translation from Reactive to Coroutines APIs is the following:
 
 * `fun handler(): Mono<Void>` becomes `suspend fun handler()`
-* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of beeing more statically typed)
+* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of being more statically typed)
 * `fun handler(): Flux<T>` becomes `fun handler(): Flow<T>`
 
 For input parameters:
