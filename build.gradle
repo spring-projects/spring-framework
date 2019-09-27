@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.9.9"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.0"
 			mavenBom "io.netty:netty-bom:4.1.39.Final"
 			mavenBom "io.projectreactor:reactor-bom:Dysprosium-RELEASE"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.20.v20190813"
@@ -380,9 +380,9 @@ configure([rootProject] + javaProjects) { project ->
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 			"https://www.ehcache.org/apidocs/2.10.4",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://fasterxml.github.io/jackson-core/javadoc/2.9/",
-			"https://fasterxml.github.io/jackson-databind/javadoc/2.9/",
-			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 			"https://junit.org/junit4/javadoc/4.12/",
 			"https://junit.org/junit5/docs/5.5.2/api/"
