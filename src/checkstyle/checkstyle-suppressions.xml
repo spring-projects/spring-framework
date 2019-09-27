@@ -17,7 +17,7 @@
 	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
 
 	<!-- spring-context -->
-	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" />
+	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" id="bannedJUnit3Imports" />
 
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
