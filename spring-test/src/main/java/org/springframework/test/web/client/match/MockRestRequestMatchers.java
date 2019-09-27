@@ -186,6 +186,20 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
+	 * Assert that the given request header does not exist.
+	 * @since 5.2
+	 */
+	public static RequestMatcher headerDoesNotExist(String name) {
+		return request -> {
+			List<String> headerValues = request.getHeaders().get(name);
+			if (headerValues != null) {
+				fail("Expected header <" + name + "> not to exist, but it exists with values: " +
+						headerValues);
+			}
+		};
+	}
+
+	/**
 	 * Access to request body matchers.
 	 */
 	public static ContentRequestMatchers content() {
