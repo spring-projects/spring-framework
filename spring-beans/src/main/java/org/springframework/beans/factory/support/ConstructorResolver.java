@@ -118,6 +118,7 @@ class ConstructorResolver {
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
+		// 若执行未指定参数实例化则尝试从 RootBeanDefinition 中缓存获取构造函数
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}
@@ -134,6 +135,7 @@ class ConstructorResolver {
 				}
 			}
 			if (argsToResolve != null) {
+				// 构造函数参数解析（包含依赖注入）
 				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve);
 			}
 		}
@@ -144,13 +146,14 @@ class ConstructorResolver {
 					mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
 
-			int minNrOfArgs;
+			int minNrOfArgs; // 最小参数个数
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
 			}
 			else {
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 				resolvedValues = new ConstructorArgumentValues();
+				// 尝试解析配置参数最大索引，默认为 0
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
@@ -168,7 +171,7 @@ class ConstructorResolver {
 							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 				}
 			}
-			AutowireUtils.sortConstructors(candidates);
+			AutowireUtils.sortConstructors(candidates); // public 优先，参数个数降序
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
 			LinkedList<UnsatisfiedDependencyException> causes = null;
@@ -185,6 +188,7 @@ class ConstructorResolver {
 					continue;
 				}
 
+				// 此时 argsToUse 已确定，要么入参传入，要么缓存解析，接下来组装成 ArgumentsHolder 用于参数匹配的权重校验
 				ArgumentsHolder argsHolder;
 				if (resolvedValues != null) {
 					try {
@@ -218,10 +222,12 @@ class ConstructorResolver {
 					argsHolder = new ArgumentsHolder(explicitArgs);
 				}
 
+				// 参数匹配的权重校验，通过 isLenientConstructorResolution 判断执行所有参数匹配权重总和，还是参数依次匹配
 				int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
 						argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
 				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
+					// 若权重满足条件则取回并进行下一循环匹配，检查是否更匹配，最终取得最适宜构造函数及参数对象
 					constructorToUse = candidate;
 					argsHolderToUse = argsHolder;
 					argsToUse = argsHolder.arguments;
@@ -229,6 +235,7 @@ class ConstructorResolver {
 					ambiguousConstructors = null;
 				}
 				else if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
+					// 若相同匹配条件有多个结果，通过 RootBeanDefinition.isLenientConstructorResolution 控制是报错还是继续执行
 					if (ambiguousConstructors == null) {
 						ambiguousConstructors = new LinkedHashSet<>();
 						ambiguousConstructors.add(constructorToUse);
@@ -237,6 +244,7 @@ class ConstructorResolver {
 				}
 			}
 
+			// 此时必筛选出最适宜构造函数，否则报错
 			if (constructorToUse == null) {
 				if (causes != null) {
 					UnsatisfiedDependencyException ex = causes.removeLast();
@@ -256,12 +264,14 @@ class ConstructorResolver {
 						ambiguousConstructors);
 			}
 
+			// 若非指定参数实例化，则缓存解析结果以提高再次实例化速度
 			if (explicitArgs == null) {
 				argsHolderToUse.storeCache(mbd, constructorToUse);
 			}
 		}
 
 		try {
+			// 根据准备好的构造函数及参数实例化
 			final InstantiationStrategy strategy = beanFactory.getInstantiationStrategy();
 			Object beanInstance;
 
@@ -765,12 +775,15 @@ class ConstructorResolver {
 			MethodParameter methodParam = MethodParameter.forExecutable(executable, argIndex);
 			GenericTypeResolver.resolveParameterType(methodParam, executable.getDeclaringClass());
 			if (argValue instanceof AutowiredArgumentMarker) {
+				// 构造函数注入
 				argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
 			}
 			else if (argValue instanceof BeanMetadataElement) {
+				// 集合、对象指针解析
 				argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 			}
 			else if (argValue instanceof String) {
+				// SpEL 解析
 				argValue = this.beanFactory.evaluateBeanDefinitionString((String) argValue, mbd);
 			}
 			Class<?> paramType = paramTypes[argIndex];
