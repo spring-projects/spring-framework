@@ -485,7 +485,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.2
 	 */
 	protected boolean hasCorsConfigurationSource(Object handler) {
-		return handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null;
+		return (handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null);
 	}
 
 	/**

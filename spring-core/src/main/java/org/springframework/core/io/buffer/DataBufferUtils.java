@@ -164,8 +164,9 @@ public abstract class DataBufferUtils {
 	 * @return a Flux of data buffers read from the given channel
 	 * @since 5.2
 	 */
-	public static Flux<DataBuffer> read(Path path, DataBufferFactory bufferFactory, int bufferSize,
-			OpenOption... options) {
+	public static Flux<DataBuffer> read(
+			Path path, DataBufferFactory bufferFactory, int bufferSize, OpenOption... options) {
+
 		Assert.notNull(path, "Path must not be null");
 		Assert.notNull(bufferFactory, "BufferFactory must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be > 0");
@@ -538,8 +539,8 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return a {@link Matcher} for the given delimiter. The matcher can be used to find the
-	 * delimiters in data buffers.
+	 * Return a {@link Matcher} for the given delimiter.
+	 * The matcher can be used to find the delimiters in data buffers.
 	 * @param delimiter the delimiter bytes to find
 	 * @return the matcher
 	 * @since 5.2
@@ -549,8 +550,8 @@ public abstract class DataBufferUtils {
 		return new KnuthMorrisPrattMatcher(delimiter);
 	}
 
-	/** Return a {@link Matcher} for the given delimiters.  The matcher can be used to find the
-	 * delimiters in data buffers.
+	/** Return a {@link Matcher} for the given delimiters.
+	 * The matcher can be used to find the delimiters in data buffers.
 	 * @param delimiters the delimiters bytes to find
 	 * @return the matcher
 	 * @since 5.2
@@ -595,7 +596,6 @@ public abstract class DataBufferUtils {
 		 * Resets the state of this matcher.
 		 */
 		void reset();
-
 	}
 
 
@@ -730,7 +730,6 @@ public abstract class DataBufferUtils {
 		private boolean isNotDisposed() {
 			return !this.disposed.get();
 		}
-
 	}
 
 
@@ -866,12 +865,11 @@ public abstract class DataBufferUtils {
 			this.sink.next(dataBuffer);
 			this.dataBuffer.set(null);
 		}
-
 	}
+
 
 	/**
 	 * Implementation of {@link Matcher} that uses the Knuth-Morris-Pratt algorithm.
-	 *
 	 * @see <a href="https://www.nayuki.io/page/knuth-morris-pratt-string-matching">Knuth-Morris-Pratt string matching</a>
 	 */
 	private static class KnuthMorrisPrattMatcher implements Matcher {
@@ -881,7 +879,6 @@ public abstract class DataBufferUtils {
 		private final int[] table;
 
 		private int matches = 0;
-
 
 		public KnuthMorrisPrattMatcher(byte[] delimiter) {
 			this.delimiter = Arrays.copyOf(delimiter, delimiter.length);
@@ -935,6 +932,7 @@ public abstract class DataBufferUtils {
 		}
 	}
 
+
 	/**
 	 * Implementation of {@link Matcher} that wraps several other matchers.
 	 */
@@ -945,7 +943,6 @@ public abstract class DataBufferUtils {
 		private final Matcher[] matchers;
 
 		byte[] longestDelimiter = NO_DELIMITER;
-
 
 		public CompositeMatcher(Matcher[] matchers) {
 			this.matchers = matchers;

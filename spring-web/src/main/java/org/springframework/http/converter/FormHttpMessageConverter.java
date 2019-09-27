@@ -203,22 +203,18 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * Add {@link MediaType} objects to be supported by this converter.
 	 * <p>The supplied {@code MediaType} objects will be appended to the list
 	 * of {@linkplain #getSupportedMediaTypes() supported MediaType objects}.
-	 * @param supportedMediaTypes a var-args list of {@code MediaType} objects
-	 * to add
+	 * @param supportedMediaTypes a var-args list of {@code MediaType} objects to add
 	 * @since 5.2
 	 * @see #setSupportedMediaTypes(List)
 	 */
 	public void addSupportedMediaTypes(MediaType... supportedMediaTypes) {
 		Assert.notNull(supportedMediaTypes, "'supportedMediaTypes' must not be null");
 		Assert.noNullElements(supportedMediaTypes, "'supportedMediaTypes' must not contain null elements");
-		for (MediaType mediaType : supportedMediaTypes) {
-			this.supportedMediaTypes.add(mediaType);
-		}
+		Collections.addAll(this.supportedMediaTypes, supportedMediaTypes);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 *
 	 * @see #setSupportedMediaTypes(List)
 	 * @see #addSupportedMediaTypes(MediaType...)
 	 */

@@ -52,8 +52,10 @@ public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 		Assert.isAssignable(CBORFactory.class, mapper.getFactory().getClass());
 	}
 
+
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		throw new UnsupportedOperationException("Does not support stream encoding yet");
 	}
+
 }

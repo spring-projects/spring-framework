@@ -42,7 +42,6 @@ public interface RouteMatcher {
 	 */
 	Route parseRoute(String routeValue);
 
-
 	/**
 	 * Whether the given {@code route} contains pattern syntax which requires
 	 * the {@link #match(String, Route)} method, or if it is a regular String

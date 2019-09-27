@@ -45,9 +45,7 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestBodyMethodArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	public RequestBodyMethodArgumentResolver(List<HttpMessageReader<?>> readers,
-			ReactiveAdapterRegistry registry) {
-
+	public RequestBodyMethodArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 

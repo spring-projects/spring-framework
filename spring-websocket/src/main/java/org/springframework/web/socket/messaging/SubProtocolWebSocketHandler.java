@@ -595,6 +595,7 @@ public class SubProtocolWebSocketHandler
 		int getTransportErrorSessions();
 	}
 
+
 	private class DefaultStats implements Stats {
 
 		private final AtomicInteger total = new AtomicInteger();
@@ -610,7 +611,6 @@ public class SubProtocolWebSocketHandler
 		private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
 		private final AtomicInteger transportError = new AtomicInteger();
-
 
 		@Override
 		public int getTotalSessions() {

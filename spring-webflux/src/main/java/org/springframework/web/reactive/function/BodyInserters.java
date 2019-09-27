@@ -154,8 +154,9 @@ public abstract class BodyInserters {
 	 * @return the inserter to write a producer
 	 * @since 5.2
 	 */
-	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromProducer(T producer,
-			ParameterizedTypeReference<?> elementTypeRef) {
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromProducer(
+			T producer, ParameterizedTypeReference<?> elementTypeRef) {
+
 		Assert.notNull(producer, "'producer' must not be null");
 		Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(producer.getClass());

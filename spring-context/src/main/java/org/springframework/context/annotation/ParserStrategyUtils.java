@@ -52,9 +52,8 @@ abstract class ParserStrategyUtils {
 	 * @since 5.2
 	 */
 	@SuppressWarnings("unchecked")
-	static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo,
-			Environment environment, ResourceLoader resourceLoader,
-			BeanDefinitionRegistry registry) {
+	static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo, Environment environment,
+			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
 
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isAssignable(assignableTo, clazz);

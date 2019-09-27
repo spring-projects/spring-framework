@@ -130,8 +130,7 @@ public abstract class HttpAccessor {
 	}
 
 	private void initialize(ClientHttpRequest request) {
-		this.clientHttpRequestInitializers.forEach(
-				initializer -> initializer.initialize(request));
+		this.clientHttpRequestInitializers.forEach(initializer -> initializer.initialize(request));
 	}
 
 }
