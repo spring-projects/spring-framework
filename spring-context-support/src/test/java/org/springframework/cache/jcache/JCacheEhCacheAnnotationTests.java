@@ -83,22 +83,22 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 
 	@Test
 	public void testEvictWithTransaction() {
-		txTemplate.execute(() -> testEvict(this.cs, false));
+		txTemplate.executeWithoutResult(s -> testEvict(this.cs, false));
 	}
 
 	@Test
 	public void testEvictEarlyWithTransaction() {
-		txTemplate.execute(() -> testEvictEarly(this.cs));
+		txTemplate.executeWithoutResult(s -> testEvictEarly(this.cs));
 	}
 
 	@Test
 	public void testEvictAllWithTransaction() {
-		txTemplate.execute(() -> testEvictAll(this.cs, false));
+		txTemplate.executeWithoutResult(s -> testEvictAll(this.cs, false));
 	}
 
 	@Test
 	public void testEvictAllEarlyWithTransaction() {
-		txTemplate.execute(() -> testEvictAllEarly(this.cs));
+		txTemplate.executeWithoutResult(s -> testEvictAllEarly(this.cs));
 	}
 
 
