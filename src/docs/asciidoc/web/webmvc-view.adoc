@@ -1841,7 +1841,7 @@ how to define a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean
 
 Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the
 `AbstractFeedView` base class and are used to provide Atom and RSS Feed views, respectively. They
-are based on java.net's https://rome.dev.java.net[ROME] project and are located in the
+are based on https://rometools.github.io/rome/[ROME] project and are located in the
 package `org.springframework.web.servlet.view.feed`.
 
 `AbstractAtomFeedView` requires you to implement the `buildFeedEntries()` method and
