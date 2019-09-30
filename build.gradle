@@ -307,7 +307,6 @@ configure(allprojects) { project ->
 
 	tasks.withType(AbstractArchiveTask) {
 		preserveFileTimestamps = false
-		reproducibleFileOrder = true
 	}
 }
 
