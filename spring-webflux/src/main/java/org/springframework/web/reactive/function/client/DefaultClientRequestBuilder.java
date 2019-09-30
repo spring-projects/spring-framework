@@ -184,8 +184,9 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			this.method = method;
 			this.url = url;
-			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
+			// cannot readOnly ,eg:  org.springframework.http.codec.HttpMessageWriter add xxx-signatureOfBody
+			this.headers = new HttpHeaders(headers);
+			this.cookies = new LinkedMultiValueMap<>(cookies);
 			this.body = body;
 			this.attributes = Collections.unmodifiableMap(attributes);
 
