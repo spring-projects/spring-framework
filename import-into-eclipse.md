@@ -18,7 +18,7 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 
 1. Ensure that Eclipse launches with JDK 8.
    - For example, on Mac OS this can be configured in the `Info.plist` file located in the `Contents` folder of the installed Eclipse or STS application (e.g., the `Eclipse.app` file).
-1. Install the [Kotlin Plugin for Eclipse](http://marketplace.eclipse.org/content/kotlin-plugin-eclipse) in Eclipse.
+1. Install the [Kotlin Plugin for Eclipse](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse) in Eclipse.
 1. Install the [Eclipse Groovy Development Tools](https://github.com/groovy/groovy-eclipse/wiki) in Eclipse.
 1. Switch to Groovy 2.5 (Preferences -> Groovy -> Compiler -> Switch to 2.5...) in Eclipse.
 1. Change the _Forbidden reference (access rule)_ in Eclipse from Error to Warning
