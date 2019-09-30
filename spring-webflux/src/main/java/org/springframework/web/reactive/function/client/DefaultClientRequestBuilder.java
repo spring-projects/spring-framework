@@ -17,11 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
@@ -184,10 +180,11 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			this.method = method;
 			this.url = url;
-			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
+			// cannot readOnly, developer need add HttpHeader in org.springframework.http.codec.HttpMessageWriter,eg: add a HttpHeader xxx-bodyOfSignature
+			this.headers = new HttpHeaders(headers);
+			this.cookies = new LinkedMultiValueMap<>(cookies);
 			this.body = body;
-			this.attributes = Collections.unmodifiableMap(attributes);
+			this.attributes = new HashMap<>(attributes);
 
 			Object id = attributes.computeIfAbsent(LOG_ID_ATTRIBUTE, name -> ObjectUtils.getIdentityHexString(this));
 			this.logPrefix = "[" + id + "] ";
