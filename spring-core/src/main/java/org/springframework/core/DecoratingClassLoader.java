@@ -94,12 +94,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 		if (this.excludedClasses.contains(className)) {
 			return true;
 		}
-		for (String packageName : this.excludedPackages) {
-			if (className.startsWith(packageName)) {
-				return true;
-			}
-		}
-		return false;
+		return this.excludedPackages.stream().anyMatch(className::startsWith);
 	}
 
 }

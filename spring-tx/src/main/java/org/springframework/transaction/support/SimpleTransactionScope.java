@@ -124,9 +124,7 @@ public class SimpleTransactionScope implements Scope {
 		@Override
 		public void afterCompletion(int status) {
 			TransactionSynchronizationManager.unbindResourceIfPossible(SimpleTransactionScope.this);
-			for (Runnable callback : this.scopedObjects.destructionCallbacks.values()) {
-				callback.run();
-			}
+			this.scopedObjects.destructionCallbacks.values().forEach(Runnable::run);
 			this.scopedObjects.destructionCallbacks.clear();
 			this.scopedObjects.scopedInstances.clear();
 		}

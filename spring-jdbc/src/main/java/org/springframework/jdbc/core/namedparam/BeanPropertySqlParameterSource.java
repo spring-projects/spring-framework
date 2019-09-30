@@ -17,8 +17,9 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotReadablePropertyException;
@@ -102,13 +103,10 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 */
 	public String[] getReadablePropertyNames() {
 		if (this.propertyNames == null) {
-			List<String> names = new ArrayList<>();
 			PropertyDescriptor[] props = this.beanWrapper.getPropertyDescriptors();
-			for (PropertyDescriptor pd : props) {
-				if (this.beanWrapper.isReadableProperty(pd.getName())) {
-					names.add(pd.getName());
-				}
-			}
+			List<String> names = Stream.of(props).filter(pd -> this.beanWrapper.isReadableProperty(pd.getName()))
+							.map(PropertyDescriptor::getName)
+							.collect(Collectors.toList());
 			this.propertyNames = StringUtils.toStringArray(names);
 		}
 		return this.propertyNames;

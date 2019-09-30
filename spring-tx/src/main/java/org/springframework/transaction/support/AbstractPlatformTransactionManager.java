@@ -655,9 +655,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private List<TransactionSynchronization> doSuspendSynchronization() {
 		List<TransactionSynchronization> suspendedSynchronizations =
 				TransactionSynchronizationManager.getSynchronizations();
-		for (TransactionSynchronization synchronization : suspendedSynchronizations) {
-			synchronization.suspend();
-		}
+		suspendedSynchronizations.forEach(TransactionSynchronization::suspend);
 		TransactionSynchronizationManager.clearSynchronization();
 		return suspendedSynchronizations;
 	}

@@ -80,9 +80,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#flush()
 	 */
 	public static void triggerFlush() {
-		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
-			synchronization.flush();
-		}
+		TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::flush);
 	}
 
 	/**
@@ -92,9 +90,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
 	public static void triggerBeforeCommit(boolean readOnly) {
-		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
-			synchronization.beforeCommit(readOnly);
-		}
+		TransactionSynchronizationManager.getSynchronizations().forEach(synchronization -> synchronization.beforeCommit(readOnly));
 	}
 
 	/**

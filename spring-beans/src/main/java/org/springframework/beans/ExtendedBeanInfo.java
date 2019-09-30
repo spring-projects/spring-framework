@@ -27,11 +27,12 @@ import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,18 +130,14 @@ class ExtendedBeanInfo implements BeanInfo {
 
 
 	private List<Method> findCandidateWriteMethods(MethodDescriptor[] methodDescriptors) {
-		List<Method> matches = new ArrayList<>();
-		for (MethodDescriptor methodDescriptor : methodDescriptors) {
-			Method method = methodDescriptor.getMethod();
-			if (isCandidateWriteMethod(method)) {
-				matches.add(method);
-			}
-		}
 		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
 		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
-		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
-		return matches;
+		return Stream.of(methodDescriptors)
+				.map(MethodDescriptor::getMethod)
+				.filter(ExtendedBeanInfo::isCandidateWriteMethod)
+				.sorted((m1, m2) -> m2.toString().compareTo(m1.toString()))
+				.collect(Collectors.toList());
 	}
 
 	public static boolean isCandidateWriteMethod(Method method) {
