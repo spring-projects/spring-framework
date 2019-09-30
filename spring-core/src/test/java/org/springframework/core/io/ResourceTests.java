@@ -272,18 +272,11 @@ class ResourceTests {
 	@Test
 	void readableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit() > 0).isTrue();
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 

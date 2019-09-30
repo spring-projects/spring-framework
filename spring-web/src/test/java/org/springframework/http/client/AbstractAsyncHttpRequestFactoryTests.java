@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.Future;
@@ -71,12 +72,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
 		assertThat(request.getURI()).as("Invalid HTTP URI").isEqualTo(uri);
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()){
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -102,12 +99,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 				throw new AssertionError(ex.getMessage(), ex);
 			}
 		});
-		ClientHttpResponse response = listenableFuture.get();
-		try {
+		try (ClientHttpResponse response = listenableFuture.get()){
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -120,7 +113,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		request.getHeaders().add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		request.getHeaders().add(headerName, headerValue2);
-		final byte[] body = "Hello World".getBytes("UTF-8");
+		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 		request.getHeaders().setContentLength(body.length);
 
 		if (request instanceof StreamingHttpOutputMessage) {
@@ -132,23 +125,19 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		}
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 			assertThat(response.getHeaders().containsKey(headerName)).as("Header not found").isTrue();
 			assertThat(response.getHeaders().get(headerName)).as("Header value not found").isEqualTo(Arrays.asList(headerValue1, headerValue2));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
 			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
 		}
-		finally {
-			response.close();
-		}
 	}
 
 	@Test
 	public void multipleWrites() throws Exception {
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
-		final byte[] body = "Hello World".getBytes("UTF-8");
+		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		if (request instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
@@ -173,7 +162,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 	public void headersAfterExecute() throws Exception {
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
-		byte[] body = "Hello World".getBytes("UTF-8");
+		byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 		FileCopyUtils.copy(body, request.getBody());
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();

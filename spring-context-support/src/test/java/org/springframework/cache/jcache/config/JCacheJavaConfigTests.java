@@ -99,10 +99,8 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Test
 	public void exceptionCacheResolverLazilyRequired() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(NoExceptionCacheResolverConfig.class);
 
-		try {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(NoExceptionCacheResolverConfig.class)) {
 			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
 			assertThat(cos.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 
@@ -112,9 +110,6 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 			// This call requires the cache manager to be set
 			assertThatIllegalStateException().isThrownBy(() ->
 					service.cacheWithException("test", false));
-		}
-		finally {
-			context.close();
 		}
 	}
 

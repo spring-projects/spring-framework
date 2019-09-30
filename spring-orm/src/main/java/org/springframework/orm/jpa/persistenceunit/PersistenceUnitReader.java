@@ -130,13 +130,9 @@ final class PersistenceUnitReader {
 				Resource[] resources = this.resourcePatternResolver.getResources(location);
 				for (Resource resource : resources) {
 					resourceLocation = resource.toString();
-					InputStream stream = resource.getInputStream();
-					try {
+					try (InputStream stream = resource.getInputStream()) {
 						Document document = buildDocument(handler, stream);
 						parseDocument(resource, document, infos);
-					}
-					finally {
-						stream.close();
 					}
 				}
 			}

@@ -46,8 +46,7 @@ public class BufferingClientHttpRequestFactoryTests extends AbstractHttpRequestF
 		byte[] body = "Hello World".getBytes("UTF-8");
 		request.getHeaders().setContentLength(body.length);
 		FileCopyUtils.copy(body, request.getBody());
-		ClientHttpResponse response = request.execute();
-		try {
+		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
@@ -61,9 +60,6 @@ public class BufferingClientHttpRequestFactoryTests extends AbstractHttpRequestF
 			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
 			FileCopyUtils.copyToByteArray(response.getBody());
 			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
-		}
-		finally {
-			response.close();
 		}
 	}
 

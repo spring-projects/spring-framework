@@ -146,12 +146,8 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	protected FileTypeMap createFileTypeMap(@Nullable Resource mappingLocation, @Nullable String[] mappings) throws IOException {
 		MimetypesFileTypeMap fileTypeMap = null;
 		if (mappingLocation != null) {
-			InputStream is = mappingLocation.getInputStream();
-			try {
+			try (InputStream is = mappingLocation.getInputStream()) {
 				fileTypeMap = new MimetypesFileTypeMap(is);
-			}
-			finally {
-				is.close();
 			}
 		}
 		else {

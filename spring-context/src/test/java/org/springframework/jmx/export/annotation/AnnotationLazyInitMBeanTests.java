@@ -35,26 +35,19 @@ public class AnnotationLazyInitMBeanTests {
 
 	@Test
 	public void lazyNaming() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertThat(server.getObjectInstance(oname)).isNotNull();
 			String name = (String) server.getAttribute(oname, "Name");
 			assertThat(name).as("Invalid name returned").isEqualTo("TEST");
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
 	public void lazyAssembling() throws Exception {
 		System.setProperty("domain", "bean");
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
@@ -79,23 +72,17 @@ public class AnnotationLazyInitMBeanTests {
 		}
 		finally {
 			System.clearProperty("domain");
-			ctx.close();
 		}
 	}
 
 	@Test
 	public void componentScan() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertThat(server.getObjectInstance(oname)).isNotNull();
 			String name = (String) server.getAttribute(oname, "Name");
 			assertThat(name).isNull();
-		}
-		finally {
-			ctx.close();
 		}
 	}
 

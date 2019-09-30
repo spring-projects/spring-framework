@@ -203,13 +203,9 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	private Object serializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			serialization.serialize(storeValue, out);
 			return out.toByteArray();
-		}
-		finally {
-			out.close();
 		}
 	}
 
@@ -230,12 +226,8 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	private Object deserializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
-		ByteArrayInputStream in = new ByteArrayInputStream((byte[]) storeValue);
-		try {
+		try (ByteArrayInputStream in = new ByteArrayInputStream((byte[]) storeValue)) {
 			return serialization.deserialize(in);
-		}
-		finally {
-			in.close();
 		}
 	}
 

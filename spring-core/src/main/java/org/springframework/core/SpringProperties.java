@@ -62,12 +62,8 @@ public final class SpringProperties {
 					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));
 			if (url != null) {
 				logger.debug("Found 'spring.properties' file in local classpath");
-				InputStream is = url.openStream();
-				try {
+				try (InputStream is = url.openStream()) {
 					localProperties.load(is);
-				}
-				finally {
-					is.close();
 				}
 			}
 		}

@@ -405,8 +405,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				throw new SockJsException("Session closed.", this.session.getId(), null);
 			}
 
-			PooledByteBuffer pooled = bufferPool.allocate();
-			try {
+			try (PooledByteBuffer pooled = bufferPool.allocate()) {
 				int r;
 				do {
 					ByteBuffer buffer = pooled.getBuffer();
@@ -435,9 +434,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			}
 			catch (IOException exc) {
 				onFailure(exc);
-			}
-			finally {
-				pooled.close();
 			}
 		}
 

@@ -147,8 +147,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testAutodetectMBeans() throws Exception {
-		ConfigurableApplicationContext ctx = load("autodetectMBeans.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = load("autodetectMBeans.xml")) {
 			ctx.getBean("exporter");
 			MBeanServer server = ctx.getBean("server", MBeanServer.class);
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
@@ -158,15 +157,11 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean3=true"));
 			assertThat(instance).isNotNull();
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
 	public void testAutodetectWithExclude() throws Exception {
-		ConfigurableApplicationContext ctx = load("autodetectMBeans.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = load("autodetectMBeans.xml")) {
 			ctx.getBean("exporter");
 			MBeanServer server = ctx.getBean("server", MBeanServer.class);
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
@@ -175,15 +170,11 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			assertThatExceptionOfType(InstanceNotFoundException.class).isThrownBy(() ->
 					server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false")));
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
 	public void testAutodetectLazyMBeans() throws Exception {
-		ConfigurableApplicationContext ctx = load("autodetectLazyMBeans.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = load("autodetectLazyMBeans.xml")) {
 			ctx.getBean("exporter");
 			MBeanServer server = ctx.getBean("server", MBeanServer.class);
 
@@ -197,19 +188,12 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			name = (String) server.getAttribute(oname, "Name");
 			assertThat(name).as("Invalid name returned").isEqualTo("Juergen Hoeller");
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
 	public void testAutodetectNoMBeans() throws Exception {
-		ConfigurableApplicationContext ctx = load("autodetectNoMBeans.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = load("autodetectNoMBeans.xml")) {
 			ctx.getBean("exporter");
-		}
-		finally {
-			ctx.close();
 		}
 	}
 

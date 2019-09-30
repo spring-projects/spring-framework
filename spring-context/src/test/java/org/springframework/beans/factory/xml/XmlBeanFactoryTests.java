@@ -172,12 +172,8 @@ public class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-		InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath());
-		try {
+		try (InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath())) {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
-		}
-		finally {
-			inputStream.close();
 		}
 
 		// Let's create the outer bean named "innerBean",

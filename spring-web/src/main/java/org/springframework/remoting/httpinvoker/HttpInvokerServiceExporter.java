@@ -113,12 +113,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request, InputStream is)
 			throws IOException, ClassNotFoundException {
 
-		ObjectInputStream ois = createObjectInputStream(decorateInputStream(request, is));
-		try {
+		try (ObjectInputStream ois = createObjectInputStream(decorateInputStream(request, is))) {
 			return doReadRemoteInvocation(ois);
-		}
-		finally {
-			ois.close();
 		}
 	}
 
@@ -170,13 +166,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
-		ObjectOutputStream oos =
-				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)));
-		try {
+		try (ObjectOutputStream oos = createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)))) {
 			doWriteRemoteInvocationResult(result, oos);
-		}
-		finally {
-			oos.close();
 		}
 	}
 
