@@ -170,7 +170,6 @@ public abstract class AnnotationUtils {
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
 			return false;
 		}
-		// TODO: annotation presence registry to be integrated here
 		return true;
 	}
 
