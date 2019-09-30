@@ -3,10 +3,10 @@ description = "Spring Core Coroutines support"
 apply plugin: "kotlin"
 
 configurations {
-    classesOnlyElements {
-        canBeConsumed = true
-        canBeResolved = false
-    }
+	classesOnlyElements {
+		canBeConsumed = true
+		canBeResolved = false
+	}
 }
 
 artifacts {
