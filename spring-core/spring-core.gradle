@@ -21,6 +21,7 @@ configurations {
 }
 
 task cglibRepackJar(type: ShadowJar) {
+	outputs.cacheIf { true }
 	baseName = 'spring-cglib-repack'
 	version = cglibVersion
 	configurations = [project.configurations.cglib]
@@ -29,6 +30,7 @@ task cglibRepackJar(type: ShadowJar) {
 }
 
 task objenesisRepackJar(type: ShadowJar) {
+	outputs.cacheIf { true }
 	baseName = 'spring-objenesis-repack'
 	version = objenesisVersion
 	configurations = [project.configurations.objenesis]
