@@ -304,10 +304,6 @@ configure(allprojects) { project ->
 			cacheDynamicVersionsFor 0, "seconds"
 		}
 	}
-
-	tasks.withType(AbstractArchiveTask) {
-		preserveFileTimestamps = false
-	}
 }
 
 configure([rootProject] + javaProjects) { project ->
