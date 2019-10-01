@@ -265,7 +265,7 @@ You can shorten it further still with a full URI template, as the following exam
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	RI uri = UriComponentsBuilder.fromPath("/hotel list/{city}?q={q}")
+	URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}?q={q}")
 			.build("New York", "foo+bar")
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
