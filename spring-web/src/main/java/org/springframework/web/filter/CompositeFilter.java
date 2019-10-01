@@ -80,7 +80,10 @@ public class CompositeFilter implements Filter {
 	 */
 	@Override
 	public void destroy() {
-		this.filters.forEach(Filter::destroy);
+		for (int i = this.filters.size(); i-- > 0;) {
+			Filter filter = this.filters.get(i);
+			filter.destroy();
+		}
 	}
 
 
