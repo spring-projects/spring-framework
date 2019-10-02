@@ -61,13 +61,13 @@ public @interface TestExecutionListeners {
 	 * the {@link TestContextManager}.
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used instead of {@link #value}.
-	 * @see org.springframework.test.context.event.EventPublishingTestExecutionListener
 	 * @see org.springframework.test.context.web.ServletTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
 	 * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+	 * @see org.springframework.test.context.event.EventPublishingTestExecutionListener
 	 */
 	@AliasFor("value")
 	Class<? extends TestExecutionListener>[] listeners() default {};
