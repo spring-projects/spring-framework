@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,19 +46,16 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * with explicit {@link ApplicationContext} testing support in a <strong>TestNG</strong>
  * environment.
  *
- * <p>Concrete subclasses:
- * <ul>
- * <li>Typically declare a class-level {@link ContextConfiguration
- * &#064;ContextConfiguration} annotation to configure the {@linkplain ApplicationContext
- * application context} {@linkplain ContextConfiguration#locations() resource locations}
- * or {@linkplain ContextConfiguration#classes() annotated classes}. <em>If your test
- * does not need to load an application context, you may choose to omit the
- * {@code @ContextConfiguration} declaration and to configure the appropriate
- * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
- * manually.</em></li>
- * <li>Must have constructors which either implicitly or explicitly delegate to
- * {@code super();}.</li>
- * </ul>
+ * <p>Concrete subclasses should typically declare a class-level
+ * {@link ContextConfiguration @ContextConfiguration} annotation to
+ * configure the {@linkplain ApplicationContext application context} {@linkplain
+ * ContextConfiguration#locations() resource locations} or {@linkplain
+ * ContextConfiguration#classes() component classes}. <em>If your test does not
+ * need to load an application context, you may choose to omit the
+ * {@link ContextConfiguration @ContextConfiguration} declaration and to configure
+ * the appropriate {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} manually.</em> Concrete subclasses must also have
+ * constructors which either implicitly or explicitly delegate to {@code super();}.
  *
  * <p>The following {@link org.springframework.test.context.TestExecutionListener
  * TestExecutionListeners} are configured by default:
@@ -105,7 +102,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 
 
 	/**
-	 * Construct a new AbstractTestNGSpringContextTests instance and initialize
+	 * Construct a new {@code AbstractTestNGSpringContextTests} instance and initialize
 	 * the internal {@link TestContextManager} for the current test class.
 	 */
 	public AbstractTestNGSpringContextTests() {
