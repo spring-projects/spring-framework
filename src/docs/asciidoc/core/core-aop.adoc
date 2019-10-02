@@ -4038,7 +4038,7 @@ The following table summarizes various `LoadTimeWeaver` implementations:
 | Running in https://tomcat.apache.org/[Apache Tomcat]
 | `TomcatLoadTimeWeaver`
 
-| Running in https://glassfish.dev.java.net/[GlassFish] (limited to EAR deployments)
+| Running in https://eclipse-ee4j.github.io/glassfish/[GlassFish] (limited to EAR deployments)
 | `GlassFishLoadTimeWeaver`
 
 | Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
