@@ -203,7 +203,7 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
 			"suitable for community download page."
 
-	ext.baseDir = "${archiveBaseName}-${project.version}";
+	ext.baseDir = "spring-framework-${project.version}";
 
 	from("src/docs/dist") {
 		include "readme.txt"
