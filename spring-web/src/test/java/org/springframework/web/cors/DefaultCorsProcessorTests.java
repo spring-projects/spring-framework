@@ -239,6 +239,22 @@ public class DefaultCorsProcessorTests {
 	}
 
 	@Test
+	public void preflightRequestToEndpointRequiringAuthentication() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.conf.addAllowedOrigin("*");
+
+		this.response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,HEAD");
+		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+	}
+
+	@Test
 	public void preflightRequestWithoutRequestMethod() throws Exception {
 		this.request.setMethod(HttpMethod.OPTIONS.name());
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
