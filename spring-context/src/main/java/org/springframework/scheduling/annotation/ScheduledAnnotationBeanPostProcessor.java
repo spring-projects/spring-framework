@@ -49,8 +49,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
-import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -103,7 +101,7 @@ import org.springframework.util.StringValueResolver;
  * @see AsyncAnnotationBeanPostProcessor
  */
 public class ScheduledAnnotationBeanPostProcessor
-		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
+		implements ScheduledTaskHolder, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
@@ -321,16 +319,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		else {
 			return beanFactory.getBean(schedulerType);
 		}
-	}
-
-
-	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 	@Override
