@@ -27,8 +27,13 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.test.context.web.ServletTestExecutionListener;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +66,7 @@ import org.springframework.util.Assert;
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
  * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
  * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener}
  * </ul>
  *
  * <p>This class serves only as a convenience for extension.
@@ -94,7 +100,10 @@ import org.springframework.util.Assert;
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners({TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class})
+@TestExecutionListeners(listeners = { ServletTestExecutionListener.class,
+	DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
+	DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
+	SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class }, inheritListeners = false)
 @Transactional
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 

@@ -27,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -55,6 +56,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener}
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener}
  * </ul>
  *
  * <p>This class serves only as a convenience for extension.
@@ -82,12 +84,14 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see DirtiesContextBeforeModesTestExecutionListener
  * @see DependencyInjectionTestExecutionListener
  * @see DirtiesContextTestExecutionListener
+ * @see EventPublishingTestExecutionListener
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  */
 @RunWith(SpringRunner.class)
 @TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+	EventPublishingTestExecutionListener.class })
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
 	/**
