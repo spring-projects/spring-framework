@@ -33,6 +33,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
@@ -308,6 +309,16 @@ class DefaultWebTestClient implements WebTestClient {
 			Assert.state(clientResponse != null, "No ClientResponse");
 			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
 			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+		}
+		
+		@Override
+		public Mono<ResponseSpec> exchangeAsync() {
+			return this.bodySpec
+					.exchange()
+					.map(clientResponse -> {
+						WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
+						return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+					});
 		}
 	}
 

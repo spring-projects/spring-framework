@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 import org.hamcrest.Matcher;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
@@ -606,6 +607,12 @@ public interface WebTestClient {
 		 * @return spec for decoding the response
 		 */
 		ResponseSpec exchange();
+		
+		/**
+		 * Perform the exchange without a request body and without blocking
+		 * @return spec for decoding the response wrapped around a Mono publisher
+		 */
+		Mono<ResponseSpec> exchangeAsync();
 	}
 
 

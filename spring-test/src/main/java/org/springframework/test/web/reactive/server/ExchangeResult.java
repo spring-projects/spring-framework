@@ -24,7 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -206,6 +208,10 @@ public class ExchangeResult {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
+			if (Schedulers.isInNonBlockingThread()) {
+				throw Exceptions.propagate(ex);
+			}
+			
 			throw new AssertionError(ex.getMessage() + "\n" + this, ex);
 		}
 	}

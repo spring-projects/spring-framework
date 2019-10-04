@@ -22,8 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -150,6 +152,66 @@ public class ResponseEntityTests {
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")
 				.expectBody().isEmpty();
+	}
+	
+	@Test
+	public void exchangeAsync() {
+		this.client.get()
+				.uri("/John")
+				.exchangeAsync()
+				.subscribeOn(Schedulers.parallel())
+				.as(StepVerifier::create)
+				.assertNext(response -> {
+					response.expectStatus().isOk();
+					
+					response.returnResult(Person.class)
+						.getResponseBody()
+						.as(StepVerifier::create)
+						.expectNext(new Person("John"))
+						.verifyComplete();
+				})
+				.verifyComplete();
+		
+		this.client.get()
+				.uri("/Jason")
+				.exchangeAsync()
+				.flatMapMany(response -> {
+					response.expectStatus().isOk();
+					
+					return response.returnResult(Person.class).getResponseBody();
+				})
+				.subscribeOn(Schedulers.parallel())
+				.as(StepVerifier::create)
+				.expectNext(new Person("Jason"))
+				.verifyComplete();
+	}
+	
+	@Test
+	public void exchangeAsyncFailure() {
+		Assertions.assertThrows(AssertionError.class, () -> {
+			this.client.get()
+					.uri("/Kyle/details")
+					.exchangeAsync()
+					.subscribeOn(Schedulers.parallel())
+					.as(StepVerifier::create)
+					.assertNext(response -> {
+						response.expectStatus().isOk();
+					})
+					.verifyComplete();
+		});
+		
+		this.client.get()
+				.uri("/Jason/details")
+				.exchangeAsync()
+				.flatMapMany(response -> {
+					response.expectStatus().isOk();
+					
+					return response.returnResult(Person.class).getResponseBody();
+				})
+				.subscribeOn(Schedulers.parallel())
+				.as(StepVerifier::create)
+				.expectError(AssertionError.class)
+				.verify();
 	}
 
 
