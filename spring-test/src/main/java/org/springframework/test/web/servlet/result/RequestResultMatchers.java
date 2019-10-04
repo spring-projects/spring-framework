@@ -31,6 +31,7 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Factory for assertions on the request.
@@ -147,6 +148,19 @@ public class RequestResultMatchers {
 			HttpSession session = result.getRequest().getSession();
 			Assert.state(session != null, "No HttpSession");
 			assertEquals("Session attribute '" + name + "'", value, session.getAttribute(name));
+		};
+	}
+
+	/**
+	 * Assert the given session attributes do not exist.
+	 */
+	public <T> ResultMatcher sessionAttributeDoesNotExist(String... names) {
+		return result -> {
+			HttpSession session = result.getRequest().getSession();
+			Assert.state(session != null, "No HttpSession");
+			for (String name : names) {
+				assertTrue("Session attribute '" + name + "' exists", session.getAttribute(name) == null);
+			}
 		};
 	}
 

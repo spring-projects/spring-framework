@@ -65,6 +65,12 @@ public class SessionAttributeAssertionTests {
 			.andExpect(request().sessionAttribute("locale", notNullValue()));
 	}
 
+	@Test
+	public void testSessionAttributeDoesNotExist() throws Exception {
+		this.mockMvc.perform(get("/"))
+			.andExpect(request().sessionAttributeDoesNotExist("myAttr1", "myAttr2"));
+	}
+
 
 	@Controller
 	@SessionAttributes("locale")
