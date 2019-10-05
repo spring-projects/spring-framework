@@ -111,24 +111,25 @@ asciidoctor {
 	logDocuments = true
 	backends = ["html5"]
 	// only ouput PDF documentation for non-SNAPSHOT builds
-	if(!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
+	if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
 		backends += "pdf"
 	}
 	options doctype: 'book', eruby: 'erubis'
-	attributes  'icons': 'font',
-			'idprefix': '',
-			'idseparator': '-',
-			'docinfo': 'shared',
-			'revnumber': project.version,
-			'sectanchors': '',
-			'sectnums': '',
-			'source-highlighter=highlight.js',
-			'highlightjsdir=js/highlight',
-			'highlightjs-theme=github',
-			stylesdir: "css/",
+	attributes([
+			icons: 'font',
+			idprefix: '',
+			idseparator: '-',
+			docinfo: 'shared',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'highlight.js',
+			highlightjsdir: 'js/highlight',
+			'highlightjs-theme': 'github',
+			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
-
+	])
 }
 
 asciidoctor.dependsOn extractDocResources
@@ -196,7 +197,6 @@ task schemaZip(type: Zip) {
  * docs, schemas, jars, source jars, javadoc jars
  */
 task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-
 	group = "Distribution"
 	archiveBaseName.set("spring-framework")
 	archiveClassifier.set("dist")
