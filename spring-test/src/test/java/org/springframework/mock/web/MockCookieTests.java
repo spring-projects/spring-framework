@@ -18,6 +18,9 @@ package org.springframework.mock.web;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -62,8 +65,8 @@ class MockCookieTests {
 
 	@Test
 	void parseHeaderWithAttributes() {
-		MockCookie cookie = MockCookie.parse(
-				"SESSION=123; Domain=example.com; Max-Age=60; Path=/; Secure; HttpOnly; SameSite=Lax");
+		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
+				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; SameSite=Lax");
 
 		assertCookie(cookie, "SESSION", "123");
 		assertThat(cookie.getDomain()).isEqualTo("example.com");
@@ -71,6 +74,8 @@ class MockCookieTests {
 		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isTrue();
 		assertThat(cookie.isHttpOnly()).isTrue();
+		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 	}
 
@@ -104,8 +109,8 @@ class MockCookieTests {
 
 	@Test
 	void parseHeaderWithAttributesCaseSensitivity() {
-		MockCookie cookie = MockCookie.parse(
-				"SESSION=123; domain=example.com; max-age=60; path=/; secure; httponly; samesite=Lax");
+		MockCookie cookie = MockCookie.parse("SESSION=123; domain=example.com; max-age=60; " +
+				"expires=Tue, 8 Oct 2019 19:50:00 GMT; path=/; secure; httponly; samesite=Lax");
 
 		assertCookie(cookie, "SESSION", "123");
 		assertThat(cookie.getDomain()).isEqualTo("example.com");
@@ -113,6 +118,8 @@ class MockCookieTests {
 		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isTrue();
 		assertThat(cookie.isHttpOnly()).isTrue();
+		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 	}
 

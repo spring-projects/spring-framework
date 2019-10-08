@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Vedran Pavic
  * @since 19.02.2006
  */
 class MockHttpServletResponseTests {
@@ -360,6 +361,14 @@ class MockHttpServletResponseTests {
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
+	}
+
+	@Test
+	void addCookieHeaderWithExpires() {
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
+				"HttpOnly; SameSite=Lax";
+		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
 	}
 
 	@Test
