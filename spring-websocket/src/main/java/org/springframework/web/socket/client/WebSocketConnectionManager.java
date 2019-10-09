@@ -143,7 +143,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 			@Override
 			public void onSuccess(@Nullable WebSocketSession result) {
 				webSocketSession = result;
-				if (logger.isInfoEnabled()){
+				if (logger.isInfoEnabled()) {
 					logger.info("Successfully connected");
 				}
 			}
