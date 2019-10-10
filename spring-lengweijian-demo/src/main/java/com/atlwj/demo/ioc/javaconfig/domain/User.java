@@ -9,22 +9,6 @@ public class User {
 		this.character = character;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getCharacter() {
-		return character;
-	}
-
-	public void setCharacter(String character) {
-		this.character = character;
-	}
-
 
 	@Override
 	public String toString() {

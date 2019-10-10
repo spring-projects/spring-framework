@@ -1,18 +1,28 @@
 package com.atlwj.demo.ioc.lifecycle;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.*;
 
 //@EnableAspectJAutoProxy
-@ComponentScan("com.atlwj.demo.ioc.lifecycle")
+//@ComponentScan("com.atlwj.demo.ioc.lifecycle")
+@Configuration
 public class LifeCycleTest {
+
+	@Bean(name = "lifeCycle",initMethod = "initMethod",destroyMethod = "destroyMethod")
+	public LifeCycleBean lifeCycleBean(){
+		return new LifeCycleBean();
+	}
+
+	@Bean(name = "xxxxxx")
+	public LifeCycleBean02 lifeCycleBean02(){
+		return new LifeCycleBean02();
+	}
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ioc = new AnnotationConfigApplicationContext(LifeCycleTest.class);
 		LifeCycleBean lifeCycleBean = (LifeCycleBean) ioc.getBean("lifeCycle");
+		LifeCycleBean02 lifeCycleBean02 = (LifeCycleBean02) ioc.getBean("xxxxxx");
 		lifeCycleBean.display();
-		ioc.close();
+		lifeCycleBean02.say02();
+		//ioc.close();
 	}
 }

@@ -77,6 +77,8 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
     // jackon ---------end---------------------
+    // https://mvnrepository.com/artifact/javax.servlet/jstl
+    compile group: 'javax.servlet', name: 'jstl', version: '1.2'
 
     // tomcat -------------start-----------------
     def tomcatVersion = '8.0.27'
@@ -86,6 +88,7 @@ dependencies {
 
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.43'
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '8.5.43'
+    // java.lang.ClassNotFoundException: org.apache.jasper.servlet.JspServlet
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '8.5.43'
     // tomcat -------------end-----------------
 

@@ -2,7 +2,7 @@ package com.atlwj.demo.ioc.annotation.autowired.dao;
 
 import org.springframework.stereotype.Repository;
 
-//@Repository
+@Repository
 public class PersonDao {
 
 	public void add(){

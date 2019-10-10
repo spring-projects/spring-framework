@@ -8,11 +8,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
 public class PersonServiceImpl02 implements PersonService {
 
 	@Autowired
-	@Nullable
 	PersonDao personDao;
 
 	@Override

@@ -12,7 +12,6 @@ public class MyServletContainerInitializer extends AbstractAnnotationConfigDispa
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
 		System.out.println("getRootConfigClasses....");
-
 		return new Class<?>[]{RootConfig.class};
 	}
 

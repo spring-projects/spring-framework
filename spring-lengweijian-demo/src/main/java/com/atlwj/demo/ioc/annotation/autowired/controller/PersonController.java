@@ -9,23 +9,15 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class PersonController implements ApplicationContextAware {
+public class PersonController{
 
-	private ApplicationContext applicationContext;
 
 	@Autowired
-	//@Qualifier(value = "personServiceImpl02")
-	PersonService personService;
+	PersonService personServiceImpl02;
 
 	public int add(){
 		// 获取person bean
-		String personInfo = applicationContext.getBean(Person.class).toString();
-		System.out.println("PersonController...add..." + personService.add() + personInfo);
+		System.out.println("PersonController...add..." + personServiceImpl02.add());
 		return 0;
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
 	}
 }

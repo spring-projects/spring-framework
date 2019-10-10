@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 public class PersonServiceImpl implements PersonService {
 
 	@Autowired
-			@Nullable
 	PersonDao personDao;
 
 	@Override

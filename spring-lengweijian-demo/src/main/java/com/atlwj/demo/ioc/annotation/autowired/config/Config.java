@@ -6,7 +6,7 @@ import org.springframework.context.annotation.*;
 /**
  *
  * 使用@Autowired注解可以完成对象的依赖注入。接下来是重点：
- * 		特性：   @Autowired默认是按照bean的配型装配，什么意思？就是注入的属性名称可以和你要注入的bean的id不同。
+ * 		特性：   @Autowired默认是按照bean的类型装配，什么意思？就是注入的属性名称可以和你要注入的bean的id不同。
  * 				但是当同一类型的bean有两个以上的时候，如果随意起属性名称会报【NoUniqueBeanDefinitionException】异常。
  * 			  	但是如果你将你声明的属性的名称修改为同一类型的bean的多个实现的其中之一的bean的id名称时，spring可以为你注入这个bean的实例。
  * 			    个人认为这是spring自动装配最牛X的地方！！！）。

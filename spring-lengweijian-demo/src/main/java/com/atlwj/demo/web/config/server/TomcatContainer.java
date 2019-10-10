@@ -67,7 +67,11 @@ public class TomcatContainer implements WebContainer {
 	private void setResource(Tomcat tomcat) {
 		String sourcePath = MyApp.class.getResource("/").getPath();
 		tomcat.getHost().setAutoDeploy(false);
-		Context ctx = tomcat.addWebapp(contextPath, new File("src/main/").getAbsolutePath());
+
+		// 这里很重要，addWebapp添加一个web项目
+		 Context ctx = tomcat.addWebapp(contextPath, new File("src/main/").getAbsolutePath());
+		// 问题？？addContext没有办法初始化spring
+//		Context ctx = tomcat.addContext(contextPath, new File("src/main/").getAbsolutePath());
 		WebResourceRoot resource = new StandardRoot(ctx);
 		resource.addPreResources(new DirResourceSet(resource,APP_CLASSES_PATH,sourcePath,"/"));
 		ctx.setResources(resource);
