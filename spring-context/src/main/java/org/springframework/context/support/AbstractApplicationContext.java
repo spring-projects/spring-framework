@@ -604,7 +604,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
-		if (this.earlyApplicationListeners == null) {
+		if (this.earlyApplicationListeners == null || this.earlyApplicationListeners.isEmpty()) {
 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
 		}
 		else {
@@ -1035,7 +1035,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			onClose();
 
 			// Reset local application listeners to pre-refresh state.
-			if (this.earlyApplicationListeners != null) {
+			if (this.earlyApplicationListeners != null && !this.earlyApplicationListeners.isEmpty()) {
 				this.applicationListeners.clear();
 				this.applicationListeners.addAll(this.earlyApplicationListeners);
 			}
