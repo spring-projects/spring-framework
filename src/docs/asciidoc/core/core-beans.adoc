@@ -11055,7 +11055,7 @@ file extension).
 .Add a
 `META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
-`META-INF/applicationContext.xml).
+`META-INF/applicationContext.xml`).
 . Drop the resulting RAR file into your
 application server's deployment directory.
 
