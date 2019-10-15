@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class LifeCycleBean02{
 
 	@Autowired
-	LifeCycleBean lifeCycleBean;
+	LifeCycleBean lifeCycleBean01;
 
 	public void say02(){
-		System.out.println(lifeCycleBean);
+		System.out.println("lifeCycleBean01.." + lifeCycleBean01);
 	}
 
 }

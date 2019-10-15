@@ -7,22 +7,20 @@ import org.springframework.context.annotation.*;
 @Configuration
 public class LifeCycleTest {
 
-	@Bean(name = "lifeCycle",initMethod = "initMethod",destroyMethod = "destroyMethod")
-	public LifeCycleBean lifeCycleBean(){
+	@Bean(value = "lifeCycleBean01",initMethod = "initMethod",destroyMethod = "destroyMethod")
+	public LifeCycleBean lifeCycleBean01(){
 		return new LifeCycleBean();
 	}
-
-	@Bean(name = "xxxxxx")
+	@Bean(value = "lifeCycleBean02")
 	public LifeCycleBean02 lifeCycleBean02(){
 		return new LifeCycleBean02();
 	}
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ioc = new AnnotationConfigApplicationContext(LifeCycleTest.class);
-		LifeCycleBean lifeCycleBean = (LifeCycleBean) ioc.getBean("lifeCycle");
-		LifeCycleBean02 lifeCycleBean02 = (LifeCycleBean02) ioc.getBean("xxxxxx");
+		LifeCycleBean lifeCycleBean = (LifeCycleBean) ioc.getBean("lifeCycleBean01");
+		LifeCycleBean02 lifeCycleBean02 = (LifeCycleBean02) ioc.getBean("lifeCycleBean02");
 		lifeCycleBean.display();
 		lifeCycleBean02.say02();
-		//ioc.close();
 	}
 }
