@@ -486,7 +486,13 @@ public class MethodParameter {
 		if (paramType != null) {
 			return paramType;
 		}
-		paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+		paramType = computeParameterType();
+		// In order to improve performance, the method forMethodParameter should not be used in some cases.
+		if ("java.lang.Object".equals(paramType.getCanonicalName()) &&
+				!getDeclaringClass().equals(getContainingClass()) &&
+				!"java.lang.Object".equals(getGenericParameterType().getClass().getCanonicalName())) {
+			paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+		}
 		if (paramType == null) {
 			paramType = computeParameterType();
 		}
