@@ -160,6 +160,16 @@ public final class BeanDefinitionBuilder {
 		return this.beanDefinition;
 	}
 
+	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * <p>If this value is {@code true} for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	public BeanDefinitionBuilder setPrimary(boolean primary) {
+		this.beanDefinition.setPrimary(primary);
+		return this;
+	}
+
 
 	/**
 	 * Set the name of the parent definition of this bean definition.
