@@ -745,4 +745,17 @@ class StringUtilsTests {
 		assertThat(StringUtils.parseLocale("")).isNull();
 	}
 
+	@Test
+	void snakeCaseToCamelCaseString() {
+		assertThat(StringUtils.snakeCaseToCamelCaseString(null)).isNull();
+		assertThat(StringUtils.snakeCaseToCamelCaseString("")).isEqualTo("");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("________")).isEqualTo("");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("____foo_bar")).isEqualTo("fooBar");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("foo_bar____")).isEqualTo("fooBar");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("____foo_bar____")).isEqualTo("fooBar");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("foo_bar")).isEqualTo("fooBar");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("Foo_Bar")).isEqualTo("fooBar");
+		assertThat(StringUtils.snakeCaseToCamelCaseString("FOO_BAR")).isEqualTo("fooBar");
+	}
+
 }

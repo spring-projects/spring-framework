@@ -72,6 +72,8 @@ public abstract class StringUtils {
 
 	private static final char EXTENSION_SEPARATOR = '.';
 
+	private static final char UNDER_SCORE = '_';
+
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings
@@ -1337,4 +1339,44 @@ public abstract class StringUtils {
 		return arrayToDelimitedString(arr, ",");
 	}
 
+	/**
+	 * Convert a snake case {@code String} to corresponding camel case {@code String}
+	 * i.e EXAMPLE_STRING to exampleString
+	 *
+	 * In-case param string is not a snake-case string method return lowercase representation
+	 * of string
+	 *
+	 * @param snake case string
+	 * @return camel case representation of string for given snake case string
+	 */
+	public static String snakeCaseToCamelCase(String str) {
+		str = trimLeadingAndTrailingUnderscoreSign(str);
+		if (isEmpty(str)) {
+			return str;
+		}
+		StringBuilder sb = new StringBuilder(str.toLowerCase());
+		for (int i = 0; i < sb.length(); i++) {
+			if ('_' == sb.charAt(i)) {
+				while (sb.charAt(i) == UNDER_SCORE) {
+					sb.deleteCharAt(i);
+				}
+				sb = sb.replace(i, i + 1, String.valueOf(Character.toUpperCase(sb.charAt(i))));
+			}
+
+		}
+		return sb.toString();
+	}
+
+	private static String trimLeadingAndTrailingUnderscoreSign(String str) {
+		if (isEmpty(str)) {
+			return str;
+		}
+		StringBuilder sb = new StringBuilder(str);
+		int index = -1;
+		while (sb.length() != 0 && (sb.charAt(0) == UNDER_SCORE|| sb.charAt(sb.length() - 1) == UNDER_SCORE)) {
+			index = sb.indexOf("_") == 0 ? 0 : sb.lastIndexOf("_") == sb.length() - 1 ? sb.length() - 1 : -1;
+			sb.deleteCharAt(index);
+		}
+		return sb.toString();
+	}
 }
