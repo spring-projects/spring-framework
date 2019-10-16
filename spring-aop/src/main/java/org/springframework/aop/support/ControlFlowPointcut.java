@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,12 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.core.ControlFlow;
-import org.springframework.core.ControlFlowFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -34,16 +34,18 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Rob Harrop
- * @see org.springframework.core.ControlFlow
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 
-	private Class<?> clazz;
+	private final Class<?> clazz;
 
-	private String methodName;
+	@Nullable
+	private final String methodName;
 
-	private int evaluations;
+	private final AtomicInteger evaluations = new AtomicInteger(0);
 
 
 	/**
@@ -55,13 +57,13 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	/**
-	 * Construct a new pointcut that matches all calls below the
-	 * given method in the given class. If the method name is null,
-	 * matches all control flows below that class.
+	 * Construct a new pointcut that matches all calls below the given method
+	 * in the given class. If no method name is given, matches all control flows
+	 * below the given class.
 	 * @param clazz the clazz
-	 * @param methodName the name of the method
+	 * @param methodName the name of the method (may be {@code null})
 	 */
-	public ControlFlowPointcut(Class<?> clazz, String methodName) {
+	public ControlFlowPointcut(Class<?> clazz, @Nullable String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
 		this.methodName = methodName;
@@ -77,8 +79,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	/**
-	 * Subclasses can override this if it's possible to filter out
-	 * some candidate classes.
+	 * Subclasses can override this if it's possible to filter out some candidate classes.
 	 */
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
@@ -92,16 +93,22 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass, Object... args) {
-		this.evaluations++;
-		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return (this.methodName != null ? cflow.under(this.clazz, this.methodName) : cflow.under(this.clazz));
+		this.evaluations.incrementAndGet();
+
+		for (StackTraceElement element : new Throwable().getStackTrace()) {
+			if (element.getClassName().equals(this.clazz.getName()) &&
+					(this.methodName == null || element.getMethodName().equals(this.methodName))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * It's useful to know how many times we've fired, for optimization.
 	 */
 	public int getEvaluations() {
-		return this.evaluations;
+		return this.evaluations.get();
 	}
 
 
@@ -117,7 +124,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -125,17 +132,21 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 			return false;
 		}
 		ControlFlowPointcut that = (ControlFlowPointcut) other;
-		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(that.methodName, this.methodName);
+		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(this.methodName, that.methodName);
 	}
 
 	@Override
 	public int hashCode() {
-		int code = 17;
-		code = 37 * code + this.clazz.hashCode();
+		int code = this.clazz.hashCode();
 		if (this.methodName != null) {
 			code = 37 * code + this.methodName.hashCode();
 		}
 		return code;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodName = " + methodName;
 	}
 
 }

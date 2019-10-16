@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,12 +27,14 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * AOP Alliance MethodInterceptor for declarative transaction
  * management using the common Spring transaction infrastructure
- * ({@link org.springframework.transaction.PlatformTransactionManager}).
+ * ({@link org.springframework.transaction.PlatformTransactionManager}/
+ * {@link org.springframework.transaction.ReactiveTransactionManager}).
  *
  * <p>Derives from the {@link TransactionAspectSupport} class which
  * contains the integration with Spring's underlying transaction API.
@@ -86,19 +88,15 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 
 
 	@Override
-	public Object invoke(final MethodInvocation invocation) throws Throwable {
+	@Nullable
+	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Work out the target class: may be {@code null}.
 		// The TransactionAttributeSource should be passed the target class
 		// as well as the method, which may be from an interface.
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
-			@Override
-			public Object proceedWithInvocation() throws Throwable {
-				return invocation.proceed();
-			}
-		});
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, invocation::proceed);
 	}
 
 

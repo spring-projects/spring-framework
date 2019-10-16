@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -17,7 +17,7 @@
 	</bean>
 
 	<bean id="regularlyProxiedOverload" lazy-init="true" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="target"><ref local="regularlyProxiedOverloadTarget"/></property>
+		<property name="target"><ref bean="regularlyProxiedOverloadTarget"/></property>
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="interceptorNames"><value>interceptor</value></property>
 	</bean>

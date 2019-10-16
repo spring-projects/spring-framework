@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,15 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
-	/** Cache for singleton aspect instances */
-	private static final Map<Class<?>, Object> aspectCache = new HashMap<Class<?>, Object>();
+	/** Cache for singleton aspect instances. */
+	private static final Map<Class<?>, Object> aspectCache = new ConcurrentHashMap<>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -119,7 +119,9 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
 		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
-		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
+		Class<?> targetClass = getTargetClass();
+		Assert.state(targetClass != null, "Unresolvable target class");
+		advisors = AopUtils.findAdvisorsThatCanApply(advisors, targetClass);
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
 		AnnotationAwareOrderComparator.sort(advisors);
 		addAdvisors(advisors);
@@ -144,7 +146,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(
 			AspectMetadata am, Class<?> aspectClass, String aspectName) {
 
-		MetadataAwareAspectInstanceFactory instanceFactory = null;
+		MetadataAwareAspectInstanceFactory instanceFactory;
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 			// Create a shared aspect instance.
 			Object instance = getSingletonAspectInstance(aspectClass);
@@ -162,23 +164,19 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * is created if one cannot be found in the instance cache.
 	 */
 	private Object getSingletonAspectInstance(Class<?> aspectClass) {
-		synchronized (aspectCache) {
-			Object instance = aspectCache.get(aspectClass);
-			if (instance != null) {
-				return instance;
-			}
-			try {
-				instance = aspectClass.newInstance();
-				aspectCache.put(aspectClass, instance);
-				return instance;
-			}
-			catch (InstantiationException ex) {
-				throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]", ex);
-			}
-			catch (IllegalAccessException ex) {
-				throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]", ex);
+		// Quick check without a lock...
+		Object instance = aspectCache.get(aspectClass);
+		if (instance == null) {
+			synchronized (aspectCache) {
+				// To be safe, check within full lock now...
+				instance = aspectCache.get(aspectClass);
+				if (instance == null) {
+					instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
+					aspectCache.put(aspectClass, instance);
+				}
 			}
 		}
+		return instance;
 	}
 
 

@@ -1,0 +1,25 @@
+description = "Spring Context Support"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-context"))
+	compile(project(":spring-core"))
+	optional(project(":spring-jdbc"))  // for Quartz support
+	optional(project(":spring-tx"))  // for Quartz support
+	optional("javax.activation:javax.activation-api")
+	optional("javax.mail:javax.mail-api")
+	optional("javax.cache:cache-api")
+	optional("com.github.ben-manes.caffeine:caffeine")
+	optional("net.sf.ehcache:ehcache")
+	optional("org.quartz-scheduler:quartz")
+	optional("org.codehaus.fabric3.api:commonj")
+	optional("org.freemarker:freemarker")
+	testCompile(project(":spring-context"))
+	testCompile("org.hsqldb:hsqldb")
+	testCompile("org.hibernate:hibernate-validator")
+	testCompile("javax.annotation:javax.annotation-api")
+	testRuntime("org.ehcache:jcache")
+	testRuntime("org.ehcache:ehcache")
+	testRuntime("org.glassfish:javax.el")
+	testRuntime("com.sun.mail:javax.mail")
+}

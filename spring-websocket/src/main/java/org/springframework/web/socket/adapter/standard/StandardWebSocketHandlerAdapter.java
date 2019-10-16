@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -59,6 +60,9 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 		this.wsSession.initializeNativeSession(session);
+
+		// The following inner classes need to remain since lambdas would not retain their
+		// declared generic types (which need to be seen by the underlying WebSocket engine)
 
 		if (this.handler.supportsPartialMessages()) {
 			session.addMessageHandler(new MessageHandler.Partial<String>() {
@@ -141,8 +145,8 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
 		catch (Throwable ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Unhandled error for " + this.wsSession, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unhandled on-close exception for " + this.wsSession, ex);
 			}
 		}
 	}

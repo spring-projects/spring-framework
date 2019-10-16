@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,7 +57,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Otherwise, an IllegalArgumentException gets thrown in that case.
-	 * @param dateFormat DateFormat to use for parsing and rendering
+	 * @param dateFormat the DateFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 */
 	public CustomDateEditor(DateFormat dateFormat, boolean allowEmpty) {
@@ -79,7 +80,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * with an "exactDateLength" specified, prepended zeros in the day or month
 	 * part may still allow for a shorter year part, so consider this as just
 	 * one more assertion that gets you closer to the intended date format.
-	 * @param dateFormat DateFormat to use for parsing and rendering
+	 * @param dateFormat the DateFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 * @param exactDateLength the exact expected length of the date String
 	 */
@@ -94,7 +95,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * Parse the Date from the given text, using the specified DateFormat.
 	 */
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(@Nullable String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
 			setValue(null);

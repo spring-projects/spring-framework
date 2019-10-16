@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,18 +17,22 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link FutureTask} that implements {@link ListenableFuture}.
  *
  * @author Arjen Poutsma
  * @since 4.0
+ * @param <T> the result type returned by this Future's {@code get} method
  */
 public class ListenableFutureTask<T> extends FutureTask<T> implements ListenableFuture<T> {
 
-	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<T>();
+	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();
 
 
 	/**
@@ -47,7 +51,7 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	 * @param runnable the runnable task
 	 * @param result the result to return on successful completion
 	 */
-	public ListenableFutureTask(Runnable runnable, T result) {
+	public ListenableFutureTask(Runnable runnable, @Nullable T result) {
 		super(runnable, result);
 	}
 
@@ -64,7 +68,16 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	}
 
 	@Override
-	protected final void done() {
+	public CompletableFuture<T> completable() {
+		CompletableFuture<T> completable = new DelegatingCompletableFuture<>(this);
+		this.callbacks.addSuccessCallback(completable::complete);
+		this.callbacks.addFailureCallback(completable::completeExceptionally);
+		return completable;
+	}
+
+
+	@Override
+	protected void done() {
 		Throwable cause;
 		try {
 			T result = get();

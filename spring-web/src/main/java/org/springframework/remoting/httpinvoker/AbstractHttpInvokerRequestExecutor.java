@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,10 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base implementation of the HttpInvokerRequestExecutor interface.
@@ -43,13 +45,14 @@ import org.springframework.util.Assert;
  * @since 1.1
  * @see #doExecuteRequest
  */
-public abstract class AbstractHttpInvokerRequestExecutor
-		implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
+public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
 
 	/**
-	 * Default content type: "application/x-java-serialized-object"
+	 * Default content type: "application/x-java-serialized-object".
 	 */
 	public static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
+
+	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
 
 
 	protected static final String HTTP_METHOD_POST = "POST";
@@ -67,15 +70,13 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	protected static final String ENCODING_GZIP = "gzip";
 
 
-	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String contentType = CONTENT_TYPE_SERIALIZED_OBJECT;
 
 	private boolean acceptGzipEncoding = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 
@@ -121,6 +122,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	/**
 	 * Return the bean ClassLoader that this executor is supposed to use.
 	 */
+	@Nullable
 	protected ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -235,7 +237,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	 * @see #createObjectInputStream
 	 * @see #doReadRemoteInvocationResult
 	 */
-	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
+	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, @Nullable String codebaseUrl)
 			throws IOException, ClassNotFoundException {
 
 		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
@@ -269,7 +271,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 */
-	protected ObjectInputStream createObjectInputStream(InputStream is, String codebaseUrl) throws IOException {
+	protected ObjectInputStream createObjectInputStream(InputStream is, @Nullable String codebaseUrl) throws IOException {
 		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), codebaseUrl);
 	}
 
@@ -292,7 +294,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocationResult)) {
 			throw new RemoteException("Deserialized object needs to be assignable to type [" +
-					RemoteInvocationResult.class.getName() + "]: " + obj);
+					RemoteInvocationResult.class.getName() + "]: " + ClassUtils.getDescriptiveType(obj));
 		}
 		return (RemoteInvocationResult) obj;
 	}

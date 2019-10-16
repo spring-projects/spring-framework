@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.tests.sample.beans;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -38,13 +39,15 @@ public class HasMap {
 
 	private Object[] objectArray;
 
-	private Class<?>[] classArray;
-
 	private Integer[] intArray;
 
-	private IdentityHashMap identityMap;
+	private Class<?>[] classArray;
 
-	private CopyOnWriteArraySet concurrentSet;
+	private List<Class<?>> classList;
+
+	private IdentityHashMap<?, ?> identityMap;
+
+	private CopyOnWriteArraySet<?> concurrentSet;
 
 	private HasMap() {
 	}
@@ -81,14 +84,6 @@ public class HasMap {
 		this.objectArray = objectArray;
 	}
 
-	public Class<?>[] getClassArray() {
-		return classArray;
-	}
-
-	public void setClassArray(Class<?>[] classArray) {
-		this.classArray = classArray;
-	}
-
 	public Integer[] getIntegerArray() {
 		return intArray;
 	}
@@ -97,19 +92,35 @@ public class HasMap {
 		intArray = is;
 	}
 
-	public IdentityHashMap getIdentityMap() {
+	public Class<?>[] getClassArray() {
+		return classArray;
+	}
+
+	public void setClassArray(Class<?>[] classArray) {
+		this.classArray = classArray;
+	}
+
+	public List<Class<?>> getClassList() {
+		return classList;
+	}
+
+	public void setClassList(List<Class<?>> classList) {
+		this.classList = classList;
+	}
+
+	public IdentityHashMap<?, ?> getIdentityMap() {
 		return identityMap;
 	}
 
-	public void setIdentityMap(IdentityHashMap identityMap) {
+	public void setIdentityMap(IdentityHashMap<?, ?> identityMap) {
 		this.identityMap = identityMap;
 	}
 
-	public CopyOnWriteArraySet getConcurrentSet() {
+	public CopyOnWriteArraySet<?> getConcurrentSet() {
 		return concurrentSet;
 	}
 
-	public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
+	public void setConcurrentSet(CopyOnWriteArraySet<?> concurrentSet) {
 		this.concurrentSet = concurrentSet;
 	}
 

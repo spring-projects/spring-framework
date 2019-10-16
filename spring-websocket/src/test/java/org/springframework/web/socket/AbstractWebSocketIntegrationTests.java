@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,21 @@
 
 package org.springframework.web.socket;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
-import org.junit.runners.Parameterized.Parameter;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
@@ -34,11 +38,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Base class for WebSocket integration tests.
@@ -48,9 +56,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
-	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<Class<?>, Class<?>>();
+	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<>();
 
 	static {
 		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
@@ -58,22 +64,36 @@ public abstract class AbstractWebSocketIntegrationTests {
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
 
-	@Rule
-	public final TestName testName = new TestName();
+	static Stream<Arguments> argumentsFactory() {
+		return Stream.of(
+				arguments(new JettyWebSocketTestServer(), new JettyWebSocketClient()),
+				arguments(new TomcatWebSocketTestServer(), new StandardWebSocketClient()),
+				arguments(new UndertowTestServer(), new StandardWebSocketClient()));
+	}
 
-	@Parameter(0)
-	public WebSocketTestServer server;
 
-	@Parameter(1)
-	public WebSocketClient webSocketClient;
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] server [{0}], client [{1}]")
+	@MethodSource("argumentsFactory")
+	protected @interface ParameterizedWebSocketTest {
+	}
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected WebSocketTestServer server;
+
+	protected WebSocketClient webSocketClient;
 
 	protected AnnotationConfigWebApplicationContext wac;
 
 
-	@Before
-	public void setup() throws Exception {
+	protected void setup(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		this.server = server;
+		this.webSocketClient = webSocketClient;
 
-		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
+		logger.debug("Setting up '" + testInfo.getTestMethod().get().getName() + "', client=" +
 				this.webSocketClient.getClass().getSimpleName() + ", server=" +
 				this.server.getClass().getSimpleName());
 
@@ -87,17 +107,16 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		this.server.setup();
 		this.server.deployConfig(this.wac);
-		// Set ServletContext in WebApplicationContext after deployment but before
-		// starting the server.
+		this.server.start();
+
 		this.wac.setServletContext(this.server.getServletContext());
 		this.wac.refresh();
-		this.server.start();
 	}
 
 	protected abstract Class<?>[] getAnnotatedConfigClasses();
 
-	@After
-	public void teardown() throws Exception {
+	@AfterEach
+	void teardown() throws Exception {
 		try {
 			if (this.webSocketClient instanceof Lifecycle) {
 				((Lifecycle) this.webSocketClient).stop();
@@ -149,24 +168,29 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Configuration
 	static class JettyUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new JettyRequestUpgradeStrategy();
 		}
 	}
 
+
 	@Configuration
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new TomcatRequestUpgradeStrategy();
 		}
 	}
 
+
 	@Configuration
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
+		@Override
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new UndertowRequestUpgradeStrategy();

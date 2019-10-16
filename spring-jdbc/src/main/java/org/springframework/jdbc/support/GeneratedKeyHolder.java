@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,15 @@ import java.util.Map;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of the {@link KeyHolder} interface, to be used for
+ * The standard implementation of the {@link KeyHolder} interface, to be used for
  * holding auto-generated keys (as potentially returned by JDBC insert statements).
  *
- * <p>Create an instance of this class for each insert operation, and pass
- * it to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate}
- * or {org.springframework.jdbc.object.SqlUpdate} methods.
+ * <p>Create an instance of this class for each insert operation, and pass it
+ * to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate} or
+ * {@link org.springframework.jdbc.object.SqlUpdate} methods.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -45,7 +46,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList<Map<String, Object>>();
+		this.keyList = new LinkedList<>();
 	}
 
 	/**
@@ -58,8 +59,9 @@ public class GeneratedKeyHolder implements KeyHolder {
 
 
 	@Override
+	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1 || this.keyList.get(0).size() > 1) {
@@ -85,14 +87,16 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
-		if (this.keyList.size() > 1)
+		if (this.keyList.size() > 1) {
 			throw new InvalidDataAccessApiUsageException(
 					"The getKeys method should only be used when keys for a single row are returned.  " +
 					"The current key list contains keys for multiple rows: " + this.keyList);
+		}
 		return this.keyList.get(0);
 	}
 

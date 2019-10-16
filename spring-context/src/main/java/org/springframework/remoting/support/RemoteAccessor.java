@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.remoting.support;
+
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class for classes that access a remote service.
@@ -46,9 +48,8 @@ public abstract class RemoteAccessor extends RemotingSupport {
 	 * but can also be optional if the lookup returns a typed proxy.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 

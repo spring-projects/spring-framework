@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,6 +33,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 
 	private final String beanName;
 
+	@Nullable
 	private Object source;
 
 
@@ -53,18 +55,19 @@ public class RuntimeBeanNameReference implements BeanReference {
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setSource(Object source) {
+	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

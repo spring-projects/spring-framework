@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -50,6 +50,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
+	@Nullable
 	private String encoding;
 
 
@@ -61,7 +62,6 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxStreamXMLReader(XMLStreamReader reader) {
-		Assert.notNull(reader, "'reader' must not be null");
 		int event = reader.getEventType();
 		if (!(event == XMLStreamConstants.START_DOCUMENT || event == XMLStreamConstants.START_ELEMENT)) {
 			throw new IllegalStateException("XMLEventReader not at start of document or element");
@@ -151,10 +151,12 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					return (location != null ? location.getLineNumber() : -1);
 				}
 				@Override
+				@Nullable
 				public String getPublicId() {
 					return (location != null ? location.getPublicId() : null);
 				}
 				@Override
+				@Nullable
 				public String getSystemId() {
 					return (location != null ? location.getSystemId() : null);
 				}
@@ -163,6 +165,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					return xmlVersion;
 				}
 				@Override
+				@Nullable
 				public String getEncoding() {
 					return encoding;
 				}
@@ -238,7 +241,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
 	private void handleDtd() throws SAXException {
 		if (getLexicalHandler() != null) {
-			javax.xml.stream.Location location = this.reader.getLocation();
+			Location location = this.reader.getLocation();
 			getLexicalHandler().startDTD(null, location.getPublicId(), location.getSystemId());
 		}
 		if (getLexicalHandler() != null) {

@@ -1,0 +1,5 @@
+# Normalize line endings to LF.
+* text eol=lf
+
+# Ensure that line endings for multipart files in spring-web are not modified.
+*.multipart -text

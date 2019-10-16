@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Properties;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
+import org.springframework.lang.Nullable;
 
 /**
  * Allows for making a properties file from a classpath location available
@@ -47,6 +48,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 
 	private boolean singleton = true;
 
+	@Nullable
 	private Properties singletonInstance;
 
 
@@ -73,6 +75,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	}
 
 	@Override
+	@Nullable
 	public final Properties getObject() throws IOException {
 		if (this.singleton) {
 			return this.singletonInstance;
@@ -95,7 +98,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	 * <p>Invoked on initialization of this FactoryBean in case of a
 	 * shared singleton; else, on each {@link #getObject()} call.
 	 * @return the object returned by this factory
-	 * @throws IOException if an exception occured during properties loading
+	 * @throws IOException if an exception occurred during properties loading
 	 * @see #mergeProperties()
 	 */
 	protected Properties createProperties() throws IOException {

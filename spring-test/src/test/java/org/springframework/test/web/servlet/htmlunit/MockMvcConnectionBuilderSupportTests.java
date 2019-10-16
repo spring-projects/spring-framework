@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,21 +18,21 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -41,12 +41,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link MockMvcWebConnectionBuilderSupport}.
@@ -55,7 +53,7 @@ import static org.mockito.Mockito.when;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @WebAppConfiguration
 @SuppressWarnings("rawtypes")
@@ -69,21 +67,23 @@ public class MockMvcConnectionBuilderSupportTests {
 	private WebApplicationContext wac;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
-		when(this.client.getWebConnection()).thenReturn(mock(WebConnection.class));
+		given(this.client.getWebConnection()).willReturn(mock(WebConnection.class));
 		this.builder = new MockMvcWebConnectionBuilderSupport(this.wac) {};
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorMockMvcNull() {
-		new MockMvcWebConnectionBuilderSupport((MockMvc) null){};
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnectionBuilderSupport((MockMvc) null){});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorContextNull() {
-		new MockMvcWebConnectionBuilderSupport((WebApplicationContext) null){};
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnectionBuilderSupport((WebApplicationContext) null){});
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = new MockMvcWebConnectionBuilderSupport(mockMvc) {}.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -108,35 +108,35 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.useMockMvcForHosts("example.com").createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcUsed(conn, "http://example.com/");
-		assertMockMvcNotUsed(conn, "http://other.com/");
+		assertMockMvcUsed(conn, "https://example.com/");
+		assertMockMvcNotUsed(conn, "http://other.example/");
 	}
 
 	@Test
 	public void mockMvcAlwaysUseMockMvc() throws Exception {
 		WebConnection conn = this.builder.alwaysUseMockMvc().createConnection(this.client);
-		assertMockMvcUsed(conn, "http://other.com/");
+		assertMockMvcUsed(conn, "http://other.example/");
 	}
 
 	@Test
 	public void defaultContextPathEmpty() throws Exception {
 		WebConnection conn = this.builder.createConnection(this.client);
-		assertThat(getResponse(conn, "http://localhost/abc").getContentAsString(), equalTo(""));
+		assertThat(getResponse(conn, "http://localhost/abc").getContentAsString()).isEqualTo("");
 	}
 
 	@Test
 	public void defaultContextPathCustom() throws Exception {
 		WebConnection conn = this.builder.contextPath("/abc").createConnection(this.client);
-		assertThat(getResponse(conn, "http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
+		assertThat(getResponse(conn, "http://localhost/abc/def").getContentAsString()).isEqualTo("/abc");
 	}
 
 
 	private void assertMockMvcUsed(WebConnection connection, String url) throws Exception {
-		assertThat(getResponse(connection, url), notNullValue());
+		assertThat(getResponse(connection, url)).isNotNull();
 	}
 
 	private void assertMockMvcNotUsed(WebConnection connection, String url) throws Exception {
-		assertThat(getResponse(connection, url), nullValue());
+		assertThat(getResponse(connection, url)).isNull();
 	}
 
 	private WebResponse getResponse(WebConnection connection, String url) throws IOException {
@@ -151,7 +151,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		@RestController
 		static class ContextPathController {
 
-			@RequestMapping
+			@RequestMapping("/def")
 			public String contextPath(HttpServletRequest request) {
 				return request.getContextPath();
 			}

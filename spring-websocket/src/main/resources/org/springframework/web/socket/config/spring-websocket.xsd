@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/websocket"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/websocket"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
+
+	<xsd:complexType name="mapping">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	An entry in the registered HandlerMapping that matches a path with a handler.
+            ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="path" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A path that maps a particular request to a handler.
+	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-type path patterns (such as /myPath/**).
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="handler" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.WebSocketHandler"><![CDATA[
+    The bean name of a WebSocketHandler to use for requests that match the path configuration.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="handshake-handler">
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.server.HandshakeHandler"><![CDATA[
+    The bean name of a HandshakeHandler to use for processing WebSocket handshake requests.
+    If none specified, a DefaultHandshakeHandler will be configured by default.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="handshake-interceptors">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.socket.server.HandshakeInterceptor"><![CDATA[
+	A list of HandshakeInterceptor beans definition and references.
+	A HandshakeInterceptor can be used to inspect the handshake request and response as well as to pass attributes to the target WebSocketHandler.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element ref="beans:bean">
+					<xsd:annotation>
+						<xsd:documentation source="org.springframework.web.socket.server.HandshakeInterceptor"><![CDATA[
+	A HandshakeInterceptor bean definition.
+                        ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element ref="beans:ref">
+					<xsd:annotation>
+						<xsd:documentation source="org.springframework.web.socket.server.HandshakeInterceptor"><![CDATA[
+	A reference to a HandshakeInterceptor bean.
+                    ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="sockjs-service">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService"><![CDATA[
+	Configures a DefaultSockJsService for processing HTTP requests from SockJS clients.
+            ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="transport-handlers" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation source="org.springframework.web.socket.sockjs.transport.TransportHandler"><![CDATA[
+	List of TransportHandler beans to be configured for the current handlers element.
+	One can choose not to register the default TransportHandlers and/or override those using
+	custom TransportHandlers.
+                ]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:choice maxOccurs="unbounded">
+							<xsd:element ref="beans:bean">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A TransportHandler bean definition.
+                        ]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a TransportHandler bean.
+                        ]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:sequence>
+					<xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Whether or not default TransportHandlers registrations should be added in addition to the ones provided within this element.
+	Default registrations include XhrPollingTransportHandler, XhrReceivingTransportHandler,
+	JsonpPollingTransportHandler, JsonpReceivingTransportHandler, XhrStreamingTransportHandler,
+	EventSourceTransportHandler, HtmlFileTransportHandler, and WebSocketTransportHandler.
+                        ]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	A unique name for the service, mainly for logging purposes.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="client-library-url" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	Transports with no native cross-domain communication (e.g. "eventsource",
+	"htmlfile") must get a simple page from the "foreign" domain in an invisible
+	iframe so that code in the iframe can run from  a domain local to the SockJS
+	server. Since the iframe needs to load the SockJS javascript client library,
+	this property allows specifying where to load it from.
+
+	By default this is set to point to
+	"https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js". However it can
+	also be set to point to a URL served by the application.
+
+	Note that it's possible to specify a relative URL in which case the URL
+	must be relative to the iframe URL. For example assuming a SockJS endpoint
+	mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	The relative URL must start with "../../" to traverse up to the location
+	above the SockJS mapping. In case of a prefix-based Servlet mapping one more
+	traversal may be needed.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="stream-bytes-limit" type="xsd:int">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	Minimum number of bytes that can be send over a single HTTP streaming request before it will be closed.
+	Defaults to 128K (i.e. 128 1024).
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="session-cookie-needed" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The "cookie_needed" value in the response from the SockJs "/info" endpoint.
+	This property indicates whether the use of a JSESSIONID cookie is required for the application to function correctly,
+	e.g. for load balancing or in Java Servlet containers for the use of an HTTP session.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="heartbeat-time" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The amount of time in milliseconds when the server has not sent any messages and after which the server
+	should send a heartbeat frame to the client in order to keep the connection from breaking.
+	The default value is 25,000 (25 seconds).
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="disconnect-delay" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The amount of time in milliseconds before a client is considered disconnected after not having
+	a receiving connection, i.e. an active connection over which the server can send data to the client.
+	The default value is 5000.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="message-cache-size" type="xsd:int">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The number of server-to-client messages that a session can cache while waiting for
+	the next HTTP polling request from the client.
+	The default size is 100.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="websocket-enabled" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	Some load balancers don't support websockets. Set this option to "false" to disable the WebSocket transport on the server side.
+	The default value is "true".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="scheduler" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The bean name of a TaskScheduler; a new ThreadPoolTaskScheduler instance will be created if no value is provided.
+	This scheduler instance will be used for scheduling heart-beat messages.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="message-codec" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The bean name of a SockJsMessageCodec to use for encoding and decoding SockJS messages.
+	By default Jackson2SockJsMessageCodec is used requiring the Jackson library to be present on the classpath.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="suppress-cors" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	This option can be used to disable automatic addition of CORS headers for SockJS requests.
+	The default value is "false".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="stomp-broker-relay">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	Configures a MessageHandler that handles messages by forwarding them to a STOMP broker.
+	This MessageHandler also opens a default "system" TCP connection to the message
+	broker that is used for sending messages that originate from the server application (as
+	opposed to from a client).
+	The "login", "password", "heartbeat-send-interval" and "heartbeat-receive-interval" attributes
+	are provided to configure this "system" connection.
+                ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="prefix" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	Comma-separated list of destination prefixes supported by the broker being configured.
+	Destinations that do not match the given prefix(es) are ignored.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="relay-host" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The STOMP message broker host.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="relay-port" type="xsd:int">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The STOMP message broker port.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="client-login" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The login to use when creating connections to the STOMP broker on behalf of connected clients.
+	By default this is set to "guest".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="client-passcode" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The passcode to use when creating connections to the STOMP broker on behalf of connected clients.
+	By default this is set to "guest".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="system-login" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The login for the shared "system" connection used to send messages to
+	the STOMP broker from within the application, i.e. messages not associated
+	with a specific client session (e.g. REST/HTTP request handling method).
+	By default this is set to "guest".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="system-passcode" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The passcode for the shared "system" connection used to send messages to
+	the STOMP broker from within the application, i.e. messages not associated
+	with a specific client session (e.g. REST/HTTP request handling method).
+	By default this is set to "guest".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="heartbeat-send-interval" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The interval, in milliseconds, at which the "system" connection will send heartbeats to the STOMP broker.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="heartbeat-receive-interval" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The interval, in milliseconds, at which the "system" connection expects to receive heartbeats from the STOMP broker.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="auto-startup" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	Whether or not the StompBrokerRelay should be automatically started as part of its SmartLifecycle,
+	i.e. at the time of an application context refresh.
+	Default value is "true".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="virtual-host" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
+	The value of the "host" header to use in STOMP CONNECT frames sent to the STOMP broker.
+	This may be useful for example in a cloud environment where the actual host to which
+	the TCP connection is established is different from the host providing the cloud-based STOMP service.
+	By default this property is not set.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="user-destination-broadcast" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Set a destination to broadcast messages to that remain unresolved because
+	the user is not connected. In a multi-application server scenario this
+	gives other application servers a chance to try.
+	By default this is not set.
+                    ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="user-registry-broadcast" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Set a destination to broadcast the content of the local user registry to
+	and to listen for such broadcasts from other servers. In a multi-application
+	server scenarios this allows each server's user registry to be aware of
+	users connected to other servers.
+	By default this is not set.
+                    ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="simple-broker">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler"><![CDATA[
+	Configures a SimpleBrokerMessageHandler that handles messages as a simple message broker implementation.
+                ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="prefix" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.SimpleBrokerMessageHandler"><![CDATA[
+	Comma-separated list of destination prefixes supported by the broker being configured.
+	Destinations that do not match the given prefix(es) are ignored.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="heartbeat" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.SimpleBrokerMessageHandler"><![CDATA[
+	Configure the value for the heartbeat settings. The first number represents how often the server will
+	write or send a heartbeat. The second is how often the client should write. 0 means no heartbeats.
+	By default this is set to "0, 0" unless the scheduler attribute is also set in which case the
+	default becomes "10000,10000" (in milliseconds).
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="scheduler" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.SimpleBrokerMessageHandler"><![CDATA[
+	The name of a task TaskScheduler to use for heartbeat support. Setting this property also
+	automatically sets the heartbeat attribute to "10000, 10000".
+	By default this attribute is not set.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="selector-header" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.SimpleBrokerMessageHandler"><![CDATA[
+	Configure the name of a header that a subscription message can have for
+	the purpose of filtering messages matched to the subscription. The header
+	value is expected to be a Spring EL boolean expression to be applied to
+	the headers of messages matched to the subscription.
+
+	For example:
+	headers.foo == 'bar'
+
+	By default this is set to "selector". You can set it to a different
+	name, or to "" to turn off support for a selector header.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+
+	</xsd:complexType>
+
+	<xsd:complexType name="channel">
+		<xsd:sequence>
+			<xsd:element name="executor" type="channel-executor" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="interceptors" type="channel-interceptors" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="channel-executor">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
+	Configuration for the ThreadPoolTaskExecutor that sends messages for the message channel.
+                ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="core-pool-size" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
+	Set the core pool size of the ThreadPoolExecutor.
+	NOTE: the core pool size is effectively the max pool size when an unbounded queue-capacity is configured (the default).
+	This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
+	When this strategy is used, the max pool size is effectively ignored.
+	By default this is set to twice the value of Runtime.availableProcessors().
+	In an application where tasks do not block frequently,
+	the number should be closer to or equal to the number of available CPUs/cores.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="max-pool-size" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
+	 Set the max pool size of the ThreadPoolExecutor.
+	 NOTE: when an unbounded queue-capacity is configured (the default), the max pool size is effectively ignored.
+	 See the "Unbounded queues" strategy in java.util.concurrent.ThreadPoolExecutor for more details.
+	 By default this is set to Integer.MAX_VALUE.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="keep-alive-seconds" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
+	 Set the time limit for which threads may remain idle before being terminated.
+	 If there are more than the core number of threads currently in the pool, after waiting this amount of time without
+	 processing a task, excess threads will be terminated.  This overrides any value set in the constructor.
+	 By default this is set to 60.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="queue-capacity" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
+	 Set the queue capacity for the ThreadPoolExecutor.
+	 NOTE: when an unbounded queue-capacity is configured (the default) the core pool size is effectively the max pool size.
+	 This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
+	 When this strategy is used, the max pool size is effectively ignored.
+	 By default this is set to Integer.MAX_VALUE.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="channel-interceptors">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.messaging.support.ChannelInterceptor"><![CDATA[
+	List of ChannelInterceptor beans to be used with this channel.
+	Empty by default.
+                ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element ref="beans:bean">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	A ChannelInterceptor bean definition.
+                        ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element ref="beans:ref">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	A reference to a ChannelInterceptor bean.
+                        ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Elements definitions -->
+
+	<xsd:element name="handlers">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configures WebSocket support by registering a SimpleUrlHandlerMapping and mapping
+	paths to registered WebSocketHandlers.
+
+	If a sockjs service is configured within this element, then a
+	SockJsHttpRequestHandler will handle
+	requests mapped to the given path.
+
+	Otherwise a WebSocketHttpRequestHandler
+	will be registered for that purpose.
+
+	See EnableWebSocket Javadoc for
+	information on code-based alternatives to enabling WebSocket support.
+            ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="mapping" type="mapping" minOccurs="1" maxOccurs="unbounded"/>
+				<xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="handshake-interceptors" type="handshake-interceptors" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="sockjs" type="sockjs-service" minOccurs="0" maxOccurs="1"/>
+			</xsd:sequence>
+			<xsd:attribute name="order" type="xsd:token">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Order value for this SimpleUrlHandlerMapping.
+	Default value is 1.
+                ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="allowed-origins" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Configure allowed Origin header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="message-broker">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configures broker-backed messaging over WebSocket using a higher-level messaging sub-protocol.
+	Registers a SimpleUrlHandlerMapping and maps paths to registered Controllers.
+
+	A StompSubProtocolHandler is registered to handle various versions of the STOMP protocol.
+
+	See EnableWebSocketMessageBroker javadoc for information on code-based alternatives to enabling broker-backed messaging.
+            ]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="transport" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configure options related to the processing of messages received from and sent to WebSocket clients.
+                        ]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="decorator-factories" maxOccurs="1" minOccurs="0">
+								<xsd:complexType>
+									<xsd:annotation>
+										<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	Configure one or more factories to decorate the handler used to process WebSocket
+	messages. This may be useful for some advanced use cases, for example to allow
+	Spring Security to forcibly close the WebSocket session when the corresponding
+	HTTP session expires.
+			]]></xsd:documentation>
+									</xsd:annotation>
+									<xsd:sequence>
+										<xsd:choice minOccurs="1" maxOccurs="unbounded">
+											<xsd:element ref="beans:bean">
+												<xsd:annotation>
+													<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	A WebSocketHandlerDecoratorFactory bean definition.
+                        ]]></xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+											<xsd:element ref="beans:ref">
+												<xsd:annotation>
+													<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	A reference to a WebSocketHandlerDecoratorFactory bean.
+                    ]]></xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+										</xsd:choice>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+						<xsd:attribute name="message-size" type="xsd:int">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Configure the maximum size for an incoming sub-protocol message.
+	For example a STOMP message may be received as multiple WebSocket messages
+	or multiple HTTP POST requests when SockJS fallback options are in use.
+
+	In theory a WebSocket message can be almost unlimited in size.
+	In practice WebSocket servers impose limits on incoming message size.
+	STOMP clients for example tend to split large messages around 16K
+	boundaries. Therefore a server must be able to buffer partial content
+	and decode when enough data is received. Use this property to configure
+	the max size of the buffer to use.
+
+	The default value is 64K (i.e. 64 * 1024).
+
+	NOTE that the current version 1.2 of the STOMP spec
+	does not specifically discuss how to send STOMP messages over WebSocket.
+	Version 2 of the spec will but in the mean time existing client libraries
+	have already established a practice that servers must handle.
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="send-timeout" type="xsd:int">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Configure a time limit (in milliseconds) for the maximum amount of a time
+	allowed when sending messages to a WebSocket session or writing to an
+	HTTP response when SockJS fallback option are in use.
+
+	In general WebSocket servers expect that messages to a single WebSocket
+	session are sent from a single thread at a time. This is automatically
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
+	If message sending is slow, or at least slower than rate of messages sending,
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
+	state is cleared and an attempt is made to close the session.
+
+	NOTE that the session time limit is checked only
+	on attempts to send additional messages. So if only a single message is
+	sent and it hangs, the session will not time out until another message is
+	sent or the underlying physical socket times out. So this is not a
+	replacement for WebSocket server or HTTP connection timeout but is rather
+	intended to control the extent of buffering of unsent messages.
+
+	NOTE that closing the session may not succeed in
+	actually closing the physical socket and may also hang. This is true
+	especially when using blocking IO such as the BIO connector in Tomcat
+	that is used by default on Tomcat 7. Therefore it is recommended to ensure
+	the server is using non-blocking IO such as Tomcat's NIO connector that
+	is used by default on Tomcat 8. If you must use blocking IO consider
+	customizing OS-level TCP settings, for example
+	/proc/sys/net/ipv4/tcp_retries2 on Linux.
+
+	The default value is 10 seconds (i.e. 10 * 10000).
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="send-buffer-size" type="xsd:int">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Configure the maximum amount of data to buffer when sending messages
+	to a WebSocket session, or an HTTP response when SockJS fallback
+	option are in use.
+
+	In general WebSocket servers expect that messages to a single WebSocket
+	session are sent from a single thread at a time. This is automatically
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
+	If message sending is slow, or at least slower than rate of messages sending,
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
+	state is cleared and an attempt is made to close the session.
+
+	NOTE that closing the session may not succeed in
+	actually closing the physical socket and may also hang. This is true
+	especially when using blocking IO such as the BIO connector in Tomcat
+	configured by default on Tomcat 7. Therefore it is recommended to ensure
+	the server is using non-blocking IO such as Tomcat's NIO connector used
+	by default on Tomcat 8. If you must use blocking IO consider customizing
+	OS-level TCP settings, for example /proc/sys/net/ipv4/tcp_retries2
+	on Linux.
+
+	The default value is 512K (i.e. 512 * 1024). If the value is set to less
+	than or equal to 0 then buffering is effectively disabled.
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="time-to-first-message" type="xsd:int">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	 Set the maximum time allowed in milliseconds after the WebSocket
+	 connection is established and before the first sub-protocol message is
+	 received.
+
+	 This handler is for WebSocket connections that use a sub-protocol.
+	 Therefore, we expect the client to send at least one sub-protocol message
+	 in the beginning, or else we assume the connection isn't doing well, e.g.
+	 proxy issue, slow network, and can be closed.
+
+	 By default this is set to 60,000 (1 minute).
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="stomp-endpoint" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Registers STOMP over WebSocket endpoints.
+                        ]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="handshake-interceptors" type="handshake-interceptors" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="sockjs" type="sockjs-service" minOccurs="0" maxOccurs="1"/>
+						</xsd:sequence>
+						<xsd:attribute name="path" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	A path that maps a particular message destination to a handler method.
+	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
+                				]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origins" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+		Configure allowed Origin header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="stomp-error-handler" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+    Configures a StompSubProtocolErrorHandler to customize or handle STOMP ERROR to clients.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="ref" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.web.socket.messaging.StompSubProtocolErrorHandler"><![CDATA[
+    The bean name of a StompSubProtocolErrorHandler.
+                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:choice>
+					<xsd:element name="simple-broker" type="simple-broker"/>
+					<xsd:element name="stomp-broker-relay" type="stomp-broker-relay"/>
+				</xsd:choice>
+				<xsd:element name="argument-resolvers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
+	Using this option does not override the built-in support for resolving handler method arguments.
+	To customize the built-in support for argument resolution configure WebSocketAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodArgumentResolver (or WebArgumentResolver for backwards compatibility) bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodArgumentResolver bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver"/>
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="return-value-handlers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
+	Using this option does not override the built-in support for handling return values.
+	To customize the built-in support for handling return values configure WebSocketAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler"/>
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="message-converters" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configure the message converters to use when extracting the payload of messages in annotated methods
+	and when sending messages (e.g. through the "broker" SimpMessagingTemplate.
+	MessageConverter registrations provided here will take precedence over MessageConverter types registered by default.
+	Also see the register-defaults attribute if you want to turn off default registrations entirely.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:choice maxOccurs="unbounded">
+								<xsd:element ref="beans:bean">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+	A MessageConverter bean definition.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+								<xsd:element ref="beans:ref">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+	A reference to an HttpMessageConverter bean.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+							</xsd:choice>
+						</xsd:sequence>
+						<xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether or not default MessageConverter registrations should be added in addition to the ones provided within this element.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="client-inbound-channel" type="channel" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The channel for receiving messages from clients (e.g. WebSocket clients).
+                ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="client-outbound-channel" type="channel" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The channel for sending messages to clients (e.g. WebSocket clients).
+                ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="broker-channel" type="channel" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The channel for sending messages with translated user destinations.
+                ]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="application-destination-prefix" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Comma-separated list of prefixes to match to the destinations of handled messages.
+	Messages whose destination does not start with one of the configured prefixes are ignored.
+
+	Prefix is removed from the destination part and then messages are delegated to
+	@SubscribeMapping and @MessageMapping}annotated methods.
+
+	Prefixes without a trailing slash will have one appended automatically.
+	By default the list of prefixes is empty in which case all destinations match.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="preserve-publish-order" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether the client must receive messages in the order of publication.
+
+	By default messages sent to the clientOutboundChannel may
+	not be processed in the same order because the channel is backed by a
+	ThreadPoolExecutor that in turn does not guarantee processing in order.
+
+	When this flag is set to true messages within the same session
+	will be sent to the clientOutboundChannel one at a time in
+	order to preserve the order of publication. Enable this only if needed
+	since there is some performance overhead to keep messages in order.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="user-destination-prefix" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The prefix used to identify user destinations.
+	Any destinations that do not start with the given prefix are not be resolved.
+	The default value is "/user/".
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="path-matcher" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the PathMatcher to use to match the destinations of incoming
+	messages to @MessageMapping and @SubscribeMapping methods.
+
+	By default AntPathMatcher is configured.
+	However applications may provide an AntPathMatcher instance
+	customized to use "." (commonly used in messaging) instead of "/" as path
+	separator or provide a completely different PathMatcher implementation.
+
+	Note that the configured PathMatcher is only used for matching the
+	portion of the destination after the configured prefix. For example given
+	application destination prefix "/app" and destination "/app/price.stock.**",
+	the message might be mapped to a controller with "price" and "stock.**"
+	as its type and method-level mappings respectively.
+
+	When the simple broker is enabled, the PathMatcher configured here is
+	also used to match message destinations when brokering messages.
+                    ]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.util.PathMatcher"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="order" type="xsd:token">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Order value for this SimpleUrlHandlerMapping.
+	Default value is 1.
+                ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="path-helper" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name of the UrlPathHelper to use for the HandlerMapping used to map handshake requests.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="validator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The bean name of the Validator instance used for validating @Payload arguments.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

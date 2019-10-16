@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,23 +17,22 @@
 package org.springframework.instrument.classloading.jboss;
 
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
- * Autodetects the specific JBoss version at runtime: currently supports
- * JBoss AS 6 and 7, as well as WildFly 8 and 9 (as of Spring 4.2).
+ * Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
- * <p><b>NOTE:</b> On JBoss 6, to avoid the container loading the classes before the
- * application actually starts, one needs to add a <tt>WEB-INF/jboss-scanning.xml</tt>
- * file to the application archive - with the following content:
- * <pre class="code">&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
- *
- * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
+ * <p>As of Spring Framework 5.0, this weaver supports WildFly 8+.
+ * As of Spring Framework 5.1.5, it also supports WildFly 13+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -41,7 +40,18 @@ import org.springframework.util.ClassUtils;
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
-	private final JBossClassLoaderAdapter adapter;
+	private static final String DELEGATING_TRANSFORMER_CLASS_NAME =
+			"org.jboss.as.server.deployment.module.DelegatingClassFileTransformer";
+
+	private static final String WRAPPER_TRANSFORMER_CLASS_NAME =
+			"org.jboss.modules.JLIClassTransformer";
+
+
+	private final ClassLoader classLoader;
+
+	private final Object delegatingTransformer;
+
+	private final Method addTransformer;
 
 
 	/**
@@ -57,29 +67,66 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
 	 * the supplied {@link ClassLoader}.
 	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
-	 * (must not be {@code null})
 	 */
-	public JBossLoadTimeWeaver(ClassLoader classLoader) {
+	public JBossLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		if (classLoader.getClass().getName().startsWith("org.jboss.modules")) {
-			// JBoss AS 7 or WildFly
-			this.adapter = new JBossModulesAdapter(classLoader);
+		this.classLoader = classLoader;
+
+		try {
+			Field transformer = ReflectionUtils.findField(classLoader.getClass(), "transformer");
+			if (transformer == null) {
+				throw new IllegalArgumentException("Could not find 'transformer' field on JBoss ClassLoader: " +
+						classLoader.getClass().getName());
+			}
+			transformer.setAccessible(true);
+
+			Object suggestedTransformer = transformer.get(classLoader);
+			if (suggestedTransformer.getClass().getName().equals(WRAPPER_TRANSFORMER_CLASS_NAME)) {
+				Field wrappedTransformer = ReflectionUtils.findField(suggestedTransformer.getClass(), "transformer");
+				if (wrappedTransformer == null) {
+					throw new IllegalArgumentException(
+							"Could not find 'transformer' field on JBoss JLIClassTransformer: " +
+							suggestedTransformer.getClass().getName());
+				}
+				wrappedTransformer.setAccessible(true);
+				suggestedTransformer = wrappedTransformer.get(suggestedTransformer);
+			}
+			if (!suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
+				throw new IllegalStateException(
+						"Transformer not of the expected type DelegatingClassFileTransformer: " +
+						suggestedTransformer.getClass().getName());
+			}
+			this.delegatingTransformer = suggestedTransformer;
+
+			Method addTransformer = ReflectionUtils.findMethod(this.delegatingTransformer.getClass(),
+					"addTransformer", ClassFileTransformer.class);
+			if (addTransformer == null) {
+				throw new IllegalArgumentException(
+						"Could not find 'addTransformer' method on JBoss DelegatingClassFileTransformer: " +
+						this.delegatingTransformer.getClass().getName());
+			}
+			addTransformer.setAccessible(true);
+			this.addTransformer = addTransformer;
 		}
-		else {
-			// JBoss AS 6
-			this.adapter = new JBossMCAdapter(classLoader);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not initialize JBoss LoadTimeWeaver", ex);
 		}
 	}
 
 
 	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
-		this.adapter.addTransformer(transformer);
+		try {
+			this.addTransformer.invoke(this.delegatingTransformer, transformer);
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not add transformer on JBoss ClassLoader: " + this.classLoader, ex);
+		}
 	}
 
 	@Override
 	public ClassLoader getInstrumentableClassLoader() {
-		return this.adapter.getInstrumentableClassLoader();
+		return this.classLoader;
 	}
 
 	@Override

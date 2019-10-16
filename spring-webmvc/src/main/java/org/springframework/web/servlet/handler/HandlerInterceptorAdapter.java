@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,11 +19,12 @@ package org.springframework.web.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Abstract adapter class for the HandlerInterceptor interface,
+ * Abstract adapter class for the {@link AsyncHandlerInterceptor} interface,
  * for simplified implementation of pre-only/post-only interceptors.
  *
  * @author Juergen Hoeller
@@ -36,7 +37,8 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	 */
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		throws Exception {
+			throws Exception {
+
 		return true;
 	}
 
@@ -44,27 +46,24 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	 * This implementation is empty.
 	 */
 	@Override
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
-			throws Exception {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterConcurrentHandlingStarted(
-			HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response,
+			Object handler) throws Exception {
 	}
 
 }

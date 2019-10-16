@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * DB2 specific implementation for the {@link CallMetaDataProvider} interface.
@@ -39,34 +41,36 @@ public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 		try {
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
 		}
-		catch (SQLException se) {
-			logger.debug("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + se.getMessage());
+		catch (SQLException ex) {
+			logger.debug("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + ex.getMessage());
 		}
 		try {
 			setSupportsSchemasInProcedureCalls(databaseMetaData.supportsSchemasInProcedureCalls());
 		}
-		catch (SQLException se) {
-			logger.debug("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + se.getMessage());
+		catch (SQLException ex) {
+			logger.debug("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + ex.getMessage());
 		}
 		try {
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
-		catch (SQLException se) {
-			logger.debug("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + se.getMessage());
+		catch (SQLException ex) {
+			logger.debug("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + ex.getMessage());
 		}
 		try {
 			setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
 		}
-		catch (SQLException se) {
-			logger.debug("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + se.getMessage());
+		catch (SQLException ex) {
+			logger.debug("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + ex.getMessage());
 		}
 	}
 
 	@Override
-	public String metaDataSchemaNameToUse(String schemaName) {
+	@Nullable
+	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (schemaName != null) {
 			return super.metaDataSchemaNameToUse(schemaName);
 		}
+
 		// Use current user schema if no schema specified...
 		String userName = getUserName();
 		return (userName != null ? userName.toUpperCase() : null);

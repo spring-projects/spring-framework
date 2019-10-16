@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,19 +16,21 @@
 
 package org.springframework.core.io.support;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * If this test case fails, uncomment diagnostics in the
@@ -40,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 17.11.2004
  */
-public class PathMatchingResourcePatternResolverTests {
+class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
@@ -51,73 +53,80 @@ public class PathMatchingResourcePatternResolverTests {
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_COMMONSLOGGING =
-			new String[] {"Log.class", "LogConfigurationException.class", "LogFactory.class",
-					"LogFactory$1.class", "LogFactory$2.class", "LogFactory$3.class", "LogFactory$4.class",
-					"LogFactory$5.class", "LogFactory$6.class", "LogSource.class"};
+	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATIONS =
+			new String[] {"NonNull.class", "NonNullApi.class", "Nullable.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
-	@Test(expected = FileNotFoundException.class)
-	public void invalidPrefixWithPatternElementInIt() throws IOException {
-		resolver.getResources("xx**:**/*.xy");
+	@Test
+	void invalidPrefixWithPatternElementInIt() throws IOException {
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				resolver.getResources("xx**:**/*.xy"));
 	}
 
 	@Test
-	public void singleResourceOnFileSystem() throws IOException {
+	void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
-		assertEquals(1, resources.length);
+		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "file", "PathMatchingResourcePatternResolverTests.class");
 	}
 
 	@Test
-	public void singleResourceInJar() throws IOException {
-		Resource[] resources = resolver.getResources("java/net/URL.class");
-		assertEquals(1, resources.length);
-		assertProtocolAndFilenames(resources, "jar", "URL.class");
+	void singleResourceInJar() throws IOException {
+		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
+		assertThat(resources.length).isEqualTo(1);
+		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
-	@Ignore  // passes under Eclipse, fails under Ant
+	@Disabled
 	@Test
-	public void classpathStarWithPatternOnFileSystem() throws IOException {
+	void classpathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
-		List<Resource> noCloverResources = new ArrayList<Resource>();
+		List<Resource> noCloverResources = new ArrayList<>();
 		for (Resource resource : resources) {
 			if (!resource.getFilename().contains("$__CLOVER_")) {
 				noCloverResources.add(resource);
 			}
 		}
-		resources = noCloverResources.toArray(new Resource[noCloverResources.size()]);
+		resources = noCloverResources.toArray(new Resource[0]);
 		assertProtocolAndFilenames(resources, "file",
 				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
 
 	@Test
-	public void classpathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+	void getResourcesOnFileSystemContainingHashtagsInTheirFileNames() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/**/resource#test*.txt");
+		assertThat(resources).extracting(Resource::getFile).extracting(File::getName)
+			.containsExactlyInAnyOrder("resource#test1.txt", "resource#test2.txt");
 	}
 
 	@Test
-	public void classpathStartWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+	void classpathWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath:reactor/util/annotation/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
 	}
 
 	@Test
-	public void rootPatternRetrievalInJarFiles() throws IOException {
+	void classpathStarWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:reactor/util/annotation/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
+	}
+
+	@Test
+	void rootPatternRetrievalInJarFiles() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:*.dtd");
 		boolean found = false;
 		for (Resource resource : resources) {
 			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
 				found = true;
+				break;
 			}
 		}
-		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
+		assertThat(found).as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar").isTrue();
 	}
 
 
@@ -142,19 +151,17 @@ public class PathMatchingResourcePatternResolverTests {
 //			System.out.println(resources[i]);
 //		}
 
-		assertEquals("Correct number of files found", filenames.length, resources.length);
+		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
 			String actualProtocol = resource.getURL().getProtocol();
-			// resources from rt.jar get retrieved as jrt images on JDK 9, so let's simply accept that as a match too
-			assertTrue(actualProtocol.equals(protocol) || ("jar".equals(protocol) && "jrt".equals(actualProtocol)));
+			assertThat(actualProtocol).isEqualTo(protocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}
 
 	private void assertFilenameIn(Resource resource, String... filenames) {
 		String filename = resource.getFilename();
-		assertTrue(resource + " does not have a filename that matches any of the specified names",
-			Arrays.stream(filenames).anyMatch(filename::endsWith));
+		assertThat(Arrays.stream(filenames).anyMatch(filename::endsWith)).as(resource + " does not have a filename that matches any of the specified names").isTrue();
 	}
 
 }

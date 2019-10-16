@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,10 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface used by {@link RestTemplate}'s retrieval methods
@@ -26,12 +28,16 @@ import org.springframework.http.client.ClientHttpResponse;
  * from a {@link ClientHttpResponse}, but don't need to worry about exception
  * handling or closing resources.
  *
- * <p>Used internally by the {@link RestTemplate}, but also useful for application code.
+ * <p>Used internally by the {@link RestTemplate}, but also useful for
+ * application code. There is one available factory method, see
+ * {@link RestTemplate#responseEntityExtractor(Type)}.
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @param <T> the data type
  * @see RestTemplate#execute
  */
+@FunctionalInterface
 public interface ResponseExtractor<T> {
 
 	/**
@@ -40,6 +46,7 @@ public interface ResponseExtractor<T> {
 	 * @return the extracted data
 	 * @throws IOException in case of I/O errors
 	 */
+	@Nullable
 	T extractData(ClientHttpResponse response) throws IOException;
 
 }

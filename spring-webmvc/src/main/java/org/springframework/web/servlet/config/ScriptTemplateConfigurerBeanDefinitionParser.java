@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,17 +26,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parse the <mvc:script-template-configurer> MVC namespace element and register a
- * {@code ScriptTemplateConfigurer} bean.
+ * Parse the <code>&lt;mvc:script-template-configurer&gt;</code> MVC namespace element and
+ * register a {@code ScriptTemplateConfigurer} bean.
  *
  * @author Sebastien Deleuze
  * @since 4.2
  */
 public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code ScriptTemplateConfigurer}.
+	 */
 	public static final String BEAN_NAME = "mvcScriptTemplateConfigurer";
 
 
@@ -54,11 +58,11 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		List<Element> childElements = DomUtils.getChildElementsByTagName(element, "script");
 		if (!childElements.isEmpty()) {
-			List<String> locations = new ArrayList<String>(childElements.size());
+			List<String> locations = new ArrayList<>(childElements.size());
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
 			}
-			builder.addPropertyValue("scripts", locations.toArray(new String[locations.size()]));
+			builder.addPropertyValue("scripts", StringUtils.toStringArray(locations));
 		}
 		builder.addPropertyValue("engineName", element.getAttribute("engine-name"));
 		if (element.hasAttribute("render-object")) {

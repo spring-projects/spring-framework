@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.BeforeAdvice;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for dealing with AspectJ advisors.
@@ -58,6 +59,7 @@ public abstract class AspectJAopUtils {
 	 * If neither the advisor nor the advice have precedence information, this method
 	 * will return {@code null}.
 	 */
+	@Nullable
 	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
 		if (anAdvisor instanceof AspectJPrecedenceInformation) {
 			return (AspectJPrecedenceInformation) anAdvisor;

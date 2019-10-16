@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.view.RedirectView;
@@ -36,9 +37,9 @@ import org.springframework.web.servlet.view.RedirectView;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
  * parses the following MVC namespace elements:
  * <ul>
- *	<li>{@code <view-controller>}
- *	<li>{@code <redirect-view-controller>}
- *	<li>{@code <status-controller>}
+ * <li>{@code <view-controller>}
+ * <li>{@code <redirect-view-controller>}
+ * <li>{@code <status-controller>}
  * </ul>
  *
  * <p>All elements result in the registration of a
@@ -55,7 +56,7 @@ import org.springframework.web.servlet.view.RedirectView;
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String HANDLER_MAPPING_BEAN_NAME =
-		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
 	@Override
@@ -75,7 +76,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 		HttpStatus statusCode = null;
 		if (element.hasAttribute("status-code")) {
-			int statusValue = Integer.valueOf(element.getAttribute("status-code"));
+			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
 			statusCode = HttpStatus.valueOf(statusValue);
 		}
 
@@ -100,12 +101,9 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 			throw new IllegalStateException("Unexpected tag name: " + name);
 		}
 
-		Map<String, BeanDefinition> urlMap;
-		if (hm.getPropertyValues().contains("urlMap")) {
-			urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().getPropertyValue("urlMap").getValue();
-		}
-		else {
-			urlMap = new ManagedMap<String, BeanDefinition>();
+		Map<String, BeanDefinition> urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().get("urlMap");
+		if (urlMap == null) {
+			urlMap = new ManagedMap<>();
 			hm.getPropertyValues().add("urlMap", urlMap);
 		}
 		urlMap.put(element.getAttribute("path"), controller);
@@ -113,7 +111,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private BeanDefinition registerHandlerMapping(ParserContext context, Object source) {
+	private BeanDefinition registerHandlerMapping(ParserContext context, @Nullable Object source) {
 		if (context.getRegistry().containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
 			return context.getRegistry().getBeanDefinition(HANDLER_MAPPING_BEAN_NAME);
 		}
@@ -132,7 +130,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		return beanDef;
 	}
 
-	private RootBeanDefinition getRedirectView(Element element, HttpStatus status, Object source) {
+	private RootBeanDefinition getRedirectView(Element element, @Nullable HttpStatus status, @Nullable Object source) {
 		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class);
 		redirectView.setSource(source);
 		redirectView.getConstructorArgumentValues().addIndexedArgumentValue(0, element.getAttribute("redirect-url"));

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -93,8 +94,8 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param payload the payload to send (may be {@code null})
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(String user, String destination, Object payload,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload, MessagePostProcessor postProcessor)
+			throws MessagingException;
 
 	/**
 	 * Send a message to the given user.
@@ -106,7 +107,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param headers the message headers
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 }

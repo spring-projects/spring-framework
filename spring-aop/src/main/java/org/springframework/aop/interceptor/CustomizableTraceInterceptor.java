@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
@@ -78,7 +79,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * The {@code $[targetClassName]} placeholder.
-	 * Replaced with the fully-qualifed name of the {@code Class}
+	 * Replaced with the fully-qualified name of the {@code Class}
 	 * of the method invocation target.
 	 */
 	public static final String PLACEHOLDER_TARGET_CLASS_NAME = "$[targetClassName]";
@@ -128,20 +129,20 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The default message used for writing method entry messages.
 	 */
-	private static final String DEFAULT_ENTER_MESSAGE =
-			"Entering method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_ENTER_MESSAGE = "Entering method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The default message used for writing method exit messages.
 	 */
-	private static final String DEFAULT_EXIT_MESSAGE =
-			"Exiting method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_EXIT_MESSAGE = "Exiting method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The default message used for writing exception messages.
 	 */
-	private static final String DEFAULT_EXCEPTION_MESSAGE =
-			"Exception thrown in method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_EXCEPTION_MESSAGE = "Exception thrown in method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The {@code Pattern} used to match placeholders.
@@ -182,14 +183,14 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
-		Assert.hasText(enterMessage, "'enterMessage' must not be empty");
+		Assert.hasText(enterMessage, "enterMessage must not be empty");
 		checkForInvalidPlaceholders(enterMessage);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_RETURN_VALUE);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_EXCEPTION,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_EXCEPTION);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_INVOCATION_TIME,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_INVOCATION_TIME + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_INVOCATION_TIME);
 		this.enterMessage = enterMessage;
 	}
 
@@ -206,10 +207,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setExitMessage(String exitMessage) {
-		Assert.hasText(exitMessage, "'exitMessage' must not be empty");
+		Assert.hasText(exitMessage, "exitMessage must not be empty");
 		checkForInvalidPlaceholders(exitMessage);
 		Assert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,
-				"exitMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
+				"exitMessage cannot contain placeholder" + PLACEHOLDER_EXCEPTION);
 		this.exitMessage = exitMessage;
 	}
 
@@ -225,12 +226,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
-		Assert.hasText(exceptionMessage, "'exceptionMessage' must not be empty");
+		Assert.hasText(exceptionMessage, "exceptionMessage must not be empty");
 		checkForInvalidPlaceholders(exceptionMessage);
 		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,
-				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
-		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_INVOCATION_TIME,
-				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_INVOCATION_TIME + "]");
+				"exceptionMessage cannot contain placeholder " + PLACEHOLDER_RETURN_VALUE);
 		this.exceptionMessage = exceptionMessage;
 	}
 
@@ -246,7 +245,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 */
 	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
-		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
+		String name = ClassUtils.getQualifiedMethodName(invocation.getMethod());
 		StopWatch stopWatch = new StopWatch(name);
 		Object returnValue = null;
 		boolean exitThroughException = false;
@@ -262,8 +261,8 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				stopWatch.stop();
 			}
 			exitThroughException = true;
-			writeToLog(logger,
-					replacePlaceholders(this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
+			writeToLog(logger, replacePlaceholders(
+					this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
 			throw ex;
 		}
 		finally {
@@ -271,32 +270,9 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				if (stopWatch.isRunning()) {
 					stopWatch.stop();
 				}
-				writeToLog(logger,
-						replacePlaceholders(this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
+				writeToLog(logger, replacePlaceholders(
+						this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
 			}
-		}
-	}
-
-	/**
-	 * Writes the supplied message to the supplied {@code Log} instance.
-	 * @see #writeToLog(org.apache.commons.logging.Log, String, Throwable)
-	 */
-	protected void writeToLog(Log logger, String message) {
-		writeToLog(logger, message, null);
-	}
-
-	/**
-	 * Writes the supplied message and {@link Throwable} to the
-	 * supplied {@code Log} instance. By default messages are written
-	 * at {@code TRACE} level. Sub-classes can override this method
-	 * to control which level the message is written at.
-	 */
-	protected void writeToLog(Log logger, String message, Throwable ex) {
-		if (ex != null) {
-			logger.trace(message, ex);
-		}
-		else {
-			logger.trace(message);
 		}
 	}
 
@@ -317,7 +293,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
-			Object returnValue, Throwable throwable, long invocationTime) {
+			@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime) {
 
 		Matcher matcher = PATTERN.matcher(message);
 
@@ -371,7 +347,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param returnValue the value returned by the method invocation.
 	 */
 	private void appendReturnValue(
-			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, Object returnValue) {
+			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, @Nullable Object returnValue) {
 
 		if (methodInvocation.getMethod().getReturnType() == void.class) {
 			matcher.appendReplacement(output, "void");

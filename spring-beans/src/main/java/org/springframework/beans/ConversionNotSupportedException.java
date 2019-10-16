@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when no suitable editor or converter can be found for a bean property.
@@ -35,7 +37,7 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param cause the root cause (may be {@code null})
 	 */
 	public ConversionNotSupportedException(PropertyChangeEvent propertyChangeEvent,
-			Class<?> requiredType, Throwable cause) {
+			@Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super(propertyChangeEvent, requiredType, cause);
 	}
 
@@ -45,7 +47,7 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public ConversionNotSupportedException(Object value, Class<?> requiredType, Throwable cause) {
+	public ConversionNotSupportedException(@Nullable Object value, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super(value, requiredType, cause);
 	}
 

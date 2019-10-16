@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,12 @@ package org.springframework.mail.javamail;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -36,18 +36,18 @@ public class ConfigurableMimeFileTypeMapTests {
 		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
 		ftm.afterPropertiesSet();
 
-		assertEquals("Invalid content type for HTM", "text/html", ftm.getContentType("foobar.HTM"));
-		assertEquals("Invalid content type for html", "text/html", ftm.getContentType("foobar.html"));
-		assertEquals("Invalid content type for c++", "text/plain", ftm.getContentType("foobar.c++"));
-		assertEquals("Invalid content type for svf", "image/vnd.svf", ftm.getContentType("foobar.svf"));
-		assertEquals("Invalid content type for dsf", "image/x-mgx-dsf", ftm.getContentType("foobar.dsf"));
-		assertEquals("Invalid default content type", "application/octet-stream", ftm.getContentType("foobar.foo"));
+		assertThat(ftm.getContentType("foobar.HTM")).as("Invalid content type for HTM").isEqualTo("text/html");
+		assertThat(ftm.getContentType("foobar.html")).as("Invalid content type for html").isEqualTo("text/html");
+		assertThat(ftm.getContentType("foobar.c++")).as("Invalid content type for c++").isEqualTo("text/plain");
+		assertThat(ftm.getContentType("foobar.svf")).as("Invalid content type for svf").isEqualTo("image/vnd.svf");
+		assertThat(ftm.getContentType("foobar.dsf")).as("Invalid content type for dsf").isEqualTo("image/x-mgx-dsf");
+		assertThat(ftm.getContentType("foobar.foo")).as("Invalid default content type").isEqualTo("application/octet-stream");
 	}
 
 	@Test
 	public void againstDefaultConfigurationWithFilePath() throws Exception {
 		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
-		assertEquals("Invalid content type for HTM", "text/html", ftm.getContentType(new File("/tmp/foobar.HTM")));
+		assertThat(ftm.getContentType(new File("/tmp/foobar.HTM"))).as("Invalid content type for HTM").isEqualTo("text/html");
 	}
 
 	@Test
@@ -56,9 +56,9 @@ public class ConfigurableMimeFileTypeMapTests {
 		ftm.setMappings(new String[] {"foo/bar HTM foo", "foo/cpp c++"});
 		ftm.afterPropertiesSet();
 
-		assertEquals("Invalid content type for HTM - override didn't work", "foo/bar", ftm.getContentType("foobar.HTM"));
-		assertEquals("Invalid content type for c++ - override didn't work", "foo/cpp", ftm.getContentType("foobar.c++"));
-		assertEquals("Invalid content type for foo - new mapping didn't work", "foo/bar", ftm.getContentType("bar.foo"));
+		assertThat(ftm.getContentType("foobar.HTM")).as("Invalid content type for HTM - override didn't work").isEqualTo("foo/bar");
+		assertThat(ftm.getContentType("foobar.c++")).as("Invalid content type for c++ - override didn't work").isEqualTo("foo/cpp");
+		assertThat(ftm.getContentType("bar.foo")).as("Invalid content type for foo - new mapping didn't work").isEqualTo("foo/bar");
 	}
 
 	@Test
@@ -69,10 +69,10 @@ public class ConfigurableMimeFileTypeMapTests {
 		ftm.setMappingLocation(resource);
 		ftm.afterPropertiesSet();
 
-		assertEquals("Invalid content type for foo", "text/foo", ftm.getContentType("foobar.foo"));
-		assertEquals("Invalid content type for bar", "text/bar", ftm.getContentType("foobar.bar"));
-		assertEquals("Invalid content type for fimg", "image/foo", ftm.getContentType("foobar.fimg"));
-		assertEquals("Invalid content type for bimg", "image/bar", ftm.getContentType("foobar.bimg"));
+		assertThat(ftm.getContentType("foobar.foo")).as("Invalid content type for foo").isEqualTo("text/foo");
+		assertThat(ftm.getContentType("foobar.bar")).as("Invalid content type for bar").isEqualTo("text/bar");
+		assertThat(ftm.getContentType("foobar.fimg")).as("Invalid content type for fimg").isEqualTo("image/foo");
+		assertThat(ftm.getContentType("foobar.bimg")).as("Invalid content type for bimg").isEqualTo("image/bar");
 	}
 
 }

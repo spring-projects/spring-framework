@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * TransactionAttribute implementation that works out whether a given exception
  * should cause transaction rollback by applying a number of rollback rules,
@@ -40,16 +42,17 @@ import org.apache.commons.logging.LogFactory;
 @SuppressWarnings("serial")
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute implements Serializable {
 
-	/** Prefix for rollback-on-exception rules in description strings */
+	/** Prefix for rollback-on-exception rules in description strings. */
 	public static final String PREFIX_ROLLBACK_RULE = "-";
 
-	/** Prefix for commit-on-exception rules in description strings */
+	/** Prefix for commit-on-exception rules in description strings. */
 	public static final String PREFIX_COMMIT_RULE = "+";
 
 
-	/** Static for optimal serializability */
+	/** Static for optimal serializability. */
 	private static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
+	@Nullable
 	private List<RollbackRuleAttribute> rollbackRules;
 
 
@@ -78,7 +81,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	public RuleBasedTransactionAttribute(RuleBasedTransactionAttribute other) {
 		super(other);
-		this.rollbackRules = new ArrayList<RollbackRuleAttribute>(other.rollbackRules);
+		this.rollbackRules = (other.rollbackRules != null ? new ArrayList<>(other.rollbackRules) : null);
 	}
 
 	/**
@@ -113,7 +116,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	public List<RollbackRuleAttribute> getRollbackRules() {
 		if (this.rollbackRules == null) {
-			this.rollbackRules = new LinkedList<RollbackRuleAttribute>();
+			this.rollbackRules = new LinkedList<>();
 		}
 		return this.rollbackRules;
 	}

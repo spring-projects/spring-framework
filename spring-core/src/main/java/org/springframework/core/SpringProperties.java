@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Static holder for local Spring properties, i.e. defined at the Spring library level.
@@ -44,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * @see org.springframework.jdbc.core.StatementCreatorUtils#IGNORE_GETPARAMETERTYPE_PROPERTY_NAME
  * @see org.springframework.test.context.cache.ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
  */
-public abstract class SpringProperties {
+public final class SpringProperties {
 
 	private static final String PROPERTIES_RESOURCE_LOCATION = "spring.properties";
 
@@ -59,7 +61,7 @@ public abstract class SpringProperties {
 			URL url = (cl != null ? cl.getResource(PROPERTIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));
 			if (url != null) {
-				logger.info("Found 'spring.properties' file in local classpath");
+				logger.debug("Found 'spring.properties' file in local classpath");
 				InputStream is = url.openStream();
 				try {
 					localProperties.load(is);
@@ -77,13 +79,17 @@ public abstract class SpringProperties {
 	}
 
 
+	private SpringProperties() {
+	}
+
+
 	/**
 	 * Programmatically set a local property, overriding an entry in the
 	 * {@code spring.properties} file (if any).
 	 * @param key the property key
 	 * @param value the associated property value, or {@code null} to reset it
 	 */
-	public static void setProperty(String key, String value) {
+	public static void setProperty(String key, @Nullable String value) {
 		if (value != null) {
 			localProperties.setProperty(key, value);
 		}
@@ -98,6 +104,7 @@ public abstract class SpringProperties {
 	 * @param key the property key
 	 * @return the associated property value, or {@code null} if none found
 	 */
+	@Nullable
 	public static String getProperty(String key) {
 		String value = localProperties.getProperty(key);
 		if (value == null) {

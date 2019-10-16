@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -39,17 +39,21 @@ import org.springframework.util.ObjectUtils;
  * format expression.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
-	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
+	private static final SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
-	protected int pos; // start = top 16bits, end = bottom 16bits
+	private final int startPos;
+
+	private final int endPos;
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
+	@Nullable
 	private SpelNodeImpl parent;
 
 	/**
@@ -61,39 +65,27 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * It does not include the trailing semicolon (for non array reference types).
 	 * Some examples: Ljava/lang/String, I, [I
      */
+	@Nullable
 	protected volatile String exitTypeDescriptor;
 
 
-	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
-		this.pos = pos;
-		// pos combines start and end so can never be zero because tokens cannot be zero length
-		Assert.isTrue(pos != 0, "Pos must not be 0");
+	public SpelNodeImpl(int startPos, int endPos, SpelNodeImpl... operands) {
+		this.startPos = startPos;
+		this.endPos = endPos;
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childNode : operands) {
-				childNode.parent = this;
+			for (SpelNodeImpl operand : operands) {
+				Assert.notNull(operand, "Operand must not be null");
+				operand.parent = this;
 			}
 		}
 	}
 
-
-	protected SpelNodeImpl getPreviousChild() {
-		SpelNodeImpl result = null;
-		if (this.parent != null) {
-			for (SpelNodeImpl child : this.parent.children) {
-				if (this == child) {
-					break;
-				}
-				result = child;
-			}
-		}
-		return result;
-	}
 
 	/**
-     * @return true if the next child is one of the specified classes
+     * Return {@code true} if the next child is one of the specified classes.
      */
-	protected boolean nextChildIs(Class<?>... clazzes) {
+	protected boolean nextChildIs(Class<?>... classes) {
 		if (this.parent != null) {
 			SpelNodeImpl[] peers = this.parent.children;
 			for (int i = 0, max = peers.length; i < max; i++) {
@@ -101,9 +93,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 					if (i + 1 >= max) {
 						return false;
 					}
-					Class<?> clazz = peers[i + 1].getClass();
-					for (Class<?> desiredClazz : clazzes) {
-						if (clazz.equals(desiredClazz)) {
+					Class<?> peerClass = peers[i + 1].getClass();
+					for (Class<?> desiredClass : classes) {
+						if (peerClass == desiredClass) {
 							return true;
 						}
 					}
@@ -115,25 +107,14 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState).getValue();
-		}
-		else {
-			// configuration not set - does that matter?
-			return getValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState).getValue();
 	}
 
 	@Override
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState);
-		}
-		else {
-			// configuration not set - does that matter?
-			return getTypedValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState);
 	}
 
 	// by default Ast nodes are not writable
@@ -143,9 +124,8 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
+	public void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException {
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
 	@Override
@@ -159,29 +139,22 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public Class<?> getObjectClass(Object obj) {
+	@Nullable
+	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
 		}
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
-	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
-		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
-	}
-
 	@Override
 	public int getStartPosition() {
-		return (this.pos >> 16);
+		return this.startPos;
 	}
 
 	@Override
 	public int getEndPosition() {
-		return (this.pos & 0xffff);
-	}
-
-	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		throw new SpelEvaluationException(this.pos, SpelMessage.NOT_ASSIGNABLE, toStringAST());
+		return this.endPos;
 	}
 
 	/**
@@ -196,9 +169,8 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	/**
 	 * Generate the bytecode for this node into the supplied visitor. Context info about
-	 * the current expression being compiled is available in the codeflow object. For
-	 * example it will include information about the type of the object currently
-	 * on the stack.
+	 * the current expression being compiled is available in the codeflow object, e.g.
+	 * including information about the type of the object currently on the stack.
 	 * @param mv the ASM MethodVisitor into which code should be generated
 	 * @param cf a context object with info about what is on the stack
 	 */
@@ -206,17 +178,27 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
 	}
 
+	@Nullable
 	public String getExitDescriptor() {
 		return this.exitTypeDescriptor;
 	}
 
+	@Nullable
+	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
+		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
+	}
+
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.NOT_ASSIGNABLE, toStringAST());
+	}
+
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
-	
+
 	/**
-	 * Generate code that handles building the argument values for the specified method. This method will take account
-	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
-	 * packaged into an array.
+	 * Generate code that handles building the argument values for the specified method.
+	 * This method will take account of whether the invoked method is a varargs method
+	 * and if it is then the argument values will be appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
 	 * @param member the method or constructor for which arguments are being setup
@@ -226,7 +208,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		String[] paramDescriptors = null;
 		boolean isVarargs = false;
 		if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>)member;
+			Constructor<?> ctor = (Constructor<?>) member;
 			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
 			isVarargs = ctor.isVarArgs();
 		}
@@ -240,31 +222,31 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 			// have been passed to satisfy the varargs and so something needs to be built.
 			int p = 0; // Current supplied argument being processed
 			int childCount = arguments.length;
-						
+
 			// Fulfill all the parameter requirements except the last one
 			for (p = 0; p < paramDescriptors.length - 1; p++) {
 				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
 			}
-			
-			SpelNodeImpl lastchild = (childCount == 0 ? null : arguments[childCount - 1]);
-			String arraytype = paramDescriptors[paramDescriptors.length - 1];
+
+			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
+			String arrayType = paramDescriptors[paramDescriptors.length - 1];
 			// Determine if the final passed argument is already suitably packaged in array
 			// form to be passed to the method
-			if (lastchild != null && lastchild.getExitDescriptor().equals(arraytype)) {
-				generateCodeForArgument(mv, cf, lastchild, paramDescriptors[p]);
+			if (lastChild != null && arrayType.equals(lastChild.getExitDescriptor())) {
+				generateCodeForArgument(mv, cf, lastChild, paramDescriptors[p]);
 			}
 			else {
-				arraytype = arraytype.substring(1); // trim the leading '[', may leave other '['		
+				arrayType = arrayType.substring(1); // trim the leading '[', may leave other '['
 				// build array big enough to hold remaining arguments
-				CodeFlow.insertNewArrayCode(mv, childCount - p, arraytype);
+				CodeFlow.insertNewArrayCode(mv, childCount - p, arrayType);
 				// Package up the remaining arguments into the array
 				int arrayindex = 0;
 				while (p < childCount) {
 					SpelNodeImpl child = arguments[p];
 					mv.visitInsn(DUP);
 					CodeFlow.insertOptimalLoad(mv, arrayindex++);
-					generateCodeForArgument(mv, cf, child, arraytype);
-					CodeFlow.insertArrayStore(mv, arraytype);
+					generateCodeForArgument(mv, cf, child, arrayType);
+					CodeFlow.insertArrayStore(mv, arrayType);
 					p++;
 				}
 			}
@@ -283,18 +265,21 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected static void generateCodeForArgument(MethodVisitor mv, CodeFlow cf, SpelNodeImpl argument, String paramDesc) {
 		cf.enterCompilationScope();
 		argument.generateCode(mv, cf);
-		boolean primitiveOnStack = CodeFlow.isPrimitive(cf.lastDescriptor());
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		boolean primitiveOnStack = CodeFlow.isPrimitive(lastDesc);
 		// Check if need to box it for the method reference?
 		if (primitiveOnStack && paramDesc.charAt(0) == 'L') {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		else if (paramDesc.length() == 1 && !primitiveOnStack) {
-			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), cf.lastDescriptor());
+			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), lastDesc);
 		}
-		else if (!cf.lastDescriptor().equals(paramDesc)) {
+		else if (!paramDesc.equals(lastDesc)) {
 			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
 			CodeFlow.insertCheckCast(mv, paramDesc);
 		}
 		cf.exitCompilationScope();
 	}
+
 }

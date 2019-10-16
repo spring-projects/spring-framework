@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Common bean definitions for auto proxy creator tests.
+-->
+<beans>
+
+	<description>
+		Matches all Advisors in the factory: we don't use a prefix
+	</description>
+
+	<bean id="aapc" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+	<!--
+		Depending on the order value, these beans should appear
+		before or after the transaction advisor. Thus we configure
+		them to check for or to refuse to accept a transaction.
+		The transaction advisor's order value is 10.
+	-->
+	<bean id="orderedBeforeTransaction" class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<property name="order"><value>9</value></property>
+		<property name="requireTransactionContext"><value>false</value></property>
+	</bean>
+
+	<bean id="orderedAfterTransaction" class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<property name="order"><value>11</value></property>
+		<property name="requireTransactionContext"><value>true</value></property>
+	</bean>
+
+	<bean id="orderedAfterTransaction2" class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<!-- Don't set order value: should remain Integer.MAX_VALUE, so it's non-ordered -->
+		<property name="requireTransactionContext"><value>true</value></property>
+	</bean>
+
+	<!-- Often we can leave the definition of such infrastructural beans to child factories -->
+	<bean id="txManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
+
+	<bean id="tas" class="org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource">
+		<property name="properties">
+			<props>
+				<prop key="setA*">PROPAGATION_REQUIRED</prop>
+				<prop key="rollbackOnly">PROPAGATION_REQUIRED</prop>
+				<prop key="echoException">PROPAGATION_REQUIRED,+javax.servlet.ServletException,-java.lang.Exception</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"><ref bean="txManager"/></property>
+		<property name="transactionAttributeSource"><ref bean="tas"/></property>
+	</bean>
+
+	<bean id="txAdvisor" class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
+		<property name="transactionInterceptor"><ref bean="txInterceptor"/></property>
+		<property name="order"><value>10</value></property>
+	</bean>
+
+	<!-- ====== Test for prototype definitions to try to provoke circular references ========================= -->
+	<!--
+		This advisor should never match and should not change how any of the tests run,
+		but it's a prototype referencing another (unused) prototype, as well as a
+		singleton, so it may pose circular reference problems, or an infinite loop.
+	-->
+	<bean id="neverMatchAdvisor" class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
+			scope="prototype">
+		<property name="dependencies">
+			<list>
+				<ref bean="singletonDependency"/>
+				<ref bean="prototypeDependency"/>
+			</list>
+		</property>
+	</bean>
+
+	<!-- These two beans would otherwise be eligible for autoproxying -->
+
+	<bean id="singletonDependency" class="org.springframework.tests.sample.beans.TestBean" scope="singleton"/>
+
+	<bean id="prototypeDependency" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+
+	<!-- ====== End test for prototype definitions to try to provoke circular references ========================= -->
+
+	<bean class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice"><ref bean="countingAdvice"/></property>
+		<property name="pattern"><value>org.springframework.tests.sample.beans.ITestBean.getName</value></property>
+	</bean>
+
+	<bean id="countingAdvice" class="org.springframework.tests.aop.advice.CountingAfterReturningAdvice"/>
+
+	<bean id="test" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="age"><value>4</value></property>
+	</bean>
+
+	<bean id="noSetters" class="org.springframework.aop.framework.autoproxy.NoSetters"/>
+
+	<bean id="rollback" class="org.springframework.aop.framework.autoproxy.Rollback"/>
+
+	<!-- The following beans test whether auto-proxying falls over for a null value -->
+
+	<bean id="tb" class="org.springframework.tests.sample.beans.TestBean"/>
+
+	<bean id="nullValueReturned" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="tb"/>
+		<property name="targetMethod" value="getSpouse"/>
+	</bean>
+
+</beans>

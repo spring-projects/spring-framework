@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,8 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -34,9 +35,11 @@ import org.springframework.core.GenericCollectionTypeResolver;
  */
 public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 
+	@Nullable
 	private Map<?, ?> sourceMap;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends Map> targetMapClass;
 
 
@@ -54,7 +57,7 @@ public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 	 * @see java.util.LinkedHashMap
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setTargetMapClass(Class<? extends Map> targetMapClass) {
+	public void setTargetMapClass(@Nullable Class<? extends Map> targetMapClass) {
 		if (targetMapClass == null) {
 			throw new IllegalArgumentException("'targetMapClass' must not be null");
 		}
@@ -82,13 +85,14 @@ public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 			result = BeanUtils.instantiateClass(this.targetMapClass);
 		}
 		else {
-			result = new LinkedHashMap<Object, Object>(this.sourceMap.size());
+			result = new LinkedHashMap<>(this.sourceMap.size());
 		}
 		Class<?> keyType = null;
 		Class<?> valueType = null;
 		if (this.targetMapClass != null) {
-			keyType = GenericCollectionTypeResolver.getMapKeyType(this.targetMapClass);
-			valueType = GenericCollectionTypeResolver.getMapValueType(this.targetMapClass);
+			ResolvableType mapType = ResolvableType.forClass(this.targetMapClass).asMap();
+			keyType = mapType.resolveGeneric(0);
+			valueType = mapType.resolveGeneric(1);
 		}
 		if (keyType != null || valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();

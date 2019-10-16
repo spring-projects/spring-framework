@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,13 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -45,7 +46,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		implements SockJsSessionFactory {
 
 	/**
-	 * Pattern for validating jsonp callback parameter values.
+	 * Pattern for validating callback parameter values.
 	 */
 	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
 
@@ -56,8 +57,8 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
-		String protocol = null;  // https://github.com/sockjs/sockjs-client/issues/130
-		sockJsSession.setAcceptedProtocol(protocol);
+		// https://github.com/sockjs/sockjs-client/issues/130
+		// sockJsSession.setAcceptedProtocol(protocol);
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
@@ -112,21 +113,16 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
 
 
+	@Nullable
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
 		String value = params.getFirst("c");
-		if (StringUtils.isEmpty(value)) {
+		if (!StringUtils.hasLength(value)) {
 			return null;
 		}
-		try {
-			String result = UriUtils.decode(value, "UTF-8");
-			return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, ex);
-		}
+		String result = UriUtils.decode(value, StandardCharsets.UTF_8);
+		return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
 	}
 
 }

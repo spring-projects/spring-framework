@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
-
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * The operator 'instanceof' checks if an object is of the class specified in the right
@@ -36,10 +37,12 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorInstanceof extends Operator {
 
+	@Nullable
 	private Class<?> type;
-	
-	public OperatorInstanceof(int pos, SpelNodeImpl... operands) {
-		super("instanceof", pos, operands);
+
+
+	public OperatorInstanceof(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("instanceof", startPos, endPos, operands);
 	}
 
 
@@ -47,18 +50,19 @@ public class OperatorInstanceof extends Operator {
 	 * Compare the left operand to see it is an instance of the type specified as the
 	 * right operand. The right operand must be a class.
 	 * @param state the expression state
-	 * @return true if the left operand is an instanceof of the right operand, otherwise
-	 *         false
+	 * @return {@code true} if the left operand is an instanceof of the right operand,
+	 * otherwise {@code false}
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		SpelNodeImpl rightOperand = getRightOperand();
 		TypedValue left = getLeftOperand().getValueInternal(state);
-		TypedValue right = getRightOperand().getValueInternal(state);
+		TypedValue right = rightOperand.getValueInternal(state);
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
-		BooleanTypedValue result = null;
-		if (rightValue == null || !(rightValue instanceof Class<?>)) {
+		BooleanTypedValue result;
+		if (rightValue == null || !(rightValue instanceof Class)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
 					(rightValue == null ? "null" : rightValue.getClass().getName()));
@@ -71,7 +75,11 @@ public class OperatorInstanceof extends Operator {
 			result = BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
 		}
 		this.type = rightClass;
-		this.exitTypeDescriptor = "Z";
+		if (rightOperand instanceof TypeReference) {
+			// Can only generate bytecode where the right operand is a direct type reference,
+			// not if it is indirect (for example when right operand is a variable reference)
+			this.exitTypeDescriptor = "Z";
+		}
 		return result;
 	}
 
@@ -79,11 +87,21 @@ public class OperatorInstanceof extends Operator {
 	public boolean isCompilable() {
 		return (this.exitTypeDescriptor != null && getLeftOperand().isCompilable());
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
-		mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor());
+		Assert.state(this.type != null, "No type available");
+		if (this.type.isPrimitive()) {
+			// always false - but left operand code always driven
+			// in case it had side effects
+			mv.visitInsn(POP);
+			mv.visitInsn(ICONST_0); // value of false
+		}
+		else {
+			mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(this.type));
+		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

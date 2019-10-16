@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,15 @@ package org.springframework.jmx.export.assembler;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
+
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.JmxTestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -69,12 +70,12 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
 
-		assertTrue(attr.isReadable());
-		assertFalse(attr.isWritable());
+		assertThat(attr.isReadable()).isTrue();
+		assertThat(attr.isWritable()).isFalse();
 	}
 
 	/*
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
 	@Test
 	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
@@ -84,9 +85,9 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		ignored.setProperty(beanKey, "dontExposeMe,setSuperman");
 		assembler.setIgnoredMethodMappings(ignored);
 		Method method = JmxTestBean.class.getMethod("dontExposeMe");
-		assertFalse(assembler.isNotIgnored(method, beanKey));
+		assertThat(assembler.isNotIgnored(method, beanKey)).isFalse();
 		// this bean does not have any ignored methods on it, so must obviously not be ignored...
-		assertTrue(assembler.isNotIgnored(method, "someOtherBeanKey"));
+		assertThat(assembler.isNotIgnored(method, "someOtherBeanKey")).isTrue();
 	}
 
 }

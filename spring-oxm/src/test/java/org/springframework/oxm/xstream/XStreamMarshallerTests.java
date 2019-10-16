@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,43 +25,49 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
+import org.xmlunit.builder.Input;
+import org.xmlunit.xpath.JAXPXPathEngine;
 
+import org.springframework.tests.XmlContent;
 import org.springframework.util.xml.StaxUtils;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
 public class XStreamMarshallerTests {
 
@@ -71,15 +77,17 @@ public class XStreamMarshallerTests {
 
 	private Flight flight;
 
-	@Before
-	public void createMarshaller() throws Exception {
+
+	@BeforeEach
+	public void createMarshaller() {
 		marshaller = new XStreamMarshaller();
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		marshaller.setAliases(aliases);
 		flight = new Flight();
 		flight.setFlightNumber(42L);
 	}
+
 
 	@Test
 	public void marshalDOMResult() throws Exception {
@@ -95,7 +103,7 @@ public class XStreamMarshallerTests {
 		flightElement.appendChild(numberElement);
 		Text text = expected.createTextNode("42");
 		numberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, document);
+		assertThat(XmlContent.of(document)).isSimilarTo(expected);
 	}
 
 	// see SWS-392
@@ -124,7 +132,7 @@ public class XStreamMarshallerTests {
 		eFlightElement.appendChild(eNumberElement);
 		Text text = expected.createTextNode("42");
 		eNumberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, existent);
+		assertThat(XmlContent.of(existent)).isSimilarTo(expected);
 	}
 
 	@Test
@@ -132,7 +140,7 @@ public class XStreamMarshallerTests {
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
@@ -141,7 +149,7 @@ public class XStreamMarshallerTests {
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flight, result);
 		String s = new String(os.toByteArray(), "UTF-8");
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, s);
+		assertThat(XmlContent.of(s)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
@@ -166,7 +174,7 @@ public class XStreamMarshallerTests {
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(writer);
 		Result result = StaxUtils.createStaxResult(streamWriter);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
@@ -176,28 +184,28 @@ public class XStreamMarshallerTests {
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(writer);
 		Result result = StaxUtils.createStaxResult(eventWriter);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
 	public void converters() throws Exception {
-		marshaller.setConverters(new Converter[]{new EncodedByteArrayConverter()});
+		marshaller.setConverters(new EncodedByteArrayConverter());
 		byte[] buf = new byte[]{0x1, 0x2};
 		Writer writer = new StringWriter();
 		marshaller.marshal(buf, new StreamResult(writer));
-		assertXMLEqual("<byte-array>AQI=</byte-array>", writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo("<byte-array>AQI=</byte-array>");
 		Reader reader = new StringReader(writer.toString());
 		byte[] bufResult = (byte[]) marshaller.unmarshal(new StreamSource(reader));
-		assertTrue("Invalid result", Arrays.equals(buf, bufResult));
+		assertThat(Arrays.equals(buf, bufResult)).as("Invalid result").isTrue();
 	}
 
 	@Test
 	public void useAttributesFor() throws Exception {
-		marshaller.setUseAttributeForTypes(new Class[]{Long.TYPE});
+		marshaller.setUseAttributeForTypes(Long.TYPE);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
 	@Test
@@ -206,7 +214,7 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
 	@Test
@@ -215,23 +223,21 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
 	@Test
 	public void useAttributesForClassStringListMap() throws Exception {
-		marshaller
-				.setUseAttributeFor(Collections.singletonMap(Flight.class, Collections.singletonList("flightNumber")));
+		marshaller.setUseAttributeFor(Collections.singletonMap(Flight.class, Collections.singletonList("flightNumber")));
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
 	@Test
-	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringClassMap() throws Exception {
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -239,13 +245,12 @@ public class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
-	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringStringMap() throws Exception {
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -253,7 +258,7 @@ public class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
 	}
 
 	@Test
@@ -262,7 +267,7 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight><flightNo>42</flightNo></flight>";
-		assertXMLEqual("Marshaller does not use aliases", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
 	@Test
@@ -282,7 +287,7 @@ public class XStreamMarshallerTests {
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
 
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);
 		marshaller.setAliases(aliases);
@@ -304,12 +309,12 @@ public class XStreamMarshallerTests {
 		marshaller.setStreamDriver(new JettisonMappedXmlDriver());
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertEquals("Invalid result", "{\"flight\":{\"flightNumber\":42}}", writer.toString());
+		assertThat(writer.toString()).as("Invalid result").isEqualTo("{\"flight\":{\"flightNumber\":42}}");
 		Object o = marshaller.unmarshal(new StreamSource(new StringReader(writer.toString())));
-		assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
+		assertThat(o instanceof Flight).as("Unmarshalled object is not Flights").isTrue();
 		Flight unflight = (Flight) o;
-		assertNotNull("Flight is null", unflight);
-		assertEquals("Number is invalid", 42L, unflight.getFlightNumber());
+		assertThat(unflight).as("Flight is null").isNotNull();
+		assertThat(unflight.getFlightNumber()).as("Number is invalid").isEqualTo(42L);
 	}
 
 	@Test
@@ -325,7 +330,7 @@ public class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertEquals("Invalid result", "{\"flightNumber\": 42}", writer.toString());
+		assertThat(writer.toString()).as("Invalid result").isEqualTo("{\"flightNumber\": 42}");
 	}
 
 	@Test
@@ -337,8 +342,27 @@ public class XStreamMarshallerTests {
 		flight.setFlightNumber(42);
 		marshaller.marshal(flight, result);
 		String expected = "<flight><number>42</number></flight>";
-		assertXMLEqual("Marshaller writes invalid StreamResult", expected, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
 	}
 
+
+	private static void assertXpathExists(String xPathExpression, String inXMLString){
+		Source source = Input.fromString(inXMLString).build();
+		Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(xPathExpression, source);
+		assertThat(count(nodes) > 0).as("Expecting to find matches for Xpath " + xPathExpression).isTrue();
+	}
+
+	private static void assertXpathNotExists(String xPathExpression, String inXMLString){
+		Source source = Input.fromString(inXMLString).build();
+		Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(xPathExpression, source);
+		assertThat(count(nodes)).as("Should be zero matches for Xpath " + xPathExpression).isEqualTo(0);
+	}
+
+	private static int count(Iterable<Node> nodes) {
+		assertThat(nodes).isNotNull();
+		AtomicInteger count = new AtomicInteger();
+		nodes.forEach(n -> count.incrementAndGet());
+		return count.get();
+	}
 
 }

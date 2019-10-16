@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,9 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * ASM class visitor which looks only for the class name and implemented types,
@@ -40,10 +42,14 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @since 2.5
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
+@Deprecated
 class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {
 
-	private String className;
+	private String className = "";
 
 	private boolean isInterface;
 
@@ -53,15 +59,17 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private boolean isFinal;
 
+	@Nullable
 	private String enclosingClassName;
 
 	private boolean independentInnerClass;
 
+	@Nullable
 	private String superClassName;
 
-	private String[] interfaces;
+	private String[] interfaces = new String[0];
 
-	private Set<String> memberClassNames = new LinkedHashSet<String>();
+	private Set<String> memberClassNames = new LinkedHashSet<>(4);
 
 
 	public ClassMetadataReadingVisitor() {
@@ -70,7 +78,9 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 
 	@Override
-	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
+	public void visit(
+			int version, int access, String name, String signature, @Nullable String supername, String[] interfaces) {
+
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
 		this.isAnnotation = ((access & Opcodes.ACC_ANNOTATION) != 0);
@@ -91,7 +101,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
-	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+	public void visitInnerClass(String name, @Nullable String outerName, String innerName, int access) {
 		if (outerName != null) {
 			String fqName = ClassUtils.convertResourcePathToClassName(name);
 			String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);
@@ -111,6 +121,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// no-op
 		return new EmptyAnnotationVisitor();
@@ -160,11 +171,6 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
-	public boolean isConcrete() {
-		return !(this.isInterface || this.isAbstract);
-	}
-
-	@Override
 	public boolean isFinal() {
 		return this.isFinal;
 	}
@@ -180,16 +186,13 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public String getEnclosingClassName() {
 		return this.enclosingClassName;
 	}
 
 	@Override
-	public boolean hasSuperClass() {
-		return (this.superClassName != null);
-	}
-
-	@Override
+	@Nullable
 	public String getSuperClassName() {
 		return this.superClassName;
 	}
@@ -201,7 +204,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	@Override
 	public String[] getMemberClassNames() {
-		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
+		return StringUtils.toStringArray(this.memberClassNames);
 	}
 
 

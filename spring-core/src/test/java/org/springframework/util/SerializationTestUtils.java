@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,9 @@ public class SerializationTestUtils {
 
 	public static void testSerialization(Object o) throws IOException {
 		OutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(o);
+		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			oos.writeObject(o);
+		}
 	}
 
 	public static boolean isSerializable(Object o) throws IOException {
@@ -50,16 +51,17 @@ public class SerializationTestUtils {
 
 	public static Object serializeAndDeserialize(Object o) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(o);
-		oos.flush();
+		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			oos.writeObject(o);
+			oos.flush();
+		}
 		baos.flush();
 		byte[] bytes = baos.toByteArray();
 
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(is);
-		Object o2 = ois.readObject();
-		return o2;
+		try (ObjectInputStream ois = new ObjectInputStream(is)) {
+			return ois.readObject();
+		}
 	}
 
 }

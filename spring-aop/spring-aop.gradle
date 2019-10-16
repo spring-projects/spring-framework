@@ -1,0 +1,9 @@
+description = "Spring AOP"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	optional("org.aspectj:aspectjweaver")
+	optional("org.apache.commons:commons-pool2")
+	optional("com.jamonapi:jamon")
+}

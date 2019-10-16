@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -34,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
-public class BeanDefinitionReaderUtils {
+public abstract class BeanDefinitionReaderUtils {
 
 	/**
 	 * Separator for generated bean names. If a class name or parent name is not
@@ -54,7 +55,7 @@ public class BeanDefinitionReaderUtils {
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-			String parentName, String className, ClassLoader classLoader) throws ClassNotFoundException {
+			@Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setParentName(parentName);
@@ -67,6 +68,23 @@ public class BeanDefinitionReaderUtils {
 			}
 		}
 		return bd;
+	}
+
+	/**
+	 * Generate a bean name for the given top-level bean definition,
+	 * unique within the given bean factory.
+	 * @param beanDefinition the bean definition to generate a bean name for
+	 * @param registry the bean factory that the definition is going to be
+	 * registered with (to check for existing bean names)
+	 * @return the generated bean name
+	 * @throws BeanDefinitionStoreException if no unique name can be generated
+	 * for the given bean definition
+	 * @see #generateBeanName(BeanDefinition, BeanDefinitionRegistry, boolean)
+	 */
+	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
+			throws BeanDefinitionStoreException {
+
+		return generateBeanName(beanDefinition, registry, false);
 	}
 
 	/**
@@ -106,31 +124,31 @@ public class BeanDefinitionReaderUtils {
 			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
-			// Top-level bean: use plain class name.
-			// Increase counter until the id is unique.
-			int counter = -1;
-			while (counter == -1 || registry.containsBeanDefinition(id)) {
-				counter++;
-				id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
-			}
+			// Top-level bean: use plain class name with unique suffix if necessary.
+			return uniqueBeanName(generatedBeanName, registry);
 		}
 		return id;
 	}
 
 	/**
-	 * Generate a bean name for the given top-level bean definition,
-	 * unique within the given bean factory.
-	 * @param beanDefinition the bean definition to generate a bean name for
+	 * Turn the given bean name into a unique bean name for the given bean factory,
+	 * appending a unique counter as suffix if necessary.
+	 * @param beanName the original bean name
 	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
-	 * @return the generated bean name
-	 * @throws BeanDefinitionStoreException if no unique name can be generated
-	 * for the given bean definition
+	 * @return the unique bean name to use
+	 * @since 5.1
 	 */
-	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
-			throws BeanDefinitionStoreException {
+	public static String uniqueBeanName(String beanName, BeanDefinitionRegistry registry) {
+		String id = beanName;
+		int counter = -1;
 
-		return generateBeanName(beanDefinition, registry, false);
+		// Increase counter until the id is unique.
+		while (counter == -1 || registry.containsBeanDefinition(id)) {
+			counter++;
+			id = beanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
+		}
+		return id;
 	}
 
 	/**

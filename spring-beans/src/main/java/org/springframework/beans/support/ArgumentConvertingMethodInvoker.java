@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ReflectionUtils;
 
@@ -39,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 
+	@Nullable
 	private TypeConverter typeConverter;
 
 	private boolean useDefaultConverter = true;
@@ -52,9 +55,9 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @see org.springframework.beans.SimpleTypeConverter
 	 * @see org.springframework.beans.BeanWrapperImpl
 	 */
-	public void setTypeConverter(TypeConverter typeConverter) {
+	public void setTypeConverter(@Nullable TypeConverter typeConverter) {
 		this.typeConverter = typeConverter;
-		this.useDefaultConverter = false;
+		this.useDefaultConverter = (typeConverter == null);
 	}
 
 	/**
@@ -64,6 +67,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * (provided that the present TypeConverter actually implements the
 	 * PropertyEditorRegistry interface).
 	 */
+	@Nullable
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null && this.useDefaultConverter) {
 			this.typeConverter = getDefaultTypeConverter();
@@ -127,13 +131,16 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @param arguments the argument values to match against method parameters
 	 * @return a matching method, or {@code null} if none
 	 */
+	@Nullable
 	protected Method doFindMatchingMethod(Object[] arguments) {
 		TypeConverter converter = getTypeConverter();
 		if (converter != null) {
 			String targetMethod = getTargetMethod();
 			Method matchingMethod = null;
 			int argCount = arguments.length;
-			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
+			Class<?> targetClass = getTargetClass();
+			Assert.state(targetClass != null, "No target class set");
+			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(targetClass);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Object[] argumentsToUse = null;
 			for (Method candidate : candidates) {

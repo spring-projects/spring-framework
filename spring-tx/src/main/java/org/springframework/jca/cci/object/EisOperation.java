@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,8 @@ import javax.resource.cci.InteractionSpec;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jca.cci.core.CciTemplate;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base class for EIS operation objects that work with the CCI API.
@@ -38,6 +40,7 @@ public abstract class EisOperation implements InitializingBean {
 
 	private CciTemplate cciTemplate = new CciTemplate();
 
+	@Nullable
 	private InteractionSpec interactionSpec;
 
 
@@ -47,9 +50,7 @@ public abstract class EisOperation implements InitializingBean {
 	 * @see #setConnectionFactory
 	 */
 	public void setCciTemplate(CciTemplate cciTemplate) {
-		if (cciTemplate == null) {
-			throw new IllegalArgumentException("cciTemplate must not be null");
-		}
+		Assert.notNull(cciTemplate, "CciTemplate must not be null");
 		this.cciTemplate = cciTemplate;
 	}
 
@@ -70,13 +71,14 @@ public abstract class EisOperation implements InitializingBean {
 	/**
 	 * Set the CCI InteractionSpec for this operation.
 	 */
-	public void setInteractionSpec(InteractionSpec interactionSpec) {
+	public void setInteractionSpec(@Nullable InteractionSpec interactionSpec) {
 		this.interactionSpec = interactionSpec;
 	}
 
 	/**
 	 * Return the CCI InteractionSpec for this operation.
 	 */
+	@Nullable
 	public InteractionSpec getInteractionSpec() {
 		return this.interactionSpec;
 	}
@@ -87,7 +89,7 @@ public abstract class EisOperation implements InitializingBean {
 		this.cciTemplate.afterPropertiesSet();
 
 		if (this.interactionSpec == null) {
-			throw new IllegalArgumentException("interactionSpec is required");
+			throw new IllegalArgumentException("InteractionSpec is required");
 		}
 	}
 

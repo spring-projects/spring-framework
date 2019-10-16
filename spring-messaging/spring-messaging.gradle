@@ -1,0 +1,35 @@
+description = "Spring Messaging"
+
+apply plugin: "kotlin"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compileOnly(project(":kotlin-coroutines"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.rsocket:rsocket-core")
+	optional("io.rsocket:rsocket-transport-netty")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("javax.xml.bind:jaxb-api")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile("javax.inject:javax.inject-tck")
+	testCompile("javax.servlet:javax.servlet-api")
+	testCompile("javax.validation:validation-api")
+	testCompile("com.thoughtworks.xstream:xstream")
+	testCompile("org.apache.activemq:activemq-broker")
+	testCompile("org.apache.activemq:activemq-kahadb-store")
+	testCompile("org.apache.activemq:activemq-stomp")
+	testCompile("io.projectreactor:reactor-test")
+	testCompile "io.reactivex.rxjava2:rxjava"
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testCompile(project(":kotlin-coroutines"))
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+	testRuntime("com.sun.activation:javax.activation")
+}

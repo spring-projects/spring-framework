@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,12 +49,12 @@ public interface ConverterRegistry {
 	/**
 	 * Add a ranged converter factory to this registry.
 	 * The convertible source/target type pair is derived from the ConverterFactory's parameterized types.
-	 * @throws IllegalArgumentException if the parameterized types could not be resolved.
+	 * @throws IllegalArgumentException if the parameterized types could not be resolved
 	 */
-	void addConverterFactory(ConverterFactory<?, ?> converterFactory);
+	void addConverterFactory(ConverterFactory<?, ?> factory);
 
 	/**
-	 * Remove any converters from sourceType to targetType.
+	 * Remove any converters from {@code sourceType} to {@code targetType}.
 	 * @param sourceType the source type
 	 * @param targetType the target type
 	 */

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -34,14 +35,14 @@ import org.springframework.util.Assert;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.
  *
- * <p>If you need a "real" connection pool outside of a J2EE container, consider
- * <a href="http://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
- * or <a href="http://sourceforge.net/projects/c3p0">C3P0</a>.
+ * <p>If you need a "real" connection pool outside of a Java EE container, consider
+ * <a href="https://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
+ * or <a href="https://sourceforge.net/projects/c3p0">C3P0</a>.
  * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full
  * connection pool beans, supporting the same basic properties as this class
  * plus specific settings (such as minimal/maximal pool size etc).
@@ -52,6 +53,7 @@ import org.springframework.util.Assert;
  */
 public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 
+	@Nullable
 	private Driver driver;
 
 
@@ -91,7 +93,7 @@ public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 	 * Create a new DriverManagerDataSource with the given standard Driver parameters.
 	 * @param driver the JDBC Driver object
 	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param conProps JDBC connection properties
+	 * @param conProps the JDBC connection properties
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	public SimpleDriverDataSource(Driver driver, String url, Properties conProps) {
@@ -117,13 +119,14 @@ public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 	 * Driver instance.
 	 * @see #setDriverClass
 	 */
-	public void setDriver(Driver driver) {
+	public void setDriver(@Nullable Driver driver) {
 		this.driver = driver;
 	}
 
 	/**
 	 * Return the JDBC Driver instance to use.
 	 */
+	@Nullable
 	public Driver getDriver() {
 		return this.driver;
 	}

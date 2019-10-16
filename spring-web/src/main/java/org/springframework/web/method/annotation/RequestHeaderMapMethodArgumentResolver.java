@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -52,8 +53,8 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
@@ -62,7 +63,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 				result = new HttpHeaders();
 			}
 			else {
-				result = new LinkedMultiValueMap<String, String>();
+				result = new LinkedMultiValueMap<>();
 			}
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
@@ -76,7 +77,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>();
+			Map<String, String> result = new LinkedHashMap<>();
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
 				String headerValue = webRequest.getHeader(headerName);

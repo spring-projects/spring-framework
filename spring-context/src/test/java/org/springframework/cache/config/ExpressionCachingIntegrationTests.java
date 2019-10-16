@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -29,13 +29,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class ExpressionCachingIntegrationTests {
 
+	@Test  // SPR-11692
 	@SuppressWarnings("unchecked")
-	@Test // SPR-11692
 	public void expressionIsCacheBasedOnActualMethod() {
 		ConfigurableApplicationContext context =
 				new AnnotationConfigApplicationContext(SharedConfig.class, Spr11692Config.class);
@@ -50,9 +49,9 @@ public class ExpressionCachingIntegrationTests {
 	}
 
 
-
 	@Configuration
 	static class Spr11692Config {
+
 		@Bean
 		public BaseDao<User> userDao() {
 			return new UserDaoImpl();
@@ -65,11 +64,14 @@ public class ExpressionCachingIntegrationTests {
 	}
 
 
-	private static interface BaseDao<T> {
+	private interface BaseDao<T> {
+
 		T persist(T t);
 	}
 
+
 	private static class UserDaoImpl implements BaseDao<User> {
+
 		@Override
 		@CachePut(value = "users", key = "#user.id")
 		public User persist(User user) {
@@ -77,7 +79,9 @@ public class ExpressionCachingIntegrationTests {
 		}
 	}
 
+
 	private static class OrderDaoImpl implements BaseDao<Order> {
+
 		@Override
 		@CachePut(value = "orders", key = "#order.id")
 		public Order persist(Order order) {
@@ -85,35 +89,41 @@ public class ExpressionCachingIntegrationTests {
 		}
 	}
 
+
 	private static class User {
+
 		private final String id;
 
-		private User(String id) {
+		public User(String id) {
 			this.id = id;
 		}
 
 		@SuppressWarnings("unused")
 		public String getId() {
-			return id;
+			return this.id;
 		}
 	}
+
 
 	private static class Order {
+
 		private final String id;
 
-		private Order(String id) {
+		public Order(String id) {
 			this.id = id;
 		}
 
 		@SuppressWarnings("unused")
 		public String getId() {
-			return id;
+			return this.id;
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
 	static class SharedConfig extends CachingConfigurerSupport {
+
 		@Override
 		@Bean
 		public CacheManager cacheManager() {

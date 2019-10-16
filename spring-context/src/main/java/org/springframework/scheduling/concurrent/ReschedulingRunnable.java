@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
+import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -49,20 +51,25 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final ScheduledExecutorService executor;
 
+	@Nullable
 	private ScheduledFuture<?> currentFuture;
 
+	@Nullable
 	private Date scheduledExecutionTime;
 
 	private final Object triggerContextMonitor = new Object();
 
 
-	public ReschedulingRunnable(Runnable delegate, Trigger trigger, ScheduledExecutorService executor, ErrorHandler errorHandler) {
+	public ReschedulingRunnable(
+			Runnable delegate, Trigger trigger, ScheduledExecutorService executor, ErrorHandler errorHandler) {
+
 		super(delegate, errorHandler);
 		this.trigger = trigger;
 		this.executor = executor;
 	}
 
 
+	@Nullable
 	public ScheduledFuture<?> schedule() {
 		synchronized (this.triggerContextMonitor) {
 			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
@@ -75,14 +82,20 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		}
 	}
 
+	private ScheduledFuture<?> obtainCurrentFuture() {
+		Assert.state(this.currentFuture != null, "No scheduled future");
+		return this.currentFuture;
+	}
+
 	@Override
 	public void run() {
 		Date actualExecutionTime = new Date();
 		super.run();
 		Date completionTime = new Date();
 		synchronized (this.triggerContextMonitor) {
+			Assert.state(this.scheduledExecutionTime != null, "No scheduled execution");
 			this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);
-			if (!this.currentFuture.isCancelled()) {
+			if (!obtainCurrentFuture().isCancelled()) {
 				schedule();
 			}
 		}
@@ -92,21 +105,21 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.cancel(mayInterruptIfRunning);
+			return obtainCurrentFuture().cancel(mayInterruptIfRunning);
 		}
 	}
 
 	@Override
 	public boolean isCancelled() {
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.isCancelled();
+			return obtainCurrentFuture().isCancelled();
 		}
 	}
 
 	@Override
 	public boolean isDone() {
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.isDone();
+			return obtainCurrentFuture().isDone();
 		}
 	}
 
@@ -114,7 +127,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	public Object get() throws InterruptedException, ExecutionException {
 		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
-			curr = this.currentFuture;
+			curr = obtainCurrentFuture();
 		}
 		return curr.get();
 	}
@@ -123,7 +136,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
-			curr = this.currentFuture;
+			curr = obtainCurrentFuture();
 		}
 		return curr.get(timeout, unit);
 	}
@@ -132,7 +145,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	public long getDelay(TimeUnit unit) {
 		ScheduledFuture<?> curr;
 		synchronized (this.triggerContextMonitor) {
-			curr = this.currentFuture;
+			curr = obtainCurrentFuture();
 		}
 		return curr.getDelay(unit);
 	}

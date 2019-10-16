@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource
@@ -38,15 +41,17 @@ import org.springframework.core.io.Resource;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.1
+ * @deprecated as of 5.1, in favor of using {@link EncodedResourceResolver}
  */
+@Deprecated
 public class GzipResourceResolver extends AbstractResourceResolver {
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resource = chain.resolveResource(request, requestPath, locations);
-		if ((resource == null) || (request != null && !isGzipAccepted(request))) {
+		if (resource == null || (request != null && !isGzipAccepted(request))) {
 			return resource;
 		}
 
@@ -57,7 +62,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			}
 		}
 		catch (IOException ex) {
-			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
+			logger.trace("No gzip resource for [" + resource.getFilename() + "]", ex);
 		}
 
 		return resource;
@@ -69,14 +74,17 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected String resolveUrlPathInternal(String resourceUrlPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations);
 	}
 
 
-	private static final class GzippedResource extends AbstractResource implements EncodedResource {
+	/**
+	 * A gzipped {@link HttpResource}.
+	 */
+	static final class GzippedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 
@@ -87,56 +95,79 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			this.gzipped = original.createRelative(original.getFilename() + ".gz");
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return this.gzipped.getInputStream();
 		}
 
+		@Override
 		public boolean exists() {
 			return this.gzipped.exists();
 		}
 
+		@Override
 		public boolean isReadable() {
 			return this.gzipped.isReadable();
 		}
 
+		@Override
 		public boolean isOpen() {
 			return this.gzipped.isOpen();
 		}
 
+		@Override
+		public boolean isFile() {
+			return this.gzipped.isFile();
+		}
+
+		@Override
 		public URL getURL() throws IOException {
 			return this.gzipped.getURL();
 		}
 
+		@Override
 		public URI getURI() throws IOException {
 			return this.gzipped.getURI();
 		}
 
+		@Override
 		public File getFile() throws IOException {
 			return this.gzipped.getFile();
 		}
 
+		@Override
 		public long contentLength() throws IOException {
 			return this.gzipped.contentLength();
 		}
 
+		@Override
 		public long lastModified() throws IOException {
 			return this.gzipped.lastModified();
 		}
 
+		@Override
 		public Resource createRelative(String relativePath) throws IOException {
 			return this.gzipped.createRelative(relativePath);
 		}
 
+		@Override
+		@Nullable
 		public String getFilename() {
 			return this.original.getFilename();
 		}
 
+		@Override
 		public String getDescription() {
 			return this.gzipped.getDescription();
 		}
 
-		public String getContentEncoding() {
-			return "gzip";
+		@Override
+		public HttpHeaders getResponseHeaders() {
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
+			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
+			return headers;
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,8 @@ package org.springframework.test.context.web;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
@@ -60,36 +60,6 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
 
 	/**
-	 * Create a new {@code WebMergedContextConfiguration} instance for the
-	 * supplied parameters.
-	 * <p>Delegates to
-	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}.
-	 * @param testClass the test class for which the configuration was merged
-	 * @param locations the merged resource locations
-	 * @param classes the merged annotated classes
-	 * @param contextInitializerClasses the merged context initializer classes
-	 * @param activeProfiles the merged active bean definition profiles
-	 * @param resourceBasePath the resource path to the root directory of the web application
-	 * @param contextLoader the resolved {@code ContextLoader}
-	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
-	 * delegate with which to retrieve the parent context
-	 * @param parent the parent configuration or {@code null} if there is no parent
-	 * @since 3.2.2
-	 * @deprecated as of Spring 4.1, use
-	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
-	 * instead.
-	 */
-	@Deprecated
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
-
-		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, resourceBasePath,
-			contextLoader, cacheAwareContextLoaderDelegate, parent);
-	}
-
-	/**
 	 * Create a new {@code WebMergedContextConfiguration} instance by copying
 	 * all properties from the supplied {@code MergedContextConfiguration}.
 	 * <p>If an <em>empty</em> value is supplied for the {@code resourceBasePath}
@@ -127,11 +97,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.1
 	 */
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, propertySourceLocations,
 			propertySourceProperties, null, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parent);
@@ -163,11 +133,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.3
 	 */
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
-			Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
+			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		super(testClass, locations, classes, contextInitializerClasses, activeProfiles, propertySourceLocations,
 			propertySourceProperties, contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parent);
@@ -196,7 +166,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (super.equals(other) &&
 				this.resourceBasePath.equals(((WebMergedContextConfiguration) other).resourceBasePath)));
 	}
@@ -208,7 +178,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public int hashCode() {
-		return super.hashCode() * 31 + this.resourceBasePath.hashCode();
+		return (31 * super.hashCode() + this.resourceBasePath.hashCode());
 	}
 
 	/**
@@ -235,7 +205,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 				.append("propertySourceProperties", ObjectUtils.nullSafeToString(getPropertySourceProperties()))
 				.append("contextCustomizers", getContextCustomizers())
 				.append("resourceBasePath", getResourceBasePath())
-				.append("contextLoader", nullSafeToString(getContextLoader()))
+				.append("contextLoader", nullSafeClassName(getContextLoader()))
 				.append("parent", getParent())
 				.toString();
 	}

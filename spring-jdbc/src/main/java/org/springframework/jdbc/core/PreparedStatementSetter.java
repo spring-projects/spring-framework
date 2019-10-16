@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,12 +40,13 @@ import java.sql.SQLException;
  * @see JdbcTemplate#update(String, PreparedStatementSetter)
  * @see JdbcTemplate#query(String, PreparedStatementSetter, ResultSetExtractor)
  */
+@FunctionalInterface
 public interface PreparedStatementSetter {
 
 	/**
 	 * Set parameter values on the given PreparedStatement.
 	 * @param ps the PreparedStatement to invoke setter methods on
-	 * @throws SQLException if a SQLException is encountered
+	 * @throws SQLException if an SQLException is encountered
 	 * (i.e. there is no need to catch SQLException)
 	 */
 	void setValues(PreparedStatement ps) throws SQLException;

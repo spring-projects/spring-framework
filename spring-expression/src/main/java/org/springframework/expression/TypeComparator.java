@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Instances of a type comparator should be able to compare pairs of objects for equality.
@@ -32,7 +34,7 @@ public interface TypeComparator {
 	 * @param secondObject the second object
 	 * @return {@code true} if the comparator can compare these objects
 	 */
-	boolean canCompare(Object firstObject, Object secondObject);
+	boolean canCompare(@Nullable Object firstObject, @Nullable Object secondObject);
 
 	/**
 	 * Compare two given objects.
@@ -43,6 +45,6 @@ public interface TypeComparator {
 	 * @throws EvaluationException if a problem occurs during comparison
 	 * (or if they are not comparable in the first place)
 	 */
-	int compare(Object firstObject, Object secondObject) throws EvaluationException;
+	int compare(@Nullable Object firstObject, @Nullable Object secondObject) throws EvaluationException;
 
 }

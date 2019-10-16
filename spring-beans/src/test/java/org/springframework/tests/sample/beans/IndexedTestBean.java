@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @since 11.11.2003
  */
+@SuppressWarnings("rawtypes")
 public class IndexedTestBean {
 
 	private TestBean[] array;
@@ -57,6 +58,7 @@ public class IndexedTestBean {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void populate() {
 		TestBean tb0 = new TestBean("name0", 0);
 		TestBean tb1 = new TestBean("name1", 0);
@@ -66,16 +68,17 @@ public class IndexedTestBean {
 		TestBean tb5 = new TestBean("name5", 0);
 		TestBean tb6 = new TestBean("name6", 0);
 		TestBean tb7 = new TestBean("name7", 0);
+		TestBean tb8 = new TestBean("name8", 0);
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
 		this.array = new TestBean[] {tb0, tb1};
-		this.list = new ArrayList<Object>();
+		this.list = new ArrayList<>();
 		this.list.add(tb2);
 		this.list.add(tb3);
-		this.set = new TreeSet<Object>();
+		this.set = new TreeSet<>();
 		this.set.add(tb6);
 		this.set.add(tb7);
-		this.map = new HashMap<Object, Object>();
+		this.map = new HashMap<>();
 		this.map.put("key1", tb4);
 		this.map.put("key2", tb5);
 		this.map.put("key.3", tb5);
@@ -83,6 +86,7 @@ public class IndexedTestBean {
 		list.add(tbX);
 		list.add(tbY);
 		this.map.put("key4", list);
+		this.map.put("key5[foo]", tb8);
 	}
 
 

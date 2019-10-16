@@ -1,0 +1,95 @@
+description = "Spring Object/XML Marshalling"
+
+configurations {
+	jibx
+	xjc
+}
+
+dependencies {
+	jibx "org.jibx:jibx-bind:1.3.1"
+	jibx "org.apache.bcel:bcel:6.0"
+	xjc "javax.xml.bind:jaxb-api:2.3.1"
+	xjc "com.sun.xml.bind:jaxb-core:2.3.0.1"
+	xjc "com.sun.xml.bind:jaxb-impl:2.3.0.1"
+	xjc "com.sun.xml.bind:jaxb-xjc:2.3.1"
+	xjc "com.sun.activation:javax.activation:1.2.0"
+}
+
+ext.genSourcesDir = "${buildDir}/generated-sources"
+ext.flightSchema = "${projectDir}/src/test/resources/org/springframework/oxm/flight.xsd"
+
+task genJaxb {
+	ext.sourcesDir = "${genSourcesDir}/jaxb"
+	ext.classesDir = "${buildDir}/classes/jaxb"
+
+	inputs.files(flightSchema).withPathSensitivity(PathSensitivity.RELATIVE)
+	outputs.dir classesDir
+
+	doLast() {
+		project.ant {
+			taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask",
+					classpath: configurations.xjc.asPath
+			mkdir(dir: sourcesDir)
+			mkdir(dir: classesDir)
+
+			xjc(destdir: sourcesDir, schema: flightSchema,
+					package: "org.springframework.oxm.jaxb.test") {
+				produces(dir: sourcesDir, includes: "**/*.java")
+			}
+
+			javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
+					debugLevel: "lines,vars,source",
+					classpath: configurations.xjc.asPath) {
+				src(path: sourcesDir)
+				include(name: "**/*.java")
+				include(name: "*.java")
+			}
+
+			copy(todir: classesDir) {
+				fileset(dir: sourcesDir, erroronmissingdir: false) {
+					exclude(name: "**/*.java")
+				}
+			}
+		}
+	}
+}
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.activation:javax.activation-api")
+	optional("com.thoughtworks.xstream:xstream")
+	optional("org.jibx:jibx-run")
+	testCompile(project(":spring-context"))
+	testCompile("org.ogce:xpp3")
+	testCompile("org.codehaus.jettison:jettison") {
+		exclude group: "stax", module: "stax-api"
+	}
+	testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+}
+
+// JiBX compiler is currently not compatible with JDK 9
+if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+	compileTestJava {
+		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+
+		doLast() {
+			project.ant {
+				taskdef(name: "jibx",
+						classname: "org.jibx.binding.ant.CompileTask",
+						classpath: configurations.jibx.asPath)
+
+				jibx(verbose: false, load: true, binding: bindingXml) {
+					classpathset(dir: sourceSets.test.java.outputDir) {
+						include(name: "**/jibx/**/*")
+					}
+				}
+			}
+		}
+	}
+}

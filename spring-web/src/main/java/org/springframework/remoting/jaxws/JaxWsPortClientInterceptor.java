@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -35,9 +36,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -48,8 +49,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
- * specific port of a JAX-WS service. Compatible with JAX-WS 2.1 and 2.2,
- * as included in JDK 6 update 4+ and Java 7/8.
+ * specific port of a JAX-WS service.
  *
  * <p>Uses either {@link LocalJaxWsServiceFactory}'s facilities underneath,
  * or takes an explicit reference to an existing JAX-WS Service instance
@@ -66,36 +66,46 @@ import org.springframework.util.StringUtils;
 public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		implements MethodInterceptor, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Service jaxWsService;
 
+	@Nullable
 	private String portName;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String endpointAddress;
 
 	private boolean maintainSession;
 
 	private boolean useSoapAction;
 
+	@Nullable
 	private String soapActionUri;
 
+	@Nullable
 	private Map<String, Object> customProperties;
 
+	@Nullable
 	private WebServiceFeature[] portFeatures;
 
-	private Object[] webServiceFeatures;
-
+	@Nullable
 	private Class<?> serviceInterface;
 
 	private boolean lookupServiceOnStartup = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private QName portQName;
 
+	@Nullable
 	private Object portStub;
 
 	private final Object preparationMonitor = new Object();
@@ -110,13 +120,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setServiceName
 	 * @see org.springframework.jndi.JndiObjectFactoryBean
 	 */
-	public void setJaxWsService(Service jaxWsService) {
+	public void setJaxWsService(@Nullable Service jaxWsService) {
 		this.jaxWsService = jaxWsService;
 	}
 
 	/**
 	 * Return a reference to an existing JAX-WS Service instance, if any.
 	 */
+	@Nullable
 	public Service getJaxWsService() {
 		return this.jaxWsService;
 	}
@@ -125,13 +136,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the name of the port.
 	 * Corresponds to the "wsdl:port" name.
 	 */
-	public void setPortName(String portName) {
+	public void setPortName(@Nullable String portName) {
 		this.portName = portName;
 	}
 
 	/**
 	 * Return the name of the port.
 	 */
+	@Nullable
 	public String getPortName() {
 		return this.portName;
 	}
@@ -140,13 +152,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the username to specify on the stub.
 	 * @see javax.xml.ws.BindingProvider#USERNAME_PROPERTY
 	 */
-	public void setUsername(String username) {
+	public void setUsername(@Nullable String username) {
 		this.username = username;
 	}
 
 	/**
 	 * Return the username to specify on the stub.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -155,13 +168,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the password to specify on the stub.
 	 * @see javax.xml.ws.BindingProvider#PASSWORD_PROPERTY
 	 */
-	public void setPassword(String password) {
+	public void setPassword(@Nullable String password) {
 		this.password = password;
 	}
 
 	/**
 	 * Return the password to specify on the stub.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}
@@ -170,13 +184,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the endpoint address to specify on the stub.
 	 * @see javax.xml.ws.BindingProvider#ENDPOINT_ADDRESS_PROPERTY
 	 */
-	public void setEndpointAddress(String endpointAddress) {
+	public void setEndpointAddress(@Nullable String endpointAddress) {
 		this.endpointAddress = endpointAddress;
 	}
 
 	/**
 	 * Return the endpoint address to specify on the stub.
 	 */
+	@Nullable
 	public String getEndpointAddress() {
 		return this.endpointAddress;
 	}
@@ -215,13 +230,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the SOAP action URI to specify on the stub.
 	 * @see javax.xml.ws.BindingProvider#SOAPACTION_URI_PROPERTY
 	 */
-	public void setSoapActionUri(String soapActionUri) {
+	public void setSoapActionUri(@Nullable String soapActionUri) {
 		this.soapActionUri = soapActionUri;
 	}
 
 	/**
 	 * Return the SOAP action URI to specify on the stub.
 	 */
+	@Nullable
 	public String getSoapActionUri() {
 		return this.soapActionUri;
 	}
@@ -245,7 +261,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public Map<String, Object> getCustomProperties() {
 		if (this.customProperties == null) {
-			this.customProperties = new HashMap<String, Object>();
+			this.customProperties = new HashMap<>();
 		}
 		return this.customProperties;
 	}
@@ -272,27 +288,11 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 	/**
-	 * Specify WebServiceFeature specifications for the JAX-WS port stub:
-	 * in the form of actual {@link javax.xml.ws.WebServiceFeature} objects,
-	 * WebServiceFeature Class references, or WebServiceFeature class names.
-	 * <p>As of Spring 4.0, this is effectively just an alternative way of
-	 * specifying {@link #setPortFeatures "portFeatures"}. Do not specify
-	 * both properties at the same time; prefer "portFeatures" moving forward.
-	 * @deprecated as of Spring 4.0, in favor of the differentiated
-	 * {@link #setServiceFeatures "serviceFeatures"} and
-	 * {@link #setPortFeatures "portFeatures"} properties
-	 */
-	@Deprecated
-	public void setWebServiceFeatures(Object[] webServiceFeatures) {
-		this.webServiceFeatures = webServiceFeatures;
-	}
-
-	/**
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
-	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
+	public void setServiceInterface(@Nullable Class<?> serviceInterface) {
+		if (serviceInterface != null) {
+			Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
@@ -300,6 +300,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
+	@Nullable
 	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
@@ -315,19 +316,18 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 	/**
-	 * Set the bean ClassLoader to use for this interceptor:
-	 * for resolving WebServiceFeature class names as specified through
-	 * {@link #setWebServiceFeatures}, and also for building a client
-	 * proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
+	 * Set the bean ClassLoader to use for this interceptor: primarily for
+	 * building a client proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
 	 */
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 	/**
 	 * Return the bean ClassLoader to use for this interceptor.
 	 */
+	@Nullable
 	protected ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -345,18 +345,19 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public void prepare() {
 		Class<?> ifc = getServiceInterface();
-		if (ifc == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
+		Assert.notNull(ifc, "Property 'serviceInterface' is required");
+
 		WebService ann = ifc.getAnnotation(WebService.class);
 		if (ann != null) {
 			applyDefaultsFromAnnotation(ann);
 		}
+
 		Service serviceToUse = getJaxWsService();
 		if (serviceToUse == null) {
 			serviceToUse = createJaxWsService();
 		}
-		this.portQName = getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
+
+		this.portQName = getQName(getPortName() != null ? getPortName() : ifc.getName());
 		Object stub = getPortStub(serviceToUse, (getPortName() != null ? this.portQName : null));
 		preparePortStub(stub);
 		this.portStub = stub;
@@ -417,6 +418,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setPortName
 	 * @see #getQName
 	 */
+	@Nullable
 	protected final QName getPortQName() {
 		return this.portQName;
 	}
@@ -428,49 +430,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @return the corresponding port object as returned from
 	 * {@code Service.getPort(...)}
 	 */
-	protected Object getPortStub(Service service, QName portQName) {
-		if (this.portFeatures != null || this.webServiceFeatures != null) {
-			WebServiceFeature[] portFeaturesToUse = this.portFeatures;
-			if (portFeaturesToUse == null) {
-				portFeaturesToUse = new WebServiceFeature[this.webServiceFeatures.length];
-				for (int i = 0; i < this.webServiceFeatures.length; i++) {
-					portFeaturesToUse[i] = convertWebServiceFeature(this.webServiceFeatures[i]);
-				}
-			}
-			return (portQName != null ? service.getPort(portQName, getServiceInterface(), portFeaturesToUse) :
-					service.getPort(getServiceInterface(), portFeaturesToUse));
+	protected Object getPortStub(Service service, @Nullable QName portQName) {
+		if (this.portFeatures != null) {
+			return (portQName != null ? service.getPort(portQName, getServiceInterface(), this.portFeatures) :
+					service.getPort(getServiceInterface(), this.portFeatures));
 		}
 		else {
 			return (portQName != null ? service.getPort(portQName, getServiceInterface()) :
 					service.getPort(getServiceInterface()));
-		}
-	}
-
-	/**
-	 * Convert the given feature specification object to a WebServiceFeature instance
-	 * @param feature the feature specification object, as passed into the
-	 * {@link #setWebServiceFeatures "webServiceFeatures"} bean property
-	 * @return the WebServiceFeature instance (never {@code null})
-	 */
-	private WebServiceFeature convertWebServiceFeature(Object feature) {
-		Assert.notNull(feature, "WebServiceFeature specification object must not be null");
-		if (feature instanceof WebServiceFeature) {
-			return (WebServiceFeature) feature;
-		}
-		else if (feature instanceof Class) {
-			return (WebServiceFeature) BeanUtils.instantiate((Class<?>) feature);
-		}
-		else if (feature instanceof String) {
-			try {
-				Class<?> featureClass = getBeanClassLoader().loadClass((String) feature);
-				return (WebServiceFeature) BeanUtils.instantiate(featureClass);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Could not load WebServiceFeature class [" + feature + "]");
-			}
-		}
-		else {
-			throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
 		}
 	}
 
@@ -485,7 +452,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setCustomProperties
 	 */
 	protected void preparePortStub(Object stub) {
-		Map<String, Object> stubProperties = new HashMap<String, Object>();
+		Map<String, Object> stubProperties = new HashMap<>();
 		String username = getUsername();
 		if (username != null) {
 			stubProperties.put(BindingProvider.USERNAME_PROPERTY, username);
@@ -522,12 +489,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Return the underlying JAX-WS port stub that this interceptor delegates to
 	 * for each method invocation on the proxy.
 	 */
+	@Nullable
 	protected Object getPortStub() {
 		return this.portStub;
 	}
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-WS proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";
@@ -549,6 +518,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #getPortStub()
 	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, Object)
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation, getPortStub());
@@ -574,7 +544,8 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @throws Throwable in case of invocation failure
 	 * @see #getPortStub()
 	 */
-	protected Object doInvoke(MethodInvocation invocation, Object portStub) throws Throwable {
+	@Nullable
+	protected Object doInvoke(MethodInvocation invocation, @Nullable Object portStub) throws Throwable {
 		Method method = invocation.getMethod();
 		try {
 			return method.invoke(portStub, invocation.getArguments());

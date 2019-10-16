@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,13 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -38,11 +38,6 @@ import org.springframework.util.CollectionUtils;
  * @since 3.0
  */
 public class ServletServerHttpResponse implements ServerHttpResponse {
-
-	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
-	private static final boolean servlet3Present =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
-
 
 	private final HttpServletResponse servletResponse;
 
@@ -60,7 +55,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	public ServletServerHttpResponse(HttpServletResponse servletResponse) {
 		Assert.notNull(servletResponse, "HttpServletResponse must not be null");
 		this.servletResponse = servletResponse;
-		this.headers = (servlet3Present ? new ServletResponseHttpHeaders() : new HttpHeaders());
+		this.headers = new ServletResponseHttpHeaders();
 	}
 
 
@@ -104,12 +99,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private void writeHeaders() {
 		if (!this.headersWritten) {
-			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				String headerName = entry.getKey();
-				for (String headerValue : entry.getValue()) {
+			getHeaders().forEach((headerName, headerValues) -> {
+				for (String headerValue : headerValues) {
 					this.servletResponse.addHeader(headerName, headerValue);
 				}
-			}
+			});
 			// HttpServletResponse exposes some headers as properties: we should include those if not already present
 			if (this.servletResponse.getContentType() == null && this.headers.getContentType() != null) {
 				this.servletResponse.setContentType(this.headers.getContentType().toString());
@@ -144,6 +138,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		}
 
 		@Override
+		@Nullable
 		public String getFirst(String headerName) {
 			String value = servletResponse.getHeader(headerName);
 			if (value != null) {
@@ -159,6 +154,9 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
 
 			Collection<String> values1 = servletResponse.getHeaders((String) key);
+			if (headersWritten) {
+				return new ArrayList<>(values1);
+			}
 			boolean isEmpty1 = CollectionUtils.isEmpty(values1);
 
 			List<String> values2 = super.get(key);
@@ -168,7 +166,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				return null;
 			}
 
-			List<String> values = new ArrayList<String>();
+			List<String> values = new ArrayList<>();
 			if (!isEmpty1) {
 				values.addAll(values1);
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,28 +17,35 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Test fixture with {@link org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver}.
+ * Test fixture with {@link RequestHeaderMethodArgumentResolver}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -54,15 +61,17 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramResolvedNameWithExpression;
 	private MethodParameter paramResolvedNameWithPlaceholder;
 	private MethodParameter paramNamedValueMap;
+	private MethodParameter paramDate;
+	private MethodParameter paramInstant;
 
 	private MockHttpServletRequest servletRequest;
 
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 		resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
@@ -75,6 +84,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 		paramResolvedNameWithExpression = new SynthesizingMethodParameter(method, 4);
 		paramResolvedNameWithPlaceholder = new SynthesizingMethodParameter(method, 5);
 		paramNamedValueMap = new SynthesizingMethodParameter(method, 6);
+		paramDate = new SynthesizingMethodParameter(method, 7);
+		paramInstant = new SynthesizingMethodParameter(method, 8);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -83,17 +94,17 @@ public class RequestHeaderMethodArgumentResolverTests {
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
-	@After
-	public void teardown() {
+	@AfterEach
+	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueStringHeader));
-		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedValueStringArray));
-		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramNamedValueMap));
+		assertThat(resolver.supportsParameter(paramNamedDefaultValueStringHeader)).as("String parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramNamedValueStringArray)).as("String array parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramNamedValueMap)).as("non-@RequestParam parameter supported").isFalse();
 	}
 
 	@Test
@@ -102,8 +113,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		servletRequest.addHeader("name", expected);
 
 		Object result = resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, webRequest, null);
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -112,15 +124,17 @@ public class RequestHeaderMethodArgumentResolverTests {
 		servletRequest.addHeader("name", expected);
 
 		Object result = resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
-		assertTrue(result instanceof String[]);
-		assertArrayEquals("Invalid result", expected, (String[]) result);
+		boolean condition = result instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat((String[]) result).isEqualTo(expected);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		Object result = resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, webRequest, null);
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", "bar", result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test
@@ -128,8 +142,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Object result = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
-			assertTrue(result instanceof String);
-			assertEquals("bar", result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo("bar");
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -144,8 +159,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Object result = resolver.resolveArgument(paramResolvedNameWithExpression, null, webRequest, null);
-			assertTrue(result instanceof String);
-			assertEquals("Invalid result", expected, result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -160,8 +176,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Object result = resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null);
-			assertTrue(result instanceof String);
-			assertEquals("Invalid result", expected, result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -173,13 +190,46 @@ public class RequestHeaderMethodArgumentResolverTests {
 		servletRequest.setContextPath("/bar");
 
 		Object result = resolver.resolveArgument(paramContextPath, null, webRequest, null);
-		assertTrue(result instanceof String);
-		assertEquals("/bar", result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo("/bar");
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test
 	public void notFound() throws Exception {
-		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void dateConversion() throws Exception {
+		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
+		servletRequest.addHeader("name", rfc1123val);
+
+		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+		Object result = resolver.resolveArgument(paramDate, null, webRequest,
+				new DefaultDataBinderFactory(bindingInitializer));
+
+		boolean condition = result instanceof Date;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(new Date(rfc1123val));
+	}
+
+	@Test
+	public void instantConversion() throws Exception {
+		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
+		servletRequest.addHeader("name", rfc1123val);
+
+		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+		Object result = resolver.resolveArgument(paramInstant, null, webRequest,
+				new DefaultDataBinderFactory(bindingInitializer));
+
+		boolean condition = result instanceof Instant;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)));
 	}
 
 
@@ -190,7 +240,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader(name = "name", defaultValue="#{request.contextPath}") String param4,
 			@RequestHeader("#{systemProperties.systemProperty}") String param5,
 			@RequestHeader("${systemProperty}") String param6,
-			@RequestHeader("name") Map<?, ?> unsupported) {
+			@RequestHeader("name") Map<?, ?> unsupported,
+			@RequestHeader("name") Date dateParam,
+			@RequestHeader("name") Instant instantParam) {
 	}
 
 }

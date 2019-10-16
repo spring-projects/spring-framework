@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -35,8 +36,9 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractResourceBasedMessageSource extends AbstractMessageSource {
 
-	private final Set<String> basenameSet = new LinkedHashSet<String>(4);
+	private final Set<String> basenameSet = new LinkedHashSet<>(4);
 
+	@Nullable
 	private String defaultEncoding;
 
 	private boolean fallbackToSystemLocale = true;
@@ -113,12 +115,13 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	/**
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
-	 * <p>Default is none, using the {@code java.util.Properties}
-	 * default encoding: ISO-8859-1.
+	 * <p>The effective default is the {@code java.util.Properties}
+	 * default encoding: ISO-8859-1. A {@code null} value indicates
+	 * the platform default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
 	 */
-	public void setDefaultEncoding(String defaultEncoding) {
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -126,6 +129,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return the default charset to use for parsing properties files, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,15 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -40,54 +40,57 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * Examples of expectations on the controller type and controller method.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class HandlerAssertionTests {
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
 
-	@Before
-	public void setup() {
-		this.mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
-	}
 
 	@Test
-	public void testHandlerType() throws Exception {
+	public void handlerType() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().handlerType(SimpleController.class));
 	}
 
 	@Test
-	public void testMethodCall() throws Exception {
+	public void methodCallOnNonMock() throws Exception {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.mockMvc.perform(get("/")).andExpect(handler().methodCall("bogus")))
+			.withMessageContaining("The supplied object [bogus] is not an instance of")
+			.withMessageContaining(MvcUriComponentsBuilder.MethodInvocationInfo.class.getName())
+			.withMessageContaining("Ensure that you invoke the handler method via MvcUriComponentsBuilder.on()");
+	}
+
+	@Test
+	public void methodCall() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	}
 
 	@Test
-	public void testHandlerMethodNameEqualTo() throws Exception {
+	public void methodName() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodName("handle"));
-
-		// Hamcrest matcher..
-		this.mockMvc.perform(get("/")).andExpect(handler().methodName(equalTo("handle")));
 	}
 
 	@Test
-	public void testHandlerMethodNameMatcher() throws Exception {
+	public void methodNameMatchers() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(handler().methodName(equalTo("handle")));
 		this.mockMvc.perform(get("/")).andExpect(handler().methodName(is(not("save"))));
 	}
 
 	@Test
-	public void testHandlerMethod() throws Exception {
+	public void method() throws Exception {
 		Method method = SimpleController.class.getMethod("handle");
 		this.mockMvc.perform(get("/")).andExpect(handler().method(method));
 	}
 
 
-
-	@Controller
+	@RestController
 	static class SimpleController {
 
 		@RequestMapping("/")
-		@ResponseBody
 		public ResponseEntity<Void> handle() {
 			return ResponseEntity.ok().build();
 		}
 	}
+
 }

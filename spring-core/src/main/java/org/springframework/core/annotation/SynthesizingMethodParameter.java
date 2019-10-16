@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,9 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 import org.springframework.core.MethodParameter;
 
@@ -102,10 +104,43 @@ public class SynthesizingMethodParameter extends MethodParameter {
 		return AnnotationUtils.synthesizeAnnotationArray(annotations, getAnnotatedElement());
 	}
 
-
 	@Override
 	public SynthesizingMethodParameter clone() {
 		return new SynthesizingMethodParameter(this);
+	}
+
+
+	/**
+	 * Create a new SynthesizingMethodParameter for the given method or constructor.
+	 * <p>This is a convenience factory method for scenarios where a
+	 * Method or Constructor reference is treated in a generic fashion.
+	 * @param executable the Method or Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @return the corresponding SynthesizingMethodParameter instance
+	 * @since 5.0
+	 */
+	public static SynthesizingMethodParameter forExecutable(Executable executable, int parameterIndex) {
+		if (executable instanceof Method) {
+			return new SynthesizingMethodParameter((Method) executable, parameterIndex);
+		}
+		else if (executable instanceof Constructor) {
+			return new SynthesizingMethodParameter((Constructor<?>) executable, parameterIndex);
+		}
+		else {
+			throw new IllegalArgumentException("Not a Method/Constructor: " + executable);
+		}
+	}
+
+	/**
+	 * Create a new SynthesizingMethodParameter for the given parameter descriptor.
+	 * <p>This is a convenience factory method for scenarios where a
+	 * Java 8 {@link Parameter} descriptor is already available.
+	 * @param parameter the parameter descriptor
+	 * @return the corresponding SynthesizingMethodParameter instance
+	 * @since 5.0
+	 */
+	public static SynthesizingMethodParameter forParameter(Parameter parameter) {
+		return forExecutable(parameter.getDeclaringExecutable(), findParameterIndex(parameter));
 	}
 
 }

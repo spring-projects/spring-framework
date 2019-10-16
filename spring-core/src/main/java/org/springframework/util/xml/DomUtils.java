@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ContentHandler;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -61,7 +62,7 @@ public abstract class DomUtils {
 		Assert.notNull(childEleNames, "Element names collection must not be null");
 		List<String> childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && nodeNameMatch(node, childEleNameList)) {
@@ -91,6 +92,7 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the {@code org.w3c.dom.Element} instance, or {@code null} if none found
 	 */
+	@Nullable
 	public static Element getChildElementByTagName(Element ele, String childEleName) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleName, "Element name must not be null");
@@ -110,20 +112,21 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the extracted text value, or {@code null} if no child element found
 	 */
+	@Nullable
 	public static String getChildElementValueByTagName(Element ele, String childEleName) {
 		Element child = getChildElementByTagName(ele, childEleName);
 		return (child != null ? getTextValue(child) : null);
 	}
 
 	/**
-	 * Retrieves all child elements of the given DOM element
+	 * Retrieves all child elements of the given DOM element.
 	 * @param ele the DOM element to analyze
 	 * @return a List of child {@code org.w3c.dom.Element} instances
 	 */
 	public static List<Element> getChildElements(Element ele) {
 		Assert.notNull(ele, "Element must not be null");
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
 package org.springframework.beans;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.util.ObjectUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract superclass for all exceptions thrown in the beans package
@@ -46,27 +46,8 @@ public abstract class BeansException extends NestedRuntimeException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public BeansException(String msg, Throwable cause) {
+	public BeansException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
-	}
-
-
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BeansException)) {
-			return false;
-		}
-		BeansException otherBe = (BeansException) other;
-		return (getMessage().equals(otherBe.getMessage()) &&
-				ObjectUtils.nullSafeEquals(getCause(), otherBe.getCause()));
-	}
-
-	@Override
-	public int hashCode() {
-		return getMessage().hashCode();
 	}
 
 }

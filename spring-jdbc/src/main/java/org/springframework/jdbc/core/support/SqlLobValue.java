@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.DisposableSqlTypeValue;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * Object to represent an SQL BLOB/CLOB value parameter. BLOBs can either be an
@@ -65,6 +66,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  */
 public class SqlLobValue implements DisposableSqlTypeValue {
 
+	@Nullable
 	private final Object content;
 
 	private final int length;
@@ -82,7 +84,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 * @param bytes the byte array containing the BLOB value
 	 * @see org.springframework.jdbc.support.lob.DefaultLobHandler
 	 */
-	public SqlLobValue(byte[] bytes) {
+	public SqlLobValue(@Nullable byte[] bytes) {
 		this(bytes, new DefaultLobHandler());
 	}
 
@@ -91,7 +93,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 * @param bytes the byte array containing the BLOB value
 	 * @param lobHandler the LobHandler to be used
 	 */
-	public SqlLobValue(byte[] bytes, LobHandler lobHandler) {
+	public SqlLobValue(@Nullable byte[] bytes, LobHandler lobHandler) {
 		this.content = bytes;
 		this.length = (bytes != null ? bytes.length : 0);
 		this.lobCreator = lobHandler.getLobCreator();
@@ -103,7 +105,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 * @param content the String containing the CLOB value
 	 * @see org.springframework.jdbc.support.lob.DefaultLobHandler
 	 */
-	public SqlLobValue(String content) {
+	public SqlLobValue(@Nullable String content) {
 		this(content, new DefaultLobHandler());
 	}
 
@@ -112,7 +114,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 * @param content the String containing the CLOB value
 	 * @param lobHandler the LobHandler to be used
 	 */
-	public SqlLobValue(String content, LobHandler lobHandler) {
+	public SqlLobValue(@Nullable String content, LobHandler lobHandler) {
 		this.content = content;
 		this.length = (content != null ? content.length() : 0);
 		this.lobCreator = lobHandler.getLobCreator();
@@ -169,8 +171,9 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 * Set the specified content via the LobCreator.
 	 */
 	@Override
-	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
+
 		if (sqlType == Types.BLOB) {
 			if (this.content instanceof byte[] || this.content == null) {
 				this.lobCreator.setBlobAsBytes(ps, paramIndex, (byte[]) this.content);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.aop.framework.autoproxy;
 
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 
 /**
  * Holder for the current proxy creation context, as exposed by auto-proxy creators
@@ -26,17 +27,22 @@ import org.springframework.core.NamedThreadLocal;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-public class ProxyCreationContext {
+public final class ProxyCreationContext {
 
-	/** ThreadLocal holding the current proxied bean name during Advisor matching */
+	/** ThreadLocal holding the current proxied bean name during Advisor matching. */
 	private static final ThreadLocal<String> currentProxiedBeanName =
-			new NamedThreadLocal<String>("Name of currently proxied bean");
+			new NamedThreadLocal<>("Name of currently proxied bean");
+
+
+	private ProxyCreationContext() {
+	}
 
 
 	/**
 	 * Return the name of the currently proxied bean instance.
 	 * @return the name of the bean, or {@code null} if none available
 	 */
+	@Nullable
 	public static String getCurrentProxiedBeanName() {
 		return currentProxiedBeanName.get();
 	}
@@ -45,7 +51,7 @@ public class ProxyCreationContext {
 	 * Set the name of the currently proxied bean instance.
 	 * @param beanName the name of the bean, or {@code null} to reset it
 	 */
-	static void setCurrentProxiedBeanName(String beanName) {
+	static void setCurrentProxiedBeanName(@Nullable String beanName) {
 		if (beanName != null) {
 			currentProxiedBeanName.set(beanName);
 		}

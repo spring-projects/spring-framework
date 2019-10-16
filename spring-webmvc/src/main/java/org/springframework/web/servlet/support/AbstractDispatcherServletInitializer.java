@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -27,6 +28,7 @@ import javax.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
@@ -38,17 +40,8 @@ import org.springframework.web.servlet.FrameworkServlet;
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
  * implementations that register a {@link DispatcherServlet} in the servlet context.
  *
- * <p>Concrete implementations are required to implement
- * {@link #createServletApplicationContext()}, as well as {@link #getServletMappings()},
- * both of which get invoked from {@link #registerDispatcherServlet(ServletContext)}.
- * Further customization can be achieved by overriding
- * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
- *
- * <p>Because this class extends from {@link AbstractContextLoaderInitializer}, concrete
- * implementations are also required to implement {@link #createRootApplicationContext()}
- * to set up a parent "<strong>root</strong>" application context. If a root context is
- * not desired, implementations can simply return {@code null} in the
- * {@code createRootApplicationContext()} implementation.
+ * <p>Most applications should consider extending the Spring Java config subclass
+ * {@link AbstractAnnotationConfigDispatcherServletInitializer}.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -84,20 +77,20 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return null or empty");
 
 		WebApplicationContext servletAppContext = createServletApplicationContext();
-		Assert.notNull(servletAppContext,
-				"createServletApplicationContext() did not return an application " +
-				"context for servlet [" + servletName + "]");
+		Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
 
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
+		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
-		Assert.notNull(registration,
-				"Failed to register servlet with name '" + servletName + "'." +
-				"Check if there is another servlet registered under the same name.");
+		if (registration == null) {
+			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
+					"Check if there is another servlet registered under the same name.");
+		}
 
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
@@ -150,6 +143,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see DispatcherServlet#setContextInitializers
 	 * @see #getRootApplicationContextInitializers()
 	 */
+	@Nullable
 	protected ApplicationContextInitializer<?>[] getServletApplicationContextInitializers() {
 		return null;
 	}
@@ -166,6 +160,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
+	@Nullable
 	protected Filter[] getServletFilters() {
 		return null;
 	}
@@ -190,16 +185,19 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, Filter filter) {
 		String filterName = Conventions.getVariableName(filter);
 		Dynamic registration = servletContext.addFilter(filterName, filter);
+
 		if (registration == null) {
-			int counter = -1;
-			while (counter == -1 || registration == null) {
-				counter++;
+			int counter = 0;
+			while (registration == null) {
+				if (counter == 100) {
+					throw new IllegalStateException("Failed to register filter with name '" + filterName + "'. " +
+							"Check if there is another filter registered under the same name.");
+				}
 				registration = servletContext.addFilter(filterName + "#" + counter, filter);
-				Assert.isTrue(counter < 100,
-						"Failed to register filter '" + filter + "'." +
-						"Could the same Filter instance have been registered already?");
+				counter++;
 			}
 		}
+
 		registration.setAsyncSupported(isAsyncSupported());
 		registration.addMappingForServletNames(getDispatcherTypes(), false, getServletName());
 		return registration;

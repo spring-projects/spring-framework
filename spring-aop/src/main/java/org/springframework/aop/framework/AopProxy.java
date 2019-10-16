@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.aop.framework;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Delegate interface for a configured AOP proxy, allowing for the creation
@@ -48,6 +50,6 @@ public interface AopProxy {
 	 * (or {@code null} for the low-level proxy facility's default)
 	 * @return the new proxy object (never {@code null})
 	 */
-	Object getProxy(ClassLoader classLoader);
+	Object getProxy(@Nullable ClassLoader classLoader);
 
 }

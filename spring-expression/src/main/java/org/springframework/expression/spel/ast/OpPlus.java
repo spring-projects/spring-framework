@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
@@ -49,18 +50,17 @@ import org.springframework.util.NumberUtils;
  */
 public class OpPlus extends Operator {
 
-	public OpPlus(int pos, SpelNodeImpl... operands) {
-		super("+", pos, operands);
-		Assert.notEmpty(operands);
+	public OpPlus(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("+", startPos, endPos, operands);
+		Assert.notEmpty(operands, "Operands must not be empty");
 	}
 
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
-		SpelNodeImpl rightOp = getRightOperand();
 
-		if (rightOp == null) {  // if only one operand, then this is unary plus
+		if (this.children.length < 2) {  // if only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
 				if (operandOne instanceof Double) {
@@ -82,7 +82,7 @@ public class OpPlus extends Operator {
 
 		TypedValue operandOneValue = leftOp.getValueInternal(state);
 		Object leftOperand = operandOneValue.getValue();
-		TypedValue operandTwoValue = rightOp.getValueInternal(state);
+		TypedValue operandTwoValue = getRightOperand().getValueInternal(state);
 		Object rightOperand = operandTwoValue.getValue();
 
 		if (leftOperand instanceof Number && rightOperand instanceof Number) {
@@ -150,7 +150,7 @@ public class OpPlus extends Operator {
 	@Override
 	public SpelNodeImpl getRightOperand() {
 		if (this.children.length < 2) {
-			return null;
+			throw new IllegalStateException("No right operand");
 		}
 		return this.children[1];
 	}
@@ -178,9 +178,9 @@ public class OpPlus extends Operator {
 			return false;
 		}
 		if (this.children.length > 1) {
-			 if (!getRightOperand().isCompilable()) {
-				 return false;
-			 }
+			if (!getRightOperand().isCompilable()) {
+				return false;
+			}
 		}
 		return (this.exitTypeDescriptor != null);
 	}
@@ -189,13 +189,13 @@ public class OpPlus extends Operator {
 	 * Walk through a possible tree of nodes that combine strings and append
 	 * them all to the same (on stack) StringBuilder.
 	 */
-	private void walk(MethodVisitor mv, CodeFlow cf, SpelNodeImpl operand) {
+	private void walk(MethodVisitor mv, CodeFlow cf, @Nullable SpelNodeImpl operand) {
 		if (operand instanceof OpPlus) {
 			OpPlus plus = (OpPlus)operand;
-			walk(mv,cf,plus.getLeftOperand());
-			walk(mv,cf,plus.getRightOperand());
+			walk(mv, cf, plus.getLeftOperand());
+			walk(mv, cf, plus.getRightOperand());
 		}
-		else {
+		else if (operand != null) {
 			cf.enterCompilationScope();
 			operand.generateCode(mv,cf);
 			if (!"Ljava/lang/String".equals(cf.lastDescriptor())) {
@@ -205,40 +205,43 @@ public class OpPlus extends Operator {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 		}
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		if (this.exitTypeDescriptor == "Ljava/lang/String") {
+		if ("Ljava/lang/String".equals(this.exitTypeDescriptor)) {
 			mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
 			mv.visitInsn(DUP);
 			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-			walk(mv,cf,getLeftOperand());
-			walk(mv,cf,getRightOperand());
+			walk(mv, cf, getLeftOperand());
+			walk(mv, cf, getRightOperand());
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
 		}
 		else {
-			getLeftOperand().generateCode(mv, cf);
-			String leftDesc = getLeftOperand().exitTypeDescriptor;
-			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, this.exitTypeDescriptor.charAt(0));
+			this.children[0].generateCode(mv, cf);
+			String leftDesc = this.children[0].exitTypeDescriptor;
+			String exitDesc = this.exitTypeDescriptor;
+			Assert.state(exitDesc != null, "No exit type descriptor");
+			char targetDesc = exitDesc.charAt(0);
+			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, targetDesc);
 			if (this.children.length > 1) {
 				cf.enterCompilationScope();
-				getRightOperand().generateCode(mv, cf);
-				String rightDesc = getRightOperand().exitTypeDescriptor;
+				this.children[1].generateCode(mv, cf);
+				String rightDesc = this.children[1].exitTypeDescriptor;
 				cf.exitCompilationScope();
-				CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, this.exitTypeDescriptor.charAt(0));
-				switch (this.exitTypeDescriptor.charAt(0)) {
+				CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
+				switch (targetDesc) {
 					case 'I':
 						mv.visitInsn(IADD);
 						break;
 					case 'J':
 						mv.visitInsn(LADD);
 						break;
-					case 'F': 
+					case 'F':
 						mv.visitInsn(FADD);
 						break;
 					case 'D':
 						mv.visitInsn(DADD);
-						break;				
+						break;
 					default:
 						throw new IllegalStateException(
 								"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");

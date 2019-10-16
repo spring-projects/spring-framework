@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original  author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -45,11 +46,12 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	 */
 	public CompositeMessageConverter(Collection<MessageConverter> converters) {
 		Assert.notEmpty(converters, "Converters must not be empty");
-		this.converters = new ArrayList<MessageConverter>(converters);
+		this.converters = new ArrayList<>(converters);
 	}
 
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = converter.fromMessage(message, targetClass);
@@ -61,7 +63,8 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	public Object fromMessage(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	@Nullable
+	public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = (converter instanceof SmartMessageConverter ?
 					((SmartMessageConverter) converter).fromMessage(message, targetClass, conversionHint) :
@@ -74,7 +77,8 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	public Message<?> toMessage(Object payload, MessageHeaders headers) {
+	@Nullable
+	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = converter.toMessage(payload, headers);
 			if (result != null) {
@@ -85,7 +89,8 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	public Message<?> toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
+	@Nullable
+	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = (converter instanceof SmartMessageConverter ?
 					((SmartMessageConverter) converter).toMessage(payload, headers, conversionHint) :

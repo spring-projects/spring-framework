@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.web.socket.config.annotation;
 
 import java.util.Arrays;
 
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -40,14 +39,10 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 public class ServletWebSocketHandlerRegistration
 		extends AbstractWebSocketHandlerRegistration<MultiValueMap<HttpRequestHandler, String>> {
 
-	public ServletWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
-		super(sockJsTaskScheduler);
-	}
-
 
 	@Override
 	protected MultiValueMap<HttpRequestHandler, String> createMappings() {
-		return new LinkedMultiValueMap<HttpRequestHandler, String>();
+		return new LinkedMultiValueMap<>();
 	}
 
 	@Override
@@ -60,10 +55,12 @@ public class ServletWebSocketHandlerRegistration
 
 	@Override
 	protected void addWebSocketHandlerMapping(MultiValueMap<HttpRequestHandler, String> mappings,
-			WebSocketHandler wsHandler, HandshakeHandler handshakeHandler,
+			WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler,
 			HandshakeInterceptor[] interceptors, String path) {
 
-		WebSocketHttpRequestHandler httpHandler = new WebSocketHttpRequestHandler(wsHandler, handshakeHandler);
+		WebSocketHttpRequestHandler httpHandler =
+				new WebSocketHttpRequestHandler(webSocketHandler, handshakeHandler);
+
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			httpHandler.setHandshakeInterceptors(Arrays.asList(interceptors));
 		}

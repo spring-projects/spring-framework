@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc;
 
 import java.util.Enumeration;
 import java.util.Properties;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -27,6 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -78,20 +82,22 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 1.1.1
  * @see ServletForwardingController
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  */
 public class ServletWrappingController extends AbstractController
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
-	private Class<?> servletClass;
+	@Nullable
+	private Class<? extends Servlet> servletClass;
 
+	@Nullable
 	private String servletName;
 
 	private Properties initParameters = new Properties();
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Servlet servletInstance;
 
 
@@ -105,7 +111,7 @@ public class ServletWrappingController extends AbstractController
 	 * Needs to implement {@code javax.servlet.Servlet}.
 	 * @see javax.servlet.Servlet
 	 */
-	public void setServletClass(Class<?> servletClass) {
+	public void setServletClass(Class<? extends Servlet> servletClass) {
 		this.servletClass = servletClass;
 	}
 
@@ -138,16 +144,12 @@ public class ServletWrappingController extends AbstractController
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.servletClass == null) {
-			throw new IllegalArgumentException("servletClass is required");
-		}
-		if (!Servlet.class.isAssignableFrom(this.servletClass)) {
-			throw new IllegalArgumentException("servletClass [" + this.servletClass.getName() +
-				"] needs to implement interface [javax.servlet.Servlet]");
+			throw new IllegalArgumentException("'servletClass' is required");
 		}
 		if (this.servletName == null) {
 			this.servletName = this.beanName;
 		}
-		this.servletInstance = (Servlet) this.servletClass.newInstance();
+		this.servletInstance = ReflectionUtils.accessibleConstructor(this.servletClass).newInstance();
 		this.servletInstance.init(new DelegatingServletConfig());
 	}
 
@@ -158,8 +160,9 @@ public class ServletWrappingController extends AbstractController
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-		throws Exception {
+			throws Exception {
 
+		Assert.state(this.servletInstance != null, "No Servlet instance");
 		this.servletInstance.service(request, response);
 		return null;
 	}
@@ -171,7 +174,9 @@ public class ServletWrappingController extends AbstractController
 	 */
 	@Override
 	public void destroy() {
-		this.servletInstance.destroy();
+		if (this.servletInstance != null) {
+			this.servletInstance.destroy();
+		}
 	}
 
 
@@ -183,11 +188,13 @@ public class ServletWrappingController extends AbstractController
 	private class DelegatingServletConfig implements ServletConfig {
 
 		@Override
+		@Nullable
 		public String getServletName() {
 			return servletName;
 		}
 
 		@Override
+		@Nullable
 		public ServletContext getServletContext() {
 			return ServletWrappingController.this.getServletContext();
 		}
@@ -198,7 +205,7 @@ public class ServletWrappingController extends AbstractController
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		public Enumeration<String> getInitParameterNames() {
 			return (Enumeration) initParameters.keys();
 		}

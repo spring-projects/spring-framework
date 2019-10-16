@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,11 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,9 +40,9 @@ import org.springframework.util.Assert;
  */
 public class SimpleNamespaceContext implements NamespaceContext {
 
-	private final Map<String, String> prefixToNamespaceUri = new HashMap<String, String>();
+	private final Map<String, String> prefixToNamespaceUri = new HashMap<>();
 
-	private final Map<String, Set<String>> namespaceUriToPrefixes = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> namespaceUriToPrefixes = new HashMap<>();
 
 	private String defaultNamespaceUri = "";
 
@@ -64,6 +66,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	}
 
 	@Override
+	@Nullable
 	public String getPrefix(String namespaceUri) {
 		Set<String> prefixes = getPrefixesSet(namespaceUri);
 		return (!prefixes.isEmpty() ? prefixes.iterator().next() : null);
@@ -87,7 +90,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
-			return (prefixes != null ?  Collections.unmodifiableSet(prefixes) : Collections.<String>emptySet());
+			return (prefixes != null ?  Collections.unmodifiableSet(prefixes) : Collections.emptySet());
 		}
 	}
 
@@ -97,9 +100,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	 * The supplied map must consist of string key value pairs.
 	 */
 	public void setBindings(Map<String, String> bindings) {
-		for (Map.Entry<String, String> entry : bindings.entrySet()) {
-			bindNamespaceUri(entry.getKey(), entry.getValue());
-		}
+		bindings.forEach(this::bindNamespaceUri);
 	}
 
 	/**
@@ -123,11 +124,8 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			this.prefixToNamespaceUri.put(prefix, namespaceUri);
-			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
-			if (prefixes == null) {
-				prefixes = new LinkedHashSet<String>();
-				this.namespaceUriToPrefixes.put(namespaceUri, prefixes);
-			}
+			Set<String> prefixes =
+					this.namespaceUriToPrefixes.computeIfAbsent(namespaceUri, k -> new LinkedHashSet<>());
 			prefixes.add(prefix);
 		}
 	}
@@ -136,7 +134,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	 * Remove the given prefix from this context.
 	 * @param prefix the prefix to be removed
 	 */
-	public void removeBinding(String prefix) {
+	public void removeBinding(@Nullable String prefix) {
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			this.defaultNamespaceUri = "";
 		}

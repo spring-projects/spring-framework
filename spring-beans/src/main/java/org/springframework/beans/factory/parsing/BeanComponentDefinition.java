@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanReference;
+import org.springframework.lang.Nullable;
 
 /**
  * ComponentDefinition based on a standard BeanDefinition, exposing the given bean
@@ -46,8 +47,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * @param beanName the name of the bean
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
-		super(beanDefinition, beanName);
-		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
+		this(new BeanDefinitionHolder(beanDefinition, beanName));
 	}
 
 	/**
@@ -56,28 +56,22 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * @param beanName the name of the bean
 	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
-	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, String[] aliases) {
-		super(beanDefinition, beanName, aliases);
-		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
+	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, @Nullable String[] aliases) {
+		this(new BeanDefinitionHolder(beanDefinition, beanName, aliases));
 	}
 
 	/**
 	 * Create a new BeanComponentDefinition for the given bean.
-	 * @param holder the BeanDefinitionHolder encapsulating the
-	 * bean definition as well as the name of the bean
+	 * @param beanDefinitionHolder the BeanDefinitionHolder encapsulating
+	 * the bean definition as well as the name of the bean
 	 */
-	public BeanComponentDefinition(BeanDefinitionHolder holder) {
-		super(holder);
-		findInnerBeanDefinitionsAndBeanReferences(holder.getBeanDefinition());
-	}
+	public BeanComponentDefinition(BeanDefinitionHolder beanDefinitionHolder) {
+		super(beanDefinitionHolder);
 
-
-	private void findInnerBeanDefinitionsAndBeanReferences(BeanDefinition beanDefinition) {
-		List<BeanDefinition> innerBeans = new ArrayList<BeanDefinition>();
-		List<BeanReference> references = new ArrayList<BeanReference>();
-		PropertyValues propertyValues = beanDefinition.getPropertyValues();
-		for (int i = 0; i < propertyValues.getPropertyValues().length; i++) {
-			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
+		List<BeanDefinition> innerBeans = new ArrayList<>();
+		List<BeanReference> references = new ArrayList<>();
+		PropertyValues propertyValues = beanDefinitionHolder.getBeanDefinition().getPropertyValues();
+		for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 			Object value = propertyValue.getValue();
 			if (value instanceof BeanDefinitionHolder) {
 				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
@@ -89,8 +83,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add((BeanReference) value);
 			}
 		}
-		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
-		this.beanReferences = references.toArray(new BeanReference[references.size()]);
+		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
+		this.beanReferences = references.toArray(new BeanReference[0]);
 	}
 
 
@@ -134,7 +128,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * as well, in addition to the superclass's equality requirements.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BeanComponentDefinition && super.equals(other)));
 	}
 

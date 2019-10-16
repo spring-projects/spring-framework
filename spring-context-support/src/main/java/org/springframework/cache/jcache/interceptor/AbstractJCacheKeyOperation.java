@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
@@ -30,6 +31,7 @@ import org.springframework.cache.interceptor.KeyGenerator;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <A> the annotation type
  */
 abstract class AbstractJCacheKeyOperation<A extends Annotation> extends AbstractJCacheOperation<A> {
 
@@ -73,7 +75,7 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 	 * used to compute the key
 	 */
 	public CacheInvocationParameter[] getKeyParameters(Object... values) {
-		List<CacheInvocationParameter> result = new ArrayList<CacheInvocationParameter>();
+		List<CacheInvocationParameter> result = new ArrayList<>();
 		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();
 			if (parameterPosition >= values.length) {
@@ -82,13 +84,13 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 			}
 			result.add(keyParameterDetail.toCacheInvocationParameter(values[parameterPosition]));
 		}
-		return result.toArray(new CacheInvocationParameter[result.size()]);
+		return result.toArray(new CacheInvocationParameter[0]);
 	}
 
 
 	private static List<CacheParameterDetail> initializeKeyParameterDetails(List<CacheParameterDetail> allParameters) {
-		List<CacheParameterDetail> all = new ArrayList<CacheParameterDetail>();
-		List<CacheParameterDetail> annotated = new ArrayList<CacheParameterDetail>();
+		List<CacheParameterDetail> all = new ArrayList<>();
+		List<CacheParameterDetail> annotated = new ArrayList<>();
 		for (CacheParameterDetail allParameter : allParameters) {
 			if (!allParameter.isValue()) {
 				all.add(allParameter);

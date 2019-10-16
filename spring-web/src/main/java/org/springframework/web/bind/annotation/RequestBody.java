@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,14 +30,13 @@ import org.springframework.http.converter.HttpMessageConverter;
  * method argument depending on the content type of the request. Optionally, automatic
  * validation can be applied by annotating the argument with {@code @Valid}.
  *
- * <p>Supported for annotated handler methods in Servlet environments.
+ * <p>Supported for annotated handler methods.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see RequestHeader
  * @see ResponseBody
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

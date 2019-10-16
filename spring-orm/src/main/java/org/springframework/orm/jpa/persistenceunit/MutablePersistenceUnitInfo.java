@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,15 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,25 +46,31 @@ import org.springframework.util.ClassUtils;
  */
 public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
+	@Nullable
 	private String persistenceUnitName;
 
+	@Nullable
 	private String persistenceProviderClassName;
 
+	@Nullable
 	private PersistenceUnitTransactionType transactionType;
 
+	@Nullable
 	private DataSource nonJtaDataSource;
 
+	@Nullable
 	private DataSource jtaDataSource;
 
-	private final List<String> mappingFileNames = new LinkedList<String>();
+	private final List<String> mappingFileNames = new LinkedList<>();
 
-	private List<URL> jarFileUrls = new LinkedList<URL>();
+	private List<URL> jarFileUrls = new LinkedList<>();
 
+	@Nullable
 	private URL persistenceUnitRootUrl;
 
-	private final List<String> managedClassNames = new LinkedList<String>();
+	private final List<String> managedClassNames = new LinkedList<>();
 
-	private final List<String> managedPackages = new LinkedList<String>();
+	private final List<String> managedPackages = new LinkedList<>();
 
 	private boolean excludeUnlistedClasses = false;
 
@@ -73,23 +82,26 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private String persistenceXMLSchemaVersion = "2.0";
 
+	@Nullable
 	private String persistenceProviderPackageName;
 
 
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
 
-	public void setPersistenceProviderClassName(String persistenceProviderClassName) {
+	public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
 		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
 	}
@@ -109,20 +121,22 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		}
 	}
 
-	public void setJtaDataSource(DataSource jtaDataSource) {
+	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
 		this.jtaDataSource = jtaDataSource;
 	}
 
 	@Override
+	@Nullable
 	public DataSource getJtaDataSource() {
 		return this.jtaDataSource;
 	}
 
-	public void setNonJtaDataSource(DataSource nonJtaDataSource) {
+	public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
 		this.nonJtaDataSource = nonJtaDataSource;
 	}
 
 	@Override
+	@Nullable
 	public DataSource getNonJtaDataSource() {
 		return this.nonJtaDataSource;
 	}
@@ -145,11 +159,12 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.jarFileUrls;
 	}
 
-	public void setPersistenceUnitRootUrl(URL persistenceUnitRootUrl) {
+	public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
 
 	@Override
+	@Nullable
 	public URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
 	}
@@ -214,13 +229,11 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	public void addProperty(String name, String value) {
-		if (this.properties == null) {
-			this.properties = new Properties();
-		}
 		this.properties.setProperty(name, value);
 	}
 
 	public void setProperties(Properties properties) {
+		Assert.notNull(properties, "Properties must not be null");
 		this.properties = properties;
 	}
 
@@ -239,10 +252,11 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
-	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {
+	public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
 		this.persistenceProviderPackageName = persistenceProviderPackageName;
 	}
 
+	@Nullable
 	public String getPersistenceProviderPackageName() {
 		return this.persistenceProviderPackageName;
 	}
@@ -253,6 +267,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}

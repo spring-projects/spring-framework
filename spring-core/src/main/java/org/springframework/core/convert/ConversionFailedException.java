@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -26,12 +27,14 @@ import org.springframework.util.ObjectUtils;
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public final class ConversionFailedException extends ConversionException {
+public class ConversionFailedException extends ConversionException {
 
+	@Nullable
 	private final TypeDescriptor sourceType;
 
 	private final TypeDescriptor targetType;
 
+	@Nullable
 	private final Object value;
 
 
@@ -42,7 +45,9 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param value the value we tried to convert
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
+	public ConversionFailedException(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType,
+			@Nullable Object value, Throwable cause) {
+
 		super("Failed to convert from type [" + sourceType + "] to type [" + targetType +
 				"] for value '" + ObjectUtils.nullSafeToString(value) + "'", cause);
 		this.sourceType = sourceType;
@@ -54,6 +59,7 @@ public final class ConversionFailedException extends ConversionException {
 	/**
 	 * Return the source type we tried to convert the value from.
 	 */
+	@Nullable
 	public TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
@@ -68,6 +74,7 @@ public final class ConversionFailedException extends ConversionException {
 	/**
 	 * Return the offending value.
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}

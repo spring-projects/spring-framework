@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
-	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<PropertySource<?>>();
+	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();
 
 
 	/**
@@ -54,6 +55,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 
 	@Override
+	@Nullable
 	public Object getProperty(String name) {
 		for (PropertySource<?> propertySource : this.propertySources) {
 			Object candidate = propertySource.getProperty(name);
@@ -76,7 +78,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 	@Override
 	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<String>();
+		Set<String> names = new LinkedHashSet<>();
 		for (PropertySource<?> propertySource : this.propertySources) {
 			if (!(propertySource instanceof EnumerablePropertySource)) {
 				throw new IllegalStateException(
@@ -102,7 +104,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	 * @since 4.1
 	 */
 	public void addFirstPropertySource(PropertySource<?> propertySource) {
-		List<PropertySource<?>> existing = new ArrayList<PropertySource<?>>(this.propertySources);
+		List<PropertySource<?>> existing = new ArrayList<>(this.propertySources);
 		this.propertySources.clear();
 		this.propertySources.add(propertySource);
 		this.propertySources.addAll(existing);
@@ -119,8 +121,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 	@Override
 	public String toString() {
-		return String.format("%s [name='%s', propertySources=%s]",
-				getClass().getSimpleName(), this.name, this.propertySources);
+		return getClass().getSimpleName() + " {name='" + this.name + "', propertySources=" + this.propertySources + "}";
 	}
 
 }

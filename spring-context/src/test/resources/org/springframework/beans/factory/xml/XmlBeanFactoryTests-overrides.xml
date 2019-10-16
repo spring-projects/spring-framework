@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -39,7 +39,7 @@
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 		<property name="friends">
 			<bean class="org.springframework.tests.sample.beans.TestBean"/>
@@ -56,7 +56,7 @@
 
 	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" scope="prototype">
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 

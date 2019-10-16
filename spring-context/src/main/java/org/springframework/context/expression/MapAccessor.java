@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * EL property accessor that knows how to traverse the keys
@@ -41,13 +43,13 @@ public class MapAccessor implements CompilablePropertyAccessor {
 	}
 
 	@Override
-	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		Map<?, ?> map = (Map<?, ?>) target;
-		return map.containsKey(name);
+	public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
+		return (target instanceof Map && ((Map<?, ?>) target).containsKey(name));
 	}
 
 	@Override
-	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+	public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
+		Assert.state(target instanceof Map, "Target must be of type Map");
 		Map<?, ?> map = (Map<?, ?>) target;
 		Object value = map.get(name);
 		if (value == null && !map.containsKey(name)) {
@@ -57,36 +59,18 @@ public class MapAccessor implements CompilablePropertyAccessor {
 	}
 
 	@Override
-	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		return true;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
+			throws AccessException {
+
+		Assert.state(target instanceof Map, "Target must be a Map");
 		Map<Object, Object> map = (Map<Object, Object>) target;
 		map.put(name, newValue);
-	}
-
-
-	/**
-	 * Exception thrown from {@code read} in order to reset a cached
-	 * PropertyAccessor, allowing other accessors to have a try.
-	 */
-	@SuppressWarnings("serial")
-	private static class MapAccessException extends AccessException {
-
-		private final String key;
-
-		public MapAccessException(String key) {
-			super(null);
-			this.key = key;
-		}
-
-		@Override
-		public String getMessage() {
-			return "Map does not contain a value for key '" + this.key + "'";
-		}
 	}
 
 	@Override
@@ -110,6 +94,27 @@ public class MapAccessor implements CompilablePropertyAccessor {
 		}
 		mv.visitLdcInsn(propertyName);
 		mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
+	}
+
+
+	/**
+	 * Exception thrown from {@code read} in order to reset a cached
+	 * PropertyAccessor, allowing other accessors to have a try.
+	 */
+	@SuppressWarnings("serial")
+	private static class MapAccessException extends AccessException {
+
+		private final String key;
+
+		public MapAccessException(String key) {
+			super("");
+			this.key = key;
+		}
+
+		@Override
+		public String getMessage() {
+			return "Map does not contain a value for key '" + this.key + "'";
+		}
 	}
 
 }

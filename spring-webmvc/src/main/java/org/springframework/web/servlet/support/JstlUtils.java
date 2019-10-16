@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,6 +29,7 @@ import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
 
 /**
  * Helper class for preparing JSTL views,
@@ -51,7 +53,7 @@ public abstract class JstlUtils {
 	 * @see org.springframework.context.ApplicationContext
 	 */
 	public static MessageSource getJstlAwareMessageSource(
-			ServletContext servletContext, MessageSource messageSource) {
+			@Nullable ServletContext servletContext, MessageSource messageSource) {
 
 		if (servletContext != null) {
 			String jstlInitParam = servletContext.getInitParameter(Config.FMT_LOCALIZATION_CONTEXT);
@@ -77,7 +79,7 @@ public abstract class JstlUtils {
 	 * typically the current ApplicationContext (may be {@code null})
 	 * @see #exposeLocalizationContext(RequestContext)
 	 */
-	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
+	public static void exposeLocalizationContext(HttpServletRequest request, @Nullable MessageSource messageSource) {
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		Config.set(request, Config.FMT_LOCALE, jstlLocale);
 		TimeZone timeZone = RequestContextUtils.getTimeZone(request);

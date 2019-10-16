@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -188,14 +190,19 @@ import org.springframework.util.StringUtils;
  */
 public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private Class<?> serviceLocatorInterface;
 
+	@Nullable
 	private Constructor<Exception> serviceLocatorExceptionConstructor;
 
+	@Nullable
 	private Properties serviceMappings;
 
+	@Nullable
 	private ListableBeanFactory beanFactory;
 
+	@Nullable
 	private Object proxy;
 
 
@@ -223,10 +230,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	 * @see #createServiceLocatorException
 	 */
 	public void setServiceLocatorExceptionClass(Class<? extends Exception> serviceLocatorExceptionClass) {
-		if (serviceLocatorExceptionClass != null && !Exception.class.isAssignableFrom(serviceLocatorExceptionClass)) {
-			throw new IllegalArgumentException(
-					"serviceLocatorException [" + serviceLocatorExceptionClass.getName() + "] is not a subclass of Exception");
-		}
 		this.serviceLocatorExceptionConstructor =
 				determineServiceLocatorExceptionConstructor(serviceLocatorExceptionClass);
 	}
@@ -281,15 +284,15 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	@SuppressWarnings("unchecked")
 	protected Constructor<Exception> determineServiceLocatorExceptionConstructor(Class<? extends Exception> exceptionClass) {
 		try {
-			return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {String.class, Throwable.class});
+			return (Constructor<Exception>) exceptionClass.getConstructor(String.class, Throwable.class);
 		}
 		catch (NoSuchMethodException ex) {
 			try {
-				return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {Throwable.class});
+				return (Constructor<Exception>) exceptionClass.getConstructor(Throwable.class);
 			}
 			catch (NoSuchMethodException ex2) {
 				try {
-					return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {String.class});
+					return (Constructor<Exception>) exceptionClass.getConstructor(String.class);
 				}
 				catch (NoSuchMethodException ex3) {
 					throw new IllegalArgumentException(
@@ -326,6 +329,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.proxy;
 	}
@@ -357,7 +361,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 				return System.identityHashCode(proxy);
 			}
 			else if (ReflectionUtils.isToStringMethod(method)) {
-				return "Service locator: " + serviceLocatorInterface.getName();
+				return "Service locator: " + serviceLocatorInterface;
 			}
 			else {
 				return invokeServiceLocatorMethod(method, args);
@@ -368,6 +372,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 			Class<?> serviceLocatorMethodReturnType = getServiceLocatorMethodReturnType(method);
 			try {
 				String beanName = tryGetBeanName(args);
+				Assert.state(beanFactory != null, "No BeanFactory available");
 				if (StringUtils.hasLength(beanName)) {
 					// Service locator for a specific bean name
 					return beanFactory.getBean(beanName, serviceLocatorMethodReturnType);
@@ -388,7 +393,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		/**
 		 * Check whether a service id was passed in.
 		 */
-		private String tryGetBeanName(Object[] args) {
+		private String tryGetBeanName(@Nullable Object[] args) {
 			String beanName = "";
 			if (args != null && args.length == 1 && args[0] != null) {
 				beanName = args[0].toString();
@@ -404,6 +409,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		}
 
 		private Class<?> getServiceLocatorMethodReturnType(Method method) throws NoSuchMethodException {
+			Assert.state(serviceLocatorInterface != null, "No service locator interface specified");
 			Class<?>[] paramTypes = method.getParameterTypes();
 			Method interfaceMethod = serviceLocatorInterface.getMethod(method.getName(), paramTypes);
 			Class<?> serviceLocatorReturnType = interfaceMethod.getReturnType();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.junit.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.util.Assert;
@@ -45,6 +46,7 @@ public class ProfileValueChecker extends Statement {
 
 	private final Class<?> testClass;
 
+	@Nullable
 	private final Method testMethod;
 
 
@@ -56,7 +58,7 @@ public class ProfileValueChecker extends Statement {
 	 * @param testMethod the test method to check; may be {@code null} if
 	 * this {@code ProfileValueChecker} is being applied at the class level
 	 */
-	public ProfileValueChecker(Statement next, Class<?> testClass, Method testMethod) {
+	public ProfileValueChecker(Statement next, Class<?> testClass, @Nullable Method testMethod) {
 		Assert.notNull(next, "The next statement must not be null");
 		Assert.notNull(testClass, "The test class must not be null");
 		this.next = next;
