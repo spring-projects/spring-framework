@@ -16,7 +16,6 @@
 
 package org.springframework.web.client;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -33,8 +32,7 @@ public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
-
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private final int rawStatusCode;
 
@@ -48,13 +46,13 @@ public class RestClientResponseException extends RestClientException {
 	@Nullable
 	private final String responseCharset;
 
-
 	/**
 	 * Construct a new instance of with the given response data.
-	 * @param statusCode the raw status code value
-	 * @param statusText the status text
+	 * 
+	 * @param statusCode      the raw status code value
+	 * @param statusText      the status text
 	 * @param responseHeaders the response headers (may be {@code null})
-	 * @param responseBody the response body content (may be {@code null})
+	 * @param responseBody    the response body content (may be {@code null})
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
@@ -67,7 +65,6 @@ public class RestClientResponseException extends RestClientException {
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
 	}
-
 
 	/**
 	 * Return the raw HTTP status code value.
@@ -102,16 +99,15 @@ public class RestClientResponseException extends RestClientException {
 	 * Return the response body as a string.
 	 */
 	public String getResponseBodyAsString() {
-		if (this.responseCharset == null) {
-			return new String(this.responseBody, DEFAULT_CHARSET);
-		}
-		try {
-			return new String(this.responseBody, this.responseCharset);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not occur
-			throw new IllegalStateException(ex);
-		}
+		return this.responseCharset == null ? getResponseBodyAsString(DEFAULT_CHARSET)
+				: getResponseBodyAsString(Charset.forName(responseCharset));
+	}
+
+	/**
+	 * Return the response body as a string with the given charset
+	 */
+	public String getResponseBodyAsString(Charset requiredCharset) {
+		return new String(this.responseBody, requiredCharset);
 	}
 
 }

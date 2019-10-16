@@ -97,7 +97,7 @@ public class WebClientResponseException extends WebClientException {
 		this.statusText = statusText;
 		this.headers = (headers != null ? headers : HttpHeaders.EMPTY);
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
-		this.responseCharset = (charset != null ? charset : StandardCharsets.ISO_8859_1);
+		this.responseCharset = (charset != null ? charset : StandardCharsets.UTF_8);
 		this.request = request;
 	}
 
@@ -139,10 +139,17 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * Return the response body as a string.
+	 * Return the response body as a string with initial or default charset
 	 */
 	public String getResponseBodyAsString() {
-		return new String(this.responseBody, this.responseCharset);
+		return getResponseBodyAsString(this.responseCharset);
+	}
+	
+	/**
+	 * Return the response body as a string with given Charset
+	 */
+	public String getResponseBodyAsString(Charset requiredCharset) {
+		return new String(this.responseBody, requiredCharset);
 	}
 
 	/**
