@@ -27,6 +27,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
+import org.springframework.util.Base64Utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -180,7 +181,24 @@ public class DefaultUserDestinationResolverTests {
 		simpUser.addSessions(new TestSimpSession("openid123"));
 		given(this.registry.getUser(userName)).willReturn(simpUser);
 
-		String destination = "/user/" + StringUtils.replace(userName, "/", "%2F") + "/queue/foo";
+		String destination = "/user/B64:" + Base64Utils.encodeToUrlSafeString(userName.getBytes()) + "/queue/foo";
+
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, new TestPrincipal("joe"), null, destination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-useropenid123");
+	}
+
+	@Test
+	public void handleMessageEncodedUserNameWithPercentTwoEff() {
+		String userName = "https%3A%2F%2Fjoe.openid.example.org%2F|911276df-8a4f-4fda-986a-0713aba85b5e";
+
+		TestSimpUser simpUser = new TestSimpUser(userName);
+		simpUser.addSessions(new TestSimpSession("openid123"));
+		given(this.registry.getUser(userName)).willReturn(simpUser);
+
+		String destination = "/user/" + userName + "/queue/foo";
 
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, new TestPrincipal("joe"), null, destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
