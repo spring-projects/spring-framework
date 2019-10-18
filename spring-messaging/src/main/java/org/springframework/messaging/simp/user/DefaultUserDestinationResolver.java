@@ -31,7 +31,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Base64Utils;
 
 /**
  * A default implementation of {@code UserDestinationResolver} that relies
@@ -214,7 +214,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		String actualDest = sourceDest.substring(userEnd);
 		String subscribeDest = this.prefix.substring(0, prefixEnd - 1) + actualDest;
 		String userName = sourceDest.substring(prefixEnd, userEnd);
-		userName = StringUtils.replace(userName, "%2F", "/");
+		userName = new String(Base64Utils.decodeFromUrlSafeString(userName));
 
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		Set<String> sessionIds;

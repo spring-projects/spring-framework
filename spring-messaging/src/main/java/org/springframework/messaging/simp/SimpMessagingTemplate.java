@@ -31,7 +31,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Base64Utils;
 
 /**
  * An implementation of
@@ -224,7 +224,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			throws MessagingException {
 
 		Assert.notNull(user, "User must not be null");
-		user = StringUtils.replace(user, "/", "%2F");
+		user = Base64Utils.encodeToUrlSafeString(user.getBytes());
 		destination = destination.startsWith("/") ? destination : "/" + destination;
 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}

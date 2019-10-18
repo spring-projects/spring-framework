@@ -87,6 +87,20 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
+	public void convertAndSendToUserWithEncodingOfPercentTwoEff() {
+		this.messagingTemplate.convertAndSendToUser("https%3A%2F%2Fjoe.openid.example.org%2F|911276df-8a4f-4fda-986a-0713aba85b5e", "/queue/foo", "data");
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+
+		assertThat(messages.size()).isEqualTo(1);
+
+		SimpMessageHeaderAccessor headerAccessor =
+				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
+
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.getDestination()).isEqualTo("/user/aHR0cHMlM0ElMkYlMkZqb2Uub3BlbmlkLmV4YW1wbGUub3JnJTJGfDkxMTI3NmRmLThhNGYtNGZkYS05ODZhLTA3MTNhYmE4NWI1ZQ==/queue/foo");
+	}
+
+	@Test
 	public void convertAndSendWithCustomHeader() {
 		Map<String, Object> headers = Collections.<String, Object>singletonMap("key", "value");
 		this.messagingTemplate.convertAndSend("/foo", "data", headers);
