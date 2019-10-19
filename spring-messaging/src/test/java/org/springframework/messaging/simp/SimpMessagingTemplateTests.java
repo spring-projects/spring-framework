@@ -83,7 +83,7 @@ public class SimpMessagingTemplateTests {
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
 		assertThat(headerAccessor).isNotNull();
-		assertThat(headerAccessor.getDestination()).isEqualTo("/user/https:%2F%2Fjoe.openid.example.org%2F/queue/foo");
+		assertThat(headerAccessor.getDestination()).isEqualTo("/user/B64:aHR0cHM6Ly9qb2Uub3BlbmlkLmV4YW1wbGUub3JnLw==/queue/foo");
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class SimpMessagingTemplateTests {
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
 		assertThat(headerAccessor).isNotNull();
-		assertThat(headerAccessor.getDestination()).isEqualTo("/user/aHR0cHMlM0ElMkYlMkZqb2Uub3BlbmlkLmV4YW1wbGUub3JnJTJGfDkxMTI3NmRmLThhNGYtNGZkYS05ODZhLTA3MTNhYmE4NWI1ZQ==/queue/foo");
+		assertThat(headerAccessor.getDestination()).isEqualTo("/user/https%3A%2F%2Fjoe.openid.example.org%2F|911276df-8a4f-4fda-986a-0713aba85b5e/queue/foo");
 	}
 
 	@Test

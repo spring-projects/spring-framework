@@ -214,7 +214,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		String actualDest = sourceDest.substring(userEnd);
 		String subscribeDest = this.prefix.substring(0, prefixEnd - 1) + actualDest;
 		String userName = sourceDest.substring(prefixEnd, userEnd);
-		userName = new String(Base64Utils.decodeFromUrlSafeString(userName));
+		if (userName.startsWith("B64:"))
+			userName = new String(Base64Utils.decodeFromUrlSafeString(userName.split("B64:")[1]));
 
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		Set<String> sessionIds;

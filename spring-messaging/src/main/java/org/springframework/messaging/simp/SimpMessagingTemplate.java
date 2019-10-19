@@ -224,7 +224,8 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			throws MessagingException {
 
 		Assert.notNull(user, "User must not be null");
-		user = Base64Utils.encodeToUrlSafeString(user.getBytes());
+		if (user.startsWith("B64:") || user.contains("/"))
+			user = "B64:" + Base64Utils.encodeToUrlSafeString(user.getBytes());
 		destination = destination.startsWith("/") ? destination : "/" + destination;
 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}

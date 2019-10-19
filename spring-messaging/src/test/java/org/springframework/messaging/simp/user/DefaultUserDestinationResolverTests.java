@@ -181,7 +181,7 @@ public class DefaultUserDestinationResolverTests {
 		simpUser.addSessions(new TestSimpSession("openid123"));
 		given(this.registry.getUser(userName)).willReturn(simpUser);
 
-		String destination = "/user/" + StringUtils.replace(userName, "/", "%2F") + "/queue/foo";
+		String destination = "/user/B64:" + Base64Utils.encodeToUrlSafeString(userName.getBytes()) + "/queue/foo";
 
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, new TestPrincipal("joe"), null, destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
@@ -198,7 +198,7 @@ public class DefaultUserDestinationResolverTests {
 		simpUser.addSessions(new TestSimpSession("openid123"));
 		given(this.registry.getUser(userName)).willReturn(simpUser);
 
-		String destination = "/user/" + Base64Utils.encodeToUrlSafeString(userName.getBytes()) + "/queue/foo";
+		String destination = "/user/" + userName + "/queue/foo";
 
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, new TestPrincipal("joe"), null, destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
