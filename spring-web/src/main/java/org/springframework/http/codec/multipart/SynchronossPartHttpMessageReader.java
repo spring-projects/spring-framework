@@ -75,10 +75,17 @@ import org.springframework.util.Assert;
  */
 public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private final DataBufferFactory bufferFactory;
 
 	private final PartBodyStreamStorageFactory streamStorageFactory = new DefaultPartBodyStreamStorageFactory();
 
+	public SynchronossPartHttpMessageReader() {
+		this.bufferFactory = new DefaultDataBufferFactory();
+	}
+
+	SynchronossPartHttpMessageReader(DataBufferFactory bufferFactory) {
+		this.bufferFactory = bufferFactory;
+	}
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
@@ -155,15 +162,15 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 					parser.write(resultBytes);
 				}
 				catch (IOException ex) {
-					listener.onError("Exception thrown providing input to the parser", ex);
+					listener.onError("Exception thrown while providing input to the parser", ex);
 				}
 				finally {
 					DataBufferUtils.release(buffer);
 				}
 			}, ex -> {
 				try {
-					listener.onError("Request body input error", ex);
 					parser.close();
+					listener.onError("Request body input error", ex);
 				}
 				catch (IOException ex2) {
 					listener.onError("Exception thrown while closing the parser", ex2);

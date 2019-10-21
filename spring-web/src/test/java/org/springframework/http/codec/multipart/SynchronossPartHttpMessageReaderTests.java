@@ -17,19 +17,23 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Subscription;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -49,17 +53,20 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
-public class SynchronossPartHttpMessageReaderTests {
+public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private final MultipartHttpMessageReader reader =
-			new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
+			new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader(this.bufferFactory));
 
+	private static final ResolvableType PARTS_ELEMENT_TYPE =
+			forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(this.reader.canRead(
-				forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
+				PARTS_ELEMENT_TYPE,
 				MediaType.MULTIPART_FORM_DATA)).isTrue();
 
 		assertThat(this.reader.canRead(
@@ -80,37 +87,30 @@ public class SynchronossPartHttpMessageReaderTests {
 	}
 
 	@Test
-	public void resolveParts() {
+	void resolveParts() {
 		ServerHttpRequest request = generateMultipartRequest();
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
-		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
-		assertThat(parts.size()).isEqualTo(2);
+		MultiValueMap<String, Part> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()).block();
 
-		assertThat(parts.containsKey("fooPart")).isTrue();
+		assertThat(parts).containsOnlyKeys("fooPart", "barPart");
+
 		Part part = parts.getFirst("fooPart");
-		boolean condition1 = part instanceof FilePart;
-		assertThat(condition1).isTrue();
+		assertThat(part).isInstanceOf(FilePart.class);
 		assertThat(part.name()).isEqualTo("fooPart");
 		assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
 		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
-		assertThat(buffer.readableByteCount()).isEqualTo(12);
-		byte[] byteContent = new byte[12];
-		buffer.read(byteContent);
-		assertThat(new String(byteContent)).isEqualTo("Lorem Ipsum.");
+		assertThat(DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8)).isEqualTo("Lorem Ipsum.");
+		DataBufferUtils.release(buffer);
 
-		assertThat(parts.containsKey("barPart")).isTrue();
 		part = parts.getFirst("barPart");
-		boolean condition = part instanceof FormFieldPart;
-		assertThat(condition).isTrue();
+		assertThat(part).isInstanceOf(FormFieldPart.class);
 		assertThat(part.name()).isEqualTo("barPart");
 		assertThat(((FormFieldPart) part).value()).isEqualTo("bar");
 	}
 
 	@Test // SPR-16545
-	public void transferTo() {
+	void transferTo() {
 		ServerHttpRequest request = generateMultipartRequest();
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
-		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
+		MultiValueMap<String, Part> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()).block();
 
 		assertThat(parts).isNotNull();
 		FilePart part = (FilePart) parts.getFirst("fooPart");
@@ -125,10 +125,18 @@ public class SynchronossPartHttpMessageReaderTests {
 	}
 
 	@Test
-	public void bodyError() {
+	void bodyError() {
 		ServerHttpRequest request = generateErrorMultipartRequest();
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
-		StepVerifier.create(this.reader.readMono(elementType, request, emptyMap())).verifyError();
+		StepVerifier.create(this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap())).verifyError();
+	}
+
+	@Test
+	void readPartsWithoutDemand() {
+		ServerHttpRequest request = generateMultipartRequest();
+		Mono<MultiValueMap<String, Part>> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap());
+		ZeroDemandSubscriber subscriber = new ZeroDemandSubscriber();
+		parts.subscribe(subscriber);
+		subscriber.cancel();
 	}
 
 
@@ -142,16 +150,24 @@ public class SynchronossPartHttpMessageReaderTests {
 		new MultipartHttpMessageWriter()
 				.write(Mono.just(partsBuilder.build()), null, MediaType.MULTIPART_FORM_DATA, outputMessage, null)
 				.block(Duration.ofSeconds(5));
-
+		Flux<DataBuffer> requestBody = outputMessage.getBody().map(buffer -> this.bufferFactory.wrap(buffer.asByteBuffer()));
 		return MockServerHttpRequest.post("/")
 				.contentType(outputMessage.getHeaders().getContentType())
-				.body(outputMessage.getBody());
+				.body(requestBody);
 	}
 
 	private ServerHttpRequest generateErrorMultipartRequest() {
 		return MockServerHttpRequest.post("/")
 				.header(CONTENT_TYPE, MULTIPART_FORM_DATA.toString())
-				.body(Flux.just(new DefaultDataBufferFactory().wrap("invalid content".getBytes())));
+				.body(Flux.just(this.bufferFactory.wrap("invalid content".getBytes())));
+	}
+
+	private static class ZeroDemandSubscriber extends BaseSubscriber<MultiValueMap<String, Part>> {
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			// Just subscribe without requesting
+		}
 	}
 
 }

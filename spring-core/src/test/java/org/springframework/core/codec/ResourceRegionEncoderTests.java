@@ -30,6 +30,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
@@ -45,17 +46,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test cases for {@link ResourceRegionEncoder} class.
  * @author Brian Clozel
  */
-class ResourceRegionEncoderTests  {
+class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 
 	private ResourceRegionEncoder encoder = new ResourceRegionEncoder();
-
-	private LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
-
-
-	@AfterEach
-	void tearDown() throws Exception {
-		this.bufferFactory.checkForLeaks();
-	}
 
 	@Test
 	void canEncode() {
