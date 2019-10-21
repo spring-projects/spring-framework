@@ -875,10 +875,10 @@ class AnnotatedElementUtilsTests {
 	@Inherited
 	@interface AliasedTransactional {
 
-		@AliasFor(attribute = "qualifier")
+		@AliasFor("qualifier")
 		String value() default "";
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String qualifier() default "";
 	}
 
@@ -956,10 +956,10 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextConfig {
 
-		@AliasFor(attribute = "locations")
+		@AliasFor("locations")
 		String[] value() default {};
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String[] locations() default {};
 
 		Class<?>[] classes() default {};

@@ -622,7 +622,7 @@ public interface MergedAnnotation<A extends Annotation> {
 		}
 
 		/**
-		 * Factory method to create a {@link Adapt} array from a set of boolean flags.
+		 * Factory method to create an {@link Adapt} array from a set of boolean flags.
 		 * @param classToString if {@link Adapt#CLASS_TO_STRING} is included
 		 * @param annotationsToMap if {@link Adapt#ANNOTATION_TO_MAP} is included
 		 * @return a new {@link Adapt} array
