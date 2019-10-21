@@ -28,9 +28,8 @@ import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
+import kotlin.reflect.KFunction
 import kotlin.reflect.full.callSuspend
-import kotlin.reflect.jvm.kotlinFunction
 
 /**
  * Convert a [Deferred] instance to a [Mono] one.
@@ -58,8 +57,7 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
  * @since 5.2
  */
 @Suppress("UNCHECKED_CAST")
-internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Any? {
-	val function = method.kotlinFunction!!
+internal fun invokeSuspendingFunction(function: KFunction<*>, bean: Any, vararg args: Any?): Any? {
 	return if (function.isSuspend) {
 		val mono = mono(Dispatchers.Unconfined) {
 			function.callSuspend(bean, *args.sliceArray(0..(args.size-2)))

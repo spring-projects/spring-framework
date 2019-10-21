@@ -120,7 +120,7 @@ class KotlinInvocableHandlerMethodTests {
 				.verifyComplete()
 	}
 
-	class CoroutinesController {
+	private class CoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
 			delay(10)
@@ -146,7 +146,5 @@ class KotlinInvocableHandlerMethodTests {
 			delay(10)
 			response.headers.add("foo", "bar")
 		}
-
-
 	}
 }

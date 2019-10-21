@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import kotlin.reflect.KFunction;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.CoroutinesUtils;
@@ -37,6 +38,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
+import org.springframework.util.KotlinReflectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -129,11 +131,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			Object value;
 			try {
 				Method method = getBridgedMethod();
-				ReflectionUtils.makeAccessible(method);
 				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+					KFunction<?> function = KotlinReflectionUtils.methodToFunction(method);
+					KotlinReflectionUtils.makeFunctionAccessible(function);
+					value = CoroutinesUtils.invokeSuspendingFunction(function, getBean(), args);
 				}
 				else {
+					ReflectionUtils.makeAccessible(method);
 					value = method.invoke(getBean(), args);
 				}
 			}
