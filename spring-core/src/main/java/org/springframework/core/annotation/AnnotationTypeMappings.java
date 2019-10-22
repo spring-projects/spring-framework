@@ -205,9 +205,9 @@ final class AnnotationTypeMappings {
 		}
 
 		/**
-		 * Return or create {@link AnnotationTypeMappings} for the specified annotation type.
+		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
-		 * @return a new or existing {@link AnnotationTypeMapping} instance
+		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType) {
 			return this.mappings.computeIfAbsent(annotationType, this::createMappings);
