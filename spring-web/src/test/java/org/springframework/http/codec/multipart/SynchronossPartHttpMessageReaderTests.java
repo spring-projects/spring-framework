@@ -17,9 +17,11 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
@@ -91,32 +93,32 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 		ServerHttpRequest request = generateMultipartRequest();
 		MultiValueMap<String, Part> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()).block();
 
-		assertThat(parts).containsOnlyKeys("fooPart", "barPart");
+		assertThat(parts).containsOnlyKeys("filePart", "textPart");
 
-		Part part = parts.getFirst("fooPart");
+		Part part = parts.getFirst("filePart");
 		assertThat(part).isInstanceOf(FilePart.class);
-		assertThat(part.name()).isEqualTo("fooPart");
+		assertThat(part.name()).isEqualTo("filePart");
 		assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
 		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
 		assertThat(DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8)).isEqualTo("Lorem Ipsum.");
 		DataBufferUtils.release(buffer);
 
-		part = parts.getFirst("barPart");
+		part = parts.getFirst("textPart");
 		assertThat(part).isInstanceOf(FormFieldPart.class);
-		assertThat(part.name()).isEqualTo("barPart");
-		assertThat(((FormFieldPart) part).value()).isEqualTo("bar");
+		assertThat(part.name()).isEqualTo("textPart");
+		assertThat(((FormFieldPart) part).value()).isEqualTo("sample-text");
 	}
 
 	@Test // SPR-16545
-	void transferTo() {
+	void transferTo() throws IOException {
 		ServerHttpRequest request = generateMultipartRequest();
 		MultiValueMap<String, Part> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()).block();
 
 		assertThat(parts).isNotNull();
-		FilePart part = (FilePart) parts.getFirst("fooPart");
+		FilePart part = (FilePart) parts.getFirst("filePart");
 		assertThat(part).isNotNull();
 
-		File dest = new File(System.getProperty("java.io.tmpdir") + "/" + part.filename());
+		File dest = File.createTempFile(part.filename(), "multipart");
 		part.transferTo(dest).block(Duration.ofSeconds(5));
 
 		assertThat(dest.exists()).isTrue();
@@ -139,12 +141,57 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 		subscriber.cancel();
 	}
 
+	@Test
+	void readTooManyParts() {
+		testMultipartExceptions(
+				reader -> reader.setMaxPartCount(1),
+				err -> {
+					assertThat(err).isInstanceOf(MultipartException.class)
+							.hasMessage("Could not parse multipart request");
+					assertThat(err.getCause()).hasMessage("Exceeded limit on maximum number of multipart parts");
+				}
+		);
+	}
+	
+	@Test
+	void readFilePartTooBig() {
+		testMultipartExceptions(
+				reader -> reader.setMaxFilePartSize(5),
+				err -> {
+					assertThat(err).isInstanceOf(MultipartException.class)
+							.hasMessage("Could not parse multipart request");
+					assertThat(err.getCause()).hasMessage("Exceeded limit on max size of multipart file : 5");
+				}
+		);
+	}
+
+	@Test
+	void readPartTooBig() {
+		testMultipartExceptions(
+				reader -> reader.setMaxPartSize(6),
+				err -> {
+					assertThat(err).isInstanceOf(MultipartException.class)
+							.hasMessage("Could not parse multipart request");
+					assertThat(err.getCause()).hasMessage("Exceeded limit on max size of multipart part : 6");
+				}
+		);
+	}
+
+	private void testMultipartExceptions(Consumer<SynchronossPartHttpMessageReader> configurer,
+		Consumer<Throwable> assertions) {
+		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader(this.bufferFactory);
+		configurer.accept(synchronossReader);
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+		ServerHttpRequest request = generateMultipartRequest();
+		StepVerifier.create(reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()))
+				.consumeErrorWith(assertions)
+				.verify();
+	}
 
 	private ServerHttpRequest generateMultipartRequest() {
-
 		MultipartBodyBuilder partsBuilder = new MultipartBodyBuilder();
-		partsBuilder.part("fooPart", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
-		partsBuilder.part("barPart", "bar");
+		partsBuilder.part("filePart", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		partsBuilder.part("textPart", "sample-text");
 
 		MockClientHttpRequest outputMessage = new MockClientHttpRequest(HttpMethod.POST, "/");
 		new MultipartHttpMessageWriter()
