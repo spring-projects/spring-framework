@@ -587,6 +587,24 @@ class MergedAnnotationsTests {
 		assertThat(synthesizedAnnotation.qualifier()).isEqualTo(qualifier);
 	}
 
+	@Test // gh-23767
+	void getWithTypeHierarchyFromClassWithComposedMetaTransactionalAnnotation() {
+		MergedAnnotation<AliasedTransactional> mergedAnnotation = MergedAnnotations.from(
+				ComposedTransactionalClass.class, SearchStrategy.TYPE_HIERARCHY).get(
+						AliasedTransactional.class);
+		assertThat(mergedAnnotation.getString("value")).isEqualTo("anotherTransactionManager");
+		assertThat(mergedAnnotation.getString("qualifier")).isEqualTo("anotherTransactionManager");
+	}
+
+	@Test // gh-23767
+	void getWithTypeHierarchyFromClassWithMetaMetaAliasedTransactional() {
+		MergedAnnotation<AliasedTransactional> mergedAnnotation = MergedAnnotations.from(
+				MetaMetaAliasedTransactionalClass.class, SearchStrategy.TYPE_HIERARCHY).get(
+						AliasedTransactional.class);
+		assertThat(mergedAnnotation.getString("value")).isEqualTo("meta");
+		assertThat(mergedAnnotation.getString("qualifier")).isEqualTo("meta");
+	}
+
 	@Test
 	void getWithTypeHierarchyFromClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
 		MergedAnnotation<?> annotation = testGetWithTypeHierarchy(
@@ -2198,6 +2216,38 @@ class MergedAnnotationsTests {
 	@Component
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedTransactionalComponent {
+	}
+
+	@AliasedTransactional
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MyAliasedTransactional {
+
+		@AliasFor(annotation = AliasedTransactional.class, attribute = "value")
+		String value() default "defaultTransactionManager";
+	}
+
+	@MyAliasedTransactional("anotherTransactionManager")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@interface ComposedMyAliasedTransactional {
+	}
+
+	@ComposedMyAliasedTransactional
+	static class ComposedTransactionalClass {
+	}
+
+	@AliasedTransactional("meta")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaAliasedTransactional {
+	}
+
+	@MetaAliasedTransactional
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MetaMetaAliasedTransactional {
+	}
+
+	@MetaMetaAliasedTransactional
+	static class MetaMetaAliasedTransactionalClass {
 	}
 
 	@TxComposedWithOverride

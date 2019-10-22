@@ -444,15 +444,21 @@ final class AnnotationTypeMapping {
 	 * convention and alias based mapping rules. For root mappings, this method
 	 * will always return {@code null}.
 	 * @param attributeIndex the attribute index of the source attribute
+	 * @param metaAnnotationsOnly if only meta annotations should be considered.
+	 * If this parameter is {@code false} then aliases within the annotation will
+	 * not be excluded.
 	 * @return the mapped annotation value, or {@code null}
 	 */
 	@Nullable
-	Object getMappedAnnotationValue(int attributeIndex) {
+	Object getMappedAnnotationValue(int attributeIndex, boolean metaAnnotationsOnly) {
 		int mapped = this.annotationValueMappings[attributeIndex];
 		if (mapped == -1) {
 			return null;
 		}
 		AnnotationTypeMapping source = this.annotationValueSource[attributeIndex];
+		if(source == this && metaAnnotationsOnly) {
+			return null;
+		}
 		return ReflectionUtils.invokeMethod(source.attributes.get(mapped), source.annotation);
 	}
 

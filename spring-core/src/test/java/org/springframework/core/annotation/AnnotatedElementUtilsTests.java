@@ -673,6 +673,62 @@ class AnnotatedElementUtilsTests {
 		assertComponentScanAttributes(ComponentScanWithBasePackagesAndValueAliasClass.class, "com.example.app.test");
 	}
 
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationAttributesOnMethodWithComposedMetaTransactionalAnnotation() throws Exception {
+		Method method = getClass().getDeclaredMethod("composedTransactionalMethod");
+
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, AliasedTransactional.class);
+		assertThat(attributes).as("Should find @AliasedTransactional on " + method).isNotNull();
+		assertThat(attributes.getString("value")).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+		assertThat(attributes.getString("qualifier")).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationOnMethodWithComposedMetaTransactionalAnnotation() throws Exception {
+		Method method = getClass().getDeclaredMethod("composedTransactionalMethod");
+
+		AliasedTransactional annotation = findMergedAnnotation(method, AliasedTransactional.class);
+		assertThat(annotation).as("Should find @AliasedTransactional on " + method).isNotNull();
+		assertThat(annotation.value()).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+		assertThat(annotation.qualifier()).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationAttributesOnClassWithComposedMetaTransactionalAnnotation() throws Exception {
+		Class<?> clazz = ComposedTransactionalClass.class;
+
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(clazz, AliasedTransactional.class);
+		assertThat(attributes).as("Should find @AliasedTransactional on " + clazz).isNotNull();
+		assertThat(attributes.getString("value")).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+		assertThat(attributes.getString("qualifier")).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationOnClassWithComposedMetaTransactionalAnnotation() throws Exception {
+		Class<?> clazz = ComposedTransactionalClass.class;
+
+		AliasedTransactional annotation = findMergedAnnotation(clazz, AliasedTransactional.class);
+		assertThat(annotation).as("Should find @AliasedTransactional on " + clazz).isNotNull();
+		assertThat(annotation.value()).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+		assertThat(annotation.qualifier()).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+	}
+
 	@Test
 	void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaConvention() {
 		assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
@@ -880,6 +936,21 @@ class AnnotatedElementUtilsTests {
 
 		@AliasFor("value")
 		String qualifier() default "";
+	}
+
+	@AliasedTransactional
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@interface MyAliasedTransactional {
+
+		@AliasFor(annotation = AliasedTransactional.class, attribute = "value")
+		String value() default "defaultTransactionManager";
+	}
+
+	@MyAliasedTransactional("anotherTransactionManager")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@interface ComposedMyAliasedTransactional {
 	}
 
 	@Transactional(qualifier = "composed1")
@@ -1183,6 +1254,14 @@ class AnnotatedElementUtilsTests {
 
 	@AliasedTransactionalComponent
 	static class AliasedTransactionalComponentClass {
+	}
+
+	@ComposedMyAliasedTransactional
+	void composedTransactionalMethod() {
+	}
+
+	@ComposedMyAliasedTransactional
+	static class ComposedTransactionalClass {
 	}
 
 	@Transactional
