@@ -441,8 +441,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			value = this.mapping.getMappedAnnotationValue(attributeIndex, forMirrorResolution);
 		}
 		if (value == null) {
-			Method attribute = mapping.getAttributes().get(attributeIndex);
-			value = ReflectionUtils.invokeMethod(attribute, mapping.getAnnotation());
+			Method attribute = this.mapping.getAttributes().get(attributeIndex);
+			value = ReflectionUtils.invokeMethod(attribute, this.mapping.getAnnotation());
 		}
 		return value;
 	}
