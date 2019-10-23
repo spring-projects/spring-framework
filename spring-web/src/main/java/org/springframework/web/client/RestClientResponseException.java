@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	private final int rawStatusCode;
