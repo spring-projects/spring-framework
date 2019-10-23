@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -68,7 +69,13 @@ public class SessionAttributeAssertionTests {
 	@Test
 	public void testSessionAttributeDoesNotExist() throws Exception {
 		this.mockMvc.perform(get("/"))
-			.andExpect(request().sessionAttributeDoesNotExist("myAttr1", "myAttr2"));
+			.andExpect(request().sessionAttributeDoesNotExist("bogus", "enigma"));
+
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() ->
+				this.mockMvc.perform(get("/"))
+					.andExpect(request().sessionAttributeDoesNotExist("locale")))
+			.withMessage("Session attribute 'locale' exists");
 	}
 
 

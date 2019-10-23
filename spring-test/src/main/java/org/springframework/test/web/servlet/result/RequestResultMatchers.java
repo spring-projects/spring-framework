@@ -153,6 +153,7 @@ public class RequestResultMatchers {
 
 	/**
 	 * Assert the given session attributes do not exist.
+	 * @since 5.2.1
 	 */
 	public <T> ResultMatcher sessionAttributeDoesNotExist(String... names) {
 		return result -> {
