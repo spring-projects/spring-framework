@@ -28,7 +28,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
@@ -91,7 +93,7 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
-				assertTrue("Model attribute '" + name + "' exists", mav.getModel().get(name) == null);
+				assertNull("Model attribute '" + name + "' exists", mav.getModel().get(name));
 			}
 		};
 	}
@@ -103,7 +105,7 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			Errors errors = getBindingResult(mav, name);
-			assertEquals("Binding/validation error count for attribute '" + name + "', ",
+			assertEquals("Binding/validation error count for attribute '" + name + "',",
 					expectedCount, errors.getErrorCount());
 		};
 	}
@@ -129,8 +131,8 @@ public class ModelResultMatchers {
 			ModelAndView mav = getModelAndView(mvcResult);
 			for (String name : names) {
 				BindingResult result = getBindingResult(mav, name);
-				assertTrue("Unexpected errors for attribute '" + name + "': " + result.getAllErrors(),
-						!result.hasErrors());
+				assertFalse("Unexpected errors for attribute '" + name + "': " + result.getAllErrors(),
+						result.hasErrors());
 			}
 		};
 	}
@@ -212,7 +214,7 @@ public class ModelResultMatchers {
 			ModelAndView mav = getModelAndView(result);
 			for (Object value : mav.getModel().values()) {
 				if (value instanceof Errors) {
-					assertTrue("Unexpected binding/validation errors: " + value, !((Errors) value).hasErrors());
+					assertFalse("Unexpected binding/validation errors: " + value, ((Errors) value).hasErrors());
 				}
 			}
 		};

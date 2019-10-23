@@ -31,6 +31,8 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.springframework.test.util.AssertionErrors.assertNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
@@ -57,16 +59,15 @@ public class RequestResultMatchers {
 	 * Assert whether asynchronous processing started, usually as a result of a
 	 * controller method returning {@link Callable} or {@link DeferredResult}.
 	 * <p>The test will await the completion of a {@code Callable} so that
-	 * {@link #asyncResult(Matcher)} can be used to assert the resulting value.
-	 * Neither a {@code Callable} nor a {@code DeferredResult} will complete
+	 * {@link #asyncResult(Matcher)} or {@link #asyncResult(Object)} can be used
+	 * to assert the resulting value.
+	 * <p>Neither a {@code Callable} nor a {@code DeferredResult} will complete
 	 * processing all the way since a {@link MockHttpServletRequest} does not
 	 * perform asynchronous dispatches.
+	 * @see #asyncNotStarted()
 	 */
 	public ResultMatcher asyncStarted() {
-		return result -> {
-			HttpServletRequest request = result.getRequest();
-			assertAsyncStarted(request);
-		};
+		return result -> assertAsyncStarted(result.getRequest());
 	}
 
 	/**
@@ -74,10 +75,7 @@ public class RequestResultMatchers {
 	 * @see #asyncStarted()
 	 */
 	public ResultMatcher asyncNotStarted() {
-		return result -> {
-			HttpServletRequest request = result.getRequest();
-			assertEquals("Async started", false, request.isAsyncStarted());
-		};
+		return result -> assertFalse("Async started", result.getRequest().isAsyncStarted());
 	}
 
 	/**
@@ -160,13 +158,13 @@ public class RequestResultMatchers {
 			HttpSession session = result.getRequest().getSession();
 			Assert.state(session != null, "No HttpSession");
 			for (String name : names) {
-				assertTrue("Session attribute '" + name + "' exists", session.getAttribute(name) == null);
+				assertNull("Session attribute '" + name + "' exists", session.getAttribute(name));
 			}
 		};
 	}
 
 	private static void assertAsyncStarted(HttpServletRequest request) {
-		assertEquals("Async started", true, request.isAsyncStarted());
+		assertTrue("Async not started", request.isAsyncStarted());
 	}
 
 }

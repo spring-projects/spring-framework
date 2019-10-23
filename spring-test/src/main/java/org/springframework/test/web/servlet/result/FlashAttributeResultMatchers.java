@@ -73,7 +73,7 @@ public class FlashAttributeResultMatchers {
 	 * Assert the number of flash attributes.
 	 */
 	public <T> ResultMatcher attributeCount(int count) {
-		return result -> assertEquals("FlashMap size must be " + count, count, result.getFlashMap().size());
+		return result -> assertEquals("FlashMap size", count, result.getFlashMap().size());
 	}
 
 }
