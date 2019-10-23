@@ -267,7 +267,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		ServerHttpResponse response = exchange.getResponse();
 		String logPrefix = exchange.getLogPrefix();
 
-		// Request handling error (e.g. remote call), if we manage to set the status..
+		// Sometimes a remote call error can look like a disconnected client.
+		// Try to set the response first before the "isDisconnectedClient" check.
+
 		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
 			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
 			return Mono.empty();
