@@ -99,11 +99,22 @@ public class RestClientResponseException extends RestClientException {
 	}
 
 	/**
-	 * Return the response body as a string.
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise {@code "UTF-8"}.
 	 */
 	public String getResponseBodyAsString() {
+		return getResponseBodyAsString(DEFAULT_CHARSET);
+	}
+
+	/**
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise the one given.
+	 * @param fallbackCharset the charset to use on if the response doesn't specify.
+	 * @since 5.1.11
+	 */
+	public String getResponseBodyAsString(Charset fallbackCharset) {
 		if (this.responseCharset == null) {
-			return new String(this.responseBody, DEFAULT_CHARSET);
+			return new String(this.responseBody, fallbackCharset);
 		}
 		try {
 			return new String(this.responseBody, this.responseCharset);
