@@ -6366,7 +6366,7 @@ server.
 
 TIP: Spring Boot provides an option to write full, end-to-end integration tests that
 include a running server. If this is your goal, see the
-{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
 For more information on the differences between out-of-container and end-to-end
 integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
 
@@ -7064,7 +7064,7 @@ responses. Applications that make use of
 <<web.adoc#mvc-ann-async-http-streaming,Spring MVC streaming>> options can use the
 <<testing.adoc#webtestclient-stream,WebTestClient>> to perform end-to-end, integration
 tests against a running server. This is also supported in Spring Boot where you can
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
 with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
 project Reactor that allows declaring expectations on a stream of data.
 
@@ -7112,8 +7112,8 @@ Thymeleaf and Freemarker, render HTML to the response body as expected. The same
 for rendering JSON, XML, and other formats through `@ResponseBody` methods.
 
 Alternatively, you may consider the full end-to-end integration testing support from
-Spring Boot with `@WebIntegrationTest`. See the
-{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot Reference Guide].
+Spring Boot with `@SpringBootTest`. See the
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
 
 There are pros and cons for each approach. The options provided in Spring MVC Test are
 different stops on the scale from classic unit testing to full integration testing. To be
