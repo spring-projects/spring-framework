@@ -172,7 +172,7 @@ public class ModelResultMatchers {
 	 * Assert a field error code for a model attribute using a {@link org.hamcrest.Matcher}.
 	 * @since 4.1
 	 */
-	public <T> ResultMatcher attributeHasFieldErrorCode(String name, String fieldName,
+	public ResultMatcher attributeHasFieldErrorCode(String name, String fieldName,
 			Matcher<? super String> matcher) {
 
 		return mvcResult -> {
@@ -189,7 +189,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the total number of errors in the model.
 	 */
-	public <T> ResultMatcher errorCount(int expectedCount) {
+	public ResultMatcher errorCount(int expectedCount) {
 		return result -> {
 			int actualCount = getErrorCount(getModelAndView(result).getModelMap());
 			assertEquals("Binding/validation error count", expectedCount, actualCount);
@@ -199,7 +199,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the model has errors.
 	 */
-	public <T> ResultMatcher hasErrors() {
+	public ResultMatcher hasErrors() {
 		return result -> {
 			int count = getErrorCount(getModelAndView(result).getModelMap());
 			assertTrue("Expected binding/validation errors", count != 0);
@@ -209,7 +209,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the model has no errors.
 	 */
-	public <T> ResultMatcher hasNoErrors() {
+	public ResultMatcher hasNoErrors() {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (Object value : mav.getModel().values()) {
@@ -223,7 +223,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the number of model attributes.
 	 */
-	public <T> ResultMatcher size(int size) {
+	public ResultMatcher size(int size) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			int actual = 0;

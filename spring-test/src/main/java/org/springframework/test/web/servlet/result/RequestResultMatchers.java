@@ -98,7 +98,7 @@ public class RequestResultMatchers {
 	 * or {@link WebAsyncTask}. The value matched is the value returned from the
 	 * {@code Callable} or the exception raised.
 	 */
-	public <T> ResultMatcher asyncResult(Object expectedResult) {
+	public ResultMatcher asyncResult(Object expectedResult) {
 		return result -> {
 			HttpServletRequest request = result.getRequest();
 			assertAsyncStarted(request);
@@ -120,7 +120,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a request attribute value.
 	 */
-	public <T> ResultMatcher attribute(String name, Object expectedValue) {
+	public ResultMatcher attribute(String name, Object expectedValue) {
 		return result ->
 				assertEquals("Request attribute '" + name + "'", expectedValue, result.getRequest().getAttribute(name));
 	}
@@ -141,7 +141,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a session attribute value.
 	 */
-	public <T> ResultMatcher sessionAttribute(String name, Object value) {
+	public ResultMatcher sessionAttribute(String name, Object value) {
 		return result -> {
 			HttpSession session = result.getRequest().getSession();
 			Assert.state(session != null, "No HttpSession");

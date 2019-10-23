@@ -65,7 +65,7 @@ public class HeaderResultMatchers {
 	 * Iterable {@link Matcher}.
 	 * @since 4.3
 	 */
-	public <T> ResultMatcher stringValues(String name, Matcher<Iterable<String>> matcher) {
+	public ResultMatcher stringValues(String name, Matcher<Iterable<String>> matcher) {
 		return result -> {
 			List<String> values = result.getResponse().getHeaders(name);
 			assertThat("Response header '" + name + "'", values, matcher);

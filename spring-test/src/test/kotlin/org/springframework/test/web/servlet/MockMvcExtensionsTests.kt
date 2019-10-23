@@ -130,7 +130,7 @@ class MockMvcExtensionsTests {
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { content { json("""{"name":"wrong"}""") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name") { value("wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { cookie { value("name", "wrong") } }
-			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { flash { attribute<String>("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { flash { attribute("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { header { stringValues("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { model { attributeExists("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrl("wrong/Url") }
