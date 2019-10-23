@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.Nullable;
@@ -30,6 +29,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.core.MessageSendingOperations;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  */
 public class UserDestinationMessageHandler implements MessageHandler, SmartLifecycle {
 
-	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
+	private static final Log logger = SimpLogging.forLogName(UserDestinationMessageHandler.class);
 
 
 	private final SubscribableChannel clientInboundChannel;
@@ -146,16 +146,6 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		return this.headerInitializer;
 	}
 
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
 
 	@Override
 	public final void start() {

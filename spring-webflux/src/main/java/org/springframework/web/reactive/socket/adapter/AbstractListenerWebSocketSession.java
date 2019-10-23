@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -260,10 +260,22 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 				rsReadLogger.trace(getLogPrefix() + "Received " + message);
 			}
 			if (!this.pendingMessages.offer(message)) {
+				discardData();
 				throw new IllegalStateException(
 						"Too many messages. Please ensure WebSocketSession.receive() is subscribed to.");
 			}
 			onDataAvailable();
+		}
+
+		@Override
+		protected void discardData() {
+			while (true) {
+				WebSocketMessage message = (WebSocketMessage) this.pendingMessages.poll();
+				if (message == null) {
+					return;
+				}
+				message.release();
+			}
 		}
 	}
 
@@ -289,6 +301,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			else if (rsWriteLogger.isTraceEnabled()) {
 				rsWriteLogger.trace(getLogPrefix() + "Sending " + message);
 			}
+			// In case of IOException, onError handling should call discardData(WebSocketMessage)..
 			return sendMessage(message);
 		}
 
@@ -312,6 +325,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 				rsWriteLogger.trace(getLogPrefix() + "Ready to send");
 			}
 			this.isReady = ready;
+		}
+
+		@Override
+		protected void discardData(WebSocketMessage message) {
+			message.release();
 		}
 	}
 

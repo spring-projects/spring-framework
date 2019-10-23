@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * A property accessor is able to read from (and possibly write to) an object's properties.
- * This interface places no restrictions, and so implementors are free to access properties
+ *
+ * <p>This interface places no restrictions, and so implementors are free to access properties
  * directly as fields or through getters or in any other way they see as appropriate.
  *
  * <p>A resolver can optionally specify an array of target classes for which it should be
@@ -28,9 +29,10 @@ import org.springframework.lang.Nullable;
  * it will be called for all property references and given a chance to determine if it
  * can read or write them.
  *
- * <p>Property resolvers are considered to be ordered and each will be called in turn.
- * The only rule that affects the call order is that any naming the target class directly
- * in {@link #getSpecificTargetClasses()} will be called first, before the general resolvers.
+ * <p>Property resolvers are considered to be ordered, and each will be called in turn.
+ * The only rule that affects the call order is that any resolver naming the target
+ * class directly in {@link #getSpecificTargetClasses()} will be called first, before
+ * the general resolvers.
  *
  * @author Andy Clement
  * @since 3.0
@@ -39,7 +41,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Return an array of classes for which this resolver should be called.
-	 * <p>>Returning {@code null} indicates this is a general resolver that
+	 * <p>Returning {@code null} indicates this is a general resolver that
 	 * can be called in an attempt to resolve a property on any type.
 	 * @return an array of classes that this resolver is suitable for
 	 * (or {@code null} if a general resolver)

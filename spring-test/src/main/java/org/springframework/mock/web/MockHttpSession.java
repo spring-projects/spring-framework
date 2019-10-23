@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -42,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Vedran Pavic
  * @since 1.0.2
  */
 @SuppressWarnings("deprecation")
@@ -180,9 +182,14 @@ public class MockHttpSession implements HttpSession {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
-			this.attributes.put(name, value);
-			if (value instanceof HttpSessionBindingListener) {
-				((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+			Object oldValue = this.attributes.put(name, value);
+			if (value != oldValue) {
+				if (oldValue instanceof HttpSessionBindingListener) {
+					((HttpSessionBindingListener) oldValue).valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
+				}
+				if (value instanceof HttpSessionBindingListener) {
+					((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+				}
 			}
 		}
 		else {

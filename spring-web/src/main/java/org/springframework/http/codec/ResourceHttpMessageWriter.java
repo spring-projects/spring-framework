@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,7 +38,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,9 +53,8 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
  *
- * <p>Also an implementation of {@code HttpMessageWriter} with support
- * for writing one or more {@link ResourceRegion}'s based on the HTTP ranges
- * specified in the request.
+ * <p>Also an implementation of {@code HttpMessageWriter} with support for writing one
+ * or more {@link ResourceRegion}'s based on the HTTP ranges specified in the request.
  *
  * <p>For reading to a Resource, use {@link ResourceDecoder} wrapped with
  * {@link DecoderHttpMessageReader}.
@@ -73,7 +71,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
 
-	private static final Log logger = HttpLog.create(LogFactory.getLog(ResourceHttpMessageWriter.class));
+	private static final Log logger = HttpLogging.forLogName(ResourceHttpMessageWriter.class);
 
 
 	private final ResourceEncoder encoder;
@@ -188,7 +186,6 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	// Server-side only: single Resource or sub-regions...
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, @Nullable ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
@@ -206,15 +203,12 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		}
 
 		return Mono.from(inputStream).flatMap(resource -> {
-
 			if (ranges.isEmpty()) {
 				return writeResource(resource, elementType, mediaType, response, hints);
 			}
-
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
-
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
 				headers.setContentType(resourceMediaType);

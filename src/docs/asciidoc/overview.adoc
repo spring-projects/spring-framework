@@ -7,8 +7,10 @@
 Spring makes it easy to create Java enterprise applications. It provides everything you
 need to embrace the Java language in an enterprise environment, with support for Groovy
 and Kotlin as alternative languages on the JVM, and with the flexibility to create many
-kinds of architectures depending on an application's needs. As of Spring Framework 5.0,
-Spring requires JDK 8+ (Java SE 8+) and provides out-of-the-box support for JDK 9 already.
+kinds of architectures depending on an application's needs. As of Spring Framework 5.1,
+Spring requires JDK 8+ (Java SE 8+) and provides out-of-the-box support for JDK 11 LTS.
+Java SE 8 update 60 is suggested as the minimum patch release for Java 8, but it is
+generally recommended to use a recent patch release.
 
 Spring supports a wide range of application scenarios. In a large enterprise, applications
 often exist for a long time and have to run on a JDK and application server whose upgrade
@@ -44,7 +46,7 @@ A note about modules: Spring's framework jars allow for deployment to JDK 9's mo
 "Automatic-Module-Name" manifest entries which define stable language-level module names
 ("spring.core", "spring.context" etc) independent from jar artifact names (the jars follow
 the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
-Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9.
+Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9+.
 
 
 
@@ -113,7 +115,7 @@ libraries that depend on Spring.
 * Care about API design. The Spring team puts a lot of thought and time into making APIs
 that are intuitive and that hold up across many versions and many years.
 * Set high standards for code quality. The Spring Framework puts a strong emphasis on
-meaningful, current, and accurate Javadoc. It is one of very few projects that can claim
+meaningful, current, and accurate javadoc. It is one of very few projects that can claim
 clean code structure with  no circular dependencies between packages.
 
 
@@ -125,7 +127,7 @@ clean code structure with  no circular dependencies between packages.
 For how-to questions or diagnosing or debugging issues, we suggest using StackOverflow,
 and we have a https://spring.io/questions[questions page] that lists the suggested tags to use.
 If you're fairly certain that there is a problem in the Spring Framework or would like
-to suggest a feature, please use the https://jira.spring.io/browse/spr[JIRA issue tracker].
+to suggest a feature, please use the https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
 
 If you have a solution in mind or a suggested fix, you can submit a pull request on
 https://github.com/spring-projects/spring-framework[Github]. However, please keep in mind
@@ -143,13 +145,13 @@ top-level project page.
 == Getting Started
 
 If you are just getting started with Spring, you may want to begin using the Spring
-Framework by creating a http://projects.spring.io/spring-boot/[Spring Boot]-based
+Framework by creating a https://projects.spring.io/spring-boot/[Spring Boot]-based
 application. Spring Boot provides a quick (and opinionated) way to create a
 production-ready Spring-based application. It is based on the Spring Framework, favors
 convention over configuration, and is designed to get you up and running as quickly
 as possible.
 
-You can use http://start.spring.io/[start.spring.io] to generate a basic project or follow
+You can use https://start.spring.io/[start.spring.io] to generate a basic project or follow
 one of the https://spring.io/guides["Getting Started" guides], such as
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service].
 As well as being easier to digest, these guides are very task focused, and most of them

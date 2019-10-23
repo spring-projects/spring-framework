@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Deque;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
@@ -195,7 +196,7 @@ public class TagWriter {
 	}
 
 	private TagStateEntry currentState() {
-		return this.tagState.peek();
+		return this.tagState.element();
 	}
 
 
@@ -232,8 +233,10 @@ public class TagWriter {
 	 */
 	private static final class SafeWriter {
 
+		@Nullable
 		private PageContext pageContext;
 
+		@Nullable
 		private Writer writer;
 
 		public SafeWriter(PageContext pageContext) {
@@ -255,7 +258,9 @@ public class TagWriter {
 		}
 
 		private Writer getWriterToUse() {
-			return (this.pageContext != null ? this.pageContext.getOut() : this.writer);
+			Writer writer = (this.pageContext != null ? this.pageContext.getOut() : this.writer);
+			Assert.state(writer != null, "No Writer available");
+			return writer;
 		}
 	}
 

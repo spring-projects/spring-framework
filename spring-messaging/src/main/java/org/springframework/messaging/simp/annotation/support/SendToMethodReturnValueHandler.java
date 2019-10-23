@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -192,7 +192,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	private DestinationHelper getDestinationHelper(MessageHeaders headers, MethodParameter returnType) {
-
 		SendToUser m1 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendToUser.class);
 		SendTo m2 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendTo.class);
 		if ((m1 != null && !ObjectUtils.isEmpty(m1.value())) || (m2 != null && !ObjectUtils.isEmpty(m2.value()))) {
@@ -205,8 +204,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			return new DestinationHelper(headers, c1, c2);
 		}
 
-		return m1 != null || m2 != null ?
-			new DestinationHelper(headers, m1, m2) : new DestinationHelper(headers, c1, c2);
+		return (m1 != null || m2 != null ?
+				new DestinationHelper(headers, m1, m2) : new DestinationHelper(headers, c1, c2));
 	}
 
 	@Nullable
@@ -291,9 +290,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			return this.sendToUser;
 		}
 
-
 		public String expandTemplateVars(String destination) {
 			return placeholderHelper.replacePlaceholders(destination, this.placeholderResolver);
 		}
 	}
+
 }

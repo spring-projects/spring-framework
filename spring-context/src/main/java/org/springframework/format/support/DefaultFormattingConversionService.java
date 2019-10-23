@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,11 +47,15 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr354Present = ClassUtils.isPresent(
-			"javax.money.MonetaryAmount", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jsr354Present;
 
-	private static final boolean jodaTimePresent = ClassUtils.isPresent(
-			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jodaTimePresent;
+
+	static {
+		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
+		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
+		jodaTimePresent = ClassUtils.isPresent("org.joda.time.LocalDate", classLoader);
+	}
 
 
 	/**

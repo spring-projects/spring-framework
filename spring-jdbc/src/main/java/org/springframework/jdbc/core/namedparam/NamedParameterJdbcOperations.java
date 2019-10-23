@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -406,7 +406,7 @@ public interface NamedParameterJdbcOperations {
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a SqlRowSet.
+	 * list of arguments to bind to the query, expecting an SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
@@ -415,7 +415,7 @@ public interface NamedParameterJdbcOperations {
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql the SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
-	 * @return a SqlRowSet representation (possibly a wrapper around a
+	 * @return an SqlRowSet representation (possibly a wrapper around a
 	 * {@code javax.sql.rowset.CachedRowSet})
 	 * @throws org.springframework.dao.DataAccessException if there is any problem executing the query
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet(String)
@@ -426,7 +426,7 @@ public interface NamedParameterJdbcOperations {
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a SqlRowSet.
+	 * list of arguments to bind to the query, expecting an SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
@@ -436,7 +436,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @return a SqlRowSet representation (possibly a wrapper around a
+	 * @return an SqlRowSet representation (possibly a wrapper around a
 	 * {@code javax.sql.rowset.CachedRowSet})
 	 * @throws org.springframework.dao.DataAccessException if there is any problem executing the query
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet(String)

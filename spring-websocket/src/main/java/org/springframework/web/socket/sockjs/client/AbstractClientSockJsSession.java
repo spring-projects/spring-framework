@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -307,7 +307,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			if (frameData != null) {
 				String[] data = getMessageCodec().decode(frameData);
 				if (data != null && data.length == 2) {
-					closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
+					closeStatus = new CloseStatus(Integer.parseInt(data[0]), data[1]);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);

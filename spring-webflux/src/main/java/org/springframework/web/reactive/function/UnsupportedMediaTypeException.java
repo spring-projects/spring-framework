@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,7 +99,7 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 	 * Return the body type in the context of which this exception was generated.
 	 * This is applicable when the exception was raised as a result trying to
 	 * encode from or decode to a specific Java type.
-	 * @return the body type, or {@code null}
+	 * @return the body type, or {@code null} if not available
 	 * @since 5.1
 	 */
 	@Nullable

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
@@ -46,7 +47,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @param port the port
 	 */
 	public ReactorNettyTcpStompClient(String host, int port) {
-		this.tcpClient = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
+		this.tcpClient = initTcpClient(host, port);
 	}
 
 	/**
@@ -58,6 +59,13 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 		this.tcpClient = tcpClient;
 	}
 
+	private static ReactorNettyTcpClient<byte[]> initTcpClient(String host, int port) {
+		ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
+		client.setLogger(SimpLogging.forLog(client.getLogger()));
+		return client;
+	}
+
+
 	/**
 	 * Connect and notify the given {@link StompSessionHandler} when connected
 	 * on the STOMP level.
@@ -67,7 +75,6 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	public ListenableFuture<StompSession> connect(StompSessionHandler handler) {
 		return connect(null, handler);
 	}
-
 
 	/**
 	 * An overloaded version of {@link #connect(StompSessionHandler)} that

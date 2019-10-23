@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -27,8 +27,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.StringContains.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link AbstractMockServerSpec}.
@@ -56,7 +55,7 @@ public class MockServerSpecTests {
 				.exchange()
 				.expectBody(String.class)
 				.consumeWith(result -> assertThat(
-						result.getResponseBody(), containsString("test-attribute=:A:B")));
+						result.getResponseBody()).contains("test-attribute=:A:B"));
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class MockServerSpecTests {
 				.exchange()
 				.expectBody(String.class)
 				.consumeWith(result -> assertThat(
-						result.getResponseBody(), containsString("test-attribute=:Fwk-A:Fwk-B:App-A:App-B")));
+						result.getResponseBody()).contains("test-attribute=:Fwk-A:Fwk-B:App-A:App-B"));
 	}
 
 

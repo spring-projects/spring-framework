@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.feed;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +43,7 @@ import com.rometools.rome.feed.atom.Feed;
  * @since 3.0
  * @see #buildFeedMetadata
  * @see #buildFeedEntries
- * @see <a href="http://www.atomenabled.org/developers/syndication/">Atom Syndication Format</a>
+ * @see <a href="https://www.atomenabled.org/developers/syndication/">Atom Syndication Format</a>
  */
 public abstract class AbstractAtomFeedView extends AbstractFeedView<Feed> {
 

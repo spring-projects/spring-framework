@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
@@ -29,6 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
@@ -161,7 +163,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public <T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return this.beanFactory.getBean(name, requiredType);
 	}
 
@@ -178,6 +180,16 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
 		return this.beanFactory.getBean(requiredType, args);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
+		return this.beanFactory.getBeanProvider(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		return this.beanFactory.getBeanProvider(requiredType);
 	}
 
 	@Override
@@ -201,13 +213,18 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
 	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getType(name);
+	}
+
+	@Override
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.getType(name, allowFactoryBeanInit);
 	}
 
 	@Override
@@ -238,6 +255,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public String[] getBeanNamesForType(@Nullable ResolvableType type) {
 		return this.beanFactory.getBeanNamesForType(type);
+	}
+
+	@Override
+	public String[] getBeanNamesForType(@Nullable ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return this.beanFactory.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	@Override
@@ -397,6 +419,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException {
+			throw new UnsupportedOperationException("Dependency resolution not supported");
+		}
+
+		@Override
+		public Object resolveBeanByName(String name, DependencyDescriptor descriptor) throws BeansException {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 

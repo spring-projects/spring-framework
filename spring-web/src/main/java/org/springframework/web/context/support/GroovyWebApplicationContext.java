@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation which takes
  * its configuration from Groovy bean definition scripts and/or XML files, as understood by
- * an {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
+ * a {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
  * This is essentially the equivalent of
  * {@link org.springframework.context.support.GenericGroovyApplicationContext}
  * for a web environment.
@@ -154,22 +154,27 @@ public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicati
 
 	// Implementation of the GroovyObject interface
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
 
+	@Override
 	public Object invokeMethod(String name, Object args) {
 		return this.metaClass.invokeMethod(this, name, args);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		this.metaClass.setProperty(this, property, newValue);
 	}
 
+	@Override
 	@Nullable
 	public Object getProperty(String property) {
 		if (containsBean(property)) {

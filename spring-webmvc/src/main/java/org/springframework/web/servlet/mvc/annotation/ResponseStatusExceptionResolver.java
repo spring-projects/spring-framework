@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -81,12 +82,13 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			}
 
 			if (ex.getCause() instanceof Exception) {
-				ex = (Exception) ex.getCause();
-				return doResolveException(request, response, handler, ex);
+				return doResolveException(request, response, handler, (Exception) ex.getCause());
 			}
 		}
 		catch (Exception resolveEx) {
-			logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
+			}
 		}
 		return null;
 	}

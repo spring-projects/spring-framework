@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import javax.enterprise.concurrent.ManagedExecutors;
 import javax.enterprise.concurrent.ManagedTask;
 
@@ -166,14 +167,6 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		return this.adaptedExecutor.submitListenable(task);
 	}
 
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
-	}
-
 
 	private static TaskExecutorAdapter getAdaptedExecutor(Executor concurrentExecutor) {
 		if (managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(concurrentExecutor)) {
@@ -230,17 +223,21 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	protected static class ManagedTaskBuilder {
 
 		public static Runnable buildManagedTask(Runnable task, String identityName) {
-			Map<String, String> properties = new HashMap<>(2);
+			Map<String, String> properties;
 			if (task instanceof SchedulingAwareRunnable) {
+				properties = new HashMap<>(4);
 				properties.put(ManagedTask.LONGRUNNING_HINT,
 						Boolean.toString(((SchedulingAwareRunnable) task).isLongLived()));
+			}
+			else {
+				properties = new HashMap<>(2);
 			}
 			properties.put(ManagedTask.IDENTITY_NAME, identityName);
 			return ManagedExecutors.managedTask(task, properties, null);
 		}
 
 		public static <T> Callable<T> buildManagedTask(Callable<T> task, String identityName) {
-			Map<String, String> properties = new HashMap<>(1);
+			Map<String, String> properties = new HashMap<>(2);
 			properties.put(ManagedTask.IDENTITY_NAME, identityName);
 			return ManagedExecutors.managedTask(task, properties, null);
 		}

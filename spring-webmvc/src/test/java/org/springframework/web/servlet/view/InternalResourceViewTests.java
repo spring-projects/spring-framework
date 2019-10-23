@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,10 @@ package org.springframework.web.servlet.view;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -30,8 +31,11 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link InternalResourceView}.
@@ -60,9 +64,10 @@ public class InternalResourceViewTests {
 	/**
 	 * If the url property isn't supplied, view initialization should fail.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullUrl() throws Exception {
-		view.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				view::afterPropertiesSet);
 	}
 
 	@Test
@@ -82,10 +87,10 @@ public class InternalResourceViewTests {
 		});
 
 		view.render(model, request, response);
-		assertEquals(url, response.getForwardedUrl());
+		assertThat(response.getForwardedUrl()).isEqualTo(url);
 
-		model.forEach((key, value) -> assertEquals("Values for model key '" + key
-				+ "' must match", value, request.getAttribute(key)));
+		model.forEach((key, value) -> assertThat(request.getAttribute(key)).as("Values for model key '" + key
+						+ "' must match").isEqualTo(value));
 	}
 
 	@Test
@@ -98,7 +103,7 @@ public class InternalResourceViewTests {
 
 		// Can now try multiple tests
 		view.render(model, request, response);
-		assertEquals(url, response.getIncludedUrl());
+		assertThat(response.getIncludedUrl()).isEqualTo(url);
 
 		model.forEach((key, value) -> verify(request).setAttribute(key, value));
 	}
@@ -113,7 +118,7 @@ public class InternalResourceViewTests {
 
 		// Can now try multiple tests
 		view.render(model, request, response);
-		assertEquals(url, response.getIncludedUrl());
+		assertThat(response.getIncludedUrl()).isEqualTo(url);
 
 		model.forEach((key, value) -> verify(request).setAttribute(key, value));
 	}
@@ -129,7 +134,7 @@ public class InternalResourceViewTests {
 
 		// Can now try multiple tests
 		view.render(model, request, response);
-		assertEquals(url, response.getIncludedUrl());
+		assertThat(response.getIncludedUrl()).isEqualTo(url);
 
 		model.forEach((k, v) -> verify(request).setAttribute(k, v));
 	}

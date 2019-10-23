@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.cache.interceptor;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link CacheProxyFactoryBean}.
@@ -42,18 +42,18 @@ public class CacheProxyFactoryBeanTests {
 		try (AnnotationConfigApplicationContext applicationContext =
 				new AnnotationConfigApplicationContext(CacheProxyFactoryBeanConfiguration.class)) {
 			Greeter greeter = applicationContext.getBean("greeter", Greeter.class);
-			assertNotNull(greeter);
-			assertFalse(greeter.isCacheMiss());
-			assertEquals("Hello John!", greeter.greet("John"));
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello Jon!", greeter.greet("Jon"));
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello John!", greeter.greet("John"));
-			assertFalse(greeter.isCacheMiss());
-			assertEquals("Hello World!", greeter.greet());
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello World!", greeter.greet());
-			assertFalse(greeter.isCacheMiss());
+			assertThat(greeter).isNotNull();
+			assertThat(greeter.isCacheMiss()).isFalse();
+			assertThat(greeter.greet("John")).isEqualTo("Hello John!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet("Jon")).isEqualTo("Hello Jon!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet("John")).isEqualTo("Hello John!");
+			assertThat(greeter.isCacheMiss()).isFalse();
+			assertThat(greeter.greet()).isEqualTo("Hello World!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet()).isEqualTo("Hello World!");
+			assertThat(greeter.isCacheMiss()).isFalse();
 		}
 	}
 

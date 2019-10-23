@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +64,6 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 	 * Set the order for this result handler relative to others.
 	 * <p>By default set to 0. It is generally safe to place it early in the
 	 * order as it looks for a concrete return type.
-	 * @param order the order
 	 */
 	public void setOrder(int order) {
 		this.order = order;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,16 +25,15 @@ import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.tests.sample.objects.TestObject;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link Conventions}.
@@ -42,91 +41,70 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Sam Brannen
  */
-public class ConventionsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
+class ConventionsTests {
 
 	@Test
-	public void simpleObject() {
-		assertEquals("Incorrect singular variable name",
-				"testObject", Conventions.getVariableName(new TestObject()));
-		assertEquals("Incorrect singular variable name", "testObject",
-				Conventions.getVariableNameForParameter(getMethodParameter(TestObject.class)));
-		assertEquals("Incorrect singular variable name", "testObject",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(TestObject.class)));
+	void simpleObject() {
+		assertThat(Conventions.getVariableName(new TestObject())).as("Incorrect singular variable name").isEqualTo("testObject");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(TestObject.class))).as("Incorrect singular variable name").isEqualTo("testObject");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(TestObject.class))).as("Incorrect singular variable name").isEqualTo("testObject");
 	}
 
 	@Test
-	public void array() {
-		assertEquals("Incorrect plural array form",
-				"testObjectList", Conventions.getVariableName(new TestObject[0]));
+	void array() {
+		Object actual = Conventions.getVariableName(new TestObject[0]);
+		assertThat(actual).as("Incorrect plural array form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void list() {
-		assertEquals("Incorrect plural List form", "testObjectList",
-				Conventions.getVariableName(Collections.singletonList(new TestObject())));
-		assertEquals("Incorrect plural List form", "testObjectList",
-				Conventions.getVariableNameForParameter(getMethodParameter(List.class)));
-		assertEquals("Incorrect plural List form", "testObjectList",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(List.class)));
+	void list() {
+		assertThat(Conventions.getVariableName(Collections.singletonList(new TestObject()))).as("Incorrect plural List form").isEqualTo("testObjectList");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(List.class))).as("Incorrect plural List form").isEqualTo("testObjectList");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(List.class))).as("Incorrect plural List form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void emptyList() {
-		this.exception.expect(IllegalArgumentException.class);
-		Conventions.getVariableName(new ArrayList<>());
+	void emptyList() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Conventions.getVariableName(new ArrayList<>()));
 	}
 
 	@Test
-	public void set() {
-		assertEquals("Incorrect plural Set form", "testObjectList",
-				Conventions.getVariableName(Collections.singleton(new TestObject())));
-		assertEquals("Incorrect plural Set form", "testObjectList",
-				Conventions.getVariableNameForParameter(getMethodParameter(Set.class)));
-		assertEquals("Incorrect plural Set form", "testObjectList",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(Set.class)));
+	void set() {
+		assertThat(Conventions.getVariableName(Collections.singleton(new TestObject()))).as("Incorrect plural Set form").isEqualTo("testObjectList");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Set.class))).as("Incorrect plural Set form").isEqualTo("testObjectList");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Set.class))).as("Incorrect plural Set form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void reactiveParameters() {
-		assertEquals("testObjectMono",
-				Conventions.getVariableNameForParameter(getMethodParameter(Mono.class)));
-		assertEquals("testObjectFlux",
-				Conventions.getVariableNameForParameter(getMethodParameter(Flux.class)));
-		assertEquals("testObjectSingle",
-				Conventions.getVariableNameForParameter(getMethodParameter(Single.class)));
-		assertEquals("testObjectObservable",
-				Conventions.getVariableNameForParameter(getMethodParameter(Observable.class)));
+	void reactiveParameters() {
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Mono.class))).isEqualTo("testObjectMono");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Flux.class))).isEqualTo("testObjectFlux");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Single.class))).isEqualTo("testObjectSingle");
+		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Observable.class))).isEqualTo("testObjectObservable");
 	}
 
 	@Test
-	public void reactiveReturnTypes() {
-		assertEquals("testObjectMono",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(Mono.class)));
-		assertEquals("testObjectFlux",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(Flux.class)));
-		assertEquals("testObjectSingle",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(Single.class)));
-		assertEquals("testObjectObservable",
-				Conventions.getVariableNameForReturnType(getMethodForReturnType(Observable.class)));
+	void reactiveReturnTypes() {
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Mono.class))).isEqualTo("testObjectMono");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Flux.class))).isEqualTo("testObjectFlux");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Single.class))).isEqualTo("testObjectSingle");
+		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Observable.class))).isEqualTo("testObjectObservable");
 	}
 
 	@Test
-	public void attributeNameToPropertyName() {
-		assertEquals("transactionManager", Conventions.attributeNameToPropertyName("transaction-manager"));
-		assertEquals("pointcutRef", Conventions.attributeNameToPropertyName("pointcut-ref"));
-		assertEquals("lookupOnStartup", Conventions.attributeNameToPropertyName("lookup-on-startup"));
+	void attributeNameToPropertyName() {
+		assertThat(Conventions.attributeNameToPropertyName("transaction-manager")).isEqualTo("transactionManager");
+		assertThat(Conventions.attributeNameToPropertyName("pointcut-ref")).isEqualTo("pointcutRef");
+		assertThat(Conventions.attributeNameToPropertyName("lookup-on-startup")).isEqualTo("lookupOnStartup");
 	}
 
 	@Test
-	public void getQualifiedAttributeName() {
+	void getQualifiedAttributeName() {
 		String baseName = "foo";
 		Class<String> cls = String.class;
 		String desiredResult = "java.lang.String.foo";
-		assertEquals(desiredResult, Conventions.getQualifiedAttributeName(cls, baseName));
+		assertThat(Conventions.getQualifiedAttributeName(cls, baseName)).isEqualTo(desiredResult);
 	}
 
 

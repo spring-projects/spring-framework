@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Properties;
+
 import javax.naming.NamingException;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -151,8 +152,8 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	 * @throws NamingException if service binding failed
 	 */
 	public void rebind() throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Binding RMI service to JNDI location [" + this.jndiName + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding RMI service to JNDI location [" + this.jndiName + "]");
 		}
 		this.jndiTemplate.rebind(this.jndiName, this.exportedObject);
 	}
@@ -162,8 +163,8 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	 */
 	@Override
 	public void destroy() throws NamingException, RemoteException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
 		}
 		this.jndiTemplate.unbind(this.jndiName);
 		invokePortableRemoteObject(unexportObject);

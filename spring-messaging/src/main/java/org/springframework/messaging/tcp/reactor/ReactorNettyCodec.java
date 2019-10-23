@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import org.springframework.messaging.Message;
 public interface ReactorNettyCodec<P> {
 
 	/**
-	 * Decode the input {@link ByteBuf} into one or more {@link Message ByteBuf} into one or more {@link Messages}.
+	 * Decode the input {@link ByteBuf} into one or more {@link Message Messages}.
 	 * @param inputBuffer the input buffer to decode from
 	 * @return 0 or more decoded messages
 	 */
@@ -42,7 +42,7 @@ public interface ReactorNettyCodec<P> {
 
 	/**
 	 * Encode the given {@link Message} to the output {@link ByteBuf}.
-	 * @param message the message the encode
+	 * @param message the message to encode
 	 * @param outputBuffer the buffer to write to
 	 */
 	void encode(Message<P> message, ByteBuf outputBuffer);

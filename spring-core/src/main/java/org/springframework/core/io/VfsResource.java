@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,15 @@ import java.net.URI;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * JBoss VFS based {@link Resource} implementation.
  *
- * <p>As of Spring 4.0, this class supports VFS 3.x on JBoss AS 6+ (package
- * {@code org.jboss.vfs}) and is in particular compatible with JBoss AS 7 and
- * WildFly 8.
+ * <p>As of Spring 4.0, this class supports VFS 3.x on JBoss AS 6+
+ * (package {@code org.jboss.vfs}) and is in particular compatible with
+ * JBoss AS 7 and WildFly 8+.
  *
  * @author Ales Justin
  * @author Juergen Hoeller
@@ -44,6 +45,11 @@ public class VfsResource extends AbstractResource {
 	private final Object resource;
 
 
+	/**
+	 * Create a new {@code VfsResource} wrapping the given resource handle.
+	 * @param resource a {@code org.jboss.vfs.VirtualFile} instance
+	 * (untyped in order to avoid a static dependency on the VFS API)
+	 */
 	public VfsResource(Object resource) {
 		Assert.notNull(resource, "VirtualFile must not be null");
 		this.resource = resource;
@@ -125,7 +131,7 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof VfsResource &&
 				this.resource.equals(((VfsResource) other).resource)));
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -58,12 +58,7 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.method;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
@@ -80,7 +75,9 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class RequestMappingInfoHandlerMappingTests {
 
@@ -90,7 +87,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
@@ -103,7 +100,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		assertEquals(expected, hm.getMethod());
+		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -112,7 +109,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/bar"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		assertEquals(expected, hm.getMethod());
+		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -120,11 +117,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		Method expected = on(TestController.class).annot(requestMapping("")).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
-		assertEquals(expected, hm.getMethod());
+		assertThat(hm.getMethod()).isEqualTo(expected);
 
 		exchange = MockServerWebExchange.from(get("/"));
 		hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
-		assertEquals(expected, hm.getMethod());
+		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -133,7 +130,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo?p=anything"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		assertEquals(expected, hm.getMethod());
+		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -142,7 +139,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, MethodNotAllowedException.class,
-				ex -> assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD), ex.getSupportedMethods()));
+				ex -> assertThat(ex.getSupportedMethods()).isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD)));
 	}
 
 	@Test  // SPR-9603
@@ -170,8 +167,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
-				ex -> assertEquals("415 UNSUPPORTED_MEDIA_TYPE " +
-						"\"Invalid mime type \"bogus\": does not contain '/'\"", ex.getMessage()));
+				ex -> assertThat(ex.getMessage()).isEqualTo(("415 UNSUPPORTED_MEDIA_TYPE " +
+										"\"Invalid mime type \"bogus\": does not contain '/'\"")));
 	}
 
 	@Test  // SPR-8462
@@ -185,8 +182,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/params"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 		assertError(mono, ServerWebInputException.class, ex -> {
-			assertThat(ex.getReason(), containsString("[foo=bar]"));
-			assertThat(ex.getReason(), containsString("[bar=baz]"));
+			assertThat(ex.getReason()).contains("[foo=bar]");
+			assertThat(ex.getReason()).contains("[bar=baz]");
 		});
 	}
 
@@ -207,13 +204,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.getHandler(exchange).block();
 
 		String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
-		assertEquals(Collections.singleton(MediaType.APPLICATION_XML), exchange.getAttributes().get(name));
+		assertThat(exchange.getAttributes().get(name)).isEqualTo(Collections.singleton(MediaType.APPLICATION_XML));
 
 		exchange = MockServerWebExchange.from(get("/content").accept(MediaType.APPLICATION_JSON));
 		this.handlerMapping.getHandler(exchange).block();
 
-		assertNull("Negated expression shouldn't be listed as producible type",
-				exchange.getAttributes().get(name));
+		assertThat(exchange.getAttributes().get(name)).as("Negated expression shouldn't be listed as producible type").isNull();
 	}
 
 	@Test
@@ -227,9 +223,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) exchange.getAttributes().get(name);
 
-		assertNotNull(uriVariables);
-		assertEquals("1", uriVariables.get("path1"));
-		assertEquals("2", uriVariables.get("path2"));
+		assertThat(uriVariables).isNotNull();
+		assertThat(uriVariables.get("path1")).isEqualTo("1");
+		assertThat(uriVariables.get("path2")).isEqualTo("2");
 	}
 
 	@Test  // SPR-9098
@@ -244,9 +240,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		@SuppressWarnings("unchecked")
 		Map<String, String> uriVariables = (Map<String, String>) exchange.getAttributes().get(name);
 
-		assertNotNull(uriVariables);
-		assertEquals("group", uriVariables.get("group"));
-		assertEquals("a/b", uriVariables.get("identifier"));
+		assertThat(uriVariables).isNotNull();
+		assertThat(uriVariables.get("group")).isEqualTo("group");
+		assertThat(uriVariables.get("identifier")).isEqualTo("a/b");
 	}
 
 	@Test
@@ -256,20 +252,18 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
 
 		PathPattern bestMatch = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
-		assertEquals("/{path1}/2", bestMatch.getPatternString());
+		assertThat(bestMatch.getPatternString()).isEqualTo("/{path1}/2");
 
 		HandlerMethod mapped = (HandlerMethod) exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
-		assertSame(handlerMethod, mapped);
+		assertThat(mapped).isSameAs(handlerMethod);
 	}
 
-	@Test
+	@Test // gh-22543
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() {
-		RequestMappingInfo key = paths().build();
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
-		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
-
-		PathPattern bestMatch = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
-		assertEquals("/1/2", bestMatch.getPatternString());
+		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
+		this.handlerMapping.handleMatch(paths().build(), handlerMethod, exchange);
+		PathPattern pattern = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
+		assertThat(pattern.getPatternString()).isEqualTo("");
 	}
 
 	@Test
@@ -283,10 +277,26 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(exchange, "cars");
 		uriVariables = getUriTemplateVariables(exchange);
 
-		assertNotNull(matrixVariables);
-		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
-		assertEquals("2012", matrixVariables.getFirst("year"));
-		assertEquals("cars", uriVariables.get("cars"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
+
+		// SPR-11897
+		exchange = MockServerWebExchange.from(get("/a=42;b=c"));
+		handleMatch(exchange, "/{foo}");
+
+		matrixVariables = getMatrixVariables(exchange, "foo");
+		uriVariables = getUriTemplateVariables(exchange);
+
+		// Unlike Spring MVC, WebFlux currently does not support APIs like
+		// "/foo/{ids}" and URL "/foo/id=1;id=2;id=3" where the whole path
+		// segment is a sequence of name-value pairs.
+
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.size()).isEqualTo(1);
+		assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
+		assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 	}
 
 	@Test
@@ -298,9 +308,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "cars");
 		Map<String, String> uriVariables = getUriTemplateVariables(exchange);
 
-		assertNotNull(matrixVariables);
-		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals("cars", uriVariables.get("cars"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.get("mvar")).isEqualTo(Collections.singletonList("a/b"));
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 	}
 
 
@@ -308,7 +318,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {
 		StepVerifier.create(mono)
 				.consumeErrorWith(error -> {
-					assertEquals(exceptionClass, error.getClass());
+					assertThat(error.getClass()).isEqualTo(exceptionClass);
 					consumer.accept((T) error);
 				})
 				.verify();
@@ -319,10 +329,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, UnsupportedMediaTypeStatusException.class, ex ->
-				assertEquals("Invalid supported consumable media types",
-						Collections.singletonList(new MediaType("application", "xml")),
-						ex.getSupportedMediaTypes()));
+		assertError(mono, UnsupportedMediaTypeStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported consumable media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
 	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods) {
@@ -334,22 +341,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<HandlerResult> mono = invocable.invoke(exchange, bindingContext);
 
 		HandlerResult result = mono.block();
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		Object value = result.getReturnValue();
-		assertNotNull(value);
-		assertEquals(HttpHeaders.class, value.getClass());
-		assertEquals(allowedMethods, ((HttpHeaders) value).getAllow());
+		assertThat(value).isNotNull();
+		assertThat(value.getClass()).isEqualTo(HttpHeaders.class);
+		assertThat(((HttpHeaders) value).getAllow()).isEqualTo(allowedMethods);
 	}
 
 	private void testMediaTypeNotAcceptable(String url) {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(url).accept(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, NotAcceptableStatusException.class, ex ->
-				assertEquals("Invalid supported producible media types",
-						Collections.singletonList(new MediaType("application", "xml")),
-						ex.getSupportedMediaTypes()));
+		assertError(mono, NotAcceptableStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported producible media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
 	private void handleMatch(ServerWebExchange exchange, String pattern) {

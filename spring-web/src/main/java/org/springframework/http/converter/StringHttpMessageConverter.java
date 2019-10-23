@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -32,7 +33,7 @@ import org.springframework.util.StreamUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}),
+ * <p>By default, this converter supports all media types (<code>&#42;/&#42;</code>),
  * and writes with a {@code Content-Type} of {@code text/plain}. This can be overridden
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
@@ -51,7 +52,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Nullable
 	private volatile List<Charset> availableCharsets;
 
-	private boolean writeAcceptCharset = true;
+	private boolean writeAcceptCharset = false;
 
 
 	/**
@@ -72,8 +73,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 
 	/**
-	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
-	 * <p>Default is {@code true}.
+	 * Whether the {@code Accept-Charset} header should be written to any outgoing
+	 * request sourced from the value of {@link Charset#availableCharsets()}.
+	 * The behavior is suppressed if the header has already been set.
+	 * <p>As of 5.2, by default is set to {@code false}.
 	 */
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.writeAcceptCharset = writeAcceptCharset;
@@ -99,10 +102,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
-		if (this.writeAcceptCharset) {
-			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
+		HttpHeaders headers = outputMessage.getHeaders();
+		if (this.writeAcceptCharset && headers.get(HttpHeaders.ACCEPT_CHARSET) == null) {
+			headers.setAcceptCharset(getAcceptedCharsets());
 		}
-		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
+		Charset charset = getContentTypeCharset(headers.getContentType());
 		StreamUtils.copy(str, charset, outputMessage.getBody());
 	}
 

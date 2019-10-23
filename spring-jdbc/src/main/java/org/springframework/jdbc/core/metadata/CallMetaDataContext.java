@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -172,7 +173,7 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Secify the name of the schema.
+	 * Specify the name of the schema.
 	 */
 	public void setSchemaName(@Nullable String schemaName) {
 		this.schemaName = schemaName;
@@ -292,7 +293,7 @@ public class CallMetaDataContext {
 		}
 		else {
 			if (this.outParameterNames.size() > 1) {
-				logger.warn("Accessing single output value when procedure has more than one output parameter");
+				logger.info("Accessing single output value when procedure has more than one output parameter");
 			}
 			return (!this.outParameterNames.isEmpty() ? this.outParameterNames.get(0) : null);
 		}
@@ -362,8 +363,7 @@ public class CallMetaDataContext {
 		}
 		setOutParameterNames(outParamNames);
 
-		List<SqlParameter> workParams = new ArrayList<>();
-		workParams.addAll(declaredReturnParams);
+		List<SqlParameter> workParams = new ArrayList<>(declaredReturnParams);
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			workParams.addAll(declaredParams.values());
 			return workParams;
@@ -391,7 +391,7 @@ public class CallMetaDataContext {
 					if (param == null) {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to locate declared parameter for function return value - " +
-								" add a SqlOutParameter with name '" + getFunctionReturnName() + "'");
+								" add an SqlOutParameter with name '" + getFunctionReturnName() + "'");
 					}
 					else if (paramName != null) {
 						setFunctionReturnName(paramName);
@@ -520,8 +520,8 @@ public class CallMetaDataContext {
 										matchedParameters.put(parameterName,
 												SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
 									}
-									else {
-										logger.warn("Unable to locate the corresponding parameter value for '" +
+									else if (logger.isInfoEnabled()) {
+										logger.info("Unable to locate the corresponding parameter value for '" +
 												parameterName + "' within the parameter values provided: " +
 												caseInsensitiveParameterNames.values());
 									}
@@ -587,8 +587,8 @@ public class CallMetaDataContext {
 			for (String parameterName : callParameterNames.keySet()) {
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 				String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
-				if (!matchedParameters.containsKey(callParameterName)) {
-					logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
+				if (!matchedParameters.containsKey(callParameterName) && logger.isInfoEnabled()) {
+					logger.info("Unable to locate the corresponding parameter value for '" + parameterName +
 							"' within the parameter values provided: " + inParameters.keySet());
 				}
 			}
@@ -626,7 +626,7 @@ public class CallMetaDataContext {
 		String schemaNameToUse;
 
 		// For Oracle where catalogs are not supported we need to reverse the schema name
-		// and the catalog name since the cataog is used for the package name
+		// and the catalog name since the catalog is used for the package name
 		if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() &&
 				!this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
 			schemaNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());

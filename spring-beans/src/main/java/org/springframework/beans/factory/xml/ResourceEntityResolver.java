@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,9 +31,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 
 /**
- * EntityResolver implementation that tries to resolve entity references
+ * {@code EntityResolver} implementation that tries to resolve entity references
  * through a {@link org.springframework.core.io.ResourceLoader} (usually,
- * relative to the resource base of an ApplicationContext), if applicable.
+ * relative to the resource base of an {@code ApplicationContext}), if applicable.
  * Extends {@link DelegatingEntityResolver} to also provide DTD and XSD lookup.
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
@@ -72,8 +72,11 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 
 	@Override
 	@Nullable
-	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
+	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId)
+			throws SAXException, IOException {
+
 		InputSource source = super.resolveEntity(publicId, systemId);
+
 		if (source == null && systemId != null) {
 			String resourcePath = null;
 			try {
@@ -105,7 +108,27 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 					logger.debug("Found XML entity [" + systemId + "]: " + resource);
 				}
 			}
+			else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
+				// External dtd/xsd lookup via https even for canonical http declaration
+				String url = systemId;
+				if (url.startsWith("http:")) {
+					url = "https:" + url.substring(5);
+				}
+				try {
+					source = new InputSource(new URL(url).openStream());
+					source.setPublicId(publicId);
+					source.setSystemId(systemId);
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not resolve XML entity [" + systemId + "] through URL [" + url + "]", ex);
+					}
+					// Fall back to the parser's default behavior.
+					source = null;
+				}
+			}
 		}
+
 		return source;
 	}
 

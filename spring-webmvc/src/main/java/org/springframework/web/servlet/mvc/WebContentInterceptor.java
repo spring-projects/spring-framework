@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
@@ -169,7 +171,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 		checkRequest(request);
 
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
 
 		CacheControl cacheControl = lookupCacheControl(lookupPath);
 		Integer cacheSeconds = lookupCacheSeconds(lookupPath);
@@ -212,9 +214,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			return cacheControl;
 		}
 		// Pattern match?
-		for (String registeredPath : this.cacheControlMappings.keySet()) {
-			if (this.pathMatcher.match(registeredPath, urlPath)) {
-				return this.cacheControlMappings.get(registeredPath);
+		for (Map.Entry<String, CacheControl> entry : this.cacheControlMappings.entrySet()) {
+			if (this.pathMatcher.match(entry.getKey(), urlPath)) {
+				return entry.getValue();
 			}
 		}
 		return null;
@@ -237,9 +239,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			return cacheSeconds;
 		}
 		// Pattern match?
-		for (String registeredPath : this.cacheMappings.keySet()) {
-			if (this.pathMatcher.match(registeredPath, urlPath)) {
-				return this.cacheMappings.get(registeredPath);
+		for (Map.Entry<String, Integer> entry : this.cacheMappings.entrySet()) {
+			if (this.pathMatcher.match(entry.getKey(), urlPath)) {
+				return entry.getValue();
 			}
 		}
 		return null;

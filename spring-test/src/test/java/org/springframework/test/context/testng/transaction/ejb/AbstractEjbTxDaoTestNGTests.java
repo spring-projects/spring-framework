@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.test.context.transaction.ejb.dao.TestEntityDao;
 
-import static org.testng.AssertJUnit.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for all TestNG-based tests involving EJB transaction
@@ -53,13 +53,13 @@ public abstract class AbstractEjbTxDaoTestNGTests extends AbstractTransactionalT
 	@Test
 	public void test1InitialState() {
 		int count = dao.getCount(TEST_NAME);
-		assertEquals("New TestEntity should have count=0.", 0, count);
+		assertThat(count).as("New TestEntity should have count=0.").isEqualTo(0);
 	}
 
 	@Test(dependsOnMethods = "test1InitialState")
 	public void test2IncrementCount1() {
 		int count = dao.incrementCount(TEST_NAME);
-		assertEquals("Expected count=1 after first increment.", 1, count);
+		assertThat(count).as("Expected count=1 after first increment.").isEqualTo(1);
 	}
 
 	/**
@@ -70,10 +70,10 @@ public abstract class AbstractEjbTxDaoTestNGTests extends AbstractTransactionalT
 	@Test(dependsOnMethods = "test2IncrementCount1")
 	public void test3IncrementCount2() {
 		int count = dao.getCount(TEST_NAME);
-		assertEquals("Expected count=1 after test2IncrementCount1().", 1, count);
+		assertThat(count).as("Expected count=1 after test2IncrementCount1().").isEqualTo(1);
 
 		count = dao.incrementCount(TEST_NAME);
-		assertEquals("Expected count=2 now.", 2, count);
+		assertThat(count).as("Expected count=2 now.").isEqualTo(2);
 	}
 
 	@AfterMethod(alwaysRun = true)

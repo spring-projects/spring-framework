@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -59,6 +60,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	private AnnotatedElement qualifiedElement;
 
+	/** Determines if the definition needs to be re-merged. */
+	volatile boolean stale;
+
 	boolean allowCaching = true;
 
 	boolean isFactoryMethodUnique = false;
@@ -70,9 +74,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile Class<?> resolvedTargetType;
 
+	/** Package-visible field for caching if the bean is a factory bean. */
+	@Nullable
+	volatile Boolean isFactoryBean;
+
 	/** Package-visible field for caching the return type of a generically typed factory method. */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
+
+	/** Package-visible field for caching a unique factory method candidate for introspection. */
+	@Nullable
+	volatile Method factoryMethodToIntrospect;
 
 	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
@@ -232,6 +244,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.allowCaching = original.allowCaching;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 		this.targetType = original.targetType;
+		this.factoryMethodToIntrospect = original.factoryMethodToIntrospect;
 	}
 
 	/**
@@ -325,14 +338,40 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Return a {@link ResolvableType} for this bean definition,
 	 * either from runtime-cached type information or from configuration-time
-	 * {@link #setTargetType(ResolvableType)} or {@link #setBeanClass(Class)}.
+	 * {@link #setTargetType(ResolvableType)} or {@link #setBeanClass(Class)},
+	 * also considering resolved factory method definitions.
 	 * @since 5.1
-	 * @see #getTargetType()
-	 * @see #getBeanClass()
+	 * @see #setTargetType(ResolvableType)
+	 * @see #setBeanClass(Class)
+	 * @see #setResolvedFactoryMethod(Method)
 	 */
+	@Override
 	public ResolvableType getResolvableType() {
 		ResolvableType targetType = this.targetType;
-		return (targetType != null ? targetType : ResolvableType.forClass(getBeanClass()));
+		if (targetType != null) {
+			return targetType;
+		}
+		ResolvableType returnType = this.factoryMethodReturnType;
+		if (returnType != null) {
+			return returnType;
+		}
+		Method factoryMethod = this.factoryMethodToIntrospect;
+		if (factoryMethod != null) {
+			return ResolvableType.forMethodReturnType(factoryMethod);
+		}
+		return super.getResolvableType();
+	}
+
+	/**
+	 * Determine preferred constructors to use for default construction, if any.
+	 * Constructor arguments will be autowired if necessary.
+	 * @return one or more preferred constructors, or {@code null} if none
+	 * (in which case the regular no-arg default constructor will be called)
+	 * @since 5.1
+	 */
+	@Nullable
+	public Constructor<?>[] getPreferredConstructors() {
+		return null;
 	}
 
 	/**
@@ -345,10 +384,29 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Specify a factory method name that refers to an overloaded method.
+	 * @since 5.2
+	 */
+	public void setNonUniqueFactoryMethodName(String name) {
+		Assert.hasText(name, "Factory method name must not be empty");
+		setFactoryMethodName(name);
+		this.isFactoryMethodUnique = false;
+	}
+
+	/**
 	 * Check whether the given candidate qualifies as a factory method.
 	 */
 	public boolean isFactoryMethod(Method candidate) {
 		return candidate.getName().equals(getFactoryMethodName());
+	}
+
+	/**
+	 * Set a resolved Java Method for the factory method on this bean definition.
+	 * @param method the resolved factory method, or {@code null} to reset it
+	 * @since 5.2
+	 */
+	public void setResolvedFactoryMethod(@Nullable Method method) {
+		this.factoryMethodToIntrospect = method;
 	}
 
 	/**
@@ -357,10 +415,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
-		synchronized (this.constructorArgumentLock) {
-			Executable candidate = this.resolvedConstructorOrFactoryMethod;
-			return (candidate instanceof Method ? (Method) candidate : null);
-		}
+		return this.factoryMethodToIntrospect;
 	}
 
 	public void registerExternallyManagedConfigMember(Member configMember) {
@@ -418,7 +473,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof RootBeanDefinition && super.equals(other)));
 	}
 

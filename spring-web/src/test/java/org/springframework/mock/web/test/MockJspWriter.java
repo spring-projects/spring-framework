@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,11 @@ package org.springframework.mock.web.test;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.JspWriter} class.
@@ -33,6 +36,7 @@ public class MockJspWriter extends JspWriter {
 
 	private final HttpServletResponse response;
 
+	@Nullable
 	private PrintWriter targetWriter;
 
 
@@ -58,7 +62,7 @@ public class MockJspWriter extends JspWriter {
 	 * @param response the servlet response to wrap
 	 * @param targetWriter the target Writer to wrap
 	 */
-	public MockJspWriter(HttpServletResponse response, Writer targetWriter) {
+	public MockJspWriter(@Nullable HttpServletResponse response, @Nullable Writer targetWriter) {
 		super(DEFAULT_BUFFER, true);
 		this.response = (response != null ? response : new MockHttpServletResponse());
 		if (targetWriter instanceof PrintWriter) {

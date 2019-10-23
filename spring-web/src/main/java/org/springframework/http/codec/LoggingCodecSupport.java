@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 
 /**
  * Base class for {@link org.springframework.core.codec.Encoder},
@@ -31,7 +31,7 @@ import org.springframework.http.HttpLog;
  */
 public class LoggingCodecSupport {
 
-	protected final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	/** Whether to log potentially sensitive info (form data at DEBUG and headers at TRACE). */
 	private boolean enableLoggingRequestDetails = false;

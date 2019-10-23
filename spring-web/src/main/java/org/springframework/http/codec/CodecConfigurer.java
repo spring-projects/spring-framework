@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -109,6 +109,39 @@ public interface CodecConfigurer {
 		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
 		 */
 		void jackson2JsonEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Protobuf {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.1
+		 * @see org.springframework.http.codec.protobuf.ProtobufDecoder
+		 */
+		void protobufDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Protobuf {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.1
+		 * @see org.springframework.http.codec.protobuf.ProtobufEncoder
+		 * @see org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter
+		 */
+		void protobufEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default JAXB2 {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.1.3
+		 * @see org.springframework.http.codec.xml.Jaxb2XmlDecoder
+		 */
+		void jaxb2Decoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default JABX2 {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.1.3
+		 * @see org.springframework.http.codec.xml.Jaxb2XmlEncoder
+		 */
+		void jaxb2Encoder(Encoder<?> encoder);
 
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.

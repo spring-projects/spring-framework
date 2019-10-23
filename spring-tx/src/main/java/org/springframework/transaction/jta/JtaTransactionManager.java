@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
+
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -497,8 +498,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected void checkUserTransactionAndTransactionManager() throws IllegalStateException {
 		// We at least need the JTA UserTransaction.
 		if (this.userTransaction != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA UserTransaction: " + this.userTransaction);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA UserTransaction: " + this.userTransaction);
 			}
 		}
 		else {
@@ -508,8 +509,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
 		if (this.transactionManager != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionManager: " + this.transactionManager);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA TransactionManager: " + this.transactionManager);
 			}
 		}
 		else {
@@ -542,8 +543,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		if (this.transactionSynchronizationRegistry != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
 			}
 		}
 	}
@@ -709,7 +710,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
 	@Nullable
-	protected TransactionManager findTransactionManager(UserTransaction ut) {
+	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
 		if (ut instanceof TransactionManager) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");

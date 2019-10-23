@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,22 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.BodyExtractors;
 
 /**
  * Static factory methods providing access to built-in implementations of
@@ -37,14 +39,15 @@ import org.springframework.util.Assert;
  *
  * @author Rob Winch
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
 
 	/**
-	 * Name of the {@linkplain ClientRequest#attributes() request attribute} that
-	 * contains the {@link Credentials} used by {@link #basicAuthentication()}.
-	 * @deprecated in favor of {@link HttpHeaders#setBasicAuth(String, String)}
+	 * Name of the request attribute with {@link Credentials} for {@link #basicAuthentication()}.
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
 	@Deprecated
 	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
@@ -52,69 +55,20 @@ public abstract class ExchangeFilterFunctions {
 
 
 	/**
-	 * Return a filter for HTTP Basic Authentication that adds an authorization
-	 * header, based on the given user and password.
-	 * <p>Note that Basic Authentication only supports characters in the
-	 * {@link StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 * @param user the user
-	 * @param password the password
-	 * @return the filter for basic authentication
-	 * @throws IllegalArgumentException if either {@code user} or
-	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
-	 * @deprecated in favor of {@link HttpHeaders#setBasicAuth(String, String)}
+	 * Consume up to the specified number of bytes from the response body and
+	 * cancel if any more data arrives.
+	 * <p>Internally delegates to {@link DataBufferUtils#takeUntilByteCount}.
+	 * @param maxByteCount the limit as number of bytes
+	 * @return the filter to limit the response size with
+	 * @since 5.1
 	 */
-	@Deprecated
-	public static ExchangeFilterFunction basicAuthentication(String user, String password) {
-		Assert.notNull(user, "'user' must not be null");
-		Assert.notNull(password, "'password' must not be null");
-		checkIllegalCharacters(user, password);
-		return basicAuthenticationInternal(request -> Optional.of(new Credentials(user, password)));
-	}
-
-	/**
-	 * Variant of {@link #basicAuthentication(String, String)} that looks up
-	 * the {@link Credentials Credentials} provided in a
-	 * {@linkplain ClientRequest#attributes() request attribute}, or if the
-	 * attribute is not found, the authorization header is not added.
-	 * @return the filter for basic authentication
-	 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
-	 * @see Credentials#basicAuthenticationCredentials(String, String)
-	 * @deprecated as of Spring 5.1, with no direct replacement
-	 */
-	@Deprecated
-	public static ExchangeFilterFunction basicAuthentication() {
-		return basicAuthenticationInternal(request ->
-				request.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE)
-						.map(credentials -> (Credentials) credentials));
-	}
-
-	private static ExchangeFilterFunction basicAuthenticationInternal(
-			Function<ClientRequest, Optional<Credentials>> credentialsFunction) {
-
-		return ExchangeFilterFunction.ofRequestProcessor(request ->
-				credentialsFunction.apply(request)
-						.map(credentials -> Mono.just(insertAuthorizationHeader(request, credentials)))
-						.orElse(Mono.just(request)));
-	}
-
-	private static void checkIllegalCharacters(String username, String password) {
-		// Basic authentication only supports ISO 8859-1, see
-		// https://stackoverflow.com/questions/702629/utf-8-characters-mangled-in-http-basic-auth-username#703341
-		CharsetEncoder encoder = StandardCharsets.ISO_8859_1.newEncoder();
-		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
-			throw new IllegalArgumentException(
-					"Username or password contains characters that cannot be encoded to ISO-8859-1");
-		}
-	}
-
-	private static ClientRequest insertAuthorizationHeader(ClientRequest request, Credentials credentials) {
-		return ClientRequest.from(request).headers(headers -> {
-			String credentialsString = credentials.username + ":" + credentials.password;
-			byte[] credentialBytes = credentialsString.getBytes(StandardCharsets.ISO_8859_1);
-			byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
-			String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
-			headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
-		}).build();
+	public static ExchangeFilterFunction limitResponseSize(long maxByteCount) {
+		return (request, next) ->
+				next.exchange(request).map(response -> {
+					Flux<DataBuffer> body = response.body(BodyExtractors.toDataBuffers());
+					body = DataBufferUtils.takeUntilByteCount(body, maxByteCount);
+					return ClientResponse.from(response).body(body).build();
+				});
 	}
 
 	/**
@@ -135,12 +89,54 @@ public abstract class ExchangeFilterFunctions {
 						Mono.error(exceptionFunction.apply(response)) : Mono.just(response)));
 	}
 
+	/**
+	 * Return a filter that applies HTTP Basic Authentication to the request
+	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
+	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
+	 * @param username the username
+	 * @param password the password
+	 * @return the filter to add authentication headers with
+	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
+	 * @see HttpHeaders#setBasicAuth(String)
+	 */
+	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
+		String encodedCredentials = HttpHeaders.encodeBasicAuth(username, password, null);
+		return (request, next) ->
+				next.exchange(ClientRequest.from(request)
+						.headers(headers -> headers.setBasicAuth(encodedCredentials))
+						.build());
+	}
 
 	/**
-	 * Stores user and password for HTTP basic authentication.
-	 * @see #basicAuthentication()
-	 * @see #basicAuthenticationCredentials(String, String)
-	 * @deprecated as of Spring 5.1, with no direct replacement
+	 * Variant of {@link #basicAuthentication(String, String)} that looks up
+	 * the {@link Credentials Credentials} in a
+	 * {@link #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE request attribute}.
+	 * @return the filter to use
+	 * @see Credentials
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
+	 */
+	@Deprecated
+	public static ExchangeFilterFunction basicAuthentication() {
+		return (request, next) -> {
+			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
+			if (attr instanceof Credentials) {
+				Credentials cred = (Credentials) attr;
+				return next.exchange(ClientRequest.from(request)
+						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
+						.build());
+			}
+			else {
+				return next.exchange(request);
+			}
+		};
+	}
+
+
+	/**
+	 * Stores username and password for HTTP basic authentication.
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
 	@Deprecated
 	public static final class Credentials {
@@ -162,24 +158,23 @@ public abstract class ExchangeFilterFunctions {
 		}
 
 		/**
-		 * Return a {@literal Consumer} that stores the given user and password
+		 * Return a {@literal Consumer} that stores the given username and password
 		 * as a request attribute of type {@code Credentials} that is in turn
 		 * used by {@link ExchangeFilterFunctions#basicAuthentication()}.
-		 * @param user the user
+		 * @param username the username
 		 * @param password the password
 		 * @return a consumer that can be passed into
 		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer)}
 		 * @see ClientRequest.Builder#attributes(java.util.function.Consumer)
 		 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
 		 */
-		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String user, String password) {
-			Credentials credentials = new Credentials(user, password);
-			checkIllegalCharacters(user, password);
+		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String username, String password) {
+			Credentials credentials = new Credentials(username, password);
 			return (map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials));
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

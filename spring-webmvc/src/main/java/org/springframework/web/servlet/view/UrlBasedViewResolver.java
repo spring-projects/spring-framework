@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.View;
 /**
  * Simple implementation of the {@link org.springframework.web.servlet.ViewResolver}
  * interface, allowing for direct resolution of symbolic view names to URLs,
- * without explicit mapping definition. This is useful if your symbolic names
+ * without explicit mapping definitions. This is useful if your symbolic names
  * match the names of your view resources in a straightforward manner
  * (i.e. the symbolic name is the unique part of the resource's filename),
  * without the need for a dedicated mapping to be defined for each view.
@@ -52,12 +53,12 @@ import org.springframework.web.servlet.View;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:myAction.do" will trigger a redirect to the given
+ * prefix. E.g.: "redirect:myAction" will trigger a redirect to the given
  * URL, rather than resolution as standard view name. This is typically used
  * for redirecting to a controller URL after finishing a form workflow.
  *
- * <p>Furthermore, forward URLs can be specified via the "forward:" prefix. E.g.:
- * "forward:myAction.do" will trigger a forward to the given URL, rather than
+ * <p>Furthermore, forward URLs can be specified via the "forward:" prefix.
+ * E.g.: "forward:myAction" will trigger a forward to the given URL, rather than
  * resolution as standard view name. This is typically used for controller URLs;
  * it is not supposed to be used for JSP URLs - use logical view names there.
  *
@@ -65,14 +66,15 @@ import org.springframework.web.servlet.View;
  * a symbolic view name to different resources depending on the current locale.
  *
  * <p><b>Note:</b> When chaining ViewResolvers, a UrlBasedViewResolver will check whether
- * the {@link AbstractUrlBasedView#checkResource specified resource actually exists}.
+ * the {@linkplain AbstractUrlBasedView#checkResource specified resource actually exists}.
  * However, with {@link InternalResourceView}, it is not generally possible to
  * determine the existence of the target resource upfront. In such a scenario,
- * a UrlBasedViewResolver will always return View for any given view name;
+ * a UrlBasedViewResolver will always return a View for any given view name;
  * as a consequence, it should be configured as the last ViewResolver in the chain.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 13.12.2003
  * @see #setViewClass
  * @see #setPrefix
@@ -224,7 +226,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * interpreted as relative to the web application root, i.e. the context
 	 * path will be prepended to the URL.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction.do"
+	 * E.g.: "redirect:myAction"
 	 * @see RedirectView#setContextRelative
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -251,7 +253,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * difference. However, some clients depend on 303 when redirecting
 	 * after a POST request; turn this flag off in such a scenario.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction.do"
+	 * E.g.: "redirect:myAction"
 	 * @see RedirectView#setHttp10Compatible
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -469,21 +471,26 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (!canHandle(viewName, locale)) {
 			return null;
 		}
+
 		// Check for special "redirect:" prefix.
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			RedirectView view = new RedirectView(redirectUrl,
+					isRedirectContextRelative(), isRedirectHttp10Compatible());
 			String[] hosts = getRedirectHosts();
 			if (hosts != null) {
 				view.setHosts(hosts);
 			}
-			return applyLifecycleMethods(viewName, view);
+			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view);
 		}
+
 		// Check for special "forward:" prefix.
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
 			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
-			return new InternalResourceView(forwardUrl);
+			InternalResourceView view = new InternalResourceView(forwardUrl);
+			return applyLifecycleMethods(FORWARD_URL_PREFIX, view);
 		}
+
 		// Else fall back to superclass implementation: calling loadView.
 		return super.createView(viewName, locale);
 	}
@@ -545,14 +552,17 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
 		view.setUrl(getPrefix() + viewName + getSuffix());
+		view.setAttributesMap(getAttributesMap());
 
 		String contentType = getContentType();
 		if (contentType != null) {
 			view.setContentType(contentType);
 		}
 
-		view.setRequestContextAttribute(getRequestContextAttribute());
-		view.setAttributesMap(getAttributesMap());
+		String requestContextAttribute = getRequestContextAttribute();
+		if (requestContextAttribute != null) {
+			view.setRequestContextAttribute(requestContextAttribute);
+		}
 
 		Boolean exposePathVariables = getExposePathVariables();
 		if (exposePathVariables != null) {

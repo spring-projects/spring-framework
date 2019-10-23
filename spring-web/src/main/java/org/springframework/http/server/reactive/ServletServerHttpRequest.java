@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -69,12 +70,18 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final byte[] buffer;
 
-
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
-		super(initUri(request), request.getContextPath() + servletPath, initHeaders(request));
+		this(createDefaultHttpHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
+	}
+
+	public ServletServerHttpRequest(HttpHeaders headers, HttpServletRequest request, AsyncContext asyncContext,
+			String servletPath, DataBufferFactory bufferFactory, int bufferSize)
+			throws IOException, URISyntaxException {
+
+		super(initUri(request), request.getContextPath() + servletPath, initHeaders(headers, request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
@@ -91,6 +98,18 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.bodyPublisher.registerReadListener();
 	}
 
+
+	private static HttpHeaders createDefaultHttpHeaders(HttpServletRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+			String name = (String) names.nextElement();
+			for (Enumeration<?> values = request.getHeaders(name); values.hasMoreElements(); ) {
+				headers.add(name, (String) values.nextElement());
+			}
+		}
+		return headers;
+	}
+
 	private static URI initUri(HttpServletRequest request) throws URISyntaxException {
 		Assert.notNull(request, "'request' must not be null");
 		StringBuffer url = request.getRequestURL();
@@ -101,16 +120,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new URI(url.toString());
 	}
 
-	private static HttpHeaders initHeaders(HttpServletRequest request) {
-		HttpHeaders headers = new HttpHeaders();
-		for (Enumeration<?> names = request.getHeaderNames();
-			names.hasMoreElements(); ) {
-			String name = (String) names.nextElement();
-			for (Enumeration<?> values = request.getHeaders(name);
-				values.hasMoreElements(); ) {
-				headers.add(name, (String) values.nextElement());
-			}
-		}
+	private static HttpHeaders initHeaders(HttpHeaders headers, HttpServletRequest request) {
 		MediaType contentType = headers.getContentType();
 		if (contentType == null) {
 			String requestContentType = request.getContentType();
@@ -168,6 +178,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
@@ -231,7 +242,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	private final class RequestAsyncListener implements AsyncListener {
 
 		@Override
-		public void onStartAsync(AsyncEvent event) {}
+		public void onStartAsync(AsyncEvent event) {
+		}
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
@@ -290,6 +302,11 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		protected void readingPaused() {
 			// no-op
+		}
+
+		@Override
+		protected void discardData() {
+			// Nothing to discard since we pass data buffers on immediately..
 		}
 
 

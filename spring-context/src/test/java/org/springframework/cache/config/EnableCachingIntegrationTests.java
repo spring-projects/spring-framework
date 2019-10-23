@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,10 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
@@ -33,8 +34,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
+import org.springframework.mock.env.MockEnvironment;
 
-import static org.springframework.cache.CacheTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Tests that represent real use cases with advanced configuration.
@@ -45,12 +50,14 @@ public class EnableCachingIntegrationTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
 		}
 	}
+
 
 	@Test
 	public void fooServiceWithInterface() {
@@ -77,22 +84,48 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
-	public void beanCondition() {
+	public void beanConditionOff() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
-		Cache cache = getCache();
 		FooService service = this.context.getBean(FooService.class);
+		Cache cache = getCache();
 
 		Object key = new Object();
 		service.getWithCondition(key);
 		assertCacheMiss(key, cache);
+		service.getWithCondition(key);
+		assertCacheMiss(key, cache);
+
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
+	}
+
+	@Test
+	public void beanConditionOn() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setEnvironment(new MockEnvironment().withProperty("bar.enabled", "true"));
+		ctx.register(BeanConditionConfig.class);
+		ctx.refresh();
+		this.context = ctx;
+
+		FooService service = this.context.getBean(FooService.class);
+		Cache cache = getCache();
+
+		Object key = new Object();
+		Object value = service.getWithCondition(key);
+		assertCacheHit(key, value, cache);
+		value = service.getWithCondition(key);
+		assertCacheHit(key, value, cache);
+
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	private Cache getCache() {
 		return this.context.getBean(CacheManager.class).getCache("testCache");
 	}
 
+
 	@Configuration
 	static class SharedConfig extends CachingConfigurerSupport {
+
 		@Override
 		@Bean
 		public CacheManager cacheManager() {
@@ -100,34 +133,42 @@ public class EnableCachingIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	@Import(SharedConfig.class)
 	@EnableCaching
 	static class FooConfig {
+
 		@Bean
 		public FooService fooService() {
 			return new FooServiceImpl();
 		}
 	}
+
 
 	@Configuration
 	@Import(SharedConfig.class)
 	@EnableCaching(proxyTargetClass = true)
 	static class FooConfigCglib {
+
 		@Bean
 		public FooService fooService() {
 			return new FooServiceImpl();
 		}
 	}
 
-	private interface FooService {
+
+	interface FooService {
+
 		Object getSimple(Object key);
 
 		Object getWithCondition(Object key);
 	}
 
+
 	@CacheConfig(cacheNames = "testCache")
-	private static class FooServiceImpl implements FooService {
+	static class FooServiceImpl implements FooService {
+
 		private final AtomicLong counter = new AtomicLong();
 
 		@Override
@@ -143,17 +184,25 @@ public class EnableCachingIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	@Import(FooConfig.class)
 	@EnableCaching
 	static class BeanConditionConfig {
 
+		@Autowired
+		Environment env;
+
 		@Bean
 		public Bar bar() {
-			return new Bar(false);
+			return new Bar(Boolean.valueOf(env.getProperty("bar.enabled")));
 		}
 
+
 		static class Bar {
+
+			public int count;
+
 			private final boolean enabled;
 
 			public Bar(boolean enabled) {
@@ -161,6 +210,7 @@ public class EnableCachingIntegrationTests {
 			}
 
 			public boolean isEnabled() {
+				this.count++;
 				return this.enabled;
 			}
 		}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,10 +81,8 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Add {@link Consumer} for a {@link ResponseCookie.ResponseCookieBuilder
-	 * ResponseCookieBuilder} that will be invoked for each cookie being built,
-	 * just before the call to
-	 * {@link ResponseCookie.ResponseCookieBuilder#build() build()}.
+	 * Add a {@link Consumer} for a {@code ResponseCookieBuilder} that will be invoked
+	 * for each cookie being built, just before the call to {@code build()}.
 	 * @param initializer consumer for a cookie builder
 	 * @since 5.1
 	 */
@@ -125,7 +123,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 				.maxAge(maxAge)
 				.httpOnly(true)
 				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
-				.sameSite("Strict");
+				.sameSite("Lax");
 
 		if (this.cookieInitializer != null) {
 			this.cookieInitializer.accept(cookieBuilder);

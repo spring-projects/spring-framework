@@ -40,58 +40,6 @@ package org.springframework.asm;
 final class SymbolTable {
 
   /**
-   * An entry of a SymbolTable. This concrete and private subclass of {@link Symbol} adds two fields
-   * which are only used inside SymbolTable, to implement hash sets of symbols (in order to avoid
-   * duplicate symbols). See {@link #entries}.
-   *
-   * @author Eric Bruneton
-   */
-  private static class Entry extends Symbol {
-
-    /** The hash code of this entry. */
-    final int hashCode;
-
-    /**
-     * Another entry (and so on recursively) having the same hash code (modulo the size of {@link
-     * #entries}) as this one.
-     */
-    Entry next;
-
-    Entry(
-        final int index,
-        final int tag,
-        final String owner,
-        final String name,
-        final String value,
-        final long data,
-        final int hashCode) {
-      super(index, tag, owner, name, value, data);
-      this.hashCode = hashCode;
-    }
-
-    Entry(final int index, final int tag, final String value, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, value, /* data = */ 0);
-      this.hashCode = hashCode;
-    }
-
-    Entry(final int index, final int tag, final String value, final long data, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, value, data);
-      this.hashCode = hashCode;
-    }
-
-    Entry(
-        final int index, final int tag, final String name, final String value, final int hashCode) {
-      super(index, tag, /* owner = */ null, name, value, /* data = */ 0);
-      this.hashCode = hashCode;
-    }
-
-    Entry(final int index, final int tag, final long data, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, /* value = */ null, data);
-      this.hashCode = hashCode;
-    }
-  }
-
-  /**
    * The ClassWriter to which this SymbolTable belongs. This is only used to get access to {@link
    * ClassWriter#getCommonSuperClass} and to serialize custom attributes with {@link
    * Attribute#write}.
@@ -99,7 +47,7 @@ final class SymbolTable {
   final ClassWriter classWriter;
 
   /**
-   * The ClassReader from which this SymbolTable was constructed, or <tt>null</tt> if it was
+   * The ClassReader from which this SymbolTable was constructed, or {@literal null} if it was
    * constructed from scratch.
    */
   private final ClassReader sourceClassReader;
@@ -161,7 +109,7 @@ final class SymbolTable {
    * be stored in the constant pool. This type table is used by the control flow and data flow
    * analysis algorithm used to compute stack map frames from scratch. This array stores {@link
    * Symbol#TYPE_TAG} and {@link Symbol#UNINITIALIZED_TYPE_TAG}) Symbol. The type symbol at index
-   * <tt>i</tt> has its {@link Symbol#index} equal to <tt>i</tt> (and vice versa).
+   * {@code i} has its {@link Symbol#index} equal to {@code i} (and vice versa).
    */
   private Entry[] typeTable;
 
@@ -191,7 +139,7 @@ final class SymbolTable {
     this.sourceClassReader = classReader;
 
     // Copy the constant pool binary content.
-    byte[] inputBytes = classReader.b;
+    byte[] inputBytes = classReader.classFileBuffer;
     int constantPoolOffset = classReader.getItem(1) - 1;
     int constantPoolLength = classReader.header - constantPoolOffset;
     constantPoolCount = classReader.getItemCount();
@@ -203,6 +151,7 @@ final class SymbolTable {
     // method calls below), and to account for bootstrap method entries.
     entries = new Entry[constantPoolCount * 2];
     char[] charBuffer = new char[classReader.getMaxStringLength()];
+    boolean hasBootstrapMethods = false;
     int itemIndex = 1;
     while (itemIndex < constantPoolCount) {
       int itemOffset = classReader.getItem(itemIndex);
@@ -223,7 +172,7 @@ final class SymbolTable {
           break;
         case Symbol.CONSTANT_INTEGER_TAG:
         case Symbol.CONSTANT_FLOAT_TAG:
-          addConstantInteger(itemIndex, itemTag, classReader.readInt(itemOffset));
+          addConstantIntegerOrFloat(itemIndex, itemTag, classReader.readInt(itemOffset));
           break;
         case Symbol.CONSTANT_NAME_AND_TYPE_TAG:
           addConstantNameAndType(
@@ -233,10 +182,10 @@ final class SymbolTable {
           break;
         case Symbol.CONSTANT_LONG_TAG:
         case Symbol.CONSTANT_DOUBLE_TAG:
-          addConstantLong(itemIndex, itemTag, classReader.readLong(itemOffset));
+          addConstantLongOrDouble(itemIndex, itemTag, classReader.readLong(itemOffset));
           break;
         case Symbol.CONSTANT_UTF8_TAG:
-          addConstantUtf8(itemIndex, classReader.readUTF(itemIndex, charBuffer));
+          addConstantUtf8(itemIndex, classReader.readUtf(itemIndex, charBuffer));
           break;
         case Symbol.CONSTANT_METHOD_HANDLE_TAG:
           int memberRefItemOffset =
@@ -252,6 +201,7 @@ final class SymbolTable {
           break;
         case Symbol.CONSTANT_DYNAMIC_TAG:
         case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
+          hasBootstrapMethods = true;
           nameAndTypeItemOffset =
               classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
           addConstantDynamicOrInvokeDynamicReference(
@@ -276,7 +226,23 @@ final class SymbolTable {
           (itemTag == Symbol.CONSTANT_LONG_TAG || itemTag == Symbol.CONSTANT_DOUBLE_TAG) ? 2 : 1;
     }
 
-    // Copy the BootstrapMethods 'bootstrap_methods' array binary content, if any.
+    // Copy the BootstrapMethods, if any.
+    if (hasBootstrapMethods) {
+      copyBootstrapMethods(classReader, charBuffer);
+    }
+  }
+
+  /**
+   * Read the BootstrapMethods 'bootstrap_methods' array binary content and add them as entries of
+   * the SymbolTable.
+   *
+   * @param classReader the ClassReader whose bootstrap methods must be copied to initialize the
+   *     SymbolTable.
+   * @param charBuffer a buffer used to read strings in the constant pool.
+   */
+  private void copyBootstrapMethods(final ClassReader classReader, final char[] charBuffer) {
+    // Find attributOffset of the 'bootstrap_methods' array.
+    byte[] inputBytes = classReader.classFileBuffer;
     int currentAttributeOffset = classReader.getFirstAttributeOffset();
     for (int i = classReader.readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
       String attributeName = classReader.readUTF8(currentAttributeOffset, charBuffer);
@@ -313,19 +279,29 @@ final class SymbolTable {
   }
 
   /**
-   * @return the ClassReader from which this SymbolTable was constructed, or <tt>null</tt> if it was
-   *     constructed from scratch.
+   * Returns the ClassReader from which this SymbolTable was constructed.
+   *
+   * @return the ClassReader from which this SymbolTable was constructed, or {@literal null} if it
+   *     was constructed from scratch.
    */
   ClassReader getSource() {
     return sourceClassReader;
   }
 
-  /** @return the major version of the class to which this symbol table belongs. */
+  /**
+   * Returns the major version of the class to which this symbol table belongs.
+   *
+   * @return the major version of the class to which this symbol table belongs.
+   */
   int getMajorVersion() {
     return majorVersion;
   }
 
-  /** @return the internal name of the class to which this symbol table belongs. */
+  /**
+   * Returns the internal name of the class to which this symbol table belongs.
+   *
+   * @return the internal name of the class to which this symbol table belongs.
+   */
   String getClassName() {
     return className;
   }
@@ -344,12 +320,20 @@ final class SymbolTable {
     return addConstantClass(className).index;
   }
 
-  /** @return the number of items in this symbol table's constant_pool array (plus 1). */
+  /**
+   * Returns the number of items in this symbol table's constant_pool array (plus 1).
+   *
+   * @return the number of items in this symbol table's constant_pool array (plus 1).
+   */
   int getConstantPoolCount() {
     return constantPoolCount;
   }
 
-  /** @return the length in bytes of this symbol table's constant_pool array. */
+  /**
+   * Returns the length in bytes of this symbol table's constant_pool array.
+   *
+   * @return the length in bytes of this symbol table's constant_pool array.
+   */
   int getConstantPoolLength() {
     return constantPool.length;
   }
@@ -400,6 +384,8 @@ final class SymbolTable {
   // -----------------------------------------------------------------------------------------------
 
   /**
+   * Returns the list of entries which can potentially have the given hash code.
+   *
    * @param hashCode a {@link Entry#hashCode} value.
    * @return the list of entries which can potentially have the given hash code. The list is stored
    *     via the {@link Entry#next} field.
@@ -510,7 +496,7 @@ final class SymbolTable {
           constantDynamic.getName(),
           constantDynamic.getDescriptor(),
           constantDynamic.getBootstrapMethod(),
-          constantDynamic.getBootstrapMethodArguments());
+          constantDynamic.getBootstrapMethodArgumentsUnsafe());
     } else {
       throw new IllegalArgumentException("value " + value);
     }
@@ -626,7 +612,7 @@ final class SymbolTable {
    * @return a new or already existing Symbol with the given value.
    */
   Symbol addConstantInteger(final int value) {
-    return addConstantInteger(Symbol.CONSTANT_INTEGER_TAG, value);
+    return addConstantIntegerOrFloat(Symbol.CONSTANT_INTEGER_TAG, value);
   }
 
   /**
@@ -637,7 +623,7 @@ final class SymbolTable {
    * @return a new or already existing Symbol with the given value.
    */
   Symbol addConstantFloat(final float value) {
-    return addConstantInteger(Symbol.CONSTANT_FLOAT_TAG, Float.floatToRawIntBits(value));
+    return addConstantIntegerOrFloat(Symbol.CONSTANT_FLOAT_TAG, Float.floatToRawIntBits(value));
   }
 
   /**
@@ -648,7 +634,7 @@ final class SymbolTable {
    * @param value an int or float.
    * @return a constant pool constant with the given tag and primitive values.
    */
-  private Symbol addConstantInteger(final int tag, final int value) {
+  private Symbol addConstantIntegerOrFloat(final int tag, final int value) {
     int hashCode = hash(tag, value);
     Entry entry = get(hashCode);
     while (entry != null) {
@@ -669,7 +655,7 @@ final class SymbolTable {
    * @param tag one of {@link Symbol#CONSTANT_INTEGER_TAG} or {@link Symbol#CONSTANT_FLOAT_TAG}.
    * @param value an int or float.
    */
-  private void addConstantInteger(final int index, final int tag, final int value) {
+  private void addConstantIntegerOrFloat(final int index, final int tag, final int value) {
     add(new Entry(index, tag, value, hash(tag, value)));
   }
 
@@ -681,7 +667,7 @@ final class SymbolTable {
    * @return a new or already existing Symbol with the given value.
    */
   Symbol addConstantLong(final long value) {
-    return addConstantLong(Symbol.CONSTANT_LONG_TAG, value);
+    return addConstantLongOrDouble(Symbol.CONSTANT_LONG_TAG, value);
   }
 
   /**
@@ -692,7 +678,7 @@ final class SymbolTable {
    * @return a new or already existing Symbol with the given value.
    */
   Symbol addConstantDouble(final double value) {
-    return addConstantLong(Symbol.CONSTANT_DOUBLE_TAG, Double.doubleToRawLongBits(value));
+    return addConstantLongOrDouble(Symbol.CONSTANT_DOUBLE_TAG, Double.doubleToRawLongBits(value));
   }
 
   /**
@@ -703,7 +689,7 @@ final class SymbolTable {
    * @param value a long or double.
    * @return a constant pool constant with the given tag and primitive values.
    */
-  private Symbol addConstantLong(final int tag, final long value) {
+  private Symbol addConstantLongOrDouble(final int tag, final long value) {
     int hashCode = hash(tag, value);
     Entry entry = get(hashCode);
     while (entry != null) {
@@ -719,13 +705,14 @@ final class SymbolTable {
   }
 
   /**
-   * Adds a new CONSTANT_Double_info to the constant pool of this symbol table.
+   * Adds a new CONSTANT_Long_info or CONSTANT_Double_info to the constant pool of this symbol
+   * table.
    *
    * @param index the constant pool index of the new Symbol.
    * @param tag one of {@link Symbol#CONSTANT_LONG_TAG} or {@link Symbol#CONSTANT_DOUBLE_TAG}.
    * @param value a long or double.
    */
-  private void addConstantLong(final int index, final int tag, final long value) {
+  private void addConstantLongOrDouble(final int index, final int tag, final long value) {
     add(new Entry(index, tag, value, hash(tag, value)));
   }
 
@@ -1131,6 +1118,8 @@ final class SymbolTable {
   // -----------------------------------------------------------------------------------------------
 
   /**
+   * Returns the type table element whose index is given.
+   *
    * @param typeIndex a type table index.
    * @return the type table element whose index is given.
    */
@@ -1154,7 +1143,7 @@ final class SymbolTable {
       }
       entry = entry.next;
     }
-    return addType(new Entry(typeCount, Symbol.TYPE_TAG, value, hashCode));
+    return addTypeInternal(new Entry(typeCount, Symbol.TYPE_TAG, value, hashCode));
   }
 
   /**
@@ -1178,7 +1167,7 @@ final class SymbolTable {
       }
       entry = entry.next;
     }
-    return addType(
+    return addTypeInternal(
         new Entry(typeCount, Symbol.UNINITIALIZED_TYPE_TAG, value, bytecodeOffset, hashCode));
   }
 
@@ -1194,8 +1183,10 @@ final class SymbolTable {
    *     corresponding to the common super class of the given types.
    */
   int addMergedType(final int typeTableIndex1, final int typeTableIndex2) {
-    // TODO sort the arguments? The merge result should be independent of their order.
-    long data = typeTableIndex1 | (((long) typeTableIndex2) << 32);
+    long data =
+        typeTableIndex1 < typeTableIndex2
+            ? typeTableIndex1 | (((long) typeTableIndex2) << 32)
+            : typeTableIndex2 | (((long) typeTableIndex1) << 32);
     int hashCode = hash(Symbol.MERGED_TYPE_TAG, typeTableIndex1 + typeTableIndex2);
     Entry entry = get(hashCode);
     while (entry != null) {
@@ -1219,7 +1210,7 @@ final class SymbolTable {
    * @return the index in {@link #typeTable} where the given type was added, which is also equal to
    *     entry's index by hypothesis.
    */
-  private int addType(final Entry entry) {
+  private int addTypeInternal(final Entry entry) {
     if (typeTable == null) {
       typeTable = new Entry[16];
     }
@@ -1273,5 +1264,57 @@ final class SymbolTable {
       final String value3,
       final int value4) {
     return 0x7FFFFFFF & (tag + value1.hashCode() * value2.hashCode() * value3.hashCode() * value4);
+  }
+
+  /**
+   * An entry of a SymbolTable. This concrete and private subclass of {@link Symbol} adds two fields
+   * which are only used inside SymbolTable, to implement hash sets of symbols (in order to avoid
+   * duplicate symbols). See {@link #entries}.
+   *
+   * @author Eric Bruneton
+   */
+  private static class Entry extends Symbol {
+
+    /** The hash code of this entry. */
+    final int hashCode;
+
+    /**
+     * Another entry (and so on recursively) having the same hash code (modulo the size of {@link
+     * #entries}) as this one.
+     */
+    Entry next;
+
+    Entry(
+        final int index,
+        final int tag,
+        final String owner,
+        final String name,
+        final String value,
+        final long data,
+        final int hashCode) {
+      super(index, tag, owner, name, value, data);
+      this.hashCode = hashCode;
+    }
+
+    Entry(final int index, final int tag, final String value, final int hashCode) {
+      super(index, tag, /* owner = */ null, /* name = */ null, value, /* data = */ 0);
+      this.hashCode = hashCode;
+    }
+
+    Entry(final int index, final int tag, final String value, final long data, final int hashCode) {
+      super(index, tag, /* owner = */ null, /* name = */ null, value, data);
+      this.hashCode = hashCode;
+    }
+
+    Entry(
+        final int index, final int tag, final String name, final String value, final int hashCode) {
+      super(index, tag, /* owner = */ null, name, value, /* data = */ 0);
+      this.hashCode = hashCode;
+    }
+
+    Entry(final int index, final int tag, final long data, final int hashCode) {
+      super(index, tag, /* owner = */ null, /* name = */ null, /* value = */ null, data);
+      this.hashCode = hashCode;
+    }
   }
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -50,25 +50,24 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 
 	protected final void assertCount(int count) {
 		String[] defnames = getListableBeanFactory().getBeanDefinitionNames();
-		assertTrue("We should have " + count + " beans, not " + defnames.length, defnames.length == count);
+		assertThat(defnames.length == count).as("We should have " + count + " beans, not " + defnames.length).isTrue();
 	}
 
 	protected void assertTestBeanCount(int count) {
 		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
-		assertTrue("We should have " + count + " beans for class org.springframework.tests.sample.beans.TestBean, not " +
-				defNames.length, defNames.length == count);
+		assertThat(defNames.length == count).as("We should have " + count + " beans for class org.springframework.tests.sample.beans.TestBean, not " +
+				defNames.length).isTrue();
 
 		int countIncludingFactoryBeans = count + 2;
 		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, true);
-		assertTrue("We should have " + countIncludingFactoryBeans +
-				" beans for class org.springframework.tests.sample.beans.TestBean, not " + names.length,
-				names.length == countIncludingFactoryBeans);
+		assertThat(names.length == countIncludingFactoryBeans).as("We should have " + countIncludingFactoryBeans +
+				" beans for class org.springframework.tests.sample.beans.TestBean, not " + names.length).isTrue();
 	}
 
 	@Test
 	public void getDefinitionsForNoSuchClass() {
 		String[] defnames = getListableBeanFactory().getBeanNamesForType(String.class);
-		assertTrue("No string definitions", defnames.length == 0);
+		assertThat(defnames.length == 0).as("No string definitions").isTrue();
 	}
 
 	/**
@@ -77,19 +76,17 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 */
 	@Test
 	public void getCountForFactoryClass() {
-		assertTrue("Should have 2 factories, not " +
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
+		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2).as("Should have 2 factories, not " +
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).isTrue();
 
-		assertTrue("Should have 2 factories, not " +
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
+		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2).as("Should have 2 factories, not " +
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).isTrue();
 	}
 
 	@Test
 	public void containsBeanDefinition() {
-		assertTrue(getListableBeanFactory().containsBeanDefinition("rod"));
-		assertTrue(getListableBeanFactory().containsBeanDefinition("roderick"));
+		assertThat(getListableBeanFactory().containsBeanDefinition("rod")).isTrue();
+		assertThat(getListableBeanFactory().containsBeanDefinition("roderick")).isTrue();
 	}
 
 }

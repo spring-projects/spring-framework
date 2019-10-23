@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
@@ -145,12 +146,12 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 		ServerContainer serverContainer = getServerContainer();
 		Assert.state(serverContainer != null,
 				"No ServerContainer set. Most likely the server's own WebSocket ServletContainerInitializer " +
-						"has not run yet. Was the Spring ApplicationContext refreshed through a " +
-						"org.springframework.web.context.ContextLoaderListener, " +
-						"i.e. after the ServletContext has been fully initialized?");
+				"has not run yet. Was the Spring ApplicationContext refreshed through a " +
+				"org.springframework.web.context.ContextLoaderListener, " +
+				"i.e. after the ServletContext has been fully initialized?");
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Registering @ServerEndpoint class: " + endpointClass);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering @ServerEndpoint class: " + endpointClass);
 			}
 			serverContainer.addEndpoint(endpointClass);
 		}
@@ -163,8 +164,8 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 		ServerContainer serverContainer = getServerContainer();
 		Assert.state(serverContainer != null, "No ServerContainer set");
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Registering ServerEndpointConfig: " + endpointConfig);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering ServerEndpointConfig: " + endpointConfig);
 			}
 			serverContainer.addEndpoint(endpointConfig);
 		}

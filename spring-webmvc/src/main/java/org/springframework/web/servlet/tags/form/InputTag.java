@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.Map;
+
 import javax.servlet.jsp.JspException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * The {@code <input>} tag renders an HTML 'input' tag with type 'text' using
@@ -241,19 +245,22 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
-	public static final String READONLY_ATTRIBUTE = "readonly";
-
 	public static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
 
 
+	@Nullable
 	private String size;
 
+	@Nullable
 	private String maxlength;
 
+	@Nullable
 	private String alt;
 
+	@Nullable
 	private String onselect;
 
+	@Nullable
 	private String autocomplete;
 
 
@@ -268,6 +275,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code size}' attribute.
 	 */
+	@Nullable
 	protected String getSize() {
 		return this.size;
 	}
@@ -283,6 +291,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code maxlength}' attribute.
 	 */
+	@Nullable
 	protected String getMaxlength() {
 		return this.maxlength;
 	}
@@ -298,6 +307,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code alt}' attribute.
 	 */
+	@Nullable
 	protected String getAlt() {
 		return this.alt;
 	}
@@ -313,6 +323,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code onselect}' attribute.
 	 */
+	@Nullable
 	protected String getOnselect() {
 		return this.onselect;
 	}
@@ -328,6 +339,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code autocomplete}' attribute.
 	 */
+	@Nullable
 	protected String getAutocomplete() {
 		return this.autocomplete;
 	}
@@ -343,7 +355,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("input");
 
 		writeDefaultAttributes(tagWriter);
-		if (!hasDynamicTypeAttribute()) {
+		Map<String, Object> attributes = getDynamicAttributes();
+		if (attributes == null || !attributes.containsKey("type")) {
 			tagWriter.writeAttribute("type", getType());
 		}
 		writeValue(tagWriter);
@@ -359,10 +372,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		return SKIP_BODY;
 	}
 
-	private boolean hasDynamicTypeAttribute() {
-		return getDynamicAttributes() != null && getDynamicAttributes().containsKey("type");
-	}
-
 	/**
 	 * Writes the '{@code value}' attribute to the supplied {@link TagWriter}.
 	 * Subclasses may choose to override this implementation to control exactly
@@ -370,7 +379,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		String value = getDisplayString(getBoundValue(), getPropertyEditor());
-		String type = hasDynamicTypeAttribute() ? (String) getDynamicAttributes().get("type") : getType();
+		String type = null;
+		Map<String, Object> attributes = getDynamicAttributes();
+		if (attributes != null) {
+			type = (String) attributes.get("type");
+		}
+		if (type == null) {
+			type = getType();
+		}
 		tagWriter.writeAttribute("value", processFieldValue(getName(), value, type));
 	}
 

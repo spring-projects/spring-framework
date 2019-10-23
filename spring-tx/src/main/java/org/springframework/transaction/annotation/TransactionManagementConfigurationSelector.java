@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,16 +38,17 @@ import org.springframework.util.ClassUtils;
 public class TransactionManagementConfigurationSelector extends AdviceModeImportSelector<EnableTransactionManagement> {
 
 	/**
-	 * {@inheritDoc}
-	 * @return {@link ProxyTransactionManagementConfiguration} or
-	 * {@code AspectJTransactionManagementConfiguration} for {@code PROXY} and
-	 * {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()}, respectively
+	 * Returns {@link ProxyTransactionManagementConfiguration} or
+	 * {@code AspectJ(Jta)TransactionManagementConfiguration} for {@code PROXY}
+	 * and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()},
+	 * respectively.
 	 */
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:
-				return new String[] {AutoProxyRegistrar.class.getName(), ProxyTransactionManagementConfiguration.class.getName()};
+				return new String[] {AutoProxyRegistrar.class.getName(),
+						ProxyTransactionManagementConfiguration.class.getName()};
 			case ASPECTJ:
 				return new String[] {determineTransactionAspectClass()};
 			default:

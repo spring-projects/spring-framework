@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jmx.support;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -151,7 +152,9 @@ public class MBeanRegistrationSupport {
 						registeredBean = this.server.registerMBean(mbean, objectName);
 					}
 					catch (InstanceNotFoundException ex2) {
-						logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						if (logger.isInfoEnabled()) {
+							logger.info("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						}
 						throw ex;
 					}
 				}
@@ -180,10 +183,10 @@ public class MBeanRegistrationSupport {
 			snapshot = new LinkedHashSet<>(this.registeredBeans);
 		}
 		if (!snapshot.isEmpty()) {
-			logger.info("Unregistering JMX-exposed beans");
-		}
-		for (ObjectName objectName : snapshot) {
-			doUnregister(objectName);
+			logger.debug("Unregistering JMX-exposed beans");
+			for (ObjectName objectName : snapshot) {
+				doUnregister(objectName);
+			}
 		}
 	}
 
@@ -204,15 +207,15 @@ public class MBeanRegistrationSupport {
 						actuallyUnregistered = true;
 					}
 					else {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
+						if (logger.isInfoEnabled()) {
+							logger.info("Could not unregister MBean [" + objectName + "] as said MBean " +
 									"is not registered (perhaps already unregistered by an external process)");
 						}
 					}
 				}
 				catch (JMException ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Could not unregister MBean [" + objectName + "]", ex);
+					if (logger.isInfoEnabled()) {
+						logger.info("Could not unregister MBean [" + objectName + "]", ex);
 					}
 				}
 			}

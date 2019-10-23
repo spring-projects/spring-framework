@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -37,12 +37,8 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
@@ -60,7 +56,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
@@ -76,25 +72,25 @@ public class RequestParamMethodArgumentResolverTests {
 	public void supportsParameter() {
 
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
-		assertFalse(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isFalse();
 
 		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestParam()).arg(String.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 	}
 
@@ -104,58 +100,52 @@ public class RequestParamMethodArgumentResolverTests {
 		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, false);
 
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		assertFalse(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isFalse();
 	}
 
 	@Test
 	public void doesNotSupportReactiveWrapper() {
-		MethodParameter param;
-		try {
-			param = this.testMethod.annot(requestParam()).arg(Mono.class, String.class);
-			this.resolver.supportsParameter(param);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
-		}
-		try {
-			param = this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class);
-			this.resolver.supportsParameter(param);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.testMethod.annot(requestParam()).arg(Mono.class, String.class)))
+			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class)))
+			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test
-	public void resolveWithQueryString() throws Exception {
+	public void resolveWithQueryString() {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=foo"));
-		assertEquals("foo", resolve(param, exchange));
+		assertThat(resolve(param, exchange)).isEqualTo("foo");
 	}
 
 	@Test
-	public void resolveStringArray() throws Exception {
+	public void resolveStringArray() {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name=foo&name=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		assertTrue(result instanceof String[]);
-		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
+		boolean condition = result instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
 	}
 
 	@Test
-	public void resolveDefaultValue() throws Exception {
+	public void resolveDefaultValue() {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertEquals("bar", resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
+		assertThat(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isEqualTo("bar");
+	}
+
+	@Test // SPR-17050
+	public void resolveAndConvertNullValue() {
+		MethodParameter param = this.testMethod
+				.annot(requestParam().notRequired())
+				.arg(Integer.class);
+		assertThat(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/?nullParam=")))).isNull();
 	}
 
 	@Test
-	public void missingRequestParam() throws Exception {
+	public void missingRequestParam() {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
@@ -168,56 +158,56 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveSimpleTypeParam() throws Exception {
+	public void resolveSimpleTypeParam() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?stringNotAnnot=plainValue").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolve(param, exchange);
-		assertEquals("plainValue", result);
+		assertThat(result).isEqualTo("plainValue");
 	}
 
 	@Test  // SPR-8561
-	public void resolveSimpleTypeParamToNull() throws Exception {
+	public void resolveSimpleTypeParamToNull() {
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		assertNull(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
+		assertThat(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isNull();
 	}
 
 	@Test  // SPR-10180
-	public void resolveEmptyValueToDefault() throws Exception {
+	public void resolveEmptyValueToDefault() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name="));
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolve(param, exchange);
-		assertEquals("bar", result);
+		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test
-	public void resolveEmptyValueWithoutDefault() throws Exception {
+	public void resolveEmptyValueWithoutDefault() {
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?stringNotAnnot=").build();
-		assertEquals("", resolve(param, MockServerWebExchange.from(request)));
+		assertThat(resolve(param, MockServerWebExchange.from(request))).isEqualTo("");
 	}
 
 	@Test
-	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
+	public void resolveEmptyValueRequiredWithoutDefault() {
 		MethodParameter param = this.testMethod.annot(requestParam()).arg(String.class);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name="));
-		assertEquals("", resolve(param, exchange));
+		assertThat(resolve(param, exchange)).isEqualTo("");
 	}
 
 	@Test
-	public void resolveOptionalParamValue() throws Exception {
+	public void resolveOptionalParamValue() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		MethodParameter param = this.testMethod.arg(forClassWithGenerics(Optional.class, Integer.class));
 		Object result = resolve(param, exchange);
-		assertEquals(Optional.empty(), result);
+		assertThat(result).isEqualTo(Optional.empty());
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"));
 		result = resolve(param, exchange);
 
-		assertEquals(Optional.class, result.getClass());
+		assertThat(result.getClass()).isEqualTo(Optional.class);
 		Optional<?> value = (Optional<?>) result;
-		assertTrue(value.isPresent());
-		assertEquals(123, value.get());
+		assertThat(value.isPresent()).isTrue();
+		assertThat(value.get()).isEqualTo(123);
 	}
 
 
@@ -237,7 +227,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") String paramRequired,
 			@RequestParam(name = "name", required = false) String paramNotRequired,
 			@RequestParam("name") Optional<Integer> paramOptional,
-			@RequestParam Mono<String> paramMono) {
+			@RequestParam Mono<String> paramMono,
+			@RequestParam(required = false) Integer nullParam) {
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -29,6 +30,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -49,12 +51,15 @@ import org.springframework.util.ObjectUtils;
  */
 public class MockFilterChain implements FilterChain {
 
+	@Nullable
 	private ServletRequest request;
 
+	@Nullable
 	private ServletResponse response;
 
 	private final List<Filter> filters;
 
+	@Nullable
 	private Iterator<Filter> iterator;
 
 
@@ -97,6 +102,7 @@ public class MockFilterChain implements FilterChain {
 	/**
 	 * Return the request that {@link #doFilter} has been called with.
 	 */
+	@Nullable
 	public ServletRequest getRequest() {
 		return this.request;
 	}
@@ -104,12 +110,13 @@ public class MockFilterChain implements FilterChain {
 	/**
 	 * Return the response that {@link #doFilter} has been called with.
 	 */
+	@Nullable
 	public ServletResponse getResponse() {
 		return this.response;
 	}
 
 	/**
-	 * Invoke registered {@link Filter}s and/or {@link Servlet} also saving the
+	 * Invoke registered {@link Filter Filters} and/or {@link Servlet} also saving the
 	 * request and response.
 	 */
 	@Override
@@ -144,7 +151,7 @@ public class MockFilterChain implements FilterChain {
 	/**
 	 * A filter that simply delegates to a Servlet.
 	 */
-	private static class ServletFilterProxy implements Filter {
+	private static final class ServletFilterProxy implements Filter {
 
 		private final Servlet delegateServlet;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,32 +16,43 @@
 
 package org.springframework.jdbc.support;
 
-import org.junit.Test;
+import java.sql.Types;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link JdbcUtils}.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class JdbcUtilsTests {
 
 	@Test
 	public void commonDatabaseName() {
-		assertEquals("Oracle", JdbcUtils.commonDatabaseName("Oracle"));
-		assertEquals("DB2", JdbcUtils.commonDatabaseName("DB2-for-Spring"));
-		assertEquals("Sybase", JdbcUtils.commonDatabaseName("Sybase SQL Server"));
-		assertEquals("Sybase", JdbcUtils.commonDatabaseName("Adaptive Server Enterprise"));
-		assertEquals("MySQL", JdbcUtils.commonDatabaseName("MySQL"));
+		assertThat(JdbcUtils.commonDatabaseName("Oracle")).isEqualTo("Oracle");
+		assertThat(JdbcUtils.commonDatabaseName("DB2-for-Spring")).isEqualTo("DB2");
+		assertThat(JdbcUtils.commonDatabaseName("Sybase SQL Server")).isEqualTo("Sybase");
+		assertThat(JdbcUtils.commonDatabaseName("Adaptive Server Enterprise")).isEqualTo("Sybase");
+		assertThat(JdbcUtils.commonDatabaseName("MySQL")).isEqualTo("MySQL");
+	}
+
+	@Test
+	public void resolveTypeName() {
+		assertThat(JdbcUtils.resolveTypeName(Types.VARCHAR)).isEqualTo("VARCHAR");
+		assertThat(JdbcUtils.resolveTypeName(Types.NUMERIC)).isEqualTo("NUMERIC");
+		assertThat(JdbcUtils.resolveTypeName(Types.INTEGER)).isEqualTo("INTEGER");
+		assertThat(JdbcUtils.resolveTypeName(JdbcUtils.TYPE_UNKNOWN)).isNull();
 	}
 
 	@Test
 	public void convertUnderscoreNameToPropertyName() {
-		assertEquals("myName", JdbcUtils.convertUnderscoreNameToPropertyName("MY_NAME"));
-		assertEquals("yourName", JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME"));
-		assertEquals("AName", JdbcUtils.convertUnderscoreNameToPropertyName("a_name"));
-		assertEquals("someoneElsesName", JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name"));
+		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("MY_NAME")).isEqualTo("myName");
+		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME")).isEqualTo("yourName");
+		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("a_name")).isEqualTo("AName");
+		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name")).isEqualTo("someoneElsesName");
 	}
 
 }

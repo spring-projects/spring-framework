@@ -1,12 +1,11 @@
-
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +16,10 @@
 
 package org.springframework.jndi;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rod Johnson
@@ -29,13 +29,8 @@ public class JndiTemplateEditorTests {
 
 	@Test
 	public void testNullIsIllegalArgument() {
-		try {
-			new JndiTemplateEditor().setAsText(null);
-			fail("Null is illegal");
-		}
-		catch (IllegalArgumentException ex) {
-			// OK
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new JndiTemplateEditor().setAsText(null));
 	}
 
 	@Test
@@ -43,7 +38,7 @@ public class JndiTemplateEditorTests {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertTrue(jt.getEnvironment() == null);
+		assertThat(jt.getEnvironment() == null).isTrue();
 	}
 
 	@Test
@@ -54,9 +49,9 @@ public class JndiTemplateEditorTests {
 		// to look anything up
 		je.setAsText("jndiInitialSomethingOrOther=org.springframework.myjndi.CompleteRubbish\nfoo=bar");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertTrue(jt.getEnvironment().size() == 2);
-		assertTrue(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther").equals("org.springframework.myjndi.CompleteRubbish"));
-		assertTrue(jt.getEnvironment().getProperty("foo").equals("bar"));
+		assertThat(jt.getEnvironment().size() == 2).isTrue();
+		assertThat(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther").equals("org.springframework.myjndi.CompleteRubbish")).isTrue();
+		assertThat(jt.getEnvironment().getProperty("foo").equals("bar")).isTrue();
 	}
 
 }

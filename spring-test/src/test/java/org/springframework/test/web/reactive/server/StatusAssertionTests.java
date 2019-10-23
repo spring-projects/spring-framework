@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,9 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.HttpMethod;
@@ -26,14 +27,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link StatusAssertions}.
- *
  * @author Rossen Stoyanchev
- * @since 5.0
  */
 public class StatusAssertionTests {
 
@@ -45,21 +46,18 @@ public class StatusAssertionTests {
 		assertions.isEqualTo(HttpStatus.CONFLICT);
 		assertions.isEqualTo(409);
 
-		try {
-			assertions.isEqualTo(HttpStatus.REQUEST_TIMEOUT);
-			fail("Wrong status expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong status
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.isEqualTo(HttpStatus.REQUEST_TIMEOUT));
 
-		try {
-			assertions.isEqualTo(408);
-			fail("Wrong status value expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong status value
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.isEqualTo(408));
+	}
+
+	@Test // gh-23630
+	public void isEqualToWithCustomStatus() {
+		statusAssertions(600).isEqualTo(600);
 	}
 
 	@Test
@@ -69,13 +67,9 @@ public class StatusAssertionTests {
 		// Success
 		assertions.reasonEquals("Conflict");
 
-		try {
-			assertions.reasonEquals("Request Timeout");
-			fail("Wrong reason expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong reason
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.reasonEquals("Request Timeout"));
 	}
 
 	@Test
@@ -85,13 +79,10 @@ public class StatusAssertionTests {
 		// Success
 		assertions.is1xxInformational();
 
-		try {
-			assertions.is2xxSuccessful();
-			fail("Wrong series expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong series
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.is2xxSuccessful());
 	}
 
 	@Test
@@ -101,13 +92,9 @@ public class StatusAssertionTests {
 		// Success
 		assertions.is2xxSuccessful();
 
-		try {
-			assertions.is5xxServerError();
-			fail("Wrong series expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong series
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.is5xxServerError());
 	}
 
 	@Test
@@ -117,13 +104,9 @@ public class StatusAssertionTests {
 		// Success
 		assertions.is3xxRedirection();
 
-		try {
-			assertions.is2xxSuccessful();
-			fail("Wrong series expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong series
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.is2xxSuccessful());
 	}
 
 	@Test
@@ -133,13 +116,9 @@ public class StatusAssertionTests {
 		// Success
 		assertions.is4xxClientError();
 
-		try {
-			assertions.is2xxSuccessful();
-			fail("Wrong series expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong series
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.is2xxSuccessful());
 	}
 
 	@Test
@@ -149,24 +128,37 @@ public class StatusAssertionTests {
 		// Success
 		assertions.is5xxServerError();
 
-		try {
-			assertions.is2xxSuccessful();
-			fail("Wrong series expected");
-		}
-		catch (AssertionError error) {
-			// Expected
-		}
+		// Wrong series
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.is2xxSuccessful());
+	}
+
+	@Test
+	public void matches() {
+		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
+
+		// Success
+		assertions.value(equalTo(409));
+		assertions.value(greaterThan(400));
+
+		// Wrong status
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.value(equalTo(200)));
 	}
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
+		return statusAssertions(status.value());
+	}
+
+	private StatusAssertions statusAssertions(int status) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
 		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
 		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,10 +25,13 @@ import com.google.protobuf.ExtensionRegistry;
  * <p>This interface provides a facility to populate the {@code ExtensionRegistry}.
  *
  * @author Alex Antonov
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see <a href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/ExtensionRegistry">
  * com.google.protobuf.ExtensionRegistry</a>
+ * @deprecated as of Spring Framework 5.1, use {@link ExtensionRegistry} based constructors instead
  */
+@Deprecated
 public interface ExtensionRegistryInitializer {
 
 	/**

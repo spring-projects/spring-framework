@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,20 @@
 
 package org.springframework.http.codec.xml;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.XMLEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
@@ -38,14 +40,12 @@ import org.springframework.http.codec.xml.jaxb.XmlType;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 	private static final String POJO_ROOT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -74,27 +74,27 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_XML));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_JSON));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
-				MediaType.APPLICATION_XML));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(getClass()),
-				MediaType.APPLICATION_XML));
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.TEXT_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
+				MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(getClass()),
+				MediaType.APPLICATION_XML)).isFalse();
 	}
 
 	@Test
 	public void splitOneBranches() {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
-				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null, Collections.emptyMap());
+				.decode(stringBuffer(POJO_ROOT), null, null, Collections.emptyMap());
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");
@@ -111,13 +111,13 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void splitMultipleBranches() throws Exception {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
-				.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null, Collections.emptyMap());
+				.decode(stringBuffer(POJO_CHILD), null, null, Collections.emptyMap());
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foo");
@@ -128,7 +128,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 					assertEndElement(events.get(7), "pojo");
 				})
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");
@@ -143,23 +143,23 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isStartElement());
-		assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
+		assertThat(event.isStartElement()).isTrue();
+		assertThat(event.asStartElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertEndElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isEndElement());
-		assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
+		assertThat(event.isEndElement()).isTrue();
+		assertThat(event.asEndElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertCharacters(XMLEvent event, String expectedData) {
-		assertTrue(event.isCharacters());
-		assertEquals(expectedData, event.asCharacters().getData());
+		assertThat(event.isCharacters()).isTrue();
+		assertThat(event.asCharacters().getData()).isEqualTo(expectedData);
 	}
 
 	@Test
 	public void decodeSingleXmlRootElement() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
+		Mono<DataBuffer> source = stringBuffer(POJO_ROOT);
 		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(Pojo.class),
 				null, Collections.emptyMap());
 
@@ -171,7 +171,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeSingleXmlTypeElement() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
+		Mono<DataBuffer> source = stringBuffer(POJO_ROOT);
 		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(TypePojo.class),
 				null, Collections.emptyMap());
 
@@ -183,7 +183,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeMultipleXmlRootElement() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
+		Mono<DataBuffer> source = stringBuffer(POJO_CHILD);
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
 				null, Collections.emptyMap());
 
@@ -196,7 +196,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeMultipleXmlTypeElement() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
+		Mono<DataBuffer> source = stringBuffer(POJO_CHILD);
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
 				null, Collections.emptyMap());
 
@@ -208,25 +208,43 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void decodeError() throws Exception {
+		Flux<DataBuffer> source = Flux.concat(
+				stringBuffer("<pojo>"),
+				Flux.error(new RuntimeException()));
+
+		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(Pojo.class),
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.expectError(RuntimeException.class)
+				.verify();
+	}
+
+	@Test
 	public void toExpectedQName() {
-		assertEquals(new QName("pojo"), this.decoder.toQName(Pojo.class));
-		assertEquals(new QName("pojo"), this.decoder.toQName(TypePojo.class));
+		assertThat(this.decoder.toQName(Pojo.class)).isEqualTo(new QName("pojo"));
+		assertThat(this.decoder.toQName(TypePojo.class)).isEqualTo(new QName("pojo"));
 
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlRootElementWithNameAndNamespace.class));
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlRootElementWithName.class));
-		assertEquals(new QName("namespace", "xmlRootElement"),
-				this.decoder.toQName(XmlRootElement.class));
+		assertThat(this.decoder.toQName(XmlRootElementWithNameAndNamespace.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlRootElementWithName.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlRootElement.class)).isEqualTo(new QName("namespace", "xmlRootElement"));
 
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlTypeWithNameAndNamespace.class));
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlTypeWithName.class));
-		assertEquals(new QName("namespace", "xmlType"),
-				this.decoder.toQName(XmlType.class));
+		assertThat(this.decoder.toQName(XmlTypeWithNameAndNamespace.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlTypeWithName.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlType.class)).isEqualTo(new QName("namespace", "xmlType"));
 
 	}
+
+	private Mono<DataBuffer> stringBuffer(String value) {
+		return Mono.defer(() -> {
+			byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+			buffer.write(bytes);
+			return Mono.just(buffer);
+		});
+	}
+
 
 	@javax.xml.bind.annotation.XmlType(name = "pojo")
 	public static class TypePojo {

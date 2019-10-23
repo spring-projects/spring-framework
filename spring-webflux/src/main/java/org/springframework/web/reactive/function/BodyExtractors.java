@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -42,6 +44,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class BodyExtractors {
@@ -69,12 +72,12 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Variant of {@link #toMono(Class)} for type information with generics.
-	 * @param typeRef the type reference for the type to decode to
+	 * @param elementTypeRef the type reference for the type to decode to
 	 * @param <T> the element type to decode to
 	 * @return {@code BodyExtractor} for {@code Mono<T>}
 	 */
-	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ParameterizedTypeReference<T> typeRef) {
-		return toMono(ResolvableType.forType(typeRef.getType()));
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ParameterizedTypeReference<T> elementTypeRef) {
+		return toMono(ResolvableType.forType(elementTypeRef.getType()));
 	}
 
 	private static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
@@ -82,7 +85,7 @@ public abstract class BodyExtractors {
 				readWithMessageReaders(inputMessage, context, elementType,
 						(HttpMessageReader<T> reader) -> readToMono(inputMessage, context, elementType, reader),
 						ex -> Mono.from(unsupportedErrorHandler(inputMessage, ex)),
-						Mono::empty);
+						skipBodyAsMono(inputMessage));
 	}
 
 	/**
@@ -111,7 +114,7 @@ public abstract class BodyExtractors {
 				readWithMessageReaders(inputMessage, context, elementType,
 						(HttpMessageReader<T> reader) -> readToFlux(inputMessage, context, elementType, reader),
 						ex -> unsupportedErrorHandler(inputMessage, ex),
-						Flux::empty);
+						skipBodyAsFlux(inputMessage));
 	}
 
 
@@ -183,7 +186,6 @@ public abstract class BodyExtractors {
 		if (VOID_TYPE.equals(elementType)) {
 			return emptySupplier.get();
 		}
-
 		MediaType contentType = Optional.ofNullable(message.getHeaders().getContentType())
 				.orElse(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -192,17 +194,13 @@ public abstract class BodyExtractors {
 				.findFirst()
 				.map(BodyExtractors::<T>cast)
 				.map(readerFunction)
-				.orElseGet(() -> errorFunction.apply(unsupportedError(context, elementType, contentType)));
-	}
-
-	private static UnsupportedMediaTypeException unsupportedError(BodyExtractor.Context context,
-			ResolvableType elementType, MediaType contentType) {
-
-		List<MediaType> supportedMediaTypes = context.messageReaders().stream()
-				.flatMap(reader -> reader.getReadableMediaTypes().stream())
-				.collect(Collectors.toList());
-
-		return new UnsupportedMediaTypeException(contentType, supportedMediaTypes, elementType);
+				.orElseGet(() -> {
+					List<MediaType> mediaTypes = context.messageReaders().stream()
+							.flatMap(reader -> reader.getReadableMediaTypes().stream())
+							.collect(Collectors.toList());
+					return errorFunction.apply(
+							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
+				});
 	}
 
 	private static <T> Mono<T> readToMono(ReactiveHttpInputMessage message, BodyExtractor.Context context,
@@ -222,17 +220,21 @@ public abstract class BodyExtractors {
 	}
 
 	private static <T> Flux<T> unsupportedErrorHandler(
-			ReactiveHttpInputMessage inputMessage, UnsupportedMediaTypeException ex) {
+			ReactiveHttpInputMessage message, UnsupportedMediaTypeException ex) {
 
-		if (inputMessage.getHeaders().getContentType() == null) {
-			// Empty body with no content type is ok
-			return inputMessage.getBody().map(o -> {
+		Flux<T> result;
+		if (message.getHeaders().getContentType() == null) {
+			// Maybe it's okay there is no content type, if there is no content..
+			result = message.getBody().map(buffer -> {
+				DataBufferUtils.release(buffer);
 				throw ex;
 			});
 		}
 		else {
-			return Flux.error(ex);
+			result = message instanceof ClientHttpResponse ?
+					consumeAndCancel(message).thenMany(Flux.error(ex)) : Flux.error(ex);
 		}
+		return result;
 	}
 
 	private static <T> HttpMessageReader<T> findReader(
@@ -249,6 +251,31 @@ public abstract class BodyExtractors {
 	@SuppressWarnings("unchecked")
 	private static <T> HttpMessageReader<T> cast(HttpMessageReader<?> reader) {
 		return (HttpMessageReader<T>) reader;
+	}
+
+	private static <T> Supplier<Flux<T>> skipBodyAsFlux(ReactiveHttpInputMessage message) {
+		return message instanceof ClientHttpResponse ?
+				() -> consumeAndCancel(message).thenMany(Mono.empty()) : Flux::empty;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Supplier<Mono<T>> skipBodyAsMono(ReactiveHttpInputMessage message) {
+		return message instanceof ClientHttpResponse ?
+				() -> consumeAndCancel(message).then(Mono.empty()) : Mono::empty;
+	}
+
+	private static Mono<Void> consumeAndCancel(ReactiveHttpInputMessage message) {
+		return message.getBody()
+				.map(buffer -> {
+					DataBufferUtils.release(buffer);
+					throw new ReadCancellationException();
+				})
+				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
+				.then();
+	}
+
+	@SuppressWarnings("serial")
+	private static class ReadCancellationException extends RuntimeException {
 	}
 
 }

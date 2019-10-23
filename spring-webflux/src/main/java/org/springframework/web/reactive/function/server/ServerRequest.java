@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +52,8 @@ import org.springframework.web.util.UriBuilder;
 
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
- * Access to headers and body is offered by {@link Headers} and
+ *
+ * <p>Access to headers and body is offered by {@link Headers} and
  * {@link #body(BodyExtractor)}, respectively.
  *
  * @author Arjen Poutsma
@@ -62,7 +63,7 @@ import org.springframework.web.util.UriBuilder;
 public interface ServerRequest {
 
 	/**
-	 * Return the HTTP method.
+	 * Get the HTTP method.
 	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
 	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
@@ -72,61 +73,59 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return the name of the HTTP method.
+	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
 	 */
 	String methodName();
 
 	/**
-	 * Return the request URI.
+	 * Get the request URI.
 	 */
 	URI uri();
 
 	/**
-	 * Return a {@code UriBuilderComponents}  from the URI associated with this
+	 * Get a {@code UriBuilderComponents} from the URI associated with this
 	 * {@code ServerRequest}.
-	 *
-	 * <p><strong>Note:</strong> as of 5.1 this method ignores
-	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores {@code "Forwarded"}
+	 * and {@code "X-Forwarded-*"} headers that specify the
 	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
 	 * to extract and use, or to discard such headers.
-	 *
 	 * @return a URI builder
 	 */
 	UriBuilder uriBuilder();
 
 	/**
-	 * Return the request path.
+	 * Get the request path.
 	 */
 	default String path() {
 		return uri().getRawPath();
 	}
 
 	/**
-	 * Return the request path as {@code PathContainer}.
+	 * Get the request path as a {@code PathContainer}.
 	 */
 	default PathContainer pathContainer() {
 		return PathContainer.parsePath(path());
 	}
 
 	/**
-	 * Return the headers of this request.
+	 * Get the headers of this request.
 	 */
 	Headers headers();
 
 	/**
-	 * Return the cookies of this request.
+	 * Get the cookies of this request.
 	 */
 	MultiValueMap<String, HttpCookie> cookies();
 
 	/**
-	 * Return the remote address where this request is connected to, if available.
+	 * Get the remote address to which this request is connected, if available.
 	 * @since 5.1
 	 */
 	Optional<InetSocketAddress> remoteAddress();
 
 	/**
-	 * Return the readers used to convert the body of this request.
+	 * Get the readers used to convert the body of this request.
 	 * @since 5.1
 	 */
 	List<HttpMessageReader<?>> messageReaders();
@@ -183,28 +182,22 @@ public interface ServerRequest {
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
 	/**
-	 * Return the request attribute value if present.
+	 * Get the request attribute value if present.
 	 * @param name the attribute name
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
 
 	/**
-	 * Return a mutable map of request attributes.
+	 * Get a mutable map of request attributes.
 	 * @return the request attributes
 	 */
 	Map<String, Object> attributes();
 
 	/**
-	 * Return the first query parameter with the given name, if present.
+	 * Get the first query parameter with the given name, if present.
 	 * @param name the parameter name
 	 * @return the parameter value
 	 */
@@ -223,12 +216,12 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all query parameters for this request.
+	 * Get all query parameters for this request.
 	 */
 	MultiValueMap<String, String> queryParams();
 
 	/**
-	 * Return the path variable with the given name, if present.
+	 * Get the path variable with the given name, if present.
 	 * @param name the variable name
 	 * @return the variable value
 	 * @throws IllegalArgumentException if there is no path variable with the given name
@@ -244,44 +237,44 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all path variables for this request.
+	 * Get all path variables for this request.
 	 */
 	Map<String, String> pathVariables();
 
 	/**
-	 * Return the web session for this request. Always guaranteed to
-	 * return an instance either matching to the session id requested by the
-	 * client, or with a new session id either because the client did not
-	 * specify one or because the underlying session had expired. Use of this
-	 * method does not automatically create a session.
+	 * Get the web session for this request.
+	 * <p>Always guaranteed to return an instance either matching the session id
+	 * requested by the client, or with a new session id either because the client
+	 * did not specify one or because the underlying session had expired.
+	 * <p>Use of this method does not automatically create a session.
 	 */
 	Mono<WebSession> session();
 
 	/**
-	 * Return the authenticated user for the request, if any.
+	 * Get the authenticated user for the request, if any.
 	 */
 	Mono<? extends Principal> principal();
 
 	/**
-	 * Return the form data from the body of the request if the Content-Type is
+	 * Get the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
 	 * <p><strong>Note:</strong> calling this method causes the request body to
-	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * be read and parsed in full, and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
 	 */
 	Mono<MultiValueMap<String, String>> formData();
 
 	/**
-	 * Return the parts of a multipart request if the Content-Type is
+	 * Get the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
 	 * <p><strong>Note:</strong> calling this method causes the request body to
-	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * be read and parsed in full, and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
 	 */
 	Mono<MultiValueMap<String, Part>> multipartData();
 
 	/**
-	 * Return the web exchange that this request is based on.
+	 * Get the web exchange that this request is based on.
 	 * <p>Note: Manipulating the exchange directly (instead of using the methods provided on
 	 * {@code ServerRequest} and {@code ServerResponse}) can lead to irregular results.
 	 * @since 5.1
@@ -289,7 +282,7 @@ public interface ServerRequest {
 	ServerWebExchange exchange();
 
 
-	// Static methods
+	// Static builder methods
 
 	/**
 	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
@@ -320,59 +313,60 @@ public interface ServerRequest {
 	interface Headers {
 
 		/**
-		 * Return the list of acceptable {@linkplain MediaType media types},
-		 * as specified by the {@code Accept} header.
-		 * <p>Returns an empty list when the acceptable media types are unspecified.
+		 * Get the list of acceptable media types, as specified by the {@code Accept}
+		 * header.
+		 * <p>Returns an empty list if the acceptable media types are unspecified.
 		 */
 		List<MediaType> accept();
 
 		/**
-		 * Return the list of acceptable {@linkplain Charset charsets},
-		 * as specified by the {@code Accept-Charset} header.
+		 * Get the list of acceptable charsets, as specified by the
+		 * {@code Accept-Charset} header.
 		 */
 		List<Charset> acceptCharset();
 
 		/**
-		 * Return the list of acceptable {@linkplain Locale.LanguageRange languages},
-		 * as specified by the {@code Accept-Language} header.
+		 * Get the list of acceptable languages, as specified by the
+		 * {@code Accept-Language} header.
 		 */
 		List<Locale.LanguageRange> acceptLanguage();
 
 		/**
-		 * Return the length of the body in bytes, as specified by the
+		 * Get the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
 		 */
 		OptionalLong contentLength();
 
 		/**
-		 * Return the {@linkplain MediaType media type} of the body, as specified
-		 * by the {@code Content-Type} header.
+		 * Get the media type of the body, as specified by the
+		 * {@code Content-Type} header.
 		 */
 		Optional<MediaType> contentType();
 
 		/**
-		 * Return the value of the required {@code Host} header.
-		 * <p>If the header value does not contain a port, the returned
-		 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+		 * Get the value of the {@code Host} header, if available.
+		 * <p>If the header value does not contain a port, the
+		 * {@linkplain InetSocketAddress#getPort() port} in the returned address will
+		 * be {@code 0}.
 		 */
 		@Nullable
 		InetSocketAddress host();
 
 		/**
-		 * Return the value of the {@code Range} header.
+		 * Get the value of the {@code Range} header.
 		 * <p>Returns an empty list when the range is unknown.
 		 */
 		List<HttpRange> range();
 
 		/**
-		 * Return the header value(s), if any, for the header of the given name.
-		 * <p>Return an empty list if no header values are found.
+		 * Get the header value(s), if any, for the header of the given name.
+		 * <p>Returns an empty list if no header values are found.
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);
 
 		/**
-		 * Return the headers as a {@link HttpHeaders} instance.
+		 * Get the headers as an instance of {@link HttpHeaders}.
 		 */
 		HttpHeaders asHttpHeaders();
 	}
@@ -392,15 +386,15 @@ public interface ServerRequest {
 		Builder method(HttpMethod method);
 
 		/**
-		 * Set the uri of the request.
-		 * @param uri the new uri
+		 * Set the URI of the request.
+		 * @param uri the new URI
 		 * @return this builder
 		 */
 		Builder uri(URI uri);
 
-		/**
+		/**
 		 * Add the given header value(s) under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -408,8 +402,8 @@ public interface ServerRequest {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate this request's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * Manipulate this request's headers with the given consumer.
+		 * <p>The headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
 		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
@@ -427,10 +421,10 @@ public interface ServerRequest {
 		Builder cookie(String name, String... values);
 
 		/**
-		 * Manipulate this request's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * Manipulate this request's cookies with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
@@ -438,37 +432,38 @@ public interface ServerRequest {
 		Builder cookies(Consumer<MultiValueMap<String, HttpCookie>> cookiesConsumer);
 
 		/**
-		 * Sets the body of the request. Calling this methods will
+		 * Set the body of the request.
+		 * <p>Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
-		 * @param body the new body.
+		 * @param body the new body
 		 * @return this builder
 		 */
 		Builder body(Flux<DataBuffer> body);
 
 		/**
-		 * Sets the body of the request to the UTF-8 encoded bytes of the given string.
-		 * Calling this methods will
+		 * Set the body of the request to the UTF-8 encoded bytes of the given string.
+		 * <p>Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
-		 * @param body the new body.
+		 * @param body the new body
 		 * @return this builder
 		 */
 		Builder body(String body);
 
 		/**
-		 * Adds an attribute with the given name and value.
-		 * @param name  the attribute name
+		 * Add an attribute with the given name and value.
+		 * @param name the attribute name
 		 * @param value the attribute value
 		 * @return this builder
 		 */
 		Builder attribute(String name, Object value);
 
 		/**
-		 * Manipulate this request's attributes with the given consumer. The map provided to the
-		 * consumer is "live", so that the consumer can be used to
-		 * {@linkplain Map#put(Object, Object) overwrite} existing header values,
-		 * {@linkplain Map#remove(Object) remove} values, or use any of the other
+		 * Manipulate this request's attributes with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used
+		 * to {@linkplain Map#put(Object, Object) overwrite} existing attributes,
+		 * {@linkplain Map#remove(Object) remove} attributes, or use any of the other
 		 * {@link Map} methods.
 		 * @param attributesConsumer a function that consumes the attributes map
 		 * @return this builder
@@ -476,7 +471,7 @@ public interface ServerRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Builds the request.
+		 * Build the request.
 		 * @return the built request
 		 */
 		ServerRequest build();

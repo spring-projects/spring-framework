@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,12 +21,12 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -48,12 +48,13 @@ import org.springframework.util.Assert;
 public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	/**
-	 * Special logger for tracing Reactive Streams signals.
-	 * <p>This logger is not exposed under "org.springframework" because it is
-	 * verbose. To enable this, and other related Reactive Streams loggers in
-	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogDelegateFactory#getHiddenLog(Class)
+	 * @see AbstractListenerWriteProcessor#rsWriteLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 * @see WriteResultPublisher#rsWriteResultLogger
 	 */
-	protected static Log rsReadLogger = LogFactory.getLog("spring-web.reactivestreams.ReadPublisher");
+	protected static Log rsReadLogger = LogDelegateFactory.getHiddenLog(AbstractListenerReadPublisher.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
@@ -162,6 +163,14 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 */
 	protected abstract void readingPaused();
 
+	/**
+	 * Invoked after an I/O read error from the underlying server or after a
+	 * cancellation signal from the downstream consumer to allow sub-classes
+	 * to discard any current cached data they might have.
+	 * @since 5.0.11
+	 */
+	protected abstract void discardData();
+
 
 	// Private methods for use in State...
 
@@ -211,6 +220,23 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			// Generally, no need to check if we just came out of readAndPublish()...
 			if (!oldState.equals(State.READING)) {
 				checkOnDataAvailable();
+			}
+		}
+	}
+
+	private void handleCompletionOrErrorBeforeDemand() {
+		State state = this.state.get();
+		if (!state.equals(State.UNSUBSCRIBED) && !state.equals(State.SUBSCRIBING)) {
+			if (this.completionBeforeDemand) {
+				rsReadLogger.trace(getLogPrefix() + "Completed before demand");
+				this.state.get().onAllDataRead(this);
+			}
+			Throwable ex = this.errorBeforeDemand;
+			if (ex != null) {
+				if (rsReadLogger.isTraceEnabled()) {
+					rsReadLogger.trace(getLogPrefix() + "Completed with error before demand: " + ex);
+				}
+				this.state.get().onError(this, ex);
 			}
 		}
 	}
@@ -274,19 +300,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 					publisher.changeState(SUBSCRIBING, NO_DEMAND);
-					// Now safe to check "beforeDemand" flags, they won't change once in NO_DEMAND
-					String logPrefix = publisher.getLogPrefix();
-					if (publisher.completionBeforeDemand) {
-						rsReadLogger.trace(logPrefix + "Completed before demand");
-						publisher.state.get().onAllDataRead(publisher);
-					}
-					Throwable ex = publisher.errorBeforeDemand;
-					if (ex != null) {
-						if (rsReadLogger.isTraceEnabled()) {
-							rsReadLogger.trace(logPrefix + "Completed with error before demand: " + ex);
-						}
-						publisher.state.get().onError(publisher, ex);
-					}
+					publisher.handleCompletionOrErrorBeforeDemand();
 				}
 				else {
 					throw new IllegalStateException("Failed to transition to SUBSCRIBING, " +
@@ -297,11 +311,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
 				publisher.completionBeforeDemand = true;
+				publisher.handleCompletionOrErrorBeforeDemand();
 			}
 
 			@Override
 			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable ex) {
 				publisher.errorBeforeDemand = ex;
+				publisher.handleCompletionOrErrorBeforeDemand();
 			}
 		},
 
@@ -321,11 +337,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
 				publisher.completionBeforeDemand = true;
+				publisher.handleCompletionOrErrorBeforeDemand();
 			}
 
 			@Override
 			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable ex) {
 				publisher.errorBeforeDemand = ex;
+				publisher.handleCompletionOrErrorBeforeDemand();
 			}
 		},
 
@@ -415,7 +433,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
-			if (!publisher.changeState(this, COMPLETED)) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.discardData();
+			}
+			else {
 				publisher.state.get().cancel(publisher);
 			}
 		}
@@ -438,6 +459,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 		<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
 			if (publisher.changeState(this, COMPLETED)) {
+				publisher.discardData();
 				Subscriber<? super T> s = publisher.subscriber;
 				if (s != null) {
 					s.onError(t);

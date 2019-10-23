@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,25 @@
 
 package org.springframework.http.codec.xml;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+
 import javax.xml.stream.events.XMLEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.io.buffer.DataBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
+public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 
 	private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -45,10 +48,10 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void toXMLEventsAalto() {
 
 		Flux<XMLEvent> events =
-				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
+				this.decoder.decode(stringBuffer(XML), null, null, Collections.emptyMap());
 
 		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
 				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
@@ -66,10 +69,10 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		decoder.useAalto = false;
 
 		Flux<XMLEvent> events =
-				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
+				this.decoder.decode(stringBuffer(XML), null, null, Collections.emptyMap());
 
 		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
 				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
@@ -78,24 +81,65 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(e -> assertCharacters(e, "barbar"))
 				.consumeNextWith(e -> assertEndElement(e, "bar"))
 				.consumeNextWith(e -> assertEndElement(e, "pojo"))
-				.consumeNextWith(e -> assertTrue(e.isEndDocument()))
+				.consumeNextWith(e -> assertThat(e.isEndDocument()).isTrue())
 				.expectComplete()
 				.verify();
 	}
 
+	@Test
+	public void decodeErrorAalto() {
+		Flux<DataBuffer> source = Flux.concat(
+				stringBuffer("<pojo>"),
+				Flux.error(new RuntimeException()));
+
+		Flux<XMLEvent> events =
+				this.decoder.decode(source, null, null, Collections.emptyMap());
+
+		StepVerifier.create(events)
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
+				.consumeNextWith(e -> assertStartElement(e, "pojo"))
+				.expectError(RuntimeException.class)
+				.verify();
+	}
+
+	@Test
+	public void decodeErrorNonAalto() {
+		decoder.useAalto = false;
+
+		Flux<DataBuffer> source = Flux.concat(
+				stringBuffer("<pojo>"),
+				Flux.error(new RuntimeException()));
+
+		Flux<XMLEvent> events =
+				this.decoder.decode(source, null, null, Collections.emptyMap());
+
+		StepVerifier.create(events)
+				.expectError(RuntimeException.class)
+				.verify();
+	}
+
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isStartElement());
-		assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
+		assertThat(event.isStartElement()).isTrue();
+		assertThat(event.asStartElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertEndElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event + " is no end element", event.isEndElement());
-		assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
+		assertThat(event.isEndElement()).as(event + " is no end element").isTrue();
+		assertThat(event.asEndElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertCharacters(XMLEvent event, String expectedData) {
-		assertTrue(event.isCharacters());
-		assertEquals(expectedData, event.asCharacters().getData());
+		assertThat(event.isCharacters()).isTrue();
+		assertThat(event.asCharacters().getData()).isEqualTo(expectedData);
+	}
+
+	private Mono<DataBuffer> stringBuffer(String value) {
+		return Mono.defer(() -> {
+			byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+			buffer.write(bytes);
+			return Mono.just(buffer);
+		});
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,14 +89,14 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 		ReactiveAdapter adapter = getAdapter(result);
 		return adapter != null && !adapter.isNoValue() &&
-				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
+				isSupportedType(result.getReturnType().getGeneric().toClass());
 	}
 
 	@Nullable
 	private static Class<?> resolveReturnValueType(HandlerResult result) {
-		Class<?> valueType = result.getReturnType().getRawClass();
+		Class<?> valueType = result.getReturnType().toClass();
 		Object value = result.getReturnValue();
-		if ((valueType == null || valueType.equals(Object.class)) && value != null) {
+		if (valueType == Object.class && value != null) {
 			valueType = value.getClass();
 		}
 		return valueType;
@@ -155,7 +155,6 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
 			if (!entityHeaders.isEmpty()) {
 				entityHeaders.entrySet().stream()
-						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 

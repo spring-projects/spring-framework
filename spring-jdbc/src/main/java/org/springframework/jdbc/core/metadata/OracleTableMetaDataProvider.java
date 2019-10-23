@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -122,7 +122,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 		Connection con = databaseMetaData.getConnection();
 		if (con == null) {
-			logger.warn("Unable to include synonyms in table meta-data lookup - no Connection from DatabaseMetaData");
+			logger.info("Unable to include synonyms in table meta-data lookup - no Connection from DatabaseMetaData");
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;
 		}
@@ -132,8 +132,8 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			con = (Connection) con.unwrap(oracleConClass);
 		}
 		catch (ClassNotFoundException | SQLException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Unable to include synonyms in table meta-data lookup - no Oracle Connection: " + ex);
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to include synonyms in table meta-data lookup - no Oracle Connection: " + ex);
 			}
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;

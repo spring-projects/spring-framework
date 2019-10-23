@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,15 +90,17 @@ class HeaderValueHolder {
 	 * Find a HeaderValueHolder by name, ignoring casing.
 	 * @param headers the Map of header names to HeaderValueHolders
 	 * @param name the name of the desired header
-	 * @return the corresponding HeaderValueHolder,
-	 * or {@code null} if none found
+	 * @return the corresponding HeaderValueHolder, or {@code null} if none found
+	 * @deprecated as of 5.1.10 in favor of using
+	 * {@link org.springframework.util.LinkedCaseInsensitiveMap}.
 	 */
 	@Nullable
+	@Deprecated
 	public static HeaderValueHolder getByName(Map<String, HeaderValueHolder> headers, String name) {
 		Assert.notNull(name, "Header name must not be null");
-		for (String headerName : headers.keySet()) {
-			if (headerName.equalsIgnoreCase(name)) {
-				return headers.get(headerName);
+		for (Map.Entry<String, HeaderValueHolder> entry : headers.entrySet()) {
+			if (entry.getKey().equalsIgnoreCase(name)) {
+				return entry.getValue();
 			}
 		}
 		return null;

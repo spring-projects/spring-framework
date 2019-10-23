@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,12 +22,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.expression.spel.ast.InlineMap;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test usage of inline maps.
@@ -121,20 +123,22 @@ public class MapTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = (SpelExpression) parser.parseExpression(expressionText);
 		SpelNode node = expression.getAST();
-		assertTrue(node instanceof InlineMap);
+		boolean condition = node instanceof InlineMap;
+		assertThat(condition).isTrue();
 		InlineMap inlineMap = (InlineMap) node;
 		if (expectedToBeConstant) {
-			assertTrue(inlineMap.isConstant());
+			assertThat(inlineMap.isConstant()).isTrue();
 		}
 		else {
-			assertFalse(inlineMap.isConstant());
+			assertThat(inlineMap.isConstant()).isFalse();
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testInlineMapWriting() {
 		// list should be unmodifiable
-		evaluate("{a:1, b:2, c:3, d:4, e:5}[a]=6", "[a:1,b: 2,c: 3,d: 4,e: 5]", unmodifiableClass);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				evaluate("{a:1, b:2, c:3, d:4, e:5}[a]=6", "[a:1,b: 2,c: 3,d: 4,e: 5]", unmodifiableClass));
 	}
 
 	@Test
@@ -149,35 +153,35 @@ public class MapTests extends AbstractExpressionTests {
 
 		expression = (SpelExpression) parser.parseExpression("foo[T]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("TV", o);
+		assertThat(o).isEqualTo("TV");
 
 		expression = (SpelExpression) parser.parseExpression("foo[t]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("tv", o);
+		assertThat(o).isEqualTo("tv");
 
 		expression = (SpelExpression) parser.parseExpression("foo[NEW]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("VALUE", o);
+		assertThat(o).isEqualTo("VALUE");
 
 		expression = (SpelExpression) parser.parseExpression("foo[new]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value", o);
+		assertThat(o).isEqualTo("value");
 
 		expression = (SpelExpression) parser.parseExpression("foo['abc.def']");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value", o);
+		assertThat(o).isEqualTo("value");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[NEW]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("37",o);
+		assertThat(o).isEqualTo("37");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[new]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("38",o);
+		assertThat(o).isEqualTo("38");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[foo[T]]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value",o);
+		assertThat(o).isEqualTo("value");
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

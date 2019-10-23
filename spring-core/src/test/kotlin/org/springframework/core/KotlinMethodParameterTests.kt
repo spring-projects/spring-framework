@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,12 @@
 
 package org.springframework.core
 
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.lang.reflect.Method
-
-import org.junit.Before
-import org.junit.Test
-
-import org.junit.Assert.*
+import java.lang.reflect.TypeVariable
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Tests for Kotlin support in [MethodParameter].
@@ -29,39 +29,127 @@ import org.junit.Assert.*
  * @author Raman Gupta
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Konrad Kaminski
  */
 class KotlinMethodParameterTests {
 
-	lateinit var nullableMethod: Method
+	private val nullableMethod: Method = javaClass.getMethod("nullable", String::class.java)
 
-	lateinit var nonNullableMethod: Method
+	private val nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
 
+	private val innerClassConstructor = InnerClass::class.java.getConstructor(KotlinMethodParameterTests::class.java)
 
-	@Before
-	@Throws(NoSuchMethodException::class)
-	fun setup() {
-		nullableMethod = javaClass.getMethod("nullable", String::class.java)
-		nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
-	}
+	private val innerClassWithParametersConstructor = InnerClassWithParameter::class.java
+			.getConstructor(KotlinMethodParameterTests::class.java, String::class.java, String::class.java)
+
+	private val regularClassConstructor = RegularClass::class.java.getConstructor(String::class.java, String::class.java)
 
 
 	@Test
 	fun `Method parameter nullability`() {
-		assertTrue(MethodParameter(nullableMethod, 0).isOptional())
-		assertFalse(MethodParameter(nonNullableMethod, 0).isOptional())
+		assertThat(MethodParameter(nullableMethod, 0).isOptional).isTrue()
+		assertThat(MethodParameter(nonNullableMethod, 0).isOptional).isFalse()
 	}
 
 	@Test
 	fun `Method return type nullability`() {
-		assertTrue(MethodParameter(nullableMethod, -1).isOptional())
-		assertFalse(MethodParameter(nonNullableMethod, -1).isOptional())
+		assertThat(MethodParameter(nullableMethod, -1).isOptional).isTrue()
+		assertThat(MethodParameter(nonNullableMethod, -1).isOptional).isFalse()
 	}
 
+	@Test  // SPR-17222
+	fun `Inner class constructor`() {
+		assertThat(MethodParameter(innerClassConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 1).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 2).isOptional).isTrue()
+	}
+
+	@Test
+	fun `Regular class constructor`() {
+		assertThat(MethodParameter(regularClassConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(regularClassConstructor, 1).isOptional).isTrue()
+	}
+
+	@Test
+	fun `Suspending function return type`() {
+		assertThat(returnParameterType("suspendFun")).isEqualTo(Number::class.java)
+		assertThat(returnGenericParameterType("suspendFun")).isEqualTo(Number::class.java)
+
+		assertThat(returnParameterType("suspendFun2")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun2")).isEqualTo("org.springframework.core.Producer<? extends java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun3")).isEqualTo(Wrapper::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun3")).isEqualTo("org.springframework.core.Wrapper<java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun4")).isEqualTo(Consumer::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun4")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun5")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterType("suspendFun5")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun5")).isEqualTo("org.springframework.core.Producer<? extends java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun6")).isEqualTo(Wrapper::class.java)
+		assertThat(returnGenericParameterType("suspendFun6")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun6")).isEqualTo("org.springframework.core.Wrapper<java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun7")).isEqualTo(Consumer::class.java)
+		assertThat(returnGenericParameterType("suspendFun7")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun7")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
+
+		assertThat(returnParameterType("suspendFun8")).isEqualTo(Object::class.java)
+		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Object::class.java)
+	}
+
+	private fun returnParameterType(funName: String) = returnMethodParameter(funName).parameterType
+	private fun returnGenericParameterType(funName: String) = returnMethodParameter(funName).genericParameterType
+	private fun returnGenericParameterTypeName(funName: String) = returnGenericParameterType(funName).typeName
+	private fun returnGenericParameterTypeBoundName(funName: String) = (returnGenericParameterType(funName) as TypeVariable<*>).bounds[0].typeName
+
+	private fun returnMethodParameter(funName: String) =
+		MethodParameter(this::class.declaredFunctions.first { it.name == funName }.javaMethod!!, -1)
+
+	@Suppress("unused_parameter")
+	fun nullable(nullable: String?): Int? = 42
+
+	@Suppress("unused_parameter")
+	fun nonNullable(nonNullable: String): Int = 42
+
+	inner class InnerClass
+
+	@Suppress("unused_parameter")
+	inner class InnerClassWithParameter(nonNullable: String, nullable: String?)
+
+	@Suppress("unused_parameter")
+	class RegularClass(nonNullable: String, nullable: String?)
 
 	@Suppress("unused", "unused_parameter")
-	fun nullable(p1: String?): Int? = 42
+	suspend fun suspendFun(p1: String): Number = TODO()
 
 	@Suppress("unused", "unused_parameter")
-	fun nonNullable(p1: String): Int = 42
+	suspend fun suspendFun2(p1: String): Producer<Number> = TODO()
 
+	@Suppress("unused", "unused_parameter")
+	suspend fun suspendFun3(p1: String): Wrapper<Number> = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	suspend fun suspendFun4(p1: String): Consumer<Number> = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	suspend fun <T: Producer<Number>> suspendFun5(p1: String): T = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	suspend fun <T: Wrapper<Number>> suspendFun6(p1: String): T = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	suspend fun <T: Consumer<Number>> suspendFun7(p1: String): T = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	suspend fun suspendFun8(p1: String): Any? = TODO()
 }
+
+interface Producer<out T>
+
+interface Wrapper<T>
+
+interface Consumer<in T>

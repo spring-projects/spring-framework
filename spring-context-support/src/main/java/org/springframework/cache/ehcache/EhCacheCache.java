@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,6 +75,19 @@ public class EhCacheCache implements Cache {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
+	public <T> T get(Object key, @Nullable Class<T> type) {
+		Element element = this.cache.get(key);
+		Object value = (element != null ? element.getObjectValue() : null);
+		if (value != null && type != null && !type.isInstance(value)) {
+			throw new IllegalStateException(
+					"Cached value is not of required type [" + type.getName() + "]: " + value);
+		}
+		return (T) value;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		Element element = lookup(key);
 		if (element != null) {
@@ -95,7 +108,6 @@ public class EhCacheCache implements Cache {
 				this.cache.releaseWriteLockOnKey(key);
 			}
 		}
-
 	}
 
 	private <T> T loadValue(Object key, Callable<T> valueLoader) {
@@ -108,19 +120,6 @@ public class EhCacheCache implements Cache {
 		}
 		put(key, value);
 		return value;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	@Nullable
-	public <T> T get(Object key, @Nullable Class<T> type) {
-		Element element = this.cache.get(key);
-		Object value = (element != null ? element.getObjectValue() : null);
-		if (value != null && type != null && !type.isInstance(value)) {
-			throw new IllegalStateException(
-					"Cached value is not of required type [" + type.getName() + "]: " + value);
-		}
-		return (T) value;
 	}
 
 	@Override
@@ -141,8 +140,20 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
+	public boolean evictIfPresent(Object key) {
+		return this.cache.remove(key);
+	}
+
+	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+	@Override
+	public boolean invalidate() {
+		boolean notEmpty = (this.cache.getSize() > 0);
+		this.cache.removeAll();
+		return notEmpty;
 	}
 
 

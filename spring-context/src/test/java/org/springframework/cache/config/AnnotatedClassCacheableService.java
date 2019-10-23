@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	private final AtomicLong counter = new AtomicLong();
 
 	public static final AtomicLong nullInvocations = new AtomicLong();
+
 
 	@Override
 	public Object cache(Object arg1) {
@@ -75,8 +76,8 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
-	@CacheEvict("testCache")
-	public void invalidate(Object arg1) {
+	@CacheEvict(cacheNames = "testCache", key = "#p0")
+	public void evict(Object arg1, Object arg2) {
 	}
 
 	@Override
@@ -86,24 +87,19 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
-	@CacheEvict(cacheNames = "testCache", allEntries = true)
-	public void evictAll(Object arg1) {
-	}
-
-	@Override
 	@CacheEvict(cacheNames = "testCache", beforeInvocation = true)
 	public void evictEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
 
 	@Override
-	@CacheEvict(cacheNames = "testCache", key = "#p0")
-	public void evict(Object arg1, Object arg2) {
+	@CacheEvict(cacheNames = "testCache", allEntries = true)
+	public void evictAll(Object arg1) {
 	}
 
 	@Override
-	@CacheEvict(cacheNames = "testCache", key = "#p0", beforeInvocation = true)
-	public void invalidateEarly(Object arg1, Object arg2) {
+	@CacheEvict(cacheNames = "testCache", allEntries = true, beforeInvocation = true)
+	public void evictAllEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
 
@@ -238,4 +234,5 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 		arg1.setId(Long.MIN_VALUE);
 		return arg1;
 	}
+
 }

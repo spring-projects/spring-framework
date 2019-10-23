@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,14 +62,12 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-
 		HttpStatus status = resolveStatus(ex);
 		if (status == null || !exchange.getResponse().setStatusCode(status)) {
 			return Mono.error(ex);
 		}
 
-		// Mirrors AbstractHandlerExceptionResolver in spring-webmvc..
-
+		// Mirrors AbstractHandlerExceptionResolver in spring-webmvc...
 		String logPrefix = exchange.getLogPrefix();
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
 			this.warnLogger.warn(logPrefix + formatError(ex, exchange.getRequest()), ex);

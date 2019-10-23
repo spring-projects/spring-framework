@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,7 +81,7 @@ public interface HandlerInterceptor {
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can decide to abort the execution chain,
-	 * typically sending a HTTP error or writing a custom response.
+	 * typically sending an HTTP error or writing a custom response.
 	 * <p><strong>Note:</strong> special considerations apply for asynchronous
 	 * request processing. For more details see
 	 * {@link org.springframework.web.servlet.AsyncHandlerInterceptor}.
@@ -141,7 +141,8 @@ public interface HandlerInterceptor {
 	 * @param response current HTTP response
 	 * @param handler handler (or {@link HandlerMethod}) that started asynchronous
 	 * execution, for type and/or instance examination
-	 * @param ex exception thrown on handler execution, if any
+	 * @param ex any exception thrown on handler execution, if any; this does not
+	 * include exceptions that have been handled through an exception resolver
 	 * @throws Exception in case of errors
 	 */
 	default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,

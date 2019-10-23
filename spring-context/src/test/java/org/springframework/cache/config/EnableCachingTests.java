@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.cache.CacheManager;
@@ -36,7 +36,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@code @EnableCaching} and its related
@@ -56,33 +56,31 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 	@Test
 	public void testKeyStrategy() {
 		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
-		assertSame(this.ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
+		assertThat(ci.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator", KeyGenerator.class));
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
 		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
-		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		assertThat(ci.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
 	}
 
 	@Test
-	public void singleCacheManagerBean() throws Throwable {
+	public void singleCacheManagerBean() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SingleCacheManagerConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void multipleCacheManagerBeans() throws Throwable {
+	@Test
+	public void multipleCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("beans of type CacheManager"));
-			throw root;
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage().contains("no unique bean of type CacheManager")).isTrue();
 		}
 	}
 
@@ -93,8 +91,8 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		ctx.refresh();  // does not throw an exception
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void multipleCachingConfigurers() throws Throwable {
+	@Test
+	public void multipleCachingConfigurers() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class, EnableCachingConfig.class);
 		try {
@@ -102,22 +100,21 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		}
 		catch (BeanCreationException ex) {
 			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("implementations of CachingConfigurer"));
-			throw root;
+			boolean condition = root instanceof IllegalStateException;
+			assertThat(condition).isTrue();
+			assertThat(root.getMessage().contains("implementations of CachingConfigurer")).isTrue();
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void noCacheManagerBeans() throws Throwable {
+	@Test
+	public void noCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EmptyConfig.class);
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("No bean of type CacheManager"));
-			throw root;
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage().contains("no bean of type CacheManager")).isTrue();
 		}
 	}
 
@@ -125,9 +122,9 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 	public void emptyConfigSupport() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertNotNull(ci.getCacheResolver());
-		assertEquals(SimpleCacheResolver.class, ci.getCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class), ((SimpleCacheResolver)ci.getCacheResolver()).getCacheManager());
+		assertThat(ci.getCacheResolver()).isNotNull();
+		assertThat(ci.getCacheResolver().getClass()).isEqualTo(SimpleCacheResolver.class);
+		assertThat(((SimpleCacheResolver) ci.getCacheResolver()).getCacheManager()).isSameAs(context.getBean(CacheManager.class));
 		context.close();
 	}
 
@@ -135,8 +132,8 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 	public void bothSetOnlyResolverIsUsed() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(FullCachingConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
-		assertSame(context.getBean("keyGenerator"), ci.getKeyGenerator());
+		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
+		assertThat(ci.getKeyGenerator()).isSameAs(context.getBean("keyGenerator"));
 		context.close();
 	}
 

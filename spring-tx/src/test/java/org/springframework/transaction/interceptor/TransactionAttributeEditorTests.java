@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,11 +19,12 @@ package org.springframework.transaction.interceptor;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests to check conversion from String to TransactionAttribute.
@@ -40,7 +41,7 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText(null);
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertTrue(ta == null);
+		assertThat(ta == null).isTrue();
 	}
 
 	@Test
@@ -48,7 +49,7 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertTrue(ta == null);
+		assertThat(ta == null).isTrue();
 	}
 
 	@Test
@@ -56,17 +57,19 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_REQUIRED");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertTrue(ta != null);
-		assertTrue(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED);
-		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_DEFAULT);
-		assertTrue(!ta.isReadOnly());
+		assertThat(ta != null).isTrue();
+		assertThat(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED).isTrue();
+		assertThat(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_DEFAULT).isTrue();
+		boolean condition = !ta.isReadOnly();
+		assertThat(condition).isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should have failed with bogus propagation code
-		pe.setAsText("XXPROPAGATION_REQUIRED");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pe.setAsText("XXPROPAGATION_REQUIRED"));
 	}
 
 	@Test
@@ -74,16 +77,17 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_REQUIRED, ISOLATION_READ_UNCOMMITTED");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertTrue(ta != null);
-		assertTrue(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED);
-		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+		assertThat(ta != null).isTrue();
+		assertThat(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED).isTrue();
+		assertThat(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED).isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testValidPropagationAndIsolationCodesAndInvalidRollbackRule() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should fail with bogus rollback rule
-		pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED,XXX");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED,XXX"));
 	}
 
 	@Test
@@ -91,16 +95,17 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_MANDATORY,ISOLATION_REPEATABLE_READ,timeout_10,-IOException,+MyRuntimeException");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertNotNull(ta);
-		assertEquals(TransactionDefinition.PROPAGATION_MANDATORY, ta.getPropagationBehavior());
-		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
-		assertEquals(10, ta.getTimeout());
-		assertFalse(ta.isReadOnly());
-		assertTrue(ta.rollbackOn(new RuntimeException()));
-		assertFalse(ta.rollbackOn(new Exception()));
+		assertThat(ta).isNotNull();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_MANDATORY);
+		assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		assertThat(ta.getTimeout()).isEqualTo(10);
+		assertThat(ta.isReadOnly()).isFalse();
+		assertThat(ta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(ta.rollbackOn(new Exception())).isFalse();
 		// Check for our bizarre customized rollback rules
-		assertTrue(ta.rollbackOn(new IOException()));
-		assertTrue(!ta.rollbackOn(new MyRuntimeException("")));
+		assertThat(ta.rollbackOn(new IOException())).isTrue();
+		boolean condition = !ta.rollbackOn(new MyRuntimeException(""));
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -108,16 +113,16 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("+IOException,readOnly,ISOLATION_READ_COMMITTED,-MyRuntimeException,PROPAGATION_SUPPORTS");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertNotNull(ta);
-		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
-		assertEquals(TransactionDefinition.ISOLATION_READ_COMMITTED, ta.getIsolationLevel());
-		assertEquals(TransactionDefinition.TIMEOUT_DEFAULT, ta.getTimeout());
-		assertTrue(ta.isReadOnly());
-		assertTrue(ta.rollbackOn(new RuntimeException()));
-		assertFalse(ta.rollbackOn(new Exception()));
+		assertThat(ta).isNotNull();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_READ_COMMITTED);
+		assertThat(ta.getTimeout()).isEqualTo(TransactionDefinition.TIMEOUT_DEFAULT);
+		assertThat(ta.isReadOnly()).isTrue();
+		assertThat(ta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(ta.rollbackOn(new Exception())).isFalse();
 		// Check for our bizarre customized rollback rules
-		assertFalse(ta.rollbackOn(new IOException()));
-		assertTrue(ta.rollbackOn(new MyRuntimeException("")));
+		assertThat(ta.rollbackOn(new IOException())).isFalse();
+		assertThat(ta.rollbackOn(new MyRuntimeException(""))).isTrue();
 	}
 
 	@Test
@@ -131,18 +136,18 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText(source.toString());
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertEquals(ta, source);
-		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
-		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
-		assertEquals(10, ta.getTimeout());
-		assertTrue(ta.isReadOnly());
-		assertTrue(ta.rollbackOn(new RuntimeException()));
-		assertFalse(ta.rollbackOn(new Exception()));
+		assertThat(source).isEqualTo(ta);
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		assertThat(ta.getTimeout()).isEqualTo(10);
+		assertThat(ta.isReadOnly()).isTrue();
+		assertThat(ta.rollbackOn(new RuntimeException())).isTrue();
+		assertThat(ta.rollbackOn(new Exception())).isFalse();
 
 		source.setTimeout(9);
-		assertNotSame(ta, source);
+		assertThat(source).isNotSameAs(ta);
 		source.setTimeout(10);
-		assertEquals(ta, source);
+		assertThat(source).isEqualTo(ta);
 	}
 
 	@Test
@@ -158,19 +163,19 @@ public class TransactionAttributeEditorTests {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText(source.toString());
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
-		assertEquals(ta, source);
-		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
-		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
-		assertEquals(10, ta.getTimeout());
-		assertTrue(ta.isReadOnly());
-		assertTrue(ta.rollbackOn(new IllegalArgumentException()));
-		assertFalse(ta.rollbackOn(new IllegalStateException()));
+		assertThat(source).isEqualTo(ta);
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		assertThat(ta.getTimeout()).isEqualTo(10);
+		assertThat(ta.isReadOnly()).isTrue();
+		assertThat(ta.rollbackOn(new IllegalArgumentException())).isTrue();
+		assertThat(ta.rollbackOn(new IllegalStateException())).isFalse();
 
 		source.getRollbackRules().clear();
-		assertNotSame(ta, source);
+		assertThat(source).isNotSameAs(ta);
 		source.getRollbackRules().add(new RollbackRuleAttribute("IllegalArgumentException"));
 		source.getRollbackRules().add(new NoRollbackRuleAttribute("IllegalStateException"));
-		assertEquals(ta, source);
+		assertThat(source).isEqualTo(ta);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
  * In the general case, the keys are returned as a List containing one Map
  * for each row of keys.
  *
- * <p>Most applications only use on key per row and process only one row at a
+ * <p>Most applications only use one key per row and process only one row at a
  * time in an insert statement. In these cases, just call {@code getKey}
  * to retrieve the key. The returned value is a Number here, which is the
  * usual type for auto-generated keys.
@@ -52,17 +52,17 @@ public interface KeyHolder {
 	 * multiple entries as well. If this method encounters multiple entries in
 	 * either the map or the list meaning that multiple keys were returned,
 	 * then an InvalidDataAccessApiUsageException is thrown.
-	 * @return the generated key
-	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
+	 * @return the generated key as a number
+	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
 	 */
 	@Nullable
 	Number getKey() throws InvalidDataAccessApiUsageException;
 
 	/**
-	 * Retrieve the first map of keys. If there are multiple entries in the list
-	 * (meaning that multiple rows had keys returned), then an
-	 * InvalidDataAccessApiUsageException is thrown.
-	 * @return the Map of generated keys
+	 * Retrieve the first map of keys.
+	 * <p>If there are multiple entries in the list (meaning that multiple rows
+	 * had keys returned), then an InvalidDataAccessApiUsageException is thrown.
+	 * @return the Map of generated keys for a single row
 	 * @throws InvalidDataAccessApiUsageException if keys for multiple rows are encountered
 	 */
 	@Nullable
@@ -70,10 +70,10 @@ public interface KeyHolder {
 
 	/**
 	 * Return a reference to the List that contains the keys.
-	 * Can be used for extracting keys for multiple rows (an unusual case),
+	 * <p>Can be used for extracting keys for multiple rows (an unusual case),
 	 * and also for adding new maps of keys.
-	 * @return the List for the generated keys, with each entry being a Map
-	 * of column names and key values
+	 * @return the List for the generated keys, with each entry representing
+	 * an individual row through a Map of column names and key values
 	 */
 	List<Map<String, Object>> getKeyList();
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,7 +62,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * {@link IllegalStateException}.
 	 * <p>By default set to 10000.
 	 * @param maxSessions the maximum number of sessions
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public void setMaxSessions(int maxSessions) {
 		this.maxSessions = maxSessions;
@@ -70,7 +70,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	/**
 	 * Return the maximum number of sessions that can be stored.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public int getMaxSessions() {
 		return this.maxSessions;
@@ -102,9 +102,9 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * Return the map of sessions with an {@link Collections#unmodifiableMap
 	 * unmodifiable} wrapper. This could be used for management purposes, to
 	 * list active sessions, invalidate expired ones, etc.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
-	public Map<String, InMemoryWebSession> getSessions() {
+	public Map<String, WebSession> getSessions() {
 		return Collections.unmodifiableMap(this.sessions);
 	}
 
@@ -140,6 +140,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		return Mono.empty();
 	}
 
+	@Override
 	public Mono<WebSession> updateLastAccessTime(WebSession session) {
 		return Mono.fromSupplier(() -> {
 			Assert.isInstanceOf(InMemoryWebSession.class, session);
@@ -153,7 +154,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * kicked off lazily during calls to {@link #createWebSession() create} or
 	 * {@link #retrieveSession retrieve}, no less than 60 seconds apart.
 	 * This method can be called to force a check at a specific time.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public void removeExpiredSessions() {
 		this.expiredSessionChecker.removeExpiredSessions(this.clock.instant());
@@ -240,17 +241,35 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		@Override
 		public Mono<Void> save() {
-			if (sessions.size() >= maxSessions) {
-				expiredSessionChecker.removeExpiredSessions(clock.instant());
-				if (sessions.size() >= maxSessions) {
-					return Mono.error(new IllegalStateException("Max sessions limit reached: " + sessions.size()));
-				}
-			}
+
+			checkMaxSessionsLimit();
+
+			// Implicitly started session..
 			if (!getAttributes().isEmpty()) {
 				this.state.compareAndSet(State.NEW, State.STARTED);
 			}
-			InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
+
+			if (isStarted()) {
+				// Save
+				InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
+
+				// Unless it was invalidated
+				if (this.state.get().equals(State.EXPIRED)) {
+					InMemoryWebSessionStore.this.sessions.remove(this.getId());
+					return Mono.error(new IllegalStateException("Session was invalidated"));
+				}
+			}
+
 			return Mono.empty();
+		}
+
+		private void checkMaxSessionsLimit() {
+			if (sessions.size() >= maxSessions) {
+				expiredSessionChecker.removeExpiredSessions(clock.instant());
+				if (sessions.size() >= maxSessions) {
+					throw new IllegalStateException("Max sessions limit reached: " + sessions.size());
+				}
+			}
 		}
 
 		@Override

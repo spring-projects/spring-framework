@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -290,7 +290,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
+	public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
 		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
@@ -313,13 +313,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			// we say this is not a match as in Spring there will never be a different
 			// runtime subtype.
 			RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
-			return (!walker.testsSubtypeSensitiveVars() ||
-					(targetClass != null && walker.testTargetInstanceOfResidue(targetClass)));
+			return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
 		}
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return matches(method, targetClass, false);
 	}
 
@@ -329,7 +328,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, Object... args) {
 		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
@@ -426,17 +425,23 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		invocation.setUserAttribute(resolveExpression(), jpm);
 	}
 
-	private ShadowMatch getTargetShadowMatch(Method method, @Nullable Class<?> targetClass) {
+	private ShadowMatch getTargetShadowMatch(Method method, Class<?> targetClass) {
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		if (targetClass != null && targetMethod.getDeclaringClass().isInterface()) {
+		if (targetMethod.getDeclaringClass().isInterface()) {
 			// Try to build the most specific interface possible for inherited methods to be
 			// considered for sub-interface matches as well, in particular for proxy classes.
 			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
 			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
 			if (ifcs.size() > 1) {
-				Class<?> compositeInterface = ClassUtils.createCompositeInterface(
-						ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
-				targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				try {
+					Class<?> compositeInterface = ClassUtils.createCompositeInterface(
+							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
+					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				}
+				catch (IllegalArgumentException ex) {
+					// Implemented interfaces probably expose conflicting method signatures...
+					// Proceed with original target method.
+				}
 			}
 		}
 		return getShadowMatch(targetMethod, method);
@@ -514,7 +519,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -539,9 +544,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("AspectJExpressionPointcut: ");
-		sb.append("(");
+		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
 			sb.append(" ");
@@ -550,8 +553,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				sb.append(", ");
 			}
 		}
-		sb.append(")");
-		sb.append(" ");
+		sb.append(") ");
 		if (getExpression() != null) {
 			sb.append(getExpression());
 		}

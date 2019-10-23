@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,7 +72,7 @@ public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 	 * @param sqlType the SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
 	 * @return the type value
-	 * @throws SQLException if a SQLException is encountered setting
+	 * @throws SQLException if an SQLException is encountered setting
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @see java.sql.PreparedStatement#setObject(int, Object, int)
 	 */
