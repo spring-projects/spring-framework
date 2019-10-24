@@ -58,7 +58,7 @@ public class XpathRequestMatchers {
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 * @throws XPathExpressionException if expression compilation failed
 	 */
-	XpathRequestMatchers(String expression, @Nullable Map<String, String> namespaces, Object... args)
+	protected XpathRequestMatchers(String expression, @Nullable Map<String, String> namespaces, Object... args)
 			throws XPathExpressionException {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
