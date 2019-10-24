@@ -65,7 +65,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert it with the given {@code Matcher<Node>}.
 	 */
-	public <T> RequestMatcher node(Matcher<? super Node> matcher) {
+	public RequestMatcher node(Matcher<? super Node> matcher) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -77,7 +77,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Assert that content exists at the given XPath.
 	 */
-	public <T> RequestMatcher exists() {
+	public RequestMatcher exists() {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -89,7 +89,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Assert that content does not exist at the given XPath.
 	 */
-	public <T> RequestMatcher doesNotExist() {
+	public RequestMatcher doesNotExist() {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -102,7 +102,7 @@ public class XpathRequestMatchers {
 	 * Apply the XPath and assert the number of nodes found with the given
 	 * {@code Matcher<Integer>}.
 	 */
-	public <T> RequestMatcher nodeCount(Matcher<Integer> matcher) {
+	public RequestMatcher nodeCount(Matcher<Integer> matcher) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -114,7 +114,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the number of nodes found.
 	 */
-	public <T> RequestMatcher nodeCount(int expectedCount) {
+	public RequestMatcher nodeCount(int expectedCount) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -126,7 +126,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the String content found with the given matcher.
 	 */
-	public <T> RequestMatcher string(Matcher<? super String> matcher) {
+	public RequestMatcher string(Matcher<? super String> matcher) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -150,7 +150,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the number found with the given matcher.
 	 */
-	public <T> RequestMatcher number(Matcher<? super Double> matcher) {
+	public RequestMatcher number(Matcher<? super Double> matcher) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -174,7 +174,7 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the boolean value found.
 	 */
-	public <T> RequestMatcher booleanValue(Boolean value) {
+	public RequestMatcher booleanValue(Boolean value) {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
