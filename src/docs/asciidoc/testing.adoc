@@ -1423,7 +1423,7 @@ standard semantics on any application components configured in the `ApplicationC
 However, these lifecycle annotations have limited usage within an actual test class.
 
 If a method within a test class is annotated with `@PostConstruct`, that method runs
-before any before methods of the underlying test framework (for example, methods
+before any "before methods" of the underlying test framework (for example, methods
 annotated with JUnit Jupiter's `@BeforeEach`), and that applies for every test method in
 the test class. On the other hand, if a method within a test class is annotated with
 `@PreDestroy`, that method never runs. Therefore, within a test class, we recommend that
