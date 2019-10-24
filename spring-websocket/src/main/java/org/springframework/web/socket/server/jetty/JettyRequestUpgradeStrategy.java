@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
-import org.eclipse.jetty.websocket.api.extensions.ExtensionFactory;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 
@@ -180,14 +179,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 		return result;
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({"unchecked", "deprecation"})
 	private Set<String> getExtensionNames() {
 		try {
-			return this.factory.getExtensionFactory().getExtensionNames();
+			return this.factory.getAvailableExtensionNames();
 		}
 		catch (IncompatibleClassChangeError ex) {
+			// Fallback for versions prior to 9.4.21:
 			// 9.4.20.v20190813: ExtensionFactory (abstract class -> interface)
-			Method method = ClassUtils.getMethod(ExtensionFactory.class, "getExtensionNames");
+			// 9.4.21.v20190926: ExtensionFactory (interface -> abstract class) + deprecated
+			Class<?> clazz = org.eclipse.jetty.websocket.api.extensions.ExtensionFactory.class;
+			Method method = ClassUtils.getMethod(clazz, "getExtensionNames");
 			return (Set<String>) ReflectionUtils.invokeMethod(method, this.factory.getExtensionFactory());
 		}
 	}
