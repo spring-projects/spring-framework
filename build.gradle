@@ -44,7 +44,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.0"
-			mavenBom "io.netty:netty-bom:4.1.39.Final"
+			mavenBom "io.netty:netty-bom:4.1.43.Final"
 			mavenBom "io.projectreactor:reactor-bom:Dysprosium-BUILD-SNAPSHOT"
 			mavenBom "io.rsocket:rsocket-bom:1.0.0-RC5"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.21.v20190926"
