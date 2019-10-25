@@ -18,6 +18,12 @@ jar {
 	}
 }
 
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}
+
 javadoc {
 	description = "Generates project-level javadoc for use in -javadoc jar"
 
