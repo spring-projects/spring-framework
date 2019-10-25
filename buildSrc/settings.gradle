@@ -1,8 +1,1 @@
-buildCache {
-	local {
-		enabled = true
-	}
-	remote(HttpBuildCache) {
-		enabled = false
-	}
-}
+apply from: new File(settingsDir, '../gradle/build-cache-settings.gradle')
