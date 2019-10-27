@@ -196,7 +196,7 @@ configure(allprojects) { project ->
 			dependency "org.testng:testng:6.14.3"
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.3"
-			dependency "org.assertj:assertj-core:3.13.2"
+			dependency "org.assertj:assertj-core:3.14.0"
 			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
