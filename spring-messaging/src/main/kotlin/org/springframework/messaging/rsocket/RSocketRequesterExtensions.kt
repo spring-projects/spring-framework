@@ -113,6 +113,15 @@ suspend inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveAndAwa
 		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 /**
+ * Nullable coroutines variant of [RSocketRequester.RequestSpec.retrieveMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.1
+ */
+suspend inline fun <reified T : Any> RSocketRequester.RequestSpec.retrieveAndAwaitOrNull(): T? =
+		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitFirstOrNull()
+
+/**
  * Coroutines variant of [RSocketRequester.RequestSpec.retrieveFlux].
  *
  * @author Sebastien Deleuze
