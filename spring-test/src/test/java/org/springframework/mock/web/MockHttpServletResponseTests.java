@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,7 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link MockHttpServletResponse}.
@@ -120,7 +122,15 @@ class MockHttpServletResponseTests {
 		assertThat(response.getHeader("Content-Type")).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
-
+	
+	@Test
+	void setContentTypeCommitted() {
+		response.setContentType("test/plain");
+		response.setCommitted(true);
+		response.setContentType("test/xml");
+		assertThat(response.getContentType()).isEqualTo("test/plain");
+	}
+	
 	@Test
 	void setCharacterEncodingThenContentType() {
 		response.setCharacterEncoding("UTF-8");
@@ -137,6 +147,15 @@ class MockHttpServletResponseTests {
 		assertThat(response.getHeader("Content-Length")).isEqualTo("66");
 	}
 
+	@Test
+	void contentLengthCommitted() {
+		response.setContentLength(66);
+		response.setCommitted(true);
+		response.setContentLength(120);
+		assertThat(response.getContentLength()).isEqualTo(66);
+		assertThat(response.getHeader("Content-Length")).isEqualTo("66");
+	}
+	
 	@Test
 	void contentLengthHeader() {
 		response.addHeader("Content-Length", "66");
@@ -382,6 +401,54 @@ class MockHttpServletResponseTests {
 		response.addCookie(new MockCookie("SESSION", "999"));
 		assertNumCookies(2);
 		assertCookieValues("123", "999");
+	}
+	
+	@Test
+	void setHeader() {
+		response.setHeader("test-header", "test-value");
+		assertThat(response.getHeader("test-header")).isEqualTo("test-value");
+		response.setHeader("test-header", "test-value2");
+		assertThat(response.getHeader("test-header")).isEqualTo("test-value2");
+	}
+
+	@Test
+	void setHeaderCommitted() {
+		response.setHeader("test-header", "test-value");
+		response.setCommitted(true);
+		response.setHeader("test-header", "test-value2");
+		assertThat(response.getHeader("test-header")).isEqualTo("test-value");	
+	}
+	
+	@Test
+	void addHeader() {
+		response.setHeader("test-header", "test-value");
+		response.addHeader("test-header", "test-value2");
+		List<String> headerList = response.getHeaders("test-header");
+		assertThat(headerList.size()).isEqualTo(2);
+		assertThat(headerList).contains("test-value","test-value2");
+	}
+
+	@Test
+	void addHeaderCommitted() {
+		response.setHeader("test-header", "test-value");
+		response.setCommitted(true);
+		response.addHeader("test-header", "test-value2");
+		List<String> headerList = response.getHeaders("test-header");
+		assertThat(headerList.size()).isEqualTo(1);
+		assertThat(headerList).contains("test-value");
+	}
+
+	@Test
+	void setBufferSize() {
+		response.setBufferSize(123);
+		assertThat(response.getBufferSize()).isEqualTo(123);
+	}
+	
+	@Test
+	void setBufferSizeCommitted() {
+		response.setCommitted(true);
+		assertThatIllegalStateException().isThrownBy(() ->
+				response.setBufferSize(123));
 	}
 
 	private void assertNumCookies(int expected) {

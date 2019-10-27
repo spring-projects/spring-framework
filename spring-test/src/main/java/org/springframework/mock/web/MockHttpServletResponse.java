@@ -241,6 +241,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLength(int contentLength) {
+		if(isCommitted()) {
+			return;
+		}
 		this.contentLength = contentLength;
 		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
 	}
@@ -251,6 +254,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLengthLong(long contentLength) {
+		if(isCommitted()) {
+			return;
+		}
 		this.contentLength = contentLength;
 		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
 	}
@@ -261,6 +267,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentType(@Nullable String contentType) {
+		if(isCommitted()) {
+			return;
+		}
 		this.contentType = contentType;
 		if (contentType != null) {
 			try {
@@ -290,6 +299,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setBufferSize(int bufferSize) {
+		Assert.state(!isCommitted(), "Cannot set buffer size - response is already committed");
 		this.bufferSize = bufferSize;
 	}
 
@@ -652,6 +662,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
+		if(isCommitted()) {
+			return;
+		}
 		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
 		if (header == null) {
