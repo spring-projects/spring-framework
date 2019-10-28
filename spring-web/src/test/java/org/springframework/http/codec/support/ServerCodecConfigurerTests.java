@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,11 +124,39 @@ public class ServerCodecConfigurerTests {
 				.filter(e -> e == encoder).orElse(null));
 	}
 
+	@Test
+	public void maxInMemorySize() {
+		int size = 99;
+		this.configurer.defaultCodecs().maxInMemorySize(size);
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertEquals(13, readers.size());
+		assertEquals(size, ((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((ResourceDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize());
+		assertEquals(size, ((FormHttpMessageReader) nextReader(readers)).getMaxInMemorySize());
+		assertEquals(size, ((SynchronossPartHttpMessageReader) nextReader(readers)).getMaxInMemorySize());
+
+		MultipartHttpMessageReader multipartReader = (MultipartHttpMessageReader) nextReader(readers);
+		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		assertEquals(size, (reader).getMaxInMemorySize());
+
+		assertEquals(size, ((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((Jackson2SmileDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+		assertEquals(size, ((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
-		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
+		HttpMessageReader<?> reader = nextReader(readers);
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
 		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
+	}
+
+	private HttpMessageReader<?> nextReader(List<HttpMessageReader<?>> readers) {
+		return readers.get(this.index.getAndIncrement());
 	}
 
 	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {

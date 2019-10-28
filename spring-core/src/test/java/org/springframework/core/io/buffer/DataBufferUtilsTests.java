@@ -48,11 +48,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -716,12 +719,23 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Mono<DataBuffer> result = DataBufferUtils.join(flux);
 
 		StepVerifier.create(result)
-				.consumeNextWith(dataBuffer -> {
-					assertEquals("foobarbaz",
-							DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8));
-					release(dataBuffer);
+				.consumeNextWith(buf -> {
+					assertEquals("foobarbaz", DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8));
+					release(buf);
 				})
 				.verifyComplete();
+	}
+
+	@Test
+	public void joinWithLimit() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+		Mono<DataBuffer> result = DataBufferUtils.join(flux, 8);
+
+		StepVerifier.create(result)
+				.verifyError(DataBufferLimitException.class);
 	}
 
 	@Test

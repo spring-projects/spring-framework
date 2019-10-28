@@ -38,6 +38,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -57,6 +58,9 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
+	private int maxInMemorySize = -1;
+
+
 	/**
 	 * Until https://github.com/FasterXML/jackson-core/issues/476 is resolved,
 	 * we need to ensure buffer recycling is off.
@@ -74,6 +78,29 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder. This
+	 * is either the size of the entire input when decoding as a whole, or the
+	 * size of one top-level JSON object within a JSON stream. When the limit
+	 * is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default in 5.1 this is set to -1, unlimited. In 5.2 the default
+	 * value for this limit is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
+	}
+
+
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
@@ -87,7 +114,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), true);
+				Flux.from(input), this.jsonFactory, getObjectMapper(), true, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -96,7 +123,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), false);
+				Flux.from(input), this.jsonFactory, getObjectMapper(), false, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
 

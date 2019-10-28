@@ -65,6 +65,14 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 	}
 
 
+	/**
+	 * Return the configured parts reader.
+	 * @since 5.1.11
+	 */
+	public HttpMessageReader<Part> getPartReader() {
+		return this.partReader;
+	}
+
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
 		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);

@@ -47,9 +47,37 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 
+	private int maxInMemorySize = -1;
+
 
 	protected AbstractDataBufferDecoder(MimeType... supportedMimeTypes) {
 		super(supportedMimeTypes);
+	}
+
+
+	/**
+	 * Configure a limit on the number of bytes that can be buffered whenever
+	 * the input stream needs to be aggregated. This can be a result of
+	 * decoding to a single {@code DataBuffer},
+	 * {@link java.nio.ByteBuffer ByteBuffer}, {@code byte[]},
+	 * {@link org.springframework.core.io.Resource Resource}, {@code String}, etc.
+	 * It can also occur when splitting the input stream, e.g. delimited text,
+	 * in which case the limit applies to data buffered between delimiters.
+	 * <p>By default in 5.1 this is set to -1, unlimited. In 5.2 the default
+	 * value for this limit is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -64,7 +92,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	public Mono<T> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input)
+		return DataBufferUtils.join(input, this.maxInMemorySize)
 				.map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
 	}
 

@@ -437,14 +437,36 @@ public abstract class DataBufferUtils {
 	 * @since 5.0.3
 	 */
 	public static Mono<DataBuffer> join(Publisher<DataBuffer> dataBuffers) {
-		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
+		return join(dataBuffers, -1);
+	}
 
-		return Flux.from(dataBuffers)
-				.collectList()
+	/**
+	 * Variant of {@link #join(Publisher)} that behaves the same way up until
+	 * the specified max number of bytes to buffer. Once the limit is exceeded,
+	 * {@link DataBufferLimitException} is raised.
+	 * @param buffers the data buffers that are to be composed
+	 * @param maxByteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @return a buffer with the aggregated content, possibly an empty Mono if
+	 * the max number of bytes to buffer is exceeded.
+	 * @throws DataBufferLimitException if maxByteCount is exceeded
+	 * @since 5.1.11
+	 */
+	@SuppressWarnings("unchecked")
+	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
+		Assert.notNull(buffers, "'dataBuffers' must not be null");
+
+		if (buffers instanceof Mono) {
+			return (Mono<DataBuffer>) buffers;
+		}
+
+		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
+
+		return Flux.from(buffers)
+				.collect(() -> new LimitedDataBufferList(maxByteCount), LimitedDataBufferList::add)
 				.filter(list -> !list.isEmpty())
 				.map(list -> list.get(0).factory().join(list))
+				.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-
 	}
 
 

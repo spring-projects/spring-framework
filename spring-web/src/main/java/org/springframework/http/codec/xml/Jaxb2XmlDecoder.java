@@ -43,6 +43,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -78,6 +79,8 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private Function<Unmarshaller, Unmarshaller> unmarshallerProcessor = Function.identity();
 
+	private int maxInMemorySize = -1;
+
 
 	public Jaxb2XmlDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
@@ -108,6 +111,29 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	public Function<Unmarshaller, Unmarshaller> getUnmarshallerProcessor() {
 		return this.unmarshallerProcessor;
+	}
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder.
+	 * This is either the size of the entire input when decoding as a whole, or when
+	 * using async parsing with Aalto XML, it is the size of one top-level XML tree.
+	 * When the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default in 5.1 this is set to -1, unlimited. In 5.2 the default
+	 * value for this limit is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+		this.xmlEventDecoder.setMaxInMemorySize(byteCount);
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
