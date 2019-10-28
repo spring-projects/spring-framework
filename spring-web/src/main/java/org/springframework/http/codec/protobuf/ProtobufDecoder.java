@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -127,7 +128,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	public Mono<Message> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(inputStream)
+		return DataBufferUtils.join(inputStream, this.maxMessageSize)
 				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
 	}
 
@@ -205,8 +206,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 							return messages;
 						}
 						if (this.messageBytesToRead > this.maxMessageSize) {
-							throw new DecodingException(
-									"The number of bytes to read from the incoming stream " +
+							throw new DataBufferLimitException(
+									"The number of bytes to read for message " +
 											"(" + this.messageBytesToRead + ") exceeds " +
 											"the configured limit (" + this.maxMessageSize + ")");
 						}

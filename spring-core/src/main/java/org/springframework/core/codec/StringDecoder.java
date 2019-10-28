@@ -25,15 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DataBufferWrapper;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.LimitedDataBufferList;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
@@ -91,12 +94,18 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 		byte[][] delimiterBytes = getDelimiterBytes(mimeType);
 
+		// TODO: Drop Consumer and use bufferUntil with Supplier<LimistedDataBufferList> (reactor-core#1925)
+		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
+		LimitedDataBufferConsumer limiter = new LimitedDataBufferConsumer(getMaxInMemorySize());
+
 		Flux<DataBuffer> inputFlux = Flux.defer(() -> {
 			DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delimiterBytes);
 			return Flux.from(input)
 					.concatMapIterable(buffer -> endFrameAfterDelimiter(buffer, matcher))
+					.doOnNext(limiter)
 					.bufferUntil(buffer -> buffer instanceof EndFrameBuffer)
 					.map(buffers -> joinAndStrip(buffers, this.stripDelimiter))
+					.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
 		});
@@ -279,4 +288,34 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 
+	/**
+	 * Temporary measure for reactor-core#1925.
+	 * Consumer that adds to a {@link LimitedDataBufferList} to enforce limits.
+	 */
+	private static class LimitedDataBufferConsumer implements Consumer<DataBuffer> {
+
+		private final LimitedDataBufferList bufferList;
+
+
+		public LimitedDataBufferConsumer(int maxInMemorySize) {
+			this.bufferList = new LimitedDataBufferList(maxInMemorySize);
+		}
+
+
+		@Override
+		public void accept(DataBuffer buffer) {
+			if (buffer instanceof EndFrameBuffer) {
+				this.bufferList.clear();
+			}
+			else {
+				try {
+					this.bufferList.add(buffer);
+				}
+				catch (DataBufferLimitException ex) {
+					DataBufferUtils.release(buffer);
+					throw ex;
+				}
+			}
+		}
+	}
 }

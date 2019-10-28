@@ -29,6 +29,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -125,6 +126,20 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 				.expectNext("stuvwxyz")
 				.expectComplete()
 				.verify());
+	}
+
+	@Test
+	void decodeNewLineWithLimit() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("abc\n"),
+				stringBuffer("defg\n"),
+				stringBuffer("hijkl\n")
+		);
+		this.decoder.setMaxInMemorySize(5);
+
+		testDecode(input, String.class, step ->
+				step.expectNext("abc", "defg")
+						.verifyError(DataBufferLimitException.class));
 	}
 
 	@Test
