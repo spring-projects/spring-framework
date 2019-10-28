@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link NullSafeComparator}.
@@ -29,21 +29,21 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Phillip Webb
  */
-public class NullSafeComparatorTests {
+class NullSafeComparatorTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCompareWithNullsLow() {
+	void shouldCompareWithNullsLow() {
 		Comparator<String> c = NullSafeComparator.NULLS_LOW;
-		assertTrue(c.compare(null, "boo") < 0);
+		assertThat(c.compare(null, "boo") < 0).isTrue();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCompareWithNullsHigh() {
+	void shouldCompareWithNullsHigh() {
 		Comparator<String> c = NullSafeComparator.NULLS_HIGH;
-		assertTrue(c.compare(null, "boo") > 0);
-		assertTrue(c.compare(null, null) == 0);
+		assertThat(c.compare(null, "boo") > 0).isTrue();
+		assertThat(c.compare(null, null) == 0).isTrue();
 	}
 
 }

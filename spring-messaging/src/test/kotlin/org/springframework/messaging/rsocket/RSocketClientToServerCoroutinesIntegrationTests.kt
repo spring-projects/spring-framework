@@ -16,24 +16,18 @@
 
 package org.springframework.messaging.rsocket
 
-import java.time.Duration
-
 import io.netty.buffer.PooledByteBufAllocator
 import io.rsocket.RSocketFactory
 import io.rsocket.frame.decoder.PayloadDecoder
 import io.rsocket.transport.netty.server.CloseableChannel
 import io.rsocket.transport.netty.server.TcpServerTransport
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
-import reactor.core.publisher.Flux
-import reactor.test.StepVerifier
-
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -42,7 +36,11 @@ import org.springframework.core.codec.StringDecoder
 import org.springframework.core.io.buffer.NettyDataBufferFactory
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.stereotype.Controller
+import reactor.core.publisher.Flux
+import reactor.test.StepVerifier
+import java.time.Duration
 
 /**
  * Coroutines server-side handling of RSocket requests.
@@ -105,7 +103,6 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 				.verify(Duration.ofSeconds(5))
 	}
 
-	@FlowPreview
 	@Controller
 	class ServerController {
 
@@ -160,17 +157,16 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Configuration
 	open class ServerConfig {
 
-		@FlowPreview
 		@Bean
 		open fun controller(): ServerController {
 			return ServerController()
 		}
 
 		@Bean
-		open fun messageHandlerAcceptor(): MessageHandlerAcceptor {
-			val acceptor = MessageHandlerAcceptor()
-			acceptor.rSocketStrategies = rsocketStrategies()
-			return acceptor
+		open fun messageHandler(): RSocketMessageHandler {
+			val handler = RSocketMessageHandler()
+			handler.rSocketStrategies = rsocketStrategies()
+			return handler
 		}
 
 		@Bean
@@ -194,15 +190,15 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		private lateinit var requester: RSocketRequester
 
 
-		@BeforeClass
+		@BeforeAll
 		@JvmStatic
 		fun setupOnce() {
 			context = AnnotationConfigApplicationContext(ServerConfig::class.java)
 
 			server = RSocketFactory.receive()
-					.addServerPlugin(interceptor)
+					.addResponderPlugin(interceptor)
 					.frameDecoder(PayloadDecoder.ZERO_COPY)
-					.acceptor(context.getBean(MessageHandlerAcceptor::class.java))
+					.acceptor(context.getBean(RSocketMessageHandler::class.java).responder())
 					.transport(TcpServerTransport.create("localhost", 7000))
 					.start()
 					.block()!!
@@ -214,7 +210,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 					.block()!!
 		}
 
-		@AfterClass
+		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
 			requester.rsocket().dispose()

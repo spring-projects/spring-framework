@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -32,8 +32,9 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
+import static java.nio.charset.StandardCharsets.UTF_16BE;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link StringDecoder}.
@@ -42,12 +43,12 @@ import static org.junit.Assert.*;
  * @author Brian Clozel
  * @author Mark Paluch
  */
-public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
+class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
 
 
-	public StringDecoderTests() {
+	StringDecoderTests() {
 		super(StringDecoder.allMimeTypes());
 	}
 
@@ -55,12 +56,12 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8"))).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON)).isFalse();
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeMultibyteCharacterUtf16() {
+	void decodeMultibyteCharacterUtf16() {
 		String u = "ü";
 		String e = "é";
 		String o = "ø";
@@ -102,7 +103,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLine() {
+	void decodeNewLine() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("\r\nabc\n"),
 				stringBuffer("def"),
@@ -127,7 +128,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLineIncludeDelimiters() {
+	void decodeNewLineIncludeDelimiters() {
 		this.decoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
 		Flux<DataBuffer> input = Flux.just(
@@ -154,7 +155,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyFlux() {
+	void decodeEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecode(input, String.class, step -> step
@@ -163,7 +164,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyDataBuffer() {
+	void decodeEmptyDataBuffer() {
 		Flux<DataBuffer> input = Flux.just(stringBuffer(""));
 		Flux<String> output = this.decoder.decode(input,
 				TYPE, null, Collections.emptyMap());
@@ -189,7 +190,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeToMonoWithEmptyFlux() {
+	void decodeToMonoWithEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecodeToMono(input, String.class, step -> step
@@ -203,6 +204,5 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		buffer.write(bytes);
 		return buffer;
 	}
-
 
 }

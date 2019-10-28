@@ -19,10 +19,8 @@ package org.springframework.jmx.export.annotation;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +39,8 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link EnableMBeanExport} and {@link MBeanExportConfiguration}.
@@ -52,13 +51,10 @@ import static org.junit.Assert.*;
  */
 public class EnableMBeanExportConfigurationTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private AnnotationConfigApplicationContext ctx;
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.ctx != null) {
 			this.ctx.close();
@@ -85,19 +81,19 @@ public class EnableMBeanExportConfigurationTests {
 	@Test
 	@SuppressWarnings("resource")
 	public void testPackagePrivateExtensionCantBeExposed() {
-		this.thrown.expect(InvalidMetadataException.class);
-		this.thrown.expectMessage(PackagePrivateTestBean.class.getName());
-		this.thrown.expectMessage("must be public");
-		new AnnotationConfigApplicationContext(PackagePrivateConfiguration.class);
+		assertThatExceptionOfType(InvalidMetadataException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(PackagePrivateConfiguration.class))
+			.withMessageContaining(PackagePrivateTestBean.class.getName())
+			.withMessageContaining("must be public");
 	}
 
 	@Test
 	@SuppressWarnings("resource")
 	public void testPackagePrivateImplementationCantBeExposed() {
-		this.thrown.expect(InvalidMetadataException.class);
-		this.thrown.expectMessage(PackagePrivateAnnotationTestBean.class.getName());
-		this.thrown.expectMessage("must be public");
-		new AnnotationConfigApplicationContext(PackagePrivateInterfaceImplementationConfiguration.class);
+		assertThatExceptionOfType(InvalidMetadataException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(PackagePrivateInterfaceImplementationConfiguration.class))
+			.withMessageContaining(PackagePrivateAnnotationTestBean.class.getName())
+			.withMessageContaining("must be public");
 	}
 
 	@Test
@@ -149,9 +145,9 @@ public class EnableMBeanExportConfigurationTests {
 
 	private void validateMBeanAttribute(MBeanServer server, String objectName, String expected) throws Exception {
 		ObjectName oname = ObjectNameManager.getInstance(objectName);
-		assertNotNull(server.getObjectInstance(oname));
+		assertThat(server.getObjectInstance(oname)).isNotNull();
 		String name = (String) server.getAttribute(oname, "Name");
-		assertEquals("Invalid name returned", expected, name);
+		assertThat(name).as("Invalid name returned").isEqualTo(expected);
 	}
 
 

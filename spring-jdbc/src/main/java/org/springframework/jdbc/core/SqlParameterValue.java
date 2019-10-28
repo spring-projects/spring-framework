@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import org.springframework.lang.Nullable;
 
 /**
- * Object to represent a SQL parameter value, including parameter meta-data
+ * Object to represent an SQL parameter value, including parameter meta-data
  * such as the SQL type and the scale for numeric values.
  *
  * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of

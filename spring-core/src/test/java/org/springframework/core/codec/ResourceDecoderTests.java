@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
@@ -31,31 +31,31 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * @author Arjen Poutsma
  */
-public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecoder> {
+class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public ResourceDecoderTests() {
+	ResourceDecoderTests() {
 		super(new ResourceDecoder());
 	}
 
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON)).isFalse();
 	}
 
 
@@ -68,10 +68,10 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 				.consumeNextWith(resource -> {
 					try {
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-						assertEquals("foobar", new String(bytes));
+						assertThat(new String(bytes)).isEqualTo("foobar");
 					}
-					catch (IOException e) {
-						fail(e.getMessage());
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
 					}
 				})
 				.expectComplete()
@@ -79,6 +79,7 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
@@ -90,11 +91,11 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 							Resource resource = (Resource) value;
 							try {
 								byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-								assertEquals("foobar", new String(bytes));
-								assertEquals("testFile", resource.getFilename());
+								assertThat(new String(bytes)).isEqualTo("foobar");
+								assertThat(resource.getFilename()).isEqualTo("testFile");
 							}
-							catch (IOException e) {
-								fail(e.getMessage());
+							catch (IOException ex) {
+								throw new AssertionError(ex.getMessage(), ex);
 							}
 						})
 						.expectComplete()

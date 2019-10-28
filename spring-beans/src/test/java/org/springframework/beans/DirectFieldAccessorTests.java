@@ -16,11 +16,11 @@
 
 package org.springframework.beans;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Specific {@link DirectFieldAccessor} tests.
@@ -48,8 +48,8 @@ public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 		};
 
 		DirectFieldAccessor dfa = createAccessor(target);
-		assertEquals(StringBuilder.class, dfa.getPropertyType("name"));
-		assertEquals(sb, dfa.getPropertyValue("name"));
+		assertThat(dfa.getPropertyType("name")).isEqualTo(StringBuilder.class);
+		assertThat(dfa.getPropertyValue("name")).isEqualTo(sb);
 	}
 
 }

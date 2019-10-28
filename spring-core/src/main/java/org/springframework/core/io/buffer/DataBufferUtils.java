@@ -27,10 +27,12 @@ import java.nio.channels.Channels;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -59,8 +61,6 @@ import org.springframework.util.Assert;
 public abstract class DataBufferUtils {
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
-
-	private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
 
 
 	//---------------------------------------------------------------------
@@ -144,10 +144,8 @@ public abstract class DataBufferUtils {
 				channel -> Flux.create(sink -> {
 					ReadCompletionHandler handler =
 							new ReadCompletionHandler(channel, sink, position, bufferFactory, bufferSize);
-					sink.onDispose(handler::dispose);
-					DataBuffer dataBuffer = bufferFactory.allocateBuffer(bufferSize);
-					ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
-					channel.read(byteBuffer, position, dataBuffer, handler);
+					sink.onCancel(handler::cancel);
+					sink.onRequest(handler::request);
 				}),
 				channel -> {
 					// Do not close channel from here, rather wait for the current read callback
@@ -155,6 +153,32 @@ public abstract class DataBufferUtils {
 				});
 
 		return flux.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+	}
+
+	/**
+	 * Read bytes from the given file {@code Path} into a {@code Flux} of {@code DataBuffer}s.
+	 * The method ensures that the file is closed when the flux is terminated.
+	 * @param path the path to read bytes from
+	 * @param bufferFactory the factory to create data buffers with
+	 * @param bufferSize the maximum size of the data buffers
+	 * @return a Flux of data buffers read from the given channel
+	 * @since 5.2
+	 */
+	public static Flux<DataBuffer> read(
+			Path path, DataBufferFactory bufferFactory, int bufferSize, OpenOption... options) {
+
+		Assert.notNull(path, "Path must not be null");
+		Assert.notNull(bufferFactory, "BufferFactory must not be null");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be > 0");
+		if (options.length > 0) {
+			for (OpenOption option : options) {
+				Assert.isTrue(!(option == StandardOpenOption.APPEND || option == StandardOpenOption.WRITE),
+						"'" + option + "' not allowed");
+			}
+		}
+
+		return readAsynchronousFileChannel(() -> AsynchronousFileChannel.open(path, options),
+				bufferFactory, bufferSize);
 	}
 
 	/**
@@ -297,7 +321,7 @@ public abstract class DataBufferUtils {
 	 * writing errors and the completion signal
 	 */
 	public static Flux<DataBuffer> write(
-			Publisher<DataBuffer> source, AsynchronousFileChannel channel, long position) {
+			Publisher<? extends DataBuffer> source, AsynchronousFileChannel channel, long position) {
 
 		Assert.notNull(source, "'source' must not be null");
 		Assert.notNull(channel, "'channel' must not be null");
@@ -309,6 +333,60 @@ public abstract class DataBufferUtils {
 			sink.onDispose(handler);
 			flux.subscribe(handler);
 		});
+
+
+	}
+
+	/**
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given
+	 * file {@link Path}. The optional {@code options} parameter specifies
+	 * how the created or opened (defaults to
+	 * {@link StandardOpenOption#CREATE CREATE},
+	 * {@link StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING}, and
+	 * {@link StandardOpenOption#WRITE WRITE}).
+	 * @param source the stream of data buffers to be written
+	 * @param destination the path to the file
+	 * @param options options specifying how the file is opened
+	 * @return a {@link Mono} that indicates completion or error
+	 * @since 5.2
+	 */
+	public static Mono<Void> write(Publisher<DataBuffer> source, Path destination, OpenOption... options) {
+		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(destination, "Destination must not be null");
+
+		Set<OpenOption> optionSet = checkWriteOptions(options);
+
+		return Mono.create(sink -> {
+			try {
+				AsynchronousFileChannel channel = AsynchronousFileChannel.open(destination, optionSet, null);
+				sink.onDispose(() -> closeChannel(channel));
+				write(source, channel).subscribe(DataBufferUtils::release,
+						sink::error,
+						sink::success);
+			}
+			catch (IOException ex) {
+				sink.error(ex);
+			}
+		});
+	}
+
+	private static Set<OpenOption> checkWriteOptions(OpenOption[] options) {
+		int length = options.length;
+		Set<OpenOption> result = new HashSet<>(length + 3);
+		if (length == 0) {
+			result.add(StandardOpenOption.CREATE);
+			result.add(StandardOpenOption.TRUNCATE_EXISTING);
+		}
+		else {
+			for (OpenOption opt : options) {
+				if (opt == StandardOpenOption.READ) {
+					throw new IllegalArgumentException("READ not allowed");
+				}
+				result.add(opt);
+			}
+		}
+		result.add(StandardOpenOption.WRITE);
+		return result;
 	}
 
 	static void closeChannel(@Nullable Channel channel) {
@@ -334,23 +412,25 @@ public abstract class DataBufferUtils {
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux whose maximum byte count is {@code maxByteCount}
 	 */
-	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+	public static Flux<DataBuffer> takeUntilByteCount(Publisher<? extends DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 
-		AtomicLong countDown = new AtomicLong(maxByteCount);
-		return Flux.from(publisher)
-				.map(buffer -> {
-					long remainder = countDown.addAndGet(-buffer.readableByteCount());
-					if (remainder < 0) {
-						int length = buffer.readableByteCount() + (int) remainder;
-						return buffer.slice(0, length);
-					}
-					else {
-						return buffer;
-					}
-				})
-				.takeUntil(buffer -> countDown.get() <= 0);
+		return Flux.defer(() -> {
+			AtomicLong countDown = new AtomicLong(maxByteCount);
+			return Flux.from(publisher)
+					.map(buffer -> {
+						long remainder = countDown.addAndGet(-buffer.readableByteCount());
+						if (remainder < 0) {
+							int length = buffer.readableByteCount() + (int) remainder;
+							return buffer.slice(0, length);
+						}
+						else {
+							return buffer;
+						}
+					})
+					.takeUntil(buffer -> countDown.get() <= 0);
+		});
 
 		// No doOnDiscard as operators used do not cache (and drop) buffers
 	}
@@ -363,7 +443,7 @@ public abstract class DataBufferUtils {
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux with the remaining part of the given publisher
 	 */
-	public static Flux<DataBuffer> skipUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+	public static Flux<DataBuffer> skipUntilByteCount(Publisher<? extends DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 
@@ -443,7 +523,8 @@ public abstract class DataBufferUtils {
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
-	public static Mono<DataBuffer> join(Publisher<DataBuffer> dataBuffers) {
+	@SuppressWarnings("unchecked")
+	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
 		if (dataBuffers instanceof Mono) {
@@ -458,8 +539,8 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return a {@link Matcher} for the given delimiters. The matcher can be used to find the
-	 * delimiters in data buffers.
+	 * Return a {@link Matcher} for the given delimiter.
+	 * The matcher can be used to find the delimiters in data buffers.
 	 * @param delimiter the delimiter bytes to find
 	 * @return the matcher
 	 * @since 5.2
@@ -469,86 +550,24 @@ public abstract class DataBufferUtils {
 		return new KnuthMorrisPrattMatcher(delimiter);
 	}
 
-	/**
-	 * Splits the given stream of data buffers around the given delimiter.
-	 * The returned flux contains data buffers that are terminated by the given delimiter,
-	 * though the delimiter itself is removed.
-	 * @param dataBuffers the input stream of data buffers
-	 * @param delimiter the delimiting byte array
-	 * @return the flux of data buffers created by splitting the given data buffers around the
-	 * given delimiter
+	/** Return a {@link Matcher} for the given delimiters.
+	 * The matcher can be used to find the delimiters in data buffers.
+	 * @param delimiters the delimiters bytes to find
+	 * @return the matcher
 	 * @since 5.2
 	 */
-	public static Flux<DataBuffer> split(Publisher<DataBuffer> dataBuffers, byte[] delimiter) {
-		return split(dataBuffers, delimiter, true);
-	}
-
-	/**
-	 * Splits the given stream of data buffers around the given delimiter.
-	 * The returned flux contains data buffers that are terminated by the given delimiter,
-	 * which is included when {@code stripDelimiter} is {@code true}, or stripped off when
-	 * {@code false}.
-	 * @param dataBuffers the input stream of data buffers
-	 * @param delimiter the delimiting byte array
-	 * @param stripDelimiter whether to include the delimiter at the end of each resulting buffer
-	 * @return the flux of data buffers created by splitting the given data buffers around the
-	 * given delimiter
-	 * @since 5.2
-	 */
-	public static Flux<DataBuffer> split(Publisher<DataBuffer> dataBuffers, byte[] delimiter,
-			boolean stripDelimiter) {
-		Assert.notNull(dataBuffers, "DataBuffers must not be null");
-		Assert.isTrue(delimiter.length > 0, "Delimiter must not be empty");
-
-		Matcher matcher = matcher(delimiter);
-		return Flux.from(dataBuffers)
-				.flatMap(buffer -> endFrameOnDelimiter(buffer, matcher))
-				.bufferUntil(buffer -> buffer == END_FRAME)
-				.map(buffers -> joinAndStrip(buffers, delimiter, stripDelimiter))
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-	}
-
-	// Return Flux, because returning List (w/ flatMapIterable) results in memory leaks because
-	// of pre-fetching.
-	private static Flux<DataBuffer> endFrameOnDelimiter(DataBuffer dataBuffer, Matcher matcher) {
-		List<DataBuffer> result = new ArrayList<>();
-		do {
-			int endIdx = matcher.match(dataBuffer);
-			int readPosition = dataBuffer.readPosition();
-			if (endIdx != -1) {
-				int length = endIdx + 1 - readPosition ;
-				result.add(dataBuffer.retainedSlice(readPosition, length));
-				result.add(END_FRAME);
-				dataBuffer.readPosition(endIdx + 1);
+	public static Matcher matcher(byte[]... delimiters) {
+		Assert.isTrue(delimiters.length > 0, "Delimiters must not be empty");
+		if (delimiters.length == 1) {
+			return matcher(delimiters[0]);
+		}
+		else {
+			Matcher[] matchers = new Matcher[delimiters.length];
+			for (int i = 0; i < delimiters.length; i++) {
+				matchers[i] = matcher(delimiters[i]);
 			}
-			else {
-				result.add(retain(dataBuffer));
-				break;
-			}
+			return new CompositeMatcher(matchers);
 		}
-		while (dataBuffer.readableByteCount() > 0);
-
-		DataBufferUtils.release(dataBuffer);
-		return Flux.fromIterable(result);
-	}
-
-	private static DataBuffer joinAndStrip(List<DataBuffer> dataBuffers, byte[] delimiter,
-			boolean stripDelimiter) {
-
-		Assert.state(!dataBuffers.isEmpty(), "DataBuffers should not be empty");
-
-		boolean endFrameFound = false;
-		int lastIdx = dataBuffers.size() - 1;
-		if (dataBuffers.get(lastIdx) == END_FRAME) {
-			endFrameFound = true;
-			dataBuffers.remove(lastIdx);
-		}
-
-		DataBuffer result = dataBuffers.get(0).factory().join(dataBuffers);
-		if (stripDelimiter && endFrameFound) {
-			result.writePosition(result.writePosition() - delimiter.length);
-		}
-		return result;
 	}
 
 
@@ -573,6 +592,10 @@ public abstract class DataBufferUtils {
 		 */
 		byte[] delimiter();
 
+		/**
+		 * Resets the state of this matcher.
+		 */
+		void reset();
 	}
 
 
@@ -632,6 +655,8 @@ public abstract class DataBufferUtils {
 
 		private final AtomicLong position;
 
+		private final AtomicBoolean reading = new AtomicBoolean();
+
 		private final AtomicBoolean disposed = new AtomicBoolean();
 
 		public ReadCompletionHandler(AsynchronousFileChannel channel,
@@ -644,42 +669,66 @@ public abstract class DataBufferUtils {
 			this.bufferSize = bufferSize;
 		}
 
+		public void read() {
+			if (this.sink.requestedFromDownstream() > 0 &&
+					isNotDisposed() &&
+					this.reading.compareAndSet(false, true)) {
+				DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, this.bufferSize);
+				this.channel.read(byteBuffer, this.position.get(), dataBuffer, this);
+			}
+		}
+
 		@Override
 		public void completed(Integer read, DataBuffer dataBuffer) {
-			if (read != -1 && !this.disposed.get()) {
-				long pos = this.position.addAndGet(read);
-				dataBuffer.writePosition(read);
-				this.sink.next(dataBuffer);
-				// onNext may have led to onCancel (e.g. downstream takeUntil)
-				if (this.disposed.get()) {
-					complete();
+			if (isNotDisposed()) {
+				if (read != -1) {
+					this.position.addAndGet(read);
+					dataBuffer.writePosition(read);
+					this.sink.next(dataBuffer);
+					this.reading.set(false);
+					read();
 				}
 				else {
-					DataBuffer newDataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
-					ByteBuffer newByteBuffer = newDataBuffer.asByteBuffer(0, this.bufferSize);
-					this.channel.read(newByteBuffer, pos, newDataBuffer, this);
+					release(dataBuffer);
+					closeChannel(this.channel);
+					if (this.disposed.compareAndSet(false, true)) {
+						this.sink.complete();
+					}
+					this.reading.set(false);
 				}
 			}
 			else {
 				release(dataBuffer);
-				complete();
+				closeChannel(this.channel);
+				this.reading.set(false);
 			}
-		}
-
-		private void complete() {
-			this.sink.complete();
-			closeChannel(this.channel);
 		}
 
 		@Override
 		public void failed(Throwable exc, DataBuffer dataBuffer) {
 			release(dataBuffer);
-			this.sink.error(exc);
 			closeChannel(this.channel);
+			if (this.disposed.compareAndSet(false, true)) {
+				this.sink.error(exc);
+			}
+			this.reading.set(false);
 		}
 
-		public void dispose() {
-			this.disposed.set(true);
+		public void request(long n) {
+			read();
+		}
+
+		public void cancel() {
+			if (this.disposed.compareAndSet(false, true)) {
+				if (!this.reading.get()) {
+					closeChannel(this.channel);
+				}
+			}
+		}
+
+		private boolean isNotDisposed() {
+			return !this.disposed.get();
 		}
 	}
 
@@ -818,9 +867,9 @@ public abstract class DataBufferUtils {
 		}
 	}
 
+
 	/**
 	 * Implementation of {@link Matcher} that uses the Knuth-Morris-Pratt algorithm.
-	 *
 	 * @see <a href="https://www.nayuki.io/page/knuth-morris-pratt-string-matching">Knuth-Morris-Pratt string matching</a>
 	 */
 	private static class KnuthMorrisPrattMatcher implements Matcher {
@@ -830,7 +879,6 @@ public abstract class DataBufferUtils {
 		private final int[] table;
 
 		private int matches = 0;
-
 
 		public KnuthMorrisPrattMatcher(byte[] delimiter) {
 			this.delimiter = Arrays.copyOf(delimiter, delimiter.length);
@@ -865,7 +913,7 @@ public abstract class DataBufferUtils {
 				if (b == this.delimiter[this.matches]) {
 					this.matches++;
 					if (this.matches == this.delimiter.length) {
-						this.matches = 0;
+						reset();
 						return i;
 					}
 				}
@@ -873,13 +921,69 @@ public abstract class DataBufferUtils {
 			return -1;
 		}
 
+		@Override
+		public byte[] delimiter() {
+			return Arrays.copyOf(this.delimiter, this.delimiter.length);
+		}
+
+		@Override
 		public void reset() {
 			this.matches = 0;
+		}
+	}
+
+
+	/**
+	 * Implementation of {@link Matcher} that wraps several other matchers.
+	 */
+	private static class CompositeMatcher implements Matcher {
+
+		private static final byte[] NO_DELIMITER = new byte[0];
+
+		private final Matcher[] matchers;
+
+		byte[] longestDelimiter = NO_DELIMITER;
+
+		public CompositeMatcher(Matcher[] matchers) {
+			this.matchers = matchers;
+		}
+
+		@Override
+		public int match(DataBuffer dataBuffer) {
+			this.longestDelimiter = NO_DELIMITER;
+			int bestEndIdx = Integer.MAX_VALUE;
+
+
+			for (Matcher matcher : this.matchers) {
+				int endIdx = matcher.match(dataBuffer);
+				if (endIdx != -1 &&
+						endIdx <= bestEndIdx &&
+						matcher.delimiter().length > this.longestDelimiter.length) {
+					bestEndIdx = endIdx;
+					this.longestDelimiter = matcher.delimiter();
+				}
+			}
+			if (bestEndIdx == Integer.MAX_VALUE) {
+				this.longestDelimiter = NO_DELIMITER;
+				return -1;
+			}
+			else {
+				reset();
+				return bestEndIdx;
+			}
 		}
 
 		@Override
 		public byte[] delimiter() {
-			return Arrays.copyOf(this.delimiter, this.delimiter.length);
+			Assert.state(this.longestDelimiter != NO_DELIMITER, "Illegal state!");
+			return this.longestDelimiter;
+		}
+
+		@Override
+		public void reset() {
+			for (Matcher matcher : this.matchers) {
+				matcher.reset();
+			}
 		}
 	}
 

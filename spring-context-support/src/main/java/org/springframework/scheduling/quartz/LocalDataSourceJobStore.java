@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -110,6 +111,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -138,6 +140,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}

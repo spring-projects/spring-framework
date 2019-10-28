@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-
-import static org.junit.Assert.*;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
  * Integration tests that verify support for default SQL script detection.
@@ -30,24 +27,20 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 4.1
  */
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
 @Sql
 @DirtiesContext
-public class DefaultScriptDetectionSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class DefaultScriptDetectionSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
-	public void classLevel() {
+	void classLevel() {
 		assertNumUsers(2);
 	}
 
 	@Test
 	@Sql
-	public void methodLevel() {
+	void methodLevel() {
 		assertNumUsers(3);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
 	}
 
 }

@@ -19,7 +19,7 @@ package org.springframework.web.servlet.function;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -28,10 +28,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
 
 /**
+ * Unit tests for {@link RouterFunctionBuilder}.
+ *
  * @author Arjen Poutsma
  */
 public class RouterFunctionBuilderTests {
@@ -52,7 +54,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(200, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(200);
 
 		servletRequest = new MockHttpServletRequest("HEAD", "/foo");
 		ServerRequest headFooRequest = new DefaultServerRequest(servletRequest, emptyList());
@@ -61,7 +63,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(202, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(202);
 
 		servletRequest = new MockHttpServletRequest("POST", "/");
 		servletRequest.setContentType("text/plain");
@@ -71,7 +73,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(204, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(204);
 
 		servletRequest = new MockHttpServletRequest("POST", "/");
 		ServerRequest invalidRequest = new DefaultServerRequest(servletRequest, emptyList());
@@ -81,7 +83,7 @@ public class RouterFunctionBuilderTests {
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
 
-		assertFalse(responseStatus.isPresent());
+		assertThat(responseStatus.isPresent()).isFalse();
 
 	}
 
@@ -90,16 +92,15 @@ public class RouterFunctionBuilderTests {
 		try {
 			return handlerFunction.handle(request);
 		}
-		catch (Exception e) {
-			fail(e.getMessage());
-			return null;
+		catch (Exception ex) {
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 
 	@Test
 	public void resources() {
 		Resource resource = new ClassPathResource("/org/springframework/web/servlet/function/");
-		assertTrue(resource.exists());
+		assertThat(resource.exists()).isTrue();
 
 		RouterFunction<ServerResponse> route = RouterFunctions.route()
 				.resources("/resources/**", resource)
@@ -113,7 +114,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(200, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(200);
 
 		servletRequest = new MockHttpServletRequest("POST", "/resources/foo.txt");
 		ServerRequest invalidRequest = new DefaultServerRequest(servletRequest, emptyList());
@@ -122,7 +123,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, invalidRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertFalse(responseStatus.isPresent());
+		assertThat(responseStatus.isPresent()).isFalse();
 	}
 
 	@Test
@@ -142,7 +143,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, fooRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(200, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(200);
 	}
 
 	@Test
@@ -156,20 +157,20 @@ public class RouterFunctionBuilderTests {
 				})
 				.before(request -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(0, count);
+					assertThat(count).isEqualTo(0);
 					return request;
 				})
 				.after((request, response) -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(3, count);
+					assertThat(count).isEqualTo(3);
 					return response;
 				})
 				.filter((request, next) -> {
 					int count = filterCount.getAndIncrement();
-					assertEquals(1, count);
+					assertThat(count).isEqualTo(1);
 					ServerResponse responseMono = next.handle(request);
 					count = filterCount.getAndIncrement();
-					assertEquals(2, count);
+					assertThat(count).isEqualTo(2);
 					return responseMono;
 				})
 				.onError(IllegalStateException.class,
@@ -180,9 +181,9 @@ public class RouterFunctionBuilderTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/foo");
 		ServerRequest fooRequest = new DefaultServerRequest(servletRequest, emptyList());
 
-		Optional<ServerResponse> fooResponse = route.route(fooRequest)
+		route.route(fooRequest)
 				.map(handlerFunction -> handle(handlerFunction, fooRequest));
-		assertEquals(4, filterCount.get());
+		assertThat(filterCount.get()).isEqualTo(4);
 
 		filterCount.set(0);
 
@@ -193,7 +194,7 @@ public class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
-		assertEquals(500, responseStatus.get().intValue());
+		assertThat(responseStatus.get().intValue()).isEqualTo(500);
 	}
 
 }

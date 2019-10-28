@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -29,7 +30,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.lang.Nullable;
 
 /**
- * Reusable operation object representing a SQL query.
+ * Reusable operation object representing an SQL query.
  *
  * <p>Subclasses must implement the {@link #newRowMapper} method to provide
  * an object that can extract the results of iterating over the

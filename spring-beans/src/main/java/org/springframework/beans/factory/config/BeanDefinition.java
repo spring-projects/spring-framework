@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -303,6 +304,17 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	// Read-only attributes
+
+	/**
+	 * Return a resolvable type for this bean definition,
+	 * based on the bean class or other specific metadata.
+	 * <p>This is typically fully resolved on a runtime-merged bean definition
+	 * but not necessarily on a configuration-time definition instance.
+	 * @return the resolvable type (potentially {@link ResolvableType#NONE})
+	 * @since 5.2
+	 * @see ConfigurableBeanFactory#getMergedBeanDefinition
+	 */
+	ResolvableType getResolvableType();
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance

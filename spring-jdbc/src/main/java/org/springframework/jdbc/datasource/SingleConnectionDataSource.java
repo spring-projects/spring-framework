@@ -175,7 +175,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Specifying a custom username and password doesn't make sense
 	 * with a single Connection. Returns the single Connection if given
-	 * the same username and password; throws a SQLException else.
+	 * the same username and password; throws an SQLException else.
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {

@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +49,8 @@ import org.springframework.util.MimeType;
 /**
  * Abstract base class for Jackson 2.9 decoding, leveraging non-blocking parsing.
  *
+ * <p>Compatible with Jackson 2.9.7 and higher.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -59,19 +60,10 @@ import org.springframework.util.MimeType;
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
 	/**
-	 * Until https://github.com/FasterXML/jackson-core/issues/476 is resolved,
-	 * we need to ensure buffer recycling is off.
-	 */
-	private final JsonFactory jsonFactory;
-
-
-	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		this.jsonFactory = mapper.getFactory().copy()
-				.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
 	}
 
 
@@ -87,8 +79,9 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		ObjectMapper mapper = getObjectMapper();
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), true);
+				Flux.from(input), mapper.getFactory(), mapper, true);
 
 		ObjectReader reader = getObjectReader(elementType, hints);
 

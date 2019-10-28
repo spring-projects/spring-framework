@@ -450,7 +450,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			defaultMediaTypes.put("smile", "application/x-jackson-smile");
 		}
 		if (jackson2CborPresent) {
-			defaultMediaTypes.put("cbor", "application/cbor");
+			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
 		return defaultMediaTypes;
 	}
@@ -569,7 +569,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+		if (convertersElement == null || Boolean.parseBoolean(convertersElement.getAttribute("register-defaults"))) {
 			messageConverters.setSource(source);
 			messageConverters.add(createConverterDefinition(ByteArrayHttpMessageConverter.class, source));
 

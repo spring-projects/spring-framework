@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Hints;
@@ -46,7 +46,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -202,8 +201,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
 		}
-		for (String name : map.keySet()) {
-			for (Object value : map.get(name)) {
+		for (List<?> values : map.values()) {
+			for (Object value : values) {
 				if (value != null && !(value instanceof String)) {
 					return true;
 				}
@@ -249,8 +248,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	private Flux<DataBuffer> encodePartValues(
 			byte[] boundary, String name, List<?> values, DataBufferFactory bufferFactory) {
 
-		return Flux.concat(values.stream().map(v ->
-				encodePart(boundary, name, v, bufferFactory)).collect(Collectors.toList()));
+		return Flux.fromIterable(values)
+				.concatMap(value -> encodePart(boundary, name, value, bufferFactory));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -265,11 +264,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 			outputHeaders.putAll(httpEntity.getHeaders());
 			body = httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
-
-			if (httpEntity instanceof MultipartBodyBuilder.PublisherEntity<?, ?>) {
-				MultipartBodyBuilder.PublisherEntity<?, ?> publisherEntity =
-						(MultipartBodyBuilder.PublisherEntity<?, ?>) httpEntity;
-				resolvableType = publisherEntity.getResolvableType();
+			if (httpEntity instanceof ResolvableTypeProvider) {
+				resolvableType = ((ResolvableTypeProvider) httpEntity).getResolvableType();
 			}
 		}
 		else {

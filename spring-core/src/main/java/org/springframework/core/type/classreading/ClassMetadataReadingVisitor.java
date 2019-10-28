@@ -42,6 +42,9 @@ import org.springframework.util.StringUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @since 2.5
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
 @Deprecated
 class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {

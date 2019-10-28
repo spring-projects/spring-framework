@@ -121,6 +121,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 		this.templateEngine = templateEngine;
 	}
 
+	@Override
 	public MarkupTemplateEngine getTemplateEngine() {
 		Assert.state(this.templateEngine != null, "No MarkupTemplateEngine set");
 		return this.templateEngine;

@@ -18,7 +18,7 @@ package org.springframework.web.filter.reactive;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.HttpHandler;
@@ -27,7 +27,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ServerWebExchangeContextFilter}.
@@ -47,7 +47,7 @@ public class ServerWebExchangeContextFilterTests {
 		httpHandler.handle(MockServerHttpRequest.get("/path").build(), new MockServerHttpResponse())
 				.block(Duration.ofSeconds(5));
 
-		assertNotNull(service.getExchange());
+		assertThat(service.getExchange()).isNotNull();
 	}
 
 

@@ -28,26 +28,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Nullable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.UsesSunMisc;
 import org.springframework.util.ReflectionUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link AnnotationTypeMappings} and {@link AnnotationTypeMapping}.
  *
  * @author Phillip Webb
  */
-public class AnnotationTypeMappingsTests {
+class AnnotationTypeMappingsTests {
 
 	@Test
-	public void forAnnotationTypeWhenNoMetaAnnotationsReturnsMappings() {
+	void forAnnotationTypeWhenNoMetaAnnotationsReturnsMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
 		assertThat(mappings.size()).isEqualTo(1);
 		assertThat(mappings.get(0).getAnnotationType()).isEqualTo(SimpleAnnotation.class);
@@ -56,13 +58,13 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationWhenHasSpringAnnotationReturnsFilteredMappings() {
+	void forAnnotationWhenHasSpringAnnotationReturnsFilteredMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithSpringLangAnnotation.class);
 		assertThat(mappings.size()).isEqualTo(1);
 	}
 
 	@Test
-	public void forAnnotationTypeWhenMetaAnnotationsReturnsMappings() {
+	void forAnnotationTypeWhenMetaAnnotationsReturnsMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(MetaAnnotated.class);
 		assertThat(mappings.size()).isEqualTo(6);
 		assertThat(getAll(mappings)).flatExtracting(
@@ -72,7 +74,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationTypeWhenHasRepeatingMetaAnnotationReturnsMapping() {
+	void forAnnotationTypeWhenHasRepeatingMetaAnnotationReturnsMapping() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class);
 		assertThat(mappings.size()).isEqualTo(3);
 		assertThat(getAll(mappings)).flatExtracting(
@@ -81,7 +83,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationTypeWhenSelfAnnotatedReturnsMapping() {
+	void forAnnotationTypeWhenSelfAnnotatedReturnsMapping() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SelfAnnotated.class);
 		assertThat(mappings.size()).isEqualTo(1);
 		assertThat(getAll(mappings)).flatExtracting(
@@ -89,7 +91,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationTypeWhenFormsLoopReturnsMapping() {
+	void forAnnotationTypeWhenFormsLoopReturnsMapping() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(LoopA.class);
 		assertThat(mappings.size()).isEqualTo(2);
 		assertThat(getAll(mappings)).flatExtracting(
@@ -97,51 +99,47 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationTypeWhenHasAliasForWithBothValueAndAttributeThrowsException() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForWithBothValueAndAttribute.class)).withMessage(
-								"In @AliasFor declared on attribute 'test' in annotation ["
-										+ AliasForWithBothValueAndAttribute.class.getName()
-										+ "], attribute 'attribute' and its alias 'value' are present with values of 'foo' and 'bar', but only one is permitted.");
+	void forAnnotationTypeWhenHasAliasForWithBothValueAndAttributeThrowsException() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForWithBothValueAndAttribute.class))
+			.withMessage("In @AliasFor declared on attribute 'test' in annotation ["
+								+ AliasForWithBothValueAndAttribute.class.getName()
+								+ "], attribute 'attribute' and its alias 'value' are present with values of 'foo' and 'bar', but only one is permitted.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForToSelfNonExistingAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForToSelfNonExistingAttribute.class)).withMessage(
-								"@AliasFor declaration on attribute 'test' in annotation ["
-										+ AliasForToSelfNonExistingAttribute.class.getName()
-										+ "] declares an alias for 'missing' which is not present.");
+	void forAnnotationTypeWhenAliasForToSelfNonExistingAttribute() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForToSelfNonExistingAttribute.class))
+			.withMessage("@AliasFor declaration on attribute 'test' in annotation ["
+								+ AliasForToSelfNonExistingAttribute.class.getName()
+								+ "] declares an alias for 'missing' which is not present.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForToOtherNonExistingAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForToOtherNonExistingAttribute.class)).withMessage(
-								"Attribute 'test' in annotation ["
-										+ AliasForToOtherNonExistingAttribute.class.getName()
-										+ "] is declared as an @AliasFor nonexistent "
-										+ "attribute 'missing' in annotation ["
-										+ AliasForToOtherNonExistingAttributeTarget.class.getName()
-										+ "].");
+	void forAnnotationTypeWhenAliasForToOtherNonExistingAttribute() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForToOtherNonExistingAttribute.class))
+			.withMessage("Attribute 'test' in annotation ["
+								+ AliasForToOtherNonExistingAttribute.class.getName()
+								+ "] is declared as an @AliasFor nonexistent "
+								+ "attribute 'missing' in annotation ["
+								+ AliasForToOtherNonExistingAttributeTarget.class.getName()
+								+ "].");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForToSelf() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForToSelf.class)).withMessage(
-								"@AliasFor declaration on attribute 'test' in annotation ["
-										+ AliasForToSelf.class.getName()
-										+ "] points to itself. Specify 'annotation' to point to "
-										+ "a same-named attribute on a meta-annotation.");
+	void forAnnotationTypeWhenAliasForToSelf() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForToSelf.class))
+			.withMessage("@AliasFor declaration on attribute 'test' in annotation ["
+								+ AliasForToSelf.class.getName()
+								+ "] points to itself. Specify 'annotation' to point to "
+								+ "a same-named attribute on a meta-annotation.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForWithArrayCompatibleReturnTypes() {
+	void forAnnotationTypeWhenAliasForWithArrayCompatibleReturnTypes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				AliasForWithArrayCompatibleReturnTypes.class);
 		AnnotationTypeMapping mapping = getMapping(mappings,
@@ -150,95 +148,88 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForWithIncompatibleReturnTypes() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForWithIncompatibleReturnTypes.class)).withMessage(
-								"Misconfigured aliases: attribute 'test' in annotation ["
-										+ AliasForWithIncompatibleReturnTypes.class.getName()
-										+ "] and attribute 'test' in annotation ["
-										+ AliasForWithIncompatibleReturnTypesTarget.class.getName()
-										+ "] must declare the same return type.");
+	void forAnnotationTypeWhenAliasForWithIncompatibleReturnTypes() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForWithIncompatibleReturnTypes.class))
+			.withMessage("Misconfigured aliases: attribute 'test' in annotation ["
+								+ AliasForWithIncompatibleReturnTypes.class.getName()
+								+ "] and attribute 'test' in annotation ["
+								+ AliasForWithIncompatibleReturnTypesTarget.class.getName()
+								+ "] must declare the same return type.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForToSelfNonAnnotatedAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForToSelfNonAnnotatedAttribute.class)).withMessage(
-								"Attribute 'other' in annotation ["
-										+ AliasForToSelfNonAnnotatedAttribute.class.getName()
-										+ "] must be declared as an @AliasFor 'test'.");
+	void forAnnotationTypeWhenAliasForToSelfNonAnnotatedAttribute() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForToSelfNonAnnotatedAttribute.class))
+			.withMessage("Attribute 'other' in annotation ["
+								+ AliasForToSelfNonAnnotatedAttribute.class.getName()
+								+ "] must be declared as an @AliasFor 'test'.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForToSelfAnnotatedToOtherAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForToSelfAnnotatedToOtherAttribute.class)).withMessage(
-								"Attribute 'b' in annotation ["
-										+ AliasForToSelfAnnotatedToOtherAttribute.class.getName()
-										+ "] must be declared as an @AliasFor 'a', not 'c'.");
+	void forAnnotationTypeWhenAliasForToSelfAnnotatedToOtherAttribute() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForToSelfAnnotatedToOtherAttribute.class))
+			.withMessage("Attribute 'b' in annotation ["
+								+ AliasForToSelfAnnotatedToOtherAttribute.class.getName()
+								+ "] must be declared as an @AliasFor 'a', not 'c'.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForNonMetaAnnotated() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForNonMetaAnnotated.class)).withMessage(
-								"@AliasFor declaration on attribute 'test' in annotation ["
-										+ AliasForNonMetaAnnotated.class.getName()
-										+ "] declares an alias for attribute 'test' in annotation ["
-										+ AliasForNonMetaAnnotatedTarget.class.getName()
-										+ "] which is not meta-present.");
+	void forAnnotationTypeWhenAliasForNonMetaAnnotated() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForNonMetaAnnotated.class))
+			.withMessage("@AliasFor declaration on attribute 'test' in annotation ["
+								+ AliasForNonMetaAnnotated.class.getName()
+								+ "] declares an alias for attribute 'test' in annotation ["
+								+ AliasForNonMetaAnnotatedTarget.class.getName()
+								+ "] which is not meta-present.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForSelfWithDifferentDefaults() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForSelfWithDifferentDefaults.class)).withMessage(
-								"Misconfigured aliases: attribute 'a' in annotation ["
-										+ AliasForSelfWithDifferentDefaults.class.getName()
-										+ "] and attribute 'b' in annotation ["
-										+ AliasForSelfWithDifferentDefaults.class.getName()
-										+ "] must declare the same default value.");
+	void forAnnotationTypeWhenAliasForSelfWithDifferentDefaults() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForSelfWithDifferentDefaults.class))
+			.withMessage("Misconfigured aliases: attribute 'a' in annotation ["
+								+ AliasForSelfWithDifferentDefaults.class.getName()
+								+ "] and attribute 'b' in annotation ["
+								+ AliasForSelfWithDifferentDefaults.class.getName()
+								+ "] must declare the same default value.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasForSelfWithMissingDefault() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasForSelfWithMissingDefault.class)).withMessage(
-								"Misconfigured aliases: attribute 'a' in annotation ["
-										+ AliasForSelfWithMissingDefault.class.getName()
-										+ "] and attribute 'b' in annotation ["
-										+ AliasForSelfWithMissingDefault.class.getName()
-										+ "] must declare default values.");
+	void forAnnotationTypeWhenAliasForSelfWithMissingDefault() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasForSelfWithMissingDefault.class))
+			.withMessage("Misconfigured aliases: attribute 'a' in annotation ["
+									+ AliasForSelfWithMissingDefault.class.getName()
+									+ "] and attribute 'b' in annotation ["
+									+ AliasForSelfWithMissingDefault.class.getName()
+									+ "] must declare default values.");
 	}
 
 	@Test
-	public void forAnnotationTypeWhenAliasWithExplicitMirrorAndDifferentDefaults() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(
-						AliasWithExplicitMirrorAndDifferentDefaults.class)).withMessage(
-								"Misconfigured aliases: attribute 'a' in annotation ["
-										+ AliasWithExplicitMirrorAndDifferentDefaults.class.getName()
-										+ "] and attribute 'c' in annotation ["
-										+ AliasWithExplicitMirrorAndDifferentDefaults.class.getName()
-										+ "] must declare the same default value.");
+	void forAnnotationTypeWhenAliasWithExplicitMirrorAndDifferentDefaults() {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				AnnotationTypeMappings.forAnnotationType(AliasWithExplicitMirrorAndDifferentDefaults.class))
+			.withMessage("Misconfigured aliases: attribute 'a' in annotation ["
+								+ AliasWithExplicitMirrorAndDifferentDefaults.class.getName()
+								+ "] and attribute 'c' in annotation ["
+								+ AliasWithExplicitMirrorAndDifferentDefaults.class.getName()
+								+ "] must declare the same default value.");
 	}
 
 	@Test
-	public void getDepthReturnsDepth() {
+	void getDistanceReturnsDistance() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);
-		assertThat(mappings.get(0).getDepth()).isEqualTo(0);
-		assertThat(mappings.get(1).getDepth()).isEqualTo(1);
+		assertThat(mappings.get(0).getDistance()).isEqualTo(0);
+		assertThat(mappings.get(1).getDistance()).isEqualTo(1);
 	}
 
 	@Test
-	public void getAnnotationTypeReturnsAnnotationType() {
+	void getAnnotationTypeReturnsAnnotationType() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);
 		assertThat(mappings.get(0).getAnnotationType()).isEqualTo(Mapped.class);
@@ -246,23 +237,23 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAnnotationTypeHierarchyReturnsTypeHierarchy() {
+	void getMetaTypeReturnsTypes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				ThreeDeepA.class);
 		AnnotationTypeMapping mappingC = mappings.get(2);
-		assertThat(mappingC.getAnnotationTypeHierarchy()).containsExactly(
+		assertThat(mappingC.getMetaTypes()).containsExactly(
 				ThreeDeepA.class, ThreeDeepB.class, ThreeDeepC.class);
 	}
 
 	@Test
-	public void getAnnotationWhenRootReturnsNull() {
+	void getAnnotationWhenRootReturnsNull() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);
 		assertThat(mappings.get(0).getAnnotation()).isNull();
 	}
 
 	@Test
-	public void getAnnotationWhenMetaAnnotationReturnsAnnotation() {
+	void getAnnotationWhenMetaAnnotationReturnsAnnotation() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);
 		assertThat(mappings.get(1).getAnnotation()).isEqualTo(
@@ -271,7 +262,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAttributesReturnsAttributes() {
+	void getAttributesReturnsAttributes() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class).get(0);
 		AttributeMethods attributes = mapping.getAttributes();
@@ -281,7 +272,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAliasMappingReturnsAttributes() throws Exception {
+	void getAliasMappingReturnsAttributes() throws Exception {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class).get(1);
 		assertThat(getAliasMapping(mapping, 0)).isEqualTo(
@@ -289,7 +280,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getConventionMappingReturnsAttributes() throws Exception {
+	void getConventionMappingReturnsAttributes() throws Exception {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class).get(1);
 		assertThat(getConventionMapping(mapping, 1)).isEqualTo(
@@ -297,7 +288,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getMirrorSetWhenAliasPairReturnsMirrors() {
+	void getMirrorSetWhenAliasPairReturnsMirrors() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
 		MirrorSets mirrorSets = mapping.getMirrorSets();
@@ -308,7 +299,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getMirrorSetWhenImplicitMirrorsReturnsMirrors() {
+	void getMirrorSetWhenImplicitMirrorsReturnsMirrors() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ImplicitMirrors.class).get(0);
 		MirrorSets mirrorSets = mapping.getMirrorSets();
@@ -319,7 +310,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getMirrorSetWhenThreeDeepReturnsMirrors() {
+	void getMirrorSetWhenThreeDeepReturnsMirrors() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				ThreeDeepA.class);
 		AnnotationTypeMapping mappingA = mappings.get(0);
@@ -336,7 +327,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAliasMappingWhenThreeDeepReturnsMappedAttributes() {
+	void getAliasMappingWhenThreeDeepReturnsMappedAttributes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				ThreeDeepA.class);
 		AnnotationTypeMapping mappingA = mappings.get(0);
@@ -354,7 +345,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAliasMappingsWhenHasDefinedAttributesReturnsMappedAttributes() {
+	void getAliasMappingsWhenHasDefinedAttributesReturnsMappedAttributes() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				DefinedAttributes.class).get(1);
 		assertThat(getAliasMapping(mapping, 0)).isNull();
@@ -362,7 +353,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void resolveMirrorsWhenAliasPairResolves() {
+	void resolveMirrorsWhenAliasPairResolves() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
 		Method[] resolvedA = resolveMirrorSets(mapping, WithAliasPairA.class,
@@ -376,7 +367,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void resolveMirrorsWhenHasSameValuesUsesFirst() {
+	void resolveMirrorsWhenHasSameValuesUsesFirst() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
 		Method[] resolved = resolveMirrorSets(mapping, WithSameValueAliasPair.class,
@@ -386,7 +377,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void resolveMirrorsWhenOnlyHasDefaultValuesResolvesNone() {
+	void resolveMirrorsWhenOnlyHasDefaultValuesResolvesNone() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
 		Method[] resolved = resolveMirrorSets(mapping, WithDefaultValueAliasPair.class,
@@ -396,20 +387,19 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void resolveMirrorsWhenHasDifferentValuesThrowsException() {
+	void resolveMirrorsWhenHasDifferentValuesThrowsException() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
-				() -> resolveMirrorSets(mapping, WithDifferentValueAliasPair.class,
-						AliasPair.class)).withMessage(
-								"Different @AliasFor mirror values for annotation ["
-										+ AliasPair.class.getName() + "] declared on "
-										+ WithDifferentValueAliasPair.class.getName()
-										+ ", attribute 'a' and its alias 'b' are declared with values of [test1] and [test2].");
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				resolveMirrorSets(mapping, WithDifferentValueAliasPair.class, AliasPair.class))
+			.withMessage("Different @AliasFor mirror values for annotation ["
+								+ AliasPair.class.getName() + "] declared on "
+								+ WithDifferentValueAliasPair.class.getName()
+								+ "; attribute 'a' and its alias 'b' are declared with values of [test1] and [test2].");
 	}
 
 	@Test
-	public void resolveMirrorsWhenHasWithMulipleRoutesToAliasReturnsMirrors() {
+	void resolveMirrorsWhenHasWithMulipleRoutesToAliasReturnsMirrors() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				MulipleRoutesToAliasA.class);
 		AnnotationTypeMapping mappingsA = getMapping(mappings,
@@ -426,7 +416,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAliasMappingWhenHasWithMulipleRoutesToAliasReturnsMappedAttributes() {
+	void getAliasMappingWhenHasWithMulipleRoutesToAliasReturnsMappedAttributes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				MulipleRoutesToAliasA.class);
 		AnnotationTypeMapping mappingsA = getMapping(mappings,
@@ -444,7 +434,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getConventionMappingWhenConventionToExplicitAliasesReturnsMappedAttributes() {
+	void getConventionMappingWhenConventionToExplicitAliasesReturnsMappedAttributes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				ConventionToExplicitAliases.class);
 		AnnotationTypeMapping mapping = getMapping(mappings,
@@ -454,7 +444,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenValueAndDefaultAreNullReturnsTrue() {
+	void isEquivalentToDefaultValueWhenValueAndDefaultAreNullReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ClassValue.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0, null,
@@ -462,7 +452,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenValueAndDefaultMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenValueAndDefaultMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ClassValueWithDefault.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0, InputStream.class,
@@ -470,7 +460,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenClassAndStringNamesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenClassAndStringNamesMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ClassValueWithDefault.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0, "java.io.InputStream",
@@ -478,7 +468,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenClassArrayAndStringArrayNamesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenClassArrayAndStringArrayNamesMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ClassArrayValueWithDefault.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0,
@@ -487,7 +477,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				NestedValue.class).get(0);
 		Map<String, Object> value = Collections.singletonMap("value",
@@ -497,7 +487,7 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void isEquivalentToDefaultValueWhenNotMatchingReturnsFalse() {
+	void isEquivalentToDefaultValueWhenNotMatchingReturnsFalse() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				ClassValueWithDefault.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0, OutputStream.class,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation.spr10546;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -25,8 +25,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.spr10546.scanpackage.AEnclosingConfig;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Rob Winch
@@ -34,7 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class Spr10546Tests {
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (context != null) {
 			context.close();
@@ -64,7 +64,7 @@ public class Spr10546Tests {
 		context = ctx;
 		ctx.scan(AEnclosingConfig.class.getPackage().getName());
 		ctx.refresh();
-		assertThat(context.getBean("myBean",String.class), equalTo("myBean"));
+		assertThat(context.getBean("myBean",String.class)).isEqualTo("myBean");
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class Spr10546Tests {
 
 	private void assertLoadsMyBean(Class<?>... annotatedClasses) {
 		context = new AnnotationConfigApplicationContext(annotatedClasses);
-		assertThat(context.getBean("myBean",String.class), equalTo("myBean"));
+		assertThat(context.getBean("myBean",String.class)).isEqualTo("myBean");
 	}
 
 }

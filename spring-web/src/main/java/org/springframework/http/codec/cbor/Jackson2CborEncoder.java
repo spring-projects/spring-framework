@@ -44,7 +44,7 @@ import org.springframework.util.MimeType;
 public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 
 	public Jackson2CborEncoder() {
-		this(Jackson2ObjectMapperBuilder.cbor().build(), new MediaType("application", "cbor"));
+		this(Jackson2ObjectMapperBuilder.cbor().build(), MediaType.APPLICATION_CBOR);
 	}
 
 	public Jackson2CborEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
@@ -52,8 +52,10 @@ public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 		Assert.isAssignable(CBORFactory.class, mapper.getFactory().getClass());
 	}
 
+
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		throw new UnsupportedOperationException("Does not support stream encoding yet");
 	}
+
 }

@@ -162,6 +162,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	// Message sending
 
+	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.state(!isClosed(), "Cannot send a message when session is closed");
 		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only");

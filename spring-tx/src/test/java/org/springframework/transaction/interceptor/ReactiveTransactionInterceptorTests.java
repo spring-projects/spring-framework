@@ -19,7 +19,7 @@ package org.springframework.transaction.interceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.transaction.ReactiveTransactionManager;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link TransactionInterceptor} with reactive methods.

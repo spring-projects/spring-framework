@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -59,9 +60,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -77,7 +78,7 @@ public class MessageReaderArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(new TestBeanValidator());
@@ -119,7 +120,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> mono = resolveValue(param, body);
 
-		assertEquals(new TestBean("FOOFOO", "BARBAR"), mono.block());
+		assertThat(mono.block()).isEqualTo(new TestBean("FOOFOO", "BARBAR"));
 	}
 
 	@Test
@@ -129,8 +130,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				flux.collectList().block());
+		assertThat(flux.collectList().block()).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Single<TestBean> single = resolveValue(param, body);
 
-		assertEquals(new TestBean("f1", "b1"), single.toBlocking().value());
+		assertThat(single.toBlocking().value()).isEqualTo(new TestBean("f1", "b1"));
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		io.reactivex.Single<TestBean> single = resolveValue(param, body);
 
-		assertEquals(new TestBean("f1", "b1"), single.blockingGet());
+		assertThat(single.blockingGet()).isEqualTo(new TestBean("f1", "b1"));
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Maybe<TestBean> maybe = resolveValue(param, body);
 
-		assertEquals(new TestBean("f1", "b1"), maybe.blockingGet());
+		assertThat(maybe.blockingGet()).isEqualTo(new TestBean("f1", "b1"));
 	}
 
 	@Test
@@ -170,8 +170,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Observable<?> observable = resolveValue(param, body);
 
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				observable.toList().toBlocking().first());
+		assertThat(observable.toList().toBlocking().first()).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -181,8 +180,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		io.reactivex.Observable<?> observable = resolveValue(param, body);
 
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				observable.toList().blockingGet());
+		assertThat(observable.toList().blockingGet()).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -192,8 +190,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Flowable<?> flowable = resolveValue(param, body);
 
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				flowable.toList().blockingGet());
+		assertThat(flowable.toList().blockingGet()).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -203,7 +200,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		CompletableFuture<?> future = resolveValue(param, body);
 
-		assertEquals(new TestBean("f1", "b1"), future.get());
+		assertThat(future.get()).isEqualTo(new TestBean("f1", "b1"));
 	}
 
 	@Test
@@ -212,7 +209,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(TestBean.class);
 		TestBean value = resolveValue(param, body);
 
-		assertEquals(new TestBean("f1", "b1"), value);
+		assertThat(value).isEqualTo(new TestBean("f1", "b1"));
 	}
 
 	@Test
@@ -225,7 +222,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		Map<String, String> actual = resolveValue(param, body);
 
-		assertEquals(map, actual);
+		assertThat(actual).isEqualTo(map);
 	}
 
 	@Test
@@ -235,7 +232,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(type);
 		List<?> list = resolveValue(param, body);
 
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), list);
+		assertThat(list).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -246,7 +243,7 @@ public class MessageReaderArgumentResolverTests {
 		Mono<?> mono = resolveValue(param, body);
 
 		List<?> list = (List<?>) mono.block(Duration.ofSeconds(5));
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), list);
+		assertThat(list).isEqualTo(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")));
 	}
 
 	@Test
@@ -255,11 +252,10 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(TestBean[].class);
 		TestBean[] value = resolveValue(param, body);
 
-		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")}, value);
+		assertThat(value).isEqualTo(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")});
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void validateMonoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
@@ -270,7 +266,6 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void validateFluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
@@ -290,7 +285,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 		SimpleBean simpleBean = resolveValue(methodParam, "{\"name\" : \"Jad\"}");
 
-		assertEquals("Jad", simpleBean.getName());
+		assertThat(simpleBean.getName()).isEqualTo("Jad");
 	}
 
 
@@ -301,9 +296,8 @@ public class MessageReaderArgumentResolverTests {
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertNotNull(value);
-		assertTrue("Unexpected return value type: " + value,
-				param.getParameterType().isAssignableFrom(value.getClass()));
+		assertThat(value).isNotNull();
+		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
 
 		return (T) value;
 	}

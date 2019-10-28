@@ -40,7 +40,7 @@ and the conversations that result from it provide a continuous flow of ideas.
 
 Before you create a ticket, please take the time to [research first](#discuss).
 
-If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverview. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
+If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverflow. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
 
 When ready create a ticket in the [GitHub issue tracker](https://github.com/spring-projects/spring-framework/issues).
 
@@ -63,11 +63,11 @@ You can contribute a source code change by submitting a pull request.
 [Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will also be reminded
 automatically when you submit a pull request.
 
-1. For all but the most trivial of contributions, please [create a ticket](#create-a-ticket).
-The purpose of the ticket is to understand and discuss the underlying issue or feature.
-We use the GitHub issue tracker as the preferred place of record for conversations and
-conclusions. In that sense discussions directly under a PR are more implementation detail
-oriented and transient in nature.
+1. Should you create a ticket first? The answer is no. Just create the pull request and use
+the description to provide context and motivation, as you would for an issue. If you want
+to start a discussion first or have already created an issue, once a pull request is created,
+we will close the issue as superseded by the pull request, and the discussion of the issue
+will continue under the pull request.
 
 1. Always check out the `master` branch and submit pull requests against it
 (for target version see [settings.gradle](settings.gradle)).
@@ -96,6 +96,13 @@ your changes remain intact. You may also be asked to rework the submission.
 If asked to make corrections, simply push the changes against the same branch, and your
 pull request will be updated. In other words, you do not need to create a new pull request
 when asked to make changes.
+
+#### Participate in Reviews
+
+Helping to review pull requests is another great way to contribute. Your feedback
+can help to shape the implementation of new features. When reviewing pull requests,
+however, please refrain from approving or rejecting a PR unless you are a core
+committer for the Spring Framework.
 
 ### Build from Source
 

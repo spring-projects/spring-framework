@@ -23,10 +23,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -40,7 +38,9 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test fixture for {@link PayloadMethodArgumentResolver}.
@@ -68,11 +68,7 @@ public class PayloadMethodArgumentResolverTests {
 	private MethodParameter paramValidated;
 
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new PayloadMethodArgumentResolver(new StringMessageConverter(), testValidator());
 
@@ -92,14 +88,14 @@ public class PayloadMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.paramAnnotated));
-		assertTrue(this.resolver.supportsParameter(this.paramNotAnnotated));
+		assertThat(this.resolver.supportsParameter(this.paramAnnotated)).isTrue();
+		assertThat(this.resolver.supportsParameter(this.paramNotAnnotated)).isTrue();
 
 		PayloadMethodArgumentResolver strictResolver = new PayloadMethodArgumentResolver(
 				new StringMessageConverter(), testValidator(), false);
 
-		assertTrue(strictResolver.supportsParameter(this.paramAnnotated));
-		assertFalse(strictResolver.supportsParameter(this.paramNotAnnotated));
+		assertThat(strictResolver.supportsParameter(this.paramAnnotated)).isTrue();
+		assertThat(strictResolver.supportsParameter(this.paramNotAnnotated)).isFalse();
 	}
 
 	@Test
@@ -107,52 +103,52 @@ public class PayloadMethodArgumentResolverTests {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		Object actual = this.resolver.resolveArgument(paramAnnotated, message);
 
-		assertEquals("ABC", actual);
+		assertThat(actual).isEqualTo("ABC");
 	}
 
 	@Test
 	public void resolveRequiredEmpty() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("").build();
-
-		thrown.expect(MethodArgumentNotValidException.class);  // required but empty
-		this.resolver.resolveArgument(paramAnnotated, message);
+		 // required but empty
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+		this.resolver.resolveArgument(paramAnnotated, message));
 	}
 
 	@Test
 	public void resolveRequiredEmptyNonAnnotatedParameter() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("").build();
-
-		thrown.expect(MethodArgumentNotValidException.class);  // required but empty
-		this.resolver.resolveArgument(this.paramNotAnnotated, message);
+		// required but empty
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.paramNotAnnotated, message));
 	}
 
 	@Test
 	public void resolveNotRequired() throws Exception {
 		Message<?> emptyByteArrayMessage = MessageBuilder.withPayload(new byte[0]).build();
-		assertNull(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage));
+		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage)).isNull();
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload("").build();
-		assertNull(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyStringMessage));
+		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyStringMessage)).isNull();
 
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
-		assertEquals("ABC", this.resolver.resolveArgument(this.paramAnnotatedNotRequired, notEmptyMessage));
+		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, notEmptyMessage)).isEqualTo("ABC");
 	}
 
 	@Test
 	public void resolveNonConvertibleParam() throws Exception {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload(123).build();
 
-		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("Cannot convert");
-		this.resolver.resolveArgument(this.paramAnnotatedRequired, notEmptyMessage);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.paramAnnotatedRequired, notEmptyMessage))
+			.withMessageContaining("Cannot convert");
 	}
 
 	@Test
 	public void resolveSpelExpressionNotSupported() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 
-		thrown.expect(IllegalStateException.class);
-		this.resolver.resolveArgument(paramWithSpelExpression, message);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.resolveArgument(paramWithSpelExpression, message));
 	}
 
 	@Test
@@ -166,26 +162,26 @@ public class PayloadMethodArgumentResolverTests {
 		// See testValidator()
 		Message<?> message = MessageBuilder.withPayload("invalidValue".getBytes()).build();
 
-		thrown.expect(MethodArgumentNotValidException.class);
-		this.resolver.resolveArgument(this.paramValidated, message);
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.paramValidated, message));
 	}
 
 	@Test
 	public void resolveFailValidationNoConversionNecessary() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("invalidValue").build();
 
-		thrown.expect(MethodArgumentNotValidException.class);
-		this.resolver.resolveArgument(this.paramValidated, message);
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.paramValidated, message));
 	}
 
 	@Test
 	public void resolveNonAnnotatedParameter() throws Exception {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
-		assertEquals("ABC", this.resolver.resolveArgument(this.paramNotAnnotated, notEmptyMessage));
+		assertThat(this.resolver.resolveArgument(this.paramNotAnnotated, notEmptyMessage)).isEqualTo("ABC");
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload("").build();
-		thrown.expect(MethodArgumentNotValidException.class);
-		this.resolver.resolveArgument(this.paramValidated, emptyStringMessage);
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.paramValidated, emptyStringMessage));
 	}
 
 	@Test
@@ -193,9 +189,8 @@ public class PayloadMethodArgumentResolverTests {
 		// See testValidator()
 		Message<?> message = MessageBuilder.withPayload("invalidValue".getBytes()).build();
 
-		thrown.expect(MethodArgumentNotValidException.class);
-		thrown.expectMessage("invalid value");
-		assertEquals("invalidValue", this.resolver.resolveArgument(this.paramValidatedNotAnnotated, message));
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() -> assertThat(this.resolver.resolveArgument(this.paramValidatedNotAnnotated, message)).isEqualTo("invalidValue"))
+			.withMessageContaining("invalid value");
 	}
 
 

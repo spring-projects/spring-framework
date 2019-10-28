@@ -21,22 +21,23 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the {@code DataBufferFactory} interface that keep track of memory leaks.
- * Useful for unit tests that handle data buffers. Simply inherit from
- * {@link AbstractLeakCheckingTestCase} or call {@link #checkForLeaks()} in
- * a JUnit {@link After} method yourself, and any buffers have not been released will result in an
- * {@link AssertionError}.
+ * Implementation of the {@code DataBufferFactory} interface that keeps track of
+ * memory leaks.
+ * <p>Useful for unit tests that handle data buffers. Simply inherit from
+ * {@link AbstractLeakCheckingTests} or call {@link #checkForLeaks()} in
+ * a JUnit <em>after</em> method yourself, and any buffers that have not been
+ * released will result in an {@link AssertionError}.
  *
  * @author Arjen Poutsma
  * @see LeakAwareDataBufferFactory
@@ -49,6 +50,8 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	private final DataBufferFactory delegate;
 
 	private final List<LeakAwareDataBuffer> created = new ArrayList<>();
+
+	private final AtomicBoolean trackCreated = new AtomicBoolean(true);
 
 
 	/**
@@ -71,10 +74,11 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	/**
 	 * Checks whether all of the data buffers allocated by this factory have also been released.
-	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit {@link After}
+	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit <em>after</em>
 	 * method.
 	 */
 	public void checkForLeaks() {
+		this.trackCreated.set(false);
 		Instant start = Instant.now();
 		while (true) {
 			if (this.created.stream().noneMatch(LeakAwareDataBuffer::isAllocated)) {
@@ -112,7 +116,9 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	@NotNull
 	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
-		this.created.add(dataBuffer);
+		if (this.trackCreated.get()) {
+			this.created.add(dataBuffer);
+		}
 		return dataBuffer;
 	}
 
@@ -130,7 +136,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
 		// Remove LeakAwareDataBuffer wrapper so delegate can find native buffers
 		dataBuffers = dataBuffers.stream()
-				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).getDelegate() : o)
+				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).dataBuffer() : o)
 				.collect(Collectors.toList());
 		return new LeakAwareDataBuffer(this.delegate.join(dataBuffers), this);
 	}

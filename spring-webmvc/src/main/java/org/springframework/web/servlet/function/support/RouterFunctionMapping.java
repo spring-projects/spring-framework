@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.NotNull;
@@ -40,10 +41,11 @@ import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 
 /**
- * {@code HandlerMapping} implementation that supports {@link RouterFunction}s.
+ * {@code HandlerMapping} implementation that supports {@link RouterFunction RouterFunctions}.
+ *
  * <p>If no {@link RouterFunction} is provided at
- * {@linkplain #RouterFunctionMapping(RouterFunction) construction time}, this mapping will detect
- * all router functions in the application context, and consult them in
+ * {@linkplain #RouterFunctionMapping(RouterFunction) construction time}, this mapping
+ * will detect all router functions in the application context, and consult them in
  * {@linkplain org.springframework.core.annotation.Order order}.
  *
  * @author Arjen Poutsma
@@ -62,8 +64,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	/**
 	 * Create an empty {@code RouterFunctionMapping}.
-	 * <p>If this constructor is used, this mapping will detect all {@link RouterFunction} instances
-	 * available in the application context.
+	 * <p>If this constructor is used, this mapping will detect all
+	 * {@link RouterFunction} instances available in the application context.
 	 */
 	public RouterFunctionMapping() {
 	}
@@ -127,7 +129,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * Detect a all {@linkplain RouterFunction router functions} in the
 	 * current application context.
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initRouterFunction() {
 		ApplicationContext applicationContext = obtainApplicationContext();
 		Map<String, RouterFunction> beans =
@@ -149,12 +151,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 */
 	private void initMessageConverters() {
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(4);
-
 		messageConverters.add(new ByteArrayHttpMessageConverter());
-
-		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
-		messageConverters.add(stringHttpMessageConverter);
+		messageConverters.add(new StringHttpMessageConverter());
 
 		try {
 			messageConverters.add(new SourceHttpMessageConverter<>());

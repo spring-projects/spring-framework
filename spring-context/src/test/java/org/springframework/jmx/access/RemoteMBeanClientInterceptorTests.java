@@ -18,6 +18,7 @@ package org.springframework.jmx.access;
 
 import java.net.BindException;
 import java.net.MalformedURLException;
+
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -25,7 +26,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.util.SocketUtils;
 
@@ -75,7 +76,7 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		return this.connector.getMBeanServerConnection();
 	}
 
-	@After
+	@AfterEach
 	@Override
 	public void tearDown() throws Exception {
 		if (this.connector != null) {

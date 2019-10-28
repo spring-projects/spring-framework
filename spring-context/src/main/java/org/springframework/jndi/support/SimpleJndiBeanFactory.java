@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
@@ -234,6 +235,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	@Override
 	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+		return getType(name, true);
+	}
+
+	@Override
+	@Nullable
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
 		try {
 			return doGetType(name);
 		}

@@ -321,6 +321,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 
 	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 * @param exchange the current exchange
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(MEDIA_TYPES_ATTRIBUTE);
+	}
+
+
+	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header.
 	 */
 	class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {

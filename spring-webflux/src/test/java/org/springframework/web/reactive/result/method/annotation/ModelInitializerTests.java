@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import rx.Single;
 
@@ -53,8 +53,9 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ModelInitializer}.
@@ -68,7 +69,7 @@ public class ModelInitializerTests {
 	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
@@ -95,7 +96,7 @@ public class ModelInitializerTests {
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
 
 		WebExchangeDataBinder binder = context.createDataBinder(this.exchange, "name");
-		assertEquals(Collections.singletonList(validator), binder.getValidators());
+		assertThat(binder.getValidators()).isEqualTo(Collections.singletonList(validator));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,22 +110,22 @@ public class ModelInitializerTests {
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
 
 		Map<String, Object> model = context.getModel().asMap();
-		assertEquals(5, model.size());
+		assertThat(model.size()).isEqualTo(5);
 
 		Object value = model.get("bean");
-		assertEquals("Bean", ((TestBean) value).getName());
+		assertThat(((TestBean) value).getName()).isEqualTo("Bean");
 
 		value = model.get("monoBean");
-		assertEquals("Mono Bean", ((Mono<TestBean>) value).block(Duration.ofMillis(5000)).getName());
+		assertThat(((Mono<TestBean>) value).block(Duration.ofMillis(5000)).getName()).isEqualTo("Mono Bean");
 
 		value = model.get("singleBean");
-		assertEquals("Single Bean", ((Single<TestBean>) value).toBlocking().value().getName());
+		assertThat(((Single<TestBean>) value).toBlocking().value().getName()).isEqualTo("Single Bean");
 
 		value = model.get("voidMethodBean");
-		assertEquals("Void Method Bean", ((TestBean) value).getName());
+		assertThat(((TestBean) value).getName()).isEqualTo("Void Method Bean");
 
 		value = model.get("voidMonoMethodBean");
-		assertEquals("Void Mono Method Bean", ((TestBean) value).getName());
+		assertThat(((TestBean) value).getName()).isEqualTo("Void Mono Method Bean");
 	}
 
 	@Test
@@ -137,18 +138,18 @@ public class ModelInitializerTests {
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
 
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
-		assertNotNull(session);
-		assertEquals(0, session.getAttributes().size());
+		assertThat(session).isNotNull();
+		assertThat(session.getAttributes().size()).isEqualTo(0);
 
 		context.saveModel();
-		assertEquals(1, session.getAttributes().size());
-		assertEquals("Bean", ((TestBean) session.getRequiredAttribute("bean")).getName());
+		assertThat(session.getAttributes().size()).isEqualTo(1);
+		assertThat(((TestBean) session.getRequiredAttribute("bean")).getName()).isEqualTo("Bean");
 	}
 
 	@Test
 	public void retrieveModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
-		assertNotNull(session);
+		assertThat(session).isNotNull();
 
 		TestBean testBean = new TestBean("Session Bean");
 		session.getAttributes().put("bean", testBean);
@@ -161,8 +162,8 @@ public class ModelInitializerTests {
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
 
 		context.saveModel();
-		assertEquals(1, session.getAttributes().size());
-		assertEquals("Session Bean", ((TestBean) session.getRequiredAttribute("bean")).getName());
+		assertThat(session.getAttributes().size()).isEqualTo(1);
+		assertThat(((TestBean) session.getRequiredAttribute("bean")).getName()).isEqualTo("Session Bean");
 	}
 
 	@Test
@@ -172,19 +173,15 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(PostMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		try {
-			this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			assertEquals("Required attribute 'missing-bean' is missing.", ex.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000)))
+			.withMessage("Required attribute 'missing-bean' is missing.");
 	}
 
 	@Test
 	public void clearModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
-		assertNotNull(session);
+		assertThat(session).isNotNull();
 
 		TestBean testBean = new TestBean("Session Bean");
 		session.getAttributes().put("bean", testBean);
@@ -199,7 +196,7 @@ public class ModelInitializerTests {
 		context.getSessionStatus().setComplete();
 		context.saveModel();
 
-		assertEquals(0, session.getAttributes().size());
+		assertThat(session.getAttributes().size()).isEqualTo(0);
 	}
 
 

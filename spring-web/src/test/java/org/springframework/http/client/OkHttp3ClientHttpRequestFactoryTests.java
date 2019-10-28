@@ -16,14 +16,14 @@
 
 package org.springframework.http.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
 /**
  * @author Roy Clarkson
  */
-public class OkHttp3ClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class OkHttp3ClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {

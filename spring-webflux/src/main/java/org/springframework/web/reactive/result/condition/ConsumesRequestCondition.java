@@ -132,6 +132,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	/**
 	 * Whether the condition has any media type expressions.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return this.expressions.isEmpty();
 	}

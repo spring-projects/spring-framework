@@ -173,6 +173,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public void setProperty(String property, Object newValue) {
 		if (PARENT.equals(property)) {
 			setParent(newValue);

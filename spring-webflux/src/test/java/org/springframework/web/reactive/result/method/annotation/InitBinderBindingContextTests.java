@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -37,7 +37,8 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link InitBinderBindingContext}.
@@ -57,8 +58,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("id", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("id");
 	}
 
 	@Test
@@ -70,7 +71,7 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertSame(conversionService, dataBinder.getConversionService());
+		assertThat(dataBinder.getConversionService()).isSameAs(conversionService);
 	}
 
 	@Test
@@ -79,8 +80,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "foo");
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("id", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("id");
 	}
 
 	@Test
@@ -89,7 +90,7 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "invalidName");
 
-		assertNull(dataBinder.getDisallowedFields());
+		assertThat(dataBinder.getDisallowedFields()).isNull();
 	}
 
 	@Test
@@ -98,14 +99,15 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertNull(dataBinder.getDisallowedFields());
+		assertThat(dataBinder.getDisallowedFields()).isNull();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void returnValueNotExpected() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
-		context.createDataBinder(exchange, null, "invalidName");
+		assertThatIllegalStateException().isThrownBy(() ->
+				context.createDataBinder(exchange, null, "invalidName"));
 	}
 
 	@Test
@@ -118,8 +120,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "foo");
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("requestParam-22");
 	}
 
 

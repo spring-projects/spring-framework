@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemov
 			CacheOperationInvocationContext<CacheRemoveOperation> context, CacheOperationInvoker invoker) {
 
 		CacheRemoveOperation operation = context.getOperation();
-
 		boolean earlyRemove = operation.isEarlyRemove();
 		if (earlyRemove) {
 			removeValue(context);
@@ -68,10 +67,10 @@ class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemov
 		Object key = generateKey(context);
 		Cache cache = resolveCache(context);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Invalidating key [" + key + "] on cache '" + cache.getName()
-					+ "' for operation " + context.getOperation());
+			logger.trace("Invalidating key [" + key + "] on cache '" + cache.getName() +
+					"' for operation " + context.getOperation());
 		}
-		doEvict(cache, key);
+		doEvict(cache, key, context.getOperation().isEarlyRemove());
 	}
 
 }

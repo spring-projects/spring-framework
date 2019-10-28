@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package org.springframework.cache;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Stephane Nicoll
  */
 public abstract class AbstractValueAdaptingCacheTests<T extends AbstractValueAdaptingCache>
 		extends AbstractCacheTests<T>  {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	protected final static String CACHE_NAME_NO_NULL = "testCacheNoNull";
 
@@ -39,12 +36,10 @@ public abstract class AbstractValueAdaptingCacheTests<T extends AbstractValueAda
 	public void testCachePutNullValueAllowNullFalse() {
 		T cache = getCache(false);
 		String key = createRandomKey();
-
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage(CACHE_NAME_NO_NULL);
-		this.thrown.expectMessage(
-				"is configured to not allow null values but null was provided");
-		cache.put(key, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				cache.put(key, null))
+			.withMessageContaining(CACHE_NAME_NO_NULL)
+			.withMessageContaining("is configured to not allow null values but null was provided");
 	}
 
 }

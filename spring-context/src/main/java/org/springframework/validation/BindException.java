@@ -299,7 +299,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || this.bindingResult.equals(other));
 	}
 

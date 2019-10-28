@@ -36,7 +36,7 @@ http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announc
 [.small]#<<web.adoc#mvc-view-freemarker, Same as in Spring MVC>>#
 
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
-kind of text output from HTML to email and others. The Spring Framework has a built-in
+kind of text output from HTML to email and others. The Spring Framework has built-in
 integration for using Spring WebFlux with FreeMarker templates.
 
 
@@ -47,8 +47,8 @@ integration for using Spring WebFlux with FreeMarker templates.
 
 The following example shows how to configure FreeMarker as a view technology:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -56,7 +56,7 @@ The following example shows how to configure FreeMarker as a view technology:
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.freemarker();
+			registry.freeMarker();
 		}
 
 		// Configure FreeMarker...
@@ -64,15 +64,34 @@ The following example shows how to configure FreeMarker as a view technology:
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfigurer() {
 			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("classpath:/templates");
+			configurer.setTemplateLoaderPath("classpath:/templates/freemarker");
 			return configurer;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+		}
+
+		// Configure FreeMarker...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates/freemarker")
 		}
 	}
 ----
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`,
-shown in the preceding example. Given the preceding configuration, if your controller returns the view name,
-`welcome`, the resolver looks for the
+shown in the preceding example. Given the preceding configuration, if your controller
+returns the view name, `welcome`, the resolver looks for the
 `classpath:/templates/freemarker/welcome.ftl` template.
 
 
@@ -82,13 +101,13 @@ shown in the preceding example. Given the preceding configuration, if your contr
 [.small]#<<web.adoc#mvc-views-freemarker, Same as in Spring MVC>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
-`Configuration` object (managed by Spring) by setting the appropriate bean properties on
-the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
-`java.util.Properties` object, and the `freemarkerVariables` property requires a
+`Configuration` object (which is managed by Spring) by setting the appropriate bean
+properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires
+a `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -108,10 +127,67 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		// ...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates")
+			setFreemarkerVariables(mapOf("xml_escape" to XmlEscape()))
+		}
+	}
+----
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
 
+
+
+[[webflux-view-freemarker-forms]]
+=== Form Handling
+[.small]#<<web.adoc#mvc-view-freemarker-forms, Same as in Spring MVC>>#
+
+Spring provides a tag library for use in JSPs that contains, among others, a
+`<spring:bind/>` element. This element primarily lets forms display values from
+form-backing objects and show the results of failed validations from a `Validator` in the
+web or business tier. Spring also has support for the same functionality in FreeMarker,
+with additional convenience macros for generating form input elements themselves.
+
+
+[[webflux-view-bind-macros]]
+==== The Bind Macros
+[.small]#<<web.adoc#mvc-view-bind-macros, Same as in Spring MVC>>#
+
+A standard set of macros are maintained within the `spring-webflux.jar` file for
+FreeMarker, so they are always available to a suitably configured application.
+
+Some of the macros defined in the Spring templating libraries are considered internal
+(private), but no such scoping exists in the macro definitions, making all macros visible
+to calling code and user templates. The following sections concentrate only on the macros
+you need to directly call from within your templates. If you wish to view the macro code
+directly, the file is called `spring.ftl` and is in the
+`org.springframework.web.reactive.result.view.freemarker` package.
+
+For additional details on binding support, see <<web.adoc#mvc-view-simple-binding, Simple
+Binding>> for Spring MVC.
+
+
+[[webflux-views-form-macros]]
+==== Form Macros
+
+For details on Spring's form macro support for FreeMarker templates, consult the following
+sections of the Spring MVC documentation.
+
+* <<web.adoc#mvc-views-form-macros, Input Macros>>
+* <<web.adoc#mvc-views-form-macros-input, Input Fields>>
+* <<web.adoc#mvc-views-form-macros-select, Selection Fields>>
+* <<web.adoc#mvc-views-form-macros-html-escaping, HTML Escaping>>
 
 
 
@@ -169,8 +245,8 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses Mustache templates and the Nashorn JavaScript engine:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -189,6 +265,26 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 			configurer.setRenderObject("Mustache");
 			configurer.setRenderFunction("render");
 			return configurer;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.scriptTemplate()
+		}
+
+		@Bean
+		fun configurer() = ScriptTemplateConfigurer().apply {
+			engineName = "nashorn"
+			setScripts("mustache.js")
+			renderObject = "Mustache"
+			renderFunction = "render"
 		}
 	}
 ----
@@ -211,11 +307,11 @@ https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
 browser facilities not available in the server-side script engine.
 The following example shows how to set a custom render function:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
-	@EnableWebMvc
+	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -234,17 +330,37 @@ The following example shows how to set a custom render function:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.scriptTemplate()
+		}
+
+		@Bean
+		fun configurer() = ScriptTemplateConfigurer().apply {
+			engineName = "nashorn"
+			setScripts("polyfill.js", "handlebars.js", "render.js")
+			renderFunction = "render"
+			isSharedEngine = false
+		}
+	}
+----
 
 NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or
-React running on Nashorn. In that case, Java 8u60 or greater is required, due
-to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
+React running on Nashorn. In that case, Java SE 8 update 60 is required, due to
+https://bugs.openjdk.java.net/browse/JDK-8076099[this bug], but it is generally
+recommended to use a recent Java SE patch release in any case.
 
 `polyfill.js` defines only the `window` object needed by Handlebars to run properly,
 as the following snippet shows:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	var window = {};
 ----
@@ -255,8 +371,7 @@ This can be done on the script side, as well as any customization you need (mana
 template engine configuration for example).
 The following example shows how compile a template:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	function render(template, model) {
 		var compiledTemplate = Handlebars.compile(template);

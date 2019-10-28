@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -24,9 +24,7 @@ import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Chris Beams
@@ -42,7 +40,7 @@ public class AnnotationConfigWebApplicationContextTests {
 		ctx.refresh();
 
 		TestBean bean = ctx.getBean(TestBean.class);
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 	@Test
@@ -53,7 +51,7 @@ public class AnnotationConfigWebApplicationContextTests {
 		ctx.refresh();
 
 		TestBean bean = ctx.getBean(TestBean.class);
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 	@Test
@@ -64,7 +62,7 @@ public class AnnotationConfigWebApplicationContextTests {
 		ctx.refresh();
 
 		TestBean bean = ctx.getBean(TestBean.class);
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 	@Test
@@ -80,7 +78,7 @@ public class AnnotationConfigWebApplicationContextTests {
 		});
 		ctx.setConfigLocation(Config.class.getName());
 		ctx.refresh();
-		assertThat(ctx.containsBean("custom-myConfig"), is(true));
+		assertThat(ctx.containsBean("custom-myConfig")).isTrue();
 	}
 
 

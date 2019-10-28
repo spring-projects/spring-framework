@@ -583,36 +583,43 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given type represents a "simple" property:
-	 * a primitive, a String or other CharSequence, a Number, a Date,
-	 * a Temporal, a URI, a URL, a Locale, a Class, or a corresponding array.
+	 * Check if the given type represents a "simple" property: a simple value
+	 * type or an array of simple value types.
+	 * <p>See {@link #isSimpleValueType(Class)} for the definition of <em>simple
+	 * value type</em>.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
-	 * @param clazz the type to check
+	 * @param type the type to check
 	 * @return whether the given type represents a "simple" property
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
+	 * @see #isSimpleValueType(Class)
 	 */
-	public static boolean isSimpleProperty(Class<?> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		return isSimpleValueType(clazz) || (clazz.isArray() && isSimpleValueType(clazz.getComponentType()));
+	public static boolean isSimpleProperty(Class<?> type) {
+		Assert.notNull(type, "'type' must not be null");
+		return isSimpleValueType(type) || (type.isArray() && isSimpleValueType(type.getComponentType()));
 	}
 
 	/**
-	 * Check if the given type represents a "simple" value type:
-	 * a primitive, an enum, a String or other CharSequence, a Number, a Date,
-	 * a Temporal, a URI, a URL, a Locale or a Class.
-	 * @param clazz the type to check
+	 * Check if the given type represents a "simple" value type: a primitive or
+	 * primitive wrapper, an enum, a String or other CharSequence, a Number, a
+	 * Date, a Temporal, a URI, a URL, a Locale, or a Class.
+	 * <p>{@code Void} and {@code void} are not considered simple value types.
+	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type
+	 * @see #isSimpleProperty(Class)
 	 */
-	public static boolean isSimpleValueType(Class<?> clazz) {
-		return (ClassUtils.isPrimitiveOrWrapper(clazz) ||
-				Enum.class.isAssignableFrom(clazz) ||
-				CharSequence.class.isAssignableFrom(clazz) ||
-				Number.class.isAssignableFrom(clazz) ||
-				Date.class.isAssignableFrom(clazz) ||
-				Temporal.class.isAssignableFrom(clazz) ||
-				URI.class == clazz || URL.class == clazz ||
-				Locale.class == clazz || Class.class == clazz);
+	public static boolean isSimpleValueType(Class<?> type) {
+		return (Void.class != type && void.class != type &&
+				(ClassUtils.isPrimitiveOrWrapper(type) ||
+				Enum.class.isAssignableFrom(type) ||
+				CharSequence.class.isAssignableFrom(type) ||
+				Number.class.isAssignableFrom(type) ||
+				Date.class.isAssignableFrom(type) ||
+				Temporal.class.isAssignableFrom(type) ||
+				URI.class == type ||
+				URL.class == type ||
+				Locale.class == type ||
+				Class.class == type));
 	}
 
 

@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -47,9 +47,11 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MessageMappingMessageHandler}.
@@ -117,12 +119,11 @@ public class MessageMappingMessageHandlerTests {
 	public void unhandledExceptionShouldFlowThrough() {
 
 		GenericMessage<?> message = new GenericMessage<>(new Object(),
-				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "string"));
+				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+						new SimpleRouteMatcher(new AntPathMatcher()).parseRoute("string")));
 
 		StepVerifier.create(initMesssageHandler().handleMessage(message))
-				.expectErrorSatisfies(ex -> assertTrue(
-						"Actual: " + ex.getMessage(),
-						ex.getMessage().startsWith("Could not resolve method parameter at index 0")))
+				.expectErrorSatisfies(ex -> assertThat(ex.getMessage().startsWith("Could not resolve method parameter at index 0")).as("Actual: " + ex.getMessage()).isTrue())
 				.verify(Duration.ofSeconds(5));
 	}
 
@@ -156,7 +157,8 @@ public class MessageMappingMessageHandlerTests {
 		Flux<DataBuffer> payload = Flux.fromIterable(Arrays.asList(content)).map(parts -> toDataBuffer(parts));
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
-		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+				new SimpleRouteMatcher(new AntPathMatcher()).parseRoute(destination));
 		return MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 	}
 

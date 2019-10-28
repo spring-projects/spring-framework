@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Maybe;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -45,8 +45,9 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.method.MvcAnnotationPredicates.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestBody;
 
 /**
  * Unit tests for {@link RequestBodyMethodArgumentResolver}. When adding a test also
@@ -62,7 +63,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -75,10 +76,10 @@ public class RequestBodyMethodArgumentResolverTests {
 		MethodParameter param;
 
 		param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annotNotPresent(RequestBody.class).arg(String.class);
-		assertFalse(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isFalse();
 	}
 
 	@Test
@@ -87,13 +88,14 @@ public class RequestBodyMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		String value = resolveValue(param, body);
 
-		assertEquals(body, value);
+		assertThat(value).isEqualTo(body);
 	}
 
-	@Test(expected = ServerWebInputException.class)
+	@Test
 	public void emptyBodyWithString() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
-		resolveValueWithEmptyBody(param);
+		assertThatExceptionOfType(ServerWebInputException.class).isThrownBy(() ->
+				resolveValueWithEmptyBody(param));
 	}
 
 	@Test
@@ -101,7 +103,7 @@ public class RequestBodyMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
 		String body = resolveValueWithEmptyBody(param);
 
-		assertNull(body);
+		assertThat(body).isNull();
 	}
 
 	@Test // SPR-15758
@@ -109,7 +111,7 @@ public class RequestBodyMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
-		assertNull(body);
+		assertThat(body).isNull();
 	}
 
 	@Test
@@ -200,15 +202,15 @@ public class RequestBodyMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(CompletableFuture.class, String.class);
 		CompletableFuture<String> future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {
-			assertNull(text);
-			assertNotNull(ex);
+			assertThat(text).isNull();
+			assertThat(ex).isNotNull();
 		});
 
 		param = this.testMethod.annot(requestBody().notRequired()).arg(CompletableFuture.class, String.class);
 		future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {
-			assertNotNull(text);
-			assertNull(ex);
+			assertThat(text).isNotNull();
+			assertThat(ex).isNull();
 		});
 	}
 
@@ -218,9 +220,8 @@ public class RequestBodyMethodArgumentResolverTests {
 		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertNotNull(value);
-		assertTrue("Unexpected return value type: " + value,
-				param.getParameterType().isAssignableFrom(value.getClass()));
+		assertThat(value).isNotNull();
+		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
 
 		//no inspection unchecked
 		return (T) value;
@@ -233,8 +234,7 @@ public class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
-			assertTrue("Unexpected parameter type: " + value,
-					param.getParameterType().isAssignableFrom(value.getClass()));
+			assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected parameter type: " + value).isTrue();
 		}
 
 		//no inspection unchecked

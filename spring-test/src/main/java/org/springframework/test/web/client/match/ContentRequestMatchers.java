@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.web.client.match;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
@@ -74,7 +75,7 @@ public class ContentRequestMatchers {
 	/**
 	 * Assert the request content type as a {@link MediaType}.
 	 */
-	public RequestMatcher contentType(final MediaType expectedContentType) {
+	public RequestMatcher contentType(MediaType expectedContentType) {
 		return request -> {
 			MediaType actualContentType = request.getHeaders().getContentType();
 			assertTrue("Content type not set", actualContentType != null);
@@ -94,7 +95,7 @@ public class ContentRequestMatchers {
 	 * Assert the request content type is compatible with the given
 	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
 	 */
-	public RequestMatcher contentTypeCompatibleWith(final MediaType contentType) {
+	public RequestMatcher contentTypeCompatibleWith(MediaType contentType) {
 		return request -> {
 			MediaType actualContentType = request.getHeaders().getContentType();
 			assertTrue("Content type not set", actualContentType != null);
@@ -108,7 +109,7 @@ public class ContentRequestMatchers {
 	/**
 	 * Get the body of the request as a UTF-8 string and apply the given {@link Matcher}.
 	 */
-	public RequestMatcher string(final Matcher<? super String> matcher) {
+	public RequestMatcher string(Matcher<? super String> matcher) {
 		return request -> {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			assertThat("Request content", mockRequest.getBodyAsString(), matcher);
@@ -118,7 +119,7 @@ public class ContentRequestMatchers {
 	/**
 	 * Get the body of the request as a UTF-8 string and compare it to the given String.
 	 */
-	public RequestMatcher string(final String expectedContent) {
+	public RequestMatcher string(String expectedContent) {
 		return request -> {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
@@ -128,7 +129,7 @@ public class ContentRequestMatchers {
 	/**
 	 * Compare the body of the request to the given byte array.
 	 */
-	public RequestMatcher bytes(final byte[] expectedContent) {
+	public RequestMatcher bytes(byte[] expectedContent) {
 		return request -> {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
@@ -139,7 +140,7 @@ public class ContentRequestMatchers {
 	 * Parse the body as form data and compare to the given {@code MultiValueMap}.
 	 * @since 4.3
 	 */
-	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
+	public RequestMatcher formData(MultiValueMap<String, String> expectedContent) {
 		return request -> {
 			HttpInputMessage inputMessage = new HttpInputMessage() {
 				@Override
@@ -165,7 +166,7 @@ public class ContentRequestMatchers {
 	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit</a> library is available.
 	 * @param expectedXmlContent the expected XML content
 	 */
-	public RequestMatcher xml(final String expectedXmlContent) {
+	public RequestMatcher xml(String expectedXmlContent) {
 		return new AbstractXmlRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -177,7 +178,7 @@ public class ContentRequestMatchers {
 	/**
 	 * Parse the request content as {@link Node} and apply the given {@link Matcher}.
 	 */
-	public RequestMatcher node(final Matcher<? super Node> matcher) {
+	public RequestMatcher node(Matcher<? super Node> matcher) {
 		return new AbstractXmlRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -190,7 +191,7 @@ public class ContentRequestMatchers {
 	 * Parse the request content as {@link DOMSource} and apply the given {@link Matcher}.
 	 * @see <a href="https://code.google.com/p/xml-matchers/">https://code.google.com/p/xml-matchers/</a>
 	 */
-	public RequestMatcher source(final Matcher<? super Source> matcher) {
+	public RequestMatcher source(Matcher<? super Source> matcher) {
 		return new AbstractXmlRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
@@ -209,7 +210,7 @@ public class ContentRequestMatchers {
 	 * @param expectedJsonContent the expected JSON content
 	 * @since 5.0.5
 	 */
-	public RequestMatcher json(final String expectedJsonContent) {
+	public RequestMatcher json(String expectedJsonContent) {
 		return json(expectedJsonContent, false);
 	}
 
@@ -228,7 +229,7 @@ public class ContentRequestMatchers {
 	 * @param strict enables strict checking
 	 * @since 5.0.5
 	 */
-	public RequestMatcher json(final String expectedJsonContent, final boolean strict) {
+	public RequestMatcher json(String expectedJsonContent, boolean strict) {
 		return request -> {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;

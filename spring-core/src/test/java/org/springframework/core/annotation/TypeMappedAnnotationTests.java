@@ -24,10 +24,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also
@@ -35,10 +34,10 @@ import static org.junit.Assert.*;
  *
  * @author Phillip Webb
  */
-public class TypeMappedAnnotationTests {
+class TypeMappedAnnotationTests {
 
 	@Test
-	public void mappingWhenMirroredReturnsMirroredValues() {
+	void mappingWhenMirroredReturnsMirroredValues() {
 		testExplicitMirror(WithExplicitMirrorA.class);
 		testExplicitMirror(WithExplicitMirrorB.class);
 	}
@@ -51,7 +50,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void mappingExplicitAliasToMetaAnnotationReturnsMappedValues() {
+	void mappingExplicitAliasToMetaAnnotationReturnsMappedValues() {
 		TypeMappedAnnotation<?> annotation = getTypeMappedAnnotation(
 				WithExplicitAliasToMetaAnnotation.class,
 				ExplicitAliasToMetaAnnotation.class,
@@ -61,7 +60,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void mappingConventionAliasToMetaAnnotationReturnsMappedValues() {
+	void mappingConventionAliasToMetaAnnotationReturnsMappedValues() {
 		TypeMappedAnnotation<?> annotation = getTypeMappedAnnotation(
 				WithConventionAliasToMetaAnnotation.class,
 				ConventionAliasToMetaAnnotation.class,
@@ -71,7 +70,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void adaptFromEmptyArrayToAnyComponentType() {
+	void adaptFromEmptyArrayToAnyComponentType() {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(ArrayTypes.class);
 		Map<String, Object> attributes = new HashMap<>();
 		for (int i = 0; i < methods.size(); i++) {
@@ -94,7 +93,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void adaptFromNestedMergedAnnotation() {
+	void adaptFromNestedMergedAnnotation() {
 		MergedAnnotation<Nested> nested = MergedAnnotation.of(Nested.class);
 		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null,
 				NestedContainer.class, Collections.singletonMap("value", nested));
@@ -102,7 +101,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void adaptFromStringToClass() {
+	void adaptFromStringToClass() {
 		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null,
 				ClassAttributes.class,
 				Collections.singletonMap("classValue", InputStream.class.getName()));
@@ -111,7 +110,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void adaptFromStringArrayToClassArray() {
+	void adaptFromStringArrayToClassArray() {
 		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null, ClassAttributes.class,
 				Collections.singletonMap("classArrayValue", new String[] { InputStream.class.getName() }));
 		assertThat(annotation.getStringArray("classArrayValue")).containsExactly(InputStream.class.getName());

@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
@@ -111,8 +112,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
-	public ServerHttpRequest.Builder header(String key, String value) {
-		this.httpHeaders.add(key, value);
+	public ServerHttpRequest.Builder header(String headerName, String... headerValues) {
+		this.httpHeaders.put(headerName, Arrays.asList(headerValues));
 		return this;
 	}
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
@@ -323,6 +324,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
 		return (this.expressions.isEmpty() ? MEDIA_TYPE_ALL_LIST : this.expressions);
+	}
+
+
+	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 * @param request the current request
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(HttpServletRequest request) {
+		request.removeAttribute(MEDIA_TYPES_ATTRIBUTE);
 	}
 
 

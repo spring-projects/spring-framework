@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link DefaultControllerSpec}.
@@ -92,13 +92,13 @@ public class DefaultControllerSpecTests {
 				.viewResolvers(viewResolverConsumer)
 				.build();
 
-		assertNotNull(argumentResolverConsumer.getValue());
-		assertNotNull(contenTypeResolverConsumer.getValue());
-		assertNotNull(corsRegistryConsumer.getValue());
-		assertNotNull(formatterConsumer.getValue());
-		assertNotNull(codecsConsumer.getValue());
-		assertNotNull(pathMatchingConsumer.getValue());
-		assertNotNull(viewResolverConsumer.getValue());
+		assertThat(argumentResolverConsumer.getValue()).isNotNull();
+		assertThat(contenTypeResolverConsumer.getValue()).isNotNull();
+		assertThat(corsRegistryConsumer.getValue()).isNotNull();
+		assertThat(formatterConsumer.getValue()).isNotNull();
+		assertThat(codecsConsumer.getValue()).isNotNull();
+		assertThat(pathMatchingConsumer.getValue()).isNotNull();
+		assertThat(viewResolverConsumer.getValue()).isNotNull();
 
 	}
 

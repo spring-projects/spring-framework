@@ -101,7 +101,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 		// Use defaults if no transaction definition given.
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
-		return TransactionSynchronizationManager.currentTransaction()
+		return TransactionSynchronizationManager.forCurrentTransaction()
 				.flatMap(synchronizationManager -> {
 
 			Object transaction = doGetTransaction(synchronizationManager);
@@ -403,7 +403,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 					"Transaction is already completed - do not call commit or rollback more than once per transaction"));
 		}
 
-		return TransactionSynchronizationManager.currentTransaction().flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 			GenericReactiveTransaction reactiveTx = (GenericReactiveTransaction) transaction;
 			if (reactiveTx.isRollbackOnly()) {
 				if (reactiveTx.isDebug()) {
@@ -483,7 +483,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			return Mono.error(new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction"));
 		}
-		return TransactionSynchronizationManager.currentTransaction().flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 			GenericReactiveTransaction reactiveTx = (GenericReactiveTransaction) transaction;
 			return processRollback(synchronizationManager, reactiveTx);
 		});

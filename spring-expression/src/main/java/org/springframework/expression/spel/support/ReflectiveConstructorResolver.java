@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Arrays.sort(ctors, (c1, c2) -> {
 				int c1pl = c1.getParameterCount();
 				int c2pl = c2.getParameterCount();
-				return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
+				return Integer.compare(c1pl, c2pl);
 			});
 
 			Constructor<?> closeMatch = null;

@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -35,8 +35,8 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.method.MvcAnnotationPredicates.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.method.MvcAnnotationPredicates.matrixAttribute;
 
 /**
  * Unit tests for {@link MatrixVariableMapMethodArgumentResolver}.
@@ -53,7 +53,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	private final ResolvableMethod testMethod = ResolvableMethod.on(this.getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.exchange.getAttributes().put(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, new LinkedHashMap<>());
 	}
@@ -62,19 +62,19 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	@Test
 	public void supportsParameter() {
 
-		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(String.class))).isFalse();
 
-		assertTrue(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().noName())
-				.arg(Map.class, String.class, String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().noName())
+				.arg(Map.class, String.class, String.class))).isTrue();
 
-		assertTrue(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().noPathVar())
-				.arg(MultiValueMap.class, String.class, String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().noPathVar())
+				.arg(MultiValueMap.class, String.class, String.class))).isTrue();
 
-		assertTrue(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().pathVar("cars"))
-				.arg(MultiValueMap.class, String.class, String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().pathVar("cars"))
+				.arg(MultiValueMap.class, String.class, String.class))).isTrue();
 
-		assertFalse(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().name("name"))
-				.arg(Map.class, String.class, String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.annot(matrixAttribute().name("name"))
+				.arg(Map.class, String.class, String.class))).isFalse();
 	}
 
 	@Test
@@ -93,8 +93,8 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				(Map<String, String>) this.resolver.resolveArgument(
 						param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertNotNull(map);
-		assertEquals("red", map.get("colors"));
+		assertThat(map).isNotNull();
+		assertThat(map.get("colors")).isEqualTo("red");
 
 		param = this.testMethod
 				.annot(matrixAttribute().noPathVar())
@@ -105,7 +105,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				(MultiValueMap<String, String>) this.resolver.resolveArgument(
 						param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertEquals(Arrays.asList("red", "green", "blue"), multivalueMap.get("colors"));
+		assertThat(multivalueMap.get("colors")).isEqualTo(Arrays.asList("red", "green", "blue"));
 	}
 
 	@Test
@@ -122,11 +122,11 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				.arg(MultiValueMap.class, String.class, String.class);
 
 		@SuppressWarnings("unchecked")
-		Map<String, String> mapForPathVar = (Map<String, String>)
+		Map<String, ?> mapForPathVar = (Map<String, ?>)
 				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertNotNull(mapForPathVar);
-		assertEquals(Arrays.asList("red", "purple"), mapForPathVar.get("colors"));
+		assertThat(mapForPathVar).isNotNull();
+		assertThat(mapForPathVar.get("colors")).isEqualTo(Arrays.asList("red", "purple"));
 
 		param = this.testMethod.annot(matrixAttribute().noName()).arg(Map.class, String.class, String.class);
 
@@ -134,8 +134,8 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> mapAll = (Map<String, String>)
 				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertNotNull(mapAll);
-		assertEquals("red", mapAll.get("colors"));
+		assertThat(mapAll).isNotNull();
+		assertThat(mapAll.get("colors")).isEqualTo("red");
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> map = (Map<String, String>)
 				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertEquals(Collections.emptyMap(), map);
+		assertThat(map).isEqualTo(Collections.emptyMap());
 	}
 
 	@Test
@@ -164,11 +164,10 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> map = (Map<String, String>) this.resolver.resolveArgument(
 				param, new BindingContext(), this.exchange).block(Duration.ZERO);
 
-		assertEquals(Collections.emptyMap(), map);
+		assertThat(map).isEqualTo(Collections.emptyMap());
 	}
 
 
-	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getMatrixVariables(String pathVarName) {
 		Map<String, MultiValueMap<String, String>> matrixVariables =
 				this.exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);

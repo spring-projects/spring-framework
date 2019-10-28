@@ -53,7 +53,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private static final char PATH_DELIMITER = '/';
 
-	private static final String PATH_DELIMITER_STRING = "/";
+	private static final String PATH_DELIMITER_STRING = String.valueOf(PATH_DELIMITER);
 
 	private static final MultiValueMap<String, String> EMPTY_QUERY_PARAMS =
 			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
@@ -86,7 +86,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other);
 		}
 		@Override
@@ -543,7 +543,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -890,7 +890,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof FullPathComponent &&
 					getPath().equals(((FullPathComponent) other).getPath())));
 		}
@@ -916,7 +916,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public String getPath() {
-			String delimiter = String.valueOf(PATH_DELIMITER);
+			String delimiter = PATH_DELIMITER_STRING;
 			StringJoiner pathBuilder = new StringJoiner(delimiter, delimiter, "");
 			for (String pathSegment : this.pathSegments) {
 				pathBuilder.add(pathSegment);
@@ -964,7 +964,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof PathSegmentComponent &&
 					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
 		}

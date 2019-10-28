@@ -16,56 +16,56 @@
 
 package org.springframework.core.log;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
  * @since 5.2
  */
-public class LogSupportTests {
+class LogSupportTests {
 
 	@Test
-	public void testLogMessageWithSupplier() {
+	void logMessageWithSupplier() {
 		LogMessage msg = LogMessage.of(() -> new StringBuilder("a").append(" b"));
-		assertEquals("a b", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 	@Test
-	public void testLogMessageWithFormat1() {
+	void logMessageWithFormat1() {
 		LogMessage msg = LogMessage.format("a %s", "b");
-		assertEquals("a b", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 	@Test
-	public void testLogMessageWithFormat2() {
+	void logMessageWithFormat2() {
 		LogMessage msg = LogMessage.format("a %s %s", "b", "c");
-		assertEquals("a b c", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b c");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 	@Test
-	public void testLogMessageWithFormat3() {
+	void logMessageWithFormat3() {
 		LogMessage msg = LogMessage.format("a %s %s %s", "b", "c", "d");
-		assertEquals("a b c d", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b c d");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 	@Test
-	public void testLogMessageWithFormat4() {
+	void logMessageWithFormat4() {
 		LogMessage msg = LogMessage.format("a %s %s %s %s", "b", "c", "d", "e");
-		assertEquals("a b c d e", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b c d e");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 	@Test
-	public void testLogMessageWithFormatX() {
+	void logMessageWithFormatX() {
 		LogMessage msg = LogMessage.format("a %s %s %s %s %s", "b", "c", "d", "e", "f");
-		assertEquals("a b c d e f", msg.toString());
-		assertSame(msg.toString(), msg.toString());
+		assertThat(msg.toString()).isEqualTo("a b c d e f");
+		assertThat(msg.toString()).isSameAs(msg.toString());
 	}
 
 }

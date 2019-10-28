@@ -19,6 +19,7 @@ package org.springframework.cache.interceptor;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -54,7 +55,7 @@ public class SimpleKey implements Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other ||
 				(other instanceof SimpleKey && Arrays.deepEquals(this.params, ((SimpleKey) other).params)));
 	}

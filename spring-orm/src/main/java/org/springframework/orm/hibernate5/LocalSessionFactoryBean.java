@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate5;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.hibernate.Interceptor;

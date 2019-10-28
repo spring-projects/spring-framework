@@ -161,6 +161,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	private HttpAsyncClient startAsyncClient() {
 		HttpAsyncClient client = getAsyncClient();
 		if (client instanceof CloseableHttpAsyncClient) {
+			@SuppressWarnings("resource")
 			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) client;
 			if (!closeableAsyncClient.isRunning()) {
 				closeableAsyncClient.start();

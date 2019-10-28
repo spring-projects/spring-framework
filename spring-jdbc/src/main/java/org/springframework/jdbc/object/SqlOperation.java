@@ -25,7 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Operation object representing a SQL-based operation such as a query or update,
+ * Operation object representing an SQL-based operation such as a query or update,
  * as opposed to a stored procedure.
  *
  * <p>Configures a {@link org.springframework.jdbc.core.PreparedStatementCreatorFactory}

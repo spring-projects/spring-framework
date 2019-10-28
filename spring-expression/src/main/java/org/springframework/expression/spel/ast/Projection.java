@@ -92,12 +92,11 @@ public class Projection extends SpelNodeImpl {
 					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", idx);
+					state.enterScope("index", result.size());
 					Object value = this.children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
 						arrayElementType = determineCommonType(arrayElementType, value.getClass());
@@ -108,7 +107,6 @@ public class Projection extends SpelNodeImpl {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
-				idx++;
 			}
 
 			if (operandIsArray) {

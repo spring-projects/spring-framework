@@ -49,6 +49,7 @@ public interface AnnotatedTypeMetadata {
 	 * Return annotation details based on the direct annotations of the
 	 * underlying element.
 	 * @return merged annotations based on the direct annotations
+	 * @since 5.2
 	 */
 	MergedAnnotations getAnnotations();
 
@@ -139,7 +140,7 @@ public interface AnnotatedTypeMetadata {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
 		return getAnnotations().stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getTypeHierarchy))
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(map ->
 						map.isEmpty() ? null : map, adaptations));

@@ -123,8 +123,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 				try {
 					context = loadContextInternal(mergedContextConfiguration);
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Storing ApplicationContext in cache under key [%s]",
-								mergedContextConfiguration));
+						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
+								System.identityHashCode(context), mergedContextConfiguration));
 					}
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
@@ -134,8 +134,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Retrieved ApplicationContext from cache with key [%s]",
-							mergedContextConfiguration));
+					logger.debug(String.format("Retrieved ApplicationContext [%s] from cache with key [%s]",
+							System.identityHashCode(context), mergedContextConfiguration));
 				}
 			}
 

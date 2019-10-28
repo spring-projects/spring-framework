@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,16 +19,17 @@ package org.springframework.core.type.classreading;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+import org.junit.jupiter.api.Test;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link AnnotationMetadataReadingVisitor}.
@@ -36,8 +37,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Phillip Webb
  */
 @SuppressWarnings("deprecation")
-public class AnnotationMetadataReadingVisitorTests
-		extends AbstractAnnotationMetadataTests {
+class AnnotationMetadataReadingVisitorTests extends AbstractAnnotationMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
@@ -63,6 +63,7 @@ public class AnnotationMetadataReadingVisitorTests
 	}
 
 	@Override
+	@Test
 	public void getAnnotationsReturnsDirectAnnotations() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
 				super::getAnnotationsReturnsDirectAnnotations);

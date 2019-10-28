@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,7 @@ public abstract class AopProxyUtils {
 		if (proxy instanceof DecoratingProxy) {
 			nonUserIfcCount++;
 		}
-		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];
-		System.arraycopy(proxyInterfaces, 0, userInterfaces, 0, userInterfaces.length);
+		Class<?>[] userInterfaces = Arrays.copyOf(proxyInterfaces, proxyInterfaces.length - nonUserIfcCount);
 		Assert.notEmpty(userInterfaces, "JDK proxy must implement one or more interfaces");
 		return userInterfaces;
 	}
