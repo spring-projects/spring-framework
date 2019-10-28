@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -60,7 +61,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private final MultipartHttpMessageReader reader =
-			new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader(this.bufferFactory));
+			new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
 
 	private static final ResolvableType PARTS_ELEMENT_TYPE =
 			forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
@@ -143,47 +144,47 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 
 	@Test
 	void readTooManyParts() {
-		testMultipartExceptions(
-				reader -> reader.setMaxPartCount(1),
-				err -> {
-					assertThat(err).isInstanceOf(MultipartException.class)
-							.hasMessage("Could not parse multipart request");
-					assertThat(err.getCause()).hasMessage("Exceeded limit on maximum number of multipart parts");
+		testMultipartExceptions(reader -> reader.setMaxParts(1), ex -> {
+					assertThat(ex)
+							.isInstanceOf(DecodingException.class)
+							.hasMessageStartingWith("Failure while parsing part[2]");
+					assertThat(ex.getCause())
+							.hasMessage("Too many parts (2 allowed)");
 				}
 		);
 	}
-	
+
 	@Test
 	void readFilePartTooBig() {
-		testMultipartExceptions(
-				reader -> reader.setMaxFilePartSize(5),
-				err -> {
-					assertThat(err).isInstanceOf(MultipartException.class)
-							.hasMessage("Could not parse multipart request");
-					assertThat(err.getCause()).hasMessage("Exceeded limit on max size of multipart file : 5");
+		testMultipartExceptions(reader -> reader.setMaxDiskUsagePerPart(5), ex -> {
+					assertThat(ex)
+							.isInstanceOf(DecodingException.class)
+							.hasMessageStartingWith("Failure while parsing part[1]");
+					assertThat(ex.getCause())
+							.hasMessage("Part[1] exceeded the disk usage limit of 5 bytes");
 				}
 		);
 	}
 
 	@Test
-	void readPartTooBig() {
-		testMultipartExceptions(
-				reader -> reader.setMaxPartSize(6),
-				err -> {
-					assertThat(err).isInstanceOf(MultipartException.class)
-							.hasMessage("Could not parse multipart request");
-					assertThat(err.getCause()).hasMessage("Exceeded limit on max size of multipart part : 6");
+	void readPartHeadersTooBig() {
+		testMultipartExceptions(reader -> reader.setMaxInMemorySize(1), ex -> {
+					assertThat(ex)
+							.isInstanceOf(DecodingException.class)
+							.hasMessageStartingWith("Failure while parsing part[1]");
+					assertThat(ex.getCause())
+							.hasMessage("Part[1] exceeded the in-memory limit of 1 bytes");
 				}
 		);
 	}
 
-	private void testMultipartExceptions(Consumer<SynchronossPartHttpMessageReader> configurer,
-		Consumer<Throwable> assertions) {
-		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader(this.bufferFactory);
-		configurer.accept(synchronossReader);
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
-		ServerHttpRequest request = generateMultipartRequest();
-		StepVerifier.create(reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap()))
+	private void testMultipartExceptions(
+			Consumer<SynchronossPartHttpMessageReader> configurer, Consumer<Throwable> assertions) {
+
+		SynchronossPartHttpMessageReader reader = new SynchronossPartHttpMessageReader();
+		configurer.accept(reader);
+		MultipartHttpMessageReader multipartReader = new MultipartHttpMessageReader(reader);
+		StepVerifier.create(multipartReader.readMono(PARTS_ELEMENT_TYPE, generateMultipartRequest(), emptyMap()))
 				.consumeErrorWith(assertions)
 				.verify();
 	}
@@ -197,7 +198,8 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 		new MultipartHttpMessageWriter()
 				.write(Mono.just(partsBuilder.build()), null, MediaType.MULTIPART_FORM_DATA, outputMessage, null)
 				.block(Duration.ofSeconds(5));
-		Flux<DataBuffer> requestBody = outputMessage.getBody().map(buffer -> this.bufferFactory.wrap(buffer.asByteBuffer()));
+		Flux<DataBuffer> requestBody = outputMessage.getBody()
+				.map(buffer -> this.bufferFactory.wrap(buffer.asByteBuffer()));
 		return MockServerHttpRequest.post("/")
 				.contentType(outputMessage.getHeaders().getContentType())
 				.body(requestBody);
