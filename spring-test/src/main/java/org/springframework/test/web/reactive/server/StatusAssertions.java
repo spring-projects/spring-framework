@@ -211,8 +211,8 @@ public class StatusAssertions {
 	}
 
 	/**
-	 * Match the response status value with a Hamcrest matcher.
-	 * @param consumer the matcher to use
+	 * Consume the response status value as an integer.
+	 * @param consumer the consumer to use
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {
