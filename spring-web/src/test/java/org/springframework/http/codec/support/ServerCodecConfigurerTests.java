@@ -36,6 +36,7 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
@@ -124,11 +125,43 @@ public class ServerCodecConfigurerTests {
 				.filter(e -> e == encoder).orElse(null)).isSameAs(encoder);
 	}
 
+	@Test
+	public void maxInMemorySize() {
+		int size = 99;
+		this.configurer.defaultCodecs().maxInMemorySize(size);
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(readers.size()).isEqualTo(13);
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+
+		ResourceHttpMessageReader resourceReader = (ResourceHttpMessageReader) nextReader(readers);
+		ResourceDecoder decoder = (ResourceDecoder) resourceReader.getDecoder();
+		assertThat(decoder.getMaxInMemorySize()).isEqualTo(size);
+
+		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
+		assertThat(((FormHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((SynchronossPartHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
+
+		MultipartHttpMessageReader multipartReader = (MultipartHttpMessageReader) nextReader(readers);
+		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		assertThat((reader).getMaxInMemorySize()).isEqualTo(size);
+
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((Jackson2SmileDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
-		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
+		HttpMessageReader<?> reader = nextReader(readers);
 		assertThat(reader.getClass()).isEqualTo(DecoderHttpMessageReader.class);
 		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
+	}
+
+	private HttpMessageReader<?> nextReader(List<HttpMessageReader<?>> readers) {
+		return readers.get(this.index.getAndIncrement());
 	}
 
 	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {

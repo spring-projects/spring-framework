@@ -818,6 +818,33 @@ for repeated, map-like access to parts, or otherwise rely on the
 `SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
 
 
+[[webflux-codecs-limits]]
+==== Limits
+
+`Decoder` and `HttpMessageReader` implementations that buffer some or all of the input
+stream can be configured with a limit on the maximum number of bytes to buffer in memory.
+In some cases buffering occurs because input is aggregated and represented as a single
+object, e.g. controller method with `@RequestBody byte[]`, `x-www-form-urlencoded` data,
+and so on. Buffering can also occurs with streaming, when splitting the input stream,
+e.g. delimited text, a stream of JSON objects, and so on. For those streaming cases, the
+limit applies to the number of bytes associted with one object in the stream.
+
+To configure buffer sizes, you can check if a given `Decoder` or `HttpMessageReader`
+exposes a `maxInMemorySize` property and if so the Javadoc will have details about default
+values. In WebFlux, the `ServerCodecConfigurer` provides a
+<<webflux-config-message-codecs,single place>> from where to set all codecs, through the
+`maxInMemorySize` property for default codecs.
+
+For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
+the size of non-file parts. For file parts it determines the threshold at which the part
+is written to disk. For file parts written to disk, there is an additional
+`maxDiskUsagePerPart` property to limit the amount of disk space per part. There is also
+a `maxParts` property to limit the overall number of parts in a multipart request.
+To configure all 3 in WebFlux, you'll need to supply a pre-configured instance of
+`MultipartHttpMessageReader` to `ServerCodecConfigurer`.
+
+
+
 [[webflux-codecs-streaming]]
 ==== Streaming
 [.small]#<<web.adoc#mvc-ann-async-http-streaming, Same as in Spring MVC>>#

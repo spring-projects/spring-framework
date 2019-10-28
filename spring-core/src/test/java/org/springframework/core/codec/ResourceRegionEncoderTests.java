@@ -19,7 +19,6 @@ package org.springframework.core.codec;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -33,7 +32,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.MimeType;

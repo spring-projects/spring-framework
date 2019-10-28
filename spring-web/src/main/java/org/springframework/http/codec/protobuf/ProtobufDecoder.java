@@ -74,7 +74,7 @@ import org.springframework.util.MimeType;
 public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Message> {
 
 	/** The default max size for aggregating messages. */
-	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 64 * 1024;
+	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 256 * 1024;
 
 	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
@@ -102,8 +102,21 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	}
 
 
+	/**
+	 * The max size allowed per message.
+	 * <p>By default, this is set to 256K.
+	 * @param maxMessageSize the max size per message, or -1 for unlimited
+	 */
 	public void setMaxMessageSize(int maxMessageSize) {
 		this.maxMessageSize = maxMessageSize;
+	}
+
+	/**
+	 * Return the {@link #setMaxMessageSize configured} message size limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxMessageSize() {
+		return this.maxMessageSize;
 	}
 
 
@@ -205,7 +218,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						if (!readMessageSize(input)) {
 							return messages;
 						}
-						if (this.messageBytesToRead > this.maxMessageSize) {
+						if (this.maxMessageSize > 0 && this.messageBytesToRead > this.maxMessageSize) {
 							throw new DataBufferLimitException(
 									"The number of bytes to read for message " +
 											"(" + this.messageBytesToRead + ") exceeds " +
