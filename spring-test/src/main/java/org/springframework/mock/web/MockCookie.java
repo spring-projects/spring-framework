@@ -46,7 +46,7 @@ public class MockCookie extends Cookie {
 
 
 	/**
-	 * Constructor with the cookie name and value.
+	 * Construct a new {@link MockCookie} with the supplied name and value.
 	 * @param name the name
 	 * @param value the value
 	 * @see Cookie#Cookie(String, String)
@@ -56,14 +56,17 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
-	 * Add the "Expires" attribute to the cookie.
+	 * Set the "Expires" attribute for this cookie.
+	 * @since 5.1.11
 	 */
 	public void setExpires(@Nullable ZonedDateTime expires) {
 		this.expires = expires;
 	}
 
 	/**
-	 * Return the "Expires" attribute, or {@code null} if not set.
+	 * Get the "Expires" attribute for this cookie.
+	 * @since 5.1.11
+	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
 	 */
 	@Nullable
 	public ZonedDateTime getExpires() {
@@ -71,10 +74,10 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
-	 * Add the "SameSite" attribute to the cookie.
+	 * Set the "SameSite" attribute for this cookie.
 	 * <p>This limits the scope of the cookie such that it will only be attached
-	 * to same site requests if {@code "Strict"} or cross-site requests if
-	 * {@code "Lax"}.
+	 * to same-site requests if the supplied value is {@code "Strict"} or cross-site
+	 * requests if the supplied value is {@code "Lax"}.
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 	 */
 	public void setSameSite(@Nullable String sameSite) {
@@ -82,7 +85,8 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
-	 * Return the "SameSite" attribute, or {@code null} if not set.
+	 * Get the "SameSite" attribute for this cookie.
+	 * @return the "SameSite" attribute for this cookie, or {@code null} if not set
 	 */
 	@Nullable
 	public String getSameSite() {
@@ -91,7 +95,7 @@ public class MockCookie extends Cookie {
 
 
 	/**
-	 * Factory method that parses the value of a "Set-Cookie" header.
+	 * Factory method that parses the value of the supplied "Set-Cookie" header.
 	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
 	 */

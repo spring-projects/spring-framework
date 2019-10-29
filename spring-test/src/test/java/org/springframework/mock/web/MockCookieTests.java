@@ -16,10 +16,10 @@
 
 package org.springframework.mock.web;
 
-import org.junit.jupiter.api.Test;
-
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -86,15 +86,15 @@ class MockCookieTests {
 
 	@Test
 	void parseNullHeader() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockCookie.parse(null))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MockCookie.parse(null))
 			.withMessageContaining("Set-Cookie header must not be null");
 	}
 
 	@Test
 	void parseInvalidHeader() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockCookie.parse("BOOM"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MockCookie.parse("BOOM"))
 			.withMessageContaining("Invalid Set-Cookie header 'BOOM'");
 	}
 
@@ -102,8 +102,8 @@ class MockCookieTests {
 	void parseInvalidAttribute() {
 		String header = "SESSION=123; Path=";
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockCookie.parse(header))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MockCookie.parse(header))
 			.withMessageContaining("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
 	}
 

@@ -350,6 +350,18 @@ class MockHttpServletResponseTests {
 		assertPrimarySessionCookie("999");
 	}
 
+	/**
+	 * @since 5.1.11
+	 */
+	@Test
+	void setCookieHeaderWithExpiresAttribute() {
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
+				"HttpOnly; SameSite=Lax";
+		response.setHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		assertNumCookies(1);
+		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
+	}
+
 	@Test
 	void addCookieHeader() {
 		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
@@ -363,8 +375,11 @@ class MockHttpServletResponseTests {
 		assertCookieValues("123", "999");
 	}
 
+	/**
+	 * @since 5.1.11
+	 */
 	@Test
-	void addCookieHeaderWithExpires() {
+	void addCookieHeaderWithExpiresAttribute() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
 				"HttpOnly; SameSite=Lax";
 		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
