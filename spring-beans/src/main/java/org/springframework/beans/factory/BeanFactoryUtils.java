@@ -182,6 +182,7 @@ public abstract class BeanFactoryUtils {
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
+	 * @param type the type that beans must match (as a {@code ResolvableType})
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
@@ -189,7 +190,6 @@ public abstract class BeanFactoryUtils {
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
 	 * eagerly initialized to determine their type: So be aware that passing in "true"
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
-	 * @param type the type that beans must match (as a {@code ResolvableType})
 	 * @return the array of matching bean names, or an empty array if none
 	 * @since 5.2
 	 * @see ListableBeanFactory#getBeanNamesForType(ResolvableType, boolean, boolean)
