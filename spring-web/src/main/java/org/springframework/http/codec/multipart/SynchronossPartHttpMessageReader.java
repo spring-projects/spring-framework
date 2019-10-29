@@ -162,7 +162,6 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}
 
-
 	@Override
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Flux.create(new SynchronossPartGenerator(message))
@@ -176,13 +175,9 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 				});
 	}
 
-
 	@Override
-	public Mono<Part> readMono(
-			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
-
-		return Mono.error(new UnsupportedOperationException(
-				"Cannot read multipart request body into single Part"));
+	public Mono<Part> readMono(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
+		return Mono.error(new UnsupportedOperationException("Cannot read multipart request body into single Part"));
 	}
 
 
@@ -196,15 +191,15 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final LimitedPartBodyStreamStorageFactory storageFactory = new LimitedPartBodyStreamStorageFactory();
 
+		@Nullable
 		private NioMultipartParserListener listener;
 
+		@Nullable
 		private NioMultipartParser parser;
-
 
 		public SynchronossPartGenerator(ReactiveHttpInputMessage inputMessage) {
 			this.inputMessage = inputMessage;
 		}
-
 
 		@Override
 		public void accept(FluxSink<Part> sink) {
@@ -228,10 +223,13 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		@Override
 		protected void hookOnNext(DataBuffer buffer) {
+			Assert.state(this.parser != null && this.listener != null, "Not initialized yet");
+
 			int size = buffer.readableByteCount();
 			this.storageFactory.increaseByteCount(size);
 			byte[] resultBytes = new byte[size];
 			buffer.read(resultBytes);
+
 			try {
 				this.parser.write(resultBytes);
 			}
@@ -248,24 +246,32 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		@Override
 		protected void hookOnError(Throwable ex) {
 			try {
-				this.parser.close();
+				if (this.parser != null) {
+					this.parser.close();
+				}
 			}
 			catch (IOException ex2) {
 				// ignore
 			}
 			finally {
-				int index = this.storageFactory.getCurrentPartIndex();
-				this.listener.onError("Failure while parsing part[" + index + "]", ex);
+				if (this.listener != null) {
+					int index = this.storageFactory.getCurrentPartIndex();
+					this.listener.onError("Failure while parsing part[" + index + "]", ex);
+				}
 			}
 		}
 
 		@Override
 		protected void hookFinally(SignalType type) {
 			try {
-				this.parser.close();
+				if (this.parser != null) {
+					this.parser.close();
+				}
 			}
 			catch (IOException ex) {
-				this.listener.onError("Error while closing parser", ex);
+				if (this.listener != null) {
+					this.listener.onError("Error while closing parser", ex);
+				}
 			}
 		}
 
@@ -279,16 +285,15 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	private class LimitedPartBodyStreamStorageFactory implements PartBodyStreamStorageFactory {
 
-		private final PartBodyStreamStorageFactory storageFactory = maxInMemorySize > 0 ?
+		private final PartBodyStreamStorageFactory storageFactory = (maxInMemorySize > 0 ?
 				new DefaultPartBodyStreamStorageFactory(maxInMemorySize) :
-				new DefaultPartBodyStreamStorageFactory();
+				new DefaultPartBodyStreamStorageFactory());
 
 		private int index = 1;
 
 		private boolean isFilePart;
 
 		private long partSize;
-
 
 		public int getCurrentPartIndex() {
 			return this.index;
@@ -338,7 +343,6 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final AtomicInteger terminated = new AtomicInteger(0);
 
-
 		FluxSinkAdapterListener(
 				FluxSink<Part> sink, MultipartContext context, LimitedPartBodyStreamStorageFactory factory) {
 
@@ -346,7 +350,6 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			this.context = context;
 			this.storageFactory = factory;
 		}
-
 
 		@Override
 		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
