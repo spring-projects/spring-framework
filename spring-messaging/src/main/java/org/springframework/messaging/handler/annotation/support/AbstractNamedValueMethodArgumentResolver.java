@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
@@ -72,10 +73,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param beanFactory a bean factory for resolving {@code ${...}}
 	 * placeholders and {@code #{...}} SpEL expressions in default values
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
+	protected AbstractNamedValueMethodArgumentResolver(@Nullable ConversionService conversionService,
 			@Nullable ConfigurableBeanFactory beanFactory) {
 
-		this.conversionService = conversionService;
+		this.conversionService = conversionService != null ? conversionService : DefaultConversionService.getSharedInstance();
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
