@@ -24,6 +24,10 @@ buildSrc/build
 /src/asciidoc/build
 target/
 
+# Projects not in this branch
+integration-tests/
+spring-core/kotlin-coroutines/
+
 # Eclipse artifacts, including WTP generated manifests
 .classpath
 .project
