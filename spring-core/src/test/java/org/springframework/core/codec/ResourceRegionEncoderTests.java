@@ -19,7 +19,6 @@ package org.springframework.core.codec;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -30,9 +29,9 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.MimeType;
@@ -45,17 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test cases for {@link ResourceRegionEncoder} class.
  * @author Brian Clozel
  */
-class ResourceRegionEncoderTests  {
+class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 
 	private ResourceRegionEncoder encoder = new ResourceRegionEncoder();
-
-	private LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
-
-
-	@AfterEach
-	void tearDown() throws Exception {
-		this.bufferFactory.checkForLeaks();
-	}
 
 	@Test
 	void canEncode() {

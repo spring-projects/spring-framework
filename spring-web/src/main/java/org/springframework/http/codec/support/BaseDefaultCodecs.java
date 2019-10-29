@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -29,6 +30,7 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -38,6 +40,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
@@ -95,6 +98,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	@Nullable
 	private Encoder<?> jaxb2Encoder;
 
+	@Nullable
+	private Integer maxInMemorySize;
+
 	private boolean enableLoggingRequestDetails = false;
 
 	private boolean registerDefaults = true;
@@ -131,6 +137,16 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 	@Override
+	public void maxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	@Nullable
+	protected Integer maxInMemorySize() {
+		return this.maxInMemorySize;
+	}
+
+	@Override
 	public void enableLoggingRequestDetails(boolean enable) {
 		this.enableLoggingRequestDetails = enable;
 	}
@@ -155,23 +171,48 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 			return Collections.emptyList();
 		}
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
-		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		readers.add(new ResourceHttpMessageReader());
-		readers.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
+		readers.add(new DecoderHttpMessageReader<>(init(new ByteArrayDecoder())));
+		readers.add(new DecoderHttpMessageReader<>(init(new ByteBufferDecoder())));
+		readers.add(new DecoderHttpMessageReader<>(init(new DataBufferDecoder())));
+		readers.add(new ResourceHttpMessageReader(init(new ResourceDecoder())));
+		readers.add(new DecoderHttpMessageReader<>(init(StringDecoder.textPlainOnly())));
 		if (protobufPresent) {
-			Decoder<?> decoder = this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder();
+			Decoder<?> decoder = this.protobufDecoder != null ? this.protobufDecoder : init(new ProtobufDecoder());
 			readers.add(new DecoderHttpMessageReader<>(decoder));
 		}
 
 		FormHttpMessageReader formReader = new FormHttpMessageReader();
+		if (this.maxInMemorySize != null) {
+			formReader.setMaxInMemorySize(this.maxInMemorySize);
+		}
 		formReader.setEnableLoggingRequestDetails(this.enableLoggingRequestDetails);
 		readers.add(formReader);
 
 		extendTypedReaders(readers);
 
 		return readers;
+	}
+
+	private <T extends Decoder<?>> T init(T decoder) {
+		if (this.maxInMemorySize != null) {
+			if (decoder instanceof AbstractDataBufferDecoder) {
+				((AbstractDataBufferDecoder<?>) decoder).setMaxInMemorySize(this.maxInMemorySize);
+			}
+			if (decoder instanceof ProtobufDecoder) {
+				((ProtobufDecoder) decoder).setMaxMessageSize(this.maxInMemorySize);
+			}
+			if (jackson2Present) {
+				if (decoder instanceof AbstractJackson2Decoder) {
+					((AbstractJackson2Decoder) decoder).setMaxInMemorySize(this.maxInMemorySize);
+				}
+			}
+			if (jaxb2Present) {
+				if (decoder instanceof Jaxb2XmlDecoder) {
+					((Jaxb2XmlDecoder) decoder).setMaxInMemorySize(this.maxInMemorySize);
+				}
+			}
+		}
+		return decoder;
 	}
 
 	/**
@@ -189,13 +230,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		}
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		if (jackson2Present) {
-			readers.add(new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
+			readers.add(new DecoderHttpMessageReader<>(init(getJackson2JsonDecoder())));
 		}
 		if (jackson2SmilePresent) {
-			readers.add(new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
+			readers.add(new DecoderHttpMessageReader<>(init(new Jackson2SmileDecoder())));
 		}
 		if (jaxb2Present) {
-			Decoder<?> decoder = this.jaxb2Decoder != null ? this.jaxb2Decoder : new Jaxb2XmlDecoder();
+			Decoder<?> decoder = this.jaxb2Decoder != null ? this.jaxb2Decoder : init(new Jaxb2XmlDecoder());
 			readers.add(new DecoderHttpMessageReader<>(decoder));
 		}
 		extendObjectReaders(readers);
@@ -216,7 +257,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 			return Collections.emptyList();
 		}
 		List<HttpMessageReader<?>> result = new ArrayList<>();
-		result.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
+		result.add(new DecoderHttpMessageReader<>(init(StringDecoder.allMimeTypes())));
 		return result;
 	}
 
