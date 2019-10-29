@@ -39,6 +39,7 @@ import static org.junit.Assert.*;
  * @author Rob Winch
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Vedran Pavic
  * @since 19.02.2006
  */
 public class MockHttpServletResponseTests {
@@ -349,6 +350,14 @@ public class MockHttpServletResponseTests {
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
+	}
+
+	@Test
+	public void addCookieHeaderWithExpires() {
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
+				"HttpOnly; SameSite=Lax";
+		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		assertEquals(cookieValue, response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
 	@Test

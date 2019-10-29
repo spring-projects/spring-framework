@@ -16,6 +16,9 @@
 
 package org.springframework.mock.web.test;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javax.servlet.http.Cookie;
 
 import org.springframework.lang.Nullable;
@@ -36,6 +39,9 @@ public class MockCookie extends Cookie {
 
 
 	@Nullable
+	private ZonedDateTime expires;
+
+	@Nullable
 	private String sameSite;
 
 
@@ -49,6 +55,20 @@ public class MockCookie extends Cookie {
 		super(name, value);
 	}
 
+	/**
+	 * Add the "Expires" attribute to the cookie.
+	 */
+	public void setExpires(@Nullable ZonedDateTime expires) {
+		this.expires = expires;
+	}
+
+	/**
+	 * Return the "Expires" attribute, or {@code null} if not set.
+	 */
+	@Nullable
+	public ZonedDateTime getExpires() {
+		return this.expires;
+	}
 
 	/**
 	 * Add the "SameSite" attribute to the cookie.
@@ -93,6 +113,10 @@ public class MockCookie extends Cookie {
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Max-Age")) {
 				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
+			}
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Expires")) {
+				cookie.setExpires(ZonedDateTime.parse(extractAttributeValue(attribute, setCookieHeader),
+						DateTimeFormatter.RFC_1123_DATE_TIME));
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Path")) {
 				cookie.setPath(extractAttributeValue(attribute, setCookieHeader));
