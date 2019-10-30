@@ -154,9 +154,10 @@ public interface CodecConfigurer {
 		 * <p>By default this is not set, in which case individual codec defaults
 		 * apply. All codecs are limited to 256K by default.
 		 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
-		 * @sine 5.1.11
+		 * @since 5.1.11
 		 */
 		void maxInMemorySize(int byteCount);
+
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
