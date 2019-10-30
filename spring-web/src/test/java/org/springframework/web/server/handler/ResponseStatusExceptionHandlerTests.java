@@ -17,15 +17,21 @@
 package org.springframework.web.server.handler;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +71,26 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new Exception(new ResponseStatusException(HttpStatus.BAD_REQUEST, ""));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
+
+	@Test // gh-23741
+	public void handleMethodNotAllowed() {
+		Throwable ex = new MethodNotAllowedException(HttpMethod.PATCH, Arrays.asList(HttpMethod.POST, HttpMethod.PUT));
+		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
+
+		MockServerHttpResponse response = this.exchange.getResponse();
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+		assertThat(response.getHeaders().getAllow()).containsOnly(HttpMethod.POST, HttpMethod.PUT);
+	}
+
+	@Test // gh-23741
+	public void handleResponseStatusExceptionWithHeaders() {
+		Throwable ex = new NotAcceptableStatusException(Arrays.asList(MediaType.TEXT_PLAIN, MediaType.TEXT_HTML));
+		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
+
+		MockServerHttpResponse response = this.exchange.getResponse();
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+		assertThat(response.getHeaders().getAccept()).containsOnly(MediaType.TEXT_PLAIN, MediaType.TEXT_HTML);
 	}
 
 	@Test

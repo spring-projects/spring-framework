@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.web.server;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Exception for errors that fit response status 405 (method not allowed).
@@ -56,6 +58,16 @@ public class MethodNotAllowedException extends ResponseStatusException {
 
 
 	/**
+	 * Return a Map with an "Allow" header.
+	 * @since 5.1.11
+	 */
+	@Override
+	public Map<String, String> getHeaders() {
+		return Collections.singletonMap("Allow",
+				StringUtils.collectionToDelimitedString(this.supportedMethods, ", "));
+	}
+
+	/**
 	 * Return the HTTP method for the failed request.
 	 */
 	public String getHttpMethod() {
@@ -68,4 +80,5 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	public Set<HttpMethod> getSupportedMethods() {
 		return this.supportedMethods;
 	}
+
 }
