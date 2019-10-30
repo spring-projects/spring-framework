@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -275,13 +276,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(
-			ContentNegotiationManager mvcContentNegotiationManager,
-			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
-		mapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
-		mapping.setContentNegotiationManager(mvcContentNegotiationManager);
+		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
+		mapping.setContentNegotiationManager(contentNegotiationManager);
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
@@ -447,10 +449,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	@Nullable
-	public HandlerMapping viewControllerHandlerMapping(PathMatcher mvcPathMatcher,
-			UrlPathHelper mvcUrlPathHelper,
-			FormattingConversionService mvcConversionService,
-			ResourceUrlProvider mvcResourceUrlProvider) {
+	public HandlerMapping viewControllerHandlerMapping(
+			@Qualifier("mvcPathMatcher") PathMatcher pathMatcher,
+			@Qualifier("mvcUrlPathHelper") UrlPathHelper urlPathHelper,
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 		ViewControllerRegistry registry = new ViewControllerRegistry(this.applicationContext);
 		addViewControllers(registry);
 
@@ -458,9 +461,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (handlerMapping == null) {
 			return null;
 		}
-		handlerMapping.setPathMatcher(mvcPathMatcher);
-		handlerMapping.setUrlPathHelper(mvcUrlPathHelper);
-		handlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+		handlerMapping.setPathMatcher(pathMatcher);
+		handlerMapping.setUrlPathHelper(urlPathHelper);
+		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
@@ -478,11 +481,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public BeanNameUrlHandlerMapping beanNameHandlerMapping(
-			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
-		mapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
 	}
@@ -500,11 +504,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RouterFunctionMapping routerFunctionMapping(
-			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping();
 		mapping.setOrder(3);
-		mapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		mapping.setMessageConverters(getMessageConverters());
 		return mapping;
@@ -517,24 +522,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	@Nullable
-	public HandlerMapping resourceHandlerMapping(UrlPathHelper mvcUrlPathHelper,
-			PathMatcher mvcPathMatcher, ContentNegotiationManager mvcContentNegotiationManager,
-			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+	public HandlerMapping resourceHandlerMapping(
+			@Qualifier("mvcUrlPathHelper") UrlPathHelper urlPathHelper,
+			@Qualifier("mvcPathMatcher") PathMatcher pathMatcher,
+			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
 		Assert.state(this.applicationContext != null, "No ApplicationContext set");
 		Assert.state(this.servletContext != null, "No ServletContext set");
 
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
-				this.servletContext, mvcContentNegotiationManager, mvcUrlPathHelper);
+				this.servletContext, contentNegotiationManager, urlPathHelper);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping == null) {
 			return null;
 		}
-		handlerMapping.setPathMatcher(mvcPathMatcher);
-		handlerMapping.setUrlPathHelper(mvcUrlPathHelper);
-		handlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+		handlerMapping.setPathMatcher(pathMatcher);
+		handlerMapping.setUrlPathHelper(urlPathHelper);
+		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
@@ -597,13 +605,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter(
-			ContentNegotiationManager mvcContentNegotiationManager,
-			FormattingConversionService mvcConversionService, Validator mvcValidator) {
+			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("mvcValidator") Validator validator) {
 
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setContentNegotiationManager(mvcContentNegotiationManager);
+		adapter.setContentNegotiationManager(contentNegotiationManager);
 		adapter.setMessageConverters(getMessageConverters());
-		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(mvcConversionService, mvcValidator));
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(conversionService, validator));
 		adapter.setCustomArgumentResolvers(getArgumentResolvers());
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
@@ -898,10 +907,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public CompositeUriComponentsContributor mvcUriComponentsContributor(
-			FormattingConversionService mvcConversionService,
-			RequestMappingHandlerAdapter requestMappingHandlerAdapter) {
+			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
+			@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter requestMappingHandlerAdapter) {
 		return new CompositeUriComponentsContributor(
-				requestMappingHandlerAdapter.getArgumentResolvers(), mvcConversionService);
+				requestMappingHandlerAdapter.getArgumentResolvers(), conversionService);
 	}
 
 	/**
@@ -932,11 +941,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerExceptionResolver handlerExceptionResolver(
-			ContentNegotiationManager mvcContentNegotiationManager) {
+			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
 		if (exceptionResolvers.isEmpty()) {
-			addDefaultHandlerExceptionResolvers(exceptionResolvers, mvcContentNegotiationManager);
+			addDefaultHandlerExceptionResolvers(exceptionResolvers, contentNegotiationManager);
 		}
 		extendHandlerExceptionResolvers(exceptionResolvers);
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
@@ -1026,9 +1035,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @since 4.1
 	 */
 	@Bean
-	public ViewResolver mvcViewResolver(ContentNegotiationManager mvcContentNegotiationManager) {
+	public ViewResolver mvcViewResolver(
+			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
 		ViewResolverRegistry registry =
-				new ViewResolverRegistry(mvcContentNegotiationManager, this.applicationContext);
+				new ViewResolverRegistry(contentNegotiationManager, this.applicationContext);
 		configureViewResolvers(registry);
 
 		if (registry.getViewResolvers().isEmpty() && this.applicationContext != null) {
