@@ -305,6 +305,7 @@ public class PropertySourceAnnotationTests {
 
 		@Inject Environment env;
 
+		@SuppressWarnings("rawtypes")
 		@Bean
 		public FactoryBean testBean() {
 			final String name = env.getProperty("testbean.name");

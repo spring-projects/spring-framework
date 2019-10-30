@@ -1356,6 +1356,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class RawFactoryMethodRepositoryConfiguration {
 
+		@SuppressWarnings("rawtypes") // intentionally a raw type
 		@Bean
 		public Repository stringRepo() {
 			return new Repository<String>() {

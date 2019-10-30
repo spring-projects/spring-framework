@@ -243,6 +243,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void forMethodParameterWithNesting() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
@@ -254,6 +255,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void forMethodParameterWithNestingAndLevels() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
@@ -820,6 +822,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void resolveTypeVariableFromMethodParameterTypeWithImplementsClass() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);

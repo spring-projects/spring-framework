@@ -578,6 +578,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
 
 		public final Set<Object> seenPayloads = new HashSet<>();
