@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
  */
 public class DateFormattingTests {
 
-	private final FormattingConversionService conversionService = new FormattingConversionService();
+	private FormattingConversionService conversionService;
 
 	private DataBinder binder;
 
@@ -58,6 +58,7 @@ public class DateFormattingTests {
 	}
 
 	private void setup(DateFormatterRegistrar registrar) {
+		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
@@ -141,6 +142,20 @@ public class DateFormattingTests {
 
 	@Test
 	public void testBindDateAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09 1:05", binder.getBindingResult().getFieldValue("dateAnnotatedPattern"));
+	}
+
+	@Test
+	public void testBindDateAnnotatedPatternWithGlobalFormat() {
+		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		DateFormatter dateFormatter = new DateFormatter();
+		dateFormatter.setIso(ISO.DATE_TIME);
+		registrar.setFormatter(dateFormatter);
+		setup(registrar);
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
 		binder.bind(propertyValues);
