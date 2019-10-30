@@ -148,7 +148,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.put(AvailableSettings.HBM2DDL_AUTO, "update");
+			jpaProperties.put(AvailableSettings.HBM2DDL_AUTO, "none");
 		}
 		if (isShowSql()) {
 			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
