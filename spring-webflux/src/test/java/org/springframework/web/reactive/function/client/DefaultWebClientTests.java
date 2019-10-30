@@ -41,8 +41,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
@@ -303,7 +303,7 @@ public class DefaultWebClientTests {
 				)
 				.build();
 		Mono<ClientResponse> exchange = client.get().uri("/path").exchange();
-		verifyZeroInteractions(this.exchangeFunction);
+		verifyNoInteractions(this.exchangeFunction);
 		exchange.block(Duration.ofSeconds(10));
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Custom")).isEqualTo("value");

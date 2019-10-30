@@ -53,7 +53,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Unit tests for {@link DefaultRSocketRequesterBuilder}.
@@ -85,7 +85,7 @@ public class DefaultRSocketRequesterBuilderTests {
 				.rsocketStrategies(strategiesConfigurer)
 				.connect(this.transport);
 
-		verifyZeroInteractions(this.transport);
+		verifyNoInteractions(this.transport);
 		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNull();
 	}
 
