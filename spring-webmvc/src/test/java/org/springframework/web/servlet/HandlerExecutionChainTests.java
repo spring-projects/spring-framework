@@ -27,7 +27,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * A test fixture with HandlerExecutionChain and mock handler interceptors.
@@ -120,7 +120,7 @@ public class HandlerExecutionChainTests {
 	@Test
 	public void exceptionBeforePreHandle() throws Exception {
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
-		verifyZeroInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
+		verifyNoInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
 	}
 
 	@Test

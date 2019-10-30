@@ -45,7 +45,7 @@ import org.springframework.transaction.TransactionStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Test cases for AOP transaction management.
@@ -148,7 +148,7 @@ public class BeanFactoryTransactionTests {
 		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
 
 		// Expect no methods
-		verifyZeroInteractions(ptm);
+		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
 		final TransactionStatus ts = mock(TransactionStatus.class);

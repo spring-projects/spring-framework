@@ -29,7 +29,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
@@ -129,7 +129,7 @@ public class AfterReturningAdviceBindingTests {
 	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
-		verifyZeroInteractions(mockCollaborator);
+		verifyNoInteractions(mockCollaborator);
 	}
 
 	@Test
