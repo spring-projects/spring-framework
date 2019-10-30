@@ -555,7 +555,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			}
 			return map;
 		}
-
 	}
 
 }
