@@ -45,6 +45,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -317,9 +318,12 @@ public class WebSocketStompClientTests {
 
 	@SuppressWarnings("unchecked")
 	private TcpConnection<byte[]> getTcpConnection() throws Exception {
-		WebSocketHandler webSocketHandler = connect();
-		webSocketHandler.afterConnectionEstablished(this.webSocketSession);
-		return (TcpConnection<byte[]>) webSocketHandler;
+		WebSocketHandler handler = connect();
+		handler.afterConnectionEstablished(this.webSocketSession);
+		if (handler instanceof WebSocketHandlerDecorator) {
+			handler = ((WebSocketHandlerDecorator) handler).getLastHandler();
+		}
+		return (TcpConnection<byte[]>) handler;
 	}
 
 	private void testInactivityTaskScheduling(Runnable runnable, long delay, long sleepTime)
