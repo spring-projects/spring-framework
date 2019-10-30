@@ -1200,7 +1200,7 @@ class AnnotatedElementUtilsTests {
 		@AliasFor("basePackages")
 		String[] value() default {};
 
-		@AliasFor("value")
+		// Intentionally no alias declaration for "value"
 		String[] basePackages() default {};
 
 		Filter[] excludeFilters() default {};
@@ -1485,7 +1485,7 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ValueAttribute {
+	@interface ValueAttribute {
 
 		String[] value();
 
@@ -1493,7 +1493,7 @@ class AnnotatedElementUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ValueAttribute("FromValueAttributeMeta")
-	static @interface ValueAttributeMeta {
+	@interface ValueAttributeMeta {
 
 		@AliasFor("alias")
 		String[] value() default {};
@@ -1505,7 +1505,7 @@ class AnnotatedElementUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ValueAttributeMeta("FromValueAttributeMetaMeta")
-	static @interface ValueAttributeMetaMeta {
+	@interface ValueAttributeMetaMeta {
 	}
 
 	@ValueAttributeMetaMeta

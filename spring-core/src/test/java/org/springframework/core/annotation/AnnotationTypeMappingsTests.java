@@ -159,15 +159,6 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void forAnnotationTypeWhenAliasForToSelfNonAnnotatedAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				AnnotationTypeMappings.forAnnotationType(AliasForToSelfNonAnnotatedAttribute.class))
-			.withMessage("Attribute 'other' in annotation ["
-								+ AliasForToSelfNonAnnotatedAttribute.class.getName()
-								+ "] must be declared as an @AliasFor 'test'.");
-	}
-
-	@Test
 	void forAnnotationTypeWhenAliasForToSelfAnnotatedToOtherAttribute() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				AnnotationTypeMappings.forAnnotationType(AliasForToSelfAnnotatedToOtherAttribute.class))
@@ -554,67 +545,67 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface SimpleAnnotation {
+	@interface SimpleAnnotation {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
 	@UsesSunMisc
-	static @interface WithSpringLangAnnotation {
+	@interface WithSpringLangAnnotation {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@A
 	@B
-	static @interface MetaAnnotated {
+	@interface MetaAnnotated {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AA
 	@AB
-	static @interface A {
+	@interface A {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AA {
+	@interface AA {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ABC
-	static @interface AB {
+	@interface AB {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ABC {
+	@interface ABC {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface B {
+	@interface B {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeating
 	@Repeating
-	static @interface WithRepeatedMetaAnnotations {
+	@interface WithRepeatedMetaAnnotations {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(Repeatings.class)
-	static @interface Repeating {
+	@interface Repeating {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface Repeatings {
+	@interface Repeatings {
 
 		Repeating[] value();
 
@@ -622,24 +613,24 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@SelfAnnotated
-	static @interface SelfAnnotated {
+	@interface SelfAnnotated {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@LoopB
-	static @interface LoopA {
+	@interface LoopA {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@LoopA
-	static @interface LoopB {
+	@interface LoopB {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithBothValueAndAttribute {
+	@interface AliasForWithBothValueAndAttribute {
 
 		@AliasFor(value = "bar", attribute = "foo")
 		String test();
@@ -647,7 +638,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForToSelfNonExistingAttribute {
+	@interface AliasForToSelfNonExistingAttribute {
 
 		@AliasFor("missing")
 		String test() default "";
@@ -658,7 +649,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AliasForToOtherNonExistingAttributeTarget
-	static @interface AliasForToOtherNonExistingAttribute {
+	@interface AliasForToOtherNonExistingAttribute {
 
 		@AliasFor(annotation = AliasForToOtherNonExistingAttributeTarget.class, attribute = "missing")
 		String test() default "";
@@ -666,14 +657,14 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForToOtherNonExistingAttributeTarget {
+	@interface AliasForToOtherNonExistingAttributeTarget {
 
 		String other() default "";
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForToSelf {
+	@interface AliasForToSelf {
 
 		@AliasFor("test")
 		String test() default "";
@@ -682,7 +673,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AliasForWithArrayCompatibleReturnTypesTarget
-	static @interface AliasForWithArrayCompatibleReturnTypes {
+	@interface AliasForWithArrayCompatibleReturnTypes {
 
 		@AliasFor(annotation = AliasForWithArrayCompatibleReturnTypesTarget.class)
 		String test() default "";
@@ -690,14 +681,14 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithArrayCompatibleReturnTypesTarget {
+	@interface AliasForWithArrayCompatibleReturnTypesTarget {
 
 		String[] test() default {};
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithIncompatibleReturnTypes {
+	@interface AliasForWithIncompatibleReturnTypes {
 
 		@AliasFor(annotation = AliasForWithIncompatibleReturnTypesTarget.class)
 		String[] test() default {};
@@ -705,24 +696,14 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithIncompatibleReturnTypesTarget {
+	@interface AliasForWithIncompatibleReturnTypesTarget {
 
 		String test() default "";
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForToSelfNonAnnotatedAttribute {
-
-		@AliasFor("other")
-		String test() default "";
-
-		String other() default "";
-
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForToSelfAnnotatedToOtherAttribute {
+	@interface AliasForToSelfAnnotatedToOtherAttribute {
 
 		@AliasFor("b")
 		String a() default "";
@@ -736,7 +717,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForNonMetaAnnotated {
+	@interface AliasForNonMetaAnnotated {
 
 		@AliasFor(annotation = AliasForNonMetaAnnotatedTarget.class)
 		String test() default "";
@@ -744,14 +725,14 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForNonMetaAnnotatedTarget {
+	@interface AliasForNonMetaAnnotatedTarget {
 
 		String test() default "";
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForSelfWithDifferentDefaults {
+	@interface AliasForSelfWithDifferentDefaults {
 
 		@AliasFor("b")
 		String a() default "a";
@@ -762,7 +743,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForSelfWithMissingDefault {
+	@interface AliasForSelfWithMissingDefault {
 
 		@AliasFor("b")
 		String a() default "a";
@@ -774,7 +755,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AliasWithExplicitMirrorAndDifferentDefaultsTarget
-	static @interface AliasWithExplicitMirrorAndDifferentDefaults {
+	@interface AliasWithExplicitMirrorAndDifferentDefaults {
 
 		@AliasFor(annotation = AliasWithExplicitMirrorAndDifferentDefaultsTarget.class, attribute = "a")
 		String a() default "x";
@@ -788,7 +769,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasWithExplicitMirrorAndDifferentDefaultsTarget {
+	@interface AliasWithExplicitMirrorAndDifferentDefaultsTarget {
 
 		String a() default "";
 
@@ -796,7 +777,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@MappedTarget
-	static @interface Mapped {
+	@interface Mapped {
 
 		String convention() default "";
 
@@ -806,7 +787,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MappedTarget {
+	@interface MappedTarget {
 
 		String convention() default "";
 
@@ -815,7 +796,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasPair {
+	@interface AliasPair {
 
 		@AliasFor("b")
 		String a() default "";
@@ -827,7 +808,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ImplicitMirrorsTarget
-	static @interface ImplicitMirrors {
+	@interface ImplicitMirrors {
 
 		@AliasFor(annotation = ImplicitMirrorsTarget.class, attribute = "c")
 		String a() default "";
@@ -838,7 +819,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ImplicitMirrorsTarget {
+	@interface ImplicitMirrorsTarget {
 
 		@AliasFor("d")
 		String c() default "";
@@ -850,7 +831,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ThreeDeepB
-	static @interface ThreeDeepA {
+	@interface ThreeDeepA {
 
 		@AliasFor(annotation = ThreeDeepB.class, attribute = "b1")
 		String a1() default "";
@@ -871,7 +852,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ThreeDeepC
-	static @interface ThreeDeepB {
+	@interface ThreeDeepB {
 
 		@AliasFor(annotation = ThreeDeepC.class, attribute = "c1")
 		String b1() default "";
@@ -882,7 +863,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ThreeDeepC {
+	@interface ThreeDeepC {
 
 		String c1() default "";
 
@@ -892,7 +873,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@DefinedAttributesTarget(a = "test")
-	static @interface DefinedAttributes {
+	@interface DefinedAttributes {
 
 		@AliasFor(annotation = DefinedAttributesTarget.class, attribute = "b")
 		String value();
@@ -900,7 +881,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface DefinedAttributesTarget {
+	@interface DefinedAttributesTarget {
 
 		String a();
 
@@ -935,7 +916,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@MulipleRoutesToAliasB
-	static @interface MulipleRoutesToAliasA {
+	@interface MulipleRoutesToAliasA {
 
 		@AliasFor(annotation = MulipleRoutesToAliasB.class, attribute = "b2")
 		String a1() default "";
@@ -944,7 +925,7 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@MulipleRoutesToAliasC
-	static @interface MulipleRoutesToAliasB {
+	@interface MulipleRoutesToAliasB {
 
 		@AliasFor(annotation = MulipleRoutesToAliasC.class, attribute = "c2")
 		String b1() default "";
@@ -958,7 +939,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MulipleRoutesToAliasC {
+	@interface MulipleRoutesToAliasC {
 
 		@AliasFor("c2")
 		String c1() default "";
@@ -970,14 +951,14 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ConventionToExplicitAliasesTarget
-	static @interface ConventionToExplicitAliases {
+	@interface ConventionToExplicitAliases {
 
 		String test() default "";
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ConventionToExplicitAliasesTarget {
+	@interface ConventionToExplicitAliasesTarget {
 
 		@AliasFor("test")
 		String value() default "";
@@ -988,28 +969,28 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ClassValue {
+	@interface ClassValue {
 
 		Class<?> value();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ClassValueWithDefault {
+	@interface ClassValueWithDefault {
 
 		Class<?> value() default InputStream.class;
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ClassArrayValueWithDefault {
+	@interface ClassArrayValueWithDefault {
 
 		Class<?>[] value() default { InputStream.class, OutputStream.class };
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface NestedValue {
+	@interface NestedValue {
 
 		ClassValue value() default @ClassValue(InputStream.class);
 

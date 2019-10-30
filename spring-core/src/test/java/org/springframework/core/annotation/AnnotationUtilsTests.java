@@ -557,16 +557,6 @@ class AnnotationUtilsTests {
 	}
 
 	@Test
-	void getRepeatableAnnotationsDeclaredOnClassWithMissingAttributeAliasDeclaration() throws Exception {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class))
-			.withMessageStartingWith("Attribute 'value' in")
-			.withMessageContaining(BrokenContextConfig.class.getName())
-			.withMessageContaining("@AliasFor 'location'");
-
-	}
-
-	@Test
 	void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() {
 		final List<String> expectedLocations = asList("A", "B");
 
@@ -1415,17 +1405,6 @@ class AnnotationUtilsTests {
 		Class<?> klass() default Object.class;
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface BrokenContextConfig {
-
-		// Intentionally missing:
-		// @AliasFor("location")
-		String value() default "";
-
-		@AliasFor("value")
-		String location() default "";
-	}
-
 	/**
 	 * Mock of {@code org.springframework.test.context.ContextHierarchy}.
 	 */
@@ -1434,17 +1413,8 @@ class AnnotationUtilsTests {
 		ContextConfig[] value();
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface BrokenHierarchy {
-		BrokenContextConfig[] value();
-	}
-
 	@Hierarchy({@ContextConfig("A"), @ContextConfig(location = "B")})
 	static class ConfigHierarchyTestCase {
-	}
-
-	@BrokenHierarchy(@BrokenContextConfig)
-	static class BrokenConfigHierarchyTestCase {
 	}
 
 	@ContextConfig("simple.xml")
@@ -1825,13 +1795,13 @@ class AnnotationUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(TestRepeatableContainer.class)
-	static @interface TestRepeatable {
+	@interface TestRepeatable {
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestRepeatableContainer {
+	@interface TestRepeatableContainer {
 
 		TestRepeatable[] value();
 	}
