@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -83,7 +82,7 @@ public abstract class RepeatableContainers {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		return Objects.equals(this.parent, ((RepeatableContainers) other).parent);
+		return ObjectUtils.nullSafeEquals(this.parent, ((RepeatableContainers) other).parent);
 	}
 
 	@Override
