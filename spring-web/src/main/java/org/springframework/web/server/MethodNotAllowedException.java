@@ -26,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,7 +40,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 
 	private final String method;
 
-	private final Set<HttpMethod> supportedMethods;
+	private final Set<HttpMethod> httpMethods;
 
 
 	public MethodNotAllowedException(HttpMethod method, Collection<HttpMethod> supportedMethods) {
@@ -53,7 +54,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 			supportedMethods = Collections.emptySet();
 		}
 		this.method = method;
-		this.supportedMethods = Collections.unmodifiableSet(new HashSet<>(supportedMethods));
+		this.httpMethods = Collections.unmodifiableSet(new HashSet<>(supportedMethods));
 	}
 
 
@@ -63,8 +64,9 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	 */
 	@Override
 	public Map<String, String> getHeaders() {
-		return Collections.singletonMap("Allow",
-				StringUtils.collectionToDelimitedString(this.supportedMethods, ", "));
+		return !CollectionUtils.isEmpty(this.httpMethods) ?
+				Collections.singletonMap("Allow", StringUtils.collectionToDelimitedString(this.httpMethods, ", ")) :
+				Collections.emptyMap();
 	}
 
 	/**
@@ -78,7 +80,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	 * Return the list of supported HTTP methods.
 	 */
 	public Set<HttpMethod> getSupportedMethods() {
-		return this.supportedMethods;
+		return this.httpMethods;
 	}
 
 }

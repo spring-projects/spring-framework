@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Exception for errors that fit response status 406 (not acceptable).
@@ -58,7 +59,9 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	 */
 	@Override
 	public Map<String, String> getHeaders() {
-		return Collections.singletonMap("Accept", MediaType.toString(this.supportedMediaTypes));
+		return !CollectionUtils.isEmpty(this.supportedMediaTypes) ?
+				Collections.singletonMap("Accept", MediaType.toString(this.supportedMediaTypes)) :
+				Collections.emptyMap();
 	}
 
 	/**
