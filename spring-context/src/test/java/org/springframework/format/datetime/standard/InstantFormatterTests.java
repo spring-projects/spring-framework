@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.format.datetime.standard;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -17,6 +33,9 @@ import static java.time.Instant.MIN;
 import static java.time.ZoneId.systemDefault;
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * @author Andrei Nevedomskii
+ */
 @SuppressWarnings("ConstantConditions")
 class InstantFormatterTests {
 
@@ -24,30 +43,30 @@ class InstantFormatterTests {
 
 	@ParameterizedTest
 	@ArgumentsSource(ISOSerializedInstantProvider.class)
-	void should_parse_an_ISO_formatted_string_representation_of_an_instant(final String input) throws ParseException {
-		final Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
+	void should_parse_an_ISO_formatted_string_representation_of_an_instant(String input) throws ParseException {
+		Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
 
-		final Instant actual = instantFormatter.parse(input, null);
+		Instant actual = instantFormatter.parse(input, null);
 
 		assertThat(actual).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(RFC1123SerializedInstantProvider.class)
-	void should_parse_an_RFC1123_formatted_string_representation_of_an_instant(final String input) throws ParseException {
-		final Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
+	void should_parse_an_RFC1123_formatted_string_representation_of_an_instant(String input) throws ParseException {
+		Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
 
-		final Instant actual = instantFormatter.parse(input, null);
+		Instant actual = instantFormatter.parse(input, null);
 
 		assertThat(actual).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(RandomInstantProvider.class)
-	void should_serialize_an_instant_using_ISO_format_and_ignoring_locale(final Instant input) {
-		final String expected = DateTimeFormatter.ISO_INSTANT.format(input);
+	void should_serialize_an_instant_using_ISO_format_and_ignoring_locale(Instant input) {
+		String expected = DateTimeFormatter.ISO_INSTANT.format(input);
 
-		final String actual = instantFormatter.print(input, null);
+		String actual = instantFormatter.print(input, null);
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -76,9 +95,9 @@ class InstantFormatterTests {
 
 	private static class RandomInstantProvider implements ArgumentsProvider {
 
-		private static final long dataSetSize = 10;
+		private static final long DATA_SET_SIZE = 10;
 
-		final Random random = new Random();
+		static final Random RANDOM = new Random();
 
 		Stream<?> provideArguments() {
 			return randomInstantStream(MIN, MAX);
@@ -86,13 +105,13 @@ class InstantFormatterTests {
 
 		@Override
 		public final Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-			return provideArguments().map(Arguments::of).limit(dataSetSize);
+			return provideArguments().map(Arguments::of).limit(DATA_SET_SIZE);
 		}
 
-		Stream<Instant> randomInstantStream(final Instant min, final Instant max) {
+		Stream<Instant> randomInstantStream(Instant min, Instant max) {
 			return Stream.concat(
 					Stream.of(Instant.now()), // make sure that the data set includes current instant
-					random.longs(min.getEpochSecond(), max.getEpochSecond())
+					RANDOM.longs(min.getEpochSecond(), max.getEpochSecond())
 							.mapToObj(Instant::ofEpochSecond)
 			);
 		}
