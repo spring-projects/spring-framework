@@ -192,7 +192,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 	}
 
-	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws CodecException, JAXBException {
 		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
 		return this.unmarshallerProcessor.apply(unmarshaller);
 	}
