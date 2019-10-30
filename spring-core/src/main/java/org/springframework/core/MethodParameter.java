@@ -486,7 +486,9 @@ public class MethodParameter {
 		if (paramType != null) {
 			return paramType;
 		}
-		paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+		if (getContainingClass() != getDeclaringClass()) {
+			paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+		}
 		if (paramType == null) {
 			paramType = computeParameterType();
 		}
