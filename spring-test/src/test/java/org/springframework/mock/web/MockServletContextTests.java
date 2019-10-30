@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.mock.web;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +26,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRegistration;
 
 import org.junit.Test;
+import org.junit.jupiter.api.condition.OS;
 
+import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +38,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Unit tests for {@link MockServletContext}.
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
@@ -45,27 +51,27 @@ public class MockServletContextTests {
 
 
 	@Test
-	public void listFiles() {
+	public void getResourcePaths() {
 		Set<String> paths = sc.getResourcePaths("/web");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/MockServletContextTests.class"));
 	}
 
 	@Test
-	public void listSubdirectories() {
+	public void getResourcePathsWithSubdirectories() {
 		Set<String> paths = sc.getResourcePaths("/");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/"));
 	}
 
 	@Test
-	public void listNonDirectory() {
+	public void getResourcePathsWithNonDirectory() {
 		Set<String> paths = sc.getResourcePaths("/web/MockServletContextTests.class");
 		assertNull(paths);
 	}
 
 	@Test
-	public void listInvalidPath() {
+	public void getResourcePathsWithInvalidPath() {
 		Set<String> paths = sc.getResourcePaths("/web/invalid");
 		assertNull(paths);
 	}
@@ -192,6 +198,52 @@ public class MockServletContextTests {
 		Map<String, ? extends FilterRegistration> filterRegistrations = sc.getFilterRegistrations();
 		assertNotNull(filterRegistrations);
 		assertEquals(0, filterRegistrations.size());
+	}
+
+	/**
+	 * @since 5.1.11
+	 */
+	@Test
+	public void getResourcePathsWithRelativePathToWindowsCDrive() {
+		MockServletContext servletContext = new MockServletContext( "org/springframework/mock", new FileSystemResourceLoader());
+		Set<String> paths = servletContext.getResourcePaths("C:\\temp");
+		assertNull(paths);
+	}
+
+	/**
+	 * @since 5.1.11
+	 */
+	@Test
+	public void getResourceWithRelativePathToWindowsCDrive() throws Exception {
+		MockServletContext servletContext = new MockServletContext( "org/springframework/mock", new FileSystemResourceLoader());
+		URL resource = servletContext.getResource("C:\\temp");
+		assertNull(resource);
+	}
+
+	/**
+	 * @since 5.1.11
+	 */
+	@Test
+	public void getResourceAsStreamWithRelativePathToWindowsCDrive() {
+		MockServletContext servletContext = new MockServletContext( "org/springframework/mock", new FileSystemResourceLoader());
+		InputStream inputStream = servletContext.getResourceAsStream("C:\\temp");
+		assertNull(inputStream);
+	}
+
+	/**
+	 * @since 5.1.11
+	 */
+	@Test
+	public void getRealPathWithRelativePathToWindowsCDrive() {
+		MockServletContext servletContext = new MockServletContext( "org/springframework/mock", new FileSystemResourceLoader());
+		String realPath = servletContext.getRealPath("C:\\temp");
+
+		if (OS.WINDOWS.isCurrentOs()) {
+			assertNull(realPath);
+		}
+		else {
+			assertNotNull(realPath);
+		}
 	}
 
 }
