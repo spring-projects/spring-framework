@@ -419,21 +419,28 @@ class DefaultWebClient implements WebClient {
 
 		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
 
+		private static final StatusHandler DEFAULT_STATUS_HANDLER =
+				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
+
+
 		private final Mono<ClientResponse> responseMono;
 
 		private final Supplier<HttpRequest> requestSupplier;
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
-			this.statusHandlers.add(new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException));
+			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
+
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
 			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
 		}
 
@@ -450,7 +457,8 @@ class DefaultWebClient implements WebClient {
 
 			Assert.notNull(statusCodePredicate, "IntPredicate must not be null");
 			Assert.notNull(exceptionFunction, "Function must not be null");
-			this.statusHandlers.add(0, new StatusHandler(statusCodePredicate, exceptionFunction));
+			int index = this.statusHandlers.size() - 1;  // Default handler always last
+			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
 			return this;
 		}
 
