@@ -73,10 +73,16 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param beanFactory a bean factory for resolving {@code ${...}}
 	 * placeholders and {@code #{...}} SpEL expressions in default values
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(@Nullable ConversionService conversionService,
+	protected AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
 			@Nullable ConfigurableBeanFactory beanFactory) {
 
-		this.conversionService = conversionService != null ? conversionService : DefaultConversionService.getSharedInstance();
+		// Fallback on shared ConversionService for now for historic reasons.
+		// Possibly remove after discussion in gh-23882.
+
+		//noinspection ConstantConditions
+		this.conversionService = conversionService != null ?
+				conversionService : DefaultConversionService.getSharedInstance();
+
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}

@@ -41,7 +41,7 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 			DestinationVariableMethodArgumentResolver.class.getSimpleName() + ".templateVariables";
 
 
-	public DestinationVariableMethodArgumentResolver(@Nullable ConversionService conversionService) {
+	public DestinationVariableMethodArgumentResolver(ConversionService conversionService) {
 		super(conversionService, null);
 	}
 

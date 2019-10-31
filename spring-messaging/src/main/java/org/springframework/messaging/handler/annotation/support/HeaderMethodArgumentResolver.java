@@ -49,7 +49,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 
 	public HeaderMethodArgumentResolver(
-			@Nullable ConversionService conversionService, @Nullable ConfigurableBeanFactory beanFactory) {
+			ConversionService conversionService, @Nullable ConfigurableBeanFactory beanFactory) {
 
 		super(conversionService, beanFactory);
 	}

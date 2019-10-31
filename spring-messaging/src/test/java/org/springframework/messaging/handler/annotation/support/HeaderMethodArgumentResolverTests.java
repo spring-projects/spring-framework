@@ -146,14 +146,6 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalHeaderWithValueFromNullConversionServiceInput() throws Exception {
-		GenericApplicationContext context = new GenericApplicationContext();
-		context.refresh();
-		resolver = new HeaderMethodArgumentResolver(null, context.getBeanFactory());
-		resolveOptionalHeaderWithValue();
-	}
-
-	@Test
 	public void resolveOptionalHeaderAsEmpty() throws Exception {
 		Message<String> message = MessageBuilder.withPayload("foo").build();
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
