@@ -5,22 +5,22 @@
 
 	<bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer">
 		<property name="propertyEditorRegistrars">
-			<bean class="org.springframework.jmx.export.CustomDateEditorRegistrar"/>
+			<bean class="org.springframework.jmx.export.CustomDateEditorRegistrar" />
 		</property>
 	</bean>
 
 	<bean id="dateRange" class="org.springframework.jmx.export.DateRange">
-		<property name="startDate" value="2004/10/12"/>
-		<property name="endDate" value="2004/11/13"/>
+		<property name="startDate" value="2004/10/12" />
+		<property name="endDate" value="2004/11/13" />
 	</bean>
 
 	<bean class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
-				<entry key="bean:name=dateRange" value-ref="dateRange"/>
+				<entry key="bean:name=dateRange" value-ref="dateRange" />
 			</map>
 		</property>
-    <property name="server" ref="server"/>
-  </bean>
+		<property name="server" ref="server" />
+	</bean>
 
 </beans>
