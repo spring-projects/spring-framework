@@ -88,7 +88,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	private long maxDiskUsagePerPart = -1;
 
-	private long maxParts = -1;
+	private int maxParts = -1;
 
 
 	/**
@@ -138,7 +138,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	 * Specify the maximum number of parts allowed in a given multipart request.
 	 * @since 5.1.11
 	 */
-	public void setMaxParts(long maxParts) {
+	public void setMaxParts(int maxParts) {
 		this.maxParts = maxParts;
 	}
 
@@ -146,7 +146,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	 * Return the {@link #setMaxParts configured} limit on the number of parts.
 	 * @since 5.1.11
 	 */
-	public long getMaxParts() {
+	public int getMaxParts() {
 		return this.maxParts;
 	}
 
