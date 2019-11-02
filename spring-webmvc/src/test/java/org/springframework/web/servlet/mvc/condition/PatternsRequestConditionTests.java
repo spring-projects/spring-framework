@@ -74,6 +74,14 @@ public class PatternsRequestConditionTests {
 	}
 
 	@Test
+	public void combineOtherInstance() {
+		PatternsRequestCondition c1 = new PatternsRequestCondition("/t1", "/t2");
+		PatternsRequestCondition c2 = new PatternsRequestCondition(new String[]{"/m1", "/m2"}, null, null, false, false);
+		PatternsRequestCondition expected = new PatternsRequestCondition(new String[]{"/t1/m1", "/t1/m2", "/t2/m1", "/t2/m2"}, null, null, false, false);
+		assertThat(c1.combine(c2)).isEqualToComparingOnlyGivenFields(expected, "patterns", "useSuffixPatternMatch", "useTrailingSlashMatch");
+	}
+
+	@Test
 	public void matchDirectPath() {
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
 		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo"));

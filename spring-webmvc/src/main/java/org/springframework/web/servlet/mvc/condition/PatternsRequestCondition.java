@@ -192,7 +192,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this);
+		return new PatternsRequestCondition(result, other);
 	}
 
 	/**
