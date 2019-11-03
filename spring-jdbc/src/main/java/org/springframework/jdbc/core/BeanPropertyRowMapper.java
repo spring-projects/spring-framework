@@ -248,15 +248,14 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			return "";
 		}
 		StringBuilder result = new StringBuilder();
-		result.append(lowerCaseName(name.substring(0, 1)));
+		result.append(Character.toLowerCase(name.charAt(0)));
 		for (int i = 1; i < name.length(); i++) {
-			String s = name.substring(i, i + 1);
-			String slc = lowerCaseName(s);
-			if (!s.equals(slc)) {
-				result.append("_").append(slc);
+			char c = name.charAt(i);
+			if (Character.isUpperCase(c)) {
+				result.append("_").append(Character.toLowerCase(c));
 			}
 			else {
-				result.append(s);
+				result.append(c);
 			}
 		}
 		return result.toString();
