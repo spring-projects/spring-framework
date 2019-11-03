@@ -182,7 +182,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		protected int extractLink(int index, String content, SortedSet<ContentChunkInfo> linksToAdd) {
-			if (content.substring(index, index + 4).equals("url(")) {
+			if (content.startsWith("url(", index)) {
 				// Ignore, UrlLinkParser will take care
 			}
 			else if (logger.isTraceEnabled()) {
