@@ -221,7 +221,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		protected int extractUnquotedLink(int position, String content, Set<ContentChunkInfo> result) {
-			if (content.substring(position, position + 4).equals("url(")) {
+			if (content.startsWith("url(", position)) {
 				// Ignore, UrlFunctionContentParser will take care
 			}
 			else if (logger.isTraceEnabled()) {
