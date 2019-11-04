@@ -64,7 +64,7 @@ class TestGroupTests {
 			.isThrownBy(() -> TestGroup.parse("performance, missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
 					"testGroups value: 'performance, missing'. Available groups include: " +
-					"[LONG_RUNNING,PERFORMANCE,CI]");
+					"[LONG_RUNNING,PERFORMANCE]");
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class TestGroupTests {
 			.isThrownBy(() -> TestGroup.parse("all-missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
 					"testGroups value: 'all-missing'. Available groups include: " +
-					"[LONG_RUNNING,PERFORMANCE,CI]");
+					"[LONG_RUNNING,PERFORMANCE]");
 	}
 
 }

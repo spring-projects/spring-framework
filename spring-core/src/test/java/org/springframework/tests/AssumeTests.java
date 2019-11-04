@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
-import static org.springframework.tests.TestGroup.CI;
 import static org.springframework.tests.TestGroup.LONG_RUNNING;
 import static org.springframework.tests.TestGroup.PERFORMANCE;
 
@@ -70,7 +69,7 @@ class AssumeTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void assumeGroupWithNoMatchingActiveTestGroup() {
-		setTestGroups(PERFORMANCE, CI);
+		setTestGroups(PERFORMANCE);
 		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> Assume.group(LONG_RUNNING));
 	}
 
@@ -99,7 +98,7 @@ class AssumeTests {
 		//
 		// java.lang.IllegalStateException: Failed to parse 'testGroups' system property:
 		// Unable to find test group 'bogus' when parsing testGroups value: 'all-bogus'.
-		// Available groups include: [LONG_RUNNING,PERFORMANCE,CI]
+		// Available groups include: [LONG_RUNNING,PERFORMANCE]
 
 		setTestGroups(testGroups);
 		assertThatIllegalStateException()
@@ -109,7 +108,7 @@ class AssumeTests {
 			.satisfies(ex ->
 				assertThat(ex.getCause().getMessage()).isEqualTo(
 					"Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups +
-					"'. Available groups include: [LONG_RUNNING,PERFORMANCE,CI]"));
+					"'. Available groups include: [LONG_RUNNING,PERFORMANCE]"));
 	}
 
 	private void setTestGroups(TestGroup... testGroups) {
