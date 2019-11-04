@@ -38,7 +38,7 @@ abstract class WebClientUtils {
 	/**
 	 * Create a delayed {@link ResponseEntity} from the given response and body.
 	 */
-	public static  <T> Mono<ResponseEntity<T>> toEntity(ClientResponse response, Mono<T> bodyMono) {
+	public static <T> Mono<ResponseEntity<T>> toEntity(ClientResponse response, Mono<T> bodyMono) {
 		return Mono.defer(() -> {
 			HttpHeaders headers = response.headers().asHttpHeaders();
 			int status = response.rawStatusCode();
@@ -61,7 +61,7 @@ abstract class WebClientUtils {
 		});
 	}
 
-	public static  <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
+	public static <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
 		HttpStatus resolvedStatus = HttpStatus.resolve(status);
 		return resolvedStatus != null
 				? new ResponseEntity<>(body, headers, resolvedStatus)
