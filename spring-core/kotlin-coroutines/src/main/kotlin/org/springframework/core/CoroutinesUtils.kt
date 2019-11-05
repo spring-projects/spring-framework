@@ -17,6 +17,7 @@
 @file:JvmName("CoroutinesUtils")
 package org.springframework.core
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,8 +28,11 @@ import kotlinx.coroutines.reactor.asFlux
 
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
+import reactor.util.context.Context
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -61,9 +65,9 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
 internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Any? {
 	val function = method.kotlinFunction!!
 	return if (function.isSuspend) {
-		val mono = mono(Dispatchers.Unconfined) {
-			function.callSuspend(bean, *args.sliceArray(0..(args.size-2)))
-					.let { if (it == Unit) null else it }
+		val mono = internalMono(Dispatchers.Unconfined) {
+			function.callSuspend(bean, *args.sliceArray(0..(args.size - 2)))
+				.let { if (it == Unit) null else it }
 		}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
 		if (function.returnType.classifier == Flow::class) {
 			mono.flatMapMany { (it as Flow<Any>).asFlux() }
@@ -75,4 +79,29 @@ internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: An
 	else {
 		function.call(bean, *args)
 	}
+}
+
+/**
+ * Invoke suspending function and add existing mono coroutinesContext to coroutine to root keys
+ * @author Konstantin Volivach
+ */
+internal fun <T> internalMono(
+	context: CoroutineContext = EmptyCoroutineContext,
+	block: suspend CoroutineScope.() -> T?
+): Mono<T> {
+	return Mono.subscriberContext().flatMap { ctx ->
+		mono(ctx.toCoroutineContext()+context, block)
+	}
+}
+
+/**
+ * Transform upper keys to coroutinesContext
+ * @author Konstantin Volivach
+ */
+private fun Context.toCoroutineContext(): CoroutineContext {
+	return this.stream()
+		.filter { it.value is CoroutineContext }
+		.map { it.value as CoroutineContext }
+		.reduce { context1, context2 -> context1 + context2 }
+		.orElse(EmptyCoroutineContext)
 }
