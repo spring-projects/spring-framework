@@ -97,7 +97,7 @@ final class DefaultPathContainer implements PathContainer {
 
 
 	static PathContainer createFromUrlPath(String path, Options options) {
-		if (path.equals("")) {
+		if (path.isEmpty()) {
 			return EMPTY_PATH;
 		}
 		char separator = options.separator();
@@ -117,7 +117,7 @@ final class DefaultPathContainer implements PathContainer {
 		while (begin < path.length()) {
 			int end = path.indexOf(separator, begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
-			if (!segment.equals("")) {
+			if (!segment.isEmpty()) {
 				elements.add(options.shouldDecodeAndParseSegments() ?
 						decodeAndParsePathSegment(segment) :
 						new DefaultPathSegment(segment, separatorElement));

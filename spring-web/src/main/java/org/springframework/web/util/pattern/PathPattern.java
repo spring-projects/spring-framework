@@ -411,8 +411,8 @@ public class PathPattern implements Comparable<PathPattern> {
 		int dotPos2 = p2string.indexOf('.');
 		String file2 = (dotPos2 == -1 ? p2string : p2string.substring(0, dotPos2));
 		String secondExtension = (dotPos2 == -1 ? "" : p2string.substring(dotPos2));
-		boolean firstExtensionWild = (firstExtension.equals(".*") || firstExtension.equals(""));
-		boolean secondExtensionWild = (secondExtension.equals(".*") || secondExtension.equals(""));
+		boolean firstExtensionWild = (firstExtension.equals(".*") || firstExtension.isEmpty());
+		boolean secondExtensionWild = (secondExtension.equals(".*") || secondExtension.isEmpty());
 		if (!firstExtensionWild && !secondExtensionWild) {
 			throw new IllegalArgumentException(
 					"Cannot combine patterns: " + this.patternString + " and " + pattern2string);

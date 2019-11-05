@@ -105,7 +105,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
 
 		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
-				.bufferUntil(line -> line.equals(""))
+				.bufferUntil(String::isEmpty)
 				.concatMap(lines -> Mono.justOrEmpty(buildEvent(lines, valueType, shouldWrap, hints)));
 	}
 
