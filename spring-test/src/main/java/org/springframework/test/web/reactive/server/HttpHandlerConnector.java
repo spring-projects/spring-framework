@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
@@ -74,6 +75,13 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod httpMethod, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
+
+		return Mono.defer(() -> doConnect(httpMethod, uri, requestCallback))
+				.subscribeOn(Schedulers.parallel());
+	}
+
+	private Mono<ClientHttpResponse> doConnect(
+			HttpMethod httpMethod, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
 		MonoProcessor<ClientHttpResponse> result = MonoProcessor.create();
 
