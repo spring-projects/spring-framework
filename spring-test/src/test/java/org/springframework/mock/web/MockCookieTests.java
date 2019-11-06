@@ -16,12 +16,12 @@
 
 package org.springframework.mock.web;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.*;
 
@@ -84,6 +84,22 @@ public class MockCookieTests {
 		assertEquals("Lax", cookie.getSameSite());
 	}
 
+	@Test
+	public void parseHeaderWithZeroExpiresAttribute() {
+		MockCookie cookie = MockCookie.parse("SESSION=123; Expires=0");
+
+		assertCookie(cookie, "SESSION", "123");
+		assertNull(cookie.getExpires());
+	}
+
+	@Test
+	public void parseHeaderWithBogusExpiresAttribute() {
+		MockCookie cookie = MockCookie.parse("SESSION=123; Expires=bogus");
+
+		assertCookie(cookie, "SESSION", "123");
+		assertNull(cookie.getExpires());
+	}
+
 	private void assertCookie(MockCookie cookie, String name, String value) {
 		assertEquals(name, cookie.getName());
 		assertEquals(value, cookie.getValue());
@@ -116,7 +132,7 @@ public class MockCookieTests {
 	public void parseHeaderWithAttributesCaseSensitivity() {
 		MockCookie cookie = MockCookie.parse("SESSION=123; domain=example.com; max-age=60; " +
 				"expires=Tue, 8 Oct 2019 19:50:00 GMT; path=/; secure; httponly; samesite=Lax");
-		
+
 		assertCookie(cookie, "SESSION", "123");
 		assertEquals("example.com", cookie.getDomain());
 		assertEquals(60, cookie.getMaxAge());

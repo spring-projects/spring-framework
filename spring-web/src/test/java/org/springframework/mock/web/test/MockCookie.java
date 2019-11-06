@@ -16,6 +16,7 @@
 
 package org.springframework.mock.web.test;
 
+import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -31,6 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Vedran Pavic
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.1
  */
 public class MockCookie extends Cookie {
@@ -119,8 +121,13 @@ public class MockCookie extends Cookie {
 				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Expires")) {
-				cookie.setExpires(ZonedDateTime.parse(extractAttributeValue(attribute, setCookieHeader),
-						DateTimeFormatter.RFC_1123_DATE_TIME));
+				try {
+					cookie.setExpires(ZonedDateTime.parse(extractAttributeValue(attribute, setCookieHeader),
+							DateTimeFormatter.RFC_1123_DATE_TIME));
+				}
+				catch (DateTimeException ex) {
+					// ignore invalid date formats
+				}
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Path")) {
 				cookie.setPath(extractAttributeValue(attribute, setCookieHeader));
