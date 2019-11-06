@@ -374,7 +374,7 @@ public final class ResponseCookie extends HttpCookie {
 			}
 			int char1 = domain.charAt(0);
 			int charN = domain.charAt(domain.length() - 1);
-			if (char1 == '.' || char1 == '-' || charN == '.' || charN == '-') {
+			if (char1 == '-' || charN == '.' || charN == '-') {
 				throw new IllegalArgumentException("Invalid first/last char in cookie domain: " + domain);
 			}
 			for (int i = 0, c = -1; i < domain.length(); i++) {

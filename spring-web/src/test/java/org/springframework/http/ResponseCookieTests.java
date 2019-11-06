@@ -85,6 +85,31 @@ public class ResponseCookieTests {
 				});
 	}
 
+	@Test
+	public void domainChecks() {
 
+		Arrays.asList("abc", "abc.org", "abc-def.org", "abc3.org", ".abc.org")
+				.forEach(domain -> ResponseCookie.from("n", "v").domain(domain).build());
+
+		Arrays.asList("-abc.org", "abc.org.", "abc.org-", "-abc.org", "abc.org-")
+				.forEach(domain -> {
+					try {
+						ResponseCookie.from("n", "v").domain(domain).build();
+					}
+					catch (IllegalArgumentException ex) {
+						assertThat(ex.getMessage(), Matchers.containsString("Invalid first/last char"));
+					}
+				});
+
+		Arrays.asList("abc..org", "abc.-org", "abc-.org")
+				.forEach(domain -> {
+					try {
+						ResponseCookie.from("n", "v").domain(domain).build();
+					}
+					catch (IllegalArgumentException ex) {
+						assertThat(ex.getMessage(), Matchers.containsString("invalid cookie domain char"));
+					}
+				});
+	}
 
 }
