@@ -232,7 +232,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 			String prefix = getPathPrefix(handlerType);
 			if (prefix != null) {
-				info = RequestMappingInfo.paths(prefix).build().combine(info);
+				info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
 			}
 		}
 		return info;

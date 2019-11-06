@@ -163,7 +163,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					if (this.embeddedValueResolver != null) {
 						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
 					}
-					info = RequestMappingInfo.paths(prefix).build().combine(info);
+					info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
 					break;
 				}
 			}

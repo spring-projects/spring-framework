@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -122,10 +123,12 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isFalse();
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch").isFalse();
+		assertThat(this.handlerMapping.useSuffixPatternMatch())
+				.as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch").isFalse();
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch").isTrue();
+		assertThat(this.handlerMapping.useSuffixPatternMatch())
+				.as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch").isTrue();
 	}
 
 	@Test
@@ -153,12 +156,32 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton("/api/user/{id}"));
 	}
 
+	@Test // gh-23907
+	public void pathPrefixPreservesPathMatchingSettings() throws NoSuchMethodException {
+		this.handlerMapping.setUseSuffixPatternMatch(false);
+		this.handlerMapping.setPathPrefixes(Collections.singletonMap("/api", HandlerTypePredicate.forAnyHandlerType()));
+		this.handlerMapping.afterPropertiesSet();
+
+		Method method = ComposedAnnotationController.class.getMethod("get");
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, ComposedAnnotationController.class);
+
+		assertThat(info).isNotNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/get");
+		assertThat(info.getPatternsCondition().getMatchingCondition(request)).isNotNull();
+
+		request = new MockHttpServletRequest("GET", "/api/get.pdf");
+		assertThat(info.getPatternsCondition().getMatchingCondition(request)).isNull();
+	}
+
 	@Test
 	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
-		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
-		assertThat(info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString())
+				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString())
+				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Test // SPR-14988
