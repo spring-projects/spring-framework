@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -137,6 +139,21 @@ public class ServletInvocableHandlerMethodTests {
 
 		assertTrue("Null return value + 'not modified' request should result in 'request handled'",
 				this.mavContainer.isRequestHandled());
+	}
+
+	@Test // gh-23775
+	public void invokeAndHandle_VoidNotModifiedWithEtag() throws Exception {
+		String etag = "\"deadb33f8badf00d\"";
+		this.request.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
+		this.webRequest.checkNotModified(etag);
+
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertTrue("Null return value + 'not modified' request should result in 'request handled'",
+				this.mavContainer.isRequestHandled());
+
+		assertEquals(true, this.request.getAttribute(ShallowEtagHeaderFilter.class.getName() + ".STREAMING"));
 	}
 
 	@Test  // SPR-9159
