@@ -66,4 +66,19 @@ public class ResponseCookieTests {
 						.hasMessageContaining("RFC2616 cookie value"));
 	}
 
+	@Test
+	public void domainChecks() {
+
+		Arrays.asList("abc", "abc.org", "abc-def.org", "abc3.org", ".abc.org")
+				.forEach(domain -> ResponseCookie.from("n", "v").domain(domain).build());
+
+		Arrays.asList("-abc.org", "abc.org.", "abc.org-", "-abc.org", "abc.org-")
+				.forEach(domain -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").domain(domain).build())
+						.hasMessageContaining("Invalid first/last char"));
+
+		Arrays.asList("abc..org", "abc.-org", "abc-.org")
+				.forEach(domain -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").domain(domain).build())
+						.hasMessageContaining("invalid cookie domain char"));
+	}
+
 }
