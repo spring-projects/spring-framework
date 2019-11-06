@@ -42,7 +42,7 @@ public class PrincipalMethodArgumentResolverTests {
 	private final PrincipalMethodArgumentResolver resolver =
 			new PrincipalMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
