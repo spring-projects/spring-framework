@@ -317,7 +317,8 @@ class DefaultWebClient implements WebClient {
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
-			return exchangeFunction.exchange(request).switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
+			return Mono.defer(() -> exchangeFunction.exchange(request))
+					.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
