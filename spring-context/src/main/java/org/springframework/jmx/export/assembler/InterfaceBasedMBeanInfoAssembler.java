@@ -231,6 +231,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		for (Class<?> ifc : ifaces) {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (ifcMethod.getName().equals(method.getName()) &&
+						ifcMethod.getParameterCount() == method.getParameterCount() &&
 						Arrays.equals(ifcMethod.getParameterTypes(), method.getParameterTypes())) {
 					return true;
 				}

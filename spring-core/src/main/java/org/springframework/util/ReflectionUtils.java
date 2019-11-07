@@ -240,13 +240,20 @@ public abstract class ReflectionUtils {
 					getDeclaredMethods(searchType, false);
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
-						(paramTypes == null || Arrays.equals(paramTypes, method.getParameterTypes()))) {
+						(paramTypes == null || hasSameParams(method, paramTypes))) {
 					return method;
 				}
 			}
 			searchType = searchType.getSuperclass();
 		}
 		return null;
+	}
+
+	private static boolean hasSameParams(Method method, @Nullable Class<?>[] paramTypes) {
+		if (paramTypes.length != method.getParameterCount()) {
+			return false;
+		}
+		return Arrays.equals(paramTypes, method.getParameterTypes());
 	}
 
 	/**
@@ -413,6 +420,7 @@ public abstract class ReflectionUtils {
 			Method methodBeingOverriddenWithCovariantReturnType = null;
 			for (Method existingMethod : methods) {
 				if (method.getName().equals(existingMethod.getName()) &&
+						method.getParameterCount() == existingMethod.getParameterCount() &&
 						Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
 					// Is this a covariant return type situation?
 					if (existingMethod.getReturnType() != method.getReturnType() &&
@@ -504,8 +512,10 @@ public abstract class ReflectionUtils {
 		if (method == null || !method.getName().equals("equals")) {
 			return false;
 		}
-		Class<?>[] paramTypes = method.getParameterTypes();
-		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
+		if (method.getParameterCount() != 1) {
+			return false;
+		}
+		return method.getParameterTypes()[0] == Object.class;
 	}
 
 	/**

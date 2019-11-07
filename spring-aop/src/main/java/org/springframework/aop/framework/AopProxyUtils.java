@@ -224,8 +224,8 @@ public abstract class AopProxyUtils {
 			return new Object[0];
 		}
 		if (method.isVarArgs()) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			if (paramTypes.length == arguments.length) {
+			if (method.getParameterCount() == arguments.length) {
+				Class<?>[] paramTypes = method.getParameterTypes();
 				int varargIndex = paramTypes.length - 1;
 				Class<?> varargType = paramTypes[varargIndex];
 				if (varargType.isArray()) {
