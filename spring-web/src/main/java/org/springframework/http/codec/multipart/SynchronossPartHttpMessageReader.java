@@ -262,6 +262,13 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		}
 
 		@Override
+		protected void hookOnComplete() {
+			if (this.listener != null) {
+				this.listener.onAllPartsFinished();
+			}
+		}
+
+		@Override
 		protected void hookFinally(SignalType type) {
 			try {
 				if (this.parser != null) {
