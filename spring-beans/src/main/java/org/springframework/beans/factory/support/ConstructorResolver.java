@@ -342,22 +342,20 @@ class ConstructorResolver {
 				if (uniqueCandidate == null) {
 					uniqueCandidate = candidate;
 				}
-				else {
-					boolean paramsNotMatch = isParamsNotMatch(uniqueCandidate, candidate);
-					if (paramsNotMatch) {
-						uniqueCandidate = null;
-						break;
-					}
+				else if (isParamMismatch(uniqueCandidate, candidate)) {
+					uniqueCandidate = null;
+					break;
 				}
 			}
 		}
 		mbd.factoryMethodToIntrospect = uniqueCandidate;
 	}
 
-	private boolean isParamsNotMatch(Method uniqueCandidate, Method candidate) {
+	private boolean isParamMismatch(Method uniqueCandidate, Method candidate) {
 		int uniqueCandidateParameterCount = uniqueCandidate.getParameterCount();
 		int candidateParameterCount = candidate.getParameterCount();
-		return uniqueCandidateParameterCount != candidateParameterCount || !Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes());
+		return (uniqueCandidateParameterCount != candidateParameterCount ||
+				!Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes()));
 	}
 
 	/**

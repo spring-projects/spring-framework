@@ -235,12 +235,10 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
 		while (searchType != null) {
-			Method[] methods = searchType.isInterface() ?
-					searchType.getMethods() :
-					getDeclaredMethods(searchType, false);
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() :
+					getDeclaredMethods(searchType, false));
 			for (Method method : methods) {
-				if (name.equals(method.getName()) &&
-						(paramTypes == null || hasSameParams(method, paramTypes))) {
+				if (name.equals(method.getName()) && (paramTypes == null || hasSameParams(method, paramTypes))) {
 					return method;
 				}
 			}
@@ -249,11 +247,9 @@ public abstract class ReflectionUtils {
 		return null;
 	}
 
-	private static boolean hasSameParams(Method method, @Nullable Class<?>[] paramTypes) {
-		if (paramTypes.length != method.getParameterCount()) {
-			return false;
-		}
-		return Arrays.equals(paramTypes, method.getParameterTypes());
+	private static boolean hasSameParams(Method method, Class<?>[] paramTypes) {
+		return (paramTypes.length == method.getParameterCount() &&
+				Arrays.equals(paramTypes, method.getParameterTypes()));
 	}
 
 	/**
