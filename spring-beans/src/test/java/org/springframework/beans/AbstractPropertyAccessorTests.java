@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.AbstractNestablePropertyAccessor.PropertyHandler;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
@@ -2187,4 +2188,29 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
+    static class Spr23937Form<T>{
+        private List<T> items;
+		public List<T> getItems() {
+			return items;
+		}
+    }
+
+	static class Spr23937FormItem{
+    }
+
+	static class XyzSpr23937Form extends Spr23937Form<Spr23937FormItem>{
+    }
+
+    @Test
+	public void genericPropertyHandler() {
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(XyzSpr23937Form.class);
+        PropertyHandler ph = wrapper.getLocalPropertyHandler("items");
+        Class<?> generic = null; // expect Spr23937FormItem
+
+		generic = ph.                   getResolvableType().getNested(1).asCollection().resolveGeneric();
+        assertThat(generic == null).as("generic is null").isTrue();
+
+		generic = ph.toTypeDescriptor().getResolvableType().getNested(1).asCollection().resolveGeneric();
+        assertThat(generic != null).as("generic not null").isTrue();
+	}
 }
