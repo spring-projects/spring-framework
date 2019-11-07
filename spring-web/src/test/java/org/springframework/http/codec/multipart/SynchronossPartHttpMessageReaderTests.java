@@ -18,6 +18,7 @@ package org.springframework.http.codec.multipart;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -44,6 +45,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -147,6 +149,24 @@ public class SynchronossPartHttpMessageReaderTests {
 		ZeroDemandSubscriber subscriber = new ZeroDemandSubscriber();
 		parts.subscribe(subscriber);
 		subscriber.cancel();
+	}
+
+	@Test
+	public void gh23768() throws IOException {
+		ReadableByteChannel channel = new ClassPathResource("invalid.multipart", getClass()).readableChannel();
+		Flux<DataBuffer> body = DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 1024);
+
+		MediaType contentType = new MediaType("multipart", "form-data",
+				singletonMap("boundary", "NbjrKgjbsaMLdnMxMfDpD6myWomYc0qNX0w"));
+		ServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType)
+				.body(body);
+
+		Mono<MultiValueMap<String, Part>> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap());
+
+		StepVerifier.create(parts)
+				.assertNext(result -> assertThat(result).isEmpty())
+				.verifyComplete();
 	}
 
 	@Test
