@@ -66,8 +66,8 @@ abstract class PropertyDescriptorUtils {
 		Class<?> propertyType = null;
 
 		if (readMethod != null) {
-			Class<?>[] params = readMethod.getParameterTypes();
-			if (params.length != 0) {
+			int parameterCount = readMethod.getParameterCount();
+			if (parameterCount != 0) {
 				throw new IntrospectionException("Bad read method arg count: " + readMethod);
 			}
 			propertyType = readMethod.getReturnType();

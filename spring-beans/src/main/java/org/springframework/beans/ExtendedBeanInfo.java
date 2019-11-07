@@ -145,11 +145,10 @@ class ExtendedBeanInfo implements BeanInfo {
 
 	public static boolean isCandidateWriteMethod(Method method) {
 		String methodName = method.getName();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		int nParams = parameterTypes.length;
+		int nParams = method.getParameterCount();
 		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && int.class == parameterTypes[0])));
+				(nParams == 1 || (nParams == 2 && int.class == method.getParameterTypes()[0])));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
