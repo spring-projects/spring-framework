@@ -154,7 +154,7 @@ public class SynchronossPartHttpMessageReaderTests {
 	@Test
 	public void gh23768() throws IOException {
 		ReadableByteChannel channel = new ClassPathResource("invalid.multipart", getClass()).readableChannel();
-		Flux<DataBuffer> body = DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 1024);
+		Flux<DataBuffer> body = DataBufferUtils.readByteChannel(() -> channel, new DefaultDataBufferFactory(), 1024);
 
 		MediaType contentType = new MediaType("multipart", "form-data",
 				singletonMap("boundary", "NbjrKgjbsaMLdnMxMfDpD6myWomYc0qNX0w"));
@@ -165,7 +165,7 @@ public class SynchronossPartHttpMessageReaderTests {
 		Mono<MultiValueMap<String, Part>> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap());
 
 		StepVerifier.create(parts)
-				.assertNext(result -> assertThat(result).isEmpty())
+				.assertNext(result -> assertTrue(result.isEmpty()))
 				.verifyComplete();
 	}
 
