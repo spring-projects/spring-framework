@@ -78,7 +78,7 @@ configure(allprojects) { project ->
 
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
-			dependency "io.reactivex.rxjava2:rxjava:2.2.13"
+			dependency "io.reactivex.rxjava2:rxjava:2.2.14"
 
 			dependency "com.caucho:hessian:4.0.62"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
@@ -159,7 +159,7 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.3') {
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.4') {
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
@@ -171,9 +171,9 @@ configure(allprojects) { project ->
 			}
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.0.3"
 
-			dependency "org.jruby:jruby:9.2.7.0"
+			dependency "org.jruby:jruby:9.2.9.0"
 			dependency "org.python:jython-standalone:2.7.1"
-			dependency "org.mozilla:rhino:1.7.10"
+			dependency "org.mozilla:rhino:1.7.11"
 
 			dependency "commons-fileupload:commons-fileupload:1.4"
 			dependency "org.synchronoss.cloud:nio-multipart-parser:1.1.0"
@@ -195,7 +195,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.testng:testng:6.14.3"
 			dependency "org.hamcrest:hamcrest:2.1"
-			dependency "org.awaitility:awaitility:3.1.3"
+			dependency "org.awaitility:awaitility:3.1.6"
 			dependency "org.assertj:assertj-core:3.14.0"
 			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
 				entry 'xmlunit-assertj'
