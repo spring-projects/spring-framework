@@ -9,7 +9,6 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -779,7 +778,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 		int size = collection.size();
 		if (index >= size && index < this.autoGrowCollectionLimit) {
-			Class<?> elementType = ph.getResolvableType().getNested(nestingLevel).asCollection().resolveGeneric();
+			Class<?> elementType = ph.toTypeDescriptor().getResolvableType().getNested(nestingLevel).asCollection().resolveGeneric();
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
 					collection.add(newValue(elementType, null, name));
