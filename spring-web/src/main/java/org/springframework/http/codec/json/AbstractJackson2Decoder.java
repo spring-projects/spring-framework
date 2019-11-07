@@ -130,7 +130,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
 	}
 
 	@Override

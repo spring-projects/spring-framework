@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -1078,6 +1079,24 @@ class WebClientIntegrationTests {
 		StepVerifier.create(responseMono)
 				.expectErrorMessage("URI is not absolute: " + uri)
 				.verify(Duration.ofSeconds(5));
+	}
+
+	@ParameterizedWebClientTest
+	void nullJsonResponseShouldBeReadAsEmpty(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setResponseCode(200)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.setBody("null"));
+
+		Mono<Map> result = this.webClient.get()
+				.uri("/null")
+				.retrieve()
+				.bodyToMono(Map.class);
+
+		StepVerifier.create(result)
+				.verifyComplete();
 	}
 
 
