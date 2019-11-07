@@ -243,7 +243,7 @@ final class PostProcessorRegistrationDelegate {
 				internalPostProcessors.add(pp);
 			}
 		}
-		// nonOrderedPostProcessors may contain beanPostProcessor which annotated with @order
+		// nonOrderedPostProcessors may contain beanPostProcessor which annotated with @Order
 		sortPostProcessors(nonOrderedPostProcessors, beanFactory);
 		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
 
