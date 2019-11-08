@@ -997,13 +997,13 @@ as the following example shows:
 .Java
 ----
 	ApplicationContext context = ...
-	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
+	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val context: ApplicationContext = ...
-	val handler = WebHttpHandlerBuilder.applicationContext(context)
+	val handler = WebHttpHandlerBuilder.applicationContext(context).build()
 ----
 
 The resulting `HttpHandler` is ready for use with a <<webflux-httphandler, server adapter>>.
