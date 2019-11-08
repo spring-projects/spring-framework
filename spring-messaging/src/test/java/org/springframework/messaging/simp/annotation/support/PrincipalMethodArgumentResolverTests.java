@@ -62,15 +62,12 @@ public class PrincipalMethodArgumentResolverTests {
 
 		param = this.testMethod.arg(Optional.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, message);
-		assertThat(Optional.class.isAssignableFrom(actual.getClass())).isTrue();
-		assertThat(((Optional<?>) actual).get()).isSameAs(user);
+		assertThat(actual).isInstanceOf(Optional.class).extracting(o -> ((Optional<?>) o).get()).isSameAs(user);
 	}
 
 
 	@SuppressWarnings("unused")
-	void handle(
-			Principal user,
-			Optional<Principal> optionalUser) {
+	void handle(Principal user, Optional<Principal> optionalUser) {
 	}
 
 }

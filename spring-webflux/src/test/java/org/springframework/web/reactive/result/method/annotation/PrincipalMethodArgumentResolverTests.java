@@ -55,24 +55,22 @@ public class PrincipalMethodArgumentResolverTests {
 
 	@Test
 	public void resolverArgument() {
-		BindingContext context = new BindingContext();
 		Principal user = () -> "Joe";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();
 
+		BindingContext context = new BindingContext();
 		MethodParameter param = this.testMethod.arg(Principal.class);
 		Object actual = this.resolver.resolveArgument(param, context, exchange).block();
 		assertThat(actual).isSameAs(user);
 
 		param = this.testMethod.arg(Mono.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(Mono.class.isAssignableFrom(actual.getClass())).isTrue();
-		assertThat(((Mono<?>) actual).block()).isSameAs(user);
+		assertThat(actual).isInstanceOf(Mono.class).extracting(o -> ((Mono<?>) o).block()).isSameAs(user);
 
 		param = this.testMethod.arg(Single.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(Single.class.isAssignableFrom(actual.getClass())).isTrue();
-		assertThat(((Single<?>) actual).blockingGet()).isSameAs(user);
+		assertThat(actual).isInstanceOf(Single.class).extracting(o -> ((Single<?>) o).blockingGet()).isSameAs(user);
 	}
 
 
