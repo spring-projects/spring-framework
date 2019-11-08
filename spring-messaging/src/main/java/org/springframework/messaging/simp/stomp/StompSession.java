@@ -117,8 +117,9 @@ public interface StompSession {
 	void disconnect();
 
 	/**
-	 * Disconnect the session by sending a DISCONNECT frame.
+	 * Variant of {@link #disconnect()} with headers.
 	 * @param headers the headers for the disconnect message frame
+	 * @since 5.2.2
 	 */
 	void disconnect(StompHeaders headers);
 
