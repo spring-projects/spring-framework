@@ -739,9 +739,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
-			if ((method == HttpMethod.DELETE || method == HttpMethod.PUT) && request.getHeaders().getAccept().isEmpty()) {
-				request.getHeaders().add("Accept", "*/*");
-			}
 			response = request.execute();
 			handleResponse(url, method, response);
 			return (responseExtractor != null ? responseExtractor.extractData(response) : null);

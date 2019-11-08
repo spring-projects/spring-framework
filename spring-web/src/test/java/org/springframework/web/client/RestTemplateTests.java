@@ -492,45 +492,47 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
-	@Test
+	@Test // gh-23740
 	public void headerAcceptAllOnPut() throws Exception {
 		MockWebServer server = new MockWebServer();
 		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
 		server.start();
-		template.setRequestFactory(new SimpleClientHttpRequestFactory());
-
-		template.put(server.url("/internal/server/error").uri(), null);
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getHeader("Accept")).isEqualTo("*/*");
-
-		server.shutdown();
+		try {
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.put(server.url("/internal/server/error").uri(), null);
+			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+		}
+		finally {
+			server.shutdown();
+		}
 	}
 
-	@Test
+	@Test // gh-23740
 	public void keepGivenAcceptHeaderOnPut() throws Exception {
 		MockWebServer server = new MockWebServer();
 		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
 		server.start();
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+			HttpEntity<String> entity = new HttpEntity<>(null, headers);
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.exchange(server.url("/internal/server/error").uri(), PUT, entity, Void.class);
 
-		template.setRequestFactory(new SimpleClientHttpRequestFactory());
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		HttpEntity<String> entity = new HttpEntity<>(null, headers);
-		template.exchange(server.url("/internal/server/error").uri(), PUT, entity, Void.class);
-
-		RecordedRequest request = server.takeRequest();
+			RecordedRequest request = server.takeRequest();
 
 			final List<List<String>> accepts = request.getHeaders().toMultimap().entrySet().stream()
-				.filter(entry -> entry.getKey().equalsIgnoreCase("accept"))
-				.map(Entry::getValue)
-				.collect(Collectors.toList());
+					.filter(entry -> entry.getKey().equalsIgnoreCase("accept"))
+					.map(Entry::getValue)
+					.collect(Collectors.toList());
 
-		assertThat(accepts).hasSize(1);
-		assertThat(accepts.get(0)).hasSize(1);
-		assertThat(accepts.get(0).get(0)).isEqualTo("application/json");
-
-		server.shutdown();
+			assertThat(accepts).hasSize(1);
+			assertThat(accepts.get(0)).hasSize(1);
+			assertThat(accepts.get(0).get(0)).isEqualTo("application/json");
+		}
+		finally {
+			server.shutdown();
+		}
 	}
 
 	@Test
@@ -579,19 +581,19 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
-	@Test
+	@Test // gh-23740
 	public void headerAcceptAllOnDelete() throws Exception {
 		MockWebServer server = new MockWebServer();
 		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
 		server.start();
-		template.setRequestFactory(new SimpleClientHttpRequestFactory());
-
-		template.delete(server.url("/internal/server/error").uri());
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getHeader("Accept")).isEqualTo("*/*");
-
-		server.shutdown();
+		try {
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.delete(server.url("/internal/server/error").uri());
+			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+		}
+		finally {
+			server.shutdown();
+		}
 	}
 
 	@Test
