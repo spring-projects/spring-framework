@@ -108,18 +108,17 @@ public class MessageBuilderTests {
 		assertThat(message2.getHeaders().get("foo")).isEqualTo("bar");
 	}
 
-	@Test
+	@Test // gh-23417
 	public void createErrorMessageFromErrorMessage() {
-		Message<String> originalMessage = MessageBuilder.withPayload("test")
-				.setHeader("foo", "bar").build();
-		RuntimeException errorPayload = new RuntimeException();
-		ErrorMessage errorMessage1 = new ErrorMessage(errorPayload, Collections.singletonMap("baz", "42"), originalMessage);
+		Message<String> source = MessageBuilder.withPayload("test").setHeader("foo", "bar").build();
+		RuntimeException ex = new RuntimeException();
+		ErrorMessage errorMessage1 = new ErrorMessage(ex, Collections.singletonMap("baz", "42"), source);
 		Message<Throwable> errorMessage2 = MessageBuilder.fromMessage(errorMessage1).build();
 		assertThat(errorMessage2).isExactlyInstanceOf(ErrorMessage.class);
 		ErrorMessage actual = (ErrorMessage) errorMessage2;
-		assertThat(actual.getPayload()).isSameAs(errorPayload);
+		assertThat(actual.getPayload()).isSameAs(ex);
 		assertThat(actual.getHeaders().get("baz")).isEqualTo("42");
-		assertThat(actual.getOriginalMessage()).isSameAs(originalMessage);
+		assertThat(actual.getOriginalMessage()).isSameAs(source);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,23 +41,23 @@ public final class MessageBuilder<T> {
 	private final T payload;
 
 	@Nullable
-	private final Message<T> originalMessage;
+	private final Message<T> providedMessage;
 
 	private MessageHeaderAccessor headerAccessor;
 
 
-	private MessageBuilder(Message<T> originalMessage) {
-		Assert.notNull(originalMessage, "Message must not be null");
-		this.payload = originalMessage.getPayload();
-		this.originalMessage = originalMessage;
-		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
+	private MessageBuilder(Message<T> providedMessage) {
+		Assert.notNull(providedMessage, "Message must not be null");
+		this.payload = providedMessage.getPayload();
+		this.providedMessage = providedMessage;
+		this.headerAccessor = new MessageHeaderAccessor(providedMessage);
 	}
 
 	private MessageBuilder(T payload, MessageHeaderAccessor accessor) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
 		this.payload = payload;
-		this.originalMessage = null;
+		this.providedMessage = null;
 		this.headerAccessor = accessor;
 	}
 
@@ -149,16 +149,18 @@ public final class MessageBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	public Message<T> build() {
-		if (this.originalMessage != null && !this.headerAccessor.isModified()) {
-			return this.originalMessage;
+		if (this.providedMessage != null && !this.headerAccessor.isModified()) {
+			return this.providedMessage;
 		}
 		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
 		if (this.payload instanceof Throwable) {
-			Message<?> originalMessage = null;
-			if (this.originalMessage != null && this.originalMessage instanceof ErrorMessage) {
-				originalMessage = ((ErrorMessage) this.originalMessage).getOriginalMessage();
+			if (this.providedMessage != null && this.providedMessage instanceof ErrorMessage) {
+				Message<?> message = ((ErrorMessage) this.providedMessage).getOriginalMessage();
+				if (message != null) {
+					return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse, message);
+				}
 			}
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse, originalMessage);
+			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
 		}
 		else {
 			return new GenericMessage<>(this.payload, headersToUse);
@@ -170,10 +172,9 @@ public final class MessageBuilder<T> {
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
-	 *
-	 * If the provided message is an {@link ErrorMessage} - the
-	 * {@link ErrorMessage#originalMessage} link will be provided to the new instance.
-	 *
+	 * <p>If the provided message is an {@link ErrorMessage}, the
+	 * {@link ErrorMessage#getOriginalMessage() originalMessage} it contains, will be
+	 * passed on to new instance.
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
