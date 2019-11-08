@@ -659,4 +659,25 @@ public class DefaultStompSessionTests {
 		verifyNoMoreInteractions(this.sessionHandler);
 	}
 
+	@Test
+	public void disconnectWithHeaders() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected()).isTrue();
+
+		StompHeaders headers = new StompHeaders();
+		headers.add("foo", "bar");
+
+		this.session.disconnect(headers);
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(headers.size()).as(headers.toString()).isEqualTo(1);
+		assertThat(headers.get("foo").size()).isEqualTo(1);
+		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
+
+		assertThat(this.session.isConnected()).isFalse();
+		verifyNoMoreInteractions(this.sessionHandler);
+	}
+
 }
