@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.URLDataSource;
@@ -43,7 +44,7 @@ import javax.xml.namespace.QName;
  */
 public class StandardClasses {
 
-	private static final QName NAME = new QName("http://springframework.org/oxm-test", "standard-classes");
+	private static final QName NAME = new QName("https://springframework.org/oxm-test", "standard-classes");
 
 	private DatatypeFactory factory;
 
@@ -90,7 +91,7 @@ public class StandardClasses {
 	}
 
 	public JAXBElement<URI> standardClassURI() {
-		return new JAXBElement<>(NAME, URI.class, URI.create("http://springframework.org"));
+		return new JAXBElement<>(NAME, URI.class, URI.create("https://springframework.org"));
 	}
 
 	public JAXBElement<XMLGregorianCalendar> standardClassXMLGregorianCalendar() throws DatatypeConfigurationException {

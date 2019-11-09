@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -31,7 +31,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -51,11 +51,11 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition rbd = new RootBeanDefinition(Person.class, cavs, null);
 		lbf.registerBeanDefinition(JUERGEN, rbd);
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN,
-				new DependencyDescriptor(Person.class.getDeclaredField("name"), false)));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN,
-				new DependencyDescriptor(Person.class.getDeclaredField("name"), true)));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN,
+				new DependencyDescriptor(Person.class.getDeclaredField("name"), false))).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN,
+				new DependencyDescriptor(Person.class.getDeclaredField("name"), true))).isTrue();
 	}
 
 	@Test
@@ -66,14 +66,14 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(Person.class, cavs, null);
 		rbd.setAutowireCandidate(false);
 		lbf.registerBeanDefinition(JUERGEN, rbd);
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, null));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN,
-				new DependencyDescriptor(Person.class.getDeclaredField("name"), false)));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN,
-				new DependencyDescriptor(Person.class.getDeclaredField("name"), true)));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isFalse();
+		assertThat(lbf.isAutowireCandidate(JUERGEN,
+				new DependencyDescriptor(Person.class.getDeclaredField("name"), false))).isFalse();
+		assertThat(lbf.isAutowireCandidate(JUERGEN,
+				new DependencyDescriptor(Person.class.getDeclaredField("name"), true))).isFalse();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithFieldDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -90,12 +90,12 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 				QualifiedTestBean.class.getDeclaredField("qualified"), false);
 		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(
 				QualifiedTestBean.class.getDeclaredField("nonqualified"), false);
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(MARK, null));
-		assertTrue(lbf.isAutowireCandidate(MARK, nonqualifiedDescriptor));
-		assertFalse(lbf.isAutowireCandidate(MARK, qualifiedDescriptor));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, nonqualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, qualifiedDescriptor)).isFalse();
 	}
 
 	@Test
@@ -111,9 +111,9 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 				QualifiedTestBean.class.getDeclaredField("qualified"), false);
 		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(
 				QualifiedTestBean.class.getDeclaredField("nonqualified"), false);
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, null));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isFalse();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor)).isFalse();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isFalse();
 	}
 
 	@Test
@@ -128,12 +128,12 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 				QualifiedTestBean.class.getDeclaredField("qualified"), false);
 		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(
 				QualifiedTestBean.class.getDeclaredField("nonqualified"), false);
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithConstructorDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -149,13 +149,13 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		MethodParameter param = new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(param, false);
 		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		assertEquals("tpb", param.getParameterName());
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
-		assertFalse(lbf.isAutowireCandidate(MARK, qualifiedDescriptor));
+		assertThat(param.getParameterName()).isEqualTo("tpb");
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, qualifiedDescriptor)).isFalse();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithMethodDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -175,15 +175,15 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(qualifiedParam, false);
 		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(nonqualifiedParam, false);
 		qualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		assertEquals("tpb", qualifiedParam.getParameterName());
+		assertThat(qualifiedParam.getParameterName()).isEqualTo("tpb");
 		nonqualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		assertEquals("tpb", nonqualifiedParam.getParameterName());
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(MARK, null));
-		assertTrue(lbf.isAutowireCandidate(MARK, nonqualifiedDescriptor));
-		assertFalse(lbf.isAutowireCandidate(MARK, qualifiedDescriptor));
+		assertThat(nonqualifiedParam.getParameterName()).isEqualTo("tpb");
+		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, null)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, nonqualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, qualifiedDescriptor)).isFalse();
 	}
 
 	@Test
@@ -202,8 +202,8 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
 				new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0),
 				false);
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
-		assertTrue(lbf.isAutowireCandidate(MARK, qualifiedDescriptor));
+		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
+		assertThat(lbf.isAutowireCandidate(MARK, qualifiedDescriptor)).isTrue();
 	}
 
 

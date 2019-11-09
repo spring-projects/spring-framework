@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -35,8 +36,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.util.Assert;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that an ImportAware @Configuration classes gets injected with the
@@ -53,15 +53,15 @@ public class ImportAwareTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportingConfig.class);
 		ctx.refresh();
-		assertNotNull(ctx.getBean("importedConfigBean"));
+		assertThat(ctx.getBean("importedConfigBean")).isNotNull();
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
-		assertThat("import metadata was not injected", importMetadata, notNullValue());
-		assertThat(importMetadata.getClassName(), is(ImportingConfig.class.getName()));
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(ImportingConfig.class.getName());
 		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
 		Class<?>[] importedClasses = importAttribs.getClassArray("value");
-		assertThat(importedClasses[0].getName(), is(ImportedConfig.class.getName()));
+		assertThat(importedClasses[0].getName()).isEqualTo(ImportedConfig.class.getName());
 	}
 
 	@Test
@@ -69,37 +69,53 @@ public class ImportAwareTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(IndirectlyImportingConfig.class);
 		ctx.refresh();
-		assertNotNull(ctx.getBean("importedConfigBean"));
+		assertThat(ctx.getBean("importedConfigBean")).isNotNull();
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
-		assertThat("import metadata was not injected", importMetadata, notNullValue());
-		assertThat(importMetadata.getClassName(), is(IndirectlyImportingConfig.class.getName()));
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(IndirectlyImportingConfig.class.getName());
 		AnnotationAttributes enableAttribs = AnnotationConfigUtils.attributesFor(importMetadata, EnableImportedConfig.class);
 		String foo = enableAttribs.getString("foo");
-		assertThat(foo, is("xyz"));
+		assertThat(foo).isEqualTo("xyz");
 	}
 
 	@Test
-	public void importRegistrar() throws Exception {
+	public void directlyAnnotatedWithImportLite() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportingConfigLite.class);
+		ctx.refresh();
+		assertThat(ctx.getBean("importedConfigBean")).isNotNull();
+
+		ImportedConfigLite importAwareConfig = ctx.getBean(ImportedConfigLite.class);
+		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(ImportingConfigLite.class.getName());
+		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
+		Class<?>[] importedClasses = importAttribs.getClassArray("value");
+		assertThat(importedClasses[0].getName()).isEqualTo(ImportedConfigLite.class.getName());
+	}
+
+	@Test
+	public void importRegistrar() {
 		ImportedRegistrar.called = false;
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportingRegistrarConfig.class);
 		ctx.refresh();
-		assertNotNull(ctx.getBean("registrarImportedBean"));
-		assertNotNull(ctx.getBean("otherImportedConfigBean"));
+		assertThat(ctx.getBean("registrarImportedBean")).isNotNull();
+		assertThat(ctx.getBean("otherImportedConfigBean")).isNotNull();
 	}
 
 	@Test
-	public void importRegistrarWithImport() throws Exception {
+	public void importRegistrarWithImport() {
 		ImportedRegistrar.called = false;
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportingRegistrarConfigWithImport.class);
 		ctx.refresh();
-		assertNotNull(ctx.getBean("registrarImportedBean"));
-		assertNotNull(ctx.getBean("otherImportedConfigBean"));
-		assertNotNull(ctx.getBean("importedConfigBean"));
-		assertNotNull(ctx.getBean(ImportedConfig.class));
+		assertThat(ctx.getBean("registrarImportedBean")).isNotNull();
+		assertThat(ctx.getBean("otherImportedConfigBean")).isNotNull();
+		assertThat(ctx.getBean("importedConfigBean")).isNotNull();
+		assertThat(ctx.getBean(ImportedConfig.class)).isNotNull();
 	}
 
 	@Test
@@ -107,8 +123,7 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
 				ConfigurationOne.class, ConfigurationTwo.class)
 				.getBean(MetadataHolder.class).importMetadata;
-		assertEquals(ConfigurationOne.class,
-				((StandardAnnotationMetadata) importMetadata).getIntrospectedClass());
+		assertThat(((StandardAnnotationMetadata) importMetadata).getIntrospectedClass()).isEqualTo(ConfigurationOne.class);
 	}
 
 	@Test
@@ -116,8 +131,20 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
 				ConfigurationTwo.class, ConfigurationOne.class)
 				.getBean(MetadataHolder.class).importMetadata;
-		assertEquals(ConfigurationOne.class,
-				((StandardAnnotationMetadata) importMetadata).getIntrospectedClass());
+		assertThat(((StandardAnnotationMetadata) importMetadata).getIntrospectedClass()).isEqualTo(ConfigurationOne.class);
+	}
+
+	@Test
+	public void metadataFromImportsOneThenThree() {
+		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
+				ConfigurationOne.class, ConfigurationThree.class)
+				.getBean(MetadataHolder.class).importMetadata;
+		assertThat(((StandardAnnotationMetadata) importMetadata).getIntrospectedClass()).isEqualTo(ConfigurationOne.class);
+	}
+
+	@Test
+	public void importAwareWithAnnotationAttributes() {
+		new AnnotationConfigApplicationContext(ApplicationConfiguration.class);
 	}
 
 
@@ -128,7 +155,7 @@ public class ImportAwareTests {
 
 
 	@Configuration
-	@EnableImportedConfig(foo="xyz")
+	@EnableImportedConfig(foo = "xyz")
 	static class IndirectlyImportingConfig {
 	}
 
@@ -169,6 +196,34 @@ public class ImportAwareTests {
 		@Bean
 		public String otherImportedConfigBean() {
 			return "";
+		}
+	}
+
+
+	@Configuration
+	@Import(ImportedConfigLite.class)
+	static class ImportingConfigLite {
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class ImportedConfigLite implements ImportAware {
+
+		AnnotationMetadata importMetadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+
+		@Bean
+		public BPP importedConfigBean() {
+			return new BPP();
+		}
+
+		@Bean
+		public AsyncAnnotationBeanPostProcessor asyncBPP() {
+			return new AsyncAnnotationBeanPostProcessor();
 		}
 	}
 
@@ -241,6 +296,13 @@ public class ImportAwareTests {
 	}
 
 
+	@Conditional(OnMissingBeanCondition.class)
+	@EnableLiteConfiguration("foo")
+	@Configuration
+	public static class ConfigurationThree {
+	}
+
+
 	@Import(SomeConfiguration.class)
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -252,6 +314,32 @@ public class ImportAwareTests {
 
 	@Configuration
 	public static class SomeConfiguration implements ImportAware {
+
+		private AnnotationMetadata importMetadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+
+		@Bean
+		public MetadataHolder holder() {
+			return new MetadataHolder(this.importMetadata);
+		}
+	}
+
+
+	@Import(LiteConfiguration.class)
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface EnableLiteConfiguration {
+
+		String value() default "";
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	public static class LiteConfiguration implements ImportAware {
 
 		private AnnotationMetadata importMetadata;
 
@@ -287,6 +375,42 @@ public class ImportAwareTests {
 		@Override
 		public ConfigurationPhase getConfigurationPhase() {
 			return ConfigurationPhase.REGISTER_BEAN;
+		}
+	}
+
+
+	@Configuration
+	@EnableFeature(policies = {
+			@EnableFeature.FeaturePolicy(name = "one"),
+			@EnableFeature.FeaturePolicy(name = "two")
+	})
+	public static class ApplicationConfiguration {
+	}
+
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Import(FeatureConfiguration.class)
+	public @interface EnableFeature {
+
+		FeaturePolicy[] policies() default {};
+
+		@interface FeaturePolicy {
+
+			String name();
+		}
+	}
+
+
+	@Configuration
+	public static class FeatureConfiguration implements ImportAware {
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata annotationMetadata) {
+			AnnotationAttributes enableFeatureAttributes =
+					AnnotationAttributes.fromMap(annotationMetadata.getAnnotationAttributes(EnableFeature.class.getName()));
+			assertThat(enableFeatureAttributes.annotationType()).isEqualTo(EnableFeature.class);
+			Arrays.stream(enableFeatureAttributes.getAnnotationArray("policies")).forEach(featurePolicyAttributes -> assertThat(featurePolicyAttributes.annotationType()).isEqualTo(EnableFeature.FeaturePolicy.class));
 		}
 	}
 

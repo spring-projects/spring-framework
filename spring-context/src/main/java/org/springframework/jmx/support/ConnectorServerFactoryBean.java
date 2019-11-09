@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -38,13 +39,13 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * {@link FactoryBean} that creates a JSR-160 {@link JMXConnectorServer},
- * optionally registers it with the {@link MBeanServer} and then starts it.
+ * optionally registers it with the {@link MBeanServer}, and then starts it.
  *
  * <p>The {@code JMXConnectorServer} can be started in a separate thread by setting the
  * {@code threaded} property to {@code true}. You can configure this thread to be a
  * daemon thread by setting the {@code daemon} property to {@code true}.
  *
- * <p>The {@code JMXConnectorServer} is correctly shutdown when an instance of this
+ * <p>The {@code JMXConnectorServer} is correctly shut down when an instance of this
  * class is destroyed on shutdown of the containing {@code ApplicationContext}.
  *
  * @author Rob Harrop
@@ -170,11 +171,12 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 		try {
 			if (this.threaded) {
 				// Start the connector server asynchronously (in a separate thread).
+				final JMXConnectorServer serverToStart = this.connectorServer;
 				Thread connectorThread = new Thread() {
 					@Override
 					public void run() {
 						try {
-							connectorServer.start();
+							serverToStart.start();
 						}
 						catch (IOException ex) {
 							throw new JmxException("Could not start JMX connector server after delay", ex);

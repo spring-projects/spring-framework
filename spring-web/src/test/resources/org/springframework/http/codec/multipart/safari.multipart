@@ -1,0 +1,27 @@
+------WebKitFormBoundaryG8fJ50opQOML0oGD
+Content-Disposition: form-data; name="text1"
+
+a
+------WebKitFormBoundaryG8fJ50opQOML0oGD
+Content-Disposition: form-data; name="text2"
+
+b
+------WebKitFormBoundaryG8fJ50opQOML0oGD
+Content-Disposition: form-data; name="file1"; filename="a.txt"
+Content-Type: text/plain
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.
+
+------WebKitFormBoundaryG8fJ50opQOML0oGD
+Content-Disposition: form-data; name="file2"; filename="a.txt"
+Content-Type: text/plain
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.
+
+------WebKitFormBoundaryG8fJ50opQOML0oGD
+Content-Disposition: form-data; name="file2"; filename="b.txt"
+Content-Type: text/plain
+
+.mallun mulubitsev di sutem silucai regetnI .tile gnicsipida rutetcesnoc ,tema tis rolod muspi meroL
+
+------WebKitFormBoundaryG8fJ50opQOML0oGD--

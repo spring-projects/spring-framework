@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -40,97 +40,99 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class CollectionToCollectionConverterTests {
+class CollectionToCollectionConverterTests {
 
 	private GenericConversionService conversionService = new GenericConversionService();
 
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 	}
 
 
 	@Test
-	public void scalarList() throws Exception {
+	void scalarList() throws Exception {
 		List<String> list = new ArrayList<>();
 		list.add("9");
 		list.add("37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarListTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		try {
 			conversionService.convert(list, sourceType, targetType);
 		}
 		catch (ConversionFailedException ex) {
-			assertTrue(ex.getCause() instanceof ConverterNotFoundException);
+			boolean condition = ex.getCause() instanceof ConverterNotFoundException;
+			assertThat(condition).isTrue();
 		}
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
-		assertFalse(list.equals(result));
-		assertEquals(9, result.get(0).intValue());
-		assertEquals(37, result.get(1).intValue());
+		assertThat(list.equals(result)).isFalse();
+		assertThat(result.get(0).intValue()).isEqualTo(9);
+		assertThat(result.get(1).intValue()).isEqualTo(37);
 	}
 
 	@Test
-	public void emptyListToList() throws Exception {
+	void emptyListToList() throws Exception {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(list, conversionService.convert(list, sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
+		assertThat(conversionService.convert(list, sourceType, targetType)).isEqualTo(list);
 	}
 
 	@Test
-	public void emptyListToListDifferentTargetType() throws Exception {
+	void emptyListToListDifferentTargetType() throws Exception {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListDifferentTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		LinkedList<Integer> result = (LinkedList<Integer>) conversionService.convert(list, sourceType, targetType);
-		assertEquals(LinkedList.class, result.getClass());
-		assertTrue(result.isEmpty());
+		assertThat(result.getClass()).isEqualTo(LinkedList.class);
+		assertThat(result.isEmpty()).isTrue();
 	}
 
 	@Test
-	public void collectionToObjectInteraction() throws Exception {
+	void collectionToObjectInteraction() throws Exception {
 		List<List<String>> list = new ArrayList<>();
 		list.add(Arrays.asList("9", "12"));
 		list.add(Arrays.asList("37", "23"));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
-		assertTrue(conversionService.canConvert(List.class, List.class));
-		assertSame(list, conversionService.convert(list, List.class));
+		assertThat(conversionService.canConvert(List.class, List.class)).isTrue();
+		assertThat((Object) conversionService.convert(list, List.class)).isSameAs(list);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void arrayCollectionToObjectInteraction() throws Exception {
+	void arrayCollectionToObjectInteraction() throws Exception {
 		List<String>[] array = new List[2];
 		array[0] = Arrays.asList("9", "12");
 		array[1] = Arrays.asList("37", "23");
 		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
-		assertTrue(conversionService.canConvert(String[].class, List.class));
-		assertEquals(Arrays.asList(array), conversionService.convert(array, List.class));
+		assertThat(conversionService.canConvert(String[].class, List.class)).isTrue();
+		assertThat(conversionService.convert(array, List.class)).isEqualTo(Arrays.asList(array));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void objectToCollection() throws Exception {
+	void objectToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<>();
 		list.add(Arrays.asList("9", "12"));
 		list.add(Arrays.asList("37", "23"));
@@ -139,17 +141,17 @@ public class CollectionToCollectionConverterTests {
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		List<List<List<Integer>>> result = (List<List<List<Integer>>>) conversionService.convert(list, sourceType, targetType);
-		assertEquals((Integer) 9, result.get(0).get(0).get(0));
-		assertEquals((Integer) 12, result.get(0).get(1).get(0));
-		assertEquals((Integer) 37, result.get(1).get(0).get(0));
-		assertEquals((Integer) 23, result.get(1).get(1).get(0));
+		assertThat(result.get(0).get(0).get(0)).isEqualTo((Integer) 9);
+		assertThat(result.get(0).get(1).get(0)).isEqualTo((Integer) 12);
+		assertThat(result.get(1).get(0).get(0)).isEqualTo((Integer) 37);
+		assertThat(result.get(1).get(1).get(0)).isEqualTo((Integer) 23);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void stringToCollection() throws Exception {
+	void stringToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<>();
 		list.add(Arrays.asList("9,12"));
 		list.add(Arrays.asList("37,23"));
@@ -159,30 +161,30 @@ public class CollectionToCollectionConverterTests {
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		List<List<List<Integer>>> result = (List<List<List<Integer>>>) conversionService.convert(list, sourceType, targetType);
-		assertEquals((Integer) 9, result.get(0).get(0).get(0));
-		assertEquals((Integer) 12, result.get(0).get(0).get(1));
-		assertEquals((Integer) 37, result.get(1).get(0).get(0));
-		assertEquals((Integer) 23, result.get(1).get(0).get(1));
+		assertThat(result.get(0).get(0).get(0)).isEqualTo((Integer) 9);
+		assertThat(result.get(0).get(0).get(1)).isEqualTo((Integer) 12);
+		assertThat(result.get(1).get(0).get(0)).isEqualTo((Integer) 37);
+		assertThat(result.get(1).get(0).get(1)).isEqualTo((Integer) 23);
 	}
 
 	@Test
-	public void convertEmptyVector_shouldReturnEmptyArrayList() {
+	void convertEmptyVector_shouldReturnEmptyArrayList() {
 		Vector<String> vector = new Vector<>();
 		vector.add("Element");
 		testCollectionConversionToArrayList(vector);
 	}
 
 	@Test
-	public void convertNonEmptyVector_shouldReturnNonEmptyArrayList() {
+	void convertNonEmptyVector_shouldReturnNonEmptyArrayList() {
 		Vector<String> vector = new Vector<>();
 		vector.add("Element");
 		testCollectionConversionToArrayList(vector);
 	}
 
 	@Test
-	public void testCollectionsEmptyList() throws Exception {
+	void collectionsEmptyList() throws Exception {
 		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
 		TypeDescriptor type = new TypeDescriptor(getClass().getField("list"));
 		converter.convert(list, type, TypeDescriptor.valueOf(Class.forName("java.util.Collections$EmptyList")));
@@ -192,73 +194,75 @@ public class CollectionToCollectionConverterTests {
 	private void testCollectionConversionToArrayList(Collection<String> aSource) {
 		Object myConverted = (new CollectionToCollectionConverter(new GenericConversionService())).convert(
 				aSource, TypeDescriptor.forObject(aSource), TypeDescriptor.forObject(new ArrayList()));
-		assertTrue(myConverted instanceof ArrayList<?>);
-		assertEquals(aSource.size(), ((ArrayList<?>) myConverted).size());
+		boolean condition = myConverted instanceof ArrayList<?>;
+		assertThat(condition).isTrue();
+		assertThat(((ArrayList<?>) myConverted).size()).isEqualTo(aSource.size());
 	}
 
 	@Test
-	public void listToCollectionNoCopyRequired() throws NoSuchFieldException {
+	void listToCollectionNoCopyRequired() throws NoSuchFieldException {
 		List<?> input = new ArrayList<>(Arrays.asList("foo", "bar"));
-		assertSame(input, conversionService.convert(input, TypeDescriptor.forObject(input),
-				new TypeDescriptor(getClass().getField("wildcardCollection"))));
+		assertThat(conversionService.convert(input, TypeDescriptor.forObject(input),
+				new TypeDescriptor(getClass().getField("wildcardCollection")))).isSameAs(input);
 	}
 
 	@Test
-	public void differentImpls() throws Exception {
+	void differentImpls() throws Exception {
 		List<Resource> resources = new ArrayList<>();
 		resources.add(new ClassPathResource("test"));
 		resources.add(new FileSystemResource("test"));
 		resources.add(new TestResource());
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThat(conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources")))).isSameAs(resources);
 	}
 
 	@Test
-	public void mixedInNulls() throws Exception {
+	void mixedInNulls() throws Exception {
 		List<Resource> resources = new ArrayList<>();
 		resources.add(new ClassPathResource("test"));
 		resources.add(null);
 		resources.add(new FileSystemResource("test"));
 		resources.add(new TestResource());
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThat(conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources")))).isSameAs(resources);
 	}
 
 	@Test
-	public void allNulls() throws Exception {
+	void allNulls() throws Exception {
 		List<Resource> resources = new ArrayList<>();
 		resources.add(null);
 		resources.add(null);
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThat(conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources")))).isSameAs(resources);
 	}
 
-	@Test(expected = ConverterNotFoundException.class)
-	public void elementTypesNotConvertible() throws Exception {
+	@Test
+	void elementTypesNotConvertible() throws Exception {
 		List<String> resources = new ArrayList<>();
 		resources.add(null);
 		resources.add(null);
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("strings"));
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected = ConversionFailedException.class)
-	public void nothingInCommon() throws Exception {
+	@Test
+	void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<>();
 		resources.add(new ClassPathResource("test"));
 		resources.add(3);
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
 	@Test
-	public void testStringToEnumSet() throws Exception {
+	void stringToEnumSet() throws Exception {
 		conversionService.addConverterFactory(new StringToEnumConverterFactory());
 		List<String> list = new ArrayList<>();
 		list.add("A");
 		list.add("C");
-		assertEquals(EnumSet.of(MyEnum.A, MyEnum.C),
-				conversionService.convert(list, TypeDescriptor.forObject(list), new TypeDescriptor(getClass().getField("enumSet"))));
+		assertThat(conversionService.convert(list, TypeDescriptor.forObject(list), new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
 	}
 
 

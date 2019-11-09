@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.web.server;
+
+import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
@@ -72,10 +75,19 @@ public class ResponseStatusException extends NestedRuntimeException {
 
 
 	/**
-	 * The HTTP status that fits the exception (never {@code null}).
+	 * Return the HTTP status associated with this exception.
 	 */
 	public HttpStatus getStatus() {
 		return this.status;
+	}
+
+	/**
+	 * Return response headers associated with the exception, possibly required
+	 * for the given status code (e.g. "Allow", "Accept").
+	 * @since 5.1.11
+	 */
+	public Map<String, String> getHeaders() {
+		return Collections.emptyMap();
 	}
 
 	/**
@@ -85,6 +97,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	public String getReason() {
 		return this.reason;
 	}
+
 
 	@Override
 	public String getMessage() {

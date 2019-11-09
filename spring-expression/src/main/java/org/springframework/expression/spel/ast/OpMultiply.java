@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,7 @@ import org.springframework.util.NumberUtils;
  * Implements the {@code multiply} operator.
  *
  * <p>Conversions and promotions are handled as defined in
- * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2 of the
+ * <a href="https://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2 of the
  * Java Language Specification</a>, with the addiction of {@code BigDecimal}/{@code BigInteger} management:
  *
  * <p>If any of the operands is of a reference type, unboxing conversion (Section 5.1.8)
@@ -52,8 +52,8 @@ import org.springframework.util.NumberUtils;
  */
 public class OpMultiply extends Operator {
 
-	public OpMultiply(int pos, SpelNodeImpl... operands) {
-		super("*", pos, operands);
+	public OpMultiply(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("*", startPos, endPos, operands);
 	}
 
 

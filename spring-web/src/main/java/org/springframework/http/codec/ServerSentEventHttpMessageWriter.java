@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +33,15 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -108,10 +112,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
-			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
+			MediaType mediaType, DataBufferFactory bufferFactory, Map<String, Object> hints) {
 
-		Class<?> elementClass = elementType.getRawClass();
-		ResolvableType valueType = (elementClass != null && ServerSentEvent.class.isAssignableFrom(elementClass) ?
+		ResolvableType dataType = (ServerSentEvent.class.isAssignableFrom(elementType.toClass()) ?
 				elementType.getGeneric() : elementType);
 
 		return Flux.from(input).map(element -> {
@@ -135,52 +138,53 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				writeField("retry", retry.toMillis(), sb);
 			}
 			if (comment != null) {
-				sb.append(':').append(comment.replaceAll("\\n", "\n:")).append("\n");
+				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
 			}
 			if (data != null) {
 				sb.append("data:");
 			}
 
-			return Flux.concat(encodeText(sb, mediaType, factory),
-					encodeData(data, valueType, mediaType, factory, hints),
-					encodeText("\n", mediaType, factory));
+			Mono<DataBuffer> bufferMono = Mono.fromCallable(() ->
+					bufferFactory.join(encodeEvent(sb, data, dataType, mediaType, bufferFactory, hints)));
+
+			return bufferMono.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
-	private void writeField(String fieldName, Object fieldValue, StringBuilder stringBuilder) {
-		stringBuilder.append(fieldName);
-		stringBuilder.append(':');
-		stringBuilder.append(fieldValue.toString());
-		stringBuilder.append("\n");
+	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
+		sb.append(fieldName);
+		sb.append(':');
+		sb.append(fieldValue.toString());
+		sb.append("\n");
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeData(@Nullable T data, ResolvableType valueType,
+	private <T> List<DataBuffer> encodeEvent(CharSequence markup, @Nullable T data, ResolvableType dataType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-		if (data == null) {
-			return Flux.empty();
+		List<DataBuffer> result = new ArrayList<>(4);
+		result.add(encodeText(markup, mediaType, factory));
+		if (data != null) {
+			if (data instanceof String) {
+				String dataLine = StringUtils.replace((String) data, "\n", "\ndata:") + "\n";
+				result.add(encodeText(dataLine, mediaType, factory));
+			}
+			else if (this.encoder == null) {
+				throw new CodecException("No SSE encoder configured and the data is not String.");
+			}
+			else {
+				result.add(((Encoder<T>) this.encoder).encodeValue(data, factory, dataType, mediaType, hints));
+				result.add(encodeText("\n", mediaType, factory));
+			}
 		}
-
-		if (data instanceof String) {
-			String text = (String) data;
-			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", mediaType, factory));
-		}
-
-		if (this.encoder == null) {
-			return Flux.error(new CodecException("No SSE encoder configured and the data is not String."));
-		}
-
-		return ((Encoder<T>) this.encoder)
-				.encode(Mono.just(data), factory, valueType, mediaType, hints)
-				.concatWith(encodeText("\n", mediaType, factory));
+		result.add(encodeText("\n", mediaType, factory));
+		return result;
 	}
 
-	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
+	private DataBuffer encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
-		return Mono.just(buffer);
+		return bufferFactory.wrap(bytes); // wrapping, not allocating
 	}
 
 	@Override

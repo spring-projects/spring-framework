@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.springframework.aop.ClassFilter;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.lang.Nullable;
@@ -35,19 +36,19 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
+	protected TransactionAttributeSourcePointcut() {
+		setClassFilter(new TransactionAttributeSourceClassFilter());
+	}
+
+
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		if (TransactionalProxy.class.isAssignableFrom(targetClass) ||
-				PlatformTransactionManager.class.isAssignableFrom(targetClass) ||
-				PersistenceExceptionTranslator.class.isAssignableFrom(targetClass)) {
-			return false;
-		}
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		return (tas == null || tas.getTransactionAttribute(method, targetClass) != null);
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -75,5 +76,24 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 	 */
 	@Nullable
 	protected abstract TransactionAttributeSource getTransactionAttributeSource();
+
+
+	/**
+	 * {@link ClassFilter} that delegates to {@link TransactionAttributeSource#isCandidateClass}
+	 * for filtering classes whose methods are not worth searching to begin with.
+	 */
+	private class TransactionAttributeSourceClassFilter implements ClassFilter {
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			if (TransactionalProxy.class.isAssignableFrom(clazz) ||
+					PlatformTransactionManager.class.isAssignableFrom(clazz) ||
+					PersistenceExceptionTranslator.class.isAssignableFrom(clazz)) {
+				return false;
+			}
+			TransactionAttributeSource tas = getTransactionAttributeSource();
+			return (tas == null || tas.isCandidateClass(clazz));
+		}
+	}
 
 }

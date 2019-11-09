@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -62,8 +63,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-		HttpStatus status = resolveStatus(ex);
-		if (status == null || !exchange.getResponse().setStatusCode(status)) {
+		if (!updateResponse(exchange.getResponse(), ex)) {
 			return Mono.error(ex);
 		}
 
@@ -72,8 +72,8 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
 			this.warnLogger.warn(logPrefix + formatError(ex, exchange.getRequest()), ex);
 		}
-		else if (logger.isWarnEnabled()) {
-			logger.warn(logPrefix + formatError(ex, exchange.getRequest()));
+		else if (logger.isDebugEnabled()) {
+			logger.debug(logPrefix + formatError(ex, exchange.getRequest()));
 		}
 
 		return exchange.getResponse().setComplete();
@@ -86,16 +86,25 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		return "Resolved [" + reason + "] for HTTP " + request.getMethod() + " " + path;
 	}
 
-	@Nullable
-	private HttpStatus resolveStatus(Throwable ex) {
+	private boolean updateResponse(ServerHttpResponse response, Throwable ex) {
+		boolean result = false;
 		HttpStatus status = determineStatus(ex);
-		if (status == null) {
-			Throwable cause = ex.getCause();
-			if (cause != null) {
-				status = resolveStatus(cause);
+		if (status != null) {
+			if (response.setStatusCode(status)) {
+				if (ex instanceof ResponseStatusException) {
+					((ResponseStatusException) ex).getHeaders()
+							.forEach((name, value) -> response.getHeaders().add(name, value));
+				}
+				result = true;
 			}
 		}
-		return status;
+		else {
+			Throwable cause = ex.getCause();
+			if (cause != null) {
+				result = updateResponse(response, cause);
+			}
+		}
+		return result;
 	}
 
 	/**

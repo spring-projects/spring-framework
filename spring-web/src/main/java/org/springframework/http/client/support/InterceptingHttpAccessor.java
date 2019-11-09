@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,8 +51,8 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
 	/**
 	 * Set the request interceptors that this accessor should use.
-	 * <p>The interceptors will get sorted according to their order
-	 * once the {@link ClientHttpRequestFactory} will be built.
+	 * <p>The interceptors will get immediately sorted according to their
+	 * {@linkplain AnnotationAwareOrderComparator#sort(List) order}.
 	 * @see #getRequestFactory()
 	 * @see AnnotationAwareOrderComparator
 	 */
@@ -66,8 +66,11 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	}
 
 	/**
-	 * Return the request interceptors that this accessor uses.
-	 * <p>The returned {@link List} is active and may get appended to.
+	 * Get the request interceptors that this accessor uses.
+	 * <p>The returned {@link List} is active and may be modified. Note,
+	 * however, that the interceptors will not be resorted according to their
+	 * {@linkplain AnnotationAwareOrderComparator#sort(List) order} before the
+	 * {@link ClientHttpRequestFactory} is built.
 	 */
 	public List<ClientHttpRequestInterceptor> getInterceptors() {
 		return this.interceptors;

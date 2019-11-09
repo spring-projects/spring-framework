@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -183,7 +183,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			return true;
 		}
 		Object value = beanDefinition.getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE);
-		return (value != null && (Boolean.TRUE.equals(value) || Boolean.valueOf(value.toString())));
+		return (value != null && (Boolean.TRUE.equals(value) || Boolean.parseBoolean(value.toString())));
 	}
 
 	/**

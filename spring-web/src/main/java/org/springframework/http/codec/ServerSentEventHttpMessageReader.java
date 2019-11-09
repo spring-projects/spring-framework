@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -93,24 +93,24 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	private boolean isServerSentEvent(ResolvableType elementType) {
-		Class<?> rawClass = elementType.getRawClass();
-		return (rawClass != null && ServerSentEvent.class.isAssignableFrom(rawClass));
+		return ServerSentEvent.class.isAssignableFrom(elementType.toClass());
 	}
 
 
 	@Override
-	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Flux<Object> read(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		boolean shouldWrap = isServerSentEvent(elementType);
 		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
 
 		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
 				.bufferUntil(line -> line.equals(""))
-				.concatMap(lines -> buildEvent(lines, valueType, shouldWrap, hints));
+				.concatMap(lines -> Mono.justOrEmpty(buildEvent(lines, valueType, shouldWrap, hints)));
 	}
 
-	private Mono<?> buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
+	@Nullable
+	private Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 
 		ServerSentEvent.Builder<Object> sseBuilder = shouldWrap ? ServerSentEvent.builder() : null;
@@ -120,63 +120,61 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		for (String line : lines) {
 			if (line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
-				data.append(line.substring(5)).append("\n");
+				data.append(line.substring(5).trim()).append("\n");
 			}
 			if (shouldWrap) {
 				if (line.startsWith("id:")) {
-					sseBuilder.id(line.substring(3));
+					sseBuilder.id(line.substring(3).trim());
 				}
 				else if (line.startsWith("event:")) {
-					sseBuilder.event(line.substring(6));
+					sseBuilder.event(line.substring(6).trim());
 				}
 				else if (line.startsWith("retry:")) {
-					sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6))));
+					sseBuilder.retry(Duration.ofMillis(Long.parseLong(line.substring(6).trim())));
 				}
 				else if (line.startsWith(":")) {
 					comment = (comment != null ? comment : new StringBuilder());
-					comment.append(line.substring(1)).append("\n");
+					comment.append(line.substring(1).trim()).append("\n");
 				}
 			}
 		}
 
-		Mono<?> decodedData = (data != null ? decodeData(data.toString(), valueType, hints) : Mono.empty());
+		Object decodedData = data != null ? decodeData(data.toString(), valueType, hints) : null;
 
 		if (shouldWrap) {
 			if (comment != null) {
 				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
 			}
-			return decodedData.map(o -> {
-				sseBuilder.data(o);
-				return sseBuilder.build();
-			});
+			if (decodedData != null) {
+				sseBuilder.data(decodedData);
+			}
+			return sseBuilder.build();
 		}
 		else {
 			return decodedData;
 		}
 	}
 
-	private Mono<?> decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
+	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
-			return Mono.just(data.substring(0, data.length() - 1));
+			return data.substring(0, data.length() - 1);
 		}
-
 		if (this.decoder == null) {
-			return Mono.error(new CodecException("No SSE decoder configured and the data is not String."));
+			throw new CodecException("No SSE decoder configured and the data is not String.");
 		}
-
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
-		Mono<DataBuffer> input = Mono.just(bufferFactory.wrap(bytes));
-		return this.decoder.decodeToMono(input, dataType, MediaType.TEXT_EVENT_STREAM, hints);
+		DataBuffer buffer = bufferFactory.wrap(bytes);  // wrapping only, no allocation
+		return this.decoder.decode(buffer, dataType, MediaType.TEXT_EVENT_STREAM, hints);
 	}
 
 	@Override
-	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Mono<Object> readMono(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		// We're ahead of String + "*/*"
 		// Let's see if we can aggregate the output (lest we time out)...
 
-		if (String.class.equals(elementType.getRawClass())) {
+		if (elementType.resolve() == String.class) {
 			Flux<DataBuffer> body = message.getBody();
 			return stringDecoder.decodeToMono(body, elementType, null, null).cast(Object.class);
 		}

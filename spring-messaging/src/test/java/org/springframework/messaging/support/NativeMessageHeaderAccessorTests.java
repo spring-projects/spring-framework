@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,15 +22,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test fixture for {@link NativeMessageHeaderAccessor}.
@@ -38,10 +37,6 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 public class NativeMessageHeaderAccessorTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void createFromNativeHeaderMap() {
@@ -52,10 +47,10 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor(inputNativeHeaders);
 		Map<String, Object> actual = headerAccessor.toMap();
 
-		assertEquals(actual.toString(), 1, actual.size());
-		assertNotNull(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
-		assertEquals(inputNativeHeaders, actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
-		assertNotSame(inputNativeHeaders, actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+		assertThat(actual.size()).as(actual.toString()).isEqualTo(1);
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNotNull();
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isEqualTo(inputNativeHeaders);
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNotSameAs(inputNativeHeaders);
 	}
 
 	@Test
@@ -72,11 +67,11 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor(message);
 		Map<String, Object> actual = headerAccessor.toMap();
 
-		assertEquals(2, actual.size());
-		assertEquals("b", actual.get("a"));
-		assertNotNull(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
-		assertEquals(inputNativeHeaders, actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
-		assertNotSame(inputNativeHeaders, actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual.get("a")).isEqualTo("b");
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNotNull();
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isEqualTo(inputNativeHeaders);
+		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNotSameAs(inputNativeHeaders);
 	}
 
 	@Test
@@ -84,10 +79,10 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor((Message<?>) null);
 
 		Map<String, Object> actual = headerAccessor.toMap();
-		assertEquals(0, actual.size());
+		assertThat(actual.size()).isEqualTo(0);
 
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
-		assertEquals(Collections.emptyMap(), actualNativeHeaders);
+		assertThat(actualNativeHeaders).isEqualTo(Collections.emptyMap());
 	}
 
 	@Test
@@ -109,16 +104,16 @@ public class NativeMessageHeaderAccessorTests {
 
 		Map<String, Object> actual = headerAccessor.toMap();
 
-		assertEquals(2, actual.size());
-		assertEquals("B", actual.get("a"));
+		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual.get("a")).isEqualTo("B");
 
 		@SuppressWarnings("unchecked")
 		Map<String, List<String>> actualNativeHeaders =
 				(Map<String, List<String>>) actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
-		assertNotNull(actualNativeHeaders);
-		assertEquals(Arrays.asList("BAR"), actualNativeHeaders.get("foo"));
-		assertEquals(Arrays.asList("baz"), actualNativeHeaders.get("bar"));
+		assertThat(actualNativeHeaders).isNotNull();
+		assertThat(actualNativeHeaders.get("foo")).isEqualTo(Arrays.asList("BAR"));
+		assertThat(actualNativeHeaders.get("bar")).isEqualTo(Arrays.asList("baz"));
 	}
 
 	@Test
@@ -129,7 +124,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headers = new NativeMessageHeaderAccessor(nativeHeaders);
 		headers.setNativeHeader("foo", "baz");
 
-		assertEquals(Arrays.asList("baz"), headers.getNativeHeader("foo"));
+		assertThat(headers.getNativeHeader("foo")).isEqualTo(Arrays.asList("baz"));
 	}
 
 	@Test
@@ -140,7 +135,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headers = new NativeMessageHeaderAccessor(nativeHeaders);
 		headers.setNativeHeader("foo", null);
 
-		assertNull(headers.getNativeHeader("foo"));
+		assertThat(headers.getNativeHeader("foo")).isNull();
 	}
 
 	@Test
@@ -148,7 +143,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", "baz");
 
-		assertEquals(Arrays.asList("baz"), headerAccessor.getNativeHeader("foo"));
+		assertThat(headerAccessor.getNativeHeader("foo")).isEqualTo(Arrays.asList("baz"));
 	}
 
 	@Test
@@ -156,8 +151,8 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", null);
 
-		assertNull(headerAccessor.getNativeHeader("foo"));
-		assertNull(headerAccessor.getMessageHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+		assertThat(headerAccessor.getNativeHeader("foo")).isNull();
+		assertThat(headerAccessor.getMessageHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNull();
 	}
 
 	@Test
@@ -166,9 +161,9 @@ public class NativeMessageHeaderAccessorTests {
 		headerAccessor.setNativeHeader("foo", "bar");
 		headerAccessor.setImmutable();
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Already immutable");
-		headerAccessor.setNativeHeader("foo", "baz");
+		assertThatIllegalStateException().isThrownBy(() ->
+				headerAccessor.setNativeHeader("foo", "baz"))
+			.withMessageContaining("Already immutable");
 	}
 
 	@Test
@@ -179,7 +174,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headers = new NativeMessageHeaderAccessor(nativeHeaders);
 		headers.addNativeHeader("foo", "baz");
 
-		assertEquals(Arrays.asList("bar", "baz"), headers.getNativeHeader("foo"));
+		assertThat(headers.getNativeHeader("foo")).isEqualTo(Arrays.asList("bar", "baz"));
 	}
 
 	@Test
@@ -190,7 +185,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headers = new NativeMessageHeaderAccessor(nativeHeaders);
 		headers.addNativeHeader("foo", null);
 
-		assertEquals(Arrays.asList("bar"), headers.getNativeHeader("foo"));
+		assertThat(headers.getNativeHeader("foo")).isEqualTo(Arrays.asList("bar"));
 	}
 
 	@Test
@@ -198,7 +193,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", "bar");
 
-		assertEquals(Arrays.asList("bar"), headerAccessor.getNativeHeader("foo"));
+		assertThat(headerAccessor.getNativeHeader("foo")).isEqualTo(Arrays.asList("bar"));
 	}
 
 	@Test
@@ -206,8 +201,8 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", null);
 
-		assertNull(headerAccessor.getNativeHeader("foo"));
-		assertNull(headerAccessor.getMessageHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+		assertThat(headerAccessor.getNativeHeader("foo")).isNull();
+		assertThat(headerAccessor.getMessageHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNull();
 	}
 
 	@Test
@@ -216,9 +211,9 @@ public class NativeMessageHeaderAccessorTests {
 		headerAccessor.addNativeHeader("foo", "bar");
 		headerAccessor.setImmutable();
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Already immutable");
-		headerAccessor.addNativeHeader("foo", "baz");
+		assertThatIllegalStateException().isThrownBy(() ->
+				headerAccessor.addNativeHeader("foo", "baz"))
+			.withMessageContaining("Already immutable");
 	}
 
 	@Test

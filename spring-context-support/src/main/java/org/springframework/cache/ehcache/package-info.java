@@ -1,6 +1,6 @@
 /**
  * Support classes for the open source cache
- * <a href="http://ehcache.sourceforge.net">EhCache 2.x</a>,
+ * <a href="https://www.ehcache.org/">EhCache 2.x</a>,
  * allowing to set up an EhCache CacheManager and Caches
  * as beans in a Spring context.
  *

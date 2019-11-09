@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -530,14 +531,16 @@ public class MockHttpServletRequestBuilder
 			this.contentType = parentBuilder.contentType;
 		}
 
-		for (String headerName : parentBuilder.headers.keySet()) {
+		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
+			String headerName = entry.getKey();
 			if (!this.headers.containsKey(headerName)) {
-				this.headers.put(headerName, parentBuilder.headers.get(headerName));
+				this.headers.put(headerName, entry.getValue());
 			}
 		}
-		for (String paramName : parentBuilder.parameters.keySet()) {
+		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
+			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
-				this.parameters.put(paramName, parentBuilder.parameters.get(paramName));
+				this.parameters.put(paramName, entry.getValue());
 			}
 		}
 		for (Cookie cookie : parentBuilder.cookies) {
@@ -551,19 +554,22 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		for (String attributeName : parentBuilder.requestAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.requestAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.requestAttributes.containsKey(attributeName)) {
-				this.requestAttributes.put(attributeName, parentBuilder.requestAttributes.get(attributeName));
+				this.requestAttributes.put(attributeName, entry.getValue());
 			}
 		}
-		for (String attributeName : parentBuilder.sessionAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.sessionAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.sessionAttributes.containsKey(attributeName)) {
-				this.sessionAttributes.put(attributeName, parentBuilder.sessionAttributes.get(attributeName));
+				this.sessionAttributes.put(attributeName, entry.getValue());
 			}
 		}
-		for (String attributeName : parentBuilder.flashAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.flashAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.flashAttributes.containsKey(attributeName)) {
-				this.flashAttributes.put(attributeName, parentBuilder.flashAttributes.get(attributeName));
+				this.flashAttributes.put(attributeName, entry.getValue());
 			}
 		}
 
@@ -708,7 +714,7 @@ public class MockHttpServletRequestBuilder
 		}));
 	}
 
-	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
+	private MultiValueMap<String, String> parseFormData(MediaType mediaType) {
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() {

@@ -227,6 +227,8 @@ abstract class Symbol {
   }
 
   /**
+   * Returns the result {@link Type#getArgumentsAndReturnSizes} on {@link #value}.
+   *
    * @return the result {@link Type#getArgumentsAndReturnSizes} on {@link #value} (memoized in
    *     {@link #info} for efficiency). This should only be used for {@link
    *     #CONSTANT_METHODREF_TAG}, {@link #CONSTANT_INTERFACE_METHODREF_TAG} and {@link

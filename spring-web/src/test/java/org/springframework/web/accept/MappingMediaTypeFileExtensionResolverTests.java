@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.accept;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link MappingMediaTypeFileExtensionResolver}.
@@ -33,23 +34,22 @@ import static org.junit.Assert.*;
  */
 public class MappingMediaTypeFileExtensionResolverTests {
 
+	private final Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+	private final MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(this.mapping);
+
 	@Test
 	public void resolveExtensions() {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
-		List<String> extensions = resolver.resolveFileExtensions(MediaType.APPLICATION_JSON);
+		List<String> extensions = this.resolver.resolveFileExtensions(MediaType.APPLICATION_JSON);
 
-		assertEquals(1, extensions.size());
-		assertEquals("json", extensions.get(0));
+		assertThat(extensions).size().isEqualTo(1);
+		assertThat(extensions.get(0)).isEqualTo("json");
 	}
 
 	@Test
 	public void resolveExtensionsNoMatch() {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
-		List<String> extensions = resolver.resolveFileExtensions(MediaType.TEXT_HTML);
+		List<String> extensions = this.resolver.resolveFileExtensions(MediaType.TEXT_HTML);
 
-		assertTrue(extensions.isEmpty());
+		assertThat(extensions).isEmpty();
 	}
 
 	/**
@@ -58,11 +58,9 @@ public class MappingMediaTypeFileExtensionResolverTests {
 	 */
 	@Test
 	public void lookupMediaTypeCaseInsensitive() {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
-		MediaType mediaType = resolver.lookupMediaType("JSON");
+		MediaType mediaType = this.resolver.lookupMediaType("JSON");
 
-		assertEquals(MediaType.APPLICATION_JSON, mediaType);
+		assertThat(mediaType).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 }

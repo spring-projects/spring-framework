@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,11 @@ package org.springframework.test.context;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * JUnit 4 based unit tests for {@link TestContextManager}, which verify proper
@@ -31,41 +33,40 @@ import static org.junit.Assert.*;
  * @since 5.0
  * @see Throwable#getSuppressed()
  */
-public class TestContextManagerSuppressedExceptionsTests {
+class TestContextManagerSuppressedExceptionsTests {
 
 	@Test
-	public void afterTestExecution() throws Exception {
+	void afterTestExecution() throws Exception {
 		test("afterTestExecution", FailingAfterTestExecutionTestCase.class,
 			(tcm, c, m) -> tcm.afterTestExecution(this, m, null));
 	}
 
 	@Test
-	public void afterTestMethod() throws Exception {
+	void afterTestMethod() throws Exception {
 		test("afterTestMethod", FailingAfterTestMethodTestCase.class,
 			(tcm, c, m) -> tcm.afterTestMethod(this, m, null));
 	}
 
 	@Test
-	public void afterTestClass() throws Exception {
+	void afterTestClass() throws Exception {
 		test("afterTestClass", FailingAfterTestClassTestCase.class, (tcm, c, m) -> tcm.afterTestClass());
 	}
 
 	private void test(String useCase, Class<?> testClass, Callback callback) throws Exception {
 		TestContextManager testContextManager = new TestContextManager(testClass);
-		assertEquals("Registered TestExecutionListeners", 2, testContextManager.getTestExecutionListeners().size());
+		assertThat(testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(2);
 
-		try {
-			Method testMethod = getClass().getMethod("toString");
-			callback.invoke(testContextManager, testClass, testMethod);
-			fail("should have thrown an AssertionError");
-		}
-		catch (AssertionError err) {
-			// 'after' callbacks are reversed, so 2 comes before 1.
-			assertEquals(useCase + "-2", err.getMessage());
-			Throwable[] suppressed = err.getSuppressed();
-			assertEquals(1, suppressed.length);
-			assertEquals(useCase + "-1", suppressed[0].getMessage());
-		}
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> {
+				Method testMethod = getClass().getMethod("toString");
+				callback.invoke(testContextManager, testClass, testMethod);
+				fail("should have thrown an AssertionError");
+			}).satisfies(ex -> {
+				// 'after' callbacks are reversed, so 2 comes before 1.
+				assertThat(ex.getMessage()).isEqualTo(useCase + "-2");
+				Throwable[] suppressed = ex.getSuppressed();
+				assertThat(suppressed).hasSize(1);
+				assertThat(suppressed[0].getMessage()).isEqualTo(useCase + "-1");
+			});
 	}
 
 

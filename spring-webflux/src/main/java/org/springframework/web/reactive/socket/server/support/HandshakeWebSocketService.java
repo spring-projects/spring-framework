@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
@@ -271,10 +272,14 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			@Nullable String protocol, Map<String, Object> attributes) {
 
 		URI uri = request.getURI();
-		HttpHeaders headers = request.getHeaders();
+		// Copy request headers, as they might be pooled and recycled by
+		// the server implementation once the handshake HTTP exchange is done.
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll(request.getHeaders());
 		Mono<Principal> principal = exchange.getPrincipal();
 		String logPrefix = exchange.getLogPrefix();
-		return new HandshakeInfo(uri, headers, principal, protocol, attributes, logPrefix);
+		InetSocketAddress remoteAddress = request.getRemoteAddress();
+		return new HandshakeInfo(uri, headers, principal, protocol, remoteAddress, attributes, logPrefix);
 	}
 
 }

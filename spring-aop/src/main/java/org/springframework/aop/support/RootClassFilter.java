@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +19,22 @@ package org.springframework.aop.support;
 import java.io.Serializable;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.util.Assert;
 
 /**
  * Simple ClassFilter implementation that passes classes (and optionally subclasses).
  *
  * @author Rod Johnson
+ * @author Sam Brannen
  */
 @SuppressWarnings("serial")
 public class RootClassFilter implements ClassFilter, Serializable {
 
-	private Class<?> clazz;
+	private final Class<?> clazz;
 
 
 	public RootClassFilter(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
 	}
 
@@ -39,6 +42,22 @@ public class RootClassFilter implements ClassFilter, Serializable {
 	@Override
 	public boolean matches(Class<?> candidate) {
 		return this.clazz.isAssignableFrom(candidate);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof RootClassFilter &&
+				this.clazz.equals(((RootClassFilter) other).clazz)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.clazz.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": " + this.clazz.getName();
 	}
 
 }

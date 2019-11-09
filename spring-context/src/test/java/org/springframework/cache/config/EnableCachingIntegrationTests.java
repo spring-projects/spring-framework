@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -37,8 +37,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
-import static org.springframework.cache.CacheTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Tests that represent real use cases with advanced configuration.
@@ -50,7 +51,7 @@ public class EnableCachingIntegrationTests {
 	private ConfigurableApplicationContext context;
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
@@ -94,7 +95,7 @@ public class EnableCachingIntegrationTests {
 		service.getWithCondition(key);
 		assertCacheMiss(key, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	@Test
@@ -114,7 +115,7 @@ public class EnableCachingIntegrationTests {
 		value = service.getWithCondition(key);
 		assertCacheHit(key, value, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	private Cache getCache() {
@@ -157,7 +158,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 
-	private interface FooService {
+	interface FooService {
 
 		Object getSimple(Object key);
 
@@ -166,7 +167,7 @@ public class EnableCachingIntegrationTests {
 
 
 	@CacheConfig(cacheNames = "testCache")
-	private static class FooServiceImpl implements FooService {
+	static class FooServiceImpl implements FooService {
 
 		private final AtomicLong counter = new AtomicLong();
 

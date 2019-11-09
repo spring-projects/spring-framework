@@ -56,7 +56,9 @@ public abstract class MethodVisitor {
    */
   protected final int api;
 
-  /** The method visitor to which this visitor must delegate method calls. May be null. */
+  /**
+   * The method visitor to which this visitor must delegate method calls. May be {@literal null}.
+   */
   protected MethodVisitor mv;
 
   /**
@@ -78,8 +80,8 @@ public abstract class MethodVisitor {
    *     be null.
    */
   public MethodVisitor(final int api, final MethodVisitor methodVisitor) {
-    if (api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4 && api != Opcodes.ASM7) {
-      throw new IllegalArgumentException();
+    if (api != Opcodes.ASM7 && api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4) {
+      throw new IllegalArgumentException("Unsupported api " + api);
     }
     this.api = api;
     this.mv = methodVisitor;
@@ -92,7 +94,7 @@ public abstract class MethodVisitor {
   /**
    * Visits a parameter of this method.
    *
-   * @param name parameter name or null if none is provided.
+   * @param name parameter name or {@literal null} if none is provided.
    * @param access the parameter's access flags, only {@code ACC_FINAL}, {@code ACC_SYNTHETIC}
    *     or/and {@code ACC_MANDATED} are allowed (see {@link Opcodes}).
    */
@@ -243,15 +245,15 @@ public abstract class MethodVisitor {
    *         <li>{@link Opcodes#F_SAME} representing frame with exactly the same locals as the
    *             previous frame and with the empty stack.
    *         <li>{@link Opcodes#F_SAME1} representing frame with exactly the same locals as the
-   *             previous frame and with single value on the stack ( <code>nStack</code> is 1 and
+   *             previous frame and with single value on the stack ( <code>numStack</code> is 1 and
    *             <code>stack[0]</code> contains value for the type of the stack item).
    *         <li>{@link Opcodes#F_APPEND} representing frame with current locals are the same as the
    *             locals in the previous frame, except that additional locals are defined (<code>
-   *             nLocal</code> is 1, 2 or 3 and <code>local</code> elements contains values
+   *             numLocal</code> is 1, 2 or 3 and <code>local</code> elements contains values
    *             representing added types).
    *         <li>{@link Opcodes#F_CHOP} representing frame with current locals are the same as the
    *             locals in the previous frame, except that the last 1-3 locals are absent and with
-   *             the empty stack (<code>nLocals</code> is 1, 2 or 3).
+   *             the empty stack (<code>numLocal</code> is 1, 2 or 3).
    *         <li>{@link Opcodes#F_FULL} representing complete frame data.
    *       </ul>
    * </ul>
@@ -264,7 +266,7 @@ public abstract class MethodVisitor {
    * @param type the type of this stack map frame. Must be {@link Opcodes#F_NEW} for expanded
    *     frames, or {@link Opcodes#F_FULL}, {@link Opcodes#F_APPEND}, {@link Opcodes#F_CHOP}, {@link
    *     Opcodes#F_SAME} or {@link Opcodes#F_APPEND}, {@link Opcodes#F_SAME1} for compressed frames.
-   * @param nLocal the number of local variables in the visited frame.
+   * @param numLocal the number of local variables in the visited frame.
    * @param local the local variable types in this frame. This array must not be modified. Primitive
    *     types are represented by {@link Opcodes#TOP}, {@link Opcodes#INTEGER}, {@link
    *     Opcodes#FLOAT}, {@link Opcodes#LONG}, {@link Opcodes#DOUBLE}, {@link Opcodes#NULL} or
@@ -272,7 +274,7 @@ public abstract class MethodVisitor {
    *     Reference types are represented by String objects (representing internal names), and
    *     uninitialized types by Label objects (this label designates the NEW instruction that
    *     created this uninitialized value).
-   * @param nStack the number of operand stack elements in the visited frame.
+   * @param numStack the number of operand stack elements in the visited frame.
    * @param stack the operand stack types in this frame. This array must not be modified. Its
    *     content has the same format as the "local" array.
    * @throws IllegalStateException if a frame is visited just after another one, without any
@@ -281,12 +283,12 @@ public abstract class MethodVisitor {
    */
   public void visitFrame(
       final int type,
-      final int nLocal,
+      final int numLocal,
       final Object[] local,
-      final int nStack,
+      final int numStack,
       final Object[] stack) {
     if (mv != null) {
-      mv.visitFrame(type, nLocal, local, nStack, stack);
+      mv.visitFrame(type, numLocal, local, numStack, stack);
     }
   }
 
@@ -390,19 +392,13 @@ public abstract class MethodVisitor {
    *     Type#getInternalName()}).
    * @param name the method's name.
    * @param descriptor the method's descriptor (see {@link Type}).
-   * @deprecated
+   * @deprecated use {@link #visitMethodInsn(int, String, String, String, boolean)} instead.
    */
   @Deprecated
   public void visitMethodInsn(
       final int opcode, final String owner, final String name, final String descriptor) {
-    if (api >= Opcodes.ASM5) {
-      boolean isInterface = opcode == Opcodes.INVOKEINTERFACE;
-      visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-      return;
-    }
-    if (mv != null) {
-      mv.visitMethodInsn(opcode, owner, name, descriptor);
-    }
+    int opcodeAndSource = opcode | (api < Opcodes.ASM5 ? Opcodes.SOURCE_DEPRECATED : 0);
+    visitMethodInsn(opcodeAndSource, owner, name, descriptor, opcode == Opcodes.INVOKEINTERFACE);
   }
 
   /**
@@ -422,15 +418,15 @@ public abstract class MethodVisitor {
       final String name,
       final String descriptor,
       final boolean isInterface) {
-    if (api < Opcodes.ASM5) {
+    if (api < Opcodes.ASM5 && (opcode & Opcodes.SOURCE_DEPRECATED) == 0) {
       if (isInterface != (opcode == Opcodes.INVOKEINTERFACE)) {
-        throw new IllegalArgumentException("INVOKESPECIAL/STATIC on interfaces requires ASM5");
+        throw new UnsupportedOperationException("INVOKESPECIAL/STATIC on interfaces requires ASM5");
       }
       visitMethodInsn(opcode, owner, name, descriptor);
       return;
     }
     if (mv != null) {
-      mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+      mv.visitMethodInsn(opcode & ~Opcodes.SOURCE_MASK, owner, name, descriptor, isInterface);
     }
   }
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,14 @@ package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for custom {@link SQLExceptionTranslator}.
@@ -45,17 +45,15 @@ public class CustomSQLExceptionTranslatorRegistrarTests {
 		sext.setSqlErrorCodes(codes);
 
 		DataAccessException exFor4200 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 42000));
-		assertNotNull("Should have been translated", exFor4200);
-		assertTrue("Should have been instance of BadSqlGrammarException",
-			BadSqlGrammarException.class.isAssignableFrom(exFor4200.getClass()));
+		assertThat(exFor4200).as("Should have been translated").isNotNull();
+		assertThat(BadSqlGrammarException.class.isAssignableFrom(exFor4200.getClass())).as("Should have been instance of BadSqlGrammarException").isTrue();
 
 		DataAccessException exFor2 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 2));
-		assertNotNull("Should have been translated", exFor2);
-		assertTrue("Should have been instance of TransientDataAccessResourceException",
-			TransientDataAccessResourceException.class.isAssignableFrom(exFor2.getClass()));
+		assertThat(exFor2).as("Should have been translated").isNotNull();
+		assertThat(TransientDataAccessResourceException.class.isAssignableFrom(exFor2.getClass())).as("Should have been instance of TransientDataAccessResourceException").isTrue();
 
 		DataAccessException exFor3 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 3));
-		assertNull("Should not have been translated", exFor3);
+		assertThat(exFor3).as("Should not have been translated").isNull();
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpResponse;
@@ -104,38 +106,55 @@ public abstract class ExchangeFunctions {
 					.doOnCancel(() -> logger.debug(logPrefix + "Cancel signal (to close connection)"))
 					.map(httpResponse -> {
 						logResponse(httpResponse, logPrefix);
-						return new DefaultClientResponse(httpResponse, this.strategies, logPrefix);
+						return new DefaultClientResponse(
+								httpResponse, this.strategies, logPrefix, httpMethod.name() + " " + url,
+								() -> createRequest(clientRequest));
 					});
 		}
 
 		private void logRequest(ClientRequest request) {
-			if (logger.isDebugEnabled()) {
-				String message = request.logPrefix() + "HTTP " + request.method() + " " + request.url();
-				if (logger.isTraceEnabled()) {
-					logger.trace(message + ", headers=" + formatHeaders(request.headers()));
-				}
-				else {
-					logger.debug(message);
-				}
-			}
+			LogFormatUtils.traceDebug(logger, traceOn ->
+					request.logPrefix() + "HTTP " + request.method() + " " + request.url() +
+							(traceOn ? ", headers=" + formatHeaders(request.headers()) : "")
+			);
 		}
 
 		private void logResponse(ClientHttpResponse response, String logPrefix) {
-			if (logger.isDebugEnabled()) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
-				String message = logPrefix + "Response " + (status != null ? status : code);
-				if (logger.isTraceEnabled()) {
-					logger.trace(message + ", headers=" + formatHeaders(response.getHeaders()));
-				}
-				else {
-					logger.debug(message);
-				}
-			}
+				return logPrefix + "Response " + (status != null ? status : code) +
+						(traceOn ? ", headers=" + formatHeaders(response.getHeaders()) : "");
+			});
 		}
 
 		private String formatHeaders(HttpHeaders headers) {
 			return this.enableLoggingRequestDetails ? headers.toString() : headers.isEmpty() ? "{}" : "{masked}";
+		}
+
+		private HttpRequest createRequest(ClientRequest request) {
+			return new HttpRequest() {
+
+				@Override
+				public HttpMethod getMethod() {
+					return request.method();
+				}
+
+				@Override
+				public String getMethodValue() {
+					return request.method().name();
+				}
+
+				@Override
+				public URI getURI() {
+					return request.url();
+				}
+
+				@Override
+				public HttpHeaders getHeaders() {
+					return request.headers();
+				}
+			};
 		}
 	}
 

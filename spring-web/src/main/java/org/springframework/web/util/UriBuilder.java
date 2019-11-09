@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
@@ -124,8 +125,21 @@ public interface UriBuilder {
 	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
+	 * @see #queryParam(String, Collection)
 	 */
 	UriBuilder queryParam(String name, Object... values);
+
+	/**
+	 * Append the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @since 5.2
+	 * @see #queryParam(String, Object...)
+	 */
+	UriBuilder queryParam(String name, @Nullable Collection<?> values);
 
 	/**
 	 * Add the given query parameters.
@@ -138,8 +152,19 @@ public interface UriBuilder {
 	 * the same parameter. If no values are given, the query parameter is removed.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
+	 * @see #replaceQueryParam(String, Collection)
 	 */
 	UriBuilder replaceQueryParam(String name, Object... values);
+
+	/**
+	 * Set the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is removed.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @since 5.2
+	 * @see #replaceQueryParam(String, Object...)
+	 */
+	UriBuilder replaceQueryParam(String name, @Nullable Collection<?> values);
 
 	/**
 	 * Set the query parameter values overriding all existing query values.

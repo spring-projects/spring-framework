@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,11 +26,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -40,30 +39,27 @@ import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link ReactorNettyTcpStompClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ReactorNettyTcpStompClientTests {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyTcpStompClientTests.class);
 
-	@Rule
-	public final TestName testName = new TestName();
 
 	private BrokerService activeMQBroker;
 
 	private ReactorNettyTcpStompClient client;
 
 
-	@Before
-	public void setUp() throws Exception {
-
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	public void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		int port = SocketUtils.findAvailableTcpPort(61613);
 
@@ -84,7 +80,7 @@ public class ReactorNettyTcpStompClientTests {
 		this.client.setTaskScheduler(taskScheduler);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		try {
 			this.client.shutdown();
@@ -110,19 +106,19 @@ public class ReactorNettyTcpStompClientTests {
 		ConsumingHandler consumingHandler2 = new ConsumingHandler(destination);
 		ListenableFuture<StompSession> consumerFuture2 = this.client.connect(consumingHandler2);
 
-		assertTrue(consumingHandler1.awaitForSubscriptions(5000));
-		assertTrue(consumingHandler2.awaitForSubscriptions(5000));
+		assertThat(consumingHandler1.awaitForSubscriptions(5000)).isTrue();
+		assertThat(consumingHandler2.awaitForSubscriptions(5000)).isTrue();
 
 		ProducingHandler producingHandler = new ProducingHandler();
 		producingHandler.addToSend(destination, "foo1");
 		producingHandler.addToSend(destination, "foo2");
 		ListenableFuture<StompSession> producerFuture = this.client.connect(producingHandler);
 
-		assertTrue(consumingHandler1.awaitForMessageCount(2, 5000));
-		assertThat(consumingHandler1.getReceived(), containsInAnyOrder("foo1", "foo2"));
+		assertThat(consumingHandler1.awaitForMessageCount(2, 5000)).isTrue();
+		assertThat(consumingHandler1.getReceived()).containsExactly("foo1", "foo2");
 
-		assertTrue(consumingHandler2.awaitForMessageCount(2, 5000));
-		assertThat(consumingHandler2.getReceived(), containsInAnyOrder("foo1", "foo2"));
+		assertThat(consumingHandler2.awaitForMessageCount(2, 5000)).isTrue();
+		assertThat(consumingHandler2.getReceived()).containsExactly("foo1", "foo2");
 
 		consumerFuture1.get().disconnect();
 		consumerFuture2.get().disconnect();

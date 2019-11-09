@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,9 +28,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -42,7 +42,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link EncodedResourceResolver}.
@@ -59,7 +59,7 @@ public class EncodedResourceResolverTests {
 	private List<Resource> locations;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void createGzippedResources() throws IOException {
 		createGzippedFile("/js/foo.js");
 		createGzippedFile("foo.css");
@@ -79,7 +79,7 @@ public class EncodedResourceResolverTests {
 	}
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Cache cache = new ConcurrentMapCache("resourceCache");
 
@@ -108,13 +108,14 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file + ".gz").getDescription(), actual.getDescription());
-		assertEquals(getResource(file).getFilename(), actual.getFilename());
+		assertThat(actual.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());
+		assertThat(actual.getFilename()).isEqualTo(getResource(file).getFilename());
 
-		assertTrue(actual instanceof HttpResource);
+		boolean condition = actual instanceof HttpResource;
+		assertThat(condition).isTrue();
 		HttpHeaders headers = ((HttpResource) actual).getResponseHeaders();
-		assertEquals("gzip", headers.getFirst(HttpHeaders.CONTENT_ENCODING));
-		assertEquals("Accept-Encoding", headers.getFirst(HttpHeaders.VARY));
+		assertThat(headers.getFirst(HttpHeaders.CONTENT_ENCODING)).isEqualTo("gzip");
+		assertThat(headers.getFirst(HttpHeaders.VARY)).isEqualTo("Accept-Encoding");
 	}
 
 	@Test
@@ -126,9 +127,10 @@ public class EncodedResourceResolverTests {
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource("foo.css.gz").getDescription(), actual.getDescription());
-		assertEquals(getResource("foo.css").getFilename(), actual.getFilename());
-		assertTrue(actual instanceof HttpResource);
+		assertThat(actual.getDescription()).isEqualTo(getResource("foo.css.gz").getDescription());
+		assertThat(actual.getFilename()).isEqualTo(getResource("foo.css").getFilename());
+		boolean condition = actual instanceof HttpResource;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -142,18 +144,20 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file + ".gz").getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
-		assertTrue(resolved instanceof HttpResource);
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
+		boolean condition = resolved instanceof HttpResource;
+		assertThat(condition).isTrue();
 
 		// 2. Resolve unencoded resource
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/js/foo.js"));
 		resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file).getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
-		assertFalse(resolved instanceof HttpResource);
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file).getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
+		boolean condition1 = resolved instanceof HttpResource;
+		assertThat(condition1).isFalse();
 	}
 
 	@Test  // SPR-13149
@@ -162,8 +166,8 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(null, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file).getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file).getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
 	}
 
 	private Resource getResource(String filePath) {

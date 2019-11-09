@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,15 +44,15 @@ public final class LogDelegateFactory {
 	/**
 	 * Create a composite logger that delegates to a primary or falls back on a
 	 * secondary logger if logging for the primary logger is not enabled.
-	 * <p>This may be used for fallback logging from lower level packages that
-	 * logically should log together with some higher level package but the two
+	 * <p>This may be used for fallback logging from lower-level packages that
+	 * logically should log together with some higher-level package but the two
 	 * don't happen to share a suitable parent package (e.g. logging for the web
-	 * and lower level http and codec packages). For such cases the primary,
-	 * class-based logger can be wrapped with a shared fallback logger.
+	 * and lower-level http and codec packages). For such cases the primary
+	 * (class-based) logger can be wrapped with a shared fallback logger.
 	 * @param primaryLogger primary logger to try first
 	 * @param secondaryLogger secondary logger
-	 * @param tertiaryLoggers optionally, more fallback loggers
-	 * @return the resulting logger to use
+	 * @param tertiaryLoggers optional vararg of further fallback loggers
+	 * @return the resulting composite logger for the related categories
 	 */
 	public static Log getCompositeLog(Log primaryLogger, Log secondaryLogger, Log... tertiaryLoggers) {
 		List<Log> loggers = new ArrayList<>(2 + tertiaryLoggers.length);
@@ -68,7 +68,7 @@ public final class LogDelegateFactory {
 	 * or unnecessary to see at any log level by default under the normal package
 	 * based log hierarchy.
 	 * @param clazz the class for which to create a logger
-	 * @return the created logger
+	 * @return a logger for the hidden category ("_" + fully-qualified class name)
 	 */
 	public static Log getHiddenLog(Class<?> clazz) {
 		return LogFactory.getLog("_" + clazz.getName());

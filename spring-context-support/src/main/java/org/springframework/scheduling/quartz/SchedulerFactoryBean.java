@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
 import org.quartz.Scheduler;
@@ -193,9 +194,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private Map<String, ?> schedulerContextMap;
 
 	@Nullable
-	private ApplicationContext applicationContext;
-
-	@Nullable
 	private String applicationContextSchedulerContextKey;
 
 	@Nullable
@@ -212,6 +210,12 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private boolean exposeSchedulerInRepository = false;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
+
+	@Nullable
+	private String beanName;
+
+	@Nullable
+	private ApplicationContext applicationContext;
 
 	@Nullable
 	private Scheduler scheduler;
@@ -252,9 +256,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Set the name of the Scheduler to create via the SchedulerFactory.
-	 * <p>If not specified, the bean name will be used as default scheduler name.
+	 * Set the name of the Scheduler to create via the SchedulerFactory, as an
+	 * alternative to the {@code org.quartz.scheduler.instanceName} property.
+	 * <p>If not specified, the name will be taken from Quartz properties
+	 * ({@code org.quartz.scheduler.instanceName}), or from the declared
+	 * {@code SchedulerFactoryBean} bean name as a fallback.
 	 * @see #setBeanName
+	 * @see StdSchedulerFactory#PROP_SCHED_INSTANCE_NAME
 	 * @see org.quartz.SchedulerFactory#getScheduler()
 	 * @see org.quartz.SchedulerFactory#getScheduler(String)
 	 */
@@ -467,9 +475,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	@Override
 	public void setBeanName(String name) {
-		if (this.schedulerName == null) {
-			this.schedulerName = name;
-		}
+		this.beanName = name;
 	}
 
 	@Override
@@ -564,10 +570,22 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
 		if (this.dataSource != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+			mergedProps.setProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 		}
+
+		// Determine scheduler name across local settings and Quartz properties...
 		if (this.schedulerName != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+		}
+		else {
+			String nameProp = mergedProps.getProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME);
+			if (nameProp != null) {
+				this.schedulerName = nameProp;
+			}
+			else if (this.beanName != null) {
+				mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.beanName);
+				this.schedulerName = this.beanName;
+			}
 		}
 
 		schedulerFactory.initialize(mergedProps);
@@ -602,6 +620,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				this.jobFactory = new AdaptableJobFactory();
 			}
 			if (this.jobFactory != null) {
+				if (this.applicationContext != null && this.jobFactory instanceof ApplicationContextAware) {
+					((ApplicationContextAware) this.jobFactory).setApplicationContext(this.applicationContext);
+				}
 				if (this.jobFactory instanceof SchedulerContextAware) {
 					((SchedulerContextAware) this.jobFactory).setSchedulerContext(scheduler.getContext());
 				}

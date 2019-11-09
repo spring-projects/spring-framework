@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * @@org.springframework.jmx.export.metadata.ManagedResource
  *    (description="My Managed Bean", objectName="spring:bean=test",
- *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
+ *    log=true, logFile="build/jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
  *    persistPeriod=200, persistLocation="./foo", persistName="bar.jmx")
  * @@org.springframework.jmx.export.metadata.ManagedNotification
  *    (name="My Notification", description="A Notification", notificationType="type.foo,type.bar")

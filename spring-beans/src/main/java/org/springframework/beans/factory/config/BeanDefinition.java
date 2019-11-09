@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -27,8 +28,8 @@ import org.springframework.lang.Nullable;
  * concrete implementations.
  *
  * <p>This is just a minimal interface: The main intention is to allow a
- * {@link BeanFactoryPostProcessor} such as {@link PropertyPlaceholderConfigurer}
- * to introspect and modify property values and other bean metadata.
+ * {@link BeanFactoryPostProcessor} to introspect and modify property values
+ * and other bean metadata.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -242,8 +243,78 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 		return !getPropertyValues().isEmpty();
 	}
 
+	/**
+	 * Set the name of the initializer method.
+	 * @since 5.1
+	 */
+	void setInitMethodName(@Nullable String initMethodName);
+
+	/**
+	 * Return the name of the initializer method.
+	 * @since 5.1
+	 */
+	@Nullable
+	String getInitMethodName();
+
+	/**
+	 * Set the name of the destroy method.
+	 * @since 5.1
+	 */
+	void setDestroyMethodName(@Nullable String destroyMethodName);
+
+	/**
+	 * Return the name of the destroy method.
+	 * @since 5.1
+	 */
+	@Nullable
+	String getDestroyMethodName();
+
+	/**
+	 * Set the role hint for this {@code BeanDefinition}. The role hint
+	 * provides the frameworks as well as tools with an indication of
+	 * the role and importance of a particular {@code BeanDefinition}.
+	 * @since 5.1
+	 * @see #ROLE_APPLICATION
+	 * @see #ROLE_SUPPORT
+	 * @see #ROLE_INFRASTRUCTURE
+	 */
+	void setRole(int role);
+
+	/**
+	 * Get the role hint for this {@code BeanDefinition}. The role hint
+	 * provides the frameworks as well as tools with an indication of
+	 * the role and importance of a particular {@code BeanDefinition}.
+	 * @see #ROLE_APPLICATION
+	 * @see #ROLE_SUPPORT
+	 * @see #ROLE_INFRASTRUCTURE
+	 */
+	int getRole();
+
+	/**
+	 * Set a human-readable description of this bean definition.
+	 * @since 5.1
+	 */
+	void setDescription(@Nullable String description);
+
+	/**
+	 * Return a human-readable description of this bean definition.
+	 */
+	@Nullable
+	String getDescription();
+
 
 	// Read-only attributes
+
+	/**
+	 * Return a resolvable type for this bean definition,
+	 * based on the bean class or other specific metadata.
+	 * <p>This is typically fully resolved on a runtime-merged bean definition
+	 * but not necessarily on a configuration-time definition instance.
+	 * @return the resolvable type (potentially {@link ResolvableType#NONE})
+	 * @since 5.2
+	 * @see ConfigurableBeanFactory#getMergedBeanDefinition
+	 */
+	ResolvableType getResolvableType();
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
@@ -264,22 +335,6 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
 	 */
 	boolean isAbstract();
-
-	/**
-	 * Get the role hint for this {@code BeanDefinition}. The role hint
-	 * provides the frameworks as well as tools with an indication of
-	 * the role and importance of a particular {@code BeanDefinition}.
-	 * @see #ROLE_APPLICATION
-	 * @see #ROLE_SUPPORT
-	 * @see #ROLE_INFRASTRUCTURE
-	 */
-	int getRole();
-
-	/**
-	 * Return a human-readable description of this bean definition.
-	 */
-	@Nullable
-	String getDescription();
 
 	/**
 	 * Return a description of the resource that this bean definition

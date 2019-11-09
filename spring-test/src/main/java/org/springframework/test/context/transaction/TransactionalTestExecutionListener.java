@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,6 +40,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
@@ -49,8 +50,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@code TestExecutionListener} that provides support for executing tests
  * within <em>test-managed transactions</em> by honoring Spring's
- * {@link org.springframework.transaction.annotation.Transactional @Transactional}
- * annotation.
+ * {@link Transactional @Transactional} annotation.
  *
  * <h3>Test-managed Transactions</h3>
  * <p><em>Test-managed transactions</em> are transactions that are managed
@@ -76,8 +76,7 @@ import org.springframework.util.StringUtils;
  * <em>not</em> annotated with {@code @Transactional} (at the class or method
  * level) will not be run within a transaction. Furthermore, tests that
  * <em>are</em> annotated with {@code @Transactional} but have the
- * {@link org.springframework.transaction.annotation.Transactional#propagation propagation}
- * type set to
+ * {@link Transactional#propagation propagation} type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
  * will not be run within a transaction.
  *
@@ -109,14 +108,29 @@ import org.springframework.util.StringUtils;
  * {@code ApplicationContext} for the test. In case there are multiple
  * instances of {@code PlatformTransactionManager} within the test's
  * {@code ApplicationContext}, a <em>qualifier</em> may be declared via
- * {@link org.springframework.transaction.annotation.Transactional @Transactional}
- * (e.g., {@code @Transactional("myTxMgr")} or {@code @Transactional(transactionManger = "myTxMgr")},
- * or {@link org.springframework.transaction.annotation.TransactionManagementConfigurer
+ * {@link Transactional @Transactional} (e.g., {@code @Transactional("myTxMgr")}
+ * or {@code @Transactional(transactionManager = "myTxMgr")}, or
+ * {@link org.springframework.transaction.annotation.TransactionManagementConfigurer
  * TransactionManagementConfigurer} can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}
  * class. See {@link TestContextTransactionUtils#retrieveTransactionManager}
  * for details on the algorithm used to look up a transaction manager in
  * the test's {@code ApplicationContext}.
+ *
+ * <h3>{@code @Transactional} Attribute Support</h3>
+ * <table border="1">
+ * <tr><th>Attribute</th><th>Supported for test-managed transactions</th></tr>
+ * <tr><td>{@link Transactional#value value} and {@link Transactional#transactionManager transactionManager}</td><td>yes</td></tr>
+ * <tr><td>{@link Transactional#propagation propagation}</td>
+ * <td>only {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED} is supported</td></tr>
+ * <tr><td>{@link Transactional#isolation isolation}</td><td>no</td></tr>
+ * <tr><td>{@link Transactional#timeout timeout}</td><td>no</td></tr>
+ * <tr><td>{@link Transactional#readOnly readOnly}</td><td>no</td></tr>
+ * <tr><td>{@link Transactional#rollbackFor rollbackFor} and {@link Transactional#rollbackForClassName rollbackForClassName}</td>
+ * <td>no: use {@link TestTransaction#flagForRollback()} instead</td></tr>
+ * <tr><td>{@link Transactional#noRollbackFor noRollbackFor} and {@link Transactional#noRollbackForClassName noRollbackForClassName}</td>
+ * <td>no: use {@link TestTransaction#flagForCommit()} instead</td></tr>
+ * </table>
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -153,7 +167,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * <p>Note that if a {@code @BeforeTransaction} method fails, any remaining
 	 * {@code @BeforeTransaction} methods will not be invoked, and a transaction
 	 * will not be started.
-	 * @see org.springframework.transaction.annotation.Transactional
+	 * @see Transactional @Transactional
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	@Override
@@ -423,7 +437,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * as well as annotated interface default methods
 	 */
 	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz))
+		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz, ReflectionUtils.USER_DECLARED_METHODS))
 				.filter(method -> AnnotatedElementUtils.hasAnnotation(method, annotationType))
 				.collect(Collectors.toList());
 	}

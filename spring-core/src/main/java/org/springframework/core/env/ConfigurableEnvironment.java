@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -119,21 +119,6 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	MutablePropertySources getPropertySources();
 
 	/**
-	 * Return the value of {@link System#getenv()} if allowed by the current
-	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
-	 * to access individual keys using calls to {@link System#getenv(String)}.
-	 * <p>Note that most {@link Environment} implementations will include this system
-	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
-	 * is recommended that this method not be used directly unless bypassing other
-	 * property sources is expressly intended.
-	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
-	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
-	 * to a property, {@code null} will be returned and an INFO-level log message will be
-	 * issued noting the exception.
-	 */
-	Map<String, Object> getSystemEnvironment();
-
-	/**
 	 * Return the value of {@link System#getProperties()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getProperty(String)}.
@@ -147,6 +132,21 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * issued noting the exception.
 	 */
 	Map<String, Object> getSystemProperties();
+
+	/**
+	 * Return the value of {@link System#getenv()} if allowed by the current
+	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
+	 * to access individual keys using calls to {@link System#getenv(String)}.
+	 * <p>Note that most {@link Environment} implementations will include this system
+	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
+	 * is recommended that this method not be used directly unless bypassing other
+	 * property sources is expressly intended.
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
+	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
+	 * to a property, {@code null} will be returned and an INFO-level log message will be
+	 * issued noting the exception.
+	 */
+	Map<String, Object> getSystemEnvironment();
 
 	/**
 	 * Append the given parent environment's active profiles, default profiles and

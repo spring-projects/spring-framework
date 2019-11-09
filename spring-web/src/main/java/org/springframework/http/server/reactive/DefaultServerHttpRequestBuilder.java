@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
@@ -72,8 +73,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		this.httpMethodValue = original.getMethodValue();
 		this.body = original.getBody();
 
-		this.httpHeaders = new HttpHeaders();
-		copyMultiValueMap(original.getHeaders(), this.httpHeaders);
+		this.httpHeaders = HttpHeaders.writableHttpHeaders(original.getHeaders());
 
 		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
 		copyMultiValueMap(original.getCookies(), this.cookies);
@@ -112,8 +112,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
-	public ServerHttpRequest.Builder header(String key, String value) {
-		this.httpHeaders.add(key, value);
+	public ServerHttpRequest.Builder header(String headerName, String... headerValues) {
+		this.httpHeaders.put(headerName, Arrays.asList(headerValues));
 		return this;
 	}
 

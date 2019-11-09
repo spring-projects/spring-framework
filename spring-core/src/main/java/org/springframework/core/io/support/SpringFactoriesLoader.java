@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -84,25 +83,25 @@ public final class SpringFactoriesLoader {
 	 * <p>The returned factories are sorted through {@link AnnotationAwareOrderComparator}.
 	 * <p>If a custom instantiation strategy is required, use {@link #loadFactoryNames}
 	 * to obtain all registered factory names.
-	 * @param factoryClass the interface or abstract class representing the factory
+	 * @param factoryType the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
 	 * @see #loadFactoryNames
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryClass, @Nullable ClassLoader classLoader) {
-		Assert.notNull(factoryClass, "'factoryClass' must not be null");
+	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader) {
+		Assert.notNull(factoryType, "'factoryType' must not be null");
 		ClassLoader classLoaderToUse = classLoader;
 		if (classLoaderToUse == null) {
 			classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
 		}
-		List<String> factoryNames = loadFactoryNames(factoryClass, classLoaderToUse);
+		List<String> factoryImplementationNames = loadFactoryNames(factoryType, classLoaderToUse);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Loaded [" + factoryClass.getName() + "] names: " + factoryNames);
+			logger.trace("Loaded [" + factoryType.getName() + "] names: " + factoryImplementationNames);
 		}
-		List<T> result = new ArrayList<>(factoryNames.size());
-		for (String factoryName : factoryNames) {
-			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
+		List<T> result = new ArrayList<>(factoryImplementationNames.size());
+		for (String factoryImplementationName : factoryImplementationNames) {
+			result.add(instantiateFactory(factoryImplementationName, factoryType, classLoaderToUse));
 		}
 		AnnotationAwareOrderComparator.sort(result);
 		return result;
@@ -112,15 +111,15 @@ public final class SpringFactoriesLoader {
 	 * Load the fully qualified class names of factory implementations of the
 	 * given type from {@value #FACTORIES_RESOURCE_LOCATION}, using the given
 	 * class loader.
-	 * @param factoryClass the interface or abstract class representing the factory
+	 * @param factoryType the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
 	 * @see #loadFactories
 	 */
-	public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
-		String factoryClassName = factoryClass.getName();
-		return loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
+	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
+		String factoryTypeName = factoryType.getName();
+		return loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
 	}
 
 	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
@@ -139,9 +138,10 @@ public final class SpringFactoriesLoader {
 				UrlResource resource = new UrlResource(url);
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
-					List<String> factoryClassNames = Arrays.asList(
-							StringUtils.commaDelimitedListToStringArray((String) entry.getValue()));
-					result.addAll((String) entry.getKey(), factoryClassNames);
+					String factoryTypeName = ((String) entry.getKey()).trim();
+					for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+						result.add(factoryTypeName, factoryImplementationName.trim());
+					}
 				}
 			}
 			cache.put(classLoader, result);
@@ -154,17 +154,19 @@ public final class SpringFactoriesLoader {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T instantiateFactory(String instanceClassName, Class<T> factoryClass, ClassLoader classLoader) {
+	private static <T> T instantiateFactory(String factoryImplementationName, Class<T> factoryType, ClassLoader classLoader) {
 		try {
-			Class<?> instanceClass = ClassUtils.forName(instanceClassName, classLoader);
-			if (!factoryClass.isAssignableFrom(instanceClass)) {
+			Class<?> factoryImplementationClass = ClassUtils.forName(factoryImplementationName, classLoader);
+			if (!factoryType.isAssignableFrom(factoryImplementationClass)) {
 				throw new IllegalArgumentException(
-						"Class [" + instanceClassName + "] is not assignable to [" + factoryClass.getName() + "]");
+						"Class [" + factoryImplementationName + "] is not assignable to factory type [" + factoryType.getName() + "]");
 			}
-			return (T) ReflectionUtils.accessibleConstructor(instanceClass).newInstance();
+			return (T) ReflectionUtils.accessibleConstructor(factoryImplementationClass).newInstance();
 		}
 		catch (Throwable ex) {
-			throw new IllegalArgumentException("Unable to instantiate factory class: " + factoryClass.getName(), ex);
+			throw new IllegalArgumentException(
+				"Unable to instantiate factory class [" + factoryImplementationName + "] for factory type [" + factoryType.getName() + "]",
+				ex);
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,9 +31,10 @@ import org.springframework.util.MultiValueMap;
 public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an HttpStatus enum value
+	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
 	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @since #getRawStatusCode()
 	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus getStatusCode();
@@ -41,7 +42,7 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	/**
 	 * Return the HTTP status code (potentially non-standard and not
 	 * resolvable through the {@link HttpStatus} enum) as an integer.
-	 * @return the HTTP status as an integer
+	 * @return the HTTP status as an integer value
 	 * @since 5.0.6
 	 * @see #getStatusCode()
 	 * @see HttpStatus#resolve(int)

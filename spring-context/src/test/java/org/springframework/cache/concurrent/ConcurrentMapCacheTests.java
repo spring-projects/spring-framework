@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Costin Leau
@@ -47,7 +48,7 @@ public class ConcurrentMapCacheTests
 	protected ConcurrentMapCache cacheNoNull;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
@@ -74,14 +75,14 @@ public class ConcurrentMapCacheTests
 
 	@Test
 	public void testIsStoreByReferenceByDefault() {
-		assertFalse(this.cache.isStoreByValue());
+		assertThat(this.cache.isStoreByValue()).isFalse();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSerializer() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
-		assertTrue(serializeCache.isStoreByValue());
+		assertThat(serializeCache.isStoreByValue()).isTrue();
 
 		Object key = createRandomKey();
 		List<String> content = new ArrayList<>();
@@ -89,18 +90,19 @@ public class ConcurrentMapCacheTests
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
-		assertEquals(3, entry.size());
-		assertEquals("one", entry.get(0));
+		assertThat(entry.size()).isEqualTo(3);
+		assertThat(entry.get(0)).isEqualTo("one");
 	}
 
 	@Test
 	public void testNonSerializableContent() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Failed to serialize");
-		this.thrown.expectMessage(this.cache.getClass().getName());
-		serializeCache.put(createRandomKey(), this.cache);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				serializeCache.put(createRandomKey(), this.cache))
+			.withMessageContaining("Failed to serialize")
+			.withMessageContaining(this.cache.getClass().getName());
+
 	}
 
 	@Test
@@ -109,10 +111,10 @@ public class ConcurrentMapCacheTests
 
 		String key = createRandomKey();
 		this.nativeCache.put(key, "Some garbage");
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Failed to deserialize");
-		this.thrown.expectMessage("Some garbage");
-		serializeCache.get(key);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				serializeCache.get(key))
+			.withMessageContaining("Failed to deserialize")
+			.withMessageContaining("Some garbage");
 	}
 
 

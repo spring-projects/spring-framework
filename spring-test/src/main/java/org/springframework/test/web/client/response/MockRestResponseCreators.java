@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client.response;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
@@ -114,6 +115,17 @@ public abstract class MockRestResponseCreators {
 	 */
 	public static DefaultResponseCreator withStatus(HttpStatus status) {
 		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * {@code ResponseCreator} with an internal application {@code IOException}. For example,
+	 * one could use this to simulate a {@code SocketTimeoutException}.
+	 * @param e the {@code Exception} to be thrown at HTTP call time.
+	 */
+	public static ResponseCreator withException(IOException e) {
+		return request -> {
+			throw e;
+		};
 	}
 
 }

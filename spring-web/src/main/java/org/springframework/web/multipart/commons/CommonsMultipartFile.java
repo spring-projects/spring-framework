@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,7 +109,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		// Check for Windows-style path
 		int winSep = filename.lastIndexOf('\\');
 		// Cut off at latest possible point
-		int pos = (winSep > unixSep ? winSep : unixSep);
+		int pos = Math.max(winSep, unixSep);
 		if (pos != -1)  {
 			// Any sort of path separator found...
 			return filename.substring(pos + 1);
@@ -165,20 +166,15 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 		try {
 			this.fileItem.write(dest);
-			if (logger.isDebugEnabled()) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
 				String action = "transferred";
 				if (!this.fileItem.isInMemory()) {
 					action = (isAvailable() ? "copied" : "moved");
 				}
-				String message = "Part '" + getName() + "',  filename '" + getOriginalFilename() + "'";
-				if (logger.isTraceEnabled()) {
-					logger.trace(message + ", stored " + getStorageDescription() + ": " + action +
-							" to [" + dest.getAbsolutePath() + "]");
-				}
-				else {
-					logger.debug(message + ": " + action + " to [" + dest.getAbsolutePath() + "]");
-				}
-			}
+				return "Part '" + getName() + "',  filename '" + getOriginalFilename() + "'" +
+						(traceOn ? ", stored " + getStorageDescription() : "") +
+						": " + action + " to [" + dest.getAbsolutePath() + "]";
+			});
 		}
 		catch (FileUploadException ex) {
 			throw new IllegalStateException(ex.getMessage(), ex);

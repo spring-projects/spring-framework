@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -160,16 +161,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		// via a Connection from the target DataSource, if possible.
 		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
 			try {
-				Connection con = obtainTargetDataSource().getConnection();
-				try {
+				try (Connection con = obtainTargetDataSource().getConnection()) {
 					checkDefaultConnectionProperties(con);
-				}
-				finally {
-					con.close();
 				}
 			}
 			catch (SQLException ex) {
-				logger.info("Could not retrieve default auto-commit and transaction isolation settings", ex);
+				logger.debug("Could not retrieve default auto-commit and transaction isolation settings", ex);
 			}
 		}
 	}
@@ -358,18 +355,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					this.holdability = (Integer) args[0];
 					return null;
 				}
-				else if (method.getName().equals("commit")) {
+				else if (method.getName().equals("commit") || method.getName().equals("rollback")) {
 					// Ignore: no statements created yet.
 					return null;
 				}
-				else if (method.getName().equals("rollback")) {
-					// Ignore: no statements created yet.
-					return null;
-				}
-				else if (method.getName().equals("getWarnings")) {
-					return null;
-				}
-				else if (method.getName().equals("clearWarnings")) {
+				else if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
+					// Ignore: no warnings to expose yet.
 					return null;
 				}
 				else if (method.getName().equals("close")) {
@@ -411,8 +402,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		private Connection getTargetConnection(Method operation) throws SQLException {
 			if (this.target == null) {
 				// No target Connection held -> fetch one.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Connecting to database for operation '" + operation.getName() + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Connecting to database for operation '" + operation.getName() + "'");
 				}
 
 				// Fetch physical Connection from DataSource.
@@ -444,8 +435,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 			else {
 				// Target Connection already held -> return it.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Using existing database connection for operation '" + operation.getName() + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Using existing database connection for operation '" + operation.getName() + "'");
 				}
 			}
 

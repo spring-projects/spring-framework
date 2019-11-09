@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
  * interface, if any, and the corresponding method on the target class).
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  * @see AnnotationMatchingPointcut
  */
@@ -86,7 +88,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -94,7 +96,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 			return false;
 		}
 		AnnotationMethodMatcher otherMm = (AnnotationMethodMatcher) other;
-		return this.annotationType.equals(otherMm.annotationType);
+		return (this.annotationType.equals(otherMm.annotationType) && this.checkInherited == otherMm.checkInherited);
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import kotlinx.coroutines.CompletableDeferredKt;
+import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,8 +43,8 @@ import org.springframework.util.ReflectionUtils;
  * {@code Observable}, and others.
  *
  * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, and Java 9+
- * Flow.Publisher.
+ * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, Java 9+
+ * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred} and {@code Flow}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -54,7 +57,7 @@ public class ReactiveAdapterRegistry {
 
 	private final boolean reactorPresent;
 
-	private final List<ReactiveAdapter> adapters = new ArrayList<>(32);
+	private final List<ReactiveAdapter> adapters = new ArrayList<>();
 
 
 	/**
@@ -62,7 +65,6 @@ public class ReactiveAdapterRegistry {
 	 * @see #getSharedInstance()
 	 */
 	public ReactiveAdapterRegistry() {
-
 		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
 
 		// Reactor
@@ -90,6 +92,11 @@ public class ReactiveAdapterRegistry {
 		}
 		// If not present, do nothing for the time being...
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
+
+		// Coroutines
+		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
+			new CoroutinesRegistrar().registerAdapters(this);
+		}
 	}
 
 
@@ -104,8 +111,8 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * Register a reactive type along with functions to adapt to and from a
-	 * Reactive Streams {@link Publisher}. The functions can assume their
-	 * input is never be {@code null} nor {@link Optional}.
+	 * Reactive Streams {@link Publisher}. The function arguments assume that
+	 * their input is neither {@code null} nor {@link Optional}.
 	 */
 	public void registerReactiveType(ReactiveTypeDescriptor descriptor,
 			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
@@ -120,6 +127,7 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * Get the adapter for the given reactive type.
+	 * @return the corresponding adapter, or {@code null} if none available
 	 */
 	@Nullable
 	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
@@ -133,34 +141,41 @@ public class ReactiveAdapterRegistry {
 	 * (may be {@code null} if a concrete source object is given)
 	 * @param source an instance of the reactive type
 	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
+	 * @return the corresponding adapter, or {@code null} if none available
 	 */
 	@Nullable
 	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
+		if (this.adapters.isEmpty()) {
+			return null;
+		}
+
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
 		if (clazz == null) {
 			return null;
 		}
-
-		return this.adapters.stream()
-				.filter(adapter -> adapter.getReactiveType() == clazz)
-				.findFirst()
-				.orElseGet(() ->
-						this.adapters.stream()
-								.filter(adapter -> adapter.getReactiveType().isAssignableFrom(clazz))
-								.findFirst()
-								.orElse(null));
+		for (ReactiveAdapter adapter : this.adapters) {
+			if (adapter.getReactiveType() == clazz) {
+				return adapter;
+			}
+		}
+		for (ReactiveAdapter adapter : this.adapters) {
+			if (adapter.getReactiveType().isAssignableFrom(clazz)) {
+				return adapter;
+			}
+		}
+		return null;
 	}
 
 
 	/**
-	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
-	 * building it once needed.
+	 * Return a shared default {@code ReactiveAdapterRegistry} instance,
+	 * lazily building it once needed.
 	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
 	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
 	 * This accessor is only meant as a fallback for code paths that want to
 	 * fall back on a default instance if one isn't provided.
-	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
+	 * @return the shared {@code ReactiveAdapterRegistry} instance
 	 * @since 5.0.2
 	 */
 	public static ReactiveAdapterRegistry getSharedInstance() {
@@ -200,12 +215,8 @@ public class ReactiveAdapterRegistry {
 					source -> source);
 
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(CompletableFuture.class, () -> {
-						CompletableFuture<?> empty = new CompletableFuture<>();
-						empty.complete(null);
-						return empty;
-					}),
-					source -> Mono.fromFuture((CompletableFuture<?>) source),
+					ReactiveTypeDescriptor.singleOptionalValue(CompletionStage.class, EmptyCompletableFuture::new),
+					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
 					source -> Mono.from(source).toFuture()
 			);
 		}
@@ -317,4 +328,30 @@ public class ReactiveAdapterRegistry {
 		}
 	}
 
+
+	private static class EmptyCompletableFuture<T> extends CompletableFuture<T> {
+
+		EmptyCompletableFuture() {
+			complete(null);
+		}
+	}
+
+
+	private static class CoroutinesRegistrar {
+
+		@SuppressWarnings("KotlinInternalInJava")
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(Deferred.class,
+							() -> CompletableDeferredKt.CompletableDeferred(null)),
+					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
+					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
+					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
+					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow
+			);
+		}
+	}
 }

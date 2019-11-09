@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
@@ -34,7 +35,6 @@ import org.springframework.util.StringUtils;
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  *
  * <p>An instance of this class is typically accessed via
- * {@link MockMvcResultMatchers#jsonPath(String, Matcher)} or
  * {@link MockMvcResultMatchers#jsonPath(String, Object...)}.
  *
  * @author Rossen Stoyanchev
@@ -236,7 +236,7 @@ public class JsonPathResultMatchers {
 	}
 
 	private String getContent(MvcResult result) throws UnsupportedEncodingException {
-		String content = result.getResponse().getContentAsString();
+		String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
 		if (StringUtils.hasLength(this.prefix)) {
 			try {
 				String reason = String.format("Expected a JSON payload prefixed with \"%s\" but found: %s",

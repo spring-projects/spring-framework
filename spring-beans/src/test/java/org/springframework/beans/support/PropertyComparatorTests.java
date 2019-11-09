@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,9 @@ package org.springframework.beans.support;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link PropertyComparator}.
@@ -39,9 +39,9 @@ public class PropertyComparatorTests {
 		dog2.setNickName("biscy");
 
 		PropertyComparator<Dog> c = new PropertyComparator<>("nickName", false, true);
-		assertTrue(c.compare(dog, dog2) > 0);
-		assertTrue(c.compare(dog, dog) == 0);
-		assertTrue(c.compare(dog2, dog) < 0);
+		assertThat(c.compare(dog, dog2) > 0).isTrue();
+		assertThat(c.compare(dog, dog) == 0).isTrue();
+		assertThat(c.compare(dog2, dog) < 0).isTrue();
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class PropertyComparatorTests {
 		Dog dog = new Dog();
 		Dog dog2 = new Dog();
 		PropertyComparator<Dog> c = new PropertyComparator<>("nickName", false, true);
-		assertTrue(c.compare(dog, dog2) == 0);
+		assertThat(c.compare(dog, dog2) == 0).isTrue();
 	}
 
 	@Test
@@ -64,13 +64,13 @@ public class PropertyComparatorTests {
 		dog2.setFirstName("biscuit");
 		dog2.setLastName("grayspots");
 
-		assertTrue(c.compare(dog1, dog2) == 0);
+		assertThat(c.compare(dog1, dog2) == 0).isTrue();
 
 		c = c.thenComparing(new PropertyComparator<>("firstName", false, true));
-		assertTrue(c.compare(dog1, dog2) > 0);
+		assertThat(c.compare(dog1, dog2) > 0).isTrue();
 
 		dog2.setLastName("konikk dog");
-		assertTrue(c.compare(dog2, dog1) > 0);
+		assertThat(c.compare(dog2, dog1) > 0).isTrue();
 	}
 
 	@Test
@@ -86,12 +86,13 @@ public class PropertyComparatorTests {
 		dog2.setFirstName("biscuit");
 		dog2.setLastName("grayspots");
 
-		assertTrue(c.compare(dog1, dog2) > 0);
+		assertThat(c.compare(dog1, dog2) > 0).isTrue();
 		c = c.reversed();
-		assertTrue(c.compare(dog1, dog2) < 0);
+		assertThat(c.compare(dog1, dog2) < 0).isTrue();
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Dog implements Comparable<Object> {
 
 		private String nickName;

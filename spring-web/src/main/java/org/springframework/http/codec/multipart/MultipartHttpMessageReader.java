@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -64,6 +65,14 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 	}
 
 
+	/**
+	 * Return the configured parts reader.
+	 * @since 5.1.11
+	 */
+	public HttpMessageReader<Part> getPartReader() {
+		return this.partReader;
+	}
+
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
 		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
@@ -93,13 +102,12 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 
 		return this.partReader.read(elementType, inputMessage, allHints)
 				.collectMultimap(Part::name)
-				.doOnNext(map -> {
-					if (logger.isDebugEnabled()) {
-						String details = isEnableLoggingRequestDetails() ?
-								map.toString() : "parts " + map.keySet() + " (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
-					}
-				})
+				.doOnNext(map ->
+					LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
+							(isEnableLoggingRequestDetails() ?
+									LogFormatUtils.formatValue(map, !traceOn) :
+									"parts " + map.keySet() + " (content masked)"))
+				)
 				.map(this::toMultiValueMap);
 	}
 

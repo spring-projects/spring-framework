@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,12 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link TransactionAttributeSourceEditor}.
@@ -44,12 +45,13 @@ public class TransactionAttributeSourceEditorTests {
 		TransactionAttributeSource tas = (TransactionAttributeSource) editor.getValue();
 
 		Method m = Object.class.getMethod("hashCode");
-		assertNull(tas.getTransactionAttribute(m, null));
+		assertThat(tas.getTransactionAttribute(m, null)).isNull();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidFormat() throws Exception {
-		editor.setAsText("foo=bar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText("foo=bar"));
 	}
 
 	@Test
@@ -105,12 +107,12 @@ public class TransactionAttributeSourceEditorTests {
 	private void checkTransactionProperties(TransactionAttributeSource tas, Method method, int propagationBehavior) {
 		TransactionAttribute ta = tas.getTransactionAttribute(method, null);
 		if (propagationBehavior >= 0) {
-			assertNotNull(ta);
-			assertEquals(TransactionDefinition.ISOLATION_DEFAULT, ta.getIsolationLevel());
-			assertEquals(propagationBehavior, ta.getPropagationBehavior());
+			assertThat(ta).isNotNull();
+			assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_DEFAULT);
+			assertThat(ta.getPropagationBehavior()).isEqualTo(propagationBehavior);
 		}
 		else {
-			assertNull(ta);
+			assertThat(ta).isNull();
 		}
 	}
 

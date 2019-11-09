@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.LoggingCodecSupport;
@@ -58,8 +59,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Dedicated log category for disconnected client exceptions.
-	 * <p>Servlet containers do not expose a notification when a client disconnects,
-	 * e.g. <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * <p>To avoid filling logs with unnecessary stack traces, we make an
 	 * effort to identify such network failures on a per-server basis, and then
 	 * log under a separate log category a simple one-line message at DEBUG level
@@ -68,17 +69,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
 			"org.springframework.web.server.DisconnectedClient";
 
-	/**
-	 * Tomcat: ClientAbortException or EOFException
-	 * Jetty: EofException
-	 * WildFly, GlassFish: java.io.IOException "Broken pipe" (already covered)
-	 * <p>TODO:
-	 * This definition is currently duplicated between HttpWebHandlerAdapter
-	 * and AbstractSockJsSession. It is a candidate for a common utility class.
-	 * @see #isDisconnectedClientError(Throwable)
-	 */
-	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
-			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+	 // Similar declaration exists in AbstractSockJsSession..
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = new HashSet<>(
+			Arrays.asList("AbortedException", "ClientAbortException", "EOFException", "EofException"));
 
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
@@ -196,8 +189,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	/**
 	 * Configure the {@code ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
-	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
-	 * WebHttpHandlerBuilder#applicationContext}.
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
 	 * @param applicationContext the context
 	 * @since 5.0.3
 	 */
@@ -231,13 +223,14 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-
 		if (this.forwardedHeaderTransformer != null) {
 			request = this.forwardedHeaderTransformer.apply(request);
 		}
-
 		ServerWebExchange exchange = createExchange(request, response);
-		logExchange(exchange);
+
+		LogFormatUtils.traceDebug(logger, traceOn ->
+				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
+						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
 
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
@@ -250,19 +243,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private void logExchange(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			String logPrefix = exchange.getLogPrefix();
-			ServerHttpRequest request = exchange.getRequest();
-			if (logger.isTraceEnabled()) {
-				logger.trace(logPrefix + formatRequest(request) + ", headers=" + formatHeaders(request.getHeaders()));
-			}
-			else {
-				logger.debug(logPrefix + formatRequest(request));
-			}
-		}
-	}
-
 	private String formatRequest(ServerHttpRequest request) {
 		String rawQuery = request.getURI().getRawQuery();
 		String query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
@@ -270,18 +250,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private void logResponse(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			String logPrefix = exchange.getLogPrefix();
-			ServerHttpResponse response = exchange.getResponse();
-			HttpStatus status = response.getStatusCode();
-			String message = "Completed " + (status != null ? status : "200 OK");
-			if (logger.isTraceEnabled()) {
-				logger.trace(logPrefix + message + ", headers=" + formatHeaders(response.getHeaders()));
-			}
-			else {
-				logger.debug(logPrefix + message);
-			}
-		}
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			HttpStatus status = exchange.getResponse().getStatusCode();
+			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
+					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
+		});
 	}
 
 	private String formatHeaders(HttpHeaders responseHeaders) {
@@ -290,12 +263,18 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private Mono<Void> handleUnresolvedError(ServerWebExchange exchange, Throwable ex) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 		String logPrefix = exchange.getLogPrefix();
 
-		if (isDisconnectedClientError(ex)) {
+		// Sometimes a remote call error can look like a disconnected client.
+		// Try to set the response first before the "isDisconnectedClient" check.
+
+		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
+			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
+			return Mono.empty();
+		}
+		else if (isDisconnectedClientError(ex)) {
 			if (lostClientLogger.isTraceEnabled()) {
 				lostClientLogger.trace(logPrefix + "Client went away", ex);
 			}
@@ -305,23 +284,23 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 			}
 			return Mono.empty();
 		}
-		else if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
-			return Mono.empty();
-		}
 		else {
-			// After the response is committed, propagate errors to the server..
+			// After the response is committed, propagate errors to the server...
 			logger.error(logPrefix + "Error [" + ex + "] for " + formatRequest(request) +
 					", but ServerHttpResponse already committed (" + response.getStatusCode() + ")");
 			return Mono.error(ex);
 		}
 	}
 
-	private boolean isDisconnectedClientError(Throwable ex)  {
+	private boolean isDisconnectedClientError(Throwable ex) {
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
-		message = (message != null ? message.toLowerCase() : "");
-		String className = ex.getClass().getSimpleName();
-		return (message.contains("broken pipe") || DISCONNECTED_CLIENT_EXCEPTIONS.contains(className));
+		if (message != null) {
+			String text = message.toLowerCase();
+			if (text.contains("broken pipe") || text.contains("connection reset by peer")) {
+				return true;
+			}
+		}
+		return DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName());
 	}
 
 }

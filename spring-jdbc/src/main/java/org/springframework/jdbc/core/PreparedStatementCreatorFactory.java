@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +34,7 @@ import org.springframework.util.Assert;
 
 /**
  * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
- * objects with different parameters based on a SQL statement and a single
+ * objects with different parameters based on an SQL statement and a single
  * set of parameter declarations.
  *
  * @author Rod Johnson
@@ -90,6 +89,14 @@ public class PreparedStatementCreatorFactory {
 		this.declaredParameters = declaredParameters;
 	}
 
+
+	/**
+	 * Return the SQL statement to execute.
+	 * @since 5.1.3
+	 */
+	public final String getSql() {
+		return this.sql;
+	}
 
 	/**
 	 * Add a new declared parameter.
@@ -196,7 +203,7 @@ public class PreparedStatementCreatorFactory {
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size()) {
-				// account for named parameters being used multiple times
+				// Account for named parameters being used multiple times
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
 					Object param = parameters.get(i);
@@ -260,11 +267,11 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
-				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
-					Collection<?> entries = (Collection<?>) in;
+				if (in instanceof Iterable && declaredParameter.getSqlType() != Types.ARRAY) {
+					Iterable<?> entries = (Iterable<?>) in;
 					for (Object entry : entries) {
 						if (entry instanceof Object[]) {
-							Object[] valueArray = ((Object[])entry);
+							Object[] valueArray = (Object[]) entry;
 							for (Object argValue : valueArray) {
 								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, argValue);
 							}

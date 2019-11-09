@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,8 @@ import org.springframework.core.codec.EncodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -117,35 +119,49 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		if (inputStream instanceof Mono) {
 			return Mono.from(inputStream).map(value ->
-					encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding)).flux();
+					encodeValue(value, bufferFactory, elementType, mimeType, hints, encoding)).flux();
 		}
-
-		for (MediaType streamingMediaType : this.streamingMediaTypes) {
-			if (streamingMediaType.isCompatibleWith(mimeType)) {
-				byte[] separator = STREAM_SEPARATORS.getOrDefault(streamingMediaType, NEWLINE_SEPARATOR);
-				return Flux.from(inputStream).map(value -> {
-					DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding);
-					if (separator != null) {
-						buffer.write(separator);
-					}
-					return buffer;
-				});
-			}
+		else {
+			return this.streamingMediaTypes.stream()
+					.filter(mediaType -> mediaType.isCompatibleWith(mimeType))
+					.findFirst()
+					.map(mediaType -> {
+						byte[] separator = STREAM_SEPARATORS.getOrDefault(mediaType, NEWLINE_SEPARATOR);
+						return Flux.from(inputStream).map(value -> {
+							DataBuffer buffer = encodeValue(
+									value, bufferFactory, elementType, mimeType, hints, encoding);
+							if (separator != null) {
+								buffer.write(separator);
+							}
+							return buffer;
+						});
+					})
+					.orElseGet(() -> {
+						ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+						return Flux.from(inputStream).collectList().map(list ->
+								encodeValue(list, bufferFactory, listType, mimeType, hints, encoding)).flux();
+					});
 		}
-
-		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-		return Flux.from(inputStream).collectList().map(list ->
-				encodeValue(list, mimeType, bufferFactory, listType, hints, encoding)).flux();
 	}
 
-	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
-			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
+	@Override
+	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-			logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
+		return encodeValue(value, bufferFactory, valueType, mimeType, hints, getJsonEncoding(mimeType));
+	}
+
+	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType valueType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
+
+		if (!Hints.isLoggingSuppressed(hints)) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Encoding [" + formatted + "]";
+			});
 		}
 
-		JavaType javaType = getJavaType(elementType.getType(), null);
+		JavaType javaType = getJavaType(valueType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
 				getObjectMapper().writerWithView(jsonView) : getObjectMapper().writer());
@@ -154,14 +170,17 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			writer = writer.forType(javaType);
 		}
 
-		writer = customizeWriter(writer, mimeType, elementType, hints);
+		writer = customizeWriter(writer, mimeType, valueType, hints);
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
+		boolean release = true;
 		OutputStream outputStream = buffer.asOutputStream();
 
 		try {
 			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(outputStream, encoding);
 			writer.writeValue(generator, value);
+			generator.flush();
+			release = false;
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new CodecException("Type definition error: " + ex.getType(), ex);
@@ -170,7 +189,13 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to data buffer",
+					ex);
+		}
+		finally {
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 
 		return buffer;

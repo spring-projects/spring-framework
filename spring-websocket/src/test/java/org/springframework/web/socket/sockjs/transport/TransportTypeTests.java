@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket.sockjs.transport;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
@@ -27,12 +27,12 @@ public class TransportTypeTests {
 
 	@Test
 	public void testFromValue() {
-		assertEquals(TransportType.WEBSOCKET, TransportType.fromValue("websocket"));
-		assertEquals(TransportType.XHR, TransportType.fromValue("xhr"));
-		assertEquals(TransportType.XHR_SEND, TransportType.fromValue("xhr_send"));
-		assertEquals(TransportType.XHR_STREAMING, TransportType.fromValue("xhr_streaming"));
-		assertEquals(TransportType.EVENT_SOURCE, TransportType.fromValue("eventsource"));
-		assertEquals(TransportType.HTML_FILE, TransportType.fromValue("htmlfile"));
+		assertThat(TransportType.fromValue("websocket")).isEqualTo(TransportType.WEBSOCKET);
+		assertThat(TransportType.fromValue("xhr")).isEqualTo(TransportType.XHR);
+		assertThat(TransportType.fromValue("xhr_send")).isEqualTo(TransportType.XHR_SEND);
+		assertThat(TransportType.fromValue("xhr_streaming")).isEqualTo(TransportType.XHR_STREAMING);
+		assertThat(TransportType.fromValue("eventsource")).isEqualTo(TransportType.EVENT_SOURCE);
+		assertThat(TransportType.fromValue("htmlfile")).isEqualTo(TransportType.HTML_FILE);
 	}
 
 }

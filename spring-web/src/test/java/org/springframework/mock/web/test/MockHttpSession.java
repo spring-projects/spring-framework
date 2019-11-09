@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +24,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -84,7 +86,7 @@ public class MockHttpSession implements HttpSession {
 	 * Create a new MockHttpSession.
 	 * @param servletContext the ServletContext that the session runs in
 	 */
-	public MockHttpSession(ServletContext servletContext) {
+	public MockHttpSession(@Nullable ServletContext servletContext) {
 		this(servletContext, null);
 	}
 
@@ -93,7 +95,7 @@ public class MockHttpSession implements HttpSession {
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
-	public MockHttpSession(ServletContext servletContext, String id) {
+	public MockHttpSession(@Nullable ServletContext servletContext, @Nullable String id) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
@@ -176,7 +178,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {

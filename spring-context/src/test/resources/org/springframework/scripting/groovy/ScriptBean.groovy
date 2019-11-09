@@ -9,10 +9,12 @@ class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
 
 	private int age
 
+	@Override
 	int getAge() {
 		return this.age
 	}
 
+	@Override
 	void setAge(int age) {
 		this.age = age
 	}

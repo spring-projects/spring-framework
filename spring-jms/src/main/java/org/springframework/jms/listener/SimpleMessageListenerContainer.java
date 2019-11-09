@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.jms.listener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -66,6 +67,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private boolean connectLazily = false;
 
+	private boolean recoverOnException = true;
+
 	private int concurrentConsumers = 1;
 
 	@Nullable
@@ -92,6 +95,21 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	public void setConnectLazily(boolean connectLazily) {
 		this.connectLazily = connectLazily;
+	}
+
+	/**
+	 * Specify whether to explicitly recover the shared JMS Connection and the
+	 * associated Sessions and MessageConsumers whenever a JMSException is reported.
+	 * <p>Default is "true": refreshing the shared connection and re-initializing the
+	 * consumers whenever the connection propagates an exception to its listener.
+	 * Set this flag to "false" in order to rely on automatic recovery within the
+	 * provider, holding on to the existing connection and consumer handles.
+	 * @since 5.1.8
+	 * @see #onException(JMSException)
+	 * @see Connection#setExceptionListener
+	 */
+	public void setRecoverOnException(boolean recoverOnException) {
+		this.recoverOnException = recoverOnException;
 	}
 
 	/**
@@ -227,8 +245,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * JMS ExceptionListener implementation, invoked by the JMS provider in
 	 * case of connection failures. Re-initializes this listener container's
-	 * shared connection and its sessions and consumers.
+	 * shared connection and its sessions and consumers, if necessary.
 	 * @param ex the reported connection exception
+	 * @see #setRecoverOnException
+	 * @see #refreshSharedConnection()
+	 * @see #initializeConsumers()
 	 */
 	@Override
 	public void onException(JMSException ex) {
@@ -236,21 +257,23 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		invokeExceptionListener(ex);
 
 		// Now try to recover the shared Connection and all consumers...
-		if (logger.isDebugEnabled()) {
-			logger.debug("Trying to recover from JMS Connection exception: " + ex);
-		}
-		try {
-			synchronized (this.consumersMonitor) {
-				this.sessions = null;
-				this.consumers = null;
+		if (this.recoverOnException) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Trying to recover from JMS Connection exception: " + ex);
 			}
-			refreshSharedConnection();
-			initializeConsumers();
-			logger.debug("Successfully refreshed JMS Connection");
-		}
-		catch (JMSException recoverEx) {
-			logger.debug("Failed to recover JMS Connection", recoverEx);
-			logger.error("Encountered non-recoverable JMSException", ex);
+			try {
+				synchronized (this.consumersMonitor) {
+					this.sessions = null;
+					this.consumers = null;
+				}
+				refreshSharedConnection();
+				initializeConsumers();
+				logger.debug("Successfully refreshed JMS Connection");
+			}
+			catch (JMSException recoverEx) {
+				logger.debug("Failed to recover JMS Connection", recoverEx);
+				logger.error("Encountered non-recoverable JMSException", ex);
+			}
 		}
 	}
 

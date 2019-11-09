@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import org.aspectj.weaver.tools.TypePatternMatcher;
 import org.springframework.aop.ClassFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  */
 public class TypePatternClassFilter implements ClassFilter {
@@ -113,4 +115,21 @@ public class TypePatternClassFilter implements ClassFilter {
 		result = StringUtils.replace(result, " or ", " || ");
 		return StringUtils.replace(result, " not ", " ! ");
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof TypePatternClassFilter &&
+				ObjectUtils.nullSafeEquals(this.typePattern, ((TypePatternClassFilter) other).typePattern)));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.typePattern);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": " + this.typePattern;
+	}
+
 }

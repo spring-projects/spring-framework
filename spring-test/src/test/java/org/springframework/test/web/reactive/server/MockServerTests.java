@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,18 +17,20 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test scenarios involving a mock server.
@@ -38,7 +40,7 @@ public class MockServerTests {
 
 
 	@Test // SPR-15674 (in comments)
-	public void mutateDoesNotCreateNewSession() throws Exception {
+	public void mutateDoesNotCreateNewSession() {
 
 		WebTestClient client = WebTestClient
 				.bindToWebHandler(exchange -> {
@@ -51,8 +53,7 @@ public class MockServerTests {
 						return exchange.getSession()
 								.map(session -> session.getAttributeOrDefault("foo", "none"))
 								.flatMap(value -> {
-									byte[] bytes = value.getBytes(UTF_8);
-									DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
+									DataBuffer buffer = toDataBuffer(value);
 									return exchange.getResponse().writeWith(Mono.just(buffer));
 								});
 					}
@@ -74,7 +75,7 @@ public class MockServerTests {
 	}
 
 	@Test // SPR-16059
-	public void mutateDoesCopy() throws Exception {
+	public void mutateDoesCopy() {
 
 		WebTestClient.Builder builder = WebTestClient
 				.bindToWebHandler(exchange -> exchange.getResponse().setComplete())
@@ -97,21 +98,21 @@ public class MockServerTests {
 		mutatedBuilder.defaultCookie("baz", "qux");
 		WebTestClient clientFromMutatedBuilder = mutatedBuilder.build();
 
-		client1.mutate().filters(filters -> assertEquals(1, filters.size()));
-		client1.mutate().defaultHeaders(headers -> assertEquals(1, headers.size()));
-		client1.mutate().defaultCookies(cookies -> assertEquals(1, cookies.size()));
+		client1.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(1));
+		client1.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(1));
+		client1.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(1));
 
-		client2.mutate().filters(filters -> assertEquals(2, filters.size()));
-		client2.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
-		client2.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+		client2.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
+		client2.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
+		client2.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
 
-		clientFromMutatedBuilder.mutate().filters(filters -> assertEquals(2, filters.size()));
-		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
-		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+		clientFromMutatedBuilder.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
+		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
+		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
 	}
 
 	@Test // SPR-16124
-	public void exchangeResultHasCookieHeaders() throws Exception {
+	public void exchangeResultHasCookieHeaders() {
 
 		ExchangeResult result = WebTestClient
 				.bindToWebHandler(exchange -> {
@@ -132,8 +133,35 @@ public class MockServerTests {
 				.expectHeader().valueEquals(HttpHeaders.SET_COOKIE, "a=alpha; Path=/pathA", "b=beta; Path=/pathB")
 				.expectBody().isEmpty();
 
-		assertEquals(Arrays.asList("a=alpha", "b=beta"),
-				result.getRequestHeaders().get(HttpHeaders.COOKIE));
+		assertThat(result.getRequestHeaders().get(HttpHeaders.COOKIE)).isEqualTo(Arrays.asList("a=alpha", "b=beta"));
+	}
+
+	@Test
+	public void responseBodyContentWithFluxExchangeResult() {
+
+		FluxExchangeResult<String> result = WebTestClient
+				.bindToWebHandler(exchange -> {
+					ServerHttpResponse response = exchange.getResponse();
+					response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+					return response.writeWith(Flux.just(toDataBuffer("body")));
+				})
+				.build()
+				.get().uri("/")
+				.exchange()
+				.expectStatus().isOk()
+				.returnResult(String.class);
+
+		// Get the raw content without consuming the response body flux..
+		byte[] bytes = result.getResponseBodyContent();
+
+		assertThat(bytes).isNotNull();
+		assertThat(new String(bytes, UTF_8)).isEqualTo("body");
+	}
+
+
+	private DataBuffer toDataBuffer(String value) {
+		byte[] bytes = value.getBytes(UTF_8);
+		return new DefaultDataBufferFactory().wrap(bytes);
 	}
 
 }

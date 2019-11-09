@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -158,6 +158,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
+		// Technically, cancellation from the result subscriber should be propagated
+		// to the upstream subscription. In practice, HttpHandler server adapters
+		// don't have a reason to cancel the result subscription.
 		this.resultPublisher.subscribe(subscriber);
 	}
 
@@ -176,8 +179,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * data item for writing once that is possible.
 	 */
 	protected void dataReceived(T data) {
-		if (this.currentData != null) {
-			throw new IllegalStateException("Current data not processed yet: " + this.currentData);
+		T prev = this.currentData;
+		if (prev != null) {
+			// This shouldn't happen:
+			//   1. dataReceived can only be called from REQUESTED state
+			//   2. currentData is cleared before requesting
+			discardData(data);
+			cancel();
+			onError(new IllegalStateException("Received new data while current not processed yet."));
 		}
 		this.currentData = data;
 	}
@@ -226,6 +235,16 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected void writingFailed(Throwable ex) {
 	}
 
+	/**
+	 * Invoked after any error (either from the upstream write Publisher, or
+	 * from I/O operations to the underlying server) and cancellation
+	 * to discard in-flight data that was in
+	 * the process of being written when the error took place.
+	 * @param data the data to be released
+	 * @since 5.0.11
+	 */
+	protected abstract void discardData(T data);
+
 
 	// Private methods for use from State's...
 
@@ -245,6 +264,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private void changeStateToComplete(State oldState) {
 		if (changeState(oldState, State.COMPLETED)) {
+			discardCurrentData();
 			writingComplete();
 			this.resultPublisher.publishComplete();
 		}
@@ -260,6 +280,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		}
 		if (result) {
 			onWritePossible();
+		}
+	}
+
+	private void discardCurrentData() {
+		T data = this.currentData;
+		this.currentData = null;
+		if (data != null) {
+			discardData(data);
 		}
 	}
 
@@ -293,6 +321,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				else {
 					super.onSubscribe(processor, subscription);
 				}
+			}
+
+			@Override
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
+				// This can happen on (very early) completion notification from container..
+				processor.changeStateToComplete(this);
 			}
 		},
 
@@ -348,6 +382,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 
@@ -355,6 +393,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 
@@ -378,11 +420,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		}
 
 		public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
-			throw new IllegalStateException(toString());
+			processor.discardData(data);
+			processor.cancel();
+			processor.onError(new IllegalStateException("Illegal onNext without demand"));
 		}
 
 		public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
+				processor.discardCurrentData();
 				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
@@ -29,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -48,6 +50,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -129,14 +132,17 @@ public class MockServletContext implements ServletContext {
 
 	private final Set<String> declaredRoles = new LinkedHashSet<>();
 
+	@Nullable
 	private Set<SessionTrackingMode> sessionTrackingModes;
 
 	private final SessionCookieConfig sessionCookieConfig = new MockSessionCookieConfig();
 
 	private int sessionTimeout;
 
+	@Nullable
 	private String requestCharacterEncoding;
 
+	@Nullable
 	private String responseCharacterEncoding;
 
 	private final Map<String, MediaType> mimeTypes = new LinkedHashMap<>();
@@ -165,7 +171,7 @@ public class MockServletContext implements ServletContext {
 	 * and no base path.
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
-	public MockServletContext(ResourceLoader resourceLoader) {
+	public MockServletContext(@Nullable ResourceLoader resourceLoader) {
 		this("", resourceLoader);
 	}
 
@@ -178,7 +184,7 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
-	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
+	public MockServletContext(String resourceBasePath, @Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = resourceBasePath;
 
@@ -262,6 +268,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getMimeType(String filePath) {
 		String extension = StringUtils.getFilenameExtension(filePath);
 		if (this.mimeTypes.containsKey(extension)) {
@@ -285,10 +292,13 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
+		String resourceLocation = getResourceLocation(actualPath);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
 			File file = resource.getFile();
 			String[] fileList = file.list();
 			if (ObjectUtils.isEmpty(fileList)) {
@@ -304,46 +314,55 @@ public class MockServletContext implements ServletContext {
 			}
 			return resourcePaths;
 		}
-		catch (IOException ex) {
+		catch (InvalidPathException | IOException ex ) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not get resource paths for " + resource, ex);
+				logger.warn("Could not get resource paths for " +
+						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
 		}
 	}
 
 	@Override
+	@Nullable
 	public URL getResource(String path) throws MalformedURLException {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
-		if (!resource.exists()) {
-			return null;
-		}
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
+			if (!resource.exists()) {
+				return null;
+			}
 			return resource.getURL();
 		}
 		catch (MalformedURLException ex) {
 			throw ex;
 		}
-		catch (IOException ex) {
+		catch (InvalidPathException | IOException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not get URL for " + resource, ex);
+				logger.warn("Could not get URL for resource " +
+						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
 		}
 	}
 
 	@Override
+	@Nullable
 	public InputStream getResourceAsStream(String path) {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
-		if (!resource.exists()) {
-			return null;
-		}
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
+			if (!resource.exists()) {
+				return null;
+			}
 			return resource.getInputStream();
 		}
-		catch (IOException ex) {
+		catch (InvalidPathException | IOException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not open InputStream for " + resource, ex);
+				logger.warn("Could not open InputStream for resource " +
+						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
 		}
@@ -414,6 +433,7 @@ public class MockServletContext implements ServletContext {
 
 	@Deprecated
 	@Override
+	@Nullable
 	public Servlet getServlet(String name) {
 		return null;
 	}
@@ -447,14 +467,18 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getRealPath(String path) {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
 			return resource.getFile().getAbsolutePath();
 		}
-		catch (IOException ex) {
+		catch (InvalidPathException | IOException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not determine real path of resource " + resource, ex);
+				logger.warn("Could not determine real path of resource " +
+						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
 		}
@@ -492,6 +516,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
@@ -503,7 +528,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -529,6 +554,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -579,21 +605,23 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override  // on Servlet 4.0
-	public void setRequestCharacterEncoding(String requestCharacterEncoding) {
+	public void setRequestCharacterEncoding(@Nullable String requestCharacterEncoding) {
 		this.requestCharacterEncoding = requestCharacterEncoding;
 	}
 
 	@Override  // on Servlet 4.0
+	@Nullable
 	public String getRequestCharacterEncoding() {
 		return this.requestCharacterEncoding;
 	}
 
 	@Override  // on Servlet 4.0
-	public void setResponseCharacterEncoding(String responseCharacterEncoding) {
+	public void setResponseCharacterEncoding(@Nullable String responseCharacterEncoding) {
 		this.responseCharacterEncoding = responseCharacterEncoding;
 	}
 
 	@Override  // on Servlet 4.0
+	@Nullable
 	public String getResponseCharacterEncoding() {
 		return this.responseCharacterEncoding;
 	}
@@ -638,6 +666,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public ServletRegistration getServletRegistration(String servletName) {
 		return null;
 	}
@@ -676,6 +705,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public FilterRegistration getFilterRegistration(String filterName) {
 		return null;
 	}

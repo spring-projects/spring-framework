@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -39,10 +38,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.time.Duration.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static java.time.Duration.ofMillis;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
  * Annotated controllers accepting and returning typed Objects.
@@ -63,7 +62,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).isEqualTo(new Person("John"));
 	}
 
@@ -72,7 +71,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
 	}
 
@@ -81,9 +80,9 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class)
-				.consumeWith(result -> assertEquals(new Person("John"), result.getResponseBody()));
+				.consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(new Person("John")));
 	}
 
 	@Test
@@ -95,7 +94,7 @@ public class ResponseEntityTests {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBodyList(Person.class).isEqualTo(expected);
 	}
 
@@ -105,10 +104,10 @@ public class ResponseEntityTests {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBodyList(Person.class).value(people -> {
-					MatcherAssert.assertThat(people, hasItem(new Person("Jason")));
-				});
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
+				.expectBodyList(Person.class).value(people ->
+					assertThat(people).contains(new Person("Jason"))
+				);
 	}
 
 	@Test
@@ -138,7 +137,7 @@ public class ResponseEntityTests {
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
 				.expectNextCount(4)
-				.consumeNextWith(person -> assertThat(person.getName(), endsWith("7")))
+				.consumeNextWith(person -> assertThat(person.getName()).endsWith("7"))
 				.thenCancel()
 				.verify();
 	}
@@ -146,7 +145,7 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() {
 		this.client.post()
-				.syncBody(new Person("John"))
+				.bodyValue(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")

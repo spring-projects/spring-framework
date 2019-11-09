@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,13 @@ package org.springframework.http.converter.xml;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters}
@@ -105,19 +105,15 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
 	protected final JAXBContext getJaxbContext(Class<?> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
-		if (jaxbContext == null) {
+		return this.jaxbContexts.computeIfAbsent(clazz, key -> {
 			try {
-				jaxbContext = JAXBContext.newInstance(clazz);
-				this.jaxbContexts.putIfAbsent(clazz, jaxbContext);
+				return JAXBContext.newInstance(clazz);
 			}
 			catch (JAXBException ex) {
 				throw new HttpMessageConversionException(
-						"Could not instantiate JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
+						"Could not create JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
 			}
-		}
-		return jaxbContext;
+		});
 	}
 
 }

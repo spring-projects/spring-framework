@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.messaging.handler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,12 +28,15 @@ import java.util.Set;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.RouteMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@link MessageCondition} for matching the destination of a Message
- * against one or more destination patterns using a {@link PathMatcher}.
+ * {@link MessageCondition} to match the destination header of a Message
+ * against one or more patterns through a {@link RouteMatcher}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -50,36 +52,41 @@ public class DestinationPatternsMessageCondition
 
 	private final Set<String> patterns;
 
-	private final PathMatcher pathMatcher;
+	private final RouteMatcher routeMatcher;
 
 
 	/**
-	 * Creates a new instance with the given destination patterns.
-	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
-	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
+	 * Constructor with patterns only. Creates and uses an instance of
+	 * {@link AntPathMatcher} with default settings.
+	 * <p>Non-empty patterns that don't start with "/" are prepended with "/".
+	 * @param patterns the URL patterns to match to, or if 0 then always match
 	 */
 	public DestinationPatternsMessageCondition(String... patterns) {
-		this(patterns, null);
+		this(patterns, (PathMatcher) null);
 	}
 
 	/**
-	 * Alternative constructor accepting a custom PathMatcher.
-	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher the PathMatcher to use
+	 * Constructor with patterns and a {@code PathMatcher} instance.
+	 * @param patterns the URL patterns to match to, or if 0 then always match
+	 * @param matcher the {@code PathMatcher} to use
 	 */
-	public DestinationPatternsMessageCondition(String[] patterns, @Nullable PathMatcher pathMatcher) {
-		this(Arrays.asList(patterns), pathMatcher);
+	public DestinationPatternsMessageCondition(String[] patterns, @Nullable PathMatcher matcher) {
+		this(patterns, new SimpleRouteMatcher(matcher != null ? matcher : new AntPathMatcher()));
 	}
 
-	private DestinationPatternsMessageCondition(Collection<String> patterns, @Nullable PathMatcher pathMatcher) {
-		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
+	/**
+	 * Constructor with patterns and a {@code RouteMatcher} instance.
+	 * @param patterns the URL patterns to match to, or if 0 then always match
+	 * @param routeMatcher the {@code RouteMatcher} to use
+	 * @since 5.2
+	 */
+	public DestinationPatternsMessageCondition(String[] patterns, RouteMatcher routeMatcher) {
+		this(Collections.unmodifiableSet(prependLeadingSlash(patterns, routeMatcher)), routeMatcher);
 	}
 
-
-	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
-		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
-		Set<String> result = new LinkedHashSet<>(patterns.size());
+	private static Set<String> prependLeadingSlash(String[] patterns, RouteMatcher routeMatcher) {
+		boolean slashSeparator = routeMatcher.combine("a", "a").equals("a/a");
+		Set<String> result = new LinkedHashSet<>(patterns.length);
 		for (String pattern : patterns) {
 			if (slashSeparator && StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 				pattern = "/" + pattern;
@@ -88,6 +95,12 @@ public class DestinationPatternsMessageCondition
 		}
 		return result;
 	}
+
+	private DestinationPatternsMessageCondition(Set<String> patterns, RouteMatcher routeMatcher) {
+		this.patterns = patterns;
+		this.routeMatcher = routeMatcher;
+	}
+
 
 
 	public Set<String> getPatterns() {
@@ -121,7 +134,7 @@ public class DestinationPatternsMessageCondition
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
-					result.add(this.pathMatcher.combine(pattern1, pattern2));
+					result.add(this.routeMatcher.combine(pattern1, pattern2));
 				}
 			}
 		}
@@ -134,7 +147,7 @@ public class DestinationPatternsMessageCondition
 		else {
 			result.add("");
 		}
-		return new DestinationPatternsMessageCondition(result, this.pathMatcher);
+		return new DestinationPatternsMessageCondition(result, this.routeMatcher);
 	}
 
 	/**
@@ -149,7 +162,7 @@ public class DestinationPatternsMessageCondition
 	@Override
 	@Nullable
 	public DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
-		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
+		Object destination = message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
 		if (destination == null) {
 			return null;
 		}
@@ -157,18 +170,33 @@ public class DestinationPatternsMessageCondition
 			return this;
 		}
 
-		List<String> matches = new ArrayList<>();
+		List<String> matches = null;
 		for (String pattern : this.patterns) {
-			if (pattern.equals(destination) || this.pathMatcher.match(pattern, destination)) {
+			if (pattern.equals(destination) || matchPattern(pattern, destination)) {
+				if (matches == null) {
+					matches = new ArrayList<>();
+				}
 				matches.add(pattern);
 			}
 		}
-		if (matches.isEmpty()) {
+		if (CollectionUtils.isEmpty(matches)) {
 			return null;
 		}
 
-		matches.sort(this.pathMatcher.getPatternComparator(destination));
-		return new DestinationPatternsMessageCondition(matches, this.pathMatcher);
+		matches.sort(getPatternComparator(destination));
+		return new DestinationPatternsMessageCondition(new LinkedHashSet<>(matches), this.routeMatcher);
+	}
+
+	private boolean matchPattern(String pattern, Object destination) {
+		return destination instanceof RouteMatcher.Route ?
+				this.routeMatcher.match(pattern, (RouteMatcher.Route) destination) :
+				((SimpleRouteMatcher) this.routeMatcher).getPathMatcher().match(pattern, (String) destination);
+	}
+
+	private Comparator<String> getPatternComparator(Object destination) {
+		return destination instanceof RouteMatcher.Route ?
+			this.routeMatcher.getPatternComparator((RouteMatcher.Route) destination) :
+			((SimpleRouteMatcher) this.routeMatcher).getPathMatcher().getPatternComparator((String) destination);
 	}
 
 	/**
@@ -183,12 +211,12 @@ public class DestinationPatternsMessageCondition
 	 */
 	@Override
 	public int compareTo(DestinationPatternsMessageCondition other, Message<?> message) {
-		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
+		Object destination = message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
 		if (destination == null) {
 			return 0;
 		}
 
-		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(destination);
+		Comparator<String> patternComparator = getPatternComparator(destination);
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
