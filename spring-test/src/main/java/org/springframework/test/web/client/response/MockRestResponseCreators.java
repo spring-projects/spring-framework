@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,13 +118,14 @@ public abstract class MockRestResponseCreators {
 	}
 
 	/**
-	 * {@code ResponseCreator} with an internal application {@code IOException}. For example,
-	 * one could use this to simulate a {@code SocketTimeoutException}.
-	 * @param e the {@code Exception} to be thrown at HTTP call time.
+	 * {@code ResponseCreator} with an internal application {@code IOException}.
+	 * <p>For example, one could use this to simulate a {@code SocketTimeoutException}.
+	 * @param ex the {@code Exception} to be thrown at HTTP call time
+	 * @since 5.2.2
 	 */
-	public static ResponseCreator withException(IOException e) {
+	public static ResponseCreator withException(IOException ex) {
 		return request -> {
-			throw e;
+			throw ex;
 		};
 	}
 
