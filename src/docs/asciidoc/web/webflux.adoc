@@ -3625,7 +3625,7 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 ----
 
 The preceding example registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
+<<webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
 
 
