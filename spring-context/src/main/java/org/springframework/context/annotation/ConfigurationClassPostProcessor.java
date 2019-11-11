@@ -448,11 +448,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		@Override
 		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
-			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
-			// postProcessProperties method attempts to autowire other configuration beans.
-			if (bean instanceof EnhancedConfiguration) {
-				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
-			}
 			return pvs;
 		}
 
