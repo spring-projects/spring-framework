@@ -48,8 +48,7 @@ public class SimpleKey implements Serializable {
 	 */
 	public SimpleKey(Object... elements) {
 		Assert.notNull(elements, "Elements must not be null");
-		this.params = new Object[elements.length];
-		System.arraycopy(elements, 0, this.params, 0, elements.length);
+		this.params = elements.clone();
 		this.hashCode = Arrays.deepHashCode(this.params);
 	}
 
