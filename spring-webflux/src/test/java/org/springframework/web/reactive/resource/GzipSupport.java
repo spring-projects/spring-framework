@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import org.springframework.core.io.ClassPathResource;
@@ -39,11 +38,17 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
+/**
+ * @author Andy Wilkinson
+ * @since 5.2.2
+ */
 class GzipSupport implements AfterEachCallback, ParameterResolver {
+
+	private static final Namespace namespace = Namespace.create(GzipSupport.class);
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		GzippedFiles gzippedFiles = getStore(context).get(GzippedFiles.class, GzippedFiles.class);
+		GzippedFiles gzippedFiles = getStore(context).remove(GzippedFiles.class, GzippedFiles.class);
 		if (gzippedFiles != null) {
 			for (File gzippedFile: gzippedFiles.created) {
 				gzippedFile.delete();
@@ -52,19 +57,17 @@ class GzipSupport implements AfterEachCallback, ParameterResolver {
 	}
 
 	@Override
-	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		return parameterContext.getParameter().getType().equals(GzippedFiles.class);
 	}
 
 	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		return getStore(extensionContext).getOrComputeIfAbsent(GzippedFiles.class);
 	}
 
 	private Store getStore(ExtensionContext extensionContext) {
-		return extensionContext.getStore(Namespace.create(getClass()));
+		return extensionContext.getStore(namespace);
 	}
 
 	static class GzippedFiles {
