@@ -199,7 +199,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @since 5.2
 	 */
 	@Nullable
-	public Predicate<String> getHeaderPredicate() {
+	protected Predicate<String> getHeaderPredicate() {
 		return this.headerPredicate;
 	}
 
