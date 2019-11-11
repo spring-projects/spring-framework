@@ -43,7 +43,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void nodeNoMatch() throws Exception {
+	public void nodeNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).node(Matchers.nullValue()).match(getStubMvcResult()));
 	}
@@ -53,9 +53,10 @@ public class XpathResultMatchersTests {
 		new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.notNullValue()).match(getStubMvcResult());
 	}
 
-	@Test(expected = AssertionError.class)
-	public void nodeListNoMatch() throws Exception {
-		new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.nullValue()).match(getStubMvcResult());
+	@Test
+	public void nodeListNoMatch() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.nullValue()).match(getStubMvcResult()));
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void existsNoMatch() throws Exception {
+	public void existsNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/Bar", null).exists().match(getStubMvcResult()));
 	}
@@ -75,7 +76,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void doesNotExistNoMatch() throws Exception {
+	public void doesNotExistNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).doesNotExist().match(getStubMvcResult()));
 	}
@@ -86,7 +87,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void nodeCountNoMatch() throws Exception {
+	public void nodeCountNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).nodeCount(1).match(getStubMvcResult()));
 	}
@@ -97,7 +98,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void stringNoMatch() throws Exception {
+	public void stringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[1]", null).string("112").match(getStubMvcResult()));
 	}
@@ -108,7 +109,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void numberNoMatch() throws Exception {
+	public void numberNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[1]", null).number(111.1).match(getStubMvcResult()));
 	}
@@ -119,7 +120,7 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
-	public void booleanValueNoMatch() throws Exception {
+	public void booleanValueNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[2]", null).booleanValue(false).match(getStubMvcResult()));
 	}
