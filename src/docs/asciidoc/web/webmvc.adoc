@@ -1292,6 +1292,14 @@ a proxy at the boundary of trust should be configured to remove untrusted `Forwa
 headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
 with `removeOnly=true`, in which case it removes but does not use the headers.
 
+In order to support <<mvc-ann-async,asynchronous requests>> this filter must be mapped
+with `DispatcherType.ASYNC` so that the filter can delay and successfully generate the an
+ETag to the end of the last async dispatch. If using Spring Framework's
+`AbstractAnnotationConfigDispatcherServletInitializer` (see <<mvc-container-config>>)
+all filters are automatically registered for all dispatch types. However if registering
+the filter via web.xml or in Spring Boot via a `FilterRegistrationBean` be sure to include
+`DispatcherType.ASYNC`.
+
 
 
 [[filters-shallow-etag]]
@@ -1309,6 +1317,14 @@ the computation. See <<mvc-caching>>.
 This filter has a `writeWeakETag` parameter that configures the filter to write weak ETags
 similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
 https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3]).
+
+In order to support <<mvc-ann-async,asynchronous requests>> this filter must be mapped
+with `DispatcherType.ASYNC` so that the filter can delay and successfully generate the an
+ETag to the end of the last async dispatch. If using Spring Framework's
+`AbstractAnnotationConfigDispatcherServletInitializer` (see <<mvc-container-config>>)
+all filters are automatically registered for all dispatch types. However if registering
+the filter via web.xml or in Spring Boot via a `FilterRegistrationBean` be sure to include
+`DispatcherType.ASYNC`.
 
 
 
