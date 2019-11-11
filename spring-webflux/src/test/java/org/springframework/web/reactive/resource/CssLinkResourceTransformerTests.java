@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import reactor.test.StepVerifier;
 
@@ -31,6 +32,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.resource.EncodedResourceResolver.EncodedResource;
+import org.springframework.web.reactive.resource.GzipSupport.GzippedFiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
@@ -41,6 +43,7 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@ExtendWith(GzipSupport.class)
 public class CssLinkResourceTransformerTests {
 
 	private ResourceTransformerChain transformerChain;
@@ -147,9 +150,8 @@ public class CssLinkResourceTransformerTests {
 	}
 
 	@Test
-	public void transformSkippedForGzippedResource() throws Exception {
-
-		EncodedResourceResolverTests.createGzippedFile("main.css");
+	public void transformSkippedForGzippedResource(GzippedFiles gzippedFiles) throws Exception {
+		gzippedFiles.create("main.css");
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/main.css"));
 		Resource resource = getResource("main.css");
