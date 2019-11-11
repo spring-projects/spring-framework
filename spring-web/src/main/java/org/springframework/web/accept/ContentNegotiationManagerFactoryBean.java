@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,49 +36,55 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * Factory to create a {@code ContentNegotiationManager} and configure it with
- * one or more {@link ContentNegotiationStrategy} instances.
+ * {@link ContentNegotiationStrategy} instances.
  *
- * <p>As of 5.0 you can set the exact strategies to use via
- * {@link #setStrategies(List)}.
- *
- * <p>As an alternative you can also rely on the set of defaults described below
- * which can be turned on or off or customized through the methods of this
- * builder:
+ * <p>This factory offers properties that in turn result in configuring the
+ * underlying strategies. The table below shows the property names, their
+ * default settings, as well as the strategies that they help to configure:
  *
  * <table>
  * <tr>
  * <th>Property Setter</th>
+ * <th>Default Value</th>
  * <th>Underlying Strategy</th>
- * <th>Default Setting</th>
+ * <th>Enabled Or Not</th>
  * </tr>
  * <tr>
- * <td>{@link #setFavorPathExtension}</td>
- * <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
- * <td>On</td>
+ * <td>{@link #setFavorPathExtension favorPathExtension}</td>
+ * <td>true</td>
+ * <td>{@link PathExtensionContentNegotiationStrategy}</td>
+ * <td>Enabled</td>
  * </tr>
  * <tr>
  * <td>{@link #setFavorParameter favorParameter}</td>
- * <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ * <td>false</td>
+ * <td>{@link ParameterContentNegotiationStrategy}</td>
  * <td>Off</td>
  * </tr>
  * <tr>
  * <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
- * <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
- * <td>On</td>
+ * <td>false</td>
+ * <td>{@link HeaderContentNegotiationStrategy}</td>
+ * <td>Enabled</td>
  * </tr>
  * <tr>
  * <td>{@link #setDefaultContentType defaultContentType}</td>
- * <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
- * <td>Not set</td>
+ * <td>null</td>
+ * <td>{@link FixedContentNegotiationStrategy}</td>
+ * <td>Off</td>
  * </tr>
  * <tr>
  * <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
+ * <td>null</td>
  * <td>{@link ContentNegotiationStrategy}</td>
- * <td>Not set</td>
+ * <td>Off</td>
  * </tr>
  * </table>
  *
- * <strong>Note:</strong> if you must use URL-based content type resolution,
+ * <p>As of 5.0 you can set the exact strategies to use via
+ * {@link #setStrategies(List)}.
+ *
+ * <p><strong>Note:</strong> if you must use URL-based content type resolution,
  * the use of a query parameter is simpler and preferable to the use of a path
  * extension since the latter can cause issues with URI variables, path
  * parameters, and URI decoding. Consider setting {@link #setFavorPathExtension}
