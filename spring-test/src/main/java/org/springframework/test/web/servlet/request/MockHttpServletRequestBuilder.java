@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -99,6 +100,9 @@ public class MockHttpServletRequestBuilder
 
 	@Nullable
 	private Boolean secure;
+
+	@Nullable
+	private String queryString = "";
 
 	@Nullable
 	private Principal principal;
@@ -351,6 +355,40 @@ public class MockHttpServletRequestBuilder
 				this.parameters.add(name, value);
 			}
 		});
+		return this;
+	}
+
+	/**
+	 * Add a query parameter to the {@link MockHttpServletRequest}.
+	 * <p>If called more than once, new values get added to existing ones.
+	 * @param name the parameter name
+	 * @param values one or more values
+	 */
+	public MockHttpServletRequestBuilder queryParam(String name, String... values) {
+		param(name, values);
+		String builder = Arrays.stream(values).map(value -> UriUtils.encode(name, StandardCharsets.UTF_8) +
+						((value != null) ? ("=" + UriUtils.encode(value, StandardCharsets.UTF_8)) : "") + "&"
+				).collect(Collectors.joining());
+		queryString += builder;
+		return this;
+	}
+
+	/**
+	 * Add a map of query parameters to the {@link MockHttpServletRequest},
+	 * for example when testing a form submission.
+	 * <p>If called more than once, new values get added to existing ones.
+	 * @param params the parameters to add
+	 * @since 4.2.4
+	 */
+	public MockHttpServletRequestBuilder queryParams(MultiValueMap<String, String> params) {
+		params(params);
+		StringBuilder builder = new StringBuilder();
+		params.forEach((key, values) -> values.forEach(value -> {
+			builder.append(UriUtils.encode(key, StandardCharsets.UTF_8))
+					.append(((value != null) ? ("=" + UriUtils.encode(value, StandardCharsets.UTF_8)) : ""))
+					.append("&");
+		}));
+		queryString += builder.toString();
 		return this;
 	}
 
@@ -636,12 +674,23 @@ public class MockHttpServletRequestBuilder
 			request.setQueryString(this.url.getRawQuery());
 		}
 		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
-
 		this.parameters.forEach((name, values) -> {
 			for (String value : values) {
 				request.addParameter(name, value);
 			}
 		});
+
+		StringBuilder queryBuilder = new StringBuilder();
+		if (request.getQueryString() != null) {
+			queryBuilder.append(request.getQueryString());
+		}
+		if (this.queryString != null && !"".equals(this.queryString)) {
+			if (queryBuilder.length() > 0) {
+				queryBuilder.append("&");
+			}
+			queryBuilder.append(this.queryString, 0, this.queryString.length() - 1);
+			request.setQueryString(queryBuilder.toString());
+		}
 
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
