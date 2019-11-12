@@ -389,6 +389,7 @@ public class MockHttpServletRequestBuilderTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getInputStream());
 
 		assertThat(result).isEqualTo(body);
+		assertThat(request.getContentLength()).isEqualTo(body.length);
 	}
 
 	@Test

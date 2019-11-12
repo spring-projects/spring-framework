@@ -687,6 +687,13 @@ public class MockHttpServletRequestBuilder
 			}
 		});
 
+		if (!ObjectUtils.isEmpty(this.content) &&
+				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
+				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+
+			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
+		}
+
 		String query = this.url.getRawQuery();
 		if (!this.queryParams.isEmpty()) {
 			String s = UriComponentsBuilder.newInstance().queryParams(this.queryParams).build().encode().getQuery();
