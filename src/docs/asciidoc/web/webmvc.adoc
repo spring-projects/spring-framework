@@ -1296,7 +1296,7 @@ In order to support <<mvc-ann-async,asynchronous requests>> and error dispatches
 filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.
 If using Spring Framework's `AbstractAnnotationConfigDispatcherServletInitializer`
 (see <<mvc-container-config>>) all filters are automatically registered for all dispatch
-types. However if registering the filter via web.xml or in Spring Boot via a
+types. However if registering the filter via `web.xml` or in Spring Boot via a
 `FilterRegistrationBean` be sure to include `DispatcherType.ASYNC` and
 `DispatcherType.ERROR` in addition to `DispatcherType.REQUEST`.
 
@@ -1319,11 +1319,11 @@ similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
 https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3]).
 
 In order to support <<mvc-ann-async,asynchronous requests>> this filter must be mapped
-with `DispatcherType.ASYNC` so that the filter can delay and successfully generate the an
+with `DispatcherType.ASYNC` so that the filter can delay and successfully generate an
 ETag to the end of the last async dispatch. If using Spring Framework's
 `AbstractAnnotationConfigDispatcherServletInitializer` (see <<mvc-container-config>>)
 all filters are automatically registered for all dispatch types. However if registering
-the filter via web.xml or in Spring Boot via a `FilterRegistrationBean` be sure to include
+the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sure to include
 `DispatcherType.ASYNC`.
 
 
