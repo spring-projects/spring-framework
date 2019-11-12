@@ -75,7 +75,7 @@ public class XpathResultMatchers {
 	 * given Hamcrest {@link Matcher}.
 	 * @since 5.2.2
 	 */
-	public ResultMatcher nodeList(final Matcher<? super NodeList> matcher) {
+	public ResultMatcher nodeList(Matcher<? super NodeList> matcher) {
 		return result -> {
 			MockHttpServletResponse response = result.getResponse();
 			this.xpathHelper.assertNodeList(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);

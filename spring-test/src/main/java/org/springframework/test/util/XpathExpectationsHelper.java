@@ -41,7 +41,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
 
-
 /**
  * A helper class for applying assertions via XPath expressions.
  *
@@ -96,7 +95,7 @@ public class XpathExpectationsHelper {
 	 * Parse the content, evaluate the XPath expression as a {@link Node},
 	 * and assert it with the given {@code Matcher<Node>}.
 	 */
-	public void assertNode(byte[] content, @Nullable String encoding, final Matcher<? super Node> matcher)
+	public void assertNode(byte[] content, @Nullable String encoding, Matcher<? super Node> matcher)
 			throws Exception {
 
 		Node node = evaluateXpath(content, encoding, Node.class);
@@ -108,7 +107,7 @@ public class XpathExpectationsHelper {
 	 * and assert it with the given {@code Matcher<NodeList>}.
 	 * @since 5.2.2
 	 */
-	public void assertNodeList(byte[] content, @Nullable String encoding, final Matcher<? super NodeList> matcher)
+	public void assertNodeList(byte[] content, @Nullable String encoding, Matcher<? super NodeList> matcher)
 			throws Exception {
 
 		Document document = parseXmlByteArray(content, encoding);
@@ -122,7 +121,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void exists(byte[] content, @Nullable String encoding) throws Exception {
 		Node node = evaluateXpath(content, encoding, Node.class);
-		AssertionErrors.assertTrue("XPath " + this.expression + " does not exist", node != null);
+		AssertionErrors.assertNotNull("XPath " + this.expression + " does not exist", node);
 	}
 
 	/**
@@ -131,7 +130,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void doesNotExist(byte[] content, @Nullable String encoding) throws Exception {
 		Node node = evaluateXpath(content, encoding, Node.class);
-		AssertionErrors.assertTrue("XPath " + this.expression + " exists", node == null);
+		AssertionErrors.assertNull("XPath " + this.expression + " exists", node);
 	}
 
 	/**
