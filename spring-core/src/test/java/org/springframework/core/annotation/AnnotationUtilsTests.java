@@ -946,29 +946,37 @@ class AnnotationUtilsTests {
 		assertThat(synthesizedComponent.value()).as("value from synthesized component: ").isEqualTo("webController");
 	}
 
-	@Test // gh-22702
-	void findAnnotationWithRepeatablesElements() {
+	@Test  // gh-22702
+	void findAnnotationWithRepeatablesElements() throws Exception {
 		assertThat(AnnotationUtils.findAnnotation(TestRepeatablesClass.class,
 				TestRepeatable.class)).isNull();
 		assertThat(AnnotationUtils.findAnnotation(TestRepeatablesClass.class,
 		TestRepeatableContainer.class)).isNotNull();
 	}
 
-	@Test // gh-23856
-	void findAnnotationFindsRepeatableContainerOnComposedAnnotationMetaAnnotatedWithRepeatableAnnotations() {
+	@Test  // gh-23856
+	void findAnnotationFindsRepeatableContainerOnComposedAnnotationMetaAnnotatedWithRepeatableAnnotations() throws Exception {
 		MyRepeatableContainer annotation = AnnotationUtils.findAnnotation(MyRepeatableMeta1And2.class, MyRepeatableContainer.class);
 
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.value()).extracting(MyRepeatable::value).containsExactly("meta1", "meta2");
 	}
 
-	@Test // gh-23856
-	void findAnnotationFindsRepeatableContainerOnComposedAnnotationMetaAnnotatedWithRepeatableAnnotationsOnMethod() throws NoSuchMethodException {
+	@Test  // gh-23856
+	void findAnnotationFindsRepeatableContainerOnComposedAnnotationMetaAnnotatedWithRepeatableAnnotationsOnMethod() throws Exception {
 		Method method = getClass().getDeclaredMethod("methodWithComposedAnnotationMetaAnnotatedWithRepeatableAnnotations");
 		MyRepeatableContainer annotation = AnnotationUtils.findAnnotation(method, MyRepeatableContainer.class);
 
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.value()).extracting(MyRepeatable::value).containsExactly("meta1", "meta2");
+	}
+
+	@Test  // gh-23929
+	void findDeprecatedAnnotation() throws Exception {
+		assertThat(getAnnotation(DeprecatedClass.class, Deprecated.class)).isNotNull();
+		assertThat(getAnnotation(SubclassOfDeprecatedClass.class, Deprecated.class)).isNull();
+		assertThat(findAnnotation(DeprecatedClass.class, Deprecated.class)).isNotNull();
+		assertThat(findAnnotation(SubclassOfDeprecatedClass.class, Deprecated.class)).isNotNull();
 	}
 
 
@@ -1810,4 +1818,12 @@ class AnnotationUtilsTests {
 	@TestRepeatable("b")
 	static class TestRepeatablesClass {
 	}
+
+	@Deprecated
+	static class DeprecatedClass {
+	}
+
+	static class SubclassOfDeprecatedClass extends DeprecatedClass {
+	}
+
 }

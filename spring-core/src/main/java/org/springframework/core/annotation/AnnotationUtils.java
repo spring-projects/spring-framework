@@ -374,6 +374,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = (containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables());
+
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS, repeatableContainers)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
@@ -455,6 +456,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables();
+
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.DIRECT, repeatableContainers)
 				.stream(annotationType)
 				.map(MergedAnnotation::withNonMergedAttributes)
@@ -484,11 +486,13 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotatedElement.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
@@ -515,11 +519,13 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(method)) {
 			return method.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
@@ -553,11 +559,23 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
-			return clazz.getDeclaredAnnotation(annotationType);
+			A annotation = clazz.getDeclaredAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
+			}
+			// For backwards compatibility, perform a superclass search with plain annotations
+			// even if not marked as @Inherited: e.g. a findAnnotation search for @Deprecated
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass == null || superclass == Object.class) {
+				return null;
+			}
+			return findAnnotation(superclass, annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
