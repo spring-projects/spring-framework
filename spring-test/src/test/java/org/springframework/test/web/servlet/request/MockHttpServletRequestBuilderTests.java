@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -236,8 +237,24 @@ public class MockHttpServletRequestBuilderTests {
 	@Test
 	public void requestParameterToQuery() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
-		this.builder.param("foo", "bar");
-		this.builder.param("foo", "baz");
+		this.builder.queryParam("foo", "bar");
+		this.builder.queryParam("foo", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
+	}
+
+	@Test
+	public void requestParameterMapToQuery() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+		List<String> values = new ArrayList<>();
+		values.add("bar");
+		values.add("baz");
+		queryParams.put("foo", values);
+		this.builder.queryParams(queryParams);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -248,8 +265,8 @@ public class MockHttpServletRequestBuilderTests {
 	@Test
 	public void requestParameterToQueryList() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
-		this.builder.param("foo[0]", "bar");
-		this.builder.param("foo[1]", "baz");
+		this.builder.queryParam("foo[0]", "bar");
+		this.builder.queryParam("foo[1]", "baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
