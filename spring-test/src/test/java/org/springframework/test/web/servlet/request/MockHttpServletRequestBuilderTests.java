@@ -236,7 +236,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterToQuery() {
+	public void queryParameter() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.queryParam("foo", "bar");
 		this.builder.queryParam("foo", "baz");
@@ -248,7 +248,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterMapToQuery() {
+	public void queryParameterMap() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		List<String> values = new ArrayList<>();
@@ -264,7 +264,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterToQueryList() {
+	public void queryParameterList() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.queryParam("foo[0]", "bar");
 		this.builder.queryParam("foo[1]", "baz");
