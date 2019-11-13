@@ -126,22 +126,24 @@ public class ControllerAdviceBean implements Ordered {
 	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
 	 * the following algorithm and cached.
 	 * <ul>
-	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
-	 * use the value returned by {@link Ordered#getOrder()}.</li>
-	 * <li>Otherwise use the value returned by {@link OrderUtils#getOrder(Class, int)}
+	 * <li>If {@link #beanType} is not null,
+	 * use the value returned by {@link OrderUtils#getOrder(Class, int)}
 	 * with {@link Ordered#LOWEST_PRECEDENCE} used as the default order value.</li>
+	 * <li>Otherwise if the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
+	 * use the value returned by {@link Ordered#getOrder()}.</li>
 	 * </ul>
 	 * @see #resolveBean()
 	 */
 	@Override
 	public int getOrder() {
 		if (this.order == null) {
+			if (this.beanType != null) {
+				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
+				return this.order;
+			}
 			Object resolvedBean = resolveBean();
 			if (resolvedBean instanceof Ordered) {
 				this.order = ((Ordered) resolvedBean).getOrder();
-			}
-			else if (this.beanType != null) {
-				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
 			}
 			else {
 				this.order = Ordered.LOWEST_PRECEDENCE;
