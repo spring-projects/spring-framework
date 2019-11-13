@@ -59,7 +59,6 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	@Test
 	@Override
 	public void count() {
-		// These are only checked for current Ctx (not parent ctx)
 		assertCount(15);
 	}
 
