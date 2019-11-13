@@ -40,8 +40,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
@@ -322,7 +320,6 @@ class DefaultServerRequest implements ServerRequest {
 			this.servletRequest = servletRequest;
 		}
 
-		@NotNull
 		@Override
 		public Set<Entry<String, List<String>>> entrySet() {
 			return this.servletRequest.getParameterMap().entrySet().stream()
@@ -388,7 +385,6 @@ class DefaultServerRequest implements ServerRequest {
 			attributeNames.forEach(this.servletRequest::removeAttribute);
 		}
 
-		@NotNull
 		@Override
 		public Set<Entry<String, Object>> entrySet() {
 			return Collections.list(this.servletRequest.getAttributeNames()).stream()

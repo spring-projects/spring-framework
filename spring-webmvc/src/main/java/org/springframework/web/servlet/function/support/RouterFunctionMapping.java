@@ -23,8 +23,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -167,7 +165,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	@Nullable
 	@Override
-	protected Object getHandlerInternal(@NotNull HttpServletRequest servletRequest) throws Exception {
+	protected Object getHandlerInternal(HttpServletRequest servletRequest) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(servletRequest);
 		servletRequest.setAttribute(LOOKUP_PATH, lookupPath);
 		if (this.routerFunction != null) {

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.util.Assert;
 
@@ -113,7 +112,6 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 		return createLeakAwareDataBuffer(this.delegate.allocateBuffer(initialCapacity));
 	}
 
-	@NotNull
 	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
 		if (this.trackCreated.get()) {
