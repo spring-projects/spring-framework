@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -794,6 +794,7 @@ public class AnnotationDrivenEventListenerTests {
 
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertTrue(!Thread.currentThread().getName().equals(event.content));
 			this.eventCollector.addEvent(this, event);
@@ -820,6 +821,7 @@ public class AnnotationDrivenEventListenerTests {
 
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertTrue(!Thread.currentThread().getName().equals(event.content));
 			this.eventCollector.addEvent(this, event);
@@ -902,7 +904,6 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
-
 	@EventListener
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ConditionalEvent {
@@ -934,18 +935,20 @@ public class AnnotationDrivenEventListenerTests {
 			super.handle(event);
 		}
 
-		@Override
 		@EventListener(condition = "#payload.startsWith('OK')")
+		@Override
 		public void handleString(String payload) {
 			super.handleString(payload);
 		}
 
 		@ConditionalEvent("#root.event.timestamp > #p0")
+		@Override
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
 
 		@ConditionalEvent("@conditionEvaluator.valid(#p0)")
+		@Override
 		public void handleRatio(Double ratio) {
 			collectEvent(ratio);
 		}
