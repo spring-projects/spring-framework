@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
-import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 
 /**
@@ -54,7 +53,7 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 
 	@Override
 	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof PollingSockJsSession;
+		return (session instanceof PollingSockJsSession);
 	}
 
 	@Override
