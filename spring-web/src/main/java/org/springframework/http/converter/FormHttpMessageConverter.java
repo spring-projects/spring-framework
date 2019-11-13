@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -415,7 +416,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	protected String serializeForm(MultiValueMap<String, Object> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
-		formData.forEach((name, values) ->
+		formData.forEach((name, values) -> {
+				if (name == null) {
+					Assert.isTrue(CollectionUtils.isEmpty(values), "Null name in form data: " + formData);
+					return;
+				}
 				values.forEach(value -> {
 					try {
 						if (builder.length() != 0) {
@@ -430,7 +435,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					catch (UnsupportedEncodingException ex) {
 						throw new IllegalStateException(ex);
 					}
-				}));
+				});
+		});
 
 		return builder.toString();
 	}
