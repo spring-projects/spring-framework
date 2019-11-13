@@ -850,9 +850,9 @@ public class AnnotationDrivenEventListenerTests {
 			this.eventCollector.addEvent(this, event);
 		}
 
-		@Override
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(event.content);
 			this.eventCollector.addEvent(this, event);
@@ -877,9 +877,9 @@ public class AnnotationDrivenEventListenerTests {
 			this.eventCollector.addEvent(this, event);
 		}
 
-		@Override
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(event.content);
 			this.eventCollector.addEvent(this, event);
@@ -994,20 +994,20 @@ public class AnnotationDrivenEventListenerTests {
 			super.handle(event);
 		}
 
-		@Override
 		@EventListener(condition = "#payload.startsWith('OK')")
+		@Override
 		public void handleString(String payload) {
 			super.handleString(payload);
 		}
 
-		@Override
 		@ConditionalEvent("#root.event.timestamp > #p0")
+		@Override
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
 
-		@Override
 		@ConditionalEvent("@conditionEvaluator.valid(#p0)")
+		@Override
 		public void handleRatio(Double ratio) {
 			collectEvent(ratio);
 		}
@@ -1085,6 +1085,7 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+
 	@Configuration
 	@Import(UseMissingEventListener.class)
 	public static class MissingEventListener {
@@ -1095,6 +1096,7 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+
 	@Component
 	public static class MyEventListener {
 
@@ -1103,6 +1105,7 @@ public class AnnotationDrivenEventListenerTests {
 			throw new AssertionError();
 		}
 	}
+
 
 	public static class UseMissingEventListener {
 

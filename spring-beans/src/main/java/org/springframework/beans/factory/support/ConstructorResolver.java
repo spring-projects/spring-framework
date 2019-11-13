@@ -486,7 +486,9 @@ class ConstructorResolver {
 				}
 			}
 
-			candidates.sort(AutowireUtils.EXECUTABLE_COMPARATOR);
+			if (candidates.size() > 1) {  // explicitly skip immutable singletonList
+				candidates.sort(AutowireUtils.EXECUTABLE_COMPARATOR);
+			}
 
 			ConstructorArgumentValues resolvedValues = null;
 			boolean autowiring = (mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);

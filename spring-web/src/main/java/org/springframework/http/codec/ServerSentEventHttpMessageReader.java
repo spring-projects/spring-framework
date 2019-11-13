@@ -155,6 +155,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 	}
 
+	@Nullable
 	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);
