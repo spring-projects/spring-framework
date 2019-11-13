@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package org.springframework.web.client;
 
-import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -48,7 +46,7 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		this("Unknown status code [" + rawStatusCode + "]" + " " + statusText,
-				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset, null, null);
+				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}
 
 	/**
@@ -59,12 +57,11 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 	 * @param responseHeaders the response headers (may be {@code null})
 	 * @param responseBody the response body content (may be {@code null})
 	 * @param responseCharset the response body charset (may be {@code null})
-	 * @param url the request URI (may be {@code null})
-	 * @param method the request HTTP method (may be {@code null})
+	 * @since 5.2.2
 	 */
-	public UnknownHttpStatusCodeException(String message, int rawStatusCode, String statusText, @Nullable HttpHeaders responseHeaders,
-			@Nullable byte[] responseBody, @Nullable Charset responseCharset, @Nullable URI url, @Nullable HttpMethod method) {
+	public UnknownHttpStatusCodeException(String message, int rawStatusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super(message, rawStatusCode, statusText, responseHeaders, responseBody, responseCharset, url, method);
+		super(message, rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}
 }
