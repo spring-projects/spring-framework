@@ -5428,6 +5428,7 @@ If there is no other resolution indicator (such as a qualifier or a primary mark
 for a non-unique dependency situation, Spring matches the injection point name
 (that is, the field name or parameter name) against the target bean names and choose the
 same-named candidate, if any.
+====
 
 That said, if you intend to express annotation-driven injection by name, do not
 primarily use `@Autowired`, even if it is capable of selecting by bean name among
@@ -5451,16 +5452,28 @@ back to the bean that is currently injected). Note that self injection is a fall
 Regular dependencies on other components always have precedence. In that sense, self
 references do not participate in regular candidate selection and are therefore in
 particular never primary. On the contrary, they always end up as lowest precedence.
-In practice, you should use self references as a last resort only (for example, for calling other methods
-on the same instance through the bean's transactional proxy). Consider factoring out
-the effected methods to a separate delegate bean in such a scenario. Alternatively, you
-can use `@Resource`, which may obtain a proxy back to the current bean by its unique name.
+In practice, you should use self references as a last resort only (for example, for
+calling other methods on the same instance through the bean's transactional proxy).
+Consider factoring out the effected methods to a separate delegate bean in such a scenario.
+Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
+by its unique name.
+
+[NOTE]
+====
+Trying to inject the results from `@Bean` methods on the same configuration class is
+effectively a self-reference scenario as well. Either lazily resolve such references
+in the method signature where it is actually needed (as opposed to an autowired field
+in the configuration class) or declare the affected `@Bean` methods as `static`,
+decoupling them from the containing configuration class instance and its lifecycle.
+Otherwise, such beans are only considered in the fallback phase, with matching beans
+on other configuration classes selected as primary candidates instead (if available).
+====
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
 narrowing through qualifier annotations at the parameter level. In contrast, `@Resource`
 is supported only for fields and bean property setter methods with a single argument.
-As a consequence, you should stick with qualifiers if your injection target is a constructor or a
-multi-argument method.
+As a consequence, you should stick with qualifiers if your injection target is a
+constructor or a multi-argument method.
 
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
@@ -6849,12 +6862,12 @@ constraints applying.
 ====
 You may declare `@Bean` methods as `static`, allowing for them to be called without
 creating their containing configuration class as an instance. This makes particular
-sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor` or
-`BeanPostProcessor`), since such beans get initialized early in the container
+sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor`
+or `BeanPostProcessor`), since such beans get initialized early in the container
 lifecycle and should avoid triggering other parts of the configuration at that point.
 
-Calls to static `@Bean` methods never get intercepted by the container,
-not even within `@Configuration` classes (as described earlier in this section), due to technical
+Calls to static `@Bean` methods never get intercepted by the container, not even within
+`@Configuration` classes (as described earlier in this section), due to technical
 limitations: CGLIB subclassing can override only non-static methods. As a consequence,
 a direct call to another `@Bean` method has standard Java semantics, resulting
 in an independent instance being returned straight from the factory method itself.
