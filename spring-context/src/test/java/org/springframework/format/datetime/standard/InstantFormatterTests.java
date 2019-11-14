@@ -16,17 +16,20 @@
 
 package org.springframework.format.datetime.standard;
 
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ArgumentsSource;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import static java.time.Instant.MAX;
 import static java.time.Instant.MIN;
@@ -34,16 +37,21 @@ import static java.time.ZoneId.systemDefault;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link InstantFormatter}.
+ *
  * @author Andrei Nevedomskii
+ * @author Sam Brannen
+ * @since 5.2.2
  */
-@SuppressWarnings("ConstantConditions")
+@DisplayName("InstantFormatter unit tests")
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class InstantFormatterTests {
 
 	private final InstantFormatter instantFormatter = new InstantFormatter();
 
 	@ParameterizedTest
 	@ArgumentsSource(ISOSerializedInstantProvider.class)
-	void should_parse_an_ISO_formatted_string_representation_of_an_instant(String input) throws ParseException {
+	void should_parse_an_ISO_formatted_string_representation_of_an_Instant(String input) throws ParseException {
 		Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
 
 		Instant actual = instantFormatter.parse(input, null);
@@ -53,7 +61,7 @@ class InstantFormatterTests {
 
 	@ParameterizedTest
 	@ArgumentsSource(RFC1123SerializedInstantProvider.class)
-	void should_parse_an_RFC1123_formatted_string_representation_of_an_instant(String input) throws ParseException {
+	void should_parse_an_RFC1123_formatted_string_representation_of_an_Instant(String input) throws ParseException {
 		Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
 
 		Instant actual = instantFormatter.parse(input, null);
@@ -63,7 +71,7 @@ class InstantFormatterTests {
 
 	@ParameterizedTest
 	@ArgumentsSource(RandomInstantProvider.class)
-	void should_serialize_an_instant_using_ISO_format_and_ignoring_locale(Instant input) {
+	void should_serialize_an_Instant_using_ISO_format_and_ignoring_Locale(Instant input) {
 		String expected = DateTimeFormatter.ISO_INSTANT.format(input);
 
 		String actual = instantFormatter.print(input, null);
@@ -97,7 +105,7 @@ class InstantFormatterTests {
 
 		private static final long DATA_SET_SIZE = 10;
 
-		static final Random RANDOM = new Random();
+		private static final Random random = new Random();
 
 		Stream<?> provideArguments() {
 			return randomInstantStream(MIN, MAX);
@@ -109,11 +117,9 @@ class InstantFormatterTests {
 		}
 
 		Stream<Instant> randomInstantStream(Instant min, Instant max) {
-			return Stream.concat(
-					Stream.of(Instant.now()), // make sure that the data set includes current instant
-					RANDOM.longs(min.getEpochSecond(), max.getEpochSecond())
-							.mapToObj(Instant::ofEpochSecond)
-			);
+			return Stream.concat(Stream.of(Instant.now()), // make sure that the data set includes current instant
+					random.longs(min.getEpochSecond(), max.getEpochSecond()).mapToObj(Instant::ofEpochSecond));
 		}
 	}
+
 }
