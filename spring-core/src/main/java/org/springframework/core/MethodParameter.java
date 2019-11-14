@@ -26,11 +26,9 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
@@ -398,7 +396,7 @@ public class MethodParameter {
 	 * either in the form of Java 8's {@link java.util.Optional}, any variant
 	 * of a parameter-level {@code Nullable} annotation (such as from JSR-305
 	 * or the FindBugs set of annotations), or a language-level nullable type
-	 * declaration in Kotlin.
+	 * declaration or {@code Continuation} parameter in Kotlin.
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
@@ -867,37 +865,39 @@ public class MethodParameter {
 	private static class KotlinDelegate {
 
 		/**
-		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type
-		 * or an optional parameter (with a default value in the Kotlin declaration).
+		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type,
+		 * an optional parameter (with a default value in the Kotlin declaration) or a {@code Continuation} parameter
+		 * used in suspending functions.
 		 */
 		public static boolean isOptional(MethodParameter param) {
 			Method method = param.getMethod();
-			Constructor<?> ctor = param.getConstructor();
 			int index = param.getParameterIndex();
 			if (method != null && index == -1) {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				return (function != null && function.getReturnType().isMarkedNullable());
 			}
+			KFunction<?> function;
+			Predicate<KParameter> predicate;
+			if (method != null) {
+				if (param.parameterType.getName().equals("kotlin.coroutines.Continuation")) {
+					return true;
+				}
+				function = ReflectJvmMapping.getKotlinFunction(method);
+				predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
+			}
 			else {
-				KFunction<?> function = null;
-				Predicate<KParameter> predicate = null;
-				if (method != null) {
-					function = ReflectJvmMapping.getKotlinFunction(method);
-					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
-				}
-				else if (ctor != null) {
-					function = ReflectJvmMapping.getKotlinFunction(ctor);
-					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind()) ||
-							KParameter.Kind.INSTANCE.equals(p.getKind());
-				}
-				if (function != null) {
-					List<KParameter> parameters = function.getParameters();
-					KParameter parameter = parameters
-							.stream()
-							.filter(predicate)
-							.collect(Collectors.toList())
-							.get(index);
-					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
+				function = ReflectJvmMapping.getKotlinFunction(param.getConstructor());
+				predicate = p -> KParameter.Kind.VALUE.equals(p.getKind()) ||
+						KParameter.Kind.INSTANCE.equals(p.getKind());
+			}
+			if (function != null) {
+				int i = 0;
+				for (KParameter kParameter : function.getParameters()) {
+					if (predicate.test(kParameter)) {
+						if (index == i++) {
+							return (kParameter.getType().isMarkedNullable() || kParameter.isOptional());
+						}
+					}
 				}
 			}
 			return false;

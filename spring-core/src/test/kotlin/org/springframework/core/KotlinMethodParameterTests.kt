@@ -20,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.reflect.Method
 import java.lang.reflect.TypeVariable
+import kotlin.coroutines.Continuation
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.jvm.javaMethod
 
@@ -99,6 +100,13 @@ class KotlinMethodParameterTests {
 
 		assertThat(returnParameterType("suspendFun8")).isEqualTo(Object::class.java)
 		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Object::class.java)
+	}
+
+	@Test
+	fun `Continuation parameter is optional`() {
+		val method = this::class.java.getDeclaredMethod("suspendFun", String::class.java, Continuation::class.java)
+		assertThat(MethodParameter(method, 0).isOptional).isFalse()
+		assertThat(MethodParameter(method, 1).isOptional).isTrue()
 	}
 
 	private fun returnParameterType(funName: String) = returnMethodParameter(funName).parameterType
