@@ -21,15 +21,12 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.ElementSelectors;
 import org.xmlunit.diff.NodeMatcher;
@@ -47,6 +44,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class AtomFeedHttpMessageConverterTests {
 
+	private static final MediaType ATOM_XML_UTF8 =
+			new MediaType(MediaType.APPLICATION_ATOM_XML, StandardCharsets.UTF_8);
+
+
 	private AtomFeedHttpMessageConverter converter;
 
 
@@ -58,21 +59,21 @@ public class AtomFeedHttpMessageConverterTests {
 
 	@Test
 	public void canRead() {
-		assertThat(converter.canRead(Feed.class, new MediaType("application", "atom+xml"))).isTrue();
-		assertThat(converter.canRead(Feed.class, new MediaType("application", "atom+xml", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canRead(Feed.class, MediaType.APPLICATION_ATOM_XML)).isTrue();
+		assertThat(converter.canRead(Feed.class, ATOM_XML_UTF8)).isTrue();
 	}
 
 	@Test
 	public void canWrite() {
-		assertThat(converter.canWrite(Feed.class, new MediaType("application", "atom+xml"))).isTrue();
-		assertThat(converter.canWrite(Feed.class, new MediaType("application", "atom+xml", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canWrite(Feed.class, MediaType.APPLICATION_ATOM_XML)).isTrue();
+		assertThat(converter.canWrite(Feed.class, ATOM_XML_UTF8)).isTrue();
 	}
 
 	@Test
 	public void read() throws IOException {
 		InputStream is = getClass().getResourceAsStream("atom.xml");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
-		inputMessage.getHeaders().setContentType(new MediaType("application", "atom+xml", StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(ATOM_XML_UTF8);
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertThat(result.getTitle()).isEqualTo("title");
 		assertThat(result.getSubtitle().getValue()).isEqualTo("subtitle");
@@ -89,7 +90,7 @@ public class AtomFeedHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException, SAXException {
+	public void write() throws IOException {
 		Feed feed = new Feed("atom_1.0");
 		feed.setTitle("title");
 
@@ -111,7 +112,7 @@ public class AtomFeedHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type")
-				.isEqualTo(new MediaType("application", "atom+xml", StandardCharsets.UTF_8));
+				.isEqualTo(ATOM_XML_UTF8);
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>title</title>" +
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
@@ -121,7 +122,7 @@ public class AtomFeedHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeOtherCharset() throws IOException, SAXException {
+	public void writeOtherCharset() throws IOException {
 		Feed feed = new Feed("atom_1.0");
 		feed.setTitle("title");
 		String encoding = "ISO-8859-1";
@@ -137,17 +138,15 @@ public class AtomFeedHttpMessageConverterTests {
 
 	@Test
 	public void writeOtherContentTypeParameters() throws IOException {
-		Feed feed = new Feed("atom_1.0");
+		MockHttpOutputMessage message = new MockHttpOutputMessage();
+		MediaType contentType = new MediaType("application", "atom+xml", singletonMap("type", "feed"));
+		converter.write(new Feed("atom_1.0"), contentType, message);
 
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(feed, new MediaType("application", "atom+xml", singletonMap("type", "feed")), outputMessage);
-
-		Map<String, String> expectedParameters = new HashMap<>();
-		expectedParameters.put("charset", "UTF-8");
-		expectedParameters.put("type", "feed");
-		assertThat(outputMessage.getHeaders().getContentType())
+		assertThat(message.getHeaders().getContentType().getParameters())
 				.as("Invalid content-type")
-				.isEqualTo(new MediaType("application", "atom+xml", expectedParameters));
+				.hasSize(2)
+				.containsEntry("type", "feed")
+				.containsEntry("charset", "UTF-8");
 	}
 
 }
