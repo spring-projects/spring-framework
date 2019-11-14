@@ -22,19 +22,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.Test;
 
 import static java.time.Instant.MAX;
 import static java.time.Instant.MIN;
 import static java.time.ZoneId.systemDefault;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link InstantFormatter}.
@@ -43,46 +36,70 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 5.1.12
  */
-@DisplayName("InstantFormatter unit tests")
-@DisplayNameGeneration(ReplaceUnderscores.class)
-class InstantFormatterTests {
+public class InstantFormatterTests {
 
 	private final InstantFormatter instantFormatter = new InstantFormatter();
 
-	@ParameterizedTest
-	@ArgumentsSource(ISOSerializedInstantProvider.class)
-	void should_parse_an_ISO_formatted_string_representation_of_an_Instant(String input) throws ParseException {
-		Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
 
-		Instant actual = instantFormatter.parse(input, null);
+	@Test
+	public void should_parse_an_ISO_formatted_string_representation_of_an_Instant() {
+		new ISOSerializedInstantProvider().provideArguments().forEach(input -> {
+			try {
+				Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
 
-		assertThat(actual).isEqualTo(expected);
+				Instant actual = instantFormatter.parse(input, null);
+
+				assertEquals(expected, actual);
+			}
+			catch (ParseException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
-	@ParameterizedTest
-	@ArgumentsSource(RFC1123SerializedInstantProvider.class)
-	void should_parse_an_RFC1123_formatted_string_representation_of_an_Instant(String input) throws ParseException {
-		Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
+	@Test
+	public void should_parse_an_RFC1123_formatted_string_representation_of_an_Instant() {
+		new RFC1123SerializedInstantProvider().provideArguments().forEach(input -> {
+			try {
+				Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
 
-		Instant actual = instantFormatter.parse(input, null);
+				Instant actual = instantFormatter.parse(input, null);
 
-		assertThat(actual).isEqualTo(expected);
+				assertEquals(expected, actual);
+			}
+			catch (ParseException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
-	@ParameterizedTest
-	@ArgumentsSource(RandomInstantProvider.class)
-	void should_serialize_an_Instant_using_ISO_format_and_ignoring_Locale(Instant input) {
-		String expected = DateTimeFormatter.ISO_INSTANT.format(input);
+	@Test
+	public void should_serialize_an_Instant_using_ISO_format_and_ignoring_Locale() {
+		new RandomInstantProvider().randomInstantStream(MIN, MAX).forEach(instant -> {
+			String expected = DateTimeFormatter.ISO_INSTANT.format(instant);
 
-		String actual = instantFormatter.print(input, null);
+			String actual = instantFormatter.print(instant, null);
 
-		assertThat(actual).isEqualTo(expected);
+			assertEquals(expected, actual);
+		});
+	}
+
+
+	private static class RandomInstantProvider {
+
+		private static final long DATA_SET_SIZE = 10;
+
+		private static final Random random = new Random();
+
+		Stream<Instant> randomInstantStream(Instant min, Instant max) {
+			return Stream.concat(Stream.of(Instant.now()), // make sure that the data set includes current instant
+				random.longs(min.getEpochSecond(), max.getEpochSecond()).limit(DATA_SET_SIZE).mapToObj(Instant::ofEpochSecond));
+		}
 	}
 
 	private static class ISOSerializedInstantProvider extends RandomInstantProvider {
 
-		@Override
-		Stream<?> provideArguments() {
+		Stream<String> provideArguments() {
 			return randomInstantStream(MIN, MAX).map(DateTimeFormatter.ISO_INSTANT::format);
 		}
 	}
@@ -90,35 +107,14 @@ class InstantFormatterTests {
 	private static class RFC1123SerializedInstantProvider extends RandomInstantProvider {
 
 		// RFC-1123 supports only 4-digit years
-		private final Instant min = Instant.parse("0000-01-01T00:00:00.00Z");
+		private static final Instant min = Instant.parse("0000-01-01T00:00:00.00Z");
 
-		private final Instant max = Instant.parse("9999-12-31T23:59:59.99Z");
+		private static final Instant max = Instant.parse("9999-12-31T23:59:59.99Z");
 
-		@Override
-		Stream<?> provideArguments() {
+
+		Stream<String> provideArguments() {
 			return randomInstantStream(min, max)
 					.map(DateTimeFormatter.RFC_1123_DATE_TIME.withZone(systemDefault())::format);
-		}
-	}
-
-	private static class RandomInstantProvider implements ArgumentsProvider {
-
-		private static final long DATA_SET_SIZE = 10;
-
-		private static final Random random = new Random();
-
-		Stream<?> provideArguments() {
-			return randomInstantStream(MIN, MAX);
-		}
-
-		@Override
-		public final Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-			return provideArguments().map(Arguments::of).limit(DATA_SET_SIZE);
-		}
-
-		Stream<Instant> randomInstantStream(Instant min, Instant max) {
-			return Stream.concat(Stream.of(Instant.now()), // make sure that the data set includes current instant
-					random.longs(min.getEpochSecond(), max.getEpochSecond()).mapToObj(Instant::ofEpochSecond));
 		}
 	}
 
