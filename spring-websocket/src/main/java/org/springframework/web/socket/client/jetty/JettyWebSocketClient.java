@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -155,7 +156,13 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 		Callable<WebSocketSession> connectTask = () -> {
 			Future<Session> future = this.client.connect(listener, uri, request);
-			future.get();
+			try {
+				// TODO Configurable timeout
+				future.get(2000, TimeUnit.MILLISECONDS);
+			} catch (Exception ex){
+				logger.error("Failed to connect to remote websocket endpoint", ex);
+				future.cancel(true); // This method will stop the running underlying task
+			}
 			return wsSession;
 		};
 
