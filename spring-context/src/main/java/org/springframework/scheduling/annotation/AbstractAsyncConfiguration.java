@@ -16,7 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
@@ -27,7 +27,6 @@ import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract base {@code Configuration} class providing common structure for enabling
@@ -62,20 +61,10 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		}
 	}
 
-	/**
-	 * Collect any {@link AsyncConfigurer} beans through autowiring.
-	 */
 	@Autowired(required = false)
-	void setConfigurers(Collection<AsyncConfigurer> configurers) {
-		if (CollectionUtils.isEmpty(configurers)) {
-			return;
-		}
-		if (configurers.size() > 1) {
-			throw new IllegalStateException("Only one AsyncConfigurer may exist");
-		}
-		AsyncConfigurer configurer = configurers.iterator().next();
-		this.executor = configurer::getAsyncExecutor;
-		this.exceptionHandler = configurer::getAsyncUncaughtExceptionHandler;
+	void setConfigurer(AsyncConfigurer asyncConfigurer) {
+		this.executor = asyncConfigurer::getAsyncExecutor;
+		this.exceptionHandler = asyncConfigurer::getAsyncUncaughtExceptionHandler;
 	}
 
 }
