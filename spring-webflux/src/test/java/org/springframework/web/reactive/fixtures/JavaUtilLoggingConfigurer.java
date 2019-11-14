@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test_fixtures.logging;
+package org.springframework.web.reactive.fixtures;
 
 import java.io.InputStream;
 import java.util.logging.LogManager;
