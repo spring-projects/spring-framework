@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.format.Formatter;
  * (which is commonly used for HTTP date header values), as of Spring 4.3.
  *
  * @author Juergen Hoeller
+ * @author Andrei Nevedomskii
  * @since 4.0
  * @see java.time.Instant#parse
  * @see java.time.format.DateTimeFormatter#ISO_INSTANT
