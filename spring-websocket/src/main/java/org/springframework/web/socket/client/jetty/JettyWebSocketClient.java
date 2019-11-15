@@ -43,6 +43,7 @@ import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.adapter.jetty.WebSocketToJettyExtensionConfigAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
+import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -157,11 +158,10 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		Callable<WebSocketSession> connectTask = () -> {
 			Future<Session> future = this.client.connect(listener, uri, request);
 			try {
-				// TODO Configurable timeout
-				future.get(2000, TimeUnit.MILLISECONDS);
+				future.get(this.client.getConnectTimeout() + 50, TimeUnit.MILLISECONDS);
 			} catch (Exception ex){
-				logger.error("Failed to connect to remote websocket endpoint", ex);
 				future.cancel(true); // This method will stop the running underlying task
+				throw HandshakeFailureException("Failed to connect to remote websocket endpoint", ex);
 			}
 			return wsSession;
 		};
