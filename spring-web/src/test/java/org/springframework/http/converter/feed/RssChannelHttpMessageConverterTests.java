@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -41,17 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RssChannelHttpMessageConverterTests {
 
-	private static final MediaType RSS_XML_UTF8 =
-			new MediaType(MediaType.APPLICATION_RSS_XML, StandardCharsets.UTF_8);
+	private static final MediaType RSS_XML_UTF8 = new MediaType(MediaType.APPLICATION_RSS_XML, StandardCharsets.UTF_8);
 
-
-	private RssChannelHttpMessageConverter converter;
-
-
-	@BeforeEach
-	public void setUp() {
-		converter = new RssChannelHttpMessageConverter();
-	}
+	private final RssChannelHttpMessageConverter converter = new RssChannelHttpMessageConverter();
 
 
 	@Test
@@ -141,7 +132,7 @@ public class RssChannelHttpMessageConverterTests {
 	public void writeOtherContentTypeParameters() throws IOException {
 		Channel channel = new Channel("rss_2.0");
 		channel.setTitle("title");
-		channel.setLink("http://example.com");
+		channel.setLink("https://example.com");
 		channel.setDescription("description");
 
 		MockHttpOutputMessage message = new MockHttpOutputMessage();
