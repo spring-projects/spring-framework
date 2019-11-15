@@ -158,7 +158,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		Callable<WebSocketSession> connectTask = () -> {
 			Future<Session> future = this.client.connect(listener, uri, request);
 			try {
-				future.get(this.client.getConnectTimeout() + 50, TimeUnit.MILLISECONDS);
+				future.get(this.client.getConnectTimeout() + this.client.getMaxIdleTimeout() + 1000, TimeUnit.MILLISECONDS);
 			} catch (Exception ex){
 				future.cancel(true); // This method will stop the running underlying task
 				throw HandshakeFailureException("Failed to connect to remote websocket endpoint", ex);
