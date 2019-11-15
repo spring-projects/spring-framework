@@ -42,6 +42,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient")
+	testCompile("org.junit.platform:junit-platform-launcher")
 	testCompile("com.squareup.okhttp3:mockwebserver")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")

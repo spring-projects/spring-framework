@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andrei Nevedomskii
  * @author Sam Brannen
- * @since 5.2.2
+ * @since 5.1.12
  */
 @DisplayName("InstantFormatter unit tests")
 @DisplayNameGeneration(ReplaceUnderscores.class)
@@ -79,6 +79,27 @@ class InstantFormatterTests {
 		assertThat(actual).isEqualTo(expected);
 	}
 
+	private static class RandomInstantProvider implements ArgumentsProvider {
+
+		private static final long DATA_SET_SIZE = 10;
+
+		private static final Random random = new Random();
+
+		@Override
+		public final Stream<Arguments> provideArguments(ExtensionContext context) {
+			return provideArguments().map(Arguments::of).limit(DATA_SET_SIZE);
+		}
+
+		Stream<?> provideArguments() {
+			return randomInstantStream(MIN, MAX);
+		}
+
+		Stream<Instant> randomInstantStream(Instant min, Instant max) {
+			return Stream.concat(Stream.of(Instant.now()), // make sure that the data set includes current instant
+					random.longs(min.getEpochSecond(), max.getEpochSecond()).mapToObj(Instant::ofEpochSecond));
+		}
+	}
+
 	private static class ISOSerializedInstantProvider extends RandomInstantProvider {
 
 		@Override
@@ -98,27 +119,6 @@ class InstantFormatterTests {
 		Stream<?> provideArguments() {
 			return randomInstantStream(min, max)
 					.map(DateTimeFormatter.RFC_1123_DATE_TIME.withZone(systemDefault())::format);
-		}
-	}
-
-	private static class RandomInstantProvider implements ArgumentsProvider {
-
-		private static final long DATA_SET_SIZE = 10;
-
-		private static final Random random = new Random();
-
-		Stream<?> provideArguments() {
-			return randomInstantStream(MIN, MAX);
-		}
-
-		@Override
-		public final Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-			return provideArguments().map(Arguments::of).limit(DATA_SET_SIZE);
-		}
-
-		Stream<Instant> randomInstantStream(Instant min, Instant max) {
-			return Stream.concat(Stream.of(Instant.now()), // make sure that the data set includes current instant
-					random.longs(min.getEpochSecond(), max.getEpochSecond()).mapToObj(Instant::ofEpochSecond));
 		}
 	}
 

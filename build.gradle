@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.0"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.1"
 			mavenBom "io.netty:netty-bom:4.1.43.Final"
 			mavenBom "io.projectreactor:reactor-bom:Dysprosium-SR1"
 			mavenBom "io.rsocket:rsocket-bom:1.0.0-RC5"
@@ -59,7 +59,7 @@ configure(allprojects) { project ->
 				entry 'log4j-slf4j-impl'
 				entry 'log4j-jul'
 			}
-			dependency "org.slf4j:slf4j-api:1.7.28"
+			dependency "org.slf4j:slf4j-api:1.7.29"
 
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
@@ -134,7 +134,7 @@ configure(allprojects) { project ->
 			dependency "org.ehcache:ehcache:3.4.0"
 			dependency "org.hibernate:hibernate-core:5.4.8.Final"
 			dependency "org.hibernate:hibernate-validator:6.0.17.Final"
-			dependency "org.webjars:webjars-locator-core:0.42"
+			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
 
 			dependencySet(group: 'org.apache.tomcat', version: '9.0.27') {
