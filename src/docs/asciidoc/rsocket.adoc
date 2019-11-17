@@ -485,7 +485,7 @@ Once you have a <<rsocket-requester-client,client>> or
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	ViewBox box = ... ;
+	ViewBox viewBox = ... ;
 
 	Flux<AirportLocation> locations = requester.route("locate.radars.within") // <1>
 			.data(viewBox) // <2>
@@ -499,7 +499,7 @@ Once you have a <<rsocket-requester-client,client>> or
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val box: ViewBox = ...
+	val viewBox: ViewBox = ...
 
 	val locations = requester.route("locate.radars.within") // <1>
 			.data(viewBox) // <2>

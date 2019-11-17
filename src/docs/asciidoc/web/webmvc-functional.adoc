@@ -409,7 +409,7 @@ header:
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
-			request -> ServerResponse.ok().body("Hello World"));
+			request -> ServerResponse.ok().body("Hello World")).build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin

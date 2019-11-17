@@ -3625,7 +3625,7 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 ----
 
 The preceding example registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
+<<webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
 
 
@@ -3861,10 +3861,10 @@ which customizes Jackson's default properties with the following ones:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-jdk7[`jackson-datatype-jdk7`]: Support for Java 7 types like `java.nio.file.Path`.
 * https://github.com/FasterXML/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
 * https://github.com/FasterXML/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * https://github.com/FasterXML/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
+* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 
 
