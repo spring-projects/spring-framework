@@ -61,6 +61,9 @@ public class PropertyPlaceholderHelper {
 
 	private final boolean ignoreUnresolvablePlaceholders;
 
+	@Nullable
+	private final String escapeValue;
+
 
 	/**
 	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
@@ -69,7 +72,7 @@ public class PropertyPlaceholderHelper {
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix) {
-		this(placeholderPrefix, placeholderSuffix, null, true);
+		this(placeholderPrefix, placeholderSuffix, null, true, null);
 	}
 
 	/**
@@ -83,7 +86,22 @@ public class PropertyPlaceholderHelper {
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
 			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+		this(placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders, null);
+	}
 
+	/**
+	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
+	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
+	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
+	 * @param valueSeparator the separating character between the placeholder variable
+	 * and the associated default value, if any
+	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
+	 * be ignored ({@code true}) or cause an exception ({@code false})
+	 * @param escapeValue the escape value. The following text after escape value considering as a plain text.
+	 * @since 5.2.2
+	 */
+	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
+			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders, @Nullable String escapeValue) {
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
 		this.placeholderPrefix = placeholderPrefix;
@@ -97,6 +115,7 @@ public class PropertyPlaceholderHelper {
 		}
 		this.valueSeparator = valueSeparator;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+		this.escapeValue = escapeValue;
 	}
 
 
@@ -127,7 +146,7 @@ public class PropertyPlaceholderHelper {
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
-		int startIndex = value.indexOf(this.placeholderPrefix);
+		int startIndex = getStartIndex(value, this.placeholderPrefix);
 		if (startIndex == -1) {
 			return value;
 		}
@@ -150,7 +169,7 @@ public class PropertyPlaceholderHelper {
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
-					int separatorIndex = placeholder.indexOf(this.valueSeparator);
+					int separatorIndex = getStartIndex(placeholder, this.valueSeparator);
 					if (separatorIndex != -1) {
 						String actualPlaceholder = placeholder.substring(0, separatorIndex);
 						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
@@ -187,11 +206,29 @@ public class PropertyPlaceholderHelper {
 		return result.toString();
 	}
 
+	private int getStartIndex(String value, String search) {
+		int index = value.indexOf(search);
+		while (index != -1 && isEscaped(value, index)) {
+			index = value.indexOf(search, index + 1);
+		}
+		return index;
+	}
+
+	private boolean isEscaped(CharSequence value, int index) {
+		if (StringUtils.hasLength(this.escapeValue)) {
+			int escapeIndex = value.toString().indexOf(this.escapeValue, index - this.escapeValue.length());
+			if (escapeIndex != -1 && escapeIndex < index) {
+				return !isEscaped(value, escapeIndex);
+			}
+		}
+		return false;
+	}
+
 	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
 		int index = startIndex + this.placeholderPrefix.length();
 		int withinNestedPlaceholder = 0;
 		while (index < buf.length()) {
-			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
+			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix) && !isEscaped(buf, index)) {
 				if (withinNestedPlaceholder > 0) {
 					withinNestedPlaceholder--;
 					index = index + this.placeholderSuffix.length();
@@ -200,7 +237,7 @@ public class PropertyPlaceholderHelper {
 					return index;
 				}
 			}
-			else if (StringUtils.substringMatch(buf, index, this.simplePrefix)) {
+			else if (StringUtils.substringMatch(buf, index, this.simplePrefix) && !isEscaped(buf, index)) {
 				withinNestedPlaceholder++;
 				index = index + this.simplePrefix.length();
 			}

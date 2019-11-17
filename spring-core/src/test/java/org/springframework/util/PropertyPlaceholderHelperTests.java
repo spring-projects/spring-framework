@@ -108,4 +108,21 @@ class PropertyPlaceholderHelperTests {
 				helper.replacePlaceholders(text, props));
 	}
 
+	@Test
+	void placeholdersWithEscape() {
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", true, "@@");
+		Properties props = new Properties();
+		props.put("p1", "actualValue");
+		props.put("p2", "${p3}");
+		props.put("p3", "@@${p2}");
+		assertThat(helper.replacePlaceholders("${p1}", props)).isEqualTo("actualValue");
+		assertThat(helper.replacePlaceholders("@@@@${p1}", props)).isEqualTo("@@@@actualValue");
+		assertThat(helper.replacePlaceholders("${p2}", props)).isEqualTo("@@${p2}");
+		assertThat(helper.replacePlaceholders("@@${p4}", props)).isEqualTo("@@${p4}");
+		assertThat(helper.replacePlaceholders("${p4@@}", props)).isEqualTo("${p4@@}");
+		assertThat(helper.replacePlaceholders("@@${p4@@}", props)).isEqualTo("@@${p4@@}");
+		assertThat(helper.replacePlaceholders("${p4:actualValue}", props)).isEqualTo("actualValue");
+		assertThat(helper.replacePlaceholders("${p4@@:def}", props)).isEqualTo("${p4@@:def}");
+	}
+
 }
