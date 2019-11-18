@@ -1048,14 +1048,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			if (this.path.length() == 0) {
 				return null;
 			}
-			String path = this.path.toString();
-			while (true) {
-				int index = path.indexOf("//");
-				if (index == -1) {
-					break;
-				}
-				path = path.substring(0, index) + path.substring(index + 1);
-			}
+			String path = this.path.toString().replace("//", "");
 			return new HierarchicalUriComponents.FullPathComponent(path);
 		}
 
