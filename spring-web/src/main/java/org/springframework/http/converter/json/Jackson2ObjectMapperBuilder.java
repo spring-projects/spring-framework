@@ -82,6 +82,8 @@ import org.springframework.util.xml.StaxUtils;
  * <ul>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
  * support for other Java 8 types like {@link java.util.Optional}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-module-parameter-names">jackson-module-parameter-names</a>:
+ * support for constructor parameter names during deserialization</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
  * support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
@@ -778,6 +780,16 @@ public class Jackson2ObjectMapperBuilder {
 		}
 		catch (ClassNotFoundException ex) {
 			// jackson-datatype-jdk8 not available
+		}
+
+		try {
+			Class<? extends Module> parameterNamesModuleClass = (Class<? extends Module>)
+					ClassUtils.forName("com.fasterxml.jackson.module.paramnames.ParameterNamesModule", this.moduleClassLoader);
+			Module parameterNamesModule = BeanUtils.instantiateClass(parameterNamesModuleClass);
+			modulesToRegister.set(parameterNamesModule.getTypeId(), parameterNamesModule);
+		}
+		catch (ClassNotFoundException ex) {
+			// jackson-parameter-names not available
 		}
 
 		try {
