@@ -56,6 +56,13 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	}
 
 
+	static final RSocketFrameTypeMessageCondition CONNECT_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.SETUP, FrameType.METADATA_PUSH);
+
+	static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
+
+
+
 	private final Set<FrameType> frameTypes;
 
 
@@ -66,6 +73,10 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	public RSocketFrameTypeMessageCondition(Collection<FrameType> frameTypes) {
 		Assert.notEmpty(frameTypes, "`frameTypes` are required");
 		this.frameTypes = Collections.unmodifiableSet(new LinkedHashSet<>(frameTypes));
+	}
+
+	private RSocketFrameTypeMessageCondition() {
+		this.frameTypes = Collections.emptySet();
 	}
 
 
@@ -124,18 +135,71 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	}
 
 
-	/** Condition to match the initial SETUP frame and subsequent metadata pushes. */
-	public static final RSocketFrameTypeMessageCondition CONNECT_CONDITION =
-			new RSocketFrameTypeMessageCondition(
-					FrameType.SETUP,
-					FrameType.METADATA_PUSH);
+	/**
+	 * Return a condition for matching the RSocket request interaction type with
+	 * that is selected based on the delcared request and response cardinality
+	 * of some handler method.
+	 * <p>The table below shows the selections made:
+	 * <table>
+	 * <tr>
+	 * <th>Request Cardinality</th>
+	 * <th>Response Cardinality</th>
+	 * <th>Interaction Types</th>
+	 * </tr>
+	 * <tr>
+	 * <td>0,1</td>
+	 * <td>0</td>
+	 * <td>Fire-And-Forget, Request-Response</td>
+	 * </tr>
+	 * <tr>
+	 * <td>0,1</td>
+	 * <td>1</td>
+	 * <td>Request-Response</td>
+	 * </tr>
+	 * <tr>
+	 * <td>0,1</td>
+	 * <td>2</td>
+	 * <td>Request-Stream</td>
+	 * </tr>
+	 * <tr>
+	 * <td>2</td>
+	 * <td>Any</td>
+	 * <td>Request-Channel</td>
+	 * </tr>
+	 * </table>
+	 * @param cardinalityIn -- the request cardinality: 1 for a single payload,
+	 * 2 for many payloads, and 0 if input is not handled.
+	 * @param cardinalityOut -- the response cardinality: 0 for no output
+	 * payloads, 1 for a single payload, and 2 for many payloads.
+	 * @return a condition to use for matching the interaction type
+	 * @since 5.2.2
+	 */
+	public static RSocketFrameTypeMessageCondition getCondition(int cardinalityIn, int cardinalityOut) {
+		switch (cardinalityIn) {
+			case 0:
+			case 1:
+				switch (cardinalityOut) {
+					case 0: return FF_RR_CONDITION;
+					case 1: return RR_CONDITION;
+					case 2: return RS_CONDITION;
+					default: throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
+				}
+			case 2:
+				return RC_CONDITION;
+			default:
+				throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
+		}
+	}
 
-	/** Condition to match one of the 4 stream request types. */
-	public static final RSocketFrameTypeMessageCondition REQUEST_CONDITION =
-			new RSocketFrameTypeMessageCondition(
-					FrameType.REQUEST_FNF,
-					FrameType.REQUEST_RESPONSE,
-					FrameType.REQUEST_STREAM,
-					FrameType.REQUEST_CHANNEL);
+
+	private static final RSocketFrameTypeMessageCondition FF_CONDITION = from(FrameType.REQUEST_FNF);
+	private static final RSocketFrameTypeMessageCondition RR_CONDITION = from(FrameType.REQUEST_RESPONSE);
+	private static final RSocketFrameTypeMessageCondition RS_CONDITION = from(FrameType.REQUEST_STREAM);
+	private static final RSocketFrameTypeMessageCondition RC_CONDITION = from(FrameType.REQUEST_CHANNEL);
+	private static final RSocketFrameTypeMessageCondition FF_RR_CONDITION = FF_CONDITION.combine(RR_CONDITION);
+
+	private static RSocketFrameTypeMessageCondition from(FrameType... frameTypes) {
+		return new RSocketFrameTypeMessageCondition(frameTypes);
+	}
 
 }

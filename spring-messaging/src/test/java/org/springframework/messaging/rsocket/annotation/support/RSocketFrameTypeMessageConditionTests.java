@@ -26,6 +26,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.messaging.rsocket.annotation.support.RSocketFrameTypeMessageCondition.CONNECT_CONDITION;
+import static org.springframework.messaging.rsocket.annotation.support.RSocketFrameTypeMessageCondition.EMPTY_CONDITION;
 
 /**
  * Unit tests for {@link RSocketFrameTypeMessageCondition}.
@@ -33,14 +35,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RSocketFrameTypeMessageConditionTests {
 
+	private static final RSocketFrameTypeMessageCondition FNF_RR_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_FNF, FrameType.REQUEST_RESPONSE);
+
+
 	@Test
 	public void getMatchingCondition() {
 		Message<?> message = message(FrameType.REQUEST_RESPONSE);
-		RSocketFrameTypeMessageCondition condition = condition(FrameType.REQUEST_FNF, FrameType.REQUEST_RESPONSE);
-		RSocketFrameTypeMessageCondition actual = condition.getMatchingCondition(message);
+		RSocketFrameTypeMessageCondition actual = FNF_RR_CONDITION.getMatchingCondition(message);
 
 		assertThat(actual).isNotNull();
 		assertThat(actual.getFrameTypes()).hasSize(1).containsOnly(FrameType.REQUEST_RESPONSE);
+	}
+
+	@Test
+	public void getMatchingConditionEmpty() {
+		Message<?> message = message(FrameType.REQUEST_RESPONSE);
+		RSocketFrameTypeMessageCondition actual = EMPTY_CONDITION.getMatchingCondition(message);
+
+		assertThat(actual).isNull();
+	}
+
+	@Test
+	public void combine() {
+
+		assertThat(EMPTY_CONDITION.combine(CONNECT_CONDITION).getFrameTypes())
+				.containsExactly(FrameType.SETUP, FrameType.METADATA_PUSH);
+
+		assertThat(EMPTY_CONDITION.combine(new RSocketFrameTypeMessageCondition(FrameType.REQUEST_FNF)).getFrameTypes())
+				.containsExactly(FrameType.REQUEST_FNF);
 	}
 
 	@Test

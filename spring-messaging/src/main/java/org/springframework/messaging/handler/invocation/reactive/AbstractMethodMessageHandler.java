@@ -232,6 +232,15 @@ public abstract class AbstractMethodMessageHandler<T>
 		return CollectionUtils.unmodifiableMultiValueMap(this.destinationLookup);
 	}
 
+	/**
+	 * Return the argument resolvers initialized during {@link #afterPropertiesSet()}.
+	 * Primarily for internal use in sub-classes.
+	 * @since 5.2.2
+	 */
+	protected HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.invocableHelper.getArgumentResolvers();
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -377,6 +386,7 @@ public abstract class AbstractMethodMessageHandler<T>
 					oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
+		mapping = extendMapping(mapping, newHandlerMethod);
 		this.handlerMethods.put(mapping, newHandlerMethod);
 
 		for (String pattern : getDirectLookupMappings(mapping)) {
@@ -403,6 +413,21 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
+	 * This method is invoked just before mappings are added. It allows
+	 * sub-classes to update the mapping with the {@link HandlerMethod} in mind.
+	 * This can be useful when the method signature is used to refine the
+	 * mapping, e.g. based on the cardinality of input and output.
+	 * <p>By default this method returns the mapping that is passed in.
+	 * @param mapping the mapping to be added
+	 * @param handlerMethod the target handler for the mapping
+	 * @return a new mapping or the same
+	 * @since 5.2.2
+	 */
+	protected T extendMapping(T mapping, HandlerMethod handlerMethod) {
+		return mapping;
+	}
+
+	/**
 	 * Return String-based destinations for the given mapping, if any, that can
 	 * be used to find matches with a direct lookup (i.e. non-patterns).
 	 * <p><strong>Note:</strong> This is completely optional. The mapping
@@ -414,7 +439,13 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	@Override
 	public Mono<Void> handleMessage(Message<?> message) throws MessagingException {
-		Match<T> match = getHandlerMethod(message);
+		Match<T> match = null;
+		try {
+			match = getHandlerMethod(message);
+		}
+		catch (Exception ex) {
+			return Mono.error(ex);
+		}
 		if (match == null) {
 			// handleNoMatch would have been invoked already
 			return Mono.empty();

@@ -84,13 +84,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 	@Test
 	fun unitReturnValue() {
-		val result = requester.route("unit-return-value").data("Hello").retrieveFlux(String::class.java)
+		val result = requester.route("unit-return-value").data("Hello").retrieveMono(String::class.java)
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5))
 	}
 
 	@Test
 	fun unitReturnValueFromExceptionHandler() {
-		val result = requester.route("unit-return-value").data("bad").retrieveFlux(String::class.java)
+		val result = requester.route("unit-return-value").data("bad").retrieveMono(String::class.java)
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5))
 	}
 

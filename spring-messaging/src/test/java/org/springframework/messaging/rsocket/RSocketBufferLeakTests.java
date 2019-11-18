@@ -137,20 +137,14 @@ public class RSocketBufferLeakTests {
 
 	@Test
 	public void errorSignalWithExceptionHandler() {
-		Mono<String> result = requester.route("error-signal").data("foo").retrieveMono(String.class);
+		Flux<String> result = requester.route("error-signal").data("foo").retrieveFlux(String.class);
 		StepVerifier.create(result).expectNext("Handled 'bad input'").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void ignoreInput() {
-		Flux<String> result = requester.route("ignore-input").data("a").retrieveFlux(String.class);
+		Mono<String> result = requester.route("ignore-input").data("a").retrieveMono(String.class);
 		StepVerifier.create(result).expectNext("bar").thenCancel().verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void retrieveMonoFromFluxResponderMethod() {
-		Mono<String> result = requester.route("request-stream").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("foo-1").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 
@@ -187,11 +181,6 @@ public class RSocketBufferLeakTests {
 		@MessageMapping("ignore-input")
 		Mono<String> ignoreInput() {
 			return Mono.delay(Duration.ofMillis(10)).map(l -> "bar");
-		}
-
-		@MessageMapping("request-stream")
-		Flux<String> stream(String payload) {
-			return Flux.range(1,100).delayElements(Duration.ofMillis(10)).map(idx -> payload + "-" + idx);
 		}
 	}
 
