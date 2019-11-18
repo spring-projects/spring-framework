@@ -80,11 +80,11 @@ import org.springframework.util.xml.StaxUtils;
  * <p>It also automatically registers the following well-known modules if they are
  * detected on the classpath:
  * <ul>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
+ * <li><a href="https://github.com/FasterXML/jackson-modules-java8">jackson-datatype-jdk8</a>:
  * support for other Java 8 types like {@link java.util.Optional}</li>
- * <li><a href="https://github.com/FasterXML/jackson-module-parameter-names">jackson-module-parameter-names</a>:
+ * <li><a href="https://github.com/FasterXML/jackson-modules-java8">jackson-module-parameter-names</a>:
  * support for constructor parameter names during deserialization</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
+ * <li><a href="https://github.com/FasterXML/jackson-modules-java8">jackson-datatype-jsr310</a>:
  * support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
  * support for Joda-Time types</li>
