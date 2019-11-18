@@ -488,11 +488,13 @@ class DefaultWebClient implements WebClient {
 
 		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> bodyPublisher) {
 			Mono<T> result = statusHandlers(response);
+			Mono<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
+							t -> wrapException(t, response));
 			if (result != null) {
-				return result.switchIfEmpty(bodyPublisher);
+				return result.switchIfEmpty(wrappedExceptions);
 			}
 			else {
-				return bodyPublisher;
+				return wrappedExceptions;
 			}
 		}
 
@@ -510,11 +512,13 @@ class DefaultWebClient implements WebClient {
 
 		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> bodyPublisher) {
 			Mono<T> result = statusHandlers(response);
+			Flux<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
+					t -> wrapException(t, response));
 			if (result != null) {
-				return result.flux().switchIfEmpty(bodyPublisher);
+				return result.flux().switchIfEmpty(wrappedExceptions);
 			}
 			else {
-				return bodyPublisher;
+				return wrappedExceptions;
 			}
 		}
 
@@ -553,6 +557,12 @@ class DefaultWebClient implements WebClient {
 			URI uri = request.getURI();
 			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
 			return result.checkpoint(description);
+		}
+
+		private <T> Mono<T> wrapException(Throwable throwable, ClientResponse response) {
+			return response.createException()
+					.map(responseException -> responseException.initCause(throwable))
+					.flatMap(Mono::error);
 		}
 
 		@Override
