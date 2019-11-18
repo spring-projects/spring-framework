@@ -138,4 +138,37 @@ class SimpleJdbcInsertTests {
 		verify(tableResultSet).close();
 	}
 
+	@Test
+	public void testSimpleJdbcInsert() {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S");
+		jdbcInsert.compile();
+		String expected = "INSERT INTO T (F, S) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testSimpleJdbcInsertWithEscapingWithSchemaName() throws Exception {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withSchemaName("S").withTableName("T").usingColumns("F", "S").usingEscaping(true);
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		jdbcInsert.compile();
+		String expected = "INSERT INTO `S.T` (`F`, `S`) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testSimpleJdbcInsertWithEscapingWithoutSchemaName() throws Exception {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S").usingEscaping(true);
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		jdbcInsert.compile();
+		String expected = "INSERT INTO `T` (`F`, `S`) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
+	}
+
 }

@@ -236,6 +236,20 @@ public abstract class AbstractJdbcInsert {
 		return this.insertTypes;
 	}
 
+	/**
+	 * Set using using escaping.
+	 */
+	public void setUsingEscaping(boolean usingEscaping) {
+		this.tableMetaDataContext.setUsingEscaping(usingEscaping);
+	}
+
+	/**
+	 * Get using escaping.
+	 */
+	public boolean isUsingEscaping() {
+		return this.tableMetaDataContext.isUsingEscaping();
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Methods handling compilation issues

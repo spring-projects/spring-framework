@@ -139,4 +139,11 @@ public interface TableMetaDataProvider {
 	 */
 	List<TableParameterMetaData> getTableParameterMetaData();
 
+	/**
+	 * Retrieves the string used to quote SQL identifiers. This method returns a space " " if identifier quoting is not supported.
+	 * {@link DatabaseMetaData#getIdentifierQuoteString()}
+	 * @return database identifier quote string.
+	 */
+	String getIdentifierQuoteString();
+
 }

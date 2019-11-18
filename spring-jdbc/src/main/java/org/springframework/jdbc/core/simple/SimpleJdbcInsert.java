@@ -115,6 +115,12 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
+	public SimpleJdbcInsert usingEscaping(boolean usingEscaping) {
+		setUsingEscaping(usingEscaping);
+		return this;
+	}
+
+	@Override
 	public int execute(Map<String, ?> args) {
 		return doExecute(args);
 	}

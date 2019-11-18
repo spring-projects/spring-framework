@@ -82,6 +82,13 @@ public interface SimpleJdbcInsertOperations {
 	 */
 	SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData();
 
+	/**
+	 * Specify should sql identifiers be quoted.
+	 * @param usingEscaping should sql identifiers be quoted
+	 * @return the instance of this SimpleJdbcInsert
+	 */
+	SimpleJdbcInsertOperations usingEscaping(boolean usingEscaping);
+
 
 	/**
 	 * Execute the insert using the values passed in.
