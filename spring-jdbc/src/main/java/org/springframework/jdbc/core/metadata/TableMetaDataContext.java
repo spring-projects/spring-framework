@@ -78,6 +78,9 @@ public class TableMetaDataContext {
 	// Are we using generated key columns
 	private boolean generatedKeyColumnsUsed = false;
 
+	// Are we using escaping for SQL identifiers
+	private boolean usingEscaping = false;
+
 
 	/**
 	 * Set the name of the table for this context.
@@ -275,13 +278,24 @@ public class TableMetaDataContext {
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
+		String identifierQuoteString = "";
+		if (this.metaDataProvider != null && this.usingEscaping) {
+			identifierQuoteString = this.metaDataProvider.getIdentifierQuoteString();
+		}
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
 		if (getSchemaName() != null) {
+			insertStatement.append(identifierQuoteString);
 			insertStatement.append(getSchemaName());
 			insertStatement.append(".");
+			insertStatement.append(getTableName());
+			insertStatement.append(identifierQuoteString);
 		}
-		insertStatement.append(getTableName());
+		else {
+			insertStatement.append(identifierQuoteString);
+			insertStatement.append(getTableName());
+			insertStatement.append(identifierQuoteString);
+		}
 		insertStatement.append(" (");
 		int columnCount = 0;
 		for (String columnName : getTableColumns()) {
@@ -290,7 +304,9 @@ public class TableMetaDataContext {
 				if (columnCount > 1) {
 					insertStatement.append(", ");
 				}
+				insertStatement.append(identifierQuoteString);
 				insertStatement.append(columnName);
+				insertStatement.append(identifierQuoteString);
 			}
 		}
 		insertStatement.append(") VALUES(");
@@ -390,4 +406,11 @@ public class TableMetaDataContext {
 		return obtainMetaDataProvider().isGeneratedKeysColumnNameArraySupported();
 	}
 
+	public boolean isUsingEscaping() {
+		return this.usingEscaping;
+	}
+
+	public void setUsingEscaping(boolean usingEscaping) {
+		this.usingEscaping = usingEscaping;
+	}
 }

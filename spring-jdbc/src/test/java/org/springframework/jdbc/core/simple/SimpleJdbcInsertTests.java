@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -79,6 +80,38 @@ public class SimpleJdbcInsertTests {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				insert.execute(new HashMap<>()));
 		verify(resultSet).close();
+	}
+
+	@Test
+	public void testSimpleJdbcInsert() {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S");
+		jdbcInsert.compile();
+		String expected = "INSERT INTO T (F, S) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void testSimpleJdbcInsertWithEscapingWithSchemaName() throws Exception {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withSchemaName("S").withTableName("T").usingColumns("F", "S").usingEscaping(true);
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		jdbcInsert.compile();
+		String expected = "INSERT INTO `S.T` (`F`, `S`) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
+	}
+	@Test
+	public void testSimpleJdbcInsertWithEscapingWithoutSchemaName() throws Exception {
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S").usingEscaping(true);
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		jdbcInsert.compile();
+		String expected = "INSERT INTO `T` (`F`, `S`) VALUES(?, ?)";
+		String actual = jdbcInsert.getInsertString();
+		assertThat(actual).isEqualTo(expected);
 	}
 
 }

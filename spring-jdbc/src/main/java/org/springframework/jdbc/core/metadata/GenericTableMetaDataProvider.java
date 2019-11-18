@@ -76,6 +76,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** Collection of TableParameterMetaData objects. */
 	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
+	/** the string used to quote SQL identifiers. */
+	private String identifierQuoteString = "";
 
 	/**
 	 * Constructor used to initialize with provided database meta-data.
@@ -212,6 +214,15 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers': " + ex.getMessage());
 			}
 		}
+
+		try {
+			this.identifierQuoteString = databaseMetaData.getIdentifierQuoteString();
+		}
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error retrieving 'DatabaseMetaData.getIdentifierQuoteString': " + ex.getMessage());
+			}
+		}
 	}
 
 	@Override
@@ -302,6 +313,14 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	@Nullable
 	protected String getDatabaseVersion() {
 		return this.databaseVersion;
+	}
+
+	/**
+	 * Provide access to identifier quote string.
+	 */
+	@Override
+	public String getIdentifierQuoteString() {
+		return this.identifierQuoteString;
 	}
 
 	/**
