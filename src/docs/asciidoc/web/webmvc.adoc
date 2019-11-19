@@ -4637,7 +4637,7 @@ The MVC configuration exposes the following options related to asynchronous requ
 You can configure the following:
 
 * Default timeout value for async requests, which if not set, depends
-on the underlying Servlet container (for example, 10 seconds on Tomcat).
+on the underlying Servlet container.
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
 <<mvc-ann-async-reactive-types>> and for executing `Callable` instances returned from
 controller methods. We highly recommended configuring this property if you
