@@ -252,11 +252,13 @@ public class ControllerAdviceBean implements Ordered {
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
 		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class)) {
-			ControllerAdvice controllerAdvice = context.findAnnotationOnBean(name, ControllerAdvice.class);
-			if (controllerAdvice != null) {
-				// Use the @ControllerAdvice annotation found by findAnnotationOnBean()
-				// in order to avoid a subsequent lookup of the same annotation.
-				adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
+			if (!ScopedProxyUtils.isScopedTarget(name)) {
+				ControllerAdvice controllerAdvice = context.findAnnotationOnBean(name, ControllerAdvice.class);
+				if (controllerAdvice != null) {
+					// Use the @ControllerAdvice annotation found by findAnnotationOnBean()
+					// in order to avoid a subsequent lookup of the same annotation.
+					adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
+				}
 			}
 		}
 		OrderComparator.sort(adviceBeans);

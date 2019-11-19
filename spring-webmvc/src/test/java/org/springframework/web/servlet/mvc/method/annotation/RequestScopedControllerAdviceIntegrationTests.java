@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class RequestScopedControllerAdviceIntegrationTests {
 
 	@Test // gh-23985
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void loadContextWithRequestScopedControllerAdvice() {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
@@ -51,17 +50,11 @@ class RequestScopedControllerAdviceIntegrationTests {
 
 		assertThatCode(context::refresh).doesNotThrowAnyException();
 
-		// Until gh-24017 is fixed, we expect the RequestScopedControllerAdvice to show up twice.
-		Class[] expectedTypes = { RequestScopedControllerAdvice.class, RequestScopedControllerAdvice.class };
-
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
-		assertThat(adviceBeans)//
-				.extracting(ControllerAdviceBean::getBeanType)//
-				.containsExactly(expectedTypes);
-
-		assertThat(adviceBeans)//
-				.extracting(ControllerAdviceBean::getOrder)//
-				.containsExactly(42, 42);
+		assertThat(adviceBeans).size().isEqualTo(1);
+		assertThat(adviceBeans.get(0))//
+				.returns(RequestScopedControllerAdvice.class, ControllerAdviceBean::getBeanType)//
+				.returns(42, ControllerAdviceBean::getOrder);
 
 		context.close();
 	}
