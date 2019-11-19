@@ -45,6 +45,45 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	public static final String FRAME_TYPE_HEADER = "rsocketFrameType";
 
 
+	/** Match connection-level frames "SETUP" or "METADATA_PUSH". */
+	public static final RSocketFrameTypeMessageCondition CONNECT_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.SETUP, FrameType.METADATA_PUSH);
+
+	/** Match RSocket frames "REQUEST_FNF" or "REQUEST_RESPONSE". */
+	public static final RSocketFrameTypeMessageCondition REQUEST_FNF_OR_RESPONSE_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_FNF, FrameType.REQUEST_RESPONSE);
+
+	/** Match RSocket frame "REQUEST_RESPONSE". */
+	public static final RSocketFrameTypeMessageCondition REQUEST_RESPONSE_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_RESPONSE);
+
+	/** Match RSocket frame "REQUEST_STREAM". */
+	public static final RSocketFrameTypeMessageCondition REQUEST_STREAM_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_STREAM);
+
+	/** Match RSocket frame "REQUEST_CHANNEL". */
+	public static final RSocketFrameTypeMessageCondition REQUEST_CHANNEL_CONDITION =
+			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_CHANNEL);
+
+	/** Empty condition that does not match to any RSocket frames (e.g. for type-level mappings) */
+	public static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
+
+
+	/**
+	 * Condition to match "REQUEST_FNF", "REQUEST_RESPONSE", "REQUEST_STREAM",
+	 * and "REQUEST_CHANNEL".
+	 * @deprecated as of 5.2.2 because matching to all interaction types is too
+	 * flexible. Please use one of the other constants in this class that match
+	 * to specific frames.
+	 */
+	@Deprecated
+	public static final RSocketFrameTypeMessageCondition REQUEST_CONDITION =
+			new RSocketFrameTypeMessageCondition(
+					FrameType.REQUEST_FNF,
+					FrameType.REQUEST_RESPONSE,
+					FrameType.REQUEST_STREAM,
+					FrameType.REQUEST_CHANNEL);
+
 	/** Per FrameType cache to return ready instances from getMatchingCondition. */
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;
 
@@ -54,13 +93,6 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 			frameTypeConditionCache.put(type.name(), new RSocketFrameTypeMessageCondition(type));
 		}
 	}
-
-
-	static final RSocketFrameTypeMessageCondition CONNECT_CONDITION =
-			new RSocketFrameTypeMessageCondition(FrameType.SETUP, FrameType.METADATA_PUSH);
-
-	static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
-
 
 
 	private final Set<FrameType> frameTypes;
@@ -179,27 +211,16 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 			case 0:
 			case 1:
 				switch (cardinalityOut) {
-					case 0: return FF_RR_CONDITION;
-					case 1: return RR_CONDITION;
-					case 2: return RS_CONDITION;
+					case 0: return REQUEST_FNF_OR_RESPONSE_CONDITION;
+					case 1: return REQUEST_RESPONSE_CONDITION;
+					case 2: return REQUEST_STREAM_CONDITION;
 					default: throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
 				}
 			case 2:
-				return RC_CONDITION;
+				return REQUEST_CHANNEL_CONDITION;
 			default:
 				throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
 		}
-	}
-
-
-	private static final RSocketFrameTypeMessageCondition FF_CONDITION = from(FrameType.REQUEST_FNF);
-	private static final RSocketFrameTypeMessageCondition RR_CONDITION = from(FrameType.REQUEST_RESPONSE);
-	private static final RSocketFrameTypeMessageCondition RS_CONDITION = from(FrameType.REQUEST_STREAM);
-	private static final RSocketFrameTypeMessageCondition RC_CONDITION = from(FrameType.REQUEST_CHANNEL);
-	private static final RSocketFrameTypeMessageCondition FF_RR_CONDITION = FF_CONDITION.combine(RR_CONDITION);
-
-	private static RSocketFrameTypeMessageCondition from(FrameType... frameTypes) {
-		return new RSocketFrameTypeMessageCondition(frameTypes);
 	}
 
 }
