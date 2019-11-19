@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  */
 public class ControllerAdviceBean implements Ordered {
@@ -187,6 +189,7 @@ public class ControllerAdviceBean implements Ordered {
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		return Arrays.stream(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class))
+				.filter(name -> !ScopedProxyUtils.isScopedTarget(name))
 				.filter(name -> context.findAnnotationOnBean(name, ControllerAdvice.class) != null)
 				.map(name -> new ControllerAdviceBean(name, context))
 				.collect(Collectors.toList());

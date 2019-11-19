@@ -48,17 +48,12 @@ public class RequestScopedControllerAdviceIntegrationTests {
 		context.register(Config.class);
 		context.refresh();
 
-		// Until gh-24017 is fixed, we expect the RequestScopedControllerAdvice to show up twice.
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
-		assertEquals(2, adviceBeans.size());
+		assertEquals(1, adviceBeans.size());
 
-		ControllerAdviceBean adviceBean1 = adviceBeans.get(0);
-		assertEquals(RequestScopedControllerAdvice.class, adviceBean1.getBeanType());
-		assertEquals(42, adviceBean1.getOrder());
-
-		ControllerAdviceBean adviceBean2 = adviceBeans.get(1);
-		assertEquals(RequestScopedControllerAdvice.class, adviceBean2.getBeanType());
-		assertEquals(42, adviceBean2.getOrder());
+		ControllerAdviceBean adviceBean = adviceBeans.get(0);
+		assertEquals(RequestScopedControllerAdvice.class, adviceBean.getBeanType());
+		assertEquals(42, adviceBean.getOrder());
 
 		context.close();
 	}
