@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
  * Integration tests for request-scoped {@link ControllerAdvice @ControllerAdvice} beans.
  *
  * @author Sam Brannen
- * @since 5.2.2
+ * @since 5.1.12
  */
 class RequestScopedControllerAdviceIntegrationTests {
 
