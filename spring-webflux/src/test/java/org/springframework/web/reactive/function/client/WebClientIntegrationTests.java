@@ -1099,6 +1099,34 @@ class WebClientIntegrationTests {
 				.verifyComplete();
 	}
 
+	@ParameterizedWebClientTest
+	void mapBodyInOnStatus(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setResponseCode(500)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.setBody("{\"fooValue\":\"bar\"}")
+		);
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.retrieve()
+				.onStatus(HttpStatus::isError, response ->
+						response.bodyToMono(Foo.class)
+								.flatMap(foo -> Mono.error(new MyException(foo.getFooValue())))
+				)
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeErrorWith(throwable -> {
+					assertThat(throwable).isInstanceOf(MyException.class);
+					MyException error = (MyException) throwable;
+					assertThat(error.getMessage()).isEqualTo("bar");
+				})
+				.verify();
+	}
+
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
