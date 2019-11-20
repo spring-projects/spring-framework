@@ -28,6 +28,9 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Default implementation of the {@link CacheAwareContextLoaderDelegate} interface.
  *
@@ -49,6 +52,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
 	private final ContextCache contextCache;
+
+	private static final Set<MergedContextConfiguration> DEAD_CONTEXTS = ConcurrentHashMap.newKeySet();;
 
 
 	/**
@@ -117,6 +122,10 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) {
+		if (DEAD_CONTEXTS.contains(mergedContextConfiguration)) {
+			throw new IllegalStateException("ApplicationContext matching the test has already failed." +
+					" Check previous failed test logs for a reason");
+		}
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
 			if (context == null) {
@@ -129,6 +138,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
 				catch (Exception ex) {
+					DEAD_CONTEXTS.add(mergedContextConfiguration);
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
 				}
 			}
