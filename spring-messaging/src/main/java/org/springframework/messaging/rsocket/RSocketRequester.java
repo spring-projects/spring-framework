@@ -85,7 +85,9 @@ public interface RSocketRequester {
 	RequestSpec route(String route, Object... routeVars);
 
 	/**
-	 * Begin to specify a new request with the given metadata value.
+	 * Begin to specify a new request with the given metadata value, which can
+	 * be a concrete value or any producer of a single value that can be adapted
+	 * to a {@link Publisher} via {@link ReactiveAdapterRegistry}.
 	 * @param metadata the metadata value to encode
 	 * @param mimeType the mime type that describes the metadata;
 	 * This is required for connection using composite metadata. Otherwise the
@@ -143,6 +145,8 @@ public interface RSocketRequester {
 		/**
 		 * Set the data for the setup payload. The data will be encoded
 		 * according to the configured {@link #dataMimeType(MimeType)}.
+		 * The data be a concrete value or any producer of a single value that
+		 * can be adapted to a {@link Publisher} via {@link ReactiveAdapterRegistry}.
 		 * <p>By default this is not set.
 		 */
 		RSocketRequester.Builder setupData(Object data);
@@ -158,7 +162,9 @@ public interface RSocketRequester {
 		/**
 		 * Add metadata entry to the setup payload. Composite metadata must be
 		 * in use if this is called more than once or in addition to
-		 * {@link #setupRoute(String, Object...)}.
+		 * {@link #setupRoute(String, Object...)}. The metadata value be a
+		 * concrete value or any producer of a single value that can be adapted
+		 * to a {@link Publisher} via {@link ReactiveAdapterRegistry}.
 		 */
 		RSocketRequester.Builder setupMetadata(Object value, @Nullable MimeType mimeType);
 
@@ -335,6 +341,9 @@ public interface RSocketRequester {
 		 * Use this to append additional metadata entries when using composite
 		 * metadata. An {@link IllegalArgumentException} is raised if this
 		 * method is used when not using composite metadata.
+		 * The metadata value be a concrete value or any producer of a single
+		 * value that can be adapted to a {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
 		 * @param metadata an Object to be encoded with a suitable
 		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
 		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}

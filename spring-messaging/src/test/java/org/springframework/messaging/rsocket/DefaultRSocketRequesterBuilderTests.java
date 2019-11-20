@@ -17,6 +17,7 @@
 package org.springframework.messaging.rsocket;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -189,6 +191,39 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		assertThat(setupPayload.getMetadataUtf8()).isEqualTo("toA");
 		assertThat(setupPayload.getDataUtf8()).isEqualTo("My data");
+	}
+
+	@Test
+	public void setupWithAsyncValues() {
+
+		Mono<String> asyncMeta1 = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async Metadata 1");
+		Mono<String> asyncMeta2 = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async Metadata 2");
+		Mono<String> data = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async data");
+
+		RSocketRequester.builder()
+				.dataMimeType(MimeTypeUtils.TEXT_PLAIN)
+				.setupRoute("toA")
+				.setupMetadata(asyncMeta1, new MimeType("text", "x.test.metadata1"))
+				.setupMetadata(asyncMeta2, new MimeType("text", "x.test.metadata2"))
+				.setupData(data)
+				.connect(this.transport)
+				.block();
+
+		ConnectionSetupPayload payload = Mono.from(this.connection.sentFrames())
+				.map(ConnectionSetupPayload::create)
+				.block();
+
+		MimeType compositeMimeType =
+				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
+
+		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
+		extractor.metadataToExtract(new MimeType("text", "x.test.metadata1"), String.class, "asyncMeta1");
+		extractor.metadataToExtract(new MimeType("text", "x.test.metadata2"), String.class, "asyncMeta2");
+		Map<String, Object> metadataValues = extractor.extract(payload, compositeMimeType);
+
+		assertThat(metadataValues.get("asyncMeta1")).isEqualTo("Async Metadata 1");
+		assertThat(metadataValues.get("asyncMeta2")).isEqualTo("Async Metadata 2");
+		assertThat(payload.getDataUtf8()).isEqualTo("Async data");
 	}
 
 	@Test

@@ -84,7 +84,7 @@ public class DefaultMetadataExtractorTests {
 				.metadata("html data", TEXT_HTML)
 				.metadata("xml data", TEXT_XML);
 
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
 		payload.release();
@@ -104,7 +104,7 @@ public class DefaultMetadataExtractorTests {
 				.metadata("html data", TEXT_HTML)
 				.metadata("xml data", TEXT_XML);
 
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
 		payload.release();
@@ -120,7 +120,7 @@ public class DefaultMetadataExtractorTests {
 	public void route() {
 		MimeType metaMimeType = MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 		MetadataEncoder metadataEncoder = new MetadataEncoder(metaMimeType, this.strategies).route("toA");
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, metaMimeType);
 		payload.release();
@@ -133,7 +133,7 @@ public class DefaultMetadataExtractorTests {
 		this.extractor.metadataToExtract(TEXT_PLAIN, String.class, ROUTE_KEY);
 
 		MetadataEncoder metadataEncoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).route("toA");
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
 		payload.release();
@@ -151,7 +151,7 @@ public class DefaultMetadataExtractorTests {
 		});
 
 		MetadataEncoder encoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).metadata("toA:text data", null);
-		DataBuffer metadata = encoder.encode();
+		DataBuffer metadata = encoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
 		payload.release();
@@ -167,7 +167,7 @@ public class DefaultMetadataExtractorTests {
 		extractor.metadataToExtract(TEXT_PLAIN, String.class, "name");
 
 		MetadataEncoder encoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).metadata("value", null);
-		DataBuffer metadata = encoder.encode();
+		DataBuffer metadata = encoder.encode().block();
 		Payload payload = createPayload(metadata);
 
 		Map<String, Object> result = extractor.extract(payload, TEXT_PLAIN);
