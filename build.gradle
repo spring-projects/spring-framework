@@ -132,8 +132,8 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.8.Final"
-			dependency "org.hibernate:hibernate-validator:6.0.17.Final"
+			dependency "org.hibernate:hibernate-core:5.4.9.Final"
+			dependency "org.hibernate:hibernate-validator:6.1.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
 
@@ -148,7 +148,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.0.27.Final') {
+			dependencySet(group: 'io.undertow', version: '2.0.28.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
