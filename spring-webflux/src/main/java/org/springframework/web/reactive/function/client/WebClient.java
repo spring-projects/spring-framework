@@ -264,7 +264,7 @@ public interface WebClient {
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
 		/**
-		 * Add the given filter to the filter chain.
+		 * Add the given filter to the end of the filter chain.
 		 * @param filter the filter to be added to the chain
 		 */
 		Builder filter(ExchangeFilterFunction filter);
