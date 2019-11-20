@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,8 +219,8 @@ public interface SqlRowSet extends Serializable {
 	 * (for NCHAR, NVARCHAR, LONGNVARCHAR columns).
 	 * @param columnIndex the column index
 	 * @return a String representing the column value
-	 * @see java.sql.ResultSet#getNString(int)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getNString(int)
 	 */
 	String getNString(int columnIndex) throws InvalidResultSetAccessException;
 
@@ -229,8 +229,8 @@ public interface SqlRowSet extends Serializable {
 	 * (for NCHAR, NVARCHAR, LONGNVARCHAR columns).
 	 * @param columnLabel the column label
 	 * @return a String representing the column value
-	 * @see java.sql.ResultSet#getNString(String)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getNString(String)
 	 */
 	String getNString(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -273,8 +273,8 @@ public interface SqlRowSet extends Serializable {
 	 * @param columnIndex the column index
 	 * @param type the Java type to convert the designated column to
 	 * @return a Object representing the column value
-	 * @see java.sql.ResultSet#getObject(int)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getObject(int, Class)
 	 */
 	<T> T getObject(int columnIndex, Class<T> type) throws InvalidResultSetAccessException;
 
@@ -283,8 +283,8 @@ public interface SqlRowSet extends Serializable {
 	 * @param columnLabel the column label
 	 * @param type the Java type to convert the designated column to
 	 * @return a Object representing the column value
-	 * @see java.sql.ResultSet#getObject(int)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getObject(String, Class)
 	 */
 	<T> T getObject(String columnLabel, Class<T> type) throws InvalidResultSetAccessException;
 
