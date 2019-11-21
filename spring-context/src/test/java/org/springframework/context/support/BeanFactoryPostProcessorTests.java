@@ -36,6 +36,8 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.Assert;
 
+import javax.transaction.Transactional;
+
 import static org.junit.Assert.*;
 
 /**
@@ -54,6 +56,7 @@ public class BeanFactoryPostProcessorTests {
 	@Test
 	public void testRegisteredBeanFactoryPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
+		//注册Bean定义
 		ac.registerSingleton("tb1", TestBean.class);
 		ac.registerSingleton("tb2", TestBean.class);
 		TestBeanFactoryPostProcessor bfpp = new TestBeanFactoryPostProcessor();
@@ -98,6 +101,7 @@ public class BeanFactoryPostProcessorTests {
 		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class));
 		bf.registerBeanDefinition("bfpp", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
 		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) bf.getBean("bfpp");
+		//未调用refresh()方法，bfpp作为普通的对象放入了BeanFactory。
 		assertFalse(bfpp.wasCalled);
 	}
 
@@ -127,6 +131,7 @@ public class BeanFactoryPostProcessorTests {
 		assertTrue(ac.getBean("bfpp2", TestBeanFactoryPostProcessor.class).wasCalled);
 	}
 
+	@Transactional()
 	@Test
 	public void testPrioritizedBeanDefinitionRegistryPostProcessorRegisteringAnother() {
 		StaticApplicationContext ac = new StaticApplicationContext();
@@ -183,6 +188,7 @@ public class BeanFactoryPostProcessorTests {
 
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+			//注册
 			registry.registerBeanDefinition("bfpp1", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
 		}
 
@@ -199,6 +205,7 @@ public class BeanFactoryPostProcessorTests {
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 			assertTrue(registry.containsBeanDefinition("bfpp1"));
+			//注册bean对象
 			registry.registerBeanDefinition("bfpp2", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
 		}
 

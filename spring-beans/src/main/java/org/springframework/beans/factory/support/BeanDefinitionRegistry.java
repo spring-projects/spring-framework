@@ -33,6 +33,7 @@ import org.springframework.core.AliasRegistry;
  * <p>Spring's bean definition readers expect to work on an implementation of this
  * interface. Known implementors within the Spring core are DefaultListableBeanFactory
  * and GenericApplicationContext.
+ * bean定义注册器,所有的bean定义都会放到这个里面
  *
  * @author Juergen Hoeller
  * @since 26.11.2003

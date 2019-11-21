@@ -33,6 +33,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
+import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
@@ -334,6 +335,9 @@ public class ClassPathXmlApplicationContextTests {
 				return super.getResource(location);
 			}
 		};
+
+		System.out.println(ctx.getEnvironment().getProperty("asddd"));
+
 		ResourceTestBean resource1 = (ResourceTestBean) ctx.getBean("resource1");
 		ResourceTestBean resource2 = (ResourceTestBean) ctx.getBean("resource2");
 		assertTrue(resource1.getResource() instanceof ClassPathResource);

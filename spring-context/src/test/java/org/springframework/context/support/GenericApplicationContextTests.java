@@ -20,7 +20,10 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 
 import static org.junit.Assert.*;
 
@@ -29,6 +32,16 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  */
 public class GenericApplicationContextTests {
+
+	@Test
+	public void testRegister() {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
+		xmlReader.loadBeanDefinitions(new ClassPathResource("applicationContext.xml"));
+		PropertiesBeanDefinitionReader propReader = new PropertiesBeanDefinitionReader(ctx);
+		propReader.loadBeanDefinitions(new ClassPathResource("otherBeans.properties"));
+		ctx.refresh();
+	}
 
 	@Test
 	public void getBeanForClass() {
@@ -43,8 +56,7 @@ public class GenericApplicationContextTests {
 		try {
 			assertSame(ac.getBean("testBean"), ac.getBean(Object.class));
 			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
+		} catch (NoUniqueBeanDefinitionException ex) {
 			// expected
 		}
 	}
@@ -89,8 +101,7 @@ public class GenericApplicationContextTests {
 		try {
 			assertSame(ac.getBean("testBean"), ac.getBean(String.class));
 			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
+		} catch (IllegalStateException ex) {
 			// expected
 		}
 
@@ -98,8 +109,7 @@ public class GenericApplicationContextTests {
 			assertSame(ac.getAutowireCapableBeanFactory().getBean("testBean"),
 					ac.getAutowireCapableBeanFactory().getBean(String.class));
 			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
+		} catch (IllegalStateException ex) {
 			// expected
 		}
 	}

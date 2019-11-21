@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * The default implementation of the {@link PropertyValues} interface.
  * Allows simple manipulation of properties, and provides constructors
  * to support deep copy and construction from a Map.
+ * 存储对象属性值
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

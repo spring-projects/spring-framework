@@ -33,17 +33,17 @@ import org.springframework.util.StringValueResolver;
  * Visitor class for traversing {@link BeanDefinition} objects, in particular
  * the property values and constructor argument values contained in them,
  * resolving bean metadata values.
- *
+ * <p>
  * <p>Used by {@link PropertyPlaceholderConfigurer} to parse all String values
  * contained in a BeanDefinition, resolving any placeholders found.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 1.2
  * @see BeanDefinition
  * @see BeanDefinition#getPropertyValues
  * @see BeanDefinition#getConstructorArgumentValues
  * @see PropertyPlaceholderConfigurer
+ * @since 1.2
  */
 public class BeanDefinitionVisitor {
 
@@ -54,6 +54,7 @@ public class BeanDefinitionVisitor {
 	/**
 	 * Create a new BeanDefinitionVisitor, applying the specified
 	 * value resolver to all bean metadata values.
+	 *
 	 * @param valueResolver the StringValueResolver to apply
 	 */
 	public BeanDefinitionVisitor(StringValueResolver valueResolver) {
@@ -72,6 +73,7 @@ public class BeanDefinitionVisitor {
 	/**
 	 * Traverse the given BeanDefinition object and the MutablePropertyValues
 	 * and ConstructorArgumentValues contained in them.
+	 *
 	 * @param beanDefinition the BeanDefinition object to traverse
 	 * @see #resolveStringValue(String)
 	 */
@@ -144,8 +146,10 @@ public class BeanDefinitionVisitor {
 	protected void visitPropertyValues(MutablePropertyValues pvs) {
 		PropertyValue[] pvArray = pvs.getPropertyValues();
 		for (PropertyValue pv : pvArray) {
+			//解析具体的值
 			Object newVal = resolveValue(pv.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
+				//设置值
 				pvs.add(pv.getName(), newVal);
 			}
 		}
@@ -169,16 +173,20 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
+	/**
+	 * 解析具体的值
+	 *
+	 * @param value
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	@Nullable
 	protected Object resolveValue(@Nullable Object value) {
 		if (value instanceof BeanDefinition) {
 			visitBeanDefinition((BeanDefinition) value);
-		}
-		else if (value instanceof BeanDefinitionHolder) {
+		} else if (value instanceof BeanDefinitionHolder) {
 			visitBeanDefinition(((BeanDefinitionHolder) value).getBeanDefinition());
-		}
-		else if (value instanceof RuntimeBeanReference) {
+		} else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
@@ -187,8 +195,7 @@ public class BeanDefinitionVisitor {
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanReference(newBeanName);
 			}
-		}
-		else if (value instanceof RuntimeBeanNameReference) {
+		} else if (value instanceof RuntimeBeanNameReference) {
 			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
@@ -197,28 +204,22 @@ public class BeanDefinitionVisitor {
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanNameReference(newBeanName);
 			}
-		}
-		else if (value instanceof Object[]) {
+		} else if (value instanceof Object[]) {
 			visitArray((Object[]) value);
-		}
-		else if (value instanceof List) {
+		} else if (value instanceof List) {
 			visitList((List) value);
-		}
-		else if (value instanceof Set) {
+		} else if (value instanceof Set) {
 			visitSet((Set) value);
-		}
-		else if (value instanceof Map) {
+		} else if (value instanceof Map) {
 			visitMap((Map) value);
-		}
-		else if (value instanceof TypedStringValue) {
+		} else if (value instanceof TypedStringValue) {
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			String stringValue = typedStringValue.getValue();
 			if (stringValue != null) {
 				String visitedString = resolveStringValue(stringValue);
 				typedStringValue.setValue(visitedString);
 			}
-		}
-		else if (value instanceof String) {
+		} else if (value instanceof String) {
 			return resolveStringValue((String) value);
 		}
 		return value;
@@ -284,6 +285,7 @@ public class BeanDefinitionVisitor {
 
 	/**
 	 * Resolve the given String value, for example parsing placeholders.
+	 *
 	 * @param strVal the original String value
 	 * @return the resolved String value
 	 */

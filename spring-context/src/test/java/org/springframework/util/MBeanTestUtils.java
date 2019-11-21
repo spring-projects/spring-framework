@@ -16,8 +16,11 @@
 
 package org.springframework.util;
 
+import org.junit.Test;
+
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
+import java.util.Random;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
@@ -42,4 +45,51 @@ public class MBeanTestUtils {
 		field.set(null, null);
 	}
 
+	/**
+	 * 查找字符串
+	 * 时间复杂度：（m-n）*n
+	 */
+	public void test1() {
+		String source = "asdfasdfasdfasdfaewwrwerw";
+		String target = "asf";
+		//判断长度
+		for (int sIndex = 0; sIndex < source.length() - target.length(); sIndex++) {
+			int tempSindex = sIndex;
+			boolean flag = true;
+			for (int tIndex = 0; tIndex < target.length(); tIndex++) {
+				if (target.indexOf(tIndex) != source.indexOf(tempSindex++)) {
+					flag = false;
+					break;
+				}
+			}
+			if (flag) {
+				//找到字符串所在位置
+				System.out.println(sIndex);
+			}
+		}
+	}
+
+	/**
+	 * n*m
+	 */
+	public void test2() {
+
+	}
+
+	public void test3() {
+		//多线程
+		Random random = new Random();
+		random.nextInt();
+	}
+
+	/**
+	 * 微信红包算法：
+	 * 1、红包个数
+	 * 2、随机包
+	 * 3、请求并打开
+	 */
+	@Test
+	public void redBag(){
+
+	}
 }
