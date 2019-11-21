@@ -47,7 +47,7 @@ dependencies {
 	}
 	optional("commons-fileupload:commons-fileupload:1.4")
 	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
-	optional("com.fasterxml.woodstox:woodstox-core:5.2.0") {  // woodstox before aalto
+	optional("com.fasterxml.woodstox:woodstox-core:5.3.0") {  // woodstox before aalto
 		exclude group: "stax", module: "stax-api"
 	}
 	optional("com.fasterxml:aalto-xml:1.1.1")
