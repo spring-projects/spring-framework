@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class ResultActionsDsl(private val actions: ResultActions, private val mockMvc: MockMvc) {
+class ResultActionsDsl internal constructor (private val actions: ResultActions, private val mockMvc: MockMvc) {
 
 	/**
 	 * Provide access to [MockMvcResultMatchersDsl] Kotlin DSL.

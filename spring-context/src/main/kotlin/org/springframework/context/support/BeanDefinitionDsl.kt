@@ -76,7 +76,7 @@ fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
+open class BeanDefinitionDsl internal constructor (private val init: BeanDefinitionDsl.() -> Unit,
 							 private val condition: (ConfigurableEnvironment) -> Boolean = { true })
 	: ApplicationContextInitializer<GenericApplicationContext> {
 

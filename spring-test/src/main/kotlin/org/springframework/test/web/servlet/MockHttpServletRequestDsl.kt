@@ -40,7 +40,7 @@ import javax.servlet.http.Cookie
  * @author Sebastien Deleuze
  * @since 5.2
  */
-open class MockHttpServletRequestDsl(private val builder: MockHttpServletRequestBuilder) {
+open class MockHttpServletRequestDsl internal constructor (private val builder: MockHttpServletRequestBuilder) {
 
 	/**
 	 * @see [MockHttpServletRequestBuilder.contextPath]
