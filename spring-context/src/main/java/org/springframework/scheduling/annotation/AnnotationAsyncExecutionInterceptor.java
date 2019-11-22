@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
-
 import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 
 /**
  * Specialization of {@link AsyncExecutionInterceptor} that delegates method execution to
@@ -38,6 +38,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  */
 public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionInterceptor {
+
+	private boolean exposeProxy;
+
 
 	/**
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor
@@ -87,4 +90,8 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 		return (async != null ? async.value() : null);
 	}
 
+
+	public void setExposeProxy(boolean exposeProxy) {
+		this.exposeProxy = exposeProxy;
+	}
 }

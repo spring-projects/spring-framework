@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,14 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 
 	private Pointcut pointcut;
 
+	private boolean exposeProxy;
+
 
 	/**
 	 * Create a new {@code AsyncAnnotationAdvisor} for bean-style configuration.
 	 */
 	public AsyncAnnotationAdvisor() {
-		this((Supplier<Executor>) null, (Supplier<AsyncUncaughtExceptionHandler>) null);
+		this((Supplier<Executor>) null, (Supplier<AsyncUncaughtExceptionHandler>) null, false);
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	public AsyncAnnotationAdvisor(
 			@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
 
-		this(SingletonSupplier.ofNullable(executor), SingletonSupplier.ofNullable(exceptionHandler));
+		this(SingletonSupplier.ofNullable(executor), SingletonSupplier.ofNullable(exceptionHandler), false);
 	}
 
 	/**
@@ -93,7 +95,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 */
 	@SuppressWarnings("unchecked")
 	public AsyncAnnotationAdvisor(
-			@Nullable Supplier<Executor> executor, @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler) {
+			@Nullable Supplier<Executor> executor, @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler, boolean exposeProxy) {
 
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<>(2);
 		asyncAnnotationTypes.add(Async.class);
@@ -104,6 +106,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
 		}
+		this.exposeProxy = exposeProxy;
 		this.advice = buildAdvice(executor, exceptionHandler);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
 	}
@@ -152,6 +155,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 
 		AnnotationAsyncExecutionInterceptor interceptor = new AnnotationAsyncExecutionInterceptor(null);
 		interceptor.configure(executor, exceptionHandler);
+		interceptor.setExposeProxy(exposeProxy);
 		return interceptor;
 	}
 

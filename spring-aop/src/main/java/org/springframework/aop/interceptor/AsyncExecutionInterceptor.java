@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
+import org.springframework.aop.framework.AopContext;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
@@ -68,6 +69,9 @@ import org.springframework.util.ClassUtils;
  */
 public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport implements MethodInterceptor, Ordered {
 
+	private boolean exposeProxy;
+
+
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
@@ -110,8 +114,14 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
+		Object oldProxy = exposeProxy ? AopContext.currentProxy() : null;
+
 		Callable<Object> task = () -> {
 			try {
+				if (exposeProxy) {
+					if (invocation instanceof ReflectiveMethodInvocation)
+						AopContext.setCurrentProxy(((ReflectiveMethodInvocation) invocation).getProxy());
+				}
 				Object result = invocation.proceed();
 				if (result instanceof Future) {
 					return ((Future<?>) result).get();
@@ -122,6 +132,10 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			}
 			catch (Throwable ex) {
 				handleError(ex, userDeclaredMethod, invocation.getArguments());
+			} finally {
+				if (exposeProxy) {
+					AopContext.setCurrentProxy(oldProxy);
+				}
 			}
 			return null;
 		};
