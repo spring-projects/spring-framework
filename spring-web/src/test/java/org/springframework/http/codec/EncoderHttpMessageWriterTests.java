@@ -180,7 +180,7 @@ class EncoderHttpMessageWriterTests {
 		configureEncoder(MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.empty(), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
-		StepVerifier.create(this.response.getBody()).expectComplete();
+		StepVerifier.create(this.response.getBody()).verifyComplete();
 		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(0);
 	}
 
