@@ -204,6 +204,6 @@ open class MockHttpServletRequestDsl(private val builder: MockHttpServletRequest
 		flashAttrs?.also { builder.flashAttrs(flashAttrs!!) }
 		session?.also { builder.session(session!!) }
 		principal?.also { builder.principal(principal!!) }
-		return ResultActionsDsl(mockMvc.perform(builder))
+		return ResultActionsDsl(mockMvc.perform(builder), mockMvc)
 	}
 }
