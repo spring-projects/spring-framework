@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import kotlin.Unit;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -929,6 +930,9 @@ public class MethodParameter {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				if (function != null && function.isSuspend()) {
 					Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
+					if (paramType == Unit.class) {
+						paramType = void.class;
+					}
 					return ResolvableType.forType(paramType).resolve(method.getReturnType());
 				}
 			}
