@@ -148,4 +148,10 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 		return (charset != null ? charset : StandardCharsets.UTF_8);
 	}
 
+
+	@Override
+	public String toString() {
+		HttpStatus code = HttpStatus.resolve(this.status);
+		return (code != null ? code.name() + "(" + this.status + ")" : "Status (" + this.status + ")") + this.headers;
+	}
 }
