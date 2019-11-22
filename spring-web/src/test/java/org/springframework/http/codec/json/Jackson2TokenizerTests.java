@@ -210,8 +210,8 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				.expectNext(expected)
 				.verifyComplete();
 
-		StepVerifier.create(decode(source, false, maxInMemorySize - 1))
-				.expectError(DataBufferLimitException.class);
+		StepVerifier.create(decode(source, false, maxInMemorySize - 2))
+				.verifyError(DataBufferLimitException.class);
 	}
 
 	@Test
