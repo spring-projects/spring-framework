@@ -62,7 +62,16 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	@Nullable
 	private volatile T currentData;
 
+	/* Indicates "onComplete" was received during the (last) write. */
 	private volatile boolean subscriberCompleted;
+
+	/**
+	 * Indicates we're waiting for one last isReady-onWritePossible cycle
+	 * after "onComplete" because some Servlet containers expect this to take
+	 * place prior to calling AsyncContext.complete().
+	 * See https://github.com/eclipse-ee4j/servlet-api/issues/273
+	 */
+	private volatile boolean readyToCompleteAfterLastWrite;
 
 	private final WriteResultPublisher resultPublisher;
 
@@ -344,7 +353,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			}
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				processor.changeStateToComplete(this);
+				processor.readyToCompleteAfterLastWrite = true;
+				processor.changeStateToReceived(this);
 			}
 		},
 
@@ -352,7 +362,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@SuppressWarnings("deprecation")
 			@Override
 			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
-				if (processor.changeState(this, WRITING)) {
+				if (processor.readyToCompleteAfterLastWrite) {
+					processor.changeStateToComplete(RECEIVED);
+				}
+				else if (processor.changeState(this, WRITING)) {
 					T data = processor.currentData;
 					Assert.state(data != null, "No data");
 					try {
@@ -360,7 +373,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 							if (processor.changeState(WRITING, REQUESTED)) {
 								processor.currentData = null;
 								if (processor.subscriberCompleted) {
-									processor.changeStateToComplete(REQUESTED);
+									processor.readyToCompleteAfterLastWrite = true;
+									processor.changeStateToReceived(REQUESTED);
 								}
 								else {
 									processor.writingPaused();
