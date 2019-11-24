@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  */
 class MergedTestPropertySources {
 
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final MergedTestPropertySources empty = new MergedTestPropertySources(new String[0], new String[0]);
 
 	private final String[] locations;
 
@@ -38,11 +38,12 @@ class MergedTestPropertySources {
 
 
 	/**
-	 * Create an <em>empty</em> {@code MergedTestPropertySources} instance.
+	 * Factory for an <em>empty</em> {@code MergedTestPropertySources} instance.
 	 */
-	MergedTestPropertySources() {
-		this(EMPTY_STRING_ARRAY, EMPTY_STRING_ARRAY);
+	static MergedTestPropertySources empty() {
+		return empty;
 	}
+
 
 	/**
 	 * Create a {@code MergedTestPropertySources} instance with the supplied

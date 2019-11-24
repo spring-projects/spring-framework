@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,93 +28,93 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class CollectionUtilsTests {
+class CollectionUtilsTests {
 
 	@Test
-	public void testIsEmpty() {
-		assertTrue(CollectionUtils.isEmpty((Set<Object>) null));
-		assertTrue(CollectionUtils.isEmpty((Map<String, String>) null));
-		assertTrue(CollectionUtils.isEmpty(new HashMap<String, String>()));
-		assertTrue(CollectionUtils.isEmpty(new HashSet<>()));
+	void isEmpty() {
+		assertThat(CollectionUtils.isEmpty((Set<Object>) null)).isTrue();
+		assertThat(CollectionUtils.isEmpty((Map<String, String>) null)).isTrue();
+		assertThat(CollectionUtils.isEmpty(new HashMap<String, String>())).isTrue();
+		assertThat(CollectionUtils.isEmpty(new HashSet<>())).isTrue();
 
 		List<Object> list = new LinkedList<>();
 		list.add(new Object());
-		assertFalse(CollectionUtils.isEmpty(list));
+		assertThat(CollectionUtils.isEmpty(list)).isFalse();
 
 		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
-		assertFalse(CollectionUtils.isEmpty(map));
+		assertThat(CollectionUtils.isEmpty(map)).isFalse();
 	}
 
 	@Test
-	public void testMergeArrayIntoCollection() {
+	void mergeArrayIntoCollection() {
 		Object[] arr = new Object[] {"value1", "value2"};
 		List<Comparable<?>> list = new LinkedList<>();
 		list.add("value3");
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertEquals("value3", list.get(0));
-		assertEquals("value1", list.get(1));
-		assertEquals("value2", list.get(2));
+		assertThat(list.get(0)).isEqualTo("value3");
+		assertThat(list.get(1)).isEqualTo("value1");
+		assertThat(list.get(2)).isEqualTo("value2");
 	}
 
 	@Test
-	public void testMergePrimitiveArrayIntoCollection() {
+	void mergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
 		List<Comparable<?>> list = new LinkedList<>();
 		list.add(Integer.valueOf(3));
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertEquals(Integer.valueOf(3), list.get(0));
-		assertEquals(Integer.valueOf(1), list.get(1));
-		assertEquals(Integer.valueOf(2), list.get(2));
+		assertThat(list.get(0)).isEqualTo(Integer.valueOf(3));
+		assertThat(list.get(1)).isEqualTo(Integer.valueOf(1));
+		assertThat(list.get(2)).isEqualTo(Integer.valueOf(2));
 	}
 
 	@Test
-	public void testMergePropertiesIntoMap() {
+	void mergePropertiesIntoMap() {
 		Properties defaults = new Properties();
 		defaults.setProperty("prop1", "value1");
 		Properties props = new Properties(defaults);
 		props.setProperty("prop2", "value2");
 		props.put("prop3", Integer.valueOf(3));
 
-		Map<String, String> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("prop4", "value4");
 
 		CollectionUtils.mergePropertiesIntoMap(props, map);
-		assertEquals("value1", map.get("prop1"));
-		assertEquals("value2", map.get("prop2"));
-		assertEquals(Integer.valueOf(3), map.get("prop3"));
-		assertEquals("value4", map.get("prop4"));
+		assertThat(map.get("prop1")).isEqualTo("value1");
+		assertThat(map.get("prop2")).isEqualTo("value2");
+		assertThat(map.get("prop3")).isEqualTo(Integer.valueOf(3));
+		assertThat(map.get("prop4")).isEqualTo("value4");
 	}
 
 	@Test
-	public void testContains() {
-		assertFalse(CollectionUtils.contains((Iterator<String>) null, "myElement"));
-		assertFalse(CollectionUtils.contains((Enumeration<String>) null, "myElement"));
-		assertFalse(CollectionUtils.contains(new LinkedList<String>().iterator(), "myElement"));
-		assertFalse(CollectionUtils.contains(new Hashtable<String, Object>().keys(), "myElement"));
+	void contains() {
+		assertThat(CollectionUtils.contains((Iterator<String>) null, "myElement")).isFalse();
+		assertThat(CollectionUtils.contains((Enumeration<String>) null, "myElement")).isFalse();
+		assertThat(CollectionUtils.contains(new LinkedList<String>().iterator(), "myElement")).isFalse();
+		assertThat(CollectionUtils.contains(new Hashtable<String, Object>().keys(), "myElement")).isFalse();
 
 		List<String> list = new LinkedList<>();
 		list.add("myElement");
-		assertTrue(CollectionUtils.contains(list.iterator(), "myElement"));
+		assertThat(CollectionUtils.contains(list.iterator(), "myElement")).isTrue();
 
 		Hashtable<String, String> ht = new Hashtable<>();
 		ht.put("myElement", "myValue");
-		assertTrue(CollectionUtils.contains(ht.keys(), "myElement"));
+		assertThat(CollectionUtils.contains(ht.keys(), "myElement")).isTrue();
 	}
 
 	@Test
-	public void testContainsAny() throws Exception {
+	void containsAny() throws Exception {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
@@ -125,48 +125,44 @@ public class CollectionUtilsTests {
 		candidates.add("def");
 		candidates.add("abc");
 
-		assertTrue(CollectionUtils.containsAny(source, candidates));
+		assertThat(CollectionUtils.containsAny(source, candidates)).isTrue();
 		candidates.remove("def");
-		assertTrue(CollectionUtils.containsAny(source, candidates));
+		assertThat(CollectionUtils.containsAny(source, candidates)).isTrue();
 		candidates.remove("abc");
-		assertFalse(CollectionUtils.containsAny(source, candidates));
+		assertThat(CollectionUtils.containsAny(source, candidates)).isFalse();
 	}
 
 	@Test
-	public void testContainsInstanceWithNullCollection() throws Exception {
-		assertFalse("Must return false if supplied Collection argument is null",
-				CollectionUtils.containsInstance(null, this));
+	void containsInstanceWithNullCollection() throws Exception {
+		assertThat(CollectionUtils.containsInstance(null, this)).as("Must return false if supplied Collection argument is null").isFalse();
 	}
 
 	@Test
-	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
+	void containsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("fiona"));
-		assertFalse("Must return false if instance is not in the supplied Collection argument",
-				CollectionUtils.containsInstance(list, new Instance("fiona")));
+		assertThat(CollectionUtils.containsInstance(list, new Instance("fiona"))).as("Must return false if instance is not in the supplied Collection argument").isFalse();
 	}
 
 	@Test
-	public void testContainsInstanceWithSameInstance() throws Exception {
+	void containsInstanceWithSameInstance() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		Instance instance = new Instance("fiona");
 		list.add(instance);
-		assertTrue("Must return true if instance is in the supplied Collection argument",
-				CollectionUtils.containsInstance(list, instance));
+		assertThat(CollectionUtils.containsInstance(list, instance)).as("Must return true if instance is in the supplied Collection argument").isTrue();
 	}
 
 	@Test
-	public void testContainsInstanceWithNullInstance() throws Exception {
+	void containsInstanceWithNullInstance() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		list.add(new Instance("fiona"));
-		assertFalse("Must return false if null instance is supplied",
-				CollectionUtils.containsInstance(list, null));
+		assertThat(CollectionUtils.containsInstance(list, null)).as("Must return false if null instance is supplied").isFalse();
 	}
 
 	@Test
-	public void testFindFirstMatch() throws Exception {
+	void findFirstMatch() throws Exception {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
@@ -177,41 +173,41 @@ public class CollectionUtilsTests {
 		candidates.add("def");
 		candidates.add("abc");
 
-		assertEquals("def", CollectionUtils.findFirstMatch(source, candidates));
+		assertThat(CollectionUtils.findFirstMatch(source, candidates)).isEqualTo("def");
 	}
 
 	@Test
-	public void testHasUniqueObject() {
+	void hasUniqueObject() {
 		List<String> list = new LinkedList<>();
 		list.add("myElement");
 		list.add("myOtherElement");
-		assertFalse(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
 
 		list = new LinkedList<>();
 		list.add("myElement");
-		assertTrue(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isTrue();
 
 		list = new LinkedList<>();
 		list.add("myElement");
 		list.add(null);
-		assertFalse(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
 
 		list = new LinkedList<>();
 		list.add(null);
 		list.add("myElement");
-		assertFalse(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
 
 		list = new LinkedList<>();
 		list.add(null);
 		list.add(null);
-		assertTrue(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isTrue();
 
 		list = new LinkedList<>();
 		list.add(null);
-		assertTrue(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isTrue();
 
 		list = new LinkedList<>();
-		assertFalse(CollectionUtils.hasUniqueObject(list));
+		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
 	}
 
 

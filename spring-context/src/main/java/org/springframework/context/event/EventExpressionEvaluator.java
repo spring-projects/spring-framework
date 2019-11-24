@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +30,8 @@ import org.springframework.expression.Expression;
 import org.springframework.lang.Nullable;
 
 /**
- * Utility class handling the SpEL expression parsing. Meant to be used
- * as a reusable, thread-safe component.
+ * Utility class for handling SpEL expression parsing for application events.
+ * <p>Meant to be used as a reusable, thread-safe component.
  *
  * @author Stephane Nicoll
  * @since 4.2
@@ -43,7 +43,8 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 
 
 	/**
-	 * Specify if the condition defined by the specified expression matches.
+	 * Determine if the condition defined by the specified expression evaluates
+	 * to {@code true}.
 	 */
 	public boolean condition(String conditionExpression, ApplicationEvent event, Method targetMethod,
 			AnnotatedElementKey methodKey, Object[] args, @Nullable BeanFactory beanFactory) {

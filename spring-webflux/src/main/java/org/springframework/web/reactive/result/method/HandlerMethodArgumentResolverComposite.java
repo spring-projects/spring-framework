@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
- * @since 5.3
+ * @since 5.1.3
  */
 class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
 
@@ -59,7 +59,6 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
-	 * @since 4.3
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable HandlerMethodArgumentResolver... resolvers) {
 		if (resolvers != null) {
@@ -89,7 +88,6 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 
 	/**
 	 * Clear the list of configured resolvers.
-	 * @since 4.3
 	 */
 	public void clear() {
 		this.argumentResolvers.clear();

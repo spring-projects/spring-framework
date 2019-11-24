@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,14 +27,15 @@ import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
-import org.xnio.channels.Channels;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -68,8 +69,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	}
 
 	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
-		UndertowHeadersAdapter headersMap =
-				new UndertowHeadersAdapter(exchange.getResponseHeaders());
+		UndertowHeadersAdapter headersMap = new UndertowHeadersAdapter(exchange.getResponseHeaders());
 		return new HttpHeaders(headersMap);
 	}
 
@@ -78,6 +78,12 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	@Override
 	public <T> T getNativeResponse() {
 		return (T) this.exchange;
+	}
+
+	@Override
+	public HttpStatus getStatusCode() {
+		HttpStatus httpStatus = super.getStatusCode();
+		return (httpStatus != null ? httpStatus : HttpStatus.resolve(this.exchange.getStatusCode()));
 	}
 
 
@@ -109,6 +115,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				cookie.setSameSiteMode(httpCookie.getSameSite());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
 			}
 		}
@@ -117,18 +124,24 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count) {
 		return doCommit(() ->
-				Mono.defer(() -> {
-					try (FileChannel source = FileChannel.open(file, StandardOpenOption.READ)) {
+				Mono.create(sink -> {
+					try {
+						FileChannel source = FileChannel.open(file, StandardOpenOption.READ);
+
+						TransferBodyListener listener = new TransferBodyListener(source, position,
+								count, sink);
+						sink.onDispose(listener::closeSource);
+
 						StreamSinkChannel destination = this.exchange.getResponseChannel();
-						Channels.transferBlocking(destination, source, position, count);
-						return Mono.empty();
+						destination.getWriteSetter().set(listener::transfer);
+
+						listener.transfer(destination);
 					}
 					catch (IOException ex) {
-						return Mono.error(ex);
+						sink.error(ex);
 					}
 				}));
 	}
-
 
 	@Override
 	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {
@@ -287,6 +300,57 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		protected boolean isFlushPending() {
 			return false;
 		}
+	}
+
+
+	private static class TransferBodyListener {
+
+		private final FileChannel source;
+
+		private final MonoSink<Void> sink;
+
+		private long position;
+
+		private long count;
+
+
+		public TransferBodyListener(FileChannel source, long position, long count, MonoSink<Void> sink) {
+			this.source = source;
+			this.sink = sink;
+			this.position = position;
+			this.count = count;
+		}
+
+		public void transfer(StreamSinkChannel destination) {
+			try {
+				while (this.count > 0) {
+					long len = destination.transferFrom(this.source, this.position, this.count);
+					if (len != 0) {
+						this.position += len;
+						this.count -= len;
+					}
+					else {
+						destination.resumeWrites();
+						return;
+					}
+				}
+				this.sink.success();
+			}
+			catch (IOException ex) {
+				this.sink.error(ex);
+			}
+
+		}
+
+		public void closeSource() {
+			try {
+				this.source.close();
+			}
+			catch (IOException ignore) {
+			}
+		}
+
+
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * {@link reactor.netty.http.HttpResources}, which is recommended since
 	 * fixed, shared resources are favored for event loop concurrency. However,
 	 * consider declaring a {@link ReactorResourceFactory} bean with
-	 * {@code globaResources=true} in order to ensure the Reactor Netty global
+	 * {@code globalResources=true} in order to ensure the Reactor Netty global
 	 * resources are shut down when the Spring ApplicationContext is closed.
 	 * @param factory the resource factory to obtain the resources from
 	 * @param mapper a mapper for further initialization of the created client

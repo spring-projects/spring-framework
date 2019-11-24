@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,20 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
@@ -32,32 +37,49 @@ import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpServerErrorException;
 
-@RunWith(Parameterized.class)
 public abstract class AbstractHttpHandlerIntegrationTests {
 
-	protected Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Custom JUnit Jupiter extension that handles exceptions thrown by test methods.
+	 *
+	 * <p>If the test method throws an {@link HttpServerErrorException}, this
+	 * extension will throw an {@link AssertionError} that wraps the
+	 * {@code HttpServerErrorException} using the
+	 * {@link HttpServerErrorException#getResponseBodyAsString() response body}
+	 * as the failure message.
+	 *
+	 * <p>This mechanism provides an actually meaningful failure message if the
+	 * test fails due to an {@code AssertionError} on the server.
+	 */
+	@RegisterExtension
+	TestExecutionExceptionHandler serverErrorToAssertionErrorConverter = (context, throwable) -> {
+		if (throwable instanceof HttpServerErrorException) {
+			HttpServerErrorException ex = (HttpServerErrorException) throwable;
+			String responseBody = ex.getResponseBodyAsString();
+			if (StringUtils.hasText(responseBody)) {
+				String prefix = AssertionError.class.getName() + ": ";
+				if (responseBody.startsWith(prefix)) {
+					responseBody = responseBody.substring(prefix.length());
+				}
+				throw new AssertionError(responseBody, ex);
+			}
+		}
+		// Else throw as-is in order to comply with the contract of TestExecutionExceptionHandler.
+		throw throwable;
+	};
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected HttpServer server;
 
 	protected int port;
 
-	@Parameterized.Parameter(0)
-	public HttpServer server;
 
-
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new ReactorHttpServer()},
-				{new TomcatHttpServer(base.getAbsolutePath())},
-				{new UndertowHttpServer()}
-		};
-	}
-
-
-	@Before
-	public void setup() throws Exception {
+	protected void startServer(HttpServer httpServer) throws Exception {
+		this.server = httpServer;
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -66,10 +88,12 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		this.port = this.server.getPort();
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		this.server.stop();
-		this.port = 0;
+	@AfterEach
+	void stopServer() {
+		if (this.server != null) {
+			this.server.stop();
+			this.port = 0;
+		}
 	}
 
 
@@ -90,6 +114,24 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	 */
 	public static Flux<Long> testInterval(Duration period, int count) {
 		return Flux.interval(period).take(count).onBackpressureBuffer(count);
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests#httpServers()")
+	// public for Kotlin
+	public @interface ParameterizedHttpServerTest {
+	}
+
+	static Stream<HttpServer> httpServers() {
+		return Stream.of(
+				new JettyHttpServer(),
+				new ReactorHttpServer(),
+				new TomcatHttpServer(),
+				new UndertowHttpServer()
+		);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -182,10 +182,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
@@ -216,6 +218,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
+	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource));
 	}
@@ -229,6 +232,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
+	@SuppressWarnings("rawtypes")
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
 		// Check for XML files and redirect them to the "standard" XmlBeanDefinitionReader
 		String filename = encodedResource.getResource().getFilename();
@@ -240,9 +244,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			logger.trace("Loading Groovy bean definitions from " + encodedResource);
 		}
 
+		@SuppressWarnings("serial")
 		Closure beans = new Closure(this) {
 			@Override
-			public Object call(Object[] args) {
+			public Object call(Object... args) {
 				invokeBeanDefiningClosure((Closure) args[0]);
 				return null;
 			}
@@ -285,6 +290,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param closure the block or closure
 	 * @return this {@code GroovyBeanDefinitionReader} instance
 	 */
+	@SuppressWarnings("rawtypes")
 	public GroovyBeanDefinitionReader beans(Closure closure) {
 		return invokeBeanDefiningClosure(closure);
 	}
@@ -306,6 +312,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param args the constructors arguments and closure configurer
 	 * @return the bean definition
 	 */
+	@SuppressWarnings("rawtypes")
 	public AbstractBeanDefinition bean(Class<?> type, Object...args) {
 		GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
 		try {
@@ -373,6 +380,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * This method overrides method invocation to create beans for each method name that
 	 * takes a class argument.
 	 */
+	@Override
+	@SuppressWarnings("rawtypes")
 	public Object invokeMethod(String name, Object arg) {
 		Object[] args = (Object[])arg;
 		if ("beans".equals(name) && args.length == 1 && args[0] instanceof Closure) {
@@ -426,6 +435,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		return false;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void finalizeDeferredProperties() {
 		for (DeferredProperty dp : this.deferredProperties.values()) {
 			if (dp.value instanceof List) {
@@ -444,6 +454,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param callable the closure argument
 	 * @return this {@code GroovyBeanDefinitionReader} instance
 	 */
+	@SuppressWarnings("rawtypes")
 	protected GroovyBeanDefinitionReader invokeBeanDefiningClosure(Closure callable) {
 		callable.setDelegate(this);
 		callable.call();
@@ -458,6 +469,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * argument is sometimes a closure. All the arguments in between are constructor arguments.
 	 * @return the bean definition wrapper
 	 */
+	@SuppressWarnings("rawtypes")
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
 		boolean hasClosureArgument = (args[args.length - 1] instanceof Closure);
 		if (args[0] instanceof Class) {
@@ -483,9 +495,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		else if (args[0] instanceof Map) {
 			// named constructor arguments
 			if (args.length > 1 && args[1] instanceof Class) {
-				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
-				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class)args[1], constructorArgs);
-				Map namedArgs = (Map)args[0];
+				List<Object> constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
+				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class<?>) args[1], constructorArgs);
+				Map namedArgs = (Map) args[0];
 				for (Object o : namedArgs.keySet()) {
 					String propName = (String) o;
 					setProperty(propName, namedArgs.get(propName));
@@ -494,7 +506,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			// factory method syntax
 			else {
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName);
-				//First arg is the map containing factoryBean : factoryMethod
+				// First arg is the map containing factoryBean : factoryMethod
 				Map.Entry factoryBeanEntry = (Map.Entry) ((Map) args[0]).entrySet().iterator().next();
 				// If we have a closure body, that will be the last argument.
 				// In between are the constructor args
@@ -537,6 +549,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		return beanDefinition;
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected List<Object> resolveConstructorArguments(Object[] args, int start, int end) {
 		Object[] constructorArgs = Arrays.copyOfRange(args, start, end);
 		for (int i = 0; i < constructorArgs.length; i++) {
@@ -601,12 +614,14 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * This method overrides property setting in the scope of the {@code GroovyBeanDefinitionReader}
 	 * to set properties on the current bean definition.
 	 */
+	@Override
 	public void setProperty(String name, Object value) {
 		if (this.currentBeanDefinition != null) {
 			applyPropertyToBeanDefinition(name, value);
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected void applyPropertyToBeanDefinition(String name, Object value) {
 		if (value instanceof GString) {
 			value = value.toString();
@@ -647,6 +662,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * properties from the {@code GroovyBeanDefinitionReader} itself
 	 * </ul>
 	 */
+	@Override
 	public Object getProperty(String name) {
 		Binding binding = getBinding();
 		if (binding != null && binding.hasVariable(name)) {
@@ -690,8 +706,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
-		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(new DescriptiveResource(
-			"Groovy"));
+		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(
+				new DescriptiveResource("Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {
@@ -749,10 +765,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			this.metaClass = InvokerHelper.getMetaClass(this);
 		}
 
+		@Override
 		public MetaClass getMetaClass() {
 			return this.metaClass;
 		}
 
+		@Override
 		public Object getProperty(String property) {
 			if (property.equals("beanName")) {
 				return getBeanName();
@@ -769,14 +787,17 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 		}
 
+		@Override
 		public Object invokeMethod(String name, Object args) {
 			return this.metaClass.invokeMethod(this, name, args);
 		}
 
+		@Override
 		public void setMetaClass(MetaClass metaClass) {
 			this.metaClass = metaClass;
 		}
 
+		@Override
 		public void setProperty(String property, Object newValue) {
 			if (!addDeferredProperty(property, newValue)) {
 				this.beanDefinition.getBeanDefinition().getPropertyValues().add(property, newValue);
@@ -785,7 +806,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 
 		/**
-		 * Wraps a bean definition property an ensures that any RuntimeBeanReference
+		 * Wraps a bean definition property and ensures that any RuntimeBeanReference
 		 * additions to it are deferred for resolution later.
 		 */
 		private class GroovyPropertyValue extends GroovyObjectSupport {
@@ -799,17 +820,20 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				this.propertyValue = propertyValue;
 			}
 
+			@SuppressWarnings("unused")
 			public void leftShift(Object value) {
 				InvokerHelper.invokeMethod(this.propertyValue, "leftShift", value);
 				updateDeferredProperties(value);
 			}
 
+			@SuppressWarnings("unused")
 			public boolean add(Object value) {
 				boolean retVal = (Boolean) InvokerHelper.invokeMethod(this.propertyValue, "add", value);
 				updateDeferredProperties(value);
 				return retVal;
 			}
 
+			@SuppressWarnings({ "rawtypes", "unused" })
 			public boolean addAll(Collection values) {
 				boolean retVal = (Boolean) InvokerHelper.invokeMethod(this.propertyValue, "addAll", values);
 				for (Object value : values) {

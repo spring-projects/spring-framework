@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Member;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
@@ -51,6 +51,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 2.0
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -58,48 +59,38 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
 	// marker object for classes that do not have any debug info
-	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
+	private static final Map<Executable, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
 
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
-	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache = new ConcurrentHashMap<>(32);
+	private final Map<Class<?>, Map<Executable, String[]>> parameterNamesCache = new ConcurrentHashMap<>(32);
 
 
 	@Override
 	@Nullable
 	public String[] getParameterNames(Method method) {
 		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
-		Class<?> declaringClass = originalMethod.getDeclaringClass();
-		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
-		if (map == null) {
-			map = inspectClass(declaringClass);
-			this.parameterNamesCache.put(declaringClass, map);
-		}
-		if (map != NO_DEBUG_INFO_MAP) {
-			return map.get(originalMethod);
-		}
-		return null;
+		return doGetParameterNames(originalMethod);
 	}
 
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		Class<?> declaringClass = ctor.getDeclaringClass();
-		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
-		if (map == null) {
-			map = inspectClass(declaringClass);
-			this.parameterNamesCache.put(declaringClass, map);
-		}
-		if (map != NO_DEBUG_INFO_MAP) {
-			return map.get(ctor);
-		}
-		return null;
+		return doGetParameterNames(ctor);
+	}
+
+	@Nullable
+	private String[] doGetParameterNames(Executable executable) {
+		Class<?> declaringClass = executable.getDeclaringClass();
+		Map<Executable, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
+		return (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
 	}
 
 	/**
-	 * Inspects the target class. Exceptions will be logged and a maker map returned
-	 * to indicate the lack of debug information.
+	 * Inspects the target class.
+	 * <p>Exceptions will be logged, and a marker map returned to indicate the
+	 * lack of debug information.
 	 */
-	private Map<Member, String[]> inspectClass(Class<?> clazz) {
+	private Map<Executable, String[]> inspectClass(Class<?> clazz) {
 		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
 		if (is == null) {
 			// We couldn't load the class file, which is not fatal as it
@@ -112,7 +103,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		try {
 			ClassReader classReader = new ClassReader(is);
-			Map<Member, String[]> map = new ConcurrentHashMap<>(32);
+			Map<Executable, String[]> map = new ConcurrentHashMap<>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
 			return map;
 		}
@@ -142,8 +133,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 
 	/**
-	 * Helper class that inspects all methods (constructor included) and then
-	 * attempts to find the parameter names for that member.
+	 * Helper class that inspects all methods and constructors and then
+	 * attempts to find the parameter names for the given {@link Executable}.
 	 */
 	private static class ParameterNameDiscoveringVisitor extends ClassVisitor {
 
@@ -151,12 +142,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 		private final Class<?> clazz;
 
-		private final Map<Member, String[]> memberMap;
+		private final Map<Executable, String[]> executableMap;
 
-		public ParameterNameDiscoveringVisitor(Class<?> clazz, Map<Member, String[]> memberMap) {
+		public ParameterNameDiscoveringVisitor(Class<?> clazz, Map<Executable, String[]> executableMap) {
 			super(SpringAsmInfo.ASM_VERSION);
 			this.clazz = clazz;
-			this.memberMap = memberMap;
+			this.executableMap = executableMap;
 		}
 
 		@Override
@@ -164,7 +155,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			// exclude synthetic + bridged && static class initialization
 			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {
-				return new LocalVariableTableVisitor(this.clazz, this.memberMap, name, desc, isStatic(access));
+				return new LocalVariableTableVisitor(this.clazz, this.executableMap, name, desc, isStatic(access));
 			}
 			return null;
 		}
@@ -185,7 +176,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 		private final Class<?> clazz;
 
-		private final Map<Member, String[]> memberMap;
+		private final Map<Executable, String[]> executableMap;
 
 		private final String name;
 
@@ -203,10 +194,10 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		 */
 		private final int[] lvtSlotIndex;
 
-		public LocalVariableTableVisitor(Class<?> clazz, Map<Member, String[]> map, String name, String desc, boolean isStatic) {
+		public LocalVariableTableVisitor(Class<?> clazz, Map<Executable, String[]> map, String name, String desc, boolean isStatic) {
 			super(SpringAsmInfo.ASM_VERSION);
 			this.clazz = clazz;
-			this.memberMap = map;
+			this.executableMap = map;
 			this.name = name;
 			this.args = Type.getArgumentTypes(desc);
 			this.parameterNames = new String[this.args.length];
@@ -231,11 +222,11 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 				// which doesn't use any local variables.
 				// This means that hasLvtInfo could be false for that kind of methods
 				// even if the class has local variable info.
-				this.memberMap.put(resolveMember(), this.parameterNames);
+				this.executableMap.put(resolveExecutable(), this.parameterNames);
 			}
 		}
 
-		private Member resolveMember() {
+		private Executable resolveExecutable() {
 			ClassLoader loader = this.clazz.getClassLoader();
 			Class<?>[] argTypes = new Class<?>[this.args.length];
 			for (int i = 0; i < this.args.length; i++) {

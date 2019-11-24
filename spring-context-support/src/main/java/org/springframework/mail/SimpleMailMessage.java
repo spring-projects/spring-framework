@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -222,7 +222,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -276,9 +276,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	private static String[] copy(String[] state) {
-		String[] copy = new String[state.length];
-		System.arraycopy(state, 0, copy, 0, state.length);
-		return copy;
+		return state.clone();
 	}
 
 }

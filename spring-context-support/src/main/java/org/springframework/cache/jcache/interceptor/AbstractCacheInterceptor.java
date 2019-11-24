@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	/**
 	 * Resolve the cache to use.
 	 * @param context the invocation context
-	 * @return the cache to use (never null)
+	 * @return the cache to use (never {@code null})
 	 */
 	protected Cache resolveCache(CacheOperationInvocationContext<O> context) {
 		Collection<? extends Cache> caches = context.getOperation().getCacheResolver().resolveCaches(context);
@@ -73,7 +73,7 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	/**
 	 * Convert the collection of caches in a single expected element.
 	 * <p>Throw an {@link IllegalStateException} if the collection holds more than one element
-	 * @return the single element or {@code null} if the collection is empty
+	 * @return the single element, or {@code null} if the collection is empty
 	 */
 	@Nullable
 	static Cache extractFrom(Collection<? extends Cache> caches) {

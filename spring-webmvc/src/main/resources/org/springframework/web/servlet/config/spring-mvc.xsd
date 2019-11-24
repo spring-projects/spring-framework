@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
@@ -253,7 +253,7 @@
 	Specify the amount of time, in milliseconds, before asynchronous request handling times out.
 	In Servlet 3, the timeout begins after the main request processing thread has exited and ends when the request
 	is dispatched again for further processing of the concurrently produced result. If this value is not set,
-	the default timeout of the underlying implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	the default timeout of the underlying implementation is used.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -601,8 +601,8 @@
 		<xsd:attribute name="stale-if-error" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Adds a "s-maxage" directive in the Cache-Control header.
-	This directive has the same meaning as the "max-age" directive, except it only applies to shared caches.
+	Adds a "stale-if-error" directive in the Cache-Control header.
+	When an error is encountered, a cached stale response may be used for the given number of seconds.
 					]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -641,7 +641,7 @@
 	with resources in the web app root taking precedence.
 	For URL-based resources (e.g. files, HTTP URLs, etc) this property supports a special prefix to
 	indicate the charset associated with the URL so that relative paths appended to it can be encoded
-	correctly, e.g. "[charset=Windows-31J]http://example.org/path".
+	correctly, e.g. "[charset=Windows-31J]https://example.org/path".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -1329,7 +1329,7 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
+	Comma-separated list of origins to allow, e.g. "https://domain1.com, https://domain2.com".
 	The special value "*" allows all domains (default).
 
 	Note that CORS checks use values from "Forwarded" (RFC 7239), "X-Forwarded-Host",

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -58,8 +57,6 @@ public class HandlerMethod {
 	public static final Log defaultLogger = LogFactory.getLog(HandlerMethod.class);
 
 
-	protected Log logger = defaultLogger;
-
 	private final Object bean;
 
 	@Nullable
@@ -75,6 +72,8 @@ public class HandlerMethod {
 
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
+
+	protected Log logger = defaultLogger;
 
 
 	/**
@@ -161,9 +160,7 @@ public class HandlerMethod {
 		int count = this.bridgedMethod.getParameterCount();
 		MethodParameter[] result = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
-			HandlerMethodParameter parameter = new HandlerMethodParameter(i);
-			GenericTypeResolver.resolveParameterType(parameter, this.beanType);
-			result[i] = parameter;
+			result[i] = new HandlerMethodParameter(i);
 		}
 		return result;
 	}
@@ -298,12 +295,12 @@ public class HandlerMethod {
 	 */
 	public String getShortLogMessage() {
 		int args = this.method.getParameterCount();
-		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
+		return getBeanType().getSimpleName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

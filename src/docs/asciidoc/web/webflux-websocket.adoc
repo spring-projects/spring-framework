@@ -1,6 +1,6 @@
 [[webflux-websocket]]
 = WebSockets
-[.small]#<<web.adoc#websocket,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket, Same as in the Servlet stack>>#
 
 This part of the reference documentation covers support for reactive-stack WebSocket
 messaging.
@@ -12,7 +12,7 @@ include::websocket-intro.adoc[leveloffset=+1]
 
 [[webflux-websocket-server]]
 == WebSocket API
-[.small]#<<web.adoc#websocket-server,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server, Same as in the Servlet stack>>#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
@@ -21,14 +21,13 @@ server-side applications that handle WebSocket messages.
 
 [[webflux-websocket-server-handler]]
 === Server
-[.small]#<<web.adoc#websocket-server-handler,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-handler, Same as in the Servlet stack>>#
 
 To create a WebSocket server, you can first create a `WebSocketHandler`.
 The following example shows how to do so:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import org.springframework.web.reactive.socket.WebSocketHandler;
 	import org.springframework.web.reactive.socket.WebSocketSession;
@@ -41,26 +40,35 @@ The following example shows how to do so:
 		}
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.web.reactive.socket.WebSocketHandler
+	import org.springframework.web.reactive.socket.WebSocketSession
+
+	class MyWebSocketHandler : WebSocketHandler {
+
+		override fun handle(session: WebSocketSession): Mono<Void> {
+			// ...
+		}
+	}
+----
 
 Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the following example shows:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
-	static class WebConfig {
+	class WebConfig {
 
 		@Bean
 		public HandlerMapping handlerMapping() {
 			Map<String, WebSocketHandler> map = new HashMap<>();
 			map.put("/path", new MyWebSocketHandler());
+			int order = -1; // before annotated controllers
 
-			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-			mapping.setUrlMap(map);
-			mapping.setOrder(-1); // before annotated controllers
-			return mapping;
+			return new SimpleUrlHandlerMapping(map, order);
 		}
 
 		@Bean
@@ -69,7 +77,24 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 		}
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class WebConfig {
+
+		@Bean
+		fun handlerMapping(): HandlerMapping {
+			val map = mapOf("/path" to MyWebSocketHandler())
+			val order = -1 // before annotated controllers
+
+			return SimpleUrlHandlerMapping(map, order)
+		}
+
+		@Bean
+		fun handlerAdapter() =  WebSocketHandlerAdapter()
+	}
+----
 
 
 
@@ -110,97 +135,166 @@ receives a cancellation signal.
 The most basic implementation of a handler is one that handles the inbound stream. The
 following example shows such an implementation:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-class ExampleHandler implements WebSocketHandler {
+	class ExampleHandler implements WebSocketHandler {
 
-	@Override
-	public Mono<Void> handle(WebSocketSession session) {
-		return session.receive()			<1>
-				.doOnNext(message -> {
-					// ...					<2>
-				})
-				.concatMap(message -> {
-					// ...					<3>
-				})
-				.then();					<4>
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
+			return session.receive()			// <1>
+					.doOnNext(message -> {
+						// ...					// <2>
+					})
+					.concatMap(message -> {
+						// ...					// <3>
+					})
+					.then();					// <4>
+		}
 	}
-}
 ----
 <1> Access the stream of inbound messages.
 <2> Do something with each message.
 <3> Perform nested asynchronous operations that use the message content.
 <4> Return a `Mono<Void>` that completes when receiving completes.
-====
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ExampleHandler : WebSocketHandler {
+
+		override fun handle(session: WebSocketSession): Mono<Void> {
+			return session.receive()            // <1>
+					.doOnNext {
+						// ...					// <2>
+					}
+					.concatMap {
+						// ...					// <3>
+					}
+					.then()                     // <4>
+		}
+	}
+----
+<1> Access the stream of inbound messages.
+<2> Do something with each message.
+<3> Perform nested asynchronous operations that use the message content.
+<4> Return a `Mono<Void>` that completes when receiving completes.
+
 
 TIP: For nested, asynchronous operations, you may need to call `message.retain()` on underlying
 servers that use pooled data buffers (for example, Netty). Otherwise, the data buffer may be
 released before you have had a chance to read the data. For more background, see
-<<core.adoc#databuffers,Data Buffers and Codecs>>.
+<<core.adoc#databuffers, Data Buffers and Codecs>>.
 
 The following implementation combines the inbound and outbound streams:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-class ExampleHandler implements WebSocketHandler {
+	class ExampleHandler implements WebSocketHandler {
 
-	@Override
-	public Mono<Void> handle(WebSocketSession session) {
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
 
-		Flux<WebSocketMessage> output = session.receive()				<1>
-				.doOnNext(message -> {
-					// ...
-				})
-				.concatMap(message -> {
-					// ...
-				})
-				.map(value -> session.textMessage("Echo " + value));	<2>
+			Flux<WebSocketMessage> output = session.receive()				// <1>
+					.doOnNext(message -> {
+						// ...
+					})
+					.concatMap(message -> {
+						// ...
+					})
+					.map(value -> session.textMessage("Echo " + value));	// <2>
 
-		return session.send(output);									<3>
+			return session.send(output);									// <3>
+		}
 	}
-}
 ----
 <1> Handle the inbound message stream.
 <2> Create the outbound message, producing a combined flow.
 <3> Return a `Mono<Void>` that does not complete while we continue to receive.
-====
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ExampleHandler : WebSocketHandler {
+
+		override fun handle(session: WebSocketSession): Mono<Void> {
+
+			val output = session.receive()                      // <1>
+					.doOnNext {
+						// ...
+					}
+					.concatMap {
+						// ...
+					}
+					.map { session.textMessage("Echo $it") }    // <2>
+
+			return session.send(output)                         // <3>
+		}
+	}
+----
+<1> Handle the inbound message stream.
+<2> Create the outbound message, producing a combined flow.
+<3> Return a `Mono<Void>` that does not complete while we continue to receive.
+
 
 Inbound and outbound streams can be independent and be joined only for completion,
 as the following example shows:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-class ExampleHandler implements WebSocketHandler {
+	class ExampleHandler implements WebSocketHandler {
 
-	@Override
-	public Mono<Void> handle(WebSocketSession session) {
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
 
-		Mono<Void> input = session.receive()								<1>
-				.doOnNext(message -> {
-					// ...
-				})
-				.concatMap(message -> {
-					// ...
-				})
-				.then();
+			Mono<Void> input = session.receive()								<1>
+					.doOnNext(message -> {
+						// ...
+					})
+					.concatMap(message -> {
+						// ...
+					})
+					.then();
 
-		Flux<String> source = ... ;
-		Mono<Void> output = session.send(source.map(session::textMessage));	<2>
+			Flux<String> source = ... ;
+			Mono<Void> output = session.send(source.map(session::textMessage));	<2>
 
-		return Mono.zip(input, output).then();								<3>
+			return Mono.zip(input, output).then();								<3>
+		}
 	}
-}
 ----
 <1> Handle inbound message stream.
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
-====
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ExampleHandler : WebSocketHandler {
+
+		override fun handle(session: WebSocketSession): Mono<Void> {
+
+			val input = session.receive()									// <1>
+					.doOnNext {
+						// ...
+					}
+					.concatMap {
+						// ...
+					}
+					.then()
+
+			val source: Flux<String> = ...
+			val output = session.send(source.map(session::textMessage))		// <2>
+
+			return Mono.zip(input, output).then()							// <3>
+		}
+	}
+----
+<1> Handle inbound message stream.
+<2> Send outgoing messages.
+<3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
 
 
 
@@ -209,7 +303,7 @@ class ExampleHandler implements WebSocketHandler {
 
 `DataBuffer` is the representation for a byte buffer in WebFlux. The Spring Core part of
 the reference has more on that in the section on
-<<core#databuffers,Data Buffers and Codecs>>. The key point to understand is that on some
+<<core#databuffers, Data Buffers and Codecs>>. The key point to understand is that on some
 servers like Netty, byte buffers are pooled and reference counted, and must be released
 when consumed to avoid memory leaks.
 
@@ -222,7 +316,7 @@ subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are cons
 
 [[webflux-websocket-server-handshake]]
 === Handshake
-[.small]#<<web.adoc#websocket-server-handshake,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-handshake, Same as in the Servlet stack>>#
 
 `WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default, that is an instance
 of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
@@ -237,18 +331,17 @@ into the attributes of the `WebSocketSession`.
 
 [[webflux-websocket-server-config]]
 === Server Configation
-[.small]#<<web.adoc#websocket-server-runtime-configuration,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-runtime-configuration, Same as in the Servlet stack>>#
 
 The `RequestUpgradeStrategy` for each server exposes WebSocket-related configuration
 options available for the underlying WebSocket engine. The following example sets
 WebSocket options when running on Tomcat:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
-	static class WebConfig {
+	class WebConfig {
 
 		@Bean
 		public WebSocketHandlerAdapter handlerAdapter() {
@@ -263,7 +356,25 @@ WebSocket options when running on Tomcat:
 		}
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class WebConfig {
+
+		@Bean
+		fun handlerAdapter() =
+				WebSocketHandlerAdapter(webSocketService())
+
+		@Bean
+		fun webSocketService(): WebSocketService {
+			val strategy = TomcatRequestUpgradeStrategy().apply {
+				setMaxSessionIdleTimeout(0L)	
+			}
+			return HandshakeWebSocketService(strategy)
+		}
+	}
+----
 
 Check the upgrade strategy for your server to see what options are available. Currently,
 only Tomcat and Jetty expose such options.
@@ -272,7 +383,7 @@ only Tomcat and Jetty expose such options.
 
 [[webflux-websocket-server-cors]]
 === CORS
-[.small]#<<web.adoc#websocket-server-allowed-origins,Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-allowed-origins, Same as in the Servlet stack>>#
 
 The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
 have your `WebSocketHandler` implement `CorsConfigurationSource` and return a
@@ -296,19 +407,29 @@ API to suspend receiving messages for back pressure.
 To start a WebSocket session, you can create an instance of the client and use its `execute`
 methods:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-WebSocketClient client = new ReactorNettyWebSocketClient();
+	WebSocketClient client = new ReactorNettyWebSocketClient();
 
-URI url = new URI("ws://localhost:8080/path");
-client.execute(url, session ->
-		session.receive()
-				.doOnNext(System.out::println)
-				.then());
+	URI url = new URI("ws://localhost:8080/path");
+	client.execute(url, session ->
+			session.receive()
+					.doOnNext(System.out::println)
+					.then());
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = ReactorNettyWebSocketClient()
+
+			val url = URI("ws://localhost:8080/path")
+			client.execute(url) { session ->
+				session.receive()
+						.doOnNext(::println)
+				.then()
+			}
+----
 
 Some clients, such as Jetty, implement `Lifecycle` and need to be stopped and started
 before you can use them. All clients have constructor options related to configuration

@@ -1,0 +1,20 @@
+buildCache {
+	local {
+		enabled = true
+	}
+	if (System.getenv('GRADLE_ENTERPRISE_URL')) {
+		remote(HttpBuildCache) {
+			enabled = true
+			url = "${System.getenv('GRADLE_ENTERPRISE_URL')}/cache/"
+			def cacheUsername = System.getenv('GRADLE_ENTERPRISE_CACHE_USERNAME')
+			def cachePassword = System.getenv('GRADLE_ENTERPRISE_CACHE_PASSWORD')
+			if (cacheUsername && cachePassword) {
+				push = true
+				credentials {
+					username = cacheUsername
+					password = cachePassword
+				}
+			}
+		}
+	}
+}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.net.URI;
 import java.util.function.Supplier;
 
 import reactor.core.publisher.Mono;
@@ -24,6 +25,7 @@ import reactor.netty.http.server.HttpServerResponse;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -72,7 +74,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
 		ServerHttpResponse response = exchange.getResponse();
-		HttpServerResponse reactorResponse = ((AbstractServerHttpResponse) response).getNativeResponse();
+		HttpServerResponse reactorResponse = getNativeResponse(response);
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
@@ -81,8 +83,22 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 					ReactorNettyWebSocketSession session =
 							new ReactorNettyWebSocketSession(
 									in, out, handshakeInfo, bufferFactory, this.maxFramePayloadLength);
-					return handler.handle(session);
+					URI uri = exchange.getRequest().getURI();
+					return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
 				});
+	}
+
+	private static HttpServerResponse getNativeResponse(ServerHttpResponse response) {
+		if (response instanceof AbstractServerHttpResponse) {
+			return ((AbstractServerHttpResponse) response).getNativeResponse();
+		}
+		else if (response instanceof ServerHttpResponseDecorator) {
+			return getNativeResponse(((ServerHttpResponseDecorator) response).getDelegate());
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Couldn't find native response in " + response.getClass().getName());
+		}
 	}
 
 }

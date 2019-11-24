@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
@@ -31,9 +31,9 @@ import org.springframework.web.reactive.accept.FixedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.IMAGE_GIF;
 import static org.springframework.http.MediaType.IMAGE_JPEG;
@@ -57,7 +57,7 @@ public class HandlerResultHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 		MediaType actual = resultHandler.selectMediaType(exchange, () -> mediaTypes);
 
-		assertEquals(IMAGE_GIF, actual);
+		assertThat(actual).isEqualTo(IMAGE_GIF);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class HandlerResultHandlerTests {
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
 		MediaType actual = resultHandler.selectMediaType(exchange, () -> mediaTypes);
 
-		assertEquals(IMAGE_GIF, actual);
+		assertThat(actual).isEqualTo(IMAGE_GIF);
 	}
 
 	@Test  // SPR-9160
@@ -76,10 +76,10 @@ public class HandlerResultHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path")
 				.header("Accept", "text/plain; q=0.5, application/json"));
 
-		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
+		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON);
 		MediaType actual = this.resultHandler.selectMediaType(exchange, () -> mediaTypes);
 
-		assertEquals(APPLICATION_JSON_UTF8, actual);
+		assertThat(actual).isEqualTo(APPLICATION_JSON);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class HandlerResultHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path").accept(text8859));
 		MediaType actual = this.resultHandler.selectMediaType(exchange, () -> Collections.singletonList(textUtf8));
 
-		assertEquals(text8859, actual);
+		assertThat(actual).isEqualTo(text8859);
 	}
 
 	@Test // SPR-12894
@@ -98,7 +98,7 @@ public class HandlerResultHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 		MediaType actual = this.resultHandler.selectMediaType(exchange, () -> producible);
 
-		assertEquals(APPLICATION_OCTET_STREAM, actual);
+		assertThat(actual).isEqualTo(APPLICATION_OCTET_STREAM);
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
@@ -47,7 +47,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
@@ -75,7 +75,7 @@ public class HttpEntityMethodProcessorTests {
 	private MockHttpServletResponse servletResponse;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
@@ -104,8 +104,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>) processor.resolveArgument(
 				paramSimpleBean, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-12861
@@ -120,8 +120,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
 				this.mavContainer, this.webRequest, this.binderFactory);
 
-		assertNotNull(result);
-		assertNull(result.getBody());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody()).isNull();
 	}
 
 	@Test
@@ -138,9 +138,9 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<List<SimpleBean>> result = (HttpEntity<List<SimpleBean>>) processor.resolveArgument(
 				paramList, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().get(0).getName());
-		assertEquals("Robert", result.getBody().get(1).getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().get(0).getName()).isEqualTo("Jad");
+		assertThat(result.getBody().get(1).getName()).isEqualTo("Robert");
 	}
 
 	@Test
@@ -161,8 +161,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>)
 				processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-12811
@@ -179,8 +179,8 @@ public class HttpEntityMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
-		assertTrue(content.contains("\"type\":\"foo\""));
-		assertTrue(content.contains("\"type\":\"bar\""));
+		assertThat(content.contains("\"type\":\"foo\"")).isTrue();
+		assertThat(content.contains("\"type\":\"bar\"")).isTrue();
 	}
 
 	@Test  // SPR-13423
@@ -196,8 +196,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 
-		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
-		assertEquals("Foo", servletResponse.getContentAsString());
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
 

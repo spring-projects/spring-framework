@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.socket.messaging;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+package org.springframework.web.socket.messaging;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,11 +22,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
@@ -50,17 +47,18 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link WebSocketStompClient}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class WebSocketStompClientIntegrationTests {
+class WebSocketStompClientIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClientIntegrationTests.class);
 
-	@Rule
-	public final TestName testName = new TestName();
 
 	private WebSocketStompClient stompClient;
 
@@ -69,10 +67,9 @@ public class WebSocketStompClientIntegrationTests {
 	private AnnotationConfigWebApplicationContext wac;
 
 
-	@Before
-	public void setUp() throws Exception {
-
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(TestConfig.class);
@@ -88,8 +85,8 @@ public class WebSocketStompClientIntegrationTests {
 		this.stompClient.setMessageConverter(new StringMessageConverter());
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		try {
 			this.server.undeployConfig();
 		}
@@ -112,15 +109,15 @@ public class WebSocketStompClientIntegrationTests {
 
 
 	@Test
-	public void publishSubscribe() throws Exception {
+	void publishSubscribe() throws Exception {
 
 		String url = "ws://127.0.0.1:" + this.server.getPort() + "/stomp";
 
 		TestHandler testHandler = new TestHandler("/topic/foo", "payload");
 		this.stompClient.connect(url, testHandler);
 
-		assertTrue(testHandler.awaitForMessageCount(1, 5000));
-		assertThat(testHandler.getReceived(), containsInAnyOrder("payload"));
+		assertThat(testHandler.awaitForMessageCount(1, 5000)).isTrue();
+		assertThat(testHandler.getReceived()).containsExactly("payload");
 	}
 
 

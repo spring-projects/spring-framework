@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import org.springframework.lang.Nullable;
 
 /**
- * Object to represent a SQL parameter value, including parameter meta-data
+ * Object to represent an SQL parameter value, including parameter meta-data
  * such as the SQL type and the scale for numeric values.
  *
  * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of

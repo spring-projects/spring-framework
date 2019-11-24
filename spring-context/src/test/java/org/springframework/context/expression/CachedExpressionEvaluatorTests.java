@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,16 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Stephane Nicoll
@@ -41,8 +43,8 @@ public class CachedExpressionEvaluatorTests {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 		Expression expression = expressionEvaluator.getTestExpression("true", method, getClass());
 		hasParsedExpression("true");
-		assertEquals(true, expression.getValue());
-		assertEquals("Expression should be in cache", 1, expressionEvaluator.testCache.size());
+		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expressionEvaluator.testCache.size()).as("Expression should be in cache").isEqualTo(1);
 	}
 
 	@Test
@@ -53,7 +55,7 @@ public class CachedExpressionEvaluatorTests {
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		hasParsedExpression("true");
-		assertEquals("Only one expression should be in cache", 1, expressionEvaluator.testCache.size());
+		assertThat(expressionEvaluator.testCache.size()).as("Only one expression should be in cache").isEqualTo(1);
 	}
 
 	@Test
@@ -61,7 +63,7 @@ public class CachedExpressionEvaluatorTests {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		expressionEvaluator.getTestExpression("true", method, Object.class);
-		assertEquals("Cached expression should be based on type", 2, expressionEvaluator.testCache.size());
+		assertThat(expressionEvaluator.testCache.size()).as("Cached expression should be based on type").isEqualTo(2);
 	}
 
 	private void hasParsedExpression(String expression) {

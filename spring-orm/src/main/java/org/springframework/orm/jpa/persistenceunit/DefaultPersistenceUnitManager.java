@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -513,9 +514,9 @@ public class DefaultPersistenceUnitManager
 
 		if (buildDefaultUnit) {
 			if (foundDefaultUnit) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
-							"overriding local default unit settings ('packagesToScan'/'mappingResources')");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Found explicit default persistence unit with name '" + defaultName + "' in persistence.xml - " +
+							"overriding local default persistence unit settings ('packagesToScan'/'mappingResources')");
 				}
 			}
 			else {

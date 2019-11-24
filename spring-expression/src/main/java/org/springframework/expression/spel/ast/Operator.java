@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,8 +54,8 @@ public abstract class Operator extends SpelNodeImpl {
 	protected String rightActualDescriptor;
 
 
-	public Operator(String payload, int pos, SpelNodeImpl... operands) {
-		super(pos, operands);
+	public Operator(String payload, int startPos, int endPos, SpelNodeImpl... operands) {
+		super(startPos, endPos, operands);
 		this.operatorName = payload;
 	}
 
@@ -113,7 +113,8 @@ public abstract class Operator extends SpelNodeImpl {
 		SpelNodeImpl right = getRightOperand();
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
 		boolean unboxLeft = !CodeFlow.isPrimitive(leftDesc);
 		boolean unboxRight = !CodeFlow.isPrimitive(rightDesc);
 		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
@@ -123,20 +124,104 @@ public abstract class Operator extends SpelNodeImpl {
 		cf.enterCompilationScope();
 		left.generateCode(mv, cf);
 		cf.exitCompilationScope();
-		if (unboxLeft) {
-			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
+		if (CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertBoxIfNecessary(mv, leftDesc);
+			unboxLeft = true;
 		}
 
 		cf.enterCompilationScope();
 		right.generateCode(mv, cf);
 		cf.exitCompilationScope();
+		if (CodeFlow.isPrimitive(rightDesc)) {
+			CodeFlow.insertBoxIfNecessary(mv, rightDesc);
+			unboxRight = true;
+		}
+
+		// This code block checks whether the left or right operand is null and handles
+		// those cases before letting the original code (that only handled actual numbers) run
+		Label rightIsNonNull = new Label();
+		mv.visitInsn(DUP);  // stack: left/right/right
+		mv.visitJumpInsn(IFNONNULL, rightIsNonNull);  // stack: left/right
+		// here: RIGHT==null LEFT==unknown
+		mv.visitInsn(SWAP);  // right/left
+		Label leftNotNullRightIsNull = new Label();
+		mv.visitJumpInsn(IFNONNULL, leftNotNullRightIsNull);  // stack: right
+		// here: RIGHT==null LEFT==null
+		mv.visitInsn(POP);  // stack: <nothing>
+		// load 0 or 1 depending on comparison instruction
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFLE: // OpGT
+			mv.visitInsn(ICONST_0);  // false - null is not < or > null
+			break;
+		case IFGT: // OpLE
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_1);  // true - null is <= or >= null
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+		mv.visitLabel(leftNotNullRightIsNull);  // stack: right
+		// RIGHT==null LEFT!=null
+		mv.visitInsn(POP);  // stack: <nothing>
+		// load 0 or 1 depending on comparison instruction
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFGT: // OpLE
+			mv.visitInsn(ICONST_0);  // false - something is not < or <= null
+			break;
+		case IFLE: // OpGT
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_1);  // true - something is > or >= null
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+
+		mv.visitLabel(rightIsNonNull);  // stack: left/right
+		// here: RIGHT!=null LEFT==unknown
+		mv.visitInsn(SWAP);  // stack: right/left
+		mv.visitInsn(DUP);  // stack: right/left/left
+		Label neitherRightNorLeftAreNull = new Label();
+		mv.visitJumpInsn(IFNONNULL, neitherRightNorLeftAreNull);  // stack: right/left
+		// here: RIGHT!=null LEFT==null
+		mv.visitInsn(POP2);  // stack: <nothing>
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFGT: // OpLE
+			mv.visitInsn(ICONST_1);  // true - null is < or <= something
+			break;
+		case IFLE: // OpGT
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_0);  // false - null is not > or >= something
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+		mv.visitLabel(neitherRightNorLeftAreNull);  // stack: right/left
+		// neither were null so unbox and proceed with numeric comparison
+		if (unboxLeft) {
+			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
+		}
+		// What we just unboxed might be a double slot item (long/double)
+		// so can't just use SWAP
+		// stack: right/left(1or2slots)
+		if (targetType == 'D' || targetType == 'J') {
+			mv.visitInsn(DUP2_X1);
+			mv.visitInsn(POP2);
+		}
+		else {
+			mv.visitInsn(SWAP);
+		}
+		// stack: left(1or2)/right
 		if (unboxRight) {
 			CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 		}
 
 		// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
-		Label elseTarget = new Label();
-		Label endOfIf = new Label();
 		if (targetType == 'D') {
 			mv.visitInsn(DCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);

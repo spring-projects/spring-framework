@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -357,7 +357,7 @@ public abstract class AbstractAdaptableMessageListener
 			throws JMSException {
 
 		if (result instanceof JmsResponse) {
-			JmsResponse<?> jmsResponse = (JmsResponse) result;
+			JmsResponse<?> jmsResponse = (JmsResponse<?>) result;
 			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
 			if (destination != null) {
 				return destination;
@@ -538,6 +538,7 @@ public abstract class AbstractAdaptableMessageListener
 			 * this case, its payload is returned.
 			 * @return the payload of the message
 			 */
+			@SuppressWarnings("rawtypes")
 			private Object unwrapPayload() throws JMSException {
 				Object payload = extractPayload(this.message);
 				if (payload instanceof org.springframework.messaging.Message) {

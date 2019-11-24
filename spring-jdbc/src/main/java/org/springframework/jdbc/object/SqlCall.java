@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.CallableStatementCreator;
@@ -28,7 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * RdbmsOperation using a JdbcTemplate and representing a SQL-based
+ * RdbmsOperation using a JdbcTemplate and representing an SQL-based
  * call such as a stored procedure or a stored function.
  *
  * <p>Configures a CallableStatementCreatorFactory based on the declared
@@ -41,32 +42,31 @@ import org.springframework.util.Assert;
 public abstract class SqlCall extends RdbmsOperation {
 
 	/**
-	 * Object enabling us to create CallableStatementCreators
-	 * efficiently, based on this class's declared parameters.
-	 */
-	@Nullable
-	private CallableStatementCreatorFactory callableStatementFactory;
-
-	/**
 	 * Flag used to indicate that this call is for a function and to
 	 * use the {? = call get_invoice_count(?)} syntax.
 	 */
 	private boolean function = false;
 
 	/**
-	 * Flag used to indicate that the sql for this call should be used exactly as it is
-	 * defined.  No need to add the escape syntax and parameter place holders.
+	 * Flag used to indicate that the sql for this call should be used exactly as
+	 * it is defined. No need to add the escape syntax and parameter place holders.
 	 */
 	private boolean sqlReadyForUse = false;
 
 	/**
 	 * Call string as defined in java.sql.CallableStatement.
-	 * String of form {call add_invoice(?, ?, ?)}
-	 * or {? = call get_invoice_count(?)} if isFunction is set to true
-	 * Updated after each parameter is added.
+	 * String of form {call add_invoice(?, ?, ?)} or {? = call get_invoice_count(?)}
+	 * if isFunction is set to true. Updated after each parameter is added.
 	 */
 	@Nullable
 	private String callString;
+
+	/**
+	 * Object enabling us to create CallableStatementCreators
+	 * efficiently, based on this class's declared parameters.
+	 */
+	@Nullable
+	private CallableStatementCreatorFactory callableStatementFactory;
 
 
 	/**
@@ -129,30 +129,32 @@ public abstract class SqlCall extends RdbmsOperation {
 	@Override
 	protected final void compileInternal() {
 		if (isSqlReadyForUse()) {
-			this.callString = getSql();
+			this.callString = resolveSql();
 		}
 		else {
+			StringBuilder callString = new StringBuilder(32);
 			List<SqlParameter> parameters = getDeclaredParameters();
 			int parameterCount = 0;
 			if (isFunction()) {
-				this.callString = "{? = call " + getSql() + "(";
+				callString.append("{? = call ").append(resolveSql()).append('(');
 				parameterCount = -1;
 			}
 			else {
-				this.callString = "{call " + getSql() + "(";
+				callString.append("{call ").append(resolveSql()).append('(');
 			}
 			for (SqlParameter parameter : parameters) {
-				if (!(parameter.isResultsParameter())) {
+				if (!parameter.isResultsParameter()) {
 					if (parameterCount > 0) {
-						this.callString += ", ";
+						callString.append(", ");
 					}
 					if (parameterCount >= 0) {
-						this.callString += "?";
+						callString.append('?');
 					}
 					parameterCount++;
 				}
 			}
-			this.callString += ")}";
+			callString.append(")}");
+			this.callString = callString.toString();
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");

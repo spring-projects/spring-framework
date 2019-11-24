@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,20 +62,20 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Arrays.sort(ctors, (c1, c2) -> {
 				int c1pl = c1.getParameterCount();
 				int c2pl = c2.getParameterCount();
-				return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
+				return Integer.compare(c1pl, c2pl);
 			});
 
 			Constructor<?> closeMatch = null;
 			Constructor<?> matchRequiringConversion = null;
 
 			for (Constructor<?> ctor : ctors) {
-				Class<?>[] paramTypes = ctor.getParameterTypes();
-				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
-				for (int i = 0; i < paramTypes.length; i++) {
+				int paramCount = ctor.getParameterCount();
+				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
+				for (int i = 0; i < paramCount; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
 				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-				if (ctor.isVarArgs() && argumentTypes.size() >= paramTypes.length - 1) {
+				if (ctor.isVarArgs() && argumentTypes.size() >= paramCount - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
 					// being provided should be
@@ -84,7 +84,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					// we are supplied does match exactly (it is an array already).
 					matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 				}
-				else if (paramTypes.length == argumentTypes.size()) {
+				else if (paramCount == argumentTypes.size()) {
 					// worth a closer look
 					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}

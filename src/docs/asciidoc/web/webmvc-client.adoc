@@ -14,11 +14,13 @@ Spring REST client and exposes a simple, template-method API over underlying HTT
 libraries.
 
 NOTE: As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
-`RestTemplate`, with efficient support for both synchronous and asynchronous, as well as streaming
-scenarios. The `RestTemplate` will be deprecated in a future version and will not have
-major new features added going forward.
+`RestTemplate`, with efficient support for both
+<<web-reactive.adoc#webflux-client-synchronous, synchronous and asynchronous>>, as well as
+streaming scenarios. The `RestTemplate` will be deprecated in a future version and will
+not have major new features added going forward.
 
-See <<integration.adoc#rest-client-access,REST Endpoints>> for details.
+
+See <<integration.adoc#rest-client-access, REST Endpoints>> for details.
 
 
 
@@ -39,4 +41,4 @@ In contrast to `RestTemplate`, `WebClient` supports the following:
 * Synchronous and asynchronous interactions.
 * Streaming up to or streaming down from a server.
 
-See <<web-reactive.adoc#webflux-client,WebClient>> for more details.
+See <<web-reactive.adoc#webflux-client, WebClient>> for more details.

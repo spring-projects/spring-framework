@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,9 @@ public class HasMap {
 
 	private List<Class<?>> classList;
 
-	private IdentityHashMap identityMap;
+	private IdentityHashMap<?, ?> identityMap;
 
-	private CopyOnWriteArraySet concurrentSet;
+	private CopyOnWriteArraySet<?> concurrentSet;
 
 	private HasMap() {
 	}
@@ -108,19 +108,19 @@ public class HasMap {
 		this.classList = classList;
 	}
 
-	public IdentityHashMap getIdentityMap() {
+	public IdentityHashMap<?, ?> getIdentityMap() {
 		return identityMap;
 	}
 
-	public void setIdentityMap(IdentityHashMap identityMap) {
+	public void setIdentityMap(IdentityHashMap<?, ?> identityMap) {
 		this.identityMap = identityMap;
 	}
 
-	public CopyOnWriteArraySet getConcurrentSet() {
+	public CopyOnWriteArraySet<?> getConcurrentSet() {
 		return concurrentSet;
 	}
 
-	public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
+	public void setConcurrentSet(CopyOnWriteArraySet<?> concurrentSet) {
 		this.concurrentSet = concurrentSet;
 	}
 

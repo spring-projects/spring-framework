@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -147,7 +147,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * <p>This avoids repeated "yyy1.(parent)=xxx", "yyy2.(parent)=xxx" definitions
 	 * in the bundle, especially if all defined views share the same parent.
 	 * <p>The parent will typically define the view class and common attributes.
-	 * Concrete views might simply consist of an URL definition then:
+	 * Concrete views might simply consist of a URL definition then:
 	 * a la "yyy1.url=/my.jsp", "yyy2.url=/your.jsp".
 	 * <p>View definitions that define their own parent or carry their own
 	 * class can still override this. Strictly speaking, the rule that a

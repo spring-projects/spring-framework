@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,9 +31,8 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import static org.hamcrest.CoreMatchers.*;
-
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Trevor Cook
@@ -46,14 +43,11 @@ public class RdbmsOperationTests {
 
 	private final TestRdbmsOperation operation = new TestRdbmsOperation();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void emptySql() {
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.compile();
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
+				operation::compile);
 	}
 
 	@Test
@@ -61,8 +55,8 @@ public class RdbmsOperationTests {
 		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.setTypes(new int[] { Types.INTEGER });
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.setTypes(new int[] { Types.INTEGER }));
 	}
 
 	@Test
@@ -70,40 +64,39 @@ public class RdbmsOperationTests {
 		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.declareParameter(new SqlParameter(Types.INTEGER));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.declareParameter(new SqlParameter(Types.INTEGER)));
 	}
 
 	@Test
 	public void tooFewParameters() {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.validateParameters((Object[]) null);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateParameters((Object[]) null));
 	}
 
 	@Test
 	public void tooFewMapParameters() {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.validateNamedParameters((Map<String, String>) null);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateNamedParameters((Map<String, String>) null));
 	}
 
 	@Test
 	public void operationConfiguredViaJdbcTemplateMustGetDataSource() throws Exception {
 		operation.setSql("foo");
-
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		exception.expectMessage(containsString("ataSource"));
-		operation.compile();
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.compile())
+			.withMessageContaining("ataSource");
 	}
 
 	@Test
 	public void tooManyParameters() {
 		operation.setSql("select * from mytable");
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.validateParameters(new Object[] { 1, 2 });
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateParameters(new Object[] { 1, 2 }));
 	}
 
 	@Test
@@ -111,8 +104,8 @@ public class RdbmsOperationTests {
 		operation.setSql("select * from mytable");
 		Map<String, String> params = new HashMap<>();
 		params.put("col1", "value");
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.validateNamedParameters(params);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateNamedParameters(params));
 	}
 
 	@Test
@@ -128,8 +121,8 @@ public class RdbmsOperationTests {
 	public void emptyDataSource() {
 		SqlOperation operation = new SqlOperation() {};
 		operation.setSql("select * from mytable");
-		exception.expect(InvalidDataAccessApiUsageException.class);
-		operation.compile();
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
+				operation::compile);
 	}
 
 	@Test
@@ -140,9 +133,9 @@ public class RdbmsOperationTests {
 		operation.setFetchSize(10);
 		operation.setMaxRows(20);
 		JdbcTemplate jt = operation.getJdbcTemplate();
-		assertEquals(ds, jt.getDataSource());
-		assertEquals(10, jt.getFetchSize());
-		assertEquals(20, jt.getMaxRows());
+		assertThat(jt.getDataSource()).isEqualTo(ds);
+		assertThat(jt.getFetchSize()).isEqualTo(10);
+		assertThat(jt.getMaxRows()).isEqualTo(20);
 	}
 
 	@Test
@@ -164,7 +157,7 @@ public class RdbmsOperationTests {
 				new SqlParameter("two", Types.NUMERIC)});
 		operation.afterPropertiesSet();
 		operation.validateParameters(new Object[] { 1, "2" });
-		assertEquals(2, operation.getDeclaredParameters().size());
+		assertThat(operation.getDeclaredParameters().size()).isEqualTo(2);
 	}
 
 

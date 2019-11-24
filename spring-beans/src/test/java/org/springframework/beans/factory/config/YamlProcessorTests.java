@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,76 +17,75 @@
 package org.springframework.beans.factory.config;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
 
-import static org.junit.Assert.*;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link YamlProcessor}.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class YamlProcessorTests {
 
 	private final YamlProcessor processor = new YamlProcessor() {};
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 
 	@Test
 	public void arrayConvertedToIndexedBeanReference() {
 		this.processor.setResources(new ByteArrayResource("foo: bar\nbar: [1,2,3]".getBytes()));
 		this.processor.process((properties, map) -> {
-			assertEquals(4, properties.size());
-			assertEquals("bar", properties.get("foo"));
-			assertEquals("bar", properties.getProperty("foo"));
-			assertEquals(1, properties.get("bar[0]"));
-			assertEquals("1", properties.getProperty("bar[0]"));
-			assertEquals(2, properties.get("bar[1]"));
-			assertEquals("2", properties.getProperty("bar[1]"));
-			assertEquals(3, properties.get("bar[2]"));
-			assertEquals("3", properties.getProperty("bar[2]"));
+			assertThat(properties.size()).isEqualTo(4);
+			assertThat(properties.get("foo")).isEqualTo("bar");
+			assertThat(properties.getProperty("foo")).isEqualTo("bar");
+			assertThat(properties.get("bar[0]")).isEqualTo(1);
+			assertThat(properties.getProperty("bar[0]")).isEqualTo("1");
+			assertThat(properties.get("bar[1]")).isEqualTo(2);
+			assertThat(properties.getProperty("bar[1]")).isEqualTo("2");
+			assertThat(properties.get("bar[2]")).isEqualTo(3);
+			assertThat(properties.getProperty("bar[2]")).isEqualTo("3");
 		});
 	}
 
 	@Test
-	public void testStringResource() {
+	public void stringResource() {
 		this.processor.setResources(new ByteArrayResource("foo # a document that is a literal".getBytes()));
-		this.processor.process((properties, map) -> assertEquals("foo", map.get("document")));
+		this.processor.process((properties, map) -> assertThat(map.get("document")).isEqualTo("foo"));
 	}
 
 	@Test
-	public void testBadDocumentStart() {
+	public void badDocumentStart() {
 		this.processor.setResources(new ByteArrayResource("foo # a document\nbar: baz".getBytes()));
-		this.exception.expect(ParserException.class);
-		this.exception.expectMessage("line 2, column 1");
-		this.processor.process((properties, map) -> {});
+		assertThatExceptionOfType(ParserException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+			.withMessageContaining("line 2, column 1");
 	}
 
 	@Test
-	public void testBadResource() {
+	public void badResource() {
 		this.processor.setResources(new ByteArrayResource("foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
-		this.exception.expect(ScannerException.class);
-		this.exception.expectMessage("line 3, column 1");
-		this.processor.process((properties, map) -> {});
+		assertThatExceptionOfType(ScannerException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+			.withMessageContaining("line 3, column 1");
 	}
 
 	@Test
 	public void mapConvertedToIndexedBeanReference() {
 		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
 		this.processor.process((properties, map) -> {
-			assertEquals("bucket", properties.get("bar.spam"));
-			assertEquals(2, properties.size());
+			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
+			assertThat(properties).hasSize(2);
 		});
 	}
 
@@ -94,8 +93,8 @@ public class YamlProcessorTests {
 	public void integerKeyBehaves() {
 		this.processor.setResources(new ByteArrayResource("foo: bar\n1: bar".getBytes()));
 		this.processor.process((properties, map) -> {
-			assertEquals("bar", properties.get("[1]"));
-			assertEquals(2, properties.size());
+			assertThat(properties.get("[1]")).isEqualTo("bar");
+			assertThat(properties).hasSize(2);
 		});
 	}
 
@@ -103,24 +102,35 @@ public class YamlProcessorTests {
 	public void integerDeepKeyBehaves() {
 		this.processor.setResources(new ByteArrayResource("foo:\n  1: bar".getBytes()));
 		this.processor.process((properties, map) -> {
-			assertEquals("bar", properties.get("foo[1]"));
-			assertEquals(1, properties.size());
+			assertThat(properties.get("foo[1]")).isEqualTo("bar");
+			assertThat(properties).hasSize(1);
 		});
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void flattenedMapIsSameAsPropertiesButOrdered() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
+		this.processor.setResources(new ByteArrayResource("cat: dog\nfoo: bar\nbar:\n spam: bucket".getBytes()));
 		this.processor.process((properties, map) -> {
-			assertEquals("bucket", properties.get("bar.spam"));
-			assertEquals(2, properties.size());
 			Map<String, Object> flattenedMap = processor.getFlattenedMap(map);
-			assertEquals("bucket", flattenedMap.get("bar.spam"));
-			assertEquals(2, flattenedMap.size());
-			assertTrue(flattenedMap instanceof LinkedHashMap);
+			assertThat(flattenedMap).isInstanceOf(LinkedHashMap.class);
+
+			assertThat(properties).hasSize(3);
+			assertThat(flattenedMap).hasSize(3);
+
+			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
+			assertThat(flattenedMap.get("bar.spam")).isEqualTo("bucket");
+
 			Map<String, Object> bar = (Map<String, Object>) map.get("bar");
-			assertEquals("bucket", bar.get("spam"));
+			assertThat(bar.get("spam")).isEqualTo("bucket");
+
+			List<Object> keysFromProperties = properties.keySet().stream().collect(toList());
+			List<String> keysFromFlattenedMap = flattenedMap.keySet().stream().collect(toList());
+			assertThat(keysFromProperties).containsExactlyInAnyOrderElementsOf(keysFromFlattenedMap);
+			// Keys in the Properties object are sorted.
+			assertThat(keysFromProperties).containsExactly("bar.spam", "cat", "foo");
+			// But the flattened map retains the order from the input.
+			assertThat(keysFromFlattenedMap).containsExactly("cat", "foo", "bar.spam");
 		});
 	}
 

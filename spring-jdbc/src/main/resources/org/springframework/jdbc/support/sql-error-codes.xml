@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	- Default SQL error codes for well-known databases.
@@ -83,7 +83,7 @@
 		</property>
 	</bean>
 
-	<!-- http://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a78d3275191014b41bae7c4a46d835/content.htm -->
+	<!-- https://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a78d3275191014b41bae7c4a46d835/content.htm -->
 	<bean id="HDB" name="Hana" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductNames">
 			<list>
@@ -186,6 +186,12 @@
 	</bean>
 
 	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductNames">
+			<list>
+				<value>MySQL</value>
+				<value>MariaDB</value>
+			</list>
+		</property>
 		<property name="badSqlGrammarCodes">
 			<value>1054,1064,1146</value>
 		</property>
@@ -199,7 +205,7 @@
 			<value>1</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
-			<value>1205</value>
+			<value>1205,3572</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>1213</value>

@@ -42,7 +42,7 @@ public abstract class FieldVisitor {
    */
   protected final int api;
 
-  /** The field visitor to which this visitor must delegate method calls. May be null. */
+  /** The field visitor to which this visitor must delegate method calls. May be {@literal null}. */
   protected FieldVisitor fv;
 
   /**
@@ -64,8 +64,8 @@ public abstract class FieldVisitor {
    *     null.
    */
   public FieldVisitor(final int api, final FieldVisitor fieldVisitor) {
-    if (api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4 && api != Opcodes.ASM7) {
-      throw new IllegalArgumentException();
+    if (api != Opcodes.ASM7 && api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4) {
+      throw new IllegalArgumentException("Unsupported api " + api);
     }
     this.api = api;
     this.fv = fieldVisitor;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -354,18 +355,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					this.holdability = (Integer) args[0];
 					return null;
 				}
-				else if (method.getName().equals("commit")) {
+				else if (method.getName().equals("commit") || method.getName().equals("rollback")) {
 					// Ignore: no statements created yet.
 					return null;
 				}
-				else if (method.getName().equals("rollback")) {
-					// Ignore: no statements created yet.
-					return null;
-				}
-				else if (method.getName().equals("getWarnings")) {
-					return null;
-				}
-				else if (method.getName().equals("clearWarnings")) {
+				else if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
+					// Ignore: no warnings to expose yet.
 					return null;
 				}
 				else if (method.getName().equals("close")) {

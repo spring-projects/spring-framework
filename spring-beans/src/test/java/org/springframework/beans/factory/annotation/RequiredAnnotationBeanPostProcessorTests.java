@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -32,7 +32,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rob Harrop
@@ -44,48 +45,38 @@ public class RequiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testWithRequiredPropertyOmitted() {
-		try {
-			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			BeanDefinition beanDef = BeanDefinitionBuilder
-				.genericBeanDefinition(RequiredTestBean.class)
-				.addPropertyValue("name", "Rob Harrop")
-				.addPropertyValue("favouriteColour", "Blue")
-				.addPropertyValue("jobTitle", "Grand Poobah")
-				.getBeanDefinition();
-			factory.registerBeanDefinition("testBean", beanDef);
-			factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
-			factory.preInstantiateSingletons();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			String message = ex.getCause().getMessage();
-			assertTrue(message.contains("Property"));
-			assertTrue(message.contains("age"));
-			assertTrue(message.contains("testBean"));
-		}
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		BeanDefinition beanDef = BeanDefinitionBuilder
+			.genericBeanDefinition(RequiredTestBean.class)
+			.addPropertyValue("name", "Rob Harrop")
+			.addPropertyValue("favouriteColour", "Blue")
+			.addPropertyValue("jobTitle", "Grand Poobah")
+			.getBeanDefinition();
+		factory.registerBeanDefinition("testBean", beanDef);
+		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining("Property")
+			.withMessageContaining("age")
+			.withMessageContaining("testBean");
 	}
 
 	@Test
 	public void testWithThreeRequiredPropertiesOmitted() {
-		try {
-			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			BeanDefinition beanDef = BeanDefinitionBuilder
-				.genericBeanDefinition(RequiredTestBean.class)
-				.addPropertyValue("name", "Rob Harrop")
-				.getBeanDefinition();
-			factory.registerBeanDefinition("testBean", beanDef);
-			factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
-			factory.preInstantiateSingletons();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			String message = ex.getCause().getMessage();
-			assertTrue(message.contains("Properties"));
-			assertTrue(message.contains("age"));
-			assertTrue(message.contains("favouriteColour"));
-			assertTrue(message.contains("jobTitle"));
-			assertTrue(message.contains("testBean"));
-		}
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		BeanDefinition beanDef = BeanDefinitionBuilder
+			.genericBeanDefinition(RequiredTestBean.class)
+			.addPropertyValue("name", "Rob Harrop")
+			.getBeanDefinition();
+		factory.registerBeanDefinition("testBean", beanDef);
+		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining("Properties")
+			.withMessageContaining("age")
+			.withMessageContaining("favouriteColour")
+			.withMessageContaining("jobTitle")
+			.withMessageContaining("testBean");
 	}
 
 	@Test
@@ -101,54 +92,44 @@ public class RequiredAnnotationBeanPostProcessorTests {
 		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		factory.preInstantiateSingletons();
 		RequiredTestBean bean = (RequiredTestBean) factory.getBean("testBean");
-		assertEquals(24, bean.getAge());
-		assertEquals("Blue", bean.getFavouriteColour());
+		assertThat(bean.getAge()).isEqualTo(24);
+		assertThat(bean.getFavouriteColour()).isEqualTo("Blue");
 	}
 
 	@Test
 	public void testWithCustomAnnotation() {
-		try {
-			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			BeanDefinition beanDef = BeanDefinitionBuilder
-				.genericBeanDefinition(RequiredTestBean.class)
-				.getBeanDefinition();
-			factory.registerBeanDefinition("testBean", beanDef);
-			RequiredAnnotationBeanPostProcessor rabpp = new RequiredAnnotationBeanPostProcessor();
-			rabpp.setRequiredAnnotationType(MyRequired.class);
-			factory.addBeanPostProcessor(rabpp);
-			factory.preInstantiateSingletons();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			String message = ex.getCause().getMessage();
-			assertTrue(message.contains("Property"));
-			assertTrue(message.contains("name"));
-			assertTrue(message.contains("testBean"));
-		}
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		BeanDefinition beanDef = BeanDefinitionBuilder
+			.genericBeanDefinition(RequiredTestBean.class)
+			.getBeanDefinition();
+		factory.registerBeanDefinition("testBean", beanDef);
+		RequiredAnnotationBeanPostProcessor rabpp = new RequiredAnnotationBeanPostProcessor();
+		rabpp.setRequiredAnnotationType(MyRequired.class);
+		factory.addBeanPostProcessor(rabpp);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining("Property")
+			.withMessageContaining("name")
+			.withMessageContaining("testBean");
 	}
 
 	@Test
 	public void testWithStaticFactoryMethod() {
-		try {
-			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			BeanDefinition beanDef = BeanDefinitionBuilder
-					.genericBeanDefinition(RequiredTestBean.class)
-					.setFactoryMethod("create")
-					.addPropertyValue("name", "Rob Harrop")
-					.addPropertyValue("favouriteColour", "Blue")
-					.addPropertyValue("jobTitle", "Grand Poobah")
-					.getBeanDefinition();
-			factory.registerBeanDefinition("testBean", beanDef);
-			factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
-			factory.preInstantiateSingletons();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			String message = ex.getCause().getMessage();
-			assertTrue(message.contains("Property"));
-			assertTrue(message.contains("age"));
-			assertTrue(message.contains("testBean"));
-		}
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		BeanDefinition beanDef = BeanDefinitionBuilder
+				.genericBeanDefinition(RequiredTestBean.class)
+				.setFactoryMethod("create")
+				.addPropertyValue("name", "Rob Harrop")
+				.addPropertyValue("favouriteColour", "Blue")
+				.addPropertyValue("jobTitle", "Grand Poobah")
+				.getBeanDefinition();
+		factory.registerBeanDefinition("testBean", beanDef);
+		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining("Property")
+			.withMessageContaining("age")
+			.withMessageContaining("testBean");
 	}
 
 	@Test
@@ -165,8 +146,8 @@ public class RequiredAnnotationBeanPostProcessorTests {
 		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		factory.preInstantiateSingletons();
 		RequiredTestBean bean = (RequiredTestBean) factory.getBean("testBean");
-		assertEquals(24, bean.getAge());
-		assertEquals("Blue", bean.getFavouriteColour());
+		assertThat(bean.getAge()).isEqualTo(24);
+		assertThat(bean.getFavouriteColour()).isEqualTo("Blue");
 	}
 
 	@Test

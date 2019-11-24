@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,6 +81,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		return ClassUtils.forName(name, this.resourceLoader.getClassLoader());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> loadClass(String name, Class<T> clazz) throws ClassNotFoundException {
 		return (Class<? extends T>) loadClass(name);

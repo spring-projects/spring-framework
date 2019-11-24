@@ -1,16 +1,16 @@
 [[web-integration]]
 = Other Web Frameworks
 
-This chapter details Spring's integration with third party web frameworks.
+This chapter details Spring's integration with third-party web frameworks.
 
 One of the core value propositions of the Spring Framework is that of enabling
 _choice_. In a general sense, Spring does not force you to use or buy into any
 particular architecture, technology, or methodology (although it certainly recommends
 some over others). This freedom to pick and choose the architecture, technology, or
 methodology that is most relevant to a developer and their development team is
-arguably most evident in the web area, where Spring provides its own web framework
-(<<mvc,Spring MVC>>) while, at the same time, providing integration with a number of
-popular third party web frameworks.
+arguably most evident in the web area, where Spring provides its own web frameworks
+(<<mvc, Spring MVC>> and <<webflux, Spring WebFlux>>) while, at the same time,
+supporting integration with a number of popular third-party web frameworks.
 
 
 
@@ -19,9 +19,8 @@ popular third party web frameworks.
 == Common Configuration
 
 Before diving into the integration specifics of each supported web framework, let us
-first take a look at the Spring configuration that is not specific to any one web
-framework. (This section is equally applicable to Spring's own web framework, Spring
-MVC.)
+first take a look at common Spring configuration that is not specific to any one web
+framework. (This section is equally applicable to Spring's own web framework variants.)
 
 One of the concepts (for want of a better word) espoused by Spring's lightweight
 application model is that of a layered architecture. Remember that in a "`classic`"
@@ -43,7 +42,6 @@ set of Spring XML configuration files to load.
 
 Consider the following `<listener/>` configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -51,11 +49,9 @@ Consider the following `<listener/>` configuration:
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 ----
-====
 
 Further consider the following `<context-param/>` configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -64,7 +60,6 @@ Further consider the following `<context-param/>` configuration:
 		<param-value>/WEB-INF/applicationContext*.xml</param-value>
 	</context-param>
 ----
-====
 
 If you do not specify the `contextConfigLocation` context parameter, the
 `ContextLoaderListener` looks for a file called `/WEB-INF/applicationContext.xml` to
@@ -79,13 +74,11 @@ created by the `ContextLoaderListener`.
 
 The following example shows how to get the `WebApplicationContext`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 ----
-====
 
 The
 {api-spring-framework}/web/context/support/WebApplicationContextUtils.html[`WebApplicationContextUtils`]
@@ -96,14 +89,14 @@ key. Rather than risk getting `NullPointerExceptions` in your application, it is
 to use the `getRequiredWebApplicationContext()` method. This method throws an exception
 when the `ApplicationContext` is missing.
 
-Once you have a reference to the `WebApplicationContext`, you can retrieve beans by
-their name or type. Most developers retrieve beans by name and then cast them to one of
-their implemented interfaces.
+Once you have a reference to the `WebApplicationContext`, you can retrieve beans by their
+name or type. Most developers retrieve beans by name and then cast them to one of their
+implemented interfaces.
 
-Fortunately, most of the frameworks in this section have simpler ways of looking up
-beans. Not only do they make it easy to get beans from a Spring container, but they also
-let you use dependency injection on their controllers. Each web framework section
-has more detail on its specific integration strategies.
+Fortunately, most of the frameworks in this section have simpler ways of looking up beans.
+Not only do they make it easy to get beans from a Spring container, but they also let you
+use dependency injection on their controllers. Each web framework section has more detail
+on its specific integration strategies.
 
 
 
@@ -111,18 +104,14 @@ has more detail on its specific integration strategies.
 [[jsf]]
 == JSF
 
-JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web user
-interface framework. As of Java EE 5, it is an official part of the Java EE umbrella.
+JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web
+user interface framework. It is an official part of the Java EE umbrella but also
+individually usable, e.g. through embedding Mojarra or MyFaces within Tomcat.
 
-For a popular JSF runtime as well as for popular JSF component libraries, check out the
-http://myfaces.apache.org/[Apache MyFaces project]. The MyFaces project also provides
-common JSF extensions, such as http://myfaces.apache.org/orchestra/[MyFaces Orchestra]
-(a Spring-based JSF extension that provides rich conversation scope support).
-
-NOTE: Spring Web Flow 2.0 provides rich JSF support through its newly established Spring Faces
-module, both for JSF-centric usage (as described in this section) and for Spring-centric
-usage (using JSF views within a Spring MVC dispatcher). See the
-http://projects.spring.io/spring-webflow[Spring Web Flow website] for details.
+Please note that recent versions of JSF became closely tied to CDI infrastructure
+in application servers, with some new JSF functionality only working in such an
+environment. Spring's JSF support is not actively evolved anymore and primarily
+exists for migration purposes when modernizing older JSF-based applications.
 
 The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 
@@ -131,16 +120,14 @@ The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 [[jsf-springbeanfaceselresolver]]
 === Spring Bean Resolver
 
-`SpringBeanFacesELResolver` is a JSF 1.2+ compliant `ELResolver` implementation,
-integrating with the standard Unified EL as used by JSF 1.2 and JSP 2.1. As
-`SpringBeanVariableResolver`, it delegates to Spring's "`business context`"
-`WebApplicationContext` first and then to the default resolver of the underlying JSF
-implementation.
+`SpringBeanFacesELResolver` is a JSF compliant `ELResolver` implementation,
+integrating with the standard Unified EL as used by JSF and JSP. It delegates to
+Spring's "`business context`" `WebApplicationContext` first and then to the
+default resolver of the underlying JSF implementation.
 
 Configuration-wise, you can define `SpringBeanFacesELResolver` in your JSF
 `faces-context.xml` file, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -151,28 +138,25 @@ Configuration-wise, you can define `SpringBeanFacesELResolver` in your JSF
 		</application>
 	</faces-config>
 ----
-====
 
 
 
 [[jsf-facescontextutils]]
 === Using `FacesContextUtils`
 
-A custom `VariableResolver` works well when mapping your properties to beans
-in `faces-config.xml`, but, at times, you may need to explicitly grab a bean. The
-{api-spring-framework}/web/jsf/FacesContextUtils.html[`FacesContextUtils`]
-class makes this easy. It is similar to `WebApplicationContextUtils`, except that it
-takes a `FacesContext` parameter rather than a `ServletContext` parameter.
+A custom `ELResolver` works well when mapping your properties to beans in
+`faces-config.xml`, but, at times, you may need to explicitly grab a bean.
+The {api-spring-framework}/web/jsf/FacesContextUtils.html[`FacesContextUtils`]
+class makes this easy. It is similar to `WebApplicationContextUtils`, except that
+it takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 
 The following example shows how to use `FacesContextUtils`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());
 ----
-====
 
 
 
@@ -180,33 +164,32 @@ The following example shows how to use `FacesContextUtils`:
 [[struts]]
 == Apache Struts 2.x
 
-Invented by Craig McClanahan, http://struts.apache.org[Struts] is an open-source project
+Invented by Craig McClanahan, https://struts.apache.org[Struts] is an open-source project
 hosted by the Apache Software Foundation. At the time, it greatly simplified the
 JSP/Servlet programming paradigm and won over many developers who were using proprietary
-frameworks. It simplified the programming model, it was open source (and thus free, as in
-beer), and it had a large community, which let the project grow and become popular
-among Java web developers.
+frameworks. It simplified the programming model, it was open source (and thus free as in
+beer), and it had a large community, which let the project grow and become popular among
+Java web developers.
 
-Check out the Struts
+As a successor to the original Struts 1.x, check out Struts 2.x and the Struts-provided
 https://struts.apache.org/release/2.3.x/docs/spring-plugin.html[Spring Plugin] for the
-built-in Spring integration shipped with Struts.
+built-in Spring integration.
 
 
 
 
 [[tapestry]]
-== Tapestry 5.x
+== Apache Tapestry 5.x
 
-http://tapestry.apache.org/[Tapestry] is a ""Component oriented framework for creating dynamic, robust,
-highly scalable web applications in Java.""
+https://tapestry.apache.org/[Tapestry] is a ""Component oriented framework for creating
+dynamic, robust, highly scalable web applications in Java.""
 
-While Spring has its own <<mvc,powerful web layer>>, there are a number of unique
+While Spring has its own <<mvc, powerful web layer>>, there are a number of unique
 advantages to building an enterprise Java application by using a combination of Tapestry
 for the web user interface and the Spring container for the lower layers.
 
 For more information, see Tapestry's dedicated
-https://tapestry.apache.org/integrating-with-spring-framework.html[integration module for
-Spring].
+https://tapestry.apache.org/integrating-with-spring-framework.html[integration module for Spring].
 
 
 
@@ -214,9 +197,9 @@ Spring].
 [[web-integration-resources]]
 == Further Resources
 
-The following links go to further resources about the various web frameworks described in this
-chapter.
+The following links go to further resources about the various web frameworks described in
+this chapter.
 
-* The http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF] homepage
-* The http://struts.apache.org/[Struts] homepage
-* The http://tapestry.apache.org/[Tapestry] homepage
+* The https://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF] homepage
+* The https://struts.apache.org/[Struts] homepage
+* The https://tapestry.apache.org/[Tapestry] homepage

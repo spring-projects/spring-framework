@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,15 +90,9 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
-	 * controller method invocations. Interceptors can be registered to apply
-	 * to all requests or be limited to a subset of URL patterns.
-	 * <p><strong>Note</strong> that interceptors registered here only apply to
-	 * controllers and not to resource handler requests. To intercept requests for
-	 * static resources either declare a
-	 * {@link org.springframework.web.servlet.handler.MappedInterceptor MappedInterceptor}
-	 * bean or switch to advanced configuration mode by extending
-	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
-	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * controller method invocations and resource handler requests.
+	 * Interceptors can be registered to apply to all requests or be limited
+	 * to a subset of URL patterns.
 	 */
 	default void addInterceptors(InterceptorRegistry registry) {
 	}
@@ -184,7 +178,7 @@ public interface WebMvcConfigurer {
 	 * Configure exception resolvers.
 	 * <p>The given list starts out empty. If it is left empty, the framework
 	 * configures a default set of resolvers, see
-	 * {@link WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)}.
+	 * {@link WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)}.
 	 * Or if any exception resolvers are added to the list, then the application
 	 * effectively takes over and must provide, fully initialized, exception
 	 * resolvers.
@@ -193,7 +187,7 @@ public interface WebMvcConfigurer {
 	 * or modify the list of exception resolvers configured by default.
 	 * @param resolvers initially an empty list
 	 * @see #extendHandlerExceptionResolvers(List)
-	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)
 	 */
 	default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 	}
@@ -204,7 +198,7 @@ public interface WebMvcConfigurer {
 	 * interfering with default ones.
 	 * @param resolvers the list of configured resolvers to extend
 	 * @since 4.3
-	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)
 	 */
 	default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 	}

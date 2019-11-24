@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -55,12 +55,12 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
-import static org.springframework.web.method.ResolvableMethod.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * ViewResolutionResultHandler relying on a canned {@link TestViewResolver}
@@ -114,7 +114,12 @@ public class ViewResolutionResultHandlerTests {
 	private void testSupports(MethodParameter returnType, boolean supports) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertEquals(supports, resultHandler.supports(handlerResult));
+		if (supports) {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should be supported").isTrue();
+		}
+		else {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should not be supported").isFalse();
+		}
 	}
 
 	@Test
@@ -125,7 +130,7 @@ public class ViewResolutionResultHandlerTests {
 		resolver2.setOrder(1);
 		List<ViewResolver> resolvers = resultHandler(resolver1, resolver2).getViewResolvers();
 
-		assertEquals(Arrays.asList(resolver2, resolver1), resolvers);
+		assertThat(resolvers).isEqualTo(Arrays.asList(resolver2, resolver1));
 	}
 
 	@Test
@@ -188,8 +193,8 @@ public class ViewResolutionResultHandlerTests {
 		returnValue = Rendering.view("account").modelAttribute("a", "a1").status(status).header("h", "h1").build();
 		String expected = "account: {a=a1, id=123}";
 		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, expected, resolver);
-		assertEquals(status, exchange.getResponse().getStatusCode());
-		assertEquals("h1", exchange.getResponse().getHeaders().getFirst("h"));
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
+		assertThat(exchange.getResponse().getHeaders().getFirst("h")).isEqualTo("h1");
 	}
 
 	@Test
@@ -255,7 +260,7 @@ public class ViewResolutionResultHandlerTests {
 				.handleResult(exchange, handlerResult)
 				.block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON, exchange.getResponse().getHeaders().getContentType());
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(APPLICATION_JSON);
 		assertResponseBody(exchange, "jsonView: {" +
 				"org.springframework.validation.BindingResult.testBean=" +
 				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
@@ -293,8 +298,8 @@ public class ViewResolutionResultHandlerTests {
 		resultHandler.handleResult(exchange, handlerResult).block(Duration.ZERO);
 
 		MockServerHttpResponse response = exchange.getResponse();
-		assertEquals(303, response.getStatusCode().value());
-		assertEquals("/", response.getHeaders().getLocation().toString());
+		assertThat(response.getStatusCode().value()).isEqualTo(303);
+		assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");
 	}
 
 
@@ -325,7 +330,7 @@ public class ViewResolutionResultHandlerTests {
 
 	private void assertResponseBody(MockServerWebExchange exchange, String responseBody) {
 		StepVerifier.create(exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals(responseBody, DataBufferTestUtils.dumpString(buf, UTF_8)))
+				.consumeNextWith(buf -> assertThat(DataBufferTestUtils.dumpString(buf, UTF_8)).isEqualTo(responseBody))
 				.expectComplete()
 				.verify();
 	}

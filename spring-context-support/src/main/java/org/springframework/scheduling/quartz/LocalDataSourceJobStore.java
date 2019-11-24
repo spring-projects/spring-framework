@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -110,6 +111,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -138,6 +140,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}

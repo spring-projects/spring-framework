@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.aopalliance.intercept;
 import java.lang.reflect.Constructor;
 
 /**
- * Description of an invocation to a constuctor, given to an
+ * Description of an invocation to a constructor, given to an
  * interceptor upon constructor-call.
  *
  * <p>A constructor invocation is a joinpoint and can be intercepted

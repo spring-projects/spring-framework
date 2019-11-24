@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test annotation to indicate whether a test is enabled or disabled for a
- * specific testing profile.
+ * Test annotation for use with JUnit 4 to indicate whether a test is enabled or
+ * disabled for a specific testing profile.
  *
  * <p>In the context of this annotation, the term <em>profile</em> refers to
  * a Java system property by default; however, the semantics can be changed
@@ -79,8 +79,8 @@ import java.lang.annotation.Target;
  * {@code @IfProfileValue} is used to enable or disable tests.
  *
  * <h3>Meta-annotation Support</h3>
- * <p>As of Spring Framework 4.0, this annotation may be used as a
- * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
  *
  * @author Rod Johnson
  * @author Sam Brannen

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,7 +63,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
-	Object getValue(Object rootObject) throws EvaluationException;
+	Object getValue(@Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in the default context against the specified root
@@ -75,7 +75,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
-	<T> T getValue(Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException;
+	<T> T getValue(@Nullable Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException;
 
 	/**
 	 * Evaluate this expression in the provided context and return the result
@@ -97,7 +97,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
-	Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException;
+	Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in a specified context which can resolve references
@@ -125,7 +125,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
-	<T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> desiredResultType)
+	<T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException;
 
 	/**
@@ -145,7 +145,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	@Nullable
-	Class<?> getValueType(Object rootObject) throws EvaluationException;
+	Class<?> getValueType(@Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Return the most general type that can be passed to the
@@ -167,7 +167,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	@Nullable
-	Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException;
+	Class<?> getValueType(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Return the most general type that can be passed to a {@link #setValue}
@@ -186,7 +186,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	@Nullable
-	TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException;
+	TypeDescriptor getValueTypeDescriptor(@Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Return the most general type that can be passed to the
@@ -208,7 +208,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	@Nullable
-	TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException;
+	TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
@@ -216,7 +216,7 @@ public interface Expression {
 	 * @return {@code true} if the expression is writable; {@code false} otherwise
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
-	boolean isWritable(Object rootObject) throws EvaluationException;
+	boolean isWritable(@Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
@@ -234,7 +234,7 @@ public interface Expression {
 	 * @return {@code true} if the expression is writable; {@code false} otherwise
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
-	boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException;
+	boolean isWritable(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
@@ -242,7 +242,7 @@ public interface Expression {
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	void setValue(Object rootObject, @Nullable Object value) throws EvaluationException;
+	void setValue(@Nullable Object rootObject, @Nullable Object value) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
@@ -260,6 +260,6 @@ public interface Expression {
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	void setValue(EvaluationContext context, Object rootObject, @Nullable Object value) throws EvaluationException;
+	void setValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Object value) throws EvaluationException;
 
 }

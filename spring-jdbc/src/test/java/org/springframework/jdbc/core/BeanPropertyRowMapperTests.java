@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -30,7 +28,8 @@ import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Thomas Risberg
@@ -38,16 +37,13 @@ import static org.junit.Assert.*;
  */
 public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testOverridingDifferentClassDefinedForMapping() {
 		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		mapper.setMappedClass(Long.class);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				mapper.setMappedClass(Long.class));
 	}
 
 	@Test
@@ -62,7 +58,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<Person> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(Person.class));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}
@@ -73,7 +69,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<ConcretePerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ConcretePerson.class));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}
@@ -84,7 +80,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<ConcretePerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ConcretePerson.class, true));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}
@@ -95,7 +91,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<ExtendedPerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ExtendedPerson.class));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		ExtendedPerson bean = result.get(0);
 		verifyPerson(bean);
 		mock.verifyClosed();
@@ -104,19 +100,17 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	public void testMappingWithUnpopulatedFieldsNotAccepted() throws Exception {
 		Mock mock = new Mock();
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		mock.getJdbcTemplate().query(
-				"select name, age, birth_date, balance from people",
-				new BeanPropertyRowMapper<>(ExtendedPerson.class, true));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				mock.getJdbcTemplate().query("select name, age, birth_date, balance from people",
+						new BeanPropertyRowMapper<>(ExtendedPerson.class, true)));
 	}
 
 	@Test
 	public void testMappingNullValue() throws Exception {
 		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		Mock mock = new Mock(MockType.TWO);
-		thrown.expect(TypeMismatchException.class);
-		mock.getJdbcTemplate().query(
-				"select name, null as age, birth_date, balance from people", mapper);
+		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
+				mock.getJdbcTemplate().query("select name, null as age, birth_date, balance from people", mapper));
 	}
 
 	@Test
@@ -125,7 +119,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<SpacePerson> result = mock.getJdbcTemplate().query(
 				"select last_name as \"Last Name\", age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(SpacePerson.class));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}
@@ -136,7 +130,7 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		List<DatePerson> result = mock.getJdbcTemplate().query(
 				"select last_name as \"Last Name\", age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(DatePerson.class));
-		assertEquals(1, result.size());
+		assertThat(result.size()).isEqualTo(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}

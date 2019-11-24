@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,73 +18,80 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.net.URL;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Examples of expectations on flash attributes.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class FlashAttributeAssertionTests {
+class FlashAttributeAssertionTests {
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc = standaloneSetup(new PersonController())
+										.alwaysExpect(status().isFound())
+										.alwaysExpect(flash().attributeCount(3))
+										.build();
 
 
-	@Before
-	public void setup() {
-		this.mockMvc = standaloneSetup(new PersonController())
-				.alwaysExpect(status().isFound())
-				.alwaysExpect(flash().attributeCount(3))
-				.build();
+	@Test
+	void attributeCountWithWrongCount() throws Exception {
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> this.mockMvc.perform(post("/persons")).andExpect(flash().attributeCount(1)))
+			.withMessage("FlashMap size expected:<1> but was:<3>");
 	}
 
 	@Test
-	public void testExists() throws Exception {
+	void attributeExists() throws Exception {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(flash().attributeExists("one", "two", "three"));
 	}
 
 	@Test
-	public void testEqualTo() throws Exception {
+	void attributeEqualTo() throws Exception {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(flash().attribute("one", "1"))
 			.andExpect(flash().attribute("two", 2.222))
-			.andExpect(flash().attribute("three", new URL("http://example.com")))
-			.andExpect(flash().attribute("one", equalTo("1")))	// Hamcrest...
-			.andExpect(flash().attribute("two", equalTo(2.222)))
-			.andExpect(flash().attribute("three", equalTo(new URL("http://example.com"))));
+			.andExpect(flash().attribute("three", new URL("https://example.com")));
 	}
 
 	@Test
-	public void testMatchers() throws Exception {
+	void attributeMatchers() throws Exception {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(flash().attribute("one", containsString("1")))
 			.andExpect(flash().attribute("two", closeTo(2, 0.5)))
-			.andExpect(flash().attribute("three", notNullValue()));
+			.andExpect(flash().attribute("three", notNullValue()))
+			.andExpect(flash().attribute("one", equalTo("1")))
+			.andExpect(flash().attribute("two", equalTo(2.222)))
+			.andExpect(flash().attribute("three", equalTo(new URL("https://example.com"))));
 	}
 
 
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/persons", method=RequestMethod.POST)
-		public String save(RedirectAttributes redirectAttrs) throws Exception {
+		@PostMapping("/persons")
+		String save(RedirectAttributes redirectAttrs) throws Exception {
 			redirectAttrs.addFlashAttribute("one", "1");
 			redirectAttrs.addFlashAttribute("two", 2.222);
-			redirectAttrs.addFlashAttribute("three", new URL("http://example.com"));
+			redirectAttrs.addFlashAttribute("three", new URL("https://example.com"));
 			return "redirect:/person/1";
 		}
 	}
+
 }

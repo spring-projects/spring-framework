@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import org.springframework.web.server.WebFilterChain;
  *
  * @author Sebastien Deleuze
  * @since 5.0
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsWebFilter implements WebFilter {
 
@@ -75,14 +75,10 @@ public class CorsWebFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
-			if (corsConfiguration != null) {
-				boolean isValid = this.processor.process(corsConfiguration, exchange);
-				if (!isValid || CorsUtils.isPreFlightRequest(request)) {
-					return Mono.empty();
-				}
-			}
+		CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
+		boolean isValid = this.processor.process(corsConfiguration, exchange);
+		if (!isValid || CorsUtils.isPreFlightRequest(request)) {
+			return Mono.empty();
 		}
 		return chain.filter(exchange);
 	}

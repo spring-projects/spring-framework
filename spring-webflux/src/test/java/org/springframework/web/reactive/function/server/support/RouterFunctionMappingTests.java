@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.server.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -33,7 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RouterFunctionMappingTests {
 
-	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/match"));
+	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com/match"));
 
 	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,11 @@ package org.springframework.core;
 import java.util.Locale;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rod Johnson
@@ -29,104 +31,96 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @since 28.04.2003
  */
-public class ConstantsTests {
+class ConstantsTests {
 
 	@Test
-	public void constants() {
+	void constants() {
 		Constants c = new Constants(A.class);
-		assertEquals(A.class.getName(), c.getClassName());
-		assertEquals(9, c.getSize());
+		assertThat(c.getClassName()).isEqualTo(A.class.getName());
+		assertThat(c.getSize()).isEqualTo(9);
 
-		assertEquals(A.DOG, c.asNumber("DOG").intValue());
-		assertEquals(A.DOG, c.asNumber("dog").intValue());
-		assertEquals(A.CAT, c.asNumber("cat").intValue());
+		assertThat(c.asNumber("DOG").intValue()).isEqualTo(A.DOG);
+		assertThat(c.asNumber("dog").intValue()).isEqualTo(A.DOG);
+		assertThat(c.asNumber("cat").intValue()).isEqualTo(A.CAT);
 
-		try {
-			c.asNumber("bogus");
-			fail("Can't get bogus field");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.asNumber("bogus"));
 
-		assertTrue(c.asString("S1").equals(A.S1));
-		try {
-			c.asNumber("S1");
-			fail("Wrong type");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThat(c.asString("S1").equals(A.S1)).isTrue();
+		assertThatExceptionOfType(Constants.ConstantException.class).as("wrong type").isThrownBy(() ->
+				c.asNumber("S1"));
 	}
 
 	@Test
-	public void getNames() {
+	void getNames() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNames("");
-		assertEquals(c.getSize(), names.size());
-		assertTrue(names.contains("DOG"));
-		assertTrue(names.contains("CAT"));
-		assertTrue(names.contains("S1"));
+		assertThat(names.size()).isEqualTo(c.getSize());
+		assertThat(names.contains("DOG")).isTrue();
+		assertThat(names.contains("CAT")).isTrue();
+		assertThat(names.contains("S1")).isTrue();
 
 		names = c.getNames("D");
-		assertEquals(1, names.size());
-		assertTrue(names.contains("DOG"));
+		assertThat(names.size()).isEqualTo(1);
+		assertThat(names.contains("DOG")).isTrue();
 
 		names = c.getNames("d");
-		assertEquals(1, names.size());
-		assertTrue(names.contains("DOG"));
+		assertThat(names.size()).isEqualTo(1);
+		assertThat(names.contains("DOG")).isTrue();
 	}
 
 	@Test
-	public void getValues() {
+	void getValues() {
 		Constants c = new Constants(A.class);
 
 		Set<?> values = c.getValues("");
-		assertEquals(7, values.size());
-		assertTrue(values.contains(Integer.valueOf(0)));
-		assertTrue(values.contains(Integer.valueOf(66)));
-		assertTrue(values.contains(""));
+		assertThat(values.size()).isEqualTo(7);
+		assertThat(values.contains(Integer.valueOf(0))).isTrue();
+		assertThat(values.contains(Integer.valueOf(66))).isTrue();
+		assertThat(values.contains("")).isTrue();
 
 		values = c.getValues("D");
-		assertEquals(1, values.size());
-		assertTrue(values.contains(Integer.valueOf(0)));
+		assertThat(values.size()).isEqualTo(1);
+		assertThat(values.contains(Integer.valueOf(0))).isTrue();
 
 		values = c.getValues("prefix");
-		assertEquals(2, values.size());
-		assertTrue(values.contains(Integer.valueOf(1)));
-		assertTrue(values.contains(Integer.valueOf(2)));
+		assertThat(values.size()).isEqualTo(2);
+		assertThat(values.contains(Integer.valueOf(1))).isTrue();
+		assertThat(values.contains(Integer.valueOf(2))).isTrue();
 
 		values = c.getValuesForProperty("myProperty");
-		assertEquals(2, values.size());
-		assertTrue(values.contains(Integer.valueOf(1)));
-		assertTrue(values.contains(Integer.valueOf(2)));
+		assertThat(values.size()).isEqualTo(2);
+		assertThat(values.contains(Integer.valueOf(1))).isTrue();
+		assertThat(values.contains(Integer.valueOf(2))).isTrue();
 	}
 
 	@Test
-	public void getValuesInTurkey() {
+	void getValuesInTurkey() {
 		Locale oldLocale = Locale.getDefault();
 		Locale.setDefault(new Locale("tr", ""));
 		try {
 			Constants c = new Constants(A.class);
 
 			Set<?> values = c.getValues("");
-			assertEquals(7, values.size());
-			assertTrue(values.contains(Integer.valueOf(0)));
-			assertTrue(values.contains(Integer.valueOf(66)));
-			assertTrue(values.contains(""));
+			assertThat(values.size()).isEqualTo(7);
+			assertThat(values.contains(Integer.valueOf(0))).isTrue();
+			assertThat(values.contains(Integer.valueOf(66))).isTrue();
+			assertThat(values.contains("")).isTrue();
 
 			values = c.getValues("D");
-			assertEquals(1, values.size());
-			assertTrue(values.contains(Integer.valueOf(0)));
+			assertThat(values.size()).isEqualTo(1);
+			assertThat(values.contains(Integer.valueOf(0))).isTrue();
 
 			values = c.getValues("prefix");
-			assertEquals(2, values.size());
-			assertTrue(values.contains(Integer.valueOf(1)));
-			assertTrue(values.contains(Integer.valueOf(2)));
+			assertThat(values.size()).isEqualTo(2);
+			assertThat(values.contains(Integer.valueOf(1))).isTrue();
+			assertThat(values.contains(Integer.valueOf(2))).isTrue();
 
 			values = c.getValuesForProperty("myProperty");
-			assertEquals(2, values.size());
-			assertTrue(values.contains(Integer.valueOf(1)));
-			assertTrue(values.contains(Integer.valueOf(2)));
+			assertThat(values.size()).isEqualTo(2);
+			assertThat(values.contains(Integer.valueOf(1))).isTrue();
+			assertThat(values.contains(Integer.valueOf(2))).isTrue();
 		}
 		finally {
 			Locale.setDefault(oldLocale);
@@ -134,125 +128,102 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void suffixAccess() {
+	void suffixAccess() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNamesForSuffix("_PROPERTY");
-		assertEquals(2, names.size());
-		assertTrue(names.contains("NO_PROPERTY"));
-		assertTrue(names.contains("YES_PROPERTY"));
+		assertThat(names.size()).isEqualTo(2);
+		assertThat(names.contains("NO_PROPERTY")).isTrue();
+		assertThat(names.contains("YES_PROPERTY")).isTrue();
 
 		Set<?> values = c.getValuesForSuffix("_PROPERTY");
-		assertEquals(2, values.size());
-		assertTrue(values.contains(Integer.valueOf(3)));
-		assertTrue(values.contains(Integer.valueOf(4)));
+		assertThat(values.size()).isEqualTo(2);
+		assertThat(values.contains(Integer.valueOf(3))).isTrue();
+		assertThat(values.contains(Integer.valueOf(4))).isTrue();
 	}
 
 	@Test
-	public void toCode() {
+	void toCode() {
 		Constants c = new Constants(A.class);
 
-		assertEquals("DOG", c.toCode(Integer.valueOf(0), ""));
-		assertEquals("DOG", c.toCode(Integer.valueOf(0), "D"));
-		assertEquals("DOG", c.toCode(Integer.valueOf(0), "DO"));
-		assertEquals("DOG", c.toCode(Integer.valueOf(0), "DoG"));
-		assertEquals("DOG", c.toCode(Integer.valueOf(0), null));
-		assertEquals("CAT", c.toCode(Integer.valueOf(66), ""));
-		assertEquals("CAT", c.toCode(Integer.valueOf(66), "C"));
-		assertEquals("CAT", c.toCode(Integer.valueOf(66), "ca"));
-		assertEquals("CAT", c.toCode(Integer.valueOf(66), "cAt"));
-		assertEquals("CAT", c.toCode(Integer.valueOf(66), null));
-		assertEquals("S1", c.toCode("", ""));
-		assertEquals("S1", c.toCode("", "s"));
-		assertEquals("S1", c.toCode("", "s1"));
-		assertEquals("S1", c.toCode("", null));
-		try {
-			c.toCode("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
-		try {
-			c.toCode("bogus", null);
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThat(c.toCode(Integer.valueOf(0), "")).isEqualTo("DOG");
+		assertThat(c.toCode(Integer.valueOf(0), "D")).isEqualTo("DOG");
+		assertThat(c.toCode(Integer.valueOf(0), "DO")).isEqualTo("DOG");
+		assertThat(c.toCode(Integer.valueOf(0), "DoG")).isEqualTo("DOG");
+		assertThat(c.toCode(Integer.valueOf(0), null)).isEqualTo("DOG");
+		assertThat(c.toCode(Integer.valueOf(66), "")).isEqualTo("CAT");
+		assertThat(c.toCode(Integer.valueOf(66), "C")).isEqualTo("CAT");
+		assertThat(c.toCode(Integer.valueOf(66), "ca")).isEqualTo("CAT");
+		assertThat(c.toCode(Integer.valueOf(66), "cAt")).isEqualTo("CAT");
+		assertThat(c.toCode(Integer.valueOf(66), null)).isEqualTo("CAT");
+		assertThat(c.toCode("", "")).isEqualTo("S1");
+		assertThat(c.toCode("", "s")).isEqualTo("S1");
+		assertThat(c.toCode("", "s1")).isEqualTo("S1");
+		assertThat(c.toCode("", null)).isEqualTo("S1");
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCode("bogus", "bogus"));
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCode("bogus", null));
 
-		assertEquals("MY_PROPERTY_NO", c.toCodeForProperty(Integer.valueOf(1), "myProperty"));
-		assertEquals("MY_PROPERTY_YES", c.toCodeForProperty(Integer.valueOf(2), "myProperty"));
-		try {
-			c.toCodeForProperty("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThat(c.toCodeForProperty(Integer.valueOf(1), "myProperty")).isEqualTo("MY_PROPERTY_NO");
+		assertThat(c.toCodeForProperty(Integer.valueOf(2), "myProperty")).isEqualTo("MY_PROPERTY_YES");
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForProperty("bogus", "bogus"));
 
-		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), ""));
-		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), "G"));
-		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), "OG"));
-		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), "DoG"));
-		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), null));
-		assertEquals("CAT", c.toCodeForSuffix(Integer.valueOf(66), ""));
-		assertEquals("CAT", c.toCodeForSuffix(Integer.valueOf(66), "T"));
-		assertEquals("CAT", c.toCodeForSuffix(Integer.valueOf(66), "at"));
-		assertEquals("CAT", c.toCodeForSuffix(Integer.valueOf(66), "cAt"));
-		assertEquals("CAT", c.toCodeForSuffix(Integer.valueOf(66), null));
-		assertEquals("S1", c.toCodeForSuffix("", ""));
-		assertEquals("S1", c.toCodeForSuffix("", "1"));
-		assertEquals("S1", c.toCodeForSuffix("", "s1"));
-		assertEquals("S1", c.toCodeForSuffix("", null));
-		try {
-			c.toCodeForSuffix("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
-		try {
-			c.toCodeForSuffix("bogus", null);
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "G")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "OG")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "DoG")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(0), null)).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "T")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "at")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "cAt")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(Integer.valueOf(66), null)).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix("", "")).isEqualTo("S1");
+		assertThat(c.toCodeForSuffix("", "1")).isEqualTo("S1");
+		assertThat(c.toCodeForSuffix("", "s1")).isEqualTo("S1");
+		assertThat(c.toCodeForSuffix("", null)).isEqualTo("S1");
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForSuffix("bogus", "bogus"));
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForSuffix("bogus", null));
 	}
 
 	@Test
-	public void getValuesWithNullPrefix() throws Exception {
+	void getValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(null);
-		assertEquals("Must have returned *all* public static final values", 7, values.size());
+		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void getValuesWithEmptyStringPrefix() throws Exception {
+	void getValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<Object> values = c.getValues("");
-		assertEquals("Must have returned *all* public static final values", 7, values.size());
+		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void getValuesWithWhitespacedStringPrefix() throws Exception {
+	void getValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(" ");
-		assertEquals("Must have returned *all* public static final values", 7, values.size());
+		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void withClassThatExposesNoConstants() throws Exception {
+	void withClassThatExposesNoConstants() throws Exception {
 		Constants c = new Constants(NoConstants.class);
-		assertEquals(0, c.getSize());
+		assertThat(c.getSize()).isEqualTo(0);
 		final Set<?> values = c.getValues("");
-		assertNotNull(values);
-		assertEquals(0, values.size());
+		assertThat(values).isNotNull();
+		assertThat(values.size()).isEqualTo(0);
 	}
 
 	@Test
-	public void ctorWithNullClass() throws Exception {
-		try {
-			new Constants(null);
-			fail("Must have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {}
+	void ctorWithNullClass() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new Constants(null));
 	}
 
 

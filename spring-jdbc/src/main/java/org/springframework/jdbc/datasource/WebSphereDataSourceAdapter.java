@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,11 @@
 
 package org.springframework.jdbc.datasource;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -37,7 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Uses IBM-specific API to get a JDBC Connection with a specific isolation
  * level (and read-only flag) from a WebSphere DataSource
- * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">IBM code example</a>).
+ * (<a href="https://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">IBM code example</a>).
  * Supports the transaction-specific isolation level exposed by
  * {@link org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()}.
  * It's also possible to specify a default isolation level, to be applied when the
@@ -141,7 +143,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
-		Connection con = (Connection) ReflectionUtils.invokeJdbcMethod(
+		Connection con = (Connection) invokeJdbcMethod(
 				this.wsDataSourceGetConnectionMethod, obtainTargetDataSource(), connSpec);
 		Assert.state(con != null, "No Connection");
 		return con;
@@ -151,8 +153,8 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * Create a WebSphere {@code JDBCConnectionSpec} object for the given characteristics.
 	 * <p>The default implementation uses reflection to apply the given settings.
 	 * Can be overridden in subclasses to customize the JDBCConnectionSpec object
-	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
-	 * <a href="http://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
+	 * (<a href="https://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
+	 * <a href="https://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
 	 * @param isolationLevel the isolation level to apply (or {@code null} if none)
 	 * @param readOnlyFlag the read-only flag to apply (or {@code null} if none)
 	 * @param username the username to apply ({@code null} or empty indicates the default)
@@ -163,21 +165,40 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	protected Object createConnectionSpec(@Nullable Integer isolationLevel, @Nullable Boolean readOnlyFlag,
 			@Nullable String username, @Nullable String password) throws SQLException {
 
-		Object connSpec = ReflectionUtils.invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
+		Object connSpec = invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
 		Assert.state(connSpec != null, "No JDBCConnectionSpec");
 		if (isolationLevel != null) {
-			ReflectionUtils.invokeJdbcMethod(this.setTransactionIsolationMethod, connSpec, isolationLevel);
+			invokeJdbcMethod(this.setTransactionIsolationMethod, connSpec, isolationLevel);
 		}
 		if (readOnlyFlag != null) {
-			ReflectionUtils.invokeJdbcMethod(this.setReadOnlyMethod, connSpec, readOnlyFlag);
+			invokeJdbcMethod(this.setReadOnlyMethod, connSpec, readOnlyFlag);
 		}
 		// If the username is empty, we'll simply let the target DataSource
 		// use its default credentials.
 		if (StringUtils.hasLength(username)) {
-			ReflectionUtils.invokeJdbcMethod(this.setUserNameMethod, connSpec, username);
-			ReflectionUtils.invokeJdbcMethod(this.setPasswordMethod, connSpec, password);
+			invokeJdbcMethod(this.setUserNameMethod, connSpec, username);
+			invokeJdbcMethod(this.setPasswordMethod, connSpec, password);
 		}
 		return connSpec;
+	}
+
+
+	@Nullable
+	private static Object invokeJdbcMethod(Method method, @Nullable Object target, @Nullable Object... args)
+			throws SQLException {
+		try {
+			return method.invoke(target, args);
+		}
+		catch (IllegalAccessException ex) {
+			ReflectionUtils.handleReflectionException(ex);
+		}
+		catch (InvocationTargetException ex) {
+			if (ex.getTargetException() instanceof SQLException) {
+				throw (SQLException) ex.getTargetException();
+			}
+			ReflectionUtils.handleInvocationTargetException(ex);
+		}
+		throw new IllegalStateException("Should never get here");
 	}
 
 }
