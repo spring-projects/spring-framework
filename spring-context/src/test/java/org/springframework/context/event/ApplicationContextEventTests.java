@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -355,7 +356,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void nonSingletonListenerInApplicationContext() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		RootBeanDefinition listener = new RootBeanDefinition(MyNonSingletonListener.class);
-		listener.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listener.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("listener", listener);
 		context.refresh();
 

@@ -94,7 +94,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
@@ -111,7 +111,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testExtendedResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
@@ -160,7 +160,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	public void testExtendedResourceInjectionWithAtRequired() {
 		bf.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		RootBeanDefinition bd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
@@ -179,7 +179,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testConstructorResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
@@ -236,7 +236,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testConstructorInjectionWithMap() {
 		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
@@ -261,7 +261,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testFieldInjectionWithMap() {
 		RootBeanDefinition bd = new RootBeanDefinition(MapFieldInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
@@ -286,7 +286,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	@Test
 	public void testMethodInjectionWithMap() {
 		RootBeanDefinition bd = new RootBeanDefinition(MapMethodInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);

@@ -36,6 +36,7 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -383,7 +384,7 @@ public class AsyncExecutionTests {
 		listenerConstructed = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);
-		listenerDef.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listenerDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));

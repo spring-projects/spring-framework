@@ -45,7 +45,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SecurityContextProvider;
@@ -442,7 +442,7 @@ public class CallbacksSecurityTests {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder
 				.genericBeanDefinition(NonPrivilegedBean.class).setScope(
-						ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+						BeanDefinition.SCOPE_PROTOTYPE)
 				.setInitMethodName("init").setDestroyMethodName("destroy")
 				.addConstructorArgValue("user1");
 		lbf.registerBeanDefinition("test", bdb.getBeanDefinition());

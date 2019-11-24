@@ -36,6 +36,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
@@ -219,7 +220,7 @@ class ApplicationContextExpressionTests {
 		cs.addConverter(String.class, String.class, String::trim);
 		ac.getBeanFactory().registerSingleton(GenericApplicationContext.CONVERSION_SERVICE_BEAN_NAME, cs);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		rbd.getPropertyValues().add("country2", new TypedStringValue("-#{systemProperties.country}-"));
 		ac.registerBeanDefinition("test", rbd);
@@ -252,7 +253,7 @@ class ApplicationContextExpressionTests {
 		Assume.notLogging(factoryLog);
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("test", rbd);

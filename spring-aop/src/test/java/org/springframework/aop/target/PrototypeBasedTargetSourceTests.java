@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.tests.sample.beans.SerializablePerson;
@@ -47,7 +48,7 @@ public class PrototypeBasedTargetSourceTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class);
 		bd.setPropertyValues(pvs);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("ts", tsBd);

@@ -176,7 +176,7 @@ public class ClassPathBeanDefinitionScannerTests {
 	public void testSimpleScanWithDefaultFiltersAndOverriddenCompatibleNamedBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(NamedStubDao.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("myNamedDao", bd);
 		int initialBeanCount = context.getBeanDefinitionCount();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
