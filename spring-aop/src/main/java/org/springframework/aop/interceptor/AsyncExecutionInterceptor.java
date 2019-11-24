@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.support.AopUtils;
@@ -114,13 +115,14 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Object oldProxy = exposeProxy ? AopContext.currentProxy() : null;
+		Object oldProxy = this.exposeProxy ? AopContext.currentProxy() : null;
 
 		Callable<Object> task = () -> {
 			try {
-				if (exposeProxy) {
-					if (invocation instanceof ReflectiveMethodInvocation)
+				if (this.exposeProxy) {
+					if (invocation instanceof ReflectiveMethodInvocation) {
 						AopContext.setCurrentProxy(((ReflectiveMethodInvocation) invocation).getProxy());
+					}
 				}
 				Object result = invocation.proceed();
 				if (result instanceof Future) {
@@ -132,8 +134,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			}
 			catch (Throwable ex) {
 				handleError(ex, userDeclaredMethod, invocation.getArguments());
-			} finally {
-				if (exposeProxy) {
+			}
+			finally {
+				if (this.exposeProxy) {
 					AopContext.setCurrentProxy(oldProxy);
 				}
 			}

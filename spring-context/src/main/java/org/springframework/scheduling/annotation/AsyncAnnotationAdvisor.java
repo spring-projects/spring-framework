@@ -155,7 +155,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 
 		AnnotationAsyncExecutionInterceptor interceptor = new AnnotationAsyncExecutionInterceptor(null);
 		interceptor.configure(executor, exceptionHandler);
-		interceptor.setExposeProxy(exposeProxy);
+		interceptor.setExposeProxy(this.exposeProxy);
 		return interceptor;
 	}
 
