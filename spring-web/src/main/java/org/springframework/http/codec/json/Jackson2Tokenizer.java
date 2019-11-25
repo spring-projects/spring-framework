@@ -122,12 +122,17 @@ final class Jackson2Tokenizer {
 	private List<TokenBuffer> parseTokenBufferFlux() throws IOException {
 		List<TokenBuffer> result = new ArrayList<>();
 
-		while (true) {
+		// SPR-16151: Smile data format uses null to separate documents
+		boolean previousNull = false;
+		while (!this.parser.isClosed()) {
 			JsonToken token = this.parser.nextToken();
-			// SPR-16151: Smile data format uses null to separate documents
 			if (token == JsonToken.NOT_AVAILABLE ||
-					(token == null && (token = this.parser.nextToken()) == null)) {
+					token == null && previousNull) {
 				break;
+			}
+			else if (token == null ) { // !previousNull
+				previousNull = true;
+				continue;
 			}
 			updateDepth(token);
 			if (!this.tokenizeArrayElements) {
@@ -169,6 +174,9 @@ final class Jackson2Tokenizer {
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
 		if (!isTopLevelArrayToken(token)) {
+			if (!this.parser.hasCurrentToken()) {
+				System.out.println("NO CURRENT TOKEN: " + token);
+			}
 			this.tokenBuffer.copyCurrentEvent(this.parser);
 		}
 
