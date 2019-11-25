@@ -15,6 +15,7 @@
  */
 package org.springframework.messaging.rsocket;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -26,10 +27,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -79,7 +84,7 @@ public class DefaultMetadataExtractorTests {
 				.metadata("html data", TEXT_HTML)
 				.metadata("xml data", TEXT_XML);
 
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
 		payload.release();
@@ -99,7 +104,7 @@ public class DefaultMetadataExtractorTests {
 				.metadata("html data", TEXT_HTML)
 				.metadata("xml data", TEXT_XML);
 
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
 		payload.release();
@@ -115,7 +120,7 @@ public class DefaultMetadataExtractorTests {
 	public void route() {
 		MimeType metaMimeType = MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 		MetadataEncoder metadataEncoder = new MetadataEncoder(metaMimeType, this.strategies).route("toA");
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, metaMimeType);
 		payload.release();
@@ -128,7 +133,7 @@ public class DefaultMetadataExtractorTests {
 		this.extractor.metadataToExtract(TEXT_PLAIN, String.class, ROUTE_KEY);
 
 		MetadataEncoder metadataEncoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).route("toA");
-		DataBuffer metadata = metadataEncoder.encode();
+		DataBuffer metadata = metadataEncoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
 		payload.release();
@@ -146,7 +151,7 @@ public class DefaultMetadataExtractorTests {
 		});
 
 		MetadataEncoder encoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).metadata("toA:text data", null);
-		DataBuffer metadata = encoder.encode();
+		DataBuffer metadata = encoder.encode().block();
 		Payload payload = createPayload(metadata);
 		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
 		payload.release();
@@ -154,6 +159,24 @@ public class DefaultMetadataExtractorTests {
 		assertThat(result).hasSize(2)
 				.containsEntry(ROUTE_KEY, "toA")
 				.containsEntry("entry1", "text data");
+	}
+
+	@Test
+	public void nonCompositeMetadataCanBeReadTwice() {
+		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(new TestDecoder());
+		extractor.metadataToExtract(TEXT_PLAIN, String.class, "name");
+
+		MetadataEncoder encoder = new MetadataEncoder(TEXT_PLAIN, this.strategies).metadata("value", null);
+		DataBuffer metadata = encoder.encode().block();
+		Payload payload = createPayload(metadata);
+
+		Map<String, Object> result = extractor.extract(payload, TEXT_PLAIN);
+		assertThat(result).hasSize(1).containsEntry("name", "value");
+
+		result = extractor.extract(payload, TEXT_PLAIN);
+		assertThat(result).hasSize(1).containsEntry("name", "value");
+
+		payload.release();
 	}
 
 	@Test
@@ -172,4 +195,25 @@ public class DefaultMetadataExtractorTests {
 		return PayloadUtils.createPayload(this.strategies.dataBufferFactory().allocateBuffer(), metadata);
 	}
 
+
+	/**
+	 * Like StringDecoder but consumes the reader index in order to prove that
+	 * extraction uses a slice and can be read twice.
+	 */
+	private static class TestDecoder extends AbstractDataBufferDecoder<String> {
+
+		public TestDecoder() {
+			super(TEXT_PLAIN);
+		}
+
+		@Override
+		public String decode(DataBuffer dataBuffer, ResolvableType elementType,
+				@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+			byte[] bytes = new byte[dataBuffer.readableByteCount()];
+			dataBuffer.read(bytes);
+			DataBufferUtils.release(dataBuffer);
+			return new String(bytes, StandardCharsets.UTF_8);
+		}
+	}
 }

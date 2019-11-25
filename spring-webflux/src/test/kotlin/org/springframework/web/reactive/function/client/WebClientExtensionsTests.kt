@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +33,6 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Sebastien Deleuze
  */
-@ExperimentalCoroutinesApi
 class WebClientExtensionsTests {
 
 	private val requestBodySpec = mockk<WebClient.RequestBodySpec>(relaxed = true)

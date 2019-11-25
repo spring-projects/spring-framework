@@ -41,7 +41,6 @@ public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 	public void withShadowedField() {
 		final StringBuilder sb = new StringBuilder();
 
-		@SuppressWarnings("serial")
 		TestBean target = new TestBean() {
 			@SuppressWarnings("unused")
 			StringBuilder name = sb;

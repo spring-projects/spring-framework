@@ -345,8 +345,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		assertThat(property.read(ctx, tester, "property").getValue()).isEqualTo("hello");
 		// cached accessor used
 		assertThat(property.read(ctx, tester, "property").getValue()).isEqualTo("hello");
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				property.getSpecificTargetClasses());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(property::getSpecificTargetClasses);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				property.write(ctx, tester, "property", null));
 
@@ -360,8 +359,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		assertThat(field.read(ctx, tester, "field").getValue()).isEqualTo(3);
 		// cached accessor used
 		assertThat(field.read(ctx, tester, "field").getValue()).isEqualTo(3);
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				field.getSpecificTargetClasses());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(field::getSpecificTargetClasses);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				field.write(ctx, tester, "field", null));
 	}

@@ -100,7 +100,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 
 	/**
-	 * Sort the given List with a default AnnotationAwareOrderComparator.
+	 * Sort the given list with a default {@link AnnotationAwareOrderComparator}.
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
 	 * @param list the List to sort

@@ -1053,7 +1053,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private final AtomicInteger disconnect = new AtomicInteger();
 
-
 		public void incrementConnectCount() {
 			this.connect.incrementAndGet();
 		}

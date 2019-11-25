@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -179,30 +178,25 @@ final class AnnotationTypeMapping {
 		}
 		if (isAliasPair(target) && checkAliasPair) {
 			AliasFor targetAliasFor = target.getAnnotation(AliasFor.class);
-			if (targetAliasFor == null) {
-				throw new AnnotationConfigurationException(String.format(
-						"%s must be declared as an @AliasFor '%s'.",
-						StringUtils.capitalize(AttributeMethods.describe(target)),
-						attribute.getName()));
-			}
-			Method mirror = resolveAliasTarget(target, targetAliasFor, false);
-			if (!mirror.equals(attribute)) {
-				throw new AnnotationConfigurationException(String.format(
-						"%s must be declared as an @AliasFor '%s', not '%s'.",
-						StringUtils.capitalize(AttributeMethods.describe(target)),
-						attribute.getName(), mirror.getName()));
+			if (targetAliasFor != null) {
+				Method mirror = resolveAliasTarget(target, targetAliasFor, false);
+				if (!mirror.equals(attribute)) {
+					throw new AnnotationConfigurationException(String.format(
+							"%s must be declared as an @AliasFor '%s', not '%s'.",
+							StringUtils.capitalize(AttributeMethods.describe(target)),
+							attribute.getName(), mirror.getName()));
+				}
 			}
 		}
 		return target;
 	}
 
 	private boolean isAliasPair(Method target) {
-		return target.getDeclaringClass().equals(this.annotationType);
+		return (this.annotationType == target.getDeclaringClass());
 	}
 
 	private boolean isCompatibleReturnType(Class<?> attributeType, Class<?> targetType) {
-		return Objects.equals(attributeType, targetType) ||
-				Objects.equals(attributeType, targetType.getComponentType());
+		return (attributeType == targetType || attributeType == targetType.getComponentType());
 	}
 
 	private void processAliases() {
@@ -296,7 +290,7 @@ final class AnnotationTypeMapping {
 			AnnotationTypeMapping mapping = this;
 			while (mapping != null && mapping.distance > 0) {
 				int mapped = mapping.getAttributes().indexOf(attribute.getName());
-				if (mapped != -1  && isBetterConventionAnnotationValue(i, isValueAttribute, mapping)) {
+				if (mapped != -1 && isBetterConventionAnnotationValue(i, isValueAttribute, mapping)) {
 					this.annotationValueMappings[i] = mapped;
 					this.annotationValueSource[i] = mapping;
 				}
@@ -307,6 +301,7 @@ final class AnnotationTypeMapping {
 
 	private boolean isBetterConventionAnnotationValue(int index, boolean isValueAttribute,
 			AnnotationTypeMapping mapping) {
+
 		if (this.annotationValueMappings[index] == -1) {
 			return true;
 		}
@@ -439,21 +434,27 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get a mapped attribute value from the most suitable
-	 * {@link #getAnnotation() meta-annotation}. The resulting value is obtained
-	 * from the closest meta-annotation, taking into consideration both
-	 * convention and alias based mapping rules. For root mappings, this method
-	 * will always return {@code null}.
+	 * {@link #getAnnotation() meta-annotation}.
+	 * <p>The resulting value is obtained from the closest meta-annotation,
+	 * taking into consideration both convention and alias based mapping rules.
+	 * For root mappings, this method will always return {@code null}.
 	 * @param attributeIndex the attribute index of the source attribute
+	 * @param metaAnnotationsOnly if only meta annotations should be considered.
+	 * If this parameter is {@code false} then aliases within the annotation will
+	 * also be considered.
 	 * @return the mapped annotation value, or {@code null}
 	 */
 	@Nullable
-	Object getMappedAnnotationValue(int attributeIndex) {
-		int mapped = this.annotationValueMappings[attributeIndex];
-		if (mapped == -1) {
+	Object getMappedAnnotationValue(int attributeIndex, boolean metaAnnotationsOnly) {
+		int mappedIndex = this.annotationValueMappings[attributeIndex];
+		if (mappedIndex == -1) {
 			return null;
 		}
 		AnnotationTypeMapping source = this.annotationValueSource[attributeIndex];
-		return ReflectionUtils.invokeMethod(source.attributes.get(mapped), source.annotation);
+		if (source == this && metaAnnotationsOnly) {
+			return null;
+		}
+		return ReflectionUtils.invokeMethod(source.attributes.get(mappedIndex), source.annotation);
 	}
 
 	/**
@@ -461,7 +462,7 @@ final class AnnotationTypeMapping {
 	 * attribute at the given index.
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @param value the value to check
-	 * @param valueExtractor the value extractor used to extract value from any
+	 * @param valueExtractor the value extractor used to extract values from any
 	 * nested annotations
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
@@ -527,13 +528,13 @@ final class AnnotationTypeMapping {
 		return value.getName().equals(extractedValue);
 	}
 
-	private static boolean areEquivalent(Annotation value, @Nullable Object extractedValue,
+	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
 			BiFunction<Method, Object, Object> valueExtractor) {
 
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(value.annotationType());
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
-			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, value),
+			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
 					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
 				return false;
 			}

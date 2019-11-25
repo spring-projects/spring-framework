@@ -105,7 +105,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
 
 		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
-				.bufferUntil(line -> line.equals(""))
+				.bufferUntil(String::isEmpty)
 				.concatMap(lines -> Mono.justOrEmpty(buildEvent(lines, valueType, shouldWrap, hints)));
 	}
 
@@ -155,6 +155,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 	}
 
+	@Nullable
 	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);

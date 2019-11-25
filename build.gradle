@@ -7,14 +7,27 @@ buildscript {
 
 plugins {
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
-	id 'org.jetbrains.kotlin.jvm' version '1.3.50' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.3.60' apply false
 	id 'org.jetbrains.dokka' version '0.9.18' apply false
 	id 'org.asciidoctor.convert' version '1.5.8'
 	id 'io.spring.nohttp' version '0.0.3.RELEASE'
 	id 'de.undercouch.download' version '4.0.0'
+	id 'com.gradle.build-scan' version '2.4.2'
 	id "com.jfrog.artifactory" version '4.9.8' apply false
-	id "io.freefair.aspectj" version "4.0.0" apply false
+	id "io.freefair.aspectj" version "4.1.1" apply false
 	id "com.github.ben-manes.versions" version "0.24.0"
+}
+
+if (System.getenv('GRADLE_ENTERPRISE_URL')) {
+	apply from: "$rootDir/gradle/build-scan-user-data.gradle"
+	buildScan {
+		captureTaskInputFiles = true
+		obfuscation {
+			ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
+		}
+		publishAlways()
+		server = System.getenv('GRADLE_ENTERPRISE_URL')
+	}
 }
 
 ext {
@@ -30,13 +43,14 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.9.9"
-			mavenBom "io.netty:netty-bom:4.1.39.Final"
-			mavenBom "io.projectreactor:reactor-bom:Dysprosium-RC1"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.20.v20190813"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.3.50"
-			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.3.1"
-			mavenBom "org.junit:junit-bom:5.5.1"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.1"
+			mavenBom "io.netty:netty-bom:4.1.43.Final"
+			mavenBom "io.projectreactor:reactor-bom:Dysprosium-BUILD-SNAPSHOT"
+			mavenBom "io.rsocket:rsocket-bom:1.0.0-RC5"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.24.v20191120"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.3.60"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.3.2"
+			mavenBom "org.junit:junit-bom:5.5.2"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.12.1') {
@@ -45,7 +59,7 @@ configure(allprojects) { project ->
 				entry 'log4j-slf4j-impl'
 				entry 'log4j-jul'
 			}
-			dependency "org.slf4j:slf4j-api:1.7.26"
+			dependency "org.slf4j:slf4j-api:1.7.29"
 
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
@@ -54,7 +68,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '2.5.7') {
+			dependencySet(group: 'org.codehaus.groovy', version: '2.5.8') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'
@@ -64,25 +78,21 @@ configure(allprojects) { project ->
 
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
-			dependency "io.reactivex.rxjava2:rxjava:2.2.12"
-			dependencySet(group: 'io.rsocket', version: '1.0.0-RC3') {
-				entry 'rsocket-core'
-				entry 'rsocket-transport-netty'
-			}
+			dependency "io.reactivex.rxjava2:rxjava:2.2.15"
 
 			dependency "com.caucho:hessian:4.0.62"
-			dependency "com.fasterxml:aalto-xml:1.2.1"
-			dependency("com.fasterxml.woodstox:woodstox-core:5.2.0") {
+			dependency "com.fasterxml:aalto-xml:1.2.2"
+			dependency("com.fasterxml.woodstox:woodstox-core:6.0.2") {
 				exclude group: "stax", name: "stax-api"
 			}
-			dependency "com.google.code.gson:gson:2.8.5"
-			dependency "com.google.protobuf:protobuf-java-util:3.9.0"
+			dependency "com.google.code.gson:gson:2.8.6"
+			dependency "com.google.protobuf:protobuf-java-util:3.10.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.1.12"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.1"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
@@ -91,12 +101,12 @@ configure(allprojects) { project ->
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.24"
+			dependency "org.yaml:snakeyaml:1.25"
 
-			dependency "com.h2database:h2:1.4.199"
+			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.0"
-			dependency "com.github.librepdf:openpdf:1.2.21"
-			dependency "com.rometools:rome:1.12.1"
+			dependency "com.github.librepdf:openpdf:1.3.11"
+			dependency "com.rometools:rome:1.12.2"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.0"
 			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
@@ -113,32 +123,32 @@ configure(allprojects) { project ->
 				entry 'derby'
 				entry 'derbyclient'
 			}
-			dependency "org.apache.poi:poi-ooxml:4.1.0"
+			dependency "org.apache.poi:poi-ooxml:4.1.1"
 			dependency "org.beanshell:bsh:2.0b5"
-			dependency "org.freemarker:freemarker:2.3.28"
+			dependency "org.freemarker:freemarker:2.3.29"
 			dependency "org.hsqldb:hsqldb:2.5.0"
-			dependency "org.quartz-scheduler:quartz:2.3.1"
+			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.4.Final"
-			dependency "org.hibernate:hibernate-validator:6.0.17.Final"
-			dependency "org.webjars:webjars-locator-core:0.37"
+			dependency "org.hibernate:hibernate-core:5.4.9.Final"
+			dependency "org.hibernate:hibernate-validator:6.1.0.Final"
+			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.24') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.29') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.22') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.29') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.0.26.Final') {
+			dependencySet(group: 'io.undertow', version: '2.0.28.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -149,11 +159,11 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.2') {
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.4') {
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.9") {
+			dependency("org.apache.httpcomponents:httpclient:4.5.10") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
@@ -161,9 +171,9 @@ configure(allprojects) { project ->
 			}
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.0.3"
 
-			dependency "org.jruby:jruby:9.2.7.0"
+			dependency "org.jruby:jruby:9.2.9.0"
 			dependency "org.python:jython-standalone:2.7.1"
-			dependency "org.mozilla:rhino:1.7.10"
+			dependency "org.mozilla:rhino:1.7.11"
 
 			dependency "commons-fileupload:commons-fileupload:1.4"
 			dependency "org.synchronoss.cloud:nio-multipart-parser:1.1.0"
@@ -177,7 +187,7 @@ configure(allprojects) { project ->
 				exclude group: "xerces", name: "xercesImpl"
 			}
 
-			dependency("junit:junit:4.13-beta-3") {
+			dependency("junit:junit:4.12") {
 				exclude group: "org.hamcrest", name: "hamcrest-core"
 			}
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
@@ -185,15 +195,15 @@ configure(allprojects) { project ->
 			}
 			dependency "org.testng:testng:6.14.3"
 			dependency "org.hamcrest:hamcrest:2.1"
-			dependency "org.awaitility:awaitility:3.1.3"
-			dependency "org.assertj:assertj-core:3.13.2"
+			dependency "org.awaitility:awaitility:3.1.6"
+			dependency "org.assertj:assertj-core:3.14.0"
 			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.0.0') {
+			dependencySet(group: 'org.mockito', version: '3.1.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -201,10 +211,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.9.3"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.35.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.36.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.35.1") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.36.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -231,8 +241,8 @@ configure(allprojects) { project ->
 
 			dependency "com.ibm.websphere:uow:6.0.2.17"
 			dependency "com.jamonapi:jamon:2.81"
-			dependency "joda-time:joda-time:2.10.3"
-			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.4"
+			dependency "joda-time:joda-time:2.10.4"
+			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.5"
 			dependency "org.javamoney:moneta:1.3"
 
 			dependency "com.sun.activation:javax.activation:1.2.0"
@@ -269,7 +279,7 @@ configure(allprojects) { project ->
 			dependency "javax.xml.ws:jaxws-api:2.3.1"
 
 			dependency "org.eclipse.persistence:javax.persistence:2.2.0"
-			
+
 			// Substitute for "javax.management:jmxremote_optional:1.0.1_04" which
 			// is not available on Maven Central
 			dependency "org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea"
@@ -285,8 +295,14 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
-			maven { url "https://repo.spring.io/libs-release" }
-			maven { url "https://repo.spring.io/milestone" } // Reactor
+			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/snapshot" }
+		}
+	}
+	configurations.all {
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+			cacheDynamicVersionsFor 0, "seconds"
 		}
 	}
 }
@@ -325,7 +341,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.23"
+		toolVersion = "8.26"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
@@ -342,8 +358,6 @@ configure([rootProject] + javaProjects) { project ->
 		testRuntime("org.apache.logging.log4j:log4j-core")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl")
 		testRuntime("org.apache.logging.log4j:log4j-jul")
-		// Hamcrest is needed at test runtime by third-party libraries
-		testRuntime("org.hamcrest:hamcrest")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
@@ -363,12 +377,12 @@ configure([rootProject] + javaProjects) { project ->
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 			"https://www.ehcache.org/apidocs/2.10.4",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://fasterxml.github.io/jackson-core/javadoc/2.9/",
-			"https://fasterxml.github.io/jackson-databind/javadoc/2.9/",
-			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 			"https://junit.org/junit4/javadoc/4.12/",
-			"https://junit.org/junit5/docs/5.5.1/api/"
+			"https://junit.org/junit5/docs/5.5.2/api/"
 	] as String[]
 }
 
@@ -389,11 +403,15 @@ configure(rootProject) {
 	nohttp {
 		source.exclude "**/test-output/**"
 		whitelistFile = project.file("src/nohttp/whitelist.lines")
-		def projectDirURI = project.projectDir.toURI()
-		allprojects.forEach { p ->
-			def outURI = p.file("out").toURI()
-			def pattern = projectDirURI.relativize(outURI).path + "**"
-			source.exclude pattern
+		def rootPath = file(rootDir).toPath()
+		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
+		projectDirs.forEach { dir ->
+			[ 'bin', 'build', 'out', '.settings' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it/**" }
+			[ '.classpath', '.project' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it" }
 		}
 	}
 

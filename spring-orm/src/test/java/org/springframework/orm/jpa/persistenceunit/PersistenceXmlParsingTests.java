@@ -254,7 +254,7 @@ public class PersistenceXmlParsingTests {
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should default false in 1.0.").isFalse();
 	}
 
-	@Disabled  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Disabled("not doing schema parsing anymore for JPA 2.0 compatibility")
 	@Test
 	public void testInvalidPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
@@ -264,7 +264,7 @@ public class PersistenceXmlParsingTests {
 				reader.readPersistenceUnitInfos(resource));
 	}
 
-	@Disabled  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Disabled("not doing schema parsing anymore for JPA 2.0 compatibility")
 	@Test
 	public void testNoSchemaPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(

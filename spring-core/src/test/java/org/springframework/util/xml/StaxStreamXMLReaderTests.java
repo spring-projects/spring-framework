@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
+class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTests {
 
 	public static final String CONTENT = "<root xmlns='http://springframework.org/spring-ws'><child/></root>";
 

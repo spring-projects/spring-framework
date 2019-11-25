@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.client
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
@@ -43,7 +42,7 @@ inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param flow the [Flow] to write to the request
- * @param <T> the type of the elements contained in the flow
+ * @param T the type of the elements contained in the flow
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -57,7 +56,7 @@ inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeaders
  * @param producer the producer to write to the request. This must be a
  * [Publisher] or another producer adaptable to a
  * [Publisher] via [org.springframework.core.ReactiveAdapterRegistry]
- * @param <T> the type of the elements contained in the producer
+ * @param T the type of the elements contained in the producer
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -103,7 +102,6 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 

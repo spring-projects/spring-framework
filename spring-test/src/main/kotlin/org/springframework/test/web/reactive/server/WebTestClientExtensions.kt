@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.reactive.server
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -40,7 +39,7 @@ inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S
  * @param producer the producer to write to the request. This must be a
  * [Publisher] or another producer adaptable to a
  * [Publisher] via [org.springframework.core.ReactiveAdapterRegistry]
- * @param <T> the type of the elements contained in the producer
+ * @param T the type of the elements contained in the producer
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -52,11 +51,10 @@ inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeaders
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param flow the [Flow] to write to the request
- * @param <T> the type of the elements contained in the publisher
+ * @param T the type of the elements contained in the publisher
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeadersSpec<*> =
 		body(flow, object : ParameterizedTypeReference<T>() {})
 

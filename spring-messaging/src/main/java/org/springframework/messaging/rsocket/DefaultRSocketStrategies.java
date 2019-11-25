@@ -46,6 +46,7 @@ import org.springframework.util.SimpleRouteMatcher;
  * Default implementation of {@link RSocketStrategies}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.2
  */
 final class DefaultRSocketStrategies implements RSocketStrategies {
@@ -128,6 +129,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		@Nullable
 		private MetadataExtractor metadataExtractor;
 
+		private final List<Consumer<MetadataExtractorRegistry>> metadataExtractors = new ArrayList<>();
+
 		DefaultRSocketStrategiesBuilder() {
 			this.encoders.add(CharSequenceEncoder.allMimeTypes());
 			this.encoders.add(new ByteBufferEncoder());
@@ -201,6 +204,12 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
+		public Builder metadataExtractorRegistry(Consumer<MetadataExtractorRegistry> consumer) {
+			this.metadataExtractors.add(consumer);
+			return this;
+		}
+
+		@Override
 		public RSocketStrategies build() {
 			RouteMatcher matcher = (this.routeMatcher != null ? this.routeMatcher : initRouteMatcher());
 
@@ -212,6 +221,10 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 			MetadataExtractor extractor = (this.metadataExtractor != null ?
 					this.metadataExtractor : new DefaultMetadataExtractor(this.decoders));
+
+			if (extractor instanceof MetadataExtractorRegistry) {
+				this.metadataExtractors.forEach(consumer -> consumer.accept((MetadataExtractorRegistry) extractor));
+			}
 
 			return new DefaultRSocketStrategies(
 					this.encoders, this.decoders, matcher, registry, factory, extractor);

@@ -141,9 +141,9 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedSseTest
 	void sseAsEvent(HttpServer httpServer, ClientHttpConnector connector) throws Exception {
-		startServer(httpServer, connector);
+		assumeTrue(httpServer instanceof JettyHttpServer);
 
-		assumeTrue(super.server instanceof JettyHttpServer);
+		startServer(httpServer, connector);
 
 		Flux<ServerSentEvent<Person>> result = this.webClient.get()
 				.uri("/event")
@@ -190,9 +190,9 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@ParameterizedSseTest // SPR-16494
 	@Disabled // https://github.com/reactor/reactor-netty/issues/283
 	void serverDetectsClientDisconnect(HttpServer httpServer, ClientHttpConnector connector) throws Exception {
-		startServer(httpServer, connector);
+		assumeTrue(httpServer instanceof ReactorHttpServer);
 
-		assumeTrue(super.server instanceof ReactorHttpServer);
+		startServer(httpServer, connector);
 
 		Flux<String> result = this.webClient.get()
 				.uri("/infinite")

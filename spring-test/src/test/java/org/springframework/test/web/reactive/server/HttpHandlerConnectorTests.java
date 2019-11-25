@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -51,7 +52,7 @@ public class HttpHandlerConnectorTests {
 
 
 	@Test
-	public void adaptRequest() throws Exception {
+	public void adaptRequest() {
 
 		TestHttpHandler handler = new TestHttpHandler(response -> {
 			response.setStatusCode(HttpStatus.OK);
@@ -79,7 +80,7 @@ public class HttpHandlerConnectorTests {
 	}
 
 	@Test
-	public void adaptResponse() throws Exception {
+	public void adaptResponse() {
 
 		ResponseCookie cookie = ResponseCookie.from("custom-cookie", "c0").build();
 
@@ -102,6 +103,22 @@ public class HttpHandlerConnectorTests {
 
 		DataBuffer buffer = response.getBody().blockFirst(Duration.ZERO);
 		assertThat(DataBufferTestUtils.dumpString(buffer, UTF_8)).isEqualTo("Custom body");
+	}
+
+	@Test // gh-23936
+	public void handlerOnNonBlockingThread() {
+
+		TestHttpHandler handler = new TestHttpHandler(response -> {
+
+			assertThat(Schedulers.isInNonBlockingThread()).isTrue();
+
+			response.setStatusCode(HttpStatus.OK);
+			return response.setComplete();
+		});
+
+		new HttpHandlerConnector(handler)
+				.connect(HttpMethod.POST, URI.create("/path"), request -> request.writeWith(Mono.empty()))
+				.block(Duration.ofSeconds(5));
 	}
 
 	private DataBuffer toDataBuffer(String body) {

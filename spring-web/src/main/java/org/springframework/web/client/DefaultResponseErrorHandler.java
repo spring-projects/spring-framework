@@ -16,8 +16,13 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Spring's default implementation of the {@link ResponseErrorHandler} interface.
@@ -96,10 +102,49 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
 		if (statusCode == null) {
-			throw new UnknownHttpStatusCodeException(response.getRawStatusCode(), response.getStatusText(),
+			String message = getErrorMessage(
+					response.getRawStatusCode(), response.getStatusText(),
+					getResponseBody(response), getCharset(response));
+			throw new UnknownHttpStatusCodeException(message,
+					response.getRawStatusCode(), response.getStatusText(),
 					response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 		handleError(response, statusCode);
+	}
+
+	/**
+	 * Return error message with details from the response body, possibly truncated:
+	 * <pre>
+	 * 404 Not Found: [{'id': 123, 'message': 'my very long... (500 bytes)]
+	 * </pre>
+	 */
+	private String getErrorMessage(
+			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset) {
+
+		String preface = rawStatusCode + " " + statusText + ": ";
+		if (ObjectUtils.isEmpty(responseBody)) {
+			return preface + "[no body]";
+		}
+
+		charset = charset == null ? StandardCharsets.UTF_8 : charset;
+		int maxChars = 200;
+
+		if (responseBody.length < maxChars * 2) {
+			return preface + "[" + new String(responseBody, charset) + "]";
+		}
+
+		try {
+			Reader reader = new InputStreamReader(new ByteArrayInputStream(responseBody), charset);
+			CharBuffer buffer = CharBuffer.allocate(maxChars);
+			reader.read(buffer);
+			reader.close();
+			buffer.flip();
+			return preface + "[" + buffer.toString() + "... (" + responseBody.length + " bytes)]";
+		}
+		catch (IOException ex) {
+			// should never happen
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	/**
@@ -118,13 +163,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);
 		Charset charset = getCharset(response);
+		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
+
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw HttpClientErrorException.create(statusCode, statusText, headers, body, charset);
+				throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
 			case SERVER_ERROR:
-				throw HttpServerErrorException.create(statusCode, statusText, headers, body, charset);
+				throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
 			default:
-				throw new UnknownHttpStatusCodeException(statusCode.value(), statusText, headers, body, charset);
+				throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
 	}
 

@@ -42,7 +42,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Mock object based tests for transaction aspects. A true unit test in that it
@@ -90,7 +90,7 @@ public abstract class AbstractTransactionAspectTests {
 		checkTransactionStatus(false);
 
 		// expect no calls
-		verifyZeroInteractions(ptm);
+		verifyNoInteractions(ptm);
 	}
 
 	/**

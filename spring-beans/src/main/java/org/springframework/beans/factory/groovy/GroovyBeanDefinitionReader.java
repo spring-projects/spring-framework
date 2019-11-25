@@ -244,6 +244,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			logger.trace("Loading Groovy bean definitions from " + encodedResource);
 		}
 
+		@SuppressWarnings("serial")
 		Closure beans = new Closure(this) {
 			@Override
 			public Object call(Object... args) {

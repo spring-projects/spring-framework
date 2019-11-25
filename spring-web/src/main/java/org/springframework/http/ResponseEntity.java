@@ -220,7 +220,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	/**
 	 * A shortcut for creating a {@code ResponseEntity} with the given body
 	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
-	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of an
 	 * {@linkplain Optional#empty()} parameter.
 	 * @return the created {@code ResponseEntity}
 	 * @since 5.1

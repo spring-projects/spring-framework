@@ -58,7 +58,6 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/**
 	 * Create a {@code SimpleUrlHandlerMapping} with default settings.
-	 * @since 5.2
 	 */
 	public SimpleUrlHandlerMapping() {
 	}

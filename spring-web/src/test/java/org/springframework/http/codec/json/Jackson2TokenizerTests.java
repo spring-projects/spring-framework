@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.TreeNode;
@@ -34,8 +33,9 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.DecodingException;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -45,7 +45,7 @@ import static java.util.Collections.singletonList;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
+public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 	private JsonFactory jsonFactory;
 
@@ -181,11 +181,68 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
 	}
 
+	private void testTokenize(List<String> input, List<String> output, boolean tokenize) {
+		StepVerifier.FirstStep<String> builder = StepVerifier.create(decode(input, tokenize, -1));
+		output.forEach(expected -> builder.assertNext(actual -> {
+			try {
+				JSONAssert.assertEquals(expected, actual, true);
+			}
+			catch (JSONException ex) {
+				throw new RuntimeException(ex);
+			}
+		}));
+		builder.verifyComplete();
+	}
+
+	@Test
+	public void testLimit() {
+
+		List<String> source = asList("[",
+				"{", "\"id\":1,\"name\":\"Dan\"", "},",
+				"{", "\"id\":2,\"name\":\"Ron\"", "},",
+				"{", "\"id\":3,\"name\":\"Bartholomew\"", "}",
+				"]");
+
+		String expected = String.join("", source);
+		int maxInMemorySize = expected.length();
+
+		StepVerifier.create(decode(source, false, maxInMemorySize))
+				.expectNext(expected)
+				.verifyComplete();
+
+		StepVerifier.create(decode(source, false, maxInMemorySize - 2))
+				.verifyError(DataBufferLimitException.class);
+	}
+
+	@Test
+	public void testLimitTokenized() {
+
+		List<String> source = asList("[",
+				"{", "\"id\":1, \"name\":\"Dan\"", "},",
+				"{", "\"id\":2, \"name\":\"Ron\"", "},",
+				"{", "\"id\":3, \"name\":\"Bartholomew\"", "}",
+				"]");
+
+		String expected = "{\"id\":3,\"name\":\"Bartholomew\"}";
+		int maxInMemorySize = expected.length();
+
+		StepVerifier.create(decode(source, true, maxInMemorySize))
+				.expectNext("{\"id\":1,\"name\":\"Dan\"}")
+				.expectNext("{\"id\":2,\"name\":\"Ron\"}")
+				.expectNext(expected)
+				.verifyComplete();
+
+		StepVerifier.create(decode(source, true, maxInMemorySize - 1))
+				.expectNext("{\"id\":1,\"name\":\"Dan\"}")
+				.expectNext("{\"id\":2,\"name\":\"Ron\"}")
+				.verifyError(DataBufferLimitException.class);
+	}
+
 	@Test
 	public void errorInStream() {
 		DataBuffer buffer = stringBuffer("{\"id\":1,\"name\":");
 		Flux<DataBuffer> source = Flux.just(buffer).concatWith(Flux.error(new RuntimeException()));
-		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, true);
+		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, true, -1);
 
 		StepVerifier.create(result)
 				.expectError(RuntimeException.class)
@@ -195,7 +252,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 	@Test  // SPR-16521
 	public void jsonEOFExceptionIsWrappedAsDecodingError() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, -1);
 
 		StepVerifier.create(tokens)
 				.expectError(DecodingException.class)
@@ -203,12 +260,13 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 	}
 
 
-	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
+	private Flux<String> decode(List<String> source, boolean tokenize, int maxInMemorySize) {
+
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
 				Flux.fromIterable(source).map(this::stringBuffer),
-				this.jsonFactory, this.objectMapper, tokenizeArrayElements);
+				this.jsonFactory, this.objectMapper, tokenize, maxInMemorySize);
 
-		Flux<String> result = tokens
+		return tokens
 				.map(tokenBuffer -> {
 					try {
 						TreeNode root = this.objectMapper.readTree(tokenBuffer.asParser());
@@ -218,10 +276,6 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 						throw new UncheckedIOException(ex);
 					}
 				});
-
-		StepVerifier.FirstStep<String> builder = StepVerifier.create(result);
-		expected.forEach(s -> builder.assertNext(new JSONAssertConsumer(s)));
-		builder.verifyComplete();
 	}
 
 	private DataBuffer stringBuffer(String value) {
@@ -229,26 +283,6 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
-	}
-
-
-	private static class JSONAssertConsumer implements Consumer<String> {
-
-		private final String expected;
-
-		JSONAssertConsumer(String expected) {
-			this.expected = expected;
-		}
-
-		@Override
-		public void accept(String s) {
-			try {
-				JSONAssert.assertEquals(this.expected, s, true);
-			}
-			catch (JSONException ex) {
-				throw new RuntimeException(ex);
-			}
-		}
 	}
 
 }

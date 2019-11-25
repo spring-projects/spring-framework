@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,21 @@ public interface CodecConfigurer {
 		 * @see org.springframework.http.codec.xml.Jaxb2XmlEncoder
 		 */
 		void jaxb2Encoder(Encoder<?> encoder);
+
+		/**
+		 * Configure a limit on the number of bytes that can be buffered whenever
+		 * the input stream needs to be aggregated. This can be a result of
+		 * decoding to a single {@code DataBuffer},
+		 * {@link java.nio.ByteBuffer ByteBuffer}, {@code byte[]},
+		 * {@link org.springframework.core.io.Resource Resource}, {@code String}, etc.
+		 * It can also occur when splitting the input stream, e.g. delimited text,
+		 * in which case the limit applies to data buffered between delimiters.
+		 * <p>By default this is not set, in which case individual codec defaults
+		 * apply. All codecs are limited to 256K by default.
+		 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+		 * @since 5.1.11
+		 */
+		void maxInMemorySize(int byteCount);
 
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.

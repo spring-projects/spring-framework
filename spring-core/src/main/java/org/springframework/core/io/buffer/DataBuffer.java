@@ -358,7 +358,6 @@ public interface DataBuffer {
 	/**
 	 * Return this buffer's data a String using the specified charset. Default implementation
 	 * delegates to {@code toString(readPosition(), readableByteCount(), charset)}.
-	 *
 	 * @param charset the character set to use
 	 * @return a string representation of all this buffers data
 	 * @since 5.2
@@ -370,7 +369,6 @@ public interface DataBuffer {
 
 	/**
 	 * Return a part of this buffer's data as a String using the specified charset.
-	 *
 	 * @param index the index at which to start the string
 	 * @param length the number of bytes to use for the string
 	 * @param charset the charset to use

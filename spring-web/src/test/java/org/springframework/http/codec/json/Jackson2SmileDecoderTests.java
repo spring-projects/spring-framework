@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTestCase;
+import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -40,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  *
  * @author Sebastien Deleuze
  */
-public class Jackson2SmileDecoderTests extends AbstractDecoderTestCase<Jackson2SmileDecoder> {
+public class Jackson2SmileDecoderTests extends AbstractDecoderTests<Jackson2SmileDecoder> {
 
 	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
 	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");

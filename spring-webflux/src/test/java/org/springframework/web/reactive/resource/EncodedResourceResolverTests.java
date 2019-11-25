@@ -16,31 +16,23 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.web.reactive.resource.GzipSupport.GzippedFiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
+@ExtendWith(GzipSupport.class)
 public class EncodedResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
@@ -57,26 +50,6 @@ public class EncodedResourceResolverTests {
 	private ResourceResolverChain resolver;
 
 	private List<Resource> locations;
-
-
-	@BeforeAll
-	public static void createGzippedResources() throws IOException {
-		createGzippedFile("/js/foo.js");
-		createGzippedFile("foo.css");
-	}
-
-	static void createGzippedFile(String filePath) throws IOException {
-		Resource location = new ClassPathResource("test/", EncodedResourceResolverTests.class);
-		Resource resource = new FileSystemResource(location.createRelative(filePath).getFile());
-
-		Path gzFilePath = Paths.get(resource.getFile().getAbsolutePath() + ".gz");
-		Files.deleteIfExists(gzFilePath);
-
-		File gzFile = Files.createFile(gzFilePath).toFile();
-		GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzFile));
-		FileCopyUtils.copy(resource.getInputStream(), out);
-		gzFile.deleteOnExit();
-	}
 
 
 	@BeforeEach
@@ -100,12 +73,13 @@ public class EncodedResourceResolverTests {
 
 
 	@Test
-	public void resolveGzipped() {
+	public void resolveGzipped(GzippedFiles gzippedFiles) {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("").header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
+		gzippedFiles.create(file);
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertThat(actual.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());
@@ -119,11 +93,11 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveGzippedWithVersion() {
+	public void resolveGzippedWithVersion(GzippedFiles gzippedFiles) {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("").header("Accept-Encoding", "gzip"));
-
+		gzippedFiles.create("foo.css");
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
@@ -134,7 +108,7 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveFromCacheWithEncodingVariants() {
+	public void resolveFromCacheWithEncodingVariants(GzippedFiles gzippedFiles) {
 
 		// 1. Resolve, and cache .gz variant
 
@@ -142,6 +116,7 @@ public class EncodedResourceResolverTests {
 				MockServerHttpRequest.get("").header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
+		gzippedFiles.create(file);
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertThat(resolved.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());

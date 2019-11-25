@@ -90,8 +90,10 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@AfterEach
 	void stopServer() {
-		this.server.stop();
-		this.port = 0;
+		if (this.server != null) {
+			this.server.stop();
+			this.port = 0;
+		}
 	}
 
 

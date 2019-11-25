@@ -37,6 +37,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
@@ -59,11 +60,36 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
+	private int maxInMemorySize = 256 * 1024;
+
+
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
+	}
+
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder. This
+	 * is either the size of the entire input when decoding as a whole, or the
+	 * size of one top-level JSON object within a JSON stream. When the limit
+	 * is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -81,7 +107,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		ObjectMapper mapper = getObjectMapper();
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), mapper.getFactory(), mapper, true);
+				Flux.from(input), mapper.getFactory(), mapper, true, getMaxInMemorySize());
 
 		ObjectReader reader = getObjectReader(elementType, hints);
 
@@ -103,8 +129,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input)
-				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+		return DataBufferUtils.join(input, this.maxInMemorySize)
+				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
 	}
 
 	@Override

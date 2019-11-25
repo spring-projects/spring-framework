@@ -80,7 +80,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Specify the database product name for the DataSource that this accessor uses.
-	 * This allows to initialize a SQLErrorCodeSQLExceptionTranslator without
+	 * This allows to initialize an SQLErrorCodeSQLExceptionTranslator without
 	 * obtaining a Connection from the DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodeSQLExceptionTranslator#setDatabaseProductName
@@ -132,7 +132,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Set whether to lazily initialize the SQLExceptionTranslator for this accessor,
-	 * on first encounter of a SQLException. Default is "true"; can be switched to
+	 * on first encounter of an SQLException. Default is "true"; can be switched to
 	 * "false" for initialization on startup.
 	 * <p>Early initialization just applies if {@code afterPropertiesSet()} is called.
 	 * @see #getExceptionTranslator()

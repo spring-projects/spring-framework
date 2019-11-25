@@ -1,3 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+	id "com.github.johnrengelman.shadow" version "5.2.0"
+}
+
 description = "Spring Core"
 
 apply plugin: "kotlin"
@@ -6,65 +12,33 @@ apply plugin: "kotlin"
 // cglib itself depends on asm and is therefore further transformed by the JarJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.3.0"
-def objenesisVersion = "3.0.1"
+def objenesisVersion = "3.1"
 
 configurations {
-	jarjar
 	cglib
 	objenesis
-	coroutines {
-		transitive = false
-	}
+	coroutines
 }
 
-task cglibRepackJar(type: Jar) { repackJar ->
-	repackJar.baseName = "spring-cglib-repack"
-	repackJar.version = cglibVersion
-
-	doLast() {
-		project.ant {
-			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
-					classpath: configurations.jarjar.asPath
-			jarjar(destfile: repackJar.archivePath) {
-				configurations.cglib.each { originalJar ->
-					zipfileset(src: originalJar)
-				}
-				// Repackage net.sf.cglib => org.springframework.cglib
-				rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-				// As mentioned above, transform cglib's internal asm dependencies from
-				// org.objectweb.asm => org.springframework.asm. Doing this counts on the
-				// the fact that Spring and cglib depend on the same version of asm!
-				rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
-			}
-		}
-	}
+task cglibRepackJar(type: ShadowJar) {
+	baseName = 'spring-cglib-repack'
+	version = cglibVersion
+	configurations = [project.configurations.cglib]
+	relocate 'net.sf.cglib', 'org.springframework.cglib'
+	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
-task objenesisRepackJar(type: Jar) { repackJar ->
-	repackJar.baseName = "spring-objenesis-repack"
-	repackJar.version = objenesisVersion
-
-	doLast() {
-		project.ant {
-			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
-					classpath: configurations.jarjar.asPath
-			jarjar(destfile: repackJar.archivePath) {
-				configurations.objenesis.each { originalJar ->
-					zipfileset(src: originalJar)
-				}
-				// Repackage org.objenesis => org.springframework.objenesis
-				rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
-			}
-		}
-	}
+task objenesisRepackJar(type: ShadowJar) {
+	baseName = 'spring-objenesis-repack'
+	version = objenesisVersion
+	configurations = [project.configurations.objenesis]
+	relocate 'org.objenesis', 'org.springframework.objenesis'
 }
 
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	jarjar("org.pantsbuild:jarjar:1.7.2")
-	coroutines(project(":kotlin-coroutines"))
-
+	coroutines(project(path: ":kotlin-coroutines", configuration: 'classesOnlyElements'))
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
 	compile(project(":spring-jcl"))
@@ -107,5 +81,5 @@ jar {
 		include "org/springframework/objenesis/**"
 	}
 
-	from { configurations.coroutines.collect { it.isDirectory() ? it : zipTree(it) } }
+	from configurations.coroutines
 }

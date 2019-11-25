@@ -103,7 +103,6 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().stringValues(VARY, "foo", "bar"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void multiStringHeaderValueWithMatchers() throws Exception {
 		this.mockMvc.perform(get("/persons/1"))

@@ -725,7 +725,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
-	 * @since 5.2.0
+	 * @since 5.2
 	 * @see #queryParam(String, Object...)
 	 */
 	@Override
@@ -773,7 +773,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
 	 * @see #replaceQueryParam(String, Object...)
-	 * @since 5.2.0
+	 * @since 5.2
 	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {

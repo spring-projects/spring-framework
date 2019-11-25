@@ -20,3 +20,9 @@ dependencies {
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.hibernate:hibernate-core")
 }
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}

@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncoder> {
+class ResourceEncoderTests extends AbstractEncoderTests<ResourceEncoder> {
 
 	private final byte[] bytes = "foo".getBytes(UTF_8);
 

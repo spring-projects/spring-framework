@@ -54,14 +54,14 @@ public class FlashAttributeResultMatchers {
 	/**
 	 * Assert a flash attribute's value.
 	 */
-	public <T> ResultMatcher attribute(String name, Object value) {
+	public ResultMatcher attribute(String name, Object value) {
 		return result -> assertEquals("Flash attribute '" + name + "'", value, result.getFlashMap().get(name));
 	}
 
 	/**
 	 * Assert the existence of the given flash attributes.
 	 */
-	public <T> ResultMatcher attributeExists(String... names) {
+	public ResultMatcher attributeExists(String... names) {
 		return result -> {
 			for (String name : names) {
 				assertNotNull("Flash attribute '" + name + "' does not exist", result.getFlashMap().get(name));
@@ -72,8 +72,8 @@ public class FlashAttributeResultMatchers {
 	/**
 	 * Assert the number of flash attributes.
 	 */
-	public <T> ResultMatcher attributeCount(int count) {
-		return result -> assertEquals("FlashMap size must be " + count, count, result.getFlashMap().size());
+	public ResultMatcher attributeCount(int count) {
+		return result -> assertEquals("FlashMap size", count, result.getFlashMap().size());
 	}
 
 }

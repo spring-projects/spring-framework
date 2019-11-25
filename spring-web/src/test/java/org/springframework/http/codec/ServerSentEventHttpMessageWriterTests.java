@@ -49,7 +49,7 @@ import static org.springframework.core.ResolvableType.forClass;
  * @author Sam Brannen
  */
 @SuppressWarnings("rawtypes")
-public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTests {
+class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTests {
 
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
@@ -58,7 +58,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 
 	@ParameterizedDataBufferAllocatingTest
-	public void canWrite(String displayName, DataBufferFactory bufferFactory) {
+	void canWrite(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), null)).isTrue();
@@ -73,7 +73,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	public void writeServerSentEvent(String displayName, DataBufferFactory bufferFactory) {
+	void writeServerSentEvent(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
@@ -91,7 +91,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	public void writeString(String displayName, DataBufferFactory bufferFactory) {
+	void writeString(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -106,7 +106,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	public void writeMultiLineString(String displayName, DataBufferFactory bufferFactory) {
+	void writeMultiLineString(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -121,7 +121,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-16516
-	public void writeStringWithCustomCharset(String displayName, DataBufferFactory bufferFactory) {
+	void writeStringWithCustomCharset(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -142,7 +142,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	public void writePojo(String displayName, DataBufferFactory bufferFactory) {
+	void writePojo(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -157,7 +157,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest  // SPR-14899
-	public void writePojoWithPrettyPrint(String displayName, DataBufferFactory bufferFactory) {
+	void writePojoWithPrettyPrint(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
@@ -179,7 +179,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-16516, SPR-16539
-	public void writePojoWithCustomEncoding(String displayName, DataBufferFactory bufferFactory) {
+	void writePojoWithCustomEncoding(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);

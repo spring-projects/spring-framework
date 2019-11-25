@@ -164,8 +164,9 @@ public abstract class DataBufferUtils {
 	 * @return a Flux of data buffers read from the given channel
 	 * @since 5.2
 	 */
-	public static Flux<DataBuffer> read(Path path, DataBufferFactory bufferFactory, int bufferSize,
-			OpenOption... options) {
+	public static Flux<DataBuffer> read(
+			Path path, DataBufferFactory bufferFactory, int bufferSize, OpenOption... options) {
+
 		Assert.notNull(path, "Path must not be null");
 		Assert.notNull(bufferFactory, "BufferFactory must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be > 0");
@@ -524,22 +525,41 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
-		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
+		return join(dataBuffers, -1);
+	}
 
-		if (dataBuffers instanceof Mono) {
-			return (Mono<DataBuffer>) dataBuffers;
+	/**
+	 * Variant of {@link #join(Publisher)} that behaves the same way up until
+	 * the specified max number of bytes to buffer. Once the limit is exceeded,
+	 * {@link DataBufferLimitException} is raised.
+	 * @param buffers the data buffers that are to be composed
+	 * @param maxByteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @return a buffer with the aggregated content, possibly an empty Mono if
+	 * the max number of bytes to buffer is exceeded.
+	 * @throws DataBufferLimitException if maxByteCount is exceeded
+	 * @since 5.1.11
+	 */
+	@SuppressWarnings("unchecked")
+	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
+		Assert.notNull(buffers, "'dataBuffers' must not be null");
+
+		if (buffers instanceof Mono) {
+			return (Mono<DataBuffer>) buffers;
 		}
 
-		return Flux.from(dataBuffers)
-				.collectList()
+		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
+
+		return Flux.from(buffers)
+				.collect(() -> new LimitedDataBufferList(maxByteCount), LimitedDataBufferList::add)
 				.filter(list -> !list.isEmpty())
 				.map(list -> list.get(0).factory().join(list))
+				.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
-	 * Return a {@link Matcher} for the given delimiter. The matcher can be used to find the
-	 * delimiters in data buffers.
+	 * Return a {@link Matcher} for the given delimiter.
+	 * The matcher can be used to find the delimiters in data buffers.
 	 * @param delimiter the delimiter bytes to find
 	 * @return the matcher
 	 * @since 5.2
@@ -549,8 +569,8 @@ public abstract class DataBufferUtils {
 		return new KnuthMorrisPrattMatcher(delimiter);
 	}
 
-	/** Return a {@link Matcher} for the given delimiters.  The matcher can be used to find the
-	 * delimiters in data buffers.
+	/** Return a {@link Matcher} for the given delimiters.
+	 * The matcher can be used to find the delimiters in data buffers.
 	 * @param delimiters the delimiters bytes to find
 	 * @return the matcher
 	 * @since 5.2
@@ -595,7 +615,6 @@ public abstract class DataBufferUtils {
 		 * Resets the state of this matcher.
 		 */
 		void reset();
-
 	}
 
 
@@ -730,7 +749,6 @@ public abstract class DataBufferUtils {
 		private boolean isNotDisposed() {
 			return !this.disposed.get();
 		}
-
 	}
 
 
@@ -866,12 +884,11 @@ public abstract class DataBufferUtils {
 			this.sink.next(dataBuffer);
 			this.dataBuffer.set(null);
 		}
-
 	}
+
 
 	/**
 	 * Implementation of {@link Matcher} that uses the Knuth-Morris-Pratt algorithm.
-	 *
 	 * @see <a href="https://www.nayuki.io/page/knuth-morris-pratt-string-matching">Knuth-Morris-Pratt string matching</a>
 	 */
 	private static class KnuthMorrisPrattMatcher implements Matcher {
@@ -881,7 +898,6 @@ public abstract class DataBufferUtils {
 		private final int[] table;
 
 		private int matches = 0;
-
 
 		public KnuthMorrisPrattMatcher(byte[] delimiter) {
 			this.delimiter = Arrays.copyOf(delimiter, delimiter.length);
@@ -935,6 +951,7 @@ public abstract class DataBufferUtils {
 		}
 	}
 
+
 	/**
 	 * Implementation of {@link Matcher} that wraps several other matchers.
 	 */
@@ -945,7 +962,6 @@ public abstract class DataBufferUtils {
 		private final Matcher[] matchers;
 
 		byte[] longestDelimiter = NO_DELIMITER;
-
 
 		public CompositeMatcher(Matcher[] matchers) {
 			this.matchers = matchers;

@@ -51,8 +51,10 @@ public class Jackson2CborDecoder extends AbstractJackson2Decoder {
 		Assert.isAssignable(CBORFactory.class, mapper.getFactory().getClass());
 	}
 
+
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		throw new UnsupportedOperationException("Does not support stream decoding yet");
 	}
+
 }

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-class CharSequenceEncoderTests extends AbstractEncoderTestCase<CharSequenceEncoder> {
+class CharSequenceEncoderTests extends AbstractEncoderTests<CharSequenceEncoder> {
 
 	private final String foo = "foo";
 

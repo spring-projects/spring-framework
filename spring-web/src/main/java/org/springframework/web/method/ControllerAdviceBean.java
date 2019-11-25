@@ -19,6 +19,7 @@ package org.springframework.web.method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -124,19 +125,42 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Get the order value for the contained bean.
 	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
-	 * the following algorithm and cached.
+	 * the following algorithm and cached. Note, however, that a
+	 * {@link ControllerAdvice @ControllerAdvice} bean that is configured as a
+	 * scoped bean &mdash; for example, as a request-scoped or session-scoped
+	 * bean &mdash; will not be eagerly resolved. Consequently, {@link Ordered} is
+	 * not honored for scoped {@code @ControllerAdvice} beans.
 	 * <ul>
 	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
 	 * use the value returned by {@link Ordered#getOrder()}.</li>
-	 * <li>Otherwise use the value returned by {@link OrderUtils#getOrder(Class, int)}
-	 * with {@link Ordered#LOWEST_PRECEDENCE} used as the default order value.</li>
+	 * <li>If the {@linkplain #getBeanType() bean type} is known, use the value returned
+	 * by {@link OrderUtils#getOrder(Class, int)} with {@link Ordered#LOWEST_PRECEDENCE}
+	 * used as the default order value.</li>
+	 * <li>Otherwise use {@link Ordered#LOWEST_PRECEDENCE} as the default, fallback
+	 * order value.</li>
 	 * </ul>
 	 * @see #resolveBean()
 	 */
 	@Override
 	public int getOrder() {
 		if (this.order == null) {
-			Object resolvedBean = resolveBean();
+			Object resolvedBean = null;
+			if (this.beanOrName instanceof String) {
+				String beanName = (String) this.beanOrName;
+				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
+				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);
+				// Avoid eager @ControllerAdvice bean resolution for scoped proxies,
+				// since attempting to do so during context initialization would result
+				// in an exception due to the current absence of the scope. For example,
+				// an HTTP request or session scope is not active during initialization.
+				if (!isScopedProxy && !ScopedProxyUtils.isScopedTarget(beanName)) {
+					resolvedBean = resolveBean();
+				}
+			}
+			else {
+				resolvedBean = resolveBean();
+			}
+
 			if (resolvedBean instanceof Ordered) {
 				this.order = ((Ordered) resolvedBean).getOrder();
 			}
@@ -228,11 +252,13 @@ public class ControllerAdviceBean implements Ordered {
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
 		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class)) {
-			ControllerAdvice controllerAdvice = context.findAnnotationOnBean(name, ControllerAdvice.class);
-			if (controllerAdvice != null) {
-				// Use the @ControllerAdvice annotation found by findAnnotationOnBean()
-				// in order to avoid a subsequent lookup of the same annotation.
-				adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
+			if (!ScopedProxyUtils.isScopedTarget(name)) {
+				ControllerAdvice controllerAdvice = context.findAnnotationOnBean(name, ControllerAdvice.class);
+				if (controllerAdvice != null) {
+					// Use the @ControllerAdvice annotation found by findAnnotationOnBean()
+					// in order to avoid a subsequent lookup of the same annotation.
+					adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
+				}
 			}
 		}
 		OrderComparator.sort(adviceBeans);

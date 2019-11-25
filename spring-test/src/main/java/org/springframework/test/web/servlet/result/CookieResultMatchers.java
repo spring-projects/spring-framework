@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertNull;
 
 /**
  * Factory for response cookie assertions.
@@ -83,7 +83,7 @@ public class CookieResultMatchers {
 	public ResultMatcher doesNotExist(String name) {
 		return result -> {
 			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("Unexpected cookie with name '" + name + "'", cookie == null);
+			assertNull("Unexpected cookie with name '" + name + "'", cookie);
 		};
 	}
 
@@ -98,7 +98,7 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert a cookie's maxAge value.
+	 * Assert a cookie's maxAge.
 	 */
 	public ResultMatcher maxAge(String name, int maxAge) {
 		return result -> {
@@ -108,7 +108,7 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert a cookie path with a Hamcrest {@link Matcher}.
+	 * Assert a cookie's path with a Hamcrest {@link Matcher}.
 	 */
 	public ResultMatcher path(String name, Matcher<? super String> matcher) {
 		return result -> {
@@ -117,6 +117,9 @@ public class CookieResultMatchers {
 		};
 	}
 
+	/**
+	 * Assert a cookie's path.
+	 */
 	public ResultMatcher path(String name, String path) {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
@@ -135,7 +138,7 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert a cookie's domain value.
+	 * Assert a cookie's domain.
 	 */
 	public ResultMatcher domain(String name, String domain) {
 		return result -> {
@@ -155,7 +158,7 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert a cookie's comment value.
+	 * Assert a cookie's comment.
 	 */
 	public ResultMatcher comment(String name, String comment) {
 		return result -> {
@@ -175,7 +178,7 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert a cookie's version value.
+	 * Assert a cookie's version.
 	 */
 	public ResultMatcher version(String name, int version) {
 		return result -> {

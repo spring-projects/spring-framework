@@ -21,7 +21,6 @@ import io.rsocket.RSocketFactory
 import io.rsocket.frame.decoder.PayloadDecoder
 import io.rsocket.transport.netty.server.CloseableChannel
 import io.rsocket.transport.netty.server.TcpServerTransport
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -40,6 +39,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
+import reactor.core.publisher.ReplayProcessor
 import reactor.test.StepVerifier
 import java.time.Duration
 
@@ -49,8 +49,35 @@ import java.time.Duration
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-@ExperimentalCoroutinesApi
 class RSocketClientToServerCoroutinesIntegrationTests {
+
+	@Test
+	fun fireAndForget() {
+		Flux.range(1, 3)
+				.concatMap { requester.route("receive").data("Hello $it").send() }
+				.blockLast()
+		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads)
+				.expectNext("Hello 1")
+				.expectNext("Hello 2")
+				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5))
+	}
+
+	@Test
+	fun fireAndForgetAsync() {
+		Flux.range(1, 3)
+				.concatMap { i: Int -> requester.route("receive-async").data("Hello $i").send() }
+				.blockLast()
+		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads)
+				.expectNext("Hello 1")
+				.expectNext("Hello 2")
+				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5))
+	}
 
 	@Test
 	fun echoAsync() {
@@ -73,6 +100,16 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	}
 
 	@Test
+	fun echoStreamAsync() {
+		val result = requester.route("echo-stream-async").data("Hello").retrieveFlux(String::class.java)
+
+		StepVerifier.create(result)
+				.expectNext("Hello 0").expectNextCount(6).expectNext("Hello 7")
+				.thenCancel()
+				.verify(Duration.ofSeconds(5))
+	}
+
+	@Test
 	fun echoChannel() {
 		val result = requester.route("echo-channel")
 				.data(Flux.range(1, 10).map { i -> "Hello " + i!! }, String::class.java)
@@ -86,13 +123,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 	@Test
 	fun unitReturnValue() {
-		val result = requester.route("unit-return-value").data("Hello").retrieveFlux(String::class.java)
+		val result = requester.route("unit-return-value").data("Hello").retrieveMono(String::class.java)
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5))
 	}
 
 	@Test
 	fun unitReturnValueFromExceptionHandler() {
-		val result = requester.route("unit-return-value").data("bad").retrieveFlux(String::class.java)
+		val result = requester.route("unit-return-value").data("bad").retrieveMono(String::class.java)
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5))
 	}
 
@@ -105,9 +142,21 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 				.verify(Duration.ofSeconds(5))
 	}
 
-	@ExperimentalCoroutinesApi
 	@Controller
 	class ServerController {
+
+		val fireForgetPayloads = ReplayProcessor.create<String>()
+
+		@MessageMapping("receive")
+		fun receive(payload: String) {
+			fireForgetPayloads.onNext(payload)
+		}
+
+		@MessageMapping("receive-async")
+		suspend fun receiveAsync(payload: String) {
+			delay(10)
+			fireForgetPayloads.onNext(payload)
+		}
 
 		@MessageMapping("echo-async")
 		suspend fun echoAsync(payload: String): String {
@@ -117,6 +166,18 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		@MessageMapping("echo-stream")
 		fun echoStream(payload: String): Flow<String> {
+			var i = 0
+			return flow {
+				while(true) {
+					delay(10)
+					emit("$payload ${i++}")
+				}
+			}
+		}
+
+		@MessageMapping("echo-stream-async")
+		suspend fun echoStreamAsync(payload: String): Flow<String> {
+			delay(10)
 			var i = 0
 			return flow {
 				while(true) {
@@ -160,7 +221,6 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Configuration
 	open class ServerConfig {
 
-		@ExperimentalCoroutinesApi
 		@Bean
 		open fun controller(): ServerController {
 			return ServerController()
@@ -189,8 +249,6 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		private lateinit var server: CloseableChannel
 
-		private val interceptor = FireAndForgetCountingInterceptor()
-
 		private lateinit var requester: RSocketRequester
 
 
@@ -200,7 +258,6 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			context = AnnotationConfigApplicationContext(ServerConfig::class.java)
 
 			server = RSocketFactory.receive()
-					.addResponderPlugin(interceptor)
 					.frameDecoder(PayloadDecoder.ZERO_COPY)
 					.acceptor(context.getBean(RSocketMessageHandler::class.java).responder())
 					.transport(TcpServerTransport.create("localhost", 7000))

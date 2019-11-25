@@ -136,7 +136,7 @@ public interface UriBuilder {
 	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
-	 * @since 5.2.0
+	 * @since 5.2
 	 * @see #queryParam(String, Object...)
 	 */
 	UriBuilder queryParam(String name, @Nullable Collection<?> values);
@@ -161,7 +161,7 @@ public interface UriBuilder {
 	 * the same parameter. If no values are given, the query parameter is removed.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
-	 * @since 5.2.0
+	 * @since 5.2
 	 * @see #replaceQueryParam(String, Object...)
 	 */
 	UriBuilder replaceQueryParam(String name, @Nullable Collection<?> values);

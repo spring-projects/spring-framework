@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -235,6 +236,47 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void queryParameter() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		this.builder.queryParam("foo", "bar");
+		this.builder.queryParam("foo", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
+	}
+
+	@Test
+	public void queryParameterMap() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+		List<String> values = new ArrayList<>();
+		values.add("bar");
+		values.add("baz");
+		queryParams.put("foo", values);
+		this.builder.queryParams(queryParams);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
+	}
+
+	@Test
+	public void queryParameterList() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		this.builder.queryParam("foo[0]", "bar");
+		this.builder.queryParam("foo[1]", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getQueryString()).isEqualTo("foo%5B0%5D=bar&foo%5B1%5D=baz");
+		assertThat(request.getParameter("foo[0]")).isEqualTo("bar");
+		assertThat(request.getParameter("foo[1]")).isEqualTo("baz");
+	}
+
+	@Test
 	public void requestParameterFromQueryWithEncoding() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo={value}", "bar=baz");
 
@@ -347,6 +389,7 @@ public class MockHttpServletRequestBuilderTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getInputStream());
 
 		assertThat(result).isEqualTo(body);
+		assertThat(request.getContentLength()).isEqualTo(body.length);
 	}
 
 	@Test

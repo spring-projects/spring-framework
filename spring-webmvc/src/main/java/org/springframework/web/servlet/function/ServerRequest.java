@@ -157,7 +157,8 @@ public interface ServerRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Get the first parameter with the given name, if present.
+	 * Get the first parameter with the given name, if present. Servlet
+	 * parameters are contained in the query string or posted form data.
 	 * @param name the parameter name
 	 * @return the parameter value
 	 * @see HttpServletRequest#getParameter(String)
@@ -177,7 +178,8 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Get all parameters for this request.
+	 * Get all parameters for this request. Servlet parameters are contained
+	 * in the query string or posted form data.
 	 * @see HttpServletRequest#getParameterMap()
 	 */
 	MultiValueMap<String, String> params();

@@ -5156,8 +5156,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	private void assertGetValueFail(Expression expression) {
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expression.getValue());
+		assertThatExceptionOfType(Exception.class).isThrownBy(expression::getValue);
 	}
 
 	private void assertIsCompiled(Expression expression) {

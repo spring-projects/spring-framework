@@ -125,9 +125,7 @@ public class TransactionSynchronizationManager {
 	 */
 	@Nullable
 	private Object doGetResource(Object actualKey) {
-		Map<Object, Object> map = this.transactionContext.getResources();
-		Object value = map.get(actualKey);
-		return value;
+		return this.transactionContext.getResources().get(actualKey);
 	}
 
 	/**

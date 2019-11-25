@@ -42,6 +42,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient")
+	testCompile("org.junit.platform:junit-platform-launcher")
 	testCompile("com.squareup.okhttp3:mockwebserver")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
@@ -54,4 +55,8 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core")
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 	testRuntime("com.sun.activation:javax.activation")
+}
+
+test {
+	maxParallelForks = 4
 }

@@ -586,7 +586,6 @@ Spring ApplicationContext, or that can be registered directly with it:
 	suspend fun getFormData(): MultiValueMap<String, String>
 ----
 
-
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
 (`application/x-www-form-urlencoded`) into a `MultiValueMap`. By default,
 `FormHttpMessageReader` is configured for use by the `ServerCodecConfigurer` bean
@@ -803,7 +802,7 @@ consistently for access to the cached form data versus reading from the raw requ
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
 encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
 another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`. At present the
+collects the parts into a `MultiValueMap`. At present
 https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
 actual parsing.
 
@@ -818,13 +817,41 @@ for repeated, map-like access to parts, or otherwise rely on the
 `SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
 
 
+[[webflux-codecs-limits]]
+==== Limits
+
+`Decoder` and `HttpMessageReader` implementations that buffer some or all of the input
+stream can be configured with a limit on the maximum number of bytes to buffer in memory.
+In some cases buffering occurs because input is aggregated and represented as a single
+object — for example, a controller method with `@RequestBody byte[]`,
+`x-www-form-urlencoded` data, and so on. Buffering can also occur with streaming, when
+splitting the input stream — for example, delimited text, a stream of JSON objects, and
+so on. For those streaming cases, the limit applies to the number of bytes associated
+with one object in the stream.
+
+To configure buffer sizes, you can check if a given `Decoder` or `HttpMessageReader`
+exposes a `maxInMemorySize` property and if so the Javadoc will have details about default
+values. In WebFlux, the `ServerCodecConfigurer` provides a
+<<webflux-config-message-codecs,single place>> from where to set all codecs, through the
+`maxInMemorySize` property for default codecs.
+
+For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
+the size of non-file parts. For file parts it determines the threshold at which the part
+is written to disk. For file parts written to disk, there is an additional
+`maxDiskUsagePerPart` property to limit the amount of disk space per part. There is also
+a `maxParts` property to limit the overall number of parts in a multipart request.
+To configure all 3 in WebFlux, you'll need to supply a pre-configured instance of
+`MultipartHttpMessageReader` to `ServerCodecConfigurer`.
+
+
+
 [[webflux-codecs-streaming]]
 ==== Streaming
 [.small]#<<web.adoc#mvc-ann-async-http-streaming, Same as in Spring MVC>>#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
 `application/stream+json`), it is important to send data periodically, in order to
-reliably detect a disconnected client sooner rather than later. Such a send could be an
+reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.
 
@@ -840,11 +867,9 @@ when consumed to avoid memory leaks.
 
 WebFlux applications generally do not need to be concerned with such issues, unless they
 consume or produce data buffers directly, as opposed to relying on codecs to convert to
-and from higher level objects. Or unless they choose to create custom codecs. For such
+and from higher level objects, or unless they choose to create custom codecs. For such
 cases please review the the information in <<core#databuffers, Data Buffers and Codecs>>,
 especially the section on <<core#databuffers-using, Using DataBuffer>>.
-
-
 
 
 
@@ -970,13 +995,13 @@ as the following example shows:
 .Java
 ----
 	ApplicationContext context = ...
-	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
+	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val context: ApplicationContext = ...
-	val handler = WebHttpHandlerBuilder.applicationContext(context)
+	val handler = WebHttpHandlerBuilder.applicationContext(context).build()
 ----
 
 The resulting `HttpHandler` is ready for use with a <<webflux-httphandler, server adapter>>.
@@ -1688,6 +1713,7 @@ under different URLs. The following example shows how to do so:
 <2> Prepare the request mapping metadata.
 <3> Get the handler method.
 <4> Add the registration.
+
 
 
 [[webflux-ann-methods]]
@@ -3450,6 +3476,7 @@ use case-oriented approach that focuses on the common scenarios, as the followin
 ----
 
 
+
 [[webflux-caching-etag-lastmodified]]
 === Controllers
 [.small]#<<web.adoc#mvc-caching-etag-lastmodified, Same as in Spring MVC>>#
@@ -3598,7 +3625,7 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 ----
 
 The preceding example registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
+<<webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
 
 
@@ -3834,10 +3861,10 @@ which customizes Jackson's default properties with the following ones:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-jdk7[`jackson-datatype-jdk7`]: Support for Java 7 types like `java.nio.file.Path`.
 * https://github.com/FasterXML/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
 * https://github.com/FasterXML/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * https://github.com/FasterXML/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
+* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 
 

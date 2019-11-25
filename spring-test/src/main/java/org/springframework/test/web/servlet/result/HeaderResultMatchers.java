@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
@@ -64,7 +65,7 @@ public class HeaderResultMatchers {
 	 * Iterable {@link Matcher}.
 	 * @since 4.3
 	 */
-	public <T> ResultMatcher stringValues(String name, Matcher<Iterable<String>> matcher) {
+	public ResultMatcher stringValues(String name, Matcher<Iterable<String>> matcher) {
 		return result -> {
 			List<String> values = result.getResponse().getHeaders(name);
 			assertThat("Response header '" + name + "'", values, matcher);
@@ -103,8 +104,8 @@ public class HeaderResultMatchers {
 	 * @since 4.0
 	 */
 	public ResultMatcher doesNotExist(String name) {
-		return result -> assertTrue("Response should not contain header '" + name + "'",
-				!result.getResponse().containsHeader(name));
+		return result -> assertFalse("Response should not contain header '" + name + "'",
+				result.getResponse().containsHeader(name));
 	}
 
 	/**

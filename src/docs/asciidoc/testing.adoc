@@ -258,7 +258,7 @@ load the mapping files, and incurring that cost before running every test in eve
 fixture leads to slower overall test runs that reduce developer productivity.
 
 Test classes typically declare either an array of resource locations for XML or Groovy
-configuration metadata -- often in the classpath -- or an array of annotated classes that
+configuration metadata -- often in the classpath -- or an array of component classes that
 is used to configure the application. These locations or classes are the same as or
 similar to those specified in `web.xml` or other configuration files for production
 deployments.
@@ -436,12 +436,13 @@ specify a custom `TestContextBootstrapper`. See the section on
 `@ContextConfiguration` defines class-level metadata that is used to determine how to
 load and configure an `ApplicationContext` for integration tests. Specifically,
 `@ContextConfiguration` declares the application context resource `locations` or the
-annotated `classes` used to load the context.
+component `classes` used to load the context.
 
 Resource locations are typically XML configuration files or Groovy scripts located in the
-classpath, while annotated classes are typically `@Configuration` classes. However,
-resource locations can also refer to files and scripts in the file system, and annotated
-classes can be component classes, and so on.
+classpath, while component classes are typically `@Configuration` classes. However,
+resource locations can also refer to files and scripts in the file system, and component
+classes can be `@Component` classes, `@Service` classes, and so on. See
+<<testcontext-ctx-management-javaconfig-component-classes>> for further details.
 
 The following example shows a `@ContextConfiguration` annotation that refers to an XML
 file:
@@ -490,7 +491,7 @@ The following example shows a `@ContextConfiguration` annotation that refers to 
 <1> Referring to a class.
 
 
-As an alternative or in addition to declaring resource locations or annotated classes,
+As an alternative or in addition to declaring resource locations or component classes,
 you can use `@ContextConfiguration` to declare `ApplicationContextInitializer` classes.
 The following example shows such a case:
 
@@ -517,7 +518,7 @@ The following example shows such a case:
 You can optionally use `@ContextConfiguration` to declare the `ContextLoader` strategy as
 well. Note, however, that you typically do not need to explicitly configure the loader,
 since the default loader supports `initializers` and either resource `locations` or
-annotated `classes`.
+component `classes`.
 
 The following example uses both a location and a loader:
 
@@ -1154,9 +1155,9 @@ result is committed to the database):
 
 `@BeforeTransaction` indicates that the annotated `void` method should be run before a
 transaction is started, for test methods that have been configured to run within a
-transaction by using Spring's `@Transactional` annotation. As of Spring Framework 4.3,
-`@BeforeTransaction` methods are not required to be `public` and may be declared on Java
-8-based interface default methods.
+transaction by using Spring's `@Transactional` annotation. `@BeforeTransaction` methods
+are not required to be `public` and may be declared on Java 8-based interface default
+methods.
 
 The following example shows how to use the `@BeforeTransaction` annotation:
 
@@ -1186,9 +1187,9 @@ The following example shows how to use the `@BeforeTransaction` annotation:
 
 `@AfterTransaction` indicates that the annotated `void` method should be run after a
 transaction is ended, for test methods that have been configured to run within a
-transaction by using Spring's `@Transactional` annotation. As of Spring Framework 4.3,
-`@AfterTransaction` methods are not required to be `public` and may be declared on Java
-8-based interface default methods.
+transaction by using Spring's `@Transactional` annotation. `@AfterTransaction` methods
+are not required to be `public` and may be declared on Java 8-based interface default
+methods.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1633,7 +1634,7 @@ The following annotations are supported only when used in conjunction with the
 `@ExtendWith(SpringExtension.class)` from JUnit Jupiter with `@ContextConfiguration` from
 the Spring TestContext Framework. It can be used at the class level as a drop-in
 replacement for `@ContextConfiguration`. With regard to configuration options, the only
-difference between `@ContextConfiguration` and `@SpringJUnitConfig` is that annotated
+difference between `@ContextConfiguration` and `@SpringJUnitConfig` is that component
 classes may be declared with the `value` attribute in `@SpringJUnitConfig`.
 
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify a
@@ -1696,7 +1697,7 @@ and `@ContextConfiguration` for further details.
 `@WebAppConfiguration` from the Spring TestContext Framework. You can use it at the class
 level as a drop-in replacement for `@ContextConfiguration` and `@WebAppConfiguration`.
 With regard to configuration options, the only difference between `@ContextConfiguration`
-and `@SpringJUnitWebConfig` is that you can declare annotated classes by using the
+and `@SpringJUnitWebConfig` is that you can declare component classes by using the
 `value` attribute in `@SpringJUnitWebConfig`. In addition, you can override the `value`
 attribute from `@WebAppConfiguration` only by using the `resourcePath` attribute in
 `@SpringJUnitWebConfig`.
@@ -2215,15 +2216,15 @@ the `TestContextManager` with which the listener is registered. See <<testcontex
 
 `ContextLoader` is a strategy interface for loading an `ApplicationContext` for an
 integration test managed by the Spring TestContext Framework. You should implement
-`SmartContextLoader` instead of this interface to provide support for annotated classes,
+`SmartContextLoader` instead of this interface to provide support for component classes,
 active bean definition profiles, test property sources, context hierarchies, and
 `WebApplicationContext` support.
 
-`SmartContextLoader` is an extension of the `ContextLoader` interface introduced in
-Spring 3.1, superseding the original minimal `ContextLoader` SPI. Specifically, a
-`SmartContextLoader` can choose to process resource locations, annotated classes,
-or context initializers. Furthermore, a `SmartContextLoader` can set active bean
-definition profiles and test property sources in the context that it loads.
+`SmartContextLoader` is an extension of the `ContextLoader` interface that supersedes the
+original minimal `ContextLoader` SPI. Specifically, a `SmartContextLoader` can choose to
+process resource locations, component classes, or context initializers. Furthermore, a
+`SmartContextLoader` can set active bean definition profiles and test property sources in
+the context that it loads.
 
 Spring provides the following implementations:
 
@@ -2238,9 +2239,9 @@ Spring provides the following implementations:
   the test class or on the presence of default locations or default configuration
   classes. A web `ContextLoader` is used only if `@WebAppConfiguration` is present on the
   test class. Groovy support is enabled only if Groovy is on the classpath.
-* `AnnotationConfigContextLoader`: Loads a standard `ApplicationContext` from annotated
+* `AnnotationConfigContextLoader`: Loads a standard `ApplicationContext` from component
   classes.
-* `AnnotationConfigWebContextLoader`: Loads a `WebApplicationContext` from annotated
+* `AnnotationConfigWebContextLoader`: Loads a `WebApplicationContext` from component
   classes.
 * `GenericGroovyXmlContextLoader`: Loads a standard `ApplicationContext` from resource
   locations that are either Groovy scripts or XML configuration files.
@@ -2315,8 +2316,8 @@ for details and examples.
 
 Registering `TestExecutionListener` implementations by using `@TestExecutionListeners` is
 suitable for custom listeners that are used in limited testing scenarios. However, it can
-become cumbersome if a custom listener needs to be used across a test suite. Since Spring
-Framework 4.1, this issue is addressed through support for automatic discovery of default
+become cumbersome if a custom listener needs to be used across an entire test suite. This
+issue is addressed through support for automatic discovery of default
 `TestExecutionListener` implementations through the `SpringFactoriesLoader` mechanism.
 
 Specifically, the `spring-test` module declares all core default `TestExecutionListener`
@@ -2390,9 +2391,9 @@ which listeners are registered by default. Moreover, the set of default listener
 change from release to release -- for example, `SqlScriptsTestExecutionListener` was
 introduced in Spring Framework 4.1, and `DirtiesContextBeforeModesTestExecutionListener`
 was introduced in Spring Framework 4.2. Furthermore, third-party frameworks like Spring
-Security register their own default `TestExecutionListener` implementations by using
-the aforementioned <<testcontext-tel-config-automatic-discovery, automatic discovery
-mechanism>>.
+Boot and Spring Security register their own default `TestExecutionListener`
+implementations by using the aforementioned <<testcontext-tel-config-automatic-discovery,
+automatic discovery mechanism>>.
 
 To avoid having to be aware of and re-declare all default listeners, you can set the
 `mergeMode` attribute of `@TestExecutionListeners` to `MergeMode.MERGE_WITH_DEFAULTS`.
@@ -2589,14 +2590,14 @@ Test classes that use the TestContext framework do not need to extend any partic
 class or implement a specific interface to configure their application context. Instead,
 configuration is achieved by declaring the `@ContextConfiguration` annotation at the
 class level. If your test class does not explicitly declare application context resource
-locations or annotated classes, the configured `ContextLoader` determines how to load a
+locations or component classes, the configured `ContextLoader` determines how to load a
 context from a default location or default configuration classes. In addition to context
-resource locations and annotated classes, an application context can also be configured
+resource locations and component classes, an application context can also be configured
 through application context initializers.
 
 The following sections explain how to use Spring's `@ContextConfiguration` annotation to
 configure a test `ApplicationContext` by using XML configuration files, Groovy scripts,
-annotated classes (typically `@Configuration` classes), or context initializers.
+component classes (typically `@Configuration` classes), or context initializers.
 Alternatively, you can implement and configure your own custom `SmartContextLoader` for
 advanced use cases.
 
@@ -2828,12 +2829,12 @@ The following listing shows how to combine both in an integration test:
 =====
 
 [[testcontext-ctx-management-javaconfig]]
-===== Context Configuration with Annotated Classes
+===== Context Configuration with Component Classes
 
-To load an `ApplicationContext` for your tests by using annotated classes (see
+To load an `ApplicationContext` for your tests by using component classes (see
 <<core.adoc#beans-java, Java-based container configuration>>), you can annotate your test
 class with `@ContextConfiguration` and configure the `classes` attribute with an array
-that contains references to annotated classes. The following example shows how to do so:
+that contains references to component classes. The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -2845,7 +2846,7 @@ that contains references to annotated classes. The following example shows how t
 		// class body...
 	}
 ----
-<1> Specifying annotated classes.
+<1> Specifying component classes.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2857,23 +2858,27 @@ that contains references to annotated classes. The following example shows how t
 		// class body...
 	}
 ----
-<1> Specifying annotated classes.
+<1> Specifying component classes.
 
 
-.Annotated Classes
+[[testcontext-ctx-management-javaconfig-component-classes]]
+.Component Classes
 [TIP]
 ====
-The term "`annotated class`" can refer to any of the following:
+The term "`component class`" can refer to any of the following:
 
 * A class annotated with `@Configuration`.
 * A component (that is, a class annotated with `@Component`, `@Service`, `@Repository`, or other stereotype annotations).
 * A JSR-330 compliant class that is annotated with `javax.inject` annotations.
-* Any other class that contains `@Bean` methods.
+* Any class that contains `@Bean`-methods.
+* Any other class that is intended to be registered as a Spring component (i.e., a Spring
+  bean in the `ApplicationContext`), potentially taking advantage of automatic autowiring
+  of a single constructor without the use of Spring annotations.
 
 See the javadoc of
 {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`] and
 {api-spring-framework}/context/annotation/Bean.html[`@Bean`] for further information
-regarding the configuration and semantics of annotated classes, paying special attention
+regarding the configuration and semantics of component classes, paying special attention
 to the discussion of `@Bean` Lite Mode.
 ====
 
@@ -2952,10 +2957,10 @@ class:
 
 
 [[testcontext-ctx-management-mixed-config]]
-===== Mixing XML, Groovy Scripts, and Annotated Classes
+===== Mixing XML, Groovy Scripts, and Component Classes
 
 It may sometimes be desirable to mix XML configuration files, Groovy scripts, and
-annotated classes (typically `@Configuration` classes) to configure an
+component classes (typically `@Configuration` classes) to configure an
 `ApplicationContext` for your tests. For example, if you use XML configuration in
 production, you may decide that you want to use `@Configuration` classes to configure
 specific Spring-managed components for your tests, or vice versa.
@@ -3031,7 +3036,7 @@ order in which the initializers are invoked depends on whether they implement Sp
 
 
 You can also omit the declaration of XML configuration files, Groovy scripts, or
-annotated classes in `@ContextConfiguration` entirely and instead declare only
+component classes in `@ContextConfiguration` entirely and instead declare only
 `ApplicationContextInitializer` classes, which are then responsible for registering beans
 in the context -- for example, by programmatically loading bean definitions from XML
 files or configuration classes. The following example shows how to do so:
@@ -3067,18 +3072,18 @@ files or configuration classes. The following example shows how to do so:
 ===== Context Configuration Inheritance
 
 `@ContextConfiguration` supports boolean `inheritLocations` and `inheritInitializers`
-attributes that denote whether resource locations or annotated classes and context
+attributes that denote whether resource locations or component classes and context
 initializers declared by superclasses should be inherited. The default value for both
 flags is `true`. This means that a test class inherits the resource locations or
-annotated classes as well as the context initializers declared by any superclasses.
-Specifically, the resource locations or annotated classes for a test class are appended
+component classes as well as the context initializers declared by any superclasses.
+Specifically, the resource locations or component classes for a test class are appended
 to the list of resource locations or annotated classes declared by superclasses.
 Similarly, the initializers for a given test class are added to the set of initializers
 defined by test superclasses. Thus, subclasses have the option of extending the resource
-locations, annotated classes, or context initializers.
+locations, component classes, or context initializers.
 
 If the `inheritLocations` or `inheritInitializers` attribute in `@ContextConfiguration`
-is set to `false`, the resource locations or annotated classes and the context
+is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
@@ -3131,7 +3136,7 @@ another and use both its own configuration file and the superclass's configurati
 <2> Configuration file defined in the subclass.
 
 
-Similarly, in the next example, which uses annotated classes, the `ApplicationContext`
+Similarly, in the next example, which uses component classes, the `ApplicationContext`
 for `ExtendedTest` is loaded from the `BaseConfig` and `ExtendedConfig` classes, in that
 order. Beans defined in `ExtendedConfig` can, therefore, override (that is, replace)
 those defined in `BaseConfig`. The following example shows how one class can extend
@@ -3223,12 +3228,11 @@ extend another and use both its own initializer and the superclass's initializer
 [[testcontext-ctx-management-env-profiles]]
 ===== Context Configuration with Environment Profiles
 
-Spring 3.1 introduced first-class support in the framework for the notion of environments
-and profiles (AKA "`bean definition profiles`"), and integration tests can be configured
-to activate particular bean definition profiles for various testing scenarios. This is
-achieved by annotating a test class with the `@ActiveProfiles` annotation and supplying a
-list of profiles that should be activated when loading the `ApplicationContext` for the
-test.
+The Spring Framework has first-class support for the notion of environments and profiles
+(AKA "bean definition profiles"), and integration tests can be configured to activate
+particular bean definition profiles for various testing scenarios. This is achieved by
+annotating a test class with the `@ActiveProfiles` annotation and supplying a list of
+profiles that should be activated when loading the `ApplicationContext` for the test.
 
 NOTE: You can use `@ActiveProfiles` with any implementation of the `SmartContextLoader`
 SPI, but `@ActiveProfiles` is not supported with implementations of the older
@@ -3703,14 +3707,13 @@ The following example demonstrates how to implement and register a custom
 [[testcontext-ctx-management-property-sources]]
 ===== Context Configuration with Test Property Sources
 
-Spring 3.1 introduced first-class support in the framework for the notion of an
-environment with a hierarchy of property sources. Since Spring 4.1, you can configure
-integration tests with test-specific property sources. In contrast to the
-`@PropertySource` annotation used on `@Configuration` classes, you can declare the
-`@TestPropertySource` annotation on a test class to declare resource locations for test
-properties files or inlined properties. These test property sources are added to the set
-of `PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
-annotated integration test.
+The Spring Framework has first-class support for the notion of an environment with a
+hierarchy of property sources, and you can configure integration tests with test-specific
+property sources. In contrast to the `@PropertySource` annotation used on
+`@Configuration` classes, you can declare the `@TestPropertySource` annotation on a test
+class to declare resource locations for test properties files or inlined properties.
+These test property sources are added to the set of `PropertySources` in the
+`Environment` for the `ApplicationContext` loaded for the annotated integration test.
 
 [NOTE]
 ====
@@ -3964,7 +3967,6 @@ to define properties in both a subclass and its superclass by using inline prope
 [[testcontext-ctx-management-web]]
 ===== Loading a `WebApplicationContext`
 
-Spring 3.2 introduced support for loading a `WebApplicationContext` in integration tests.
 To instruct the TestContext framework to load a `WebApplicationContext` instead of a
 standard `ApplicationContext`, you can annotate the respective test class with
 `@WebAppConfiguration`.
@@ -4027,7 +4029,7 @@ framework's support for convention over configuration:
 
 If you annotate a test class with `@WebAppConfiguration` without specifying a resource
 base path, the resource path effectively defaults to `file:src/main/webapp`. Similarly,
-if you declare `@ContextConfiguration` without specifying resource `locations`, annotated
+if you declare `@ContextConfiguration` without specifying resource `locations`, component
 `classes`, or context `initializers`, Spring tries to detect the presence of your
 configuration by using conventions (that is, `WacTests-context.xml` in the same package
 as the `WacTests` class or static nested `@Configuration` classes).
@@ -4106,7 +4108,7 @@ Contrast the comments in this example with the previous example.
 
 .[[testcontext-ctx-management-web-mocks]]Working with Web Mocks
 --
-To provide comprehensive web testing support, Spring 3.2 introduced a
+To provide comprehensive web testing support, the TestContext framework has a
 `ServletTestExecutionListener` that is enabled by default. When testing against a
 `WebApplicationContext`, this <<testcontext-key-abstractions, `TestExecutionListener`>>
 sets up default thread-local state by using Spring Web's `RequestContextHolder` before
@@ -4236,12 +4238,12 @@ cannot cache application contexts between test classes, and the build process ru
 significantly more slowly as a result.
 ====
 
-Since Spring Framework 4.3, the size of the context cache is bounded with a default
-maximum size of 32. Whenever the maximum size is reached, a least recently used (LRU)
-eviction policy is used to evict and close stale contexts. You can configure the maximum
-size from the command line or a build script by setting a JVM system property named
-`spring.test.context.cache.maxSize`. As an alternative, you can set the same property
-programmatically by using the `SpringProperties` API.
+The size of the context cache is bounded with a default maximum size of 32. Whenever the
+maximum size is reached, a least recently used (LRU) eviction policy is used to evict and
+close stale contexts. You can configure the maximum size from the command line or a build
+script by setting a JVM system property named `spring.test.context.cache.maxSize`. As an
+alternative, you can set the same property programmatically by using the
+`SpringProperties` API.
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to execute, it is often beneficial to
@@ -4274,15 +4276,14 @@ components. Another use case can be found in Spring Batch applications, where yo
 have a parent context that provides configuration for shared batch infrastructure and a
 child context for the configuration of a specific batch job.
 
-Since Spring Framework 3.2.2, you can write integration tests that use context
-hierarchies by declaring context configuration with the `@ContextHierarchy` annotation,
-either on an individual test class or within a test class hierarchy. If a context
-hierarchy is declared on multiple classes within a test class hierarchy, you can also
-merge or override the context configuration for a specific, named level in the context
-hierarchy. When merging configuration for a given level in the hierarchy, the
-configuration resource type (that is, XML configuration files or annotated classes) must
-be consistent. Otherwise, it is perfectly acceptable to have different levels in a
-context hierarchy configured using different resource types.
+You can write integration tests that use context hierarchies by declaring context
+configuration with the `@ContextHierarchy` annotation, either on an individual test class
+or within a test class hierarchy. If a context hierarchy is declared on multiple classes
+within a test class hierarchy, you can also merge or override the context configuration
+for a specific, named level in the context hierarchy. When merging configuration for a
+given level in the hierarchy, the configuration resource type (that is, XML configuration
+files or component classes) must be consistent. Otherwise, it is perfectly acceptable to
+have different levels in a context hierarchy configured using different resource types.
 
 The remaining JUnit Jupiter based examples in this section show common configuration
 scenarios for integration tests that require the use of context hierarchies.
@@ -4504,9 +4505,9 @@ invoke a `public` constructor or setter method on your test class.
 Because `@Autowired` is used to perform <<core.adoc#beans-factory-autowire, autowiring by
 type>>, if you have multiple bean definitions of the same type, you cannot rely on this
 approach for those particular beans. In that case, you can use `@Autowired` in
-conjunction with `@Qualifier`. As of Spring 3.0, you can also choose to use `@Inject` in
-conjunction with `@Named`. Alternatively, if your test class has access to its
-`ApplicationContext`, you can perform an explicit lookup by using (for example) a call to
+conjunction with `@Qualifier`. You can also choose to use `@Inject` in conjunction with
+`@Named`. Alternatively, if your test class has access to its `ApplicationContext`, you
+can perform an explicit lookup by using (for example) a call to
 `applicationContext.getBean("titleRepository", TitleRepository.class)`.
 
 If you do not want dependency injection applied to your test instances, do not annotate
@@ -4699,8 +4700,8 @@ bean by name there (as shown earlier, assuming that `myDataSource` is the bean `
 ==== Testing Request- and Session-scoped Beans
 
 Spring has supported <<core#beans-factory-scopes-other, Request- and session-scoped
-beans>> since the early years. Since Spring 3.2, you can test your request-scoped and
-session-scoped beans by following these steps:
+beans>> since the early years, and you can test your request-scoped and session-scoped
+beans by following these steps:
 
 * Ensure that a `WebApplicationContext` is loaded for your test by annotating your test
   class with `@WebAppConfiguration`.
@@ -5061,12 +5062,12 @@ via the `@Commit` and `@Rollback` annotations. See the corresponding entries in 
 [[testcontext-tx-programmatic-tx-mgt]]
 ===== Programmatic Transaction Management
 
-Since Spring Framework 4.1, you can interact with test-managed transactions
-programmatically by using the static methods in `TestTransaction`. For example, you can
-use `TestTransaction` within test methods, before methods, and after methods to start or
-end the current test-managed transaction or to configure the current test-managed
-transaction for rollback or commit. Support for `TestTransaction` is automatically
-available whenever the `TransactionalTestExecutionListener` is enabled.
+You can interact with test-managed transactions programmatically by using the static
+methods in `TestTransaction`. For example, you can use `TestTransaction` within test
+methods, before methods, and after methods to start or end the current test-managed
+transaction or to configure the current test-managed transaction for rollback or commit.
+Support for `TestTransaction` is automatically available whenever the
+`TransactionalTestExecutionListener` is enabled.
 
 The following example demonstrates some of the features of `TestTransaction`. See the
 javadoc for {api-spring-framework}/test/context/transaction/TestTransaction.html[`TestTransaction`]
@@ -5780,7 +5781,7 @@ via `@SqlMergeMode(OVERRIDE)`. Consult the <<spring-testing-annotation-sqlmergem
 [[testcontext-parallel-test-execution]]
 ==== Parallel Test Execution
 
-Spring Framework 5.0 introduces basic support for executing tests in parallel within a
+Spring Framework 5.0 introduced basic support for executing tests in parallel within a
 single JVM when using the Spring TestContext Framework. In general, this means that most
 test classes or test methods can be executed in parallel without any changes to test code
 or configuration.
@@ -5795,12 +5796,13 @@ for when not to execute tests in parallel.
 
 Do not execute tests in parallel if the tests:
 
-* Use Spring's `@DirtiesContext` support.
+* Use Spring Framework's `@DirtiesContext` support.
+* Use Spring Boot's `@MockBean` or `@SpyBean` support.
 * Use JUnit 4's `@FixMethodOrder` support or any testing framework feature
   that is designed to ensure that test methods run in a particular order. Note,
   however, that this does not apply if entire test classes are executed in parallel.
 * Change the state of shared services or systems such as a database, message broker,
-  filesystem, and others. This applies to both in-memory and external systems.
+  filesystem, and others. This applies to both embedded and external systems.
 
 [TIP]
 ====
@@ -6364,7 +6366,7 @@ server.
 
 TIP: Spring Boot provides an option to write full, end-to-end integration tests that
 include a running server. If this is your goal, see the
-{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
 For more information on the differences between out-of-container and end-to-end
 integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
 
@@ -6898,13 +6900,13 @@ request. You can do so as follows, where `print()` is a static import from
 ----
 
 As long as request processing does not cause an unhandled exception, the `print()` method
-prints all the available result data to `System.out`. Spring Framework 4.2 introduced a
-`log()` method and two additional variants of the `print()` method, one that accepts an
-`OutputStream` and one that accepts a `Writer`. For example, invoking `print(System.err)`
-prints the result data to `System.err`, while invoking `print(myWriter)` prints the
-result data to a custom writer. If you want to have the result data logged instead of
-printed, you can invoke the `log()` method, which logs the result data as a single
-`DEBUG` message under the `org.springframework.test.web.servlet.result` logging category.
+prints all the available result data to `System.out`. There is also a `log()` method and
+two additional variants of the `print()` method, one that accepts an `OutputStream` and
+one that accepts a `Writer`. For example, invoking `print(System.err)` prints the result
+data to `System.err`, while invoking `print(myWriter)` prints the result data to a custom
+writer. If you want to have the result data logged instead of printed, you can invoke the
+`log()` method, which logs the result data as a single `DEBUG` message under the
+`org.springframework.test.web.servlet.result` logging category.
 
 In some cases, you may want to get direct access to the result and verify something that
 cannot be verified otherwise. This can be achieved by appending `.andReturn()` after all
@@ -7062,7 +7064,7 @@ responses. Applications that make use of
 <<web.adoc#mvc-ann-async-http-streaming,Spring MVC streaming>> options can use the
 <<testing.adoc#webtestclient-stream,WebTestClient>> to perform end-to-end, integration
 tests against a running server. This is also supported in Spring Boot where you can
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
 with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
 project Reactor that allows declaring expectations on a stream of data.
 
@@ -7110,8 +7112,8 @@ Thymeleaf and Freemarker, render HTML to the response body as expected. The same
 for rendering JSON, XML, and other formats through `@ResponseBody` methods.
 
 Alternatively, you may consider the full end-to-end integration testing support from
-Spring Boot with `@WebIntegrationTest`. See the
-{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot Reference Guide].
+Spring Boot with `@SpringBootTest`. See the
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
 
 There are pros and cons for each approach. The options provided in Spring MVC Test are
 different stops on the scale from classic unit testing to full integration testing. To be

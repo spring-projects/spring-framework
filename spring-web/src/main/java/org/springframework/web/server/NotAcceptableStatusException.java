@@ -18,9 +18,11 @@ package org.springframework.web.server;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Exception for errors that fit response status 406 (not acceptable).
@@ -50,6 +52,17 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
 	}
 
+
+	/**
+	 * Return a Map with an "Accept" header.
+	 * @since 5.1.11
+	 */
+	@Override
+	public Map<String, String> getHeaders() {
+		return !CollectionUtils.isEmpty(this.supportedMediaTypes) ?
+				Collections.singletonMap("Accept", MediaType.toString(this.supportedMediaTypes)) :
+				Collections.emptyMap();
+	}
 
 	/**
 	 * Return the list of supported content types in cases when the Accept

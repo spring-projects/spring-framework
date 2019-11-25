@@ -80,7 +80,7 @@ dokka {
 }
 
 task downloadResources(type: Download) {
-	def version = "0.1.2.RELEASE"
+	def version = "0.1.3.RELEASE"
 	src "https://repo.spring.io/release/io/spring/docresources/" +
 			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
@@ -111,24 +111,25 @@ asciidoctor {
 	logDocuments = true
 	backends = ["html5"]
 	// only ouput PDF documentation for non-SNAPSHOT builds
-	if(!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
+	if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
 		backends += "pdf"
 	}
 	options doctype: 'book', eruby: 'erubis'
-	attributes  'icons': 'font',
-			'idprefix': '',
-			'idseparator': '-',
-			'docinfo': 'shared',
-			'revnumber': project.version,
-			'sectanchors': '',
-			'sectnums': '',
-			'source-highlighter=highlight.js',
-			'highlightjsdir=js/highlight',
-			'highlightjs-theme=atom-one-dark-reasonable',
-			stylesdir: "css/",
+	attributes([
+			icons: 'font',
+			idprefix: '',
+			idseparator: '-',
+			docinfo: 'shared',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'highlight.js',
+			highlightjsdir: 'js/highlight',
+			'highlightjs-theme': 'github',
+			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
-
+	])
 }
 
 asciidoctor.dependsOn extractDocResources
@@ -174,14 +175,14 @@ task schemaZip(type: Zip) {
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {
-			it.path.endsWith("META-INF/spring.schemas")
+			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
 		}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
 			assert shortName != key
 			File xsdFile = module.sourceSets.main.resources.find {
-				it.path.endsWith(schemas.get(key))
+				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
 			}
 			assert xsdFile != null
 			into (shortName) {
@@ -196,14 +197,13 @@ task schemaZip(type: Zip) {
  * docs, schemas, jars, source jars, javadoc jars
  */
 task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-
 	group = "Distribution"
 	archiveBaseName.set("spring-framework")
 	archiveClassifier.set("dist")
 	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
 			"suitable for community download page."
 
-	ext.baseDir = "${archiveBaseName}-${project.version}";
+	ext.baseDir = "spring-framework-${project.version}";
 
 	from("src/docs/dist") {
 		include "readme.txt"

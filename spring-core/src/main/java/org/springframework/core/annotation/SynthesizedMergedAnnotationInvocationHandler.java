@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -62,9 +61,6 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		this.annotation = annotation;
 		this.type = type;
 		this.attributes = AttributeMethods.forAnnotationType(type);
-		for (int i = 0; i < this.attributes.size(); i++) {
-			getAttributeValue(this.attributes.get(i));
-		}
 	}
 
 
@@ -90,7 +86,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	private boolean isAnnotationTypeMethod(Method method) {
-		return (Objects.equals(method.getName(), "annotationType") && method.getParameterCount() == 0);
+		return (method.getName().equals("annotationType") && method.getParameterCount() == 0);
 	}
 
 	/**

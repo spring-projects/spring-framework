@@ -1344,7 +1344,7 @@ for the return value, by default, a message is sent directly to the client (thro
 When is this useful? Assume that the broker is mapped to `/topic` and `/queue`, while
 application controllers are mapped to `/app`. In this setup, the broker stores all
 subscriptions to `/topic` and `/queue` that are intended for repeated broadcasts, and
-there is no need for the application to get involved. A client could also also subscribe to
+there is no need for the application to get involved. A client could also subscribe to
 some `/app` destination, and a controller could return a value in response to that
 subscription without involving the broker without storing or using the subscription again
 (effectively a one-time request-reply exchange). One use case for this is populating a UI
@@ -2462,7 +2462,7 @@ When you use `@EnableWebSocketMessageBroker` or `<websocket:message-broker>`, ke
 infrastructure components automatically gather statisticss and counters that provide
 important insight into the internal state of the application. The configuration
 also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
-available information in one place and by, default logs, it at the `INFO` level once
+available information in one place and by default logs it at the `INFO` level once
 every 30 minutes. This bean can be exported to JMX through Spring's
 `MBeanExporter` for viewing at runtime (for example, through JDK's `jconsole`).
 The following list summarizes the available information:
@@ -2535,7 +2535,7 @@ Ideally, controllers under test should be invoked as they are at runtime, much l
 the approach to testing controllers that handle HTTP requests by using the Spring MVC Test
 framework -- that is, without running a Servlet container but relying on the Spring Framework
 to invoke the annotated controllers. As with Spring MVC Test, you have two
-two possible alternatives here, either use a "`context-based`" or use a "`standalone`" setup:
+possible alternatives here, either use a "`context-based`" or use a "`standalone`" setup:
 
 * Load the actual Spring configuration with the help of the
 Spring TestContext framework, inject `clientInboundChannel` as a test field, and

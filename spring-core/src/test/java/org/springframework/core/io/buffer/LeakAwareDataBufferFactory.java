@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.util.Assert;
 
@@ -35,7 +34,7 @@ import org.springframework.util.Assert;
  * Implementation of the {@code DataBufferFactory} interface that keeps track of
  * memory leaks.
  * <p>Useful for unit tests that handle data buffers. Simply inherit from
- * {@link AbstractLeakCheckingTestCase} or call {@link #checkForLeaks()} in
+ * {@link AbstractLeakCheckingTests} or call {@link #checkForLeaks()} in
  * a JUnit <em>after</em> method yourself, and any buffers that have not been
  * released will result in an {@link AssertionError}.
  *
@@ -113,7 +112,6 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 		return createLeakAwareDataBuffer(this.delegate.allocateBuffer(initialCapacity));
 	}
 
-	@NotNull
 	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
 		if (this.trackCreated.get()) {

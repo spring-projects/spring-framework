@@ -16,7 +16,6 @@
 
 package org.springframework.transaction.reactive
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
@@ -34,7 +33,7 @@ class TransactionalOperatorExtensionsTests {
 	fun commitWithSuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
-			operator.transactional {
+			operator.executeAndAwait {
 				delay(1)
 				true
 			}
@@ -48,7 +47,7 @@ class TransactionalOperatorExtensionsTests {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
 			try {
-				operator.transactional {
+				operator.executeAndAwait {
 					delay(1)
 					throw IllegalStateException()
 				}
@@ -62,7 +61,6 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun commitWithFlow() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		val flow = flow {
@@ -72,7 +70,7 @@ class TransactionalOperatorExtensionsTests {
 			emit(4)
 		}
 		runBlocking {
-			val list = operator.transactional(flow).toList()
+			val list = flow.transactional(operator).toList()
 			assertThat(list).hasSize(4)
 		}
 		assertThat(tm.commit).isTrue()
@@ -80,7 +78,6 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun rollbackWithFlow() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		val flow = flow<Int> {
@@ -89,7 +86,7 @@ class TransactionalOperatorExtensionsTests {
 		}
 		runBlocking {
 			try {
-				operator.transactional(flow).toList()
+				flow.transactional(operator).toList()
 			} catch (ex: IllegalStateException) {
 				assertThat(tm.commit).isFalse()
 				assertThat(tm.rollback).isTrue()

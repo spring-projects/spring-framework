@@ -147,11 +147,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 							"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
 				}
 				String name = tok.substring(0, eqIdx);
-				String value = tok.substring(eqIdx + 1);
-
 				// Delete first and last characters of value: { and }
-				value = value.substring(1);
-				value = value.substring(0, value.length() - 1);
+				int beginIndex = eqIdx + 2;
+				int endIndex = tok.length() - 1;
+				String value = tok.substring(beginIndex, endIndex);
 
 				addStaticAttribute(name, value);
 			}

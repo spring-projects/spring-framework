@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.reactivex.Flowable
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -77,7 +76,6 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun `BodyBuilder#bodyAndAwait with flow parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = mockk<Flow<List<Foo>>>()

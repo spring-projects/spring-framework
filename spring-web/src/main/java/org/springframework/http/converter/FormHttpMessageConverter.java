@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -203,22 +204,18 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * Add {@link MediaType} objects to be supported by this converter.
 	 * <p>The supplied {@code MediaType} objects will be appended to the list
 	 * of {@linkplain #getSupportedMediaTypes() supported MediaType objects}.
-	 * @param supportedMediaTypes a var-args list of {@code MediaType} objects
-	 * to add
+	 * @param supportedMediaTypes a var-args list of {@code MediaType} objects to add
 	 * @since 5.2
 	 * @see #setSupportedMediaTypes(List)
 	 */
 	public void addSupportedMediaTypes(MediaType... supportedMediaTypes) {
 		Assert.notNull(supportedMediaTypes, "'supportedMediaTypes' must not be null");
 		Assert.noNullElements(supportedMediaTypes, "'supportedMediaTypes' must not contain null elements");
-		for (MediaType mediaType : supportedMediaTypes) {
-			this.supportedMediaTypes.add(mediaType);
-		}
+		Collections.addAll(this.supportedMediaTypes, supportedMediaTypes);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 *
 	 * @see #setSupportedMediaTypes(List)
 	 * @see #addSupportedMediaTypes(MediaType...)
 	 */
@@ -419,7 +416,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	protected String serializeForm(MultiValueMap<String, Object> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
-		formData.forEach((name, values) ->
+		formData.forEach((name, values) -> {
+				if (name == null) {
+					Assert.isTrue(CollectionUtils.isEmpty(values), "Null name in form data: " + formData);
+					return;
+				}
 				values.forEach(value -> {
 					try {
 						if (builder.length() != 0) {
@@ -434,7 +435,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					catch (UnsupportedEncodingException ex) {
 						throw new IllegalStateException(ex);
 					}
-				}));
+				});
+		});
 
 		return builder.toString();
 	}

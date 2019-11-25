@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
  * to use when retrieving <em>profile values</em> configured via
  * {@link IfProfileValue @IfProfileValue}.
  *
- * <p>As of Spring Framework 4.0, this annotation may be used as a
- * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5

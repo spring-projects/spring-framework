@@ -921,11 +921,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		ordered.verify(con).setReadOnly(false);
 		verify(con).close();
 	}
 
@@ -954,11 +956,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con, stmt);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(stmt).executeUpdate("SET TRANSACTION READ ONLY");
 		ordered.verify(stmt).close();
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
+		ordered.verify(con).setReadOnly(false);
 		ordered.verify(con).close();
 	}
 
@@ -1437,7 +1441,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1498,7 +1501,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1559,7 +1561,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 

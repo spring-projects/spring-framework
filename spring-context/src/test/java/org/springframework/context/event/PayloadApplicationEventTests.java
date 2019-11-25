@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PayloadApplicationEventTests {
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "resource" })
 	public void testEventClassWithInterface() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 		AuditablePayloadEvent event = new AuditablePayloadEvent<>(this, "xyz");

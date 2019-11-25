@@ -35,16 +35,11 @@ import org.springframework.util.SocketUtils;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
+class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
-	private static final int SERVICE_PORT;
+	private final int servicePort = SocketUtils.findAvailableTcpPort();
 
-	private static final String SERVICE_URL;
-
-	static {
-		SERVICE_PORT = SocketUtils.findAvailableTcpPort();
-		SERVICE_URL = "service:jmx:jmxmp://localhost:" + SERVICE_PORT;
-	}
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + servicePort;
 
 
 	private JMXConnectorServer connectorServer;
@@ -61,13 +56,13 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		}
 		catch (BindException ex) {
 			System.out.println("Skipping remote JMX tests because binding to local port ["
-					+ SERVICE_PORT + "] failed: " + ex.getMessage());
+					+ this.servicePort + "] failed: " + ex.getMessage());
 			runTests = false;
 		}
 	}
 
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
-		return new JMXServiceURL(SERVICE_URL);
+		return new JMXServiceURL(this.serviceUrl);
 	}
 
 	@Override

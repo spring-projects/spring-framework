@@ -652,6 +652,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
+
 	@Override
 	public String toString() {
 		return "StompSubProtocolHandler" + getSupportedProtocols();
@@ -688,7 +689,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		private final AtomicInteger connected = new AtomicInteger();
 
 		private final AtomicInteger disconnect = new AtomicInteger();
-
 
 		public void incrementConnectCount() {
 			this.connect.incrementAndGet();

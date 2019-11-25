@@ -31,6 +31,7 @@ import org.springframework.util.MimeType;
  *
  * @author Rossen Stoyanchev
  * @since 5.2
+ * @see MetadataExtractorRegistry
  */
 public interface MetadataExtractor {
 

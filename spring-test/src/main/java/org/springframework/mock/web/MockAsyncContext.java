@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class MockAsyncContext implements AsyncContext {
 	@Nullable
 	private String dispatchedPath;
 
-	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
+	private long timeout = 10 * 1000L;
 
 	private final List<Runnable> dispatchHandlers = new ArrayList<>();
 

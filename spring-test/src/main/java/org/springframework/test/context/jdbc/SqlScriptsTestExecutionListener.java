@@ -260,7 +260,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					TransactionDefinition.PROPAGATION_REQUIRED);
 			TransactionAttribute txAttr = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 					testContext, new DefaultTransactionAttribute(propagation));
-			new TransactionTemplate(txMgr, txAttr).execute(() -> populator.execute(finalDataSource));
+			new TransactionTemplate(txMgr, txAttr).executeWithoutResult(s -> populator.execute(finalDataSource));
 		}
 	}
 

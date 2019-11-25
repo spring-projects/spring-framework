@@ -16,8 +16,11 @@
 
 package org.springframework.transaction.support;
 
+import java.util.function.Consumer;
+
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * Interface specifying basic transaction execution operations.
@@ -40,6 +43,7 @@ public interface TransactionOperations {
 	 * @return a result object returned by the callback, or {@code null} if none
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
+	 * @see #executeWithoutResult(Consumer)
 	 */
 	@Nullable
 	<T> T execute(TransactionCallback<T> action) throws TransactionException;
@@ -59,9 +63,9 @@ public interface TransactionOperations {
 	 * @see #execute(TransactionCallback)
 	 * @see TransactionCallbackWithoutResult
 	 */
-	default void execute(Runnable action) throws TransactionException {
+	default void executeWithoutResult(Consumer<TransactionStatus> action) throws TransactionException {
 		execute(status -> {
-			action.run();
+			action.accept(status);
 			return null;
 		});
 	}

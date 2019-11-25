@@ -49,12 +49,7 @@ public enum TestGroup {
 	 * {@code StopWatch}, etc. should be considered a candidate as their successful
 	 * execution is likely to be based on events occurring within a given time window.
 	 */
-	PERFORMANCE,
-
-	/**
-	 * Tests that should only be run on the continuous integration server.
-	 */
-	CI;
+	PERFORMANCE;
 
 
 	/**
@@ -82,6 +77,7 @@ public enum TestGroup {
 					"' system property: " + ex.getMessage(), ex);
 		}
 	}
+
 	/**
 	 * Parse the specified comma separated string of groups.
 	 * @param value the comma separated string of groups

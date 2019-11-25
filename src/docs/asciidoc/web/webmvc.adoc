@@ -1280,14 +1280,25 @@ that proxies can use to provide information about the original request. There ar
 non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
 `X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
 
-`ForwardedHeaderFilter` is a Servlet filter that modifies the host, port, and scheme of
-the request, based on `Forwarded` headers, and then removes those headers.
+`ForwardedHeaderFilter` is a Servlet filter that modifies the request in order to
+a) change the host, port, and scheme based on `Forwarded` headers, and b) to remove those
+headers to eliminate further impact. The filter relies on wrapping the request, and
+therefore it must be ordered ahead of other filters, such as `RequestContextFilter`, that
+should work with the modified and not the original request.
 
 There are security considerations for forwarded headers since an application cannot know
 if the headers were added by a proxy, as intended, or by a malicious client. This is why
-a proxy at the boundary of trust should be configured to remove untrusted `Forwarded` headers that come
-from the outside. You can also configure the `ForwardedHeaderFilter` with
-`removeOnly=true`, in which case it removes but does not use the headers.
+a proxy at the boundary of trust should be configured to remove untrusted `Forwarded`
+headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
+with `removeOnly=true`, in which case it removes but does not use the headers.
+
+In order to support <<mvc-ann-async,asynchronous requests>> and error dispatches this
+filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.
+If using Spring Framework's `AbstractAnnotationConfigDispatcherServletInitializer`
+(see <<mvc-container-config>>) all filters are automatically registered for all dispatch
+types. However if registering the filter via `web.xml` or in Spring Boot via a
+`FilterRegistrationBean` be sure to include `DispatcherType.ASYNC` and
+`DispatcherType.ERROR` in addition to `DispatcherType.REQUEST`.
 
 
 
@@ -1306,6 +1317,14 @@ the computation. See <<mvc-caching>>.
 This filter has a `writeWeakETag` parameter that configures the filter to write weak ETags
 similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
 https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3]).
+
+In order to support <<mvc-ann-async,asynchronous requests>> this filter must be mapped
+with `DispatcherType.ASYNC` so that the filter can delay and successfully generate an
+ETag to the end of the last async dispatch. If using Spring Framework's
+`AbstractAnnotationConfigDispatcherServletInitializer` (see <<mvc-container-config>>)
+all filters are automatically registered for all dispatch types. However if registering
+the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sure to include
+`DispatcherType.ASYNC`.
 
 
 
@@ -1440,8 +1459,10 @@ controller. When this is the case, for controllers specifically, we recommend
 using class-based proxying. This is typically the default choice with controllers.
 However, if a controller must implement an interface that is not a Spring Context
 callback (such as `InitializingBean`, `*Aware`, and others), you may need to explicitly
-configure class-based proxying. For example, with `<tx:annotation-driven/>`, you can
-change to `<tx:annotation-driven proxy-target-class="true"/>`.
+configure class-based proxying. For example, with `<tx:annotation-driven/>` you can
+change to `<tx:annotation-driven proxy-target-class="true"/>`, and with
+`@EnableTransactionManagement` you can change to
+`@EnableTransactionManagement(proxyTargetClass = true)`.
 
 
 
@@ -3904,6 +3925,7 @@ performance if used extensively. See the
 {api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
 
+include::webmvc-functional.adoc[leveloffset=+1]
 
 
 
@@ -4615,7 +4637,7 @@ The MVC configuration exposes the following options related to asynchronous requ
 You can configure the following:
 
 * Default timeout value for async requests, which if not set, depends
-on the underlying Servlet container (for example, 10 seconds on Tomcat).
+on the underlying Servlet container.
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
 <<mvc-ann-async-reactive-types>> and for executing `Callable` instances returned from
 controller methods. We highly recommended configuring this property if you
@@ -4815,7 +4837,7 @@ as the following example shows:
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
 304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
-to 409 (PRECONDITION_FAILED), to prevent concurrent modification.
+to 412 (PRECONDITION_FAILED), to prevent concurrent modification.
 
 
 
@@ -5295,10 +5317,10 @@ This builder customizes Jackson's default properties as follows:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-jdk7[jackson-datatype-jdk7]: Support for Java 7 types, such as `java.nio.file.Path`.
 * https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: Support for Joda-Time types.
 * https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: Support for Java 8 Date and Time API types.
 * https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: Support for other Java 8 types, such as `Optional`.
+* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 NOTE: Enabling indentation with Jackson XML support requires
 https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.woodstox%22%20AND%20a%3A%22woodstox-core-asl%22[`woodstox-core-asl`]

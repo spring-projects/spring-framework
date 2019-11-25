@@ -37,7 +37,7 @@ import static org.springframework.core.ResolvableType.forClass;
 /**
  * @author Arjen Poutsma
  */
-class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecoder> {
+class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 

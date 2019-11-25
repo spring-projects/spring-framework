@@ -399,8 +399,8 @@ public interface ServerResponse {
 
 		/**
 		 * Set the body of the response to the given {@code Object} and return it.
-		 * This is a shortcut for using a {@link #body(BodyInserter)} with an
-		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 * This is a shortcut for using a {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
 		 * @param body the body of the response
 		 * @return the built response
 		 * @throws IllegalArgumentException if {@code body} is a

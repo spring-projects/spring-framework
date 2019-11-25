@@ -109,7 +109,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_JSON}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -120,7 +120,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -170,7 +170,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -182,7 +182,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
 	 * @since 5.0
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -370,7 +370,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
-		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem", StandardCharsets.UTF_8);
+		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
 		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");

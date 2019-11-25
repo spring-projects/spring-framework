@@ -119,6 +119,8 @@ public class MockHttpServletRequestBuilder
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
+	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+
 	private final List<Cookie> cookies = new ArrayList<>();
 
 	private final List<Locale> locales = new ArrayList<>();
@@ -248,6 +250,10 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the request body.
+	 * <p>If content is provided and {@link #contentType(MediaType)} is set to
+	 * {@code application/x-www-form-urlencoded}, the content will be parsed
+	 * and used to populate the {@link #param(String, String...) request
+	 * parameters} map.
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(byte[] content) {
@@ -257,6 +263,10 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the request body as a UTF-8 String.
+	 * <p>If content is provided and {@link #contentType(MediaType)} is set to
+	 * {@code application/x-www-form-urlencoded}, the content will be parsed
+	 * and used to populate the {@link #param(String, String...) request
+	 * parameters} map.
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
@@ -266,6 +276,10 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the 'Content-Type' header of the request.
+	 * <p>If content is provided and {@code contentType} is set to
+	 * {@code application/x-www-form-urlencoded}, the content will be parsed
+	 * and used to populate the {@link #param(String, String...) request
+	 * parameters} map.
 	 * @param contentType the content type
 	 */
 	public MockHttpServletRequestBuilder contentType(MediaType contentType) {
@@ -328,8 +342,18 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Add a request parameter to the {@link MockHttpServletRequest}.
-	 * <p>If called more than once, new values get added to existing ones.
+	 * Add a request parameter to {@link MockHttpServletRequest#getParameterMap()}.
+	 * <p>In the Servlet API, a request parameter may be parsed from the query
+	 * string and/or from the body of an {@code application/x-www-form-urlencoded}
+	 * request. This method simply adds to the request parameter map. You may
+	 * also use add Servlet request parameters by specifying the query or form
+	 * data through one of the following:
+	 * <ul>
+	 * <li>Supply a URL with a query to {@link MockMvcRequestBuilders}.
+	 * <li>Add query params via {@link #queryParam} or {@link #queryParams}.
+	 * <li>Provide {@link #content} with {@link #contentType}
+	 * {@code application/x-www-form-urlencoded}.
+	 * </ul>
 	 * @param name the parameter name
 	 * @param values one or more values
 	 */
@@ -339,9 +363,7 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Add a map of request parameters to the {@link MockHttpServletRequest},
-	 * for example when testing a form submission.
-	 * <p>If called more than once, new values get added to existing ones.
+	 * Variant of {@link #param(String, String...)} with a {@link MultiValueMap}.
 	 * @param params the parameters to add
 	 * @since 4.2.4
 	 */
@@ -351,6 +373,33 @@ public class MockHttpServletRequestBuilder
 				this.parameters.add(name, value);
 			}
 		});
+		return this;
+	}
+
+	/**
+	 * Append to the query string and also add to the
+	 * {@link #param(String, String...) request parameters} map. The parameter
+	 * name and value are encoded when they are added to the query string.
+	 * @param name the parameter name
+	 * @param values one or more values
+	 * @since 5.2.2
+	 */
+	public MockHttpServletRequestBuilder queryParam(String name, String... values) {
+		param(name, values);
+		this.queryParams.addAll(name, Arrays.asList(values));
+		return this;
+	}
+
+	/**
+	 * Append to the query string and also add to the
+	 * {@link #params(MultiValueMap)}  request parameters} map. The parameter
+	 * name and value are encoded when they are added to the query string.
+	 * @param params the parameters to add
+	 * @since 5.2.2
+	 */
+	public MockHttpServletRequestBuilder queryParams(MultiValueMap<String, String> params) {
+		params(params);
+		this.queryParams.addAll(params);
 		return this;
 	}
 
@@ -543,6 +592,12 @@ public class MockHttpServletRequestBuilder
 				this.parameters.put(paramName, entry.getValue());
 			}
 		}
+		for (Map.Entry<String, List<String>> entry : parentBuilder.queryParams.entrySet()) {
+			String paramName = entry.getKey();
+			if (!this.queryParams.containsKey(paramName)) {
+				this.queryParams.put(paramName, entry.getValue());
+			}
+		}
 		for (Cookie cookie : parentBuilder.cookies) {
 			if (!containsCookie(cookie)) {
 				this.cookies.add(cookie);
@@ -632,8 +687,20 @@ public class MockHttpServletRequestBuilder
 			}
 		});
 
-		if (this.url.getRawQuery() != null) {
-			request.setQueryString(this.url.getRawQuery());
+		if (!ObjectUtils.isEmpty(this.content) &&
+				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
+				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+
+			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
+		}
+
+		String query = this.url.getRawQuery();
+		if (!this.queryParams.isEmpty()) {
+			String s = UriComponentsBuilder.newInstance().queryParams(this.queryParams).build().encode().getQuery();
+			query = StringUtils.isEmpty(query) ? s : query + "&" + s;
+		}
+		if (query != null) {
+			request.setQueryString(query);
 		}
 		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
 

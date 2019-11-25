@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDecoder> {
+class ByteArrayDecoderTests extends AbstractDecoderTests<ByteArrayDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 

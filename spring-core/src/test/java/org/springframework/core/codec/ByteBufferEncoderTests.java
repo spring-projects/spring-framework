@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEncoder> {
+class ByteBufferEncoderTests extends AbstractEncoderTests<ByteBufferEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 

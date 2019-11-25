@@ -39,4 +39,5 @@ dependencies {
 	testRuntime("javax.xml.bind:jaxb-api")
 	testRuntime("org.glassfish:javax.el")
 	testRuntime("org.javamoney:moneta")
+	testRuntime("org.junit.vintage:junit-vintage-engine") // for @Inject TCK
 }

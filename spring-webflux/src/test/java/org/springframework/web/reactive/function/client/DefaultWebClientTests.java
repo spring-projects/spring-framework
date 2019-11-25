@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,8 +43,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
@@ -303,10 +305,52 @@ public class DefaultWebClientTests {
 				)
 				.build();
 		Mono<ClientResponse> exchange = client.get().uri("/path").exchange();
-		verifyZeroInteractions(this.exchangeFunction);
+		verifyNoInteractions(this.exchangeFunction);
 		exchange.block(Duration.ofSeconds(10));
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Custom")).isEqualTo("value");
+	}
+
+	@Test // gh-23880
+	public void onStatusHandlersOrderIsPreserved() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Mono<Void> result = this.builder.build().get()
+				.uri("/path")
+				.retrieve()
+				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
+				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectErrorMessage("1").verify();
+	}
+
+	@Test // gh-23880
+	@SuppressWarnings("unchecked")
+	public void onStatusHandlersDefaultHandlerIsLast() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Predicate<HttpStatus> predicate1 = mock(Predicate.class);
+		Predicate<HttpStatus> predicate2 = mock(Predicate.class);
+
+		given(predicate1.test(HttpStatus.BAD_REQUEST)).willReturn(false);
+		given(predicate2.test(HttpStatus.BAD_REQUEST)).willReturn(false);
+
+		Mono<Void> result = this.builder.build().get()
+				.uri("/path")
+				.retrieve()
+				.onStatus(predicate1, resp -> Mono.error(new IllegalStateException()))
+				.onStatus(predicate2, resp -> Mono.error(new IllegalStateException()))
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectError(WebClientResponseException.class).verify();
+
+		verify(predicate1).test(HttpStatus.BAD_REQUEST);
+		verify(predicate2).test(HttpStatus.BAD_REQUEST);
 	}
 
 	private ClientRequest verifyAndGetRequest() {

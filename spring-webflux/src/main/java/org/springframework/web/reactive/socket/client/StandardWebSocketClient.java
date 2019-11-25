@@ -109,7 +109,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
 					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
-				.subscribeOn(Schedulers.elastic()) // connectToServer is blocking
+				.subscribeOn(Schedulers.boundedElastic()) // connectToServer is blocking
 				.then(completionMono);
 	}
 
