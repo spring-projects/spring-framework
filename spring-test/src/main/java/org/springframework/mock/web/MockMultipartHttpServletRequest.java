@@ -16,6 +16,7 @@
 
 package org.springframework.mock.web;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -121,9 +124,17 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 		if (file != null) {
 			return file.getContentType();
 		}
-		else {
-			return null;
+
+		try {
+			Part part = getPart(paramOrFileName);
+			if (part != null) {
+				return part.getContentType();
+			}
+		} catch (ServletException | IOException e) {
+			throw new IllegalStateException("Cannot extract content type from multipart request.", e);
 		}
+
+		return null;
 	}
 
 	@Override
