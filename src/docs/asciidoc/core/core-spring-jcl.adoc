@@ -1,0 +1,32 @@
+[[spring-jcl]]
+= Logging
+
+Spring Framework since 5.0 comes with its own Commons Logging bridge implemented
+in `spring-jcl` module. The implementation checks for the presence of the Log4j 2.x API
+and the SLF4J 1.7 API in the Spring Framework classpath, falling back to JUL if none of
+the two is available. Note that this Commons Logging variant is only meant to be used
+for infrastructure logging purposes in the core framework and in extensions.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+public class MyBean {
+	private final Log log = LogFactory.getLog(getClass());
+    // ...
+}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+class MyBean {
+  private val log = LogFactory.getLog(javaClass)
+  // ...
+}
+----
+
+Log implementation may be instantiated by `org.apache.commons.logging.LogFactory`.
+
+For logging need in application code, prefer direct use of Log4j 2.x or SLF4J or JUL.
+Simply put Log4j 2.x or Logback (or another SLF4J provider) onto your classpath, without
+any extra bridges, and let the framework auto-adapt to your choice. For further information see
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-logging[Spring Boot Logging Reference Documentation].
