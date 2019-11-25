@@ -28,10 +28,11 @@ If you have a question, check Stack Overflow using
 [this list of tags](https://spring.io/questions), organized by Spring project.
 Find an existing discussion, or start a new one if necessary.
 
-If you suspect an issue, perform a search in the
+If you find an issue, perform a search in the
 [GitHub issue tracker](https://github.com/spring-projects/spring-framework/issues), using a few different keywords.
-When you find related issues and discussions, prior or current, it helps you to learn, and
-it helps us to make a decision.
+If you find discussions related to your issue either past or current, read them as it helps you learn about the issue
+and helps us make a decision on the issue.
+
 
 #### Create a Ticket
 
