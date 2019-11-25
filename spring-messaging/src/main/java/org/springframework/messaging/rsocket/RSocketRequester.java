@@ -238,9 +238,9 @@ public interface RSocketRequester {
 	}
 
 	/**
-	 * Spec for providing input data for an RSocket request and triggering the exchange.
+	 * Spec to declare the input for an RSocket request.
 	 */
-	interface RequestSpec extends MetadataSpec<RequestSpec> {
+	interface RequestSpec extends MetadataSpec<RequestSpec>, RetrieveSpec {
 
 		/**
 		 * Append additional metadata entries through a {@code Consumer}.
@@ -262,7 +262,7 @@ public interface RSocketRequester {
 		 * @param data the Object value for the payload data
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object data);
+		RetrieveSpec data(Object data);
 
 		/**
 		 * Variant of {@link #data(Object)} that also accepts a hint for the
@@ -274,7 +274,7 @@ public interface RSocketRequester {
 		 * @param elementClass the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object producer, Class<?> elementClass);
+		RetrieveSpec data(Object producer, Class<?> elementClass);
 
 		/**
 		 * Variant of {@link #data(Object, Class)} for when the type hint has
@@ -285,7 +285,38 @@ public interface RSocketRequester {
 		 * @param elementTypeRef the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+		RetrieveSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+	}
+
+
+	/**
+	 * Spec for providing additional composite metadata entries.
+	 *
+	 * @param <S> a self reference to the spec type
+	 */
+	interface MetadataSpec<S extends MetadataSpec<S>> {
+
+		/**
+		 * Use this to append additional metadata entries when using composite
+		 * metadata. An {@link IllegalArgumentException} is raised if this
+		 * method is used when not using composite metadata.
+		 * The metadata value be a concrete value or any producer of a single
+		 * value that can be adapted to a {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param metadata an Object to be encoded with a suitable
+		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
+		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+		 * @param mimeType the mime type that describes the metadata
+		 */
+		S metadata(Object metadata, MimeType mimeType);
+	}
+
+
+	/**
+	 * Spec to declare the expected output for an RSocket request.
+	 * @since 5.2.2
+	 */
+	interface RetrieveSpec {
 
 		/**
 		 * Perform a {@link RSocket#fireAndForget fireAndForget}.
@@ -328,28 +359,6 @@ public interface RSocketRequester {
 		 * to have a generic type. See {@link ParameterizedTypeReference}.
 		 */
 		<T> Flux<T> retrieveFlux(ParameterizedTypeReference<T> dataTypeRef);
-	}
-
-	/**
-	 * Spec for specifying the metadata.
-	 *
-	 * @param <S> a self reference to the spec type
-	 */
-	interface MetadataSpec<S extends MetadataSpec<S>> {
-
-		/**
-		 * Use this to append additional metadata entries when using composite
-		 * metadata. An {@link IllegalArgumentException} is raised if this
-		 * method is used when not using composite metadata.
-		 * The metadata value be a concrete value or any producer of a single
-		 * value that can be adapted to a {@link Publisher} via
-		 * {@link ReactiveAdapterRegistry}.
-		 * @param metadata an Object to be encoded with a suitable
-		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
-		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
-		 * @param mimeType the mime type that describes the metadata
-		 */
-		S metadata(Object metadata, MimeType mimeType);
 	}
 
 }

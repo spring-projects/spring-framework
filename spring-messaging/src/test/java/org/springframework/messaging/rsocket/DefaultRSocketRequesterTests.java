@@ -40,6 +40,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.RSocketRequester.RequestSpec;
+import org.springframework.messaging.rsocket.RSocketRequester.RetrieveSpec;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -90,7 +91,7 @@ public class DefaultRSocketRequesterTests {
 		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).then(), Void.class), "");
 	}
 
-	private void testSendMono(Function<RequestSpec, RequestSpec> mapper, String expectedValue) {
+	private void testSendMono(Function<RequestSpec, RetrieveSpec> mapper, String expectedValue) {
 		mapper.apply(this.requester.route("toA")).send().block(Duration.ofSeconds(5));
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
@@ -114,7 +115,7 @@ public class DefaultRSocketRequesterTests {
 		testSendFlux(spec -> spec.data(stringFlux.cast(Object.class), Object.class), values);
 	}
 
-	private void testSendFlux(Function<RequestSpec, RequestSpec> mapper, String... expectedValues) {
+	private void testSendFlux(Function<RequestSpec, RetrieveSpec> mapper, String... expectedValues) {
 		this.rsocket.reset();
 		mapper.apply(this.requester.route("toA")).retrieveFlux(String.class).blockLast(Duration.ofSeconds(5));
 
