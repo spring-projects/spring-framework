@@ -18,10 +18,12 @@ package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +32,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,6 +119,20 @@ public class ScheduledAnnotationBeanPostProcessor
 	 */
 	public static final String DEFAULT_TASK_SCHEDULER_BEAN_NAME = "taskScheduler";
 
+	private static Pattern DURATION_IN_TEXT_FORMAT = Pattern.compile("^([\\+\\-]?\\d+)([a-zA-Z]{1,2})$");
+
+	private static final Map<String, ChronoUnit> UNITS;
+
+	static {
+		Map<String, ChronoUnit> units = new HashMap<>();
+		units.put("ns", ChronoUnit.NANOS);
+		units.put("ms", ChronoUnit.MILLIS);
+		units.put("s", ChronoUnit.SECONDS);
+		units.put("m", ChronoUnit.MINUTES);
+		units.put("h", ChronoUnit.HOURS);
+		units.put("d", ChronoUnit.DAYS);
+		UNITS = Collections.unmodifiableMap(units);
+	}
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -394,13 +412,9 @@ public class ScheduledAnnotationBeanPostProcessor
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
-					try {
-						initialDelay = parseDelayAsLong(initialDelayString);
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into long");
-					}
+					initialDelay = parseDelayAsLong(initialDelayString,
+							"Invalid initialDelayString value \"" +
+									initialDelayString + "\" - cannot parse into long");
 				}
 			}
 
@@ -448,13 +462,9 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (StringUtils.hasLength(fixedDelayString)) {
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
-					try {
-						fixedDelay = parseDelayAsLong(fixedDelayString);
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
-					}
+					fixedDelay = parseDelayAsLong(fixedDelayString,
+							"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
+
 					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 				}
 			}
@@ -474,13 +484,9 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (StringUtils.hasLength(fixedRateString)) {
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
-					try {
-						fixedRate = parseDelayAsLong(fixedRateString);
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
-					}
+					fixedRate = parseDelayAsLong(fixedRateString,
+							"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
+
 					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
 				}
 			}
@@ -515,11 +521,24 @@ public class ScheduledAnnotationBeanPostProcessor
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
-	private static long parseDelayAsLong(String value) throws RuntimeException {
-		if (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1)))) {
-			return Duration.parse(value).toMillis();
+	private static long parseDelayAsLong(String value, String exceptionMessage) throws IllegalArgumentException {
+		try {
+			if (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1)))) {
+				return Duration.parse(value).toMillis();
+			}
+			return Long.parseLong(value);
+
 		}
-		return Long.parseLong(value);
+		catch (RuntimeException ex) {
+			Matcher matcher = DURATION_IN_TEXT_FORMAT.matcher(value);
+
+			Assert.isTrue(matcher.matches(), exceptionMessage);
+			long amount = Long.parseLong(matcher.group(1));
+			ChronoUnit unit = UNITS.get(matcher.group(2).toLowerCase());
+			Assert.notNull(unit, exceptionMessage);
+
+			return Duration.of(amount, unit).toMillis();
+		}
 	}
 
 	private static boolean isP(char ch) {
