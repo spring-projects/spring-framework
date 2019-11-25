@@ -112,7 +112,7 @@ public abstract class BodyInserters {
 	 * {@link #fromProducer(Object, Class)} should be used.
 	 * @see #fromPublisher(Publisher, Class)
 	 * @see #fromProducer(Object, Class)
-	 * @deprecated As of Spring Framework 5.2, in favor of {@link #fromValue(T)}.
+	 * @deprecated As of Spring Framework 5.2, in favor of {@link #fromValue(Object)}
 	 */
 	@Deprecated
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
