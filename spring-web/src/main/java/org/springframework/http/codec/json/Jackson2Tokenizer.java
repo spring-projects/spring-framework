@@ -174,9 +174,6 @@ final class Jackson2Tokenizer {
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
 		if (!isTopLevelArrayToken(token)) {
-			if (!this.parser.hasCurrentToken()) {
-				System.out.println("NO CURRENT TOKEN: " + token);
-			}
 			this.tokenBuffer.copyCurrentEvent(this.parser);
 		}
 
