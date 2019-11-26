@@ -64,6 +64,9 @@ import static org.mockito.Mockito.mock;
  */
 public class ModelInitializerTests {
 
+	private static final Duration TIMEOUT = Duration.ofMillis(5000);
+
+
 	private ModelInitializer modelInitializer;
 
 	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
@@ -93,7 +96,7 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(GetMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
+		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		WebExchangeDataBinder binder = context.createDataBinder(this.exchange, "name");
 		assertThat(binder.getValidators()).isEqualTo(Collections.singletonList(validator));
@@ -107,7 +110,7 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(GetMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
+		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		Map<String, Object> model = context.getModel().asMap();
 		assertThat(model.size()).isEqualTo(5);
@@ -116,7 +119,7 @@ public class ModelInitializerTests {
 		assertThat(((TestBean) value).getName()).isEqualTo("Bean");
 
 		value = model.get("monoBean");
-		assertThat(((Mono<TestBean>) value).block(Duration.ofMillis(5000)).getName()).isEqualTo("Mono Bean");
+		assertThat(((Mono<TestBean>) value).block(TIMEOUT).getName()).isEqualTo("Mono Bean");
 
 		value = model.get("singleBean");
 		assertThat(((Single<TestBean>) value).toBlocking().value().getName()).isEqualTo("Single Bean");
@@ -135,7 +138,7 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(GetMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
+		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
 		assertThat(session).isNotNull();
@@ -148,7 +151,7 @@ public class ModelInitializerTests {
 
 	@Test
 	public void retrieveModelAttributeFromSession() {
-		WebSession session = this.exchange.getSession().block(Duration.ZERO);
+		WebSession session = this.exchange.getSession().block(TIMEOUT);
 		assertThat(session).isNotNull();
 
 		TestBean testBean = new TestBean("Session Bean");
@@ -159,7 +162,7 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(GetMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
+		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		context.saveModel();
 		assertThat(session.getAttributes().size()).isEqualTo(1);
@@ -174,13 +177,13 @@ public class ModelInitializerTests {
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(PostMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000)))
+				this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT))
 			.withMessage("Required attribute 'missing-bean' is missing.");
 	}
 
 	@Test
 	public void clearModelAttributeFromSession() {
-		WebSession session = this.exchange.getSession().block(Duration.ZERO);
+		WebSession session = this.exchange.getSession().block(TIMEOUT);
 		assertThat(session).isNotNull();
 
 		TestBean testBean = new TestBean("Session Bean");
@@ -191,7 +194,7 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(GetMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
+		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		context.getSessionStatus().setComplete();
 		context.saveModel();
