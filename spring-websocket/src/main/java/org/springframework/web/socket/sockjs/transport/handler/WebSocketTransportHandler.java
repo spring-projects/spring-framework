@@ -124,7 +124,7 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 			wsHandler = new SockJsWebSocketHandler(getServiceConfig(), wsHandler, sockJsSession);
 			this.handshakeHandler.doHandshake(request, response, wsHandler, sockJsSession.getAttributes());
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			sockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			throw new SockJsTransportFailureException("WebSocket handshake failure", wsSession.getId(), ex);
 		}

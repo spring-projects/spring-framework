@@ -171,7 +171,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 		catch (HandshakeFailureException ex) {
 			failure = ex;
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
 		finally {
