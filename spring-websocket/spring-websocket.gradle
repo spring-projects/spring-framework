@@ -21,6 +21,7 @@ dependencies {
 	optional("io.undertow:undertow-servlet")
 	optional("io.undertow:undertow-websockets-jsr")
 	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.google.protobuf:protobuf-java-util")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket")
 	testCompile("io.projectreactor.netty:reactor-netty")

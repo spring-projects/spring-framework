@@ -84,7 +84,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @since 4.1.5
 	 */
 	public MappingJackson2MessageConverter(MimeType... supportedMimeTypes) {
-		super(Arrays.asList(supportedMimeTypes));
+		super(supportedMimeTypes);
 		this.objectMapper = initObjectMapper();
 	}
 

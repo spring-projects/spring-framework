@@ -15,6 +15,7 @@ dependencies {
 	optional("javax.xml.bind:jaxb-api")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("com.google.protobuf:protobuf-java-util")
 	testCompile("javax.inject:javax.inject-tck")
 	testCompile("javax.servlet:javax.servlet-api")
 	testCompile("javax.validation:validation-api")
