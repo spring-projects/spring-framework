@@ -125,7 +125,7 @@ clean code structure with  no circular dependencies between packages.
 == Feedback and Contributions
 
 For how-to questions or diagnosing or debugging issues, we suggest using StackOverflow,
-and we have a https://spring.io/questions[questions page] that lists the suggested tags to use.
+and we have an https://spring.io/questions[questions page] that lists the suggested tags to use.
 If you're fairly certain that there is a problem in the Spring Framework or would like
 to suggest a feature, please use the https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
 
@@ -145,7 +145,7 @@ top-level project page.
 == Getting Started
 
 If you are just getting started with Spring, you may want to begin using the Spring
-Framework by creating a https://projects.spring.io/spring-boot/[Spring Boot]-based
+Framework by creating an https://projects.spring.io/spring-boot/[Spring Boot]-based
 application. Spring Boot provides a quick (and opinionated) way to create a
 production-ready Spring-based application. It is based on the Spring Framework, favors
 convention over configuration, and is designed to get you up and running as quickly

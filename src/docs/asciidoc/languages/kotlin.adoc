@@ -439,7 +439,7 @@ https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coro
 
 * `Flow` is push-based while `Flux` is push-pull hybrid
 * Backpressure is implemented via suspending functions
-* `Flow` has only a https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/collect.html[single suspending `collect` method] and operators are implemented as https://kotlinlang.org/docs/reference/extensions.html[extensions]
+* `Flow` has only an https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/collect.html[single suspending `collect` method] and operators are implemented as https://kotlinlang.org/docs/reference/extensions.html[extensions]
 * https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-core/common/src/flow/operators[Operators are easy to implement] thanks to Coroutines
 * Extensions allow to add custom operators to `Flow`
 * Collect operations are suspending functions
@@ -700,7 +700,7 @@ As the following example shows, this allows for easy changes to individual prope
 Common persistence technologies (such as JPA) require a default constructor, preventing this
 kind of design. Fortunately, there is now a workaround for this
 https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["`default constructor hell`"],
-since Kotlin provides a https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[`kotlin-jpa`]
+since Kotlin provides an https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[`kotlin-jpa`]
 plugin that generates synthetic no-arg constructor for classes annotated with JPA annotations.
 
 If you need to leverage this kind of mechanism for other persistence technologies, you can configure
@@ -947,7 +947,7 @@ class SpecificationLikeTests {
 [[kotlin-webtestclient-issue]]
 ==== `WebTestClient` Type Inference Issue in Kotlin
 
-Due to a https://youtrack.jetbrains.com/issue/KT-5464[type inference issue], you must
+Due to an https://youtrack.jetbrains.com/issue/KT-5464[type inference issue], you must
 use the Kotlin `expectBody` extension (such as `.expectBody<String>().isEqualTo("toys")`),
 since it provides a workaround for the Kotlin issue with the Java API.
 
