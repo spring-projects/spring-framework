@@ -34,13 +34,23 @@ operator fun PropertyResolver.get(key: String) : String? = getProperty(key)
 
 /**
  * Extension for [PropertyResolver.getProperty] providing a `getProperty<Foo>(...)`
- * variant returning a nullable [String].
+ * variant returning a nullable [Foo].
  *
  * @author Sebastien Deleuze
  * @since 5.1
  */
 inline fun <reified T> PropertyResolver.getProperty(key: String) : T? =
 		getProperty(key, T::class.java)
+
+/**
+ * Extension for [PropertyResolver.getProperty] providing a `getProperty<Foo>(...)`
+ * variant returning default [Foo].
+ *
+ * @author Krzysztof Kocel
+ * @since 5.3
+ */
+inline fun <reified T> PropertyResolver.getProperty(key: String, defaultValue: T) : T =
+	getProperty(key, T::class.java, defaultValue)
 
 /**
  * Extension for [PropertyResolver.getRequiredProperty] providing a
