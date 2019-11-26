@@ -44,6 +44,7 @@ import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.ProtobufMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -115,10 +116,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean javaxValidationPresent;
 
+	private static final boolean protobufPresent;
+
 	static {
 		ClassLoader classLoader = MessageBrokerBeanDefinitionParser.class.getClassLoader();
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader);
 		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
 	}
 
 
@@ -501,6 +505,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonFactoryDef.setSource(source);
 				jacksonConverterDef.getPropertyValues().add("objectMapper", jacksonFactoryDef);
 				converters.add(jacksonConverterDef);
+			}
+			if (protobufPresent) {
+				final RootBeanDefinition protoConverterDef = new RootBeanDefinition(ProtobufMessageConverter.class);
+				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
+				resolverDef.getPropertyValues().add("defaultMimeType", ProtobufMessageConverter.PROTOBUF);
+				protoConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
+				converters.add(protoConverterDef);
 			}
 		}
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();

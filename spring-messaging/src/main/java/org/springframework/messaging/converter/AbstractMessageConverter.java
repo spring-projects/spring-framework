@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +48,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<MimeType> supportedMimeTypes;
+	private List<MimeType> supportedMimeTypes;
 
 	@Nullable
 	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
@@ -62,8 +63,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @param supportedMimeType the supported MIME type
 	 */
 	protected AbstractMessageConverter(MimeType supportedMimeType) {
-		Assert.notNull(supportedMimeType, "supportedMimeType is required");
-		this.supportedMimeTypes = Collections.<MimeType>singletonList(supportedMimeType);
+		setSupportedMimeTypes(Collections.singletonList(supportedMimeType));
 	}
 
 	/**
@@ -71,8 +71,16 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @param supportedMimeTypes the supported MIME types
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
-		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
-		this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
+		setSupportedMimeTypes(new ArrayList<>(supportedMimeTypes));
+	}
+
+	/**
+	 * Construct an {@code AbstractMessageConverter} supporting multiple MIME types.
+	 * @param supportedMimeTypes the supported MIME types
+	 * @since 5.2.2
+	 */
+	protected AbstractMessageConverter(MimeType... supportedMimeTypes) {
+		setSupportedMimeTypes(Arrays.asList(supportedMimeTypes));
 	}
 
 
@@ -81,6 +89,15 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	public List<MimeType> getSupportedMimeTypes() {
 		return Collections.unmodifiableList(this.supportedMimeTypes);
+	}
+
+	/**
+	 * Set the list of {@link MimeType} objects supported by this converter.
+	 * @since 5.2.2
+	 */
+	protected void setSupportedMimeTypes(List<MimeType> supportedMimeTypes) {
+		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
+		this.supportedMimeTypes = supportedMimeTypes;
 	}
 
 	/**

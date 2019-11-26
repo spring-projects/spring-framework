@@ -37,6 +37,7 @@ import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.ProtobufMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpLogging;
@@ -93,9 +94,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
-			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
+	private static final boolean jackson2Present;
 
+	private static final boolean protobufPresent;
+
+	static {
+		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader);
+		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+	}
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -391,6 +398,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			if (jackson2Present) {
 				converters.add(createJacksonConverter());
 			}
+			if (protobufPresent) {
+				converters.add(createProtobufConverter());
+			}
 		}
 		return new CompositeMessageConverter(converters);
 	}
@@ -399,6 +409,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		converter.setContentTypeResolver(resolver);
+		return converter;
+	}
+
+	protected ProtobufMessageConverter createProtobufConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(ProtobufMessageConverter.PROTOBUF);
+		final ProtobufMessageConverter converter = new ProtobufMessageConverter();
 		converter.setContentTypeResolver(resolver);
 		return converter;
 	}

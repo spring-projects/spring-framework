@@ -70,7 +70,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	 * @param supportedMimeTypes the MIME types
 	 */
 	public MarshallingMessageConverter(MimeType... supportedMimeTypes) {
-		super(Arrays.asList(supportedMimeTypes));
+		super(supportedMimeTypes);
 	}
 
 	/**
