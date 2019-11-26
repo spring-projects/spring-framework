@@ -1,6 +1,6 @@
 [[webmvc-fn]]
 = Functional Endpoints
-[.small]#<<web-reactive.adoc#webflux-fn, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn, WebFlux>>#
 
 Spring Web MVC includes WebMvc.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
@@ -12,7 +12,7 @@ the same <<web#mvc-servlet>>.
 
 [[webmvc-fn-overview]]
 == Overview
-[.small]#<<web-reactive.adoc#webflux-fn-overview, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn-overview, WebFlux>>#
 
 In WebMvc.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a `ServerResponse`.
@@ -110,7 +110,7 @@ If you register the `RouterFunction` as a bean, for instance by exposing it in a
 
 [[webmvc-fn-handler-functions]]
 == HandlerFunction
-[.small]#<<web-reactive.adoc#webflux-fn-handler-functions, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn-handler-functions, WebFlux>>#
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response, including headers, body, method, and status code.
@@ -375,7 +375,7 @@ See <<core.adoc#validation-beanvalidation, Spring Validation>>.
 
 [[webmvc-fn-router-functions]]
 == `RouterFunction`
-[.small]#<<web-reactive.adoc#webflux-fn-router-functions, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn-router-functions, WebFlux>>#
 
 Router functions are used to route the requests to the corresponding `HandlerFunction`.
 Typically, you do not write router functions yourself, but rather use a method on the
@@ -581,7 +581,7 @@ We can further improve by using the `nest` method together with `accept`:
 
 [[webmvc-fn-running]]
 == Running a Server
-[.small]#<<web-reactive.adoc#webflux-fn-running, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn-running, WebFlux>>#
 
 You typically run router functions in a <<web.adoc#mvc-servlet, `DispatcherHandler`>>-based setup through the
 <<web.adoc#mvc-config>>, which uses Spring configuration to declare the
@@ -674,7 +674,7 @@ The following example shows a WebFlux Java configuration:
 
 [[webmvc-fn-handler-filter-function]]
 == Filtering Handler Functions
-[.small]#<<web-reactive.adoc#webflux-fn-handler-filter-function, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-fn-handler-filter-function, WebFlux>>#
 
 You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
 function builder.

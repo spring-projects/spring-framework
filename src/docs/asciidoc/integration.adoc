@@ -1113,7 +1113,7 @@ converters to use explicitly.
 
 [[rest-message-conversion]]
 ===== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
 
 The `spring-web` module contains the `HttpMessageConverter` contract for reading and
 writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
