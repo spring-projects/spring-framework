@@ -1716,7 +1716,7 @@ the `WEB-INF/defs` directory. At initialization of the `WebApplicationContext`, 
 files are loaded, and the definitions factory are initialized. After that has
 been done, the Tiles included in the definition files can be used as views within your
 Spring web application. To be able to use the views, you have to have a `ViewResolver`
-as with any other view technology used with Spring. You can can use either of two
+as with any other view technology used with Spring. You can use either of two
 implementations, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`.
 
 You can specify locale-specific Tiles definitions by adding an underscore and then
