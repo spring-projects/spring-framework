@@ -79,7 +79,7 @@ The responder may then return `PAYLOAD` frames with response messages, and in th
 of `REQUEST_CHANNEL` the requester may also send `PAYLOAD` frames with more request
 messages.
 
-When a request involves a stream of messages such as as `Request-Stream` and `Channel`,
+When a request involves a stream of messages such as `Request-Stream` and `Channel`,
 the responder must respect demand signals from the requester. Demand is expressed as a
 number of messages. Initial demand is specified in `REQUEST_STREAM` and
 `REQUEST_CHANNEL` frames. Subsequent demand is signaled via `REQUEST_N` frames.

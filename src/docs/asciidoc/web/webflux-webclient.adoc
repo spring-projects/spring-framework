@@ -662,7 +662,7 @@ or, in the case of a `Resource`, based on the file extension. If necessary, you 
 explicitly provide the `MediaType` to use for each part through one of the overloaded
 builder `part` methods.
 
-Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
+Once a `MultiValueMap` is prepared, the easiest way to pass it to the `WebClient` is
 through the `body` method, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

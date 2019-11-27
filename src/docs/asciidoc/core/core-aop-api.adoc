@@ -576,7 +576,7 @@ methods can be combined in a single class. The following listing shows the final
 
 NOTE: If a throws-advice method throws an exception itself, it overrides the
 original exception (that is, it changes the exception thrown to the user). The overriding
-exception is typically a RuntimeException, which is is compatible with any method
+exception is typically a RuntimeException, which is compatible with any method
 signature. However, if a throws-advice method throws a checked exception, it must
 match the declared exceptions of the target method and is, hence, to some degree
 coupled to specific target method signatures. _Do not throw an undeclared checked

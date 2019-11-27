@@ -868,7 +868,7 @@ when consumed to avoid memory leaks.
 WebFlux applications generally do not need to be concerned with such issues, unless they
 consume or produce data buffers directly, as opposed to relying on codecs to convert to
 and from higher level objects, or unless they choose to create custom codecs. For such
-cases please review the the information in <<core#databuffers, Data Buffers and Codecs>>,
+cases please review the information in <<core#databuffers, Data Buffers and Codecs>>,
 especially the section on <<core#databuffers-using, Using DataBuffer>>.
 
 
