@@ -3739,7 +3739,7 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 | `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
 | Choose any specific request or response type (for example, `ServletRequest` or
-  `HttpServletRequest` or or Spring's `MultipartRequest` or `MultipartHttpServletRequest`).
+  `HttpServletRequest` or Spring's `MultipartRequest` or `MultipartHttpServletRequest`).
 
 | `javax.servlet.http.HttpSession`
 | Enforces the presence of a session. As a consequence, such an argument is never `null`. +
@@ -4284,7 +4284,7 @@ as the following example shows:
 	}
 ----
 
-The return value can then be obtained by running the the given task through the
+The return value can then be obtained by running the given task through the
 <<mvc-ann-async-configuration-spring-mvc, configured>> `TaskExecutor`.
 
 
