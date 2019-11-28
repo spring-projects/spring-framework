@@ -96,8 +96,12 @@ public class AnnotationMetadataTests {
 		assertThat(metadata.hasAnnotation(Component.class.getName()), is(false));
 		assertThat(metadata.hasAnnotation(Scope.class.getName()), is(false));
 		assertThat(metadata.hasAnnotation(SpecialAttr.class.getName()), is(false));
+		assertThat(metadata.hasMetaAnnotation(Component.class.getName()), is(false));
+		assertThat(metadata.hasMetaAnnotation(MetaAnnotation.class.getName()), is(false));
 		assertThat(metadata.getAnnotationTypes().size(), is(0));
 		assertThat(metadata.getAnnotationAttributes(Component.class.getName()), nullValue());
+		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), false), nullValue());
+		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), true), nullValue());
 		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size(), equalTo(0));
 		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName()), equalTo(false));
 		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()), nullValue());
