@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests demonstrating that the reflection-based {@link StandardAnnotationMetadata}
- * and ASM-based {@code AnnotationMetadataReadingVisitor} produce identical output.
+ * and ASM-based {@code SimpleAnnotationMetadata} produce <em>almost</em> identical output.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -50,9 +50,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  */
 class AnnotationMetadataTests {
-
-	private static final boolean reproduceGh24077 = false;
-
 
 	@Test
 	void standardAnnotationMetadata() {
@@ -73,7 +70,7 @@ class AnnotationMetadataTests {
 	@Test
 	void standardAnnotationMetadataForSubclass() {
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(AnnotatedComponentSubClass.class);
-		doTestSubClassAnnotationInfo(metadata);
+		doTestSubClassAnnotationInfo(metadata, false);
 	}
 
 	@Test
@@ -81,10 +78,10 @@ class AnnotationMetadataTests {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(AnnotatedComponentSubClass.class.getName());
 		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-		doTestSubClassAnnotationInfo(metadata);
+		doTestSubClassAnnotationInfo(metadata, true);
 	}
 
-	private void doTestSubClassAnnotationInfo(AnnotationMetadata metadata) {
+	private void doTestSubClassAnnotationInfo(AnnotationMetadata metadata, boolean asm) {
 		assertThat(metadata.getClassName()).isEqualTo(AnnotatedComponentSubClass.class.getName());
 		assertThat(metadata.isInterface()).isFalse();
 		assertThat(metadata.isAnnotation()).isFalse();
@@ -97,15 +94,15 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isAnnotated(Scope.class.getName())).isFalse();
 		assertThat(metadata.isAnnotated(SpecialAttr.class.getName())).isFalse();
 
-		if (reproduceGh24077) {
-			assertThat(metadata.isAnnotated(NamedComposedAnnotation.class.getName())).isTrue();
-			assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isTrue();
-			assertThat(metadata.getAnnotationTypes()).containsExactly(NamedComposedAnnotation.class.getName());
-		}
-		else {
+		if (asm) {
 			assertThat(metadata.isAnnotated(NamedComposedAnnotation.class.getName())).isFalse();
 			assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isFalse();
 			assertThat(metadata.getAnnotationTypes()).isEmpty();
+		}
+		else {
+			assertThat(metadata.isAnnotated(NamedComposedAnnotation.class.getName())).isTrue();
+			assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isTrue();
+			assertThat(metadata.getAnnotationTypes()).containsExactly(NamedComposedAnnotation.class.getName());
 		}
 
 		assertThat(metadata.hasAnnotation(Component.class.getName())).isFalse();
@@ -252,7 +249,7 @@ class AnnotationMetadataTests {
 	@Test
 	void inheritedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(NamedComposedAnnotationExtended.class);
-		assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isFalse();
+		assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isTrue();
 	}
 
 	@Test
@@ -294,29 +291,18 @@ class AnnotationMetadataTests {
 
 		assertThat(metadata.isAnnotated(Component.class.getName())).isTrue();
 
-		if (reproduceGh24077) {
-			assertThat(metadata.isAnnotated(NamedComposedAnnotation.class.getName())).isTrue();
-		}
+		assertThat(metadata.isAnnotated(NamedComposedAnnotation.class.getName())).isTrue();
 
 		assertThat(metadata.hasAnnotation(Component.class.getName())).isTrue();
 		assertThat(metadata.hasAnnotation(Scope.class.getName())).isTrue();
 		assertThat(metadata.hasAnnotation(SpecialAttr.class.getName())).isTrue();
 
-		if (reproduceGh24077) {
-			assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isTrue();
-			assertThat(metadata.getAnnotationTypes()).containsExactlyInAnyOrder(
-					Component.class.getName(), Scope.class.getName(),
-					SpecialAttr.class.getName(), DirectAnnotation.class.getName(),
-					MetaMetaAnnotation.class.getName(), EnumSubclasses.class.getName(),
-					NamedComposedAnnotation.class.getName());
-		}
-		else {
-			assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isFalse();
-			assertThat(metadata.getAnnotationTypes()).containsExactlyInAnyOrder(
-					Component.class.getName(), Scope.class.getName(),
-					SpecialAttr.class.getName(), DirectAnnotation.class.getName(),
-					MetaMetaAnnotation.class.getName(), EnumSubclasses.class.getName());
-		}
+		assertThat(metadata.hasAnnotation(NamedComposedAnnotation.class.getName())).isTrue();
+		assertThat(metadata.getAnnotationTypes()).containsExactlyInAnyOrder(
+				Component.class.getName(), Scope.class.getName(),
+				SpecialAttr.class.getName(), DirectAnnotation.class.getName(),
+				MetaMetaAnnotation.class.getName(), EnumSubclasses.class.getName(),
+				NamedComposedAnnotation.class.getName());
 
 		AnnotationAttributes compAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(Component.class.getName());
 		assertThat(compAttrs).hasSize(1);
@@ -513,6 +499,7 @@ class AnnotationMetadataTests {
 	@DirectAnnotation(value = "direct", additional = "", additionalArray = {})
 	@MetaMetaAnnotation
 	@EnumSubclasses({SubclassEnum.FOO, SubclassEnum.BAR})
+	@NamedComposedAnnotation
 	private static class AnnotatedComponent implements Serializable {
 
 		@TestAutowired
