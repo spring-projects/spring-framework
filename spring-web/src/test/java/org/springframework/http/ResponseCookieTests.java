@@ -72,7 +72,7 @@ public class ResponseCookieTests {
 		Arrays.asList("abc", "abc.org", "abc-def.org", "abc3.org", ".abc.org")
 				.forEach(domain -> ResponseCookie.from("n", "v").domain(domain).build());
 
-		Arrays.asList("-abc.org", "abc.org.", "abc.org-", "-abc.org", "abc.org-")
+		Arrays.asList("-abc.org", "abc.org.", "abc.org-")
 				.forEach(domain -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").domain(domain).build())
 						.hasMessageContaining("Invalid first/last char"));
 
