@@ -44,9 +44,13 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * <p>If you would like to provide a URI template with variables, consider using
- * {@link org.springframework.web.util.UriTemplate}:
+ * {@link org.springframework.web.util.DefaultUriBuilderFactory DefaultUriBuilderFactory}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;https://example.com/{foo}&quot;).expand(&quot;bar&quot;);
+ * // Create shared factory
+ * UriBuilderFactory factory = new DefaultUriBuilderFactory();
+ *
+ * // Use factory to create URL from template
+ * URI uri = factory.uriString(&quot;https://example.com/{foo}&quot;).build(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
