@@ -77,6 +77,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * and Spring Kotlin extensions to perform integration tests on an embedded WebFlux server.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -436,10 +437,24 @@ public interface WebTestClient {
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * <p>Note that in a scenario where the builder is configured by
+		 * multiple parties, it is preferable to use
+		 * {@link #exchangeStrategies(Consumer)} in order to customize the same
+		 * {@code ExchangeStrategies}. This method here sets the strategies that
+		 * everyone else then can customize.
+		 * <p>By default this is {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
+
+		/**
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
+		 * @since 5.1.12
+		 */
+		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
 
 		/**
 		 * Max amount of time to wait for responses.
@@ -877,7 +892,7 @@ public interface WebTestClient {
 		 * @since 5.1
 		 * @see #xpath(String, Map, Object...)
 		 */
-		default XpathAssertions xpath(String expression, Object... args){
+		default XpathAssertions xpath(String expression, Object... args) {
 			return xpath(expression, null, args);
 		}
 
@@ -891,7 +906,7 @@ public interface WebTestClient {
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */
-		XpathAssertions xpath(String expression, @Nullable  Map<String, String> namespaces, Object... args);
+		XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args);
 
 		/**
 		 * Assert the response body content with the given {@link Consumer}.

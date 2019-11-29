@@ -39,4 +39,16 @@ public class ExchangeStrategiesTests {
 		assertFalse(strategies.messageWriters().isEmpty());
 	}
 
+	@Test
+	@SuppressWarnings("deprecation")
+	public void mutate() {
+		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
+		assertTrue(strategies.messageReaders().isEmpty());
+		assertTrue(strategies.messageWriters().isEmpty());
+
+		ExchangeStrategies mutated = strategies.mutate().codecs(codecs -> codecs.registerDefaults(true)).build();
+		assertFalse(mutated.messageReaders().isEmpty());
+		assertFalse(mutated.messageWriters().isEmpty());
+	}
+
 }

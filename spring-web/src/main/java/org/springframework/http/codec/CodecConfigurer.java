@@ -87,6 +87,15 @@ public interface CodecConfigurer {
 	 */
 	List<HttpMessageWriter<?>> getWriters();
 
+	/**
+	 * Create a copy of this {@link CodecConfigurer}. The returned clone has its
+	 * own lists of default and custom codecs and generally can be configured
+	 * independently. Keep in mind however that codec instances (if any are
+	 * configured) are themselves not cloned.
+	 * @since 5.1.12
+	 */
+	CodecConfigurer clone();
+
 
 	/**
 	 * Customize or replace the HTTP message readers and writers registered by

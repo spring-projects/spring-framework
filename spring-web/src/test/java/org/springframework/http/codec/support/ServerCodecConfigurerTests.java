@@ -60,7 +60,11 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -147,6 +151,50 @@ public class ServerCodecConfigurerTests {
 		assertEquals(size, ((Jackson2SmileDecoder) getNextDecoder(readers)).getMaxInMemorySize());
 		assertEquals(size, ((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize());
 		assertEquals(size, ((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize());
+	}
+
+	@Test
+	public void cloneConfigurer() {
+		ServerCodecConfigurer clone = this.configurer.clone();
+
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		clone.defaultCodecs().multipartReader(reader);
+		clone.defaultCodecs().serverSentEventEncoder(encoder);
+
+		// Clone has the customizations
+
+		HttpMessageReader<?> actualReader = clone.getReaders().stream()
+				.filter(r -> r instanceof MultipartHttpMessageReader)
+				.findFirst()
+				.get();
+
+		Encoder<?> actualEncoder = clone.getWriters().stream()
+				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
+				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
+				.findFirst()
+				.get();
+
+
+		assertSame(reader, actualReader);
+		assertSame(encoder, actualEncoder);
+
+		// Original does not have the customizations
+
+		actualReader = this.configurer.getReaders().stream()
+				.filter(r -> r instanceof MultipartHttpMessageReader)
+				.findFirst()
+				.get();
+
+		actualEncoder = this.configurer.getWriters().stream()
+				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
+				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
+				.findFirst()
+				.get();
+
+
+		assertNotSame(reader, actualReader);
+		assertNotSame(encoder, actualEncoder);
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {

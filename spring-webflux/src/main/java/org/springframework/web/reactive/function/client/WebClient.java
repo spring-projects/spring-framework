@@ -64,6 +64,7 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
 public interface WebClient {
@@ -289,10 +290,24 @@ public interface WebClient {
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default this is obtained from {@link ExchangeStrategies#withDefaults()}.
+		 * <p>Note that in a scenario where the builder is configured by
+		 * multiple parties, it is preferable to use
+		 * {@link #exchangeStrategies(Consumer)} in order to customize the same
+		 * {@code ExchangeStrategies}. This method here sets the strategies that
+		 * everyone else then can customize.
+		 * <p>By default this is {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
+
+		/**
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
+		 * @since 5.1.12
+		 */
+		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
 
 		/**
 		 * Provide an {@link ExchangeFunction} pre-configured with
