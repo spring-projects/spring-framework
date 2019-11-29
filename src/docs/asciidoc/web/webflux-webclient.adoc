@@ -42,14 +42,14 @@ The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	ExchangeStrategies strategies = ExchangeStrategies.builder()
-			.codecs(configurer -> {
-				// ...
-			})
-			.build();
+	Consumer<ExchangeStrategies.Builder> customizeCodecs = builder -> {
+		builder.codecs(configurer -> {
+			//...
+		});
+	};
 
 	WebClient client = WebClient.builder()
-			.exchangeStrategies(strategies)
+			.exchangeStrategies(customizeCodecs)
 			.build();
 ----
 ====
@@ -73,7 +73,35 @@ modified copy without affecting the original instance, as the following example 
 ----
 ====
 
+[[webflux-client-builder-maxinmemorysize]]
+=== MaxInMemorySize
 
+Spring WebFlux configures by default a maximum size for buffering data in-memory when decoding
+HTTP responses with the `WebClient`. This avoids application memory issues if the received
+response is much larger than expected.
+
+You can configure a default value that might not be enough for your use case, and your application
+can hit that limit with the following:
+
+----
+org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer
+----
+
+You can configure this limit on all default codecs with the following code sample:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(configurer ->
+				configurer.codecs(codecs ->
+					codecs.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
+				)
+			)
+			.build();
+----
+====
 
 [[webflux-client-builder-reactor]]
 === Reactor Netty
