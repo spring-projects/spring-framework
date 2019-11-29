@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,16 +124,16 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 		if (file != null) {
 			return file.getContentType();
 		}
-
 		try {
 			Part part = getPart(paramOrFileName);
 			if (part != null) {
 				return part.getContentType();
 			}
-		} catch (ServletException | IOException e) {
-			throw new IllegalStateException("Cannot extract content type from multipart request.", e);
 		}
-
+		catch (ServletException | IOException ex) {
+			// Should never happen (we're not actually parsing)
+			throw new IllegalStateException(ex);
+		}
 		return null;
 	}
 
