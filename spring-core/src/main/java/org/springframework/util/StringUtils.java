@@ -1002,8 +1002,8 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim the elements of the given {@code String} array,
-	 * calling {@code String.trim()} on each of them.
+	 * Trim the elements of the given {@code String} array, calling
+	 * {@code String.trim()} on each non-null element.
 	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
