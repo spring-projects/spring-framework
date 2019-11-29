@@ -4124,11 +4124,9 @@ example uses only one configuration method (we show examples of multiple methods
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource).withTableName("t_actor");
 		}
 
@@ -4148,7 +4146,6 @@ example uses only one configuration method (we show examples of multiple methods
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource).withTableName("t_actor")
 
 		fun add(actor: Actor) {
@@ -4183,11 +4180,9 @@ listing shows how it works:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4209,7 +4204,6 @@ listing shows how it works:
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor").usingGeneratedKeyColumns("id")
 
@@ -4245,11 +4239,9 @@ You can limit the columns for an insert by specifying a list of column names wit
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingColumns("first_name", "last_name")
@@ -4272,7 +4264,6 @@ You can limit the columns for an insert by specifying a list of column names wit
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingColumns("first_name", "last_name")
@@ -4309,11 +4300,9 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4333,7 +4322,6 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingGeneratedKeyColumns("id")
@@ -4356,11 +4344,9 @@ convenient `addValue` method that can be chained. The following example shows ho
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4382,7 +4368,6 @@ convenient `addValue` method that can be chained. The following example shows ho
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingGeneratedKeyColumns("id")
@@ -4445,11 +4430,9 @@ of the stored procedure):
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcCall procReadActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.procReadActor = new SimpleJdbcCall(dataSource)
 					.withProcedureName("read_actor");
 		}
@@ -4474,7 +4457,6 @@ of the stored procedure):
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val procReadActor = SimpleJdbcCall(dataSource)
 				.withProcedureName("read_actor")
 
