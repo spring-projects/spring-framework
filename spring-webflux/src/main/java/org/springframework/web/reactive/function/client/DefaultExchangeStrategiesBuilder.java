@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,16 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 	}
 
 
-	private final ClientCodecConfigurer codecConfigurer = ClientCodecConfigurer.create();
+	private final ClientCodecConfigurer codecConfigurer;
 
 
 	public DefaultExchangeStrategiesBuilder() {
+		this.codecConfigurer = ClientCodecConfigurer.create();
 		this.codecConfigurer.registerDefaults(false);
+	}
+
+	private DefaultExchangeStrategiesBuilder(DefaultExchangeStrategies other) {
+		this.codecConfigurer = other.codecConfigurer.clone();
 	}
 
 
@@ -69,17 +74,27 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 
 	private static class DefaultExchangeStrategies implements ExchangeStrategies {
 
+		private final ClientCodecConfigurer codecConfigurer;
+
 		private final List<HttpMessageReader<?>> readers;
 
 		private final List<HttpMessageWriter<?>> writers;
 
+
 		public DefaultExchangeStrategies(ClientCodecConfigurer codecConfigurer) {
-			this.readers = unmodifiableCopy(codecConfigurer.getReaders());
-			this.writers = unmodifiableCopy(codecConfigurer.getWriters());
+			this.codecConfigurer = codecConfigurer;
+			this.readers = unmodifiableCopy(this.codecConfigurer.getReaders());
+			this.writers = unmodifiableCopy(this.codecConfigurer.getWriters());
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
 			return Collections.unmodifiableList(new ArrayList<>(list));
+		}
+
+		@Override
+		@Deprecated
+		public Builder mutate() {
+			return new DefaultExchangeStrategiesBuilder(this);
 		}
 
 		@Override

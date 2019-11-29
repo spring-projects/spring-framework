@@ -169,18 +169,19 @@ public interface RSocketRequester {
 		RSocketRequester.Builder setupMetadata(Object value, @Nullable MimeType mimeType);
 
 		/**
-		 * Provide {@link RSocketStrategies} to use.
-		 * <p>By default this is based on default settings of
-		 * {@link RSocketStrategies.Builder} but may be further customized via
-		 * {@link #rsocketStrategies(Consumer)}.
+		 * Provide the {@link RSocketStrategies} to use.
+		 * <p>This is useful for changing the default settings, yet still allowing
+		 * further customizations via {@link #rsocketStrategies(Consumer)}.
+		 * If not set, defaults are obtained from {@link RSocketStrategies#builder()}.
+		 * @param strategies the strategies to use
 		 */
 		RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies);
 
 		/**
 		 * Customize the {@link RSocketStrategies}.
-		 * <p>By default this starts out as {@link RSocketStrategies#builder()}.
-		 * However if strategies were {@link #rsocketStrategies(RSocketStrategies) set}
-		 * explicitly, then they are {@link RSocketStrategies#mutate() mutated}.
+		 * <p>Allows further customization on {@link RSocketStrategies},
+		 * mutating them if they were {@link #rsocketStrategies(RSocketStrategies) set},
+		 * or starting from {@link RSocketStrategies#builder()} defaults}.
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
 

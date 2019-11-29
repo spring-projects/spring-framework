@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,30 @@ import org.springframework.http.codec.ClientCodecConfigurer;
  */
 public class DefaultClientCodecConfigurer extends BaseCodecConfigurer implements ClientCodecConfigurer {
 
+
 	public DefaultClientCodecConfigurer() {
 		super(new ClientDefaultCodecsImpl());
 		((ClientDefaultCodecsImpl) defaultCodecs()).setPartWritersSupplier(() -> getWritersInternal(true));
 	}
 
+	private DefaultClientCodecConfigurer(DefaultClientCodecConfigurer other) {
+		super(other);
+	}
+
+
 	@Override
 	public ClientDefaultCodecs defaultCodecs() {
 		return (ClientDefaultCodecs) super.defaultCodecs();
+	}
+
+	@Override
+	public DefaultClientCodecConfigurer clone() {
+		return new DefaultClientCodecConfigurer(this);
+	}
+
+	@Override
+	protected BaseDefaultCodecs cloneDefaultCodecs() {
+		return new ClientDefaultCodecsImpl((ClientDefaultCodecsImpl) defaultCodecs());
 	}
 
 }
