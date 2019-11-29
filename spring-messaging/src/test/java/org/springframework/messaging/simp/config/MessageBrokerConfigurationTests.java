@@ -41,7 +41,6 @@ import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
-import org.springframework.messaging.converter.ProtobufMessageConverter;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -282,17 +281,13 @@ public class MessageBrokerConfigurationTests {
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
-		assertThat(converters).hasSize(4);
+		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
 		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
 		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
-		assertThat(converters.get(3)).isInstanceOf(ProtobufMessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
-
-		resolver = ((ProtobufMessageConverter) converters.get(3)).getContentTypeResolver();
-		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(ProtobufMessageConverter.PROTOBUF);
 	}
 
 	@Test
@@ -344,13 +339,12 @@ public class MessageBrokerConfigurationTests {
 		};
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
-		assertThat(compositeConverter.getConverters()).hasSize(5);
+		assertThat(compositeConverter.getConverters()).hasSize(4);
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
 		assertThat(iterator.next()).isEqualTo(testConverter);
 		assertThat(iterator.next()).isInstanceOf(StringMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(ByteArrayMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(MappingJackson2MessageConverter.class);
-		assertThat(iterator.next()).isInstanceOf(ProtobufMessageConverter.class);
 	}
 
 	@Test

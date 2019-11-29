@@ -41,7 +41,6 @@ import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.ProtobufMessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
@@ -340,17 +339,13 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(simpMessagingTemplate.getUserDestinationPrefix()).isEqualTo("/personal/");
 
 		List<MessageConverter> converters = compositeMessageConverter.getConverters();
-		assertThat(converters).hasSize(4);
+		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
 		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
 		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
-		assertThat(converters.get(3)).isInstanceOf(ProtobufMessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
-
-		resolver = ((ProtobufMessageConverter) converters.get(3)).getContentTypeResolver();
-		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(ProtobufMessageConverter.PROTOBUF);
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
 		Object pathMatcher = handlerAccessor.getPropertyValue("pathMatcher");
@@ -420,7 +415,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
 		assertThat(compositeConverter).isNotNull();
 
-		assertThat(compositeConverter.getConverters().size()).isEqualTo(5);
+		assertThat(compositeConverter.getConverters().size()).isEqualTo(4);
 		assertThat(compositeConverter.getConverters().iterator().next().getClass()).isEqualTo(StringMessageConverter.class);
 	}
 

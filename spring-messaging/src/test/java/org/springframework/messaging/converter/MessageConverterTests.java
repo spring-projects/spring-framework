@@ -78,8 +78,7 @@ public class MessageConverterTests {
 	public void supportsMimeTypeNoneConfigured() {
 		Message<String> message = MessageBuilder.withPayload(
 				"ABC").setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-		final MimeType[] empty = {};
-		this.converter = new TestMessageConverter(empty);
+		this.converter = new TestMessageConverter(new MimeType[0]);
 
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("success-from");
 	}
@@ -100,10 +99,8 @@ public class MessageConverterTests {
 
 	@Test
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
-		final MimeType[] empty = {};
-		this.converter = new TestMessageConverter(empty);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.converter.setStrictContentTypeMatch(true));
+		this.converter = new TestMessageConverter(new MimeType[0]);
+		assertThatIllegalArgumentException().isThrownBy(() -> this.converter.setStrictContentTypeMatch(true));
 	}
 
 	@Test
@@ -158,15 +155,15 @@ public class MessageConverterTests {
 		}
 
 		@Override
-		protected Object convertFromInternal(Message<?> message, Class<?> targetClass,
-											 @Nullable Object conversionHint) {
+		protected Object convertFromInternal(
+				Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 
 			return "success-from";
 		}
 
 		@Override
-		protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
-										   @Nullable Object conversionHint) {
+		protected Object convertToInternal(
+				Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 			return "success-to";
 		}

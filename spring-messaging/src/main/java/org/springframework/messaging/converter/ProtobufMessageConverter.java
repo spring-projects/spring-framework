@@ -23,12 +23,12 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Map;
 
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
+
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ClassUtils;
@@ -77,59 +77,23 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 
 	/**
-	 * Construct a new {@code ProtobufMessageConverter}.
+	 * Constructor with a default instance of {@link ExtensionRegistry}.
 	 */
 	public ProtobufMessageConverter() {
-		this((ProtobufFormatSupport) null, (ExtensionRegistry) null);
+		this(null, null);
 	}
 
 	/**
-	 * Construct a new {@code ProtobufMessageConverter} with a registry that specifies
-	 * protocol message extensions.
-	 *
-	 * @param extensionRegistry the registry to populate
+	 * Constructor with a given {@code ExtensionRegistry}.
 	 */
-	public ProtobufMessageConverter(@Nullable ExtensionRegistry extensionRegistry) {
+	public ProtobufMessageConverter(ExtensionRegistry extensionRegistry) {
 		this(null, extensionRegistry);
 	}
 
-	/**
-	 * Construct a new {@code ProtobufMessageConverter} with the given
-	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration.
-	 *
-	 * @param parser  the JSON parser configuration
-	 * @param printer the JSON printer configuration
-	 */
-	public ProtobufMessageConverter(@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
-		this(new ProtobufJavaUtilSupport(parser, printer), (ExtensionRegistry) null);
-	}
+	ProtobufMessageConverter(@Nullable ProtobufFormatSupport formatSupport,
+			@Nullable ExtensionRegistry extensionRegistry) {
 
-	/**
-	 * Construct a new {@code ProtobufMessageConverter} with the given
-	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration, also
-	 * accepting a registry that specifies protocol message extensions.
-	 *
-	 * @param parser            the JSON parser configuration
-	 * @param printer           the JSON printer configuration
-	 * @param extensionRegistry the registry to populate
-	 */
-	public ProtobufMessageConverter(@Nullable JsonFormat.Parser parser,
-									@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistry extensionRegistry) {
-
-		this(new ProtobufJavaUtilSupport(parser, printer), extensionRegistry);
-	}
-
-	/**
-	 * Construct a new {@code ProtobufMessageConverter} with the given
-	 * {@code ProtobufFormatSupport}  configuration, also
-	 * accepting a registry that specifies protocol message extensions.
-	 *
-	 * @param formatSupport     support third party
-	 * @param extensionRegistry the registry to populate
-	 */
-	public ProtobufMessageConverter(@Nullable ProtobufFormatSupport formatSupport,
-									@Nullable ExtensionRegistry extensionRegistry) {
-		super(PROTOBUF);
+		super(PROTOBUF, TEXT_PLAIN);
 
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
@@ -142,11 +106,12 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 		}
 
 		if (this.protobufFormatSupport != null) {
-			setSupportedMimeTypes(Arrays.asList(protobufFormatSupport.supportedMediaTypes()));
+			addSupportedMimeTypes(this.protobufFormatSupport.supportedMediaTypes());
 		}
 
 		this.extensionRegistry = (extensionRegistry == null ? ExtensionRegistry.newInstance() : extensionRegistry);
 	}
+
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
@@ -161,7 +126,9 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertFromInternal(org.springframework.messaging.Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected Object convertFromInternal(org.springframework.messaging.Message<?> message,
+			Class<?> targetClass, @Nullable Object conversionHint) {
+
 		MimeType contentType = getMimeType(message.getHeaders());
 		final Object payload = message.getPayload();
 
@@ -175,18 +142,16 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 		}
 
 		Message.Builder builder = getMessageBuilder(targetClass);
-
 		try {
 			if (PROTOBUF.isCompatibleWith(contentType)) {
 				builder.mergeFrom((byte[]) payload, this.extensionRegistry);
 			}
-			else if (protobufFormatSupport != null) {
-				this.protobufFormatSupport.merge(
-						message, charset, contentType, this.extensionRegistry, builder);
+			else if (this.protobufFormatSupport != null) {
+				this.protobufFormatSupport.merge(message, charset, contentType, this.extensionRegistry, builder);
 			}
 		}
-		catch (IOException e) {
-			throw new MessageConversionException(message, "Could not read proto message" + e.getMessage(), e);
+		catch (IOException ex) {
+			throw new MessageConversionException(message, "Could not read proto message" + ex.getMessage(), ex);
 		}
 
 		return builder.build();
@@ -194,13 +159,14 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 
 	@Override
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(
+			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+
 		final Message message = (Message) payload;
 
 		MimeType contentType = getMimeType(headers);
 		if (contentType == null) {
 			contentType = PROTOBUF;
-
 		}
 
 		Charset charset = contentType.getCharset();
@@ -220,13 +186,12 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 				payload = new String(outputStream.toByteArray(), charset);
 			}
 		}
-		catch (IOException e) {
-			throw new MessageConversionException("Could not write proto message" + e.getMessage(), e);
+		catch (IOException ex) {
+			throw new MessageConversionException("Could not write proto message" + ex.getMessage(), ex);
 
 		}
 		return payload;
 	}
-
 
 	/**
 	 * Create a new {@code Message.Builder} instance for the given class.
@@ -257,9 +222,9 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 		boolean supportsWriteOnly(@Nullable MimeType mediaType);
 
-		void merge(org.springframework.messaging.Message<?> message, Charset charset, MimeType contentType,
-				   ExtensionRegistry extensionRegistry, Message.Builder builder)
-				throws IOException, MessageConversionException;
+		void merge(org.springframework.messaging.Message<?> message,
+				Charset charset, MimeType contentType, ExtensionRegistry extensionRegistry,
+				Message.Builder builder) throws IOException, MessageConversionException;
 
 		void print(Message message, OutputStream output, MimeType contentType, Charset charset)
 				throws IOException, MessageConversionException;
@@ -283,7 +248,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 		@Override
 		public MimeType[] supportedMediaTypes() {
-			return new MimeType[]{PROTOBUF, TEXT_PLAIN, APPLICATION_JSON};
+			return new MimeType[]{APPLICATION_JSON};
 		}
 
 		@Override
@@ -292,8 +257,8 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 		}
 
 		@Override
-		public void merge(org.springframework.messaging.Message<?> message, Charset charset, MimeType contentType,
-						  ExtensionRegistry extensionRegistry, Message.Builder builder)
+		public void merge(org.springframework.messaging.Message<?> message, Charset charset,
+				MimeType contentType, ExtensionRegistry extensionRegistry, Message.Builder builder)
 				throws IOException, MessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
@@ -313,12 +278,12 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 				OutputStreamWriter writer = new OutputStreamWriter(output, charset);
 				this.printer.appendTo(message, writer);
 				writer.flush();
-			} else {
+			}
+			else {
 				throw new MessageConversionException(
 						"protobuf-java-util does not support printing " + contentType);
 			}
 		}
 	}
-
 
 }

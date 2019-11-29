@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.converter;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.protobuf.ExtensionRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.protobuf.Msg;
@@ -39,15 +39,18 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
  *
  * @author Parviz Rozikov
  */
-class ProtobufMessageConverterTest {
+public class ProtobufMessageConverterTests {
 
 	private ProtobufMessageConverter converter;
 
 	private ExtensionRegistry extensionRegistry;
 
 	private Msg testMsg;
+
 	private Message<byte[]> message;
+
 	private Message<byte[]> messageWithoutContentType;
+
 	private Message<String> messageJson;
 
 
@@ -58,20 +61,22 @@ class ProtobufMessageConverterTest {
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 		this.message = MessageBuilder.withPayload(this.testMsg.toByteArray())
 				.setHeader(CONTENT_TYPE, ProtobufMessageConverter.PROTOBUF).build();
-		this.messageWithoutContentType = MessageBuilder.withPayload(this.testMsg.toByteArray())
+		this.messageWithoutContentType = MessageBuilder.withPayload(this.testMsg.toByteArray()).build();
+		this.messageJson = MessageBuilder.withPayload(
+					"{\n" +
+					"  \"foo\": \"Foo\",\n" +
+					"  \"blah\": {\n" +
+					"    \"blah\": 123\n" +
+					"  }\n" +
+						"}")
+				.setHeader(CONTENT_TYPE, APPLICATION_JSON)
 				.build();
-		this.messageJson = MessageBuilder.withPayload("{\n" +
-				"  \"foo\": \"Foo\",\n" +
-				"  \"blah\": {\n" +
-				"    \"blah\": 123\n" +
-				"  }\n" +
-				"}")
-				.setHeader(CONTENT_TYPE, APPLICATION_JSON).build();
 	}
+
 
 	@Test
 	public void extensionRegistryNull() {
-		ProtobufMessageConverter converter = new ProtobufMessageConverter((ExtensionRegistry) null);
+		ProtobufMessageConverter converter = new ProtobufMessageConverter(null);
 		assertThat(converter.extensionRegistry).isNotNull();
 	}
 
@@ -92,13 +97,13 @@ class ProtobufMessageConverterTest {
 
 
 	@Test
-	public void convertFrom() throws IOException {
+	public void convertFrom() {
 		final Msg msg = (Msg) converter.fromMessage(message, Msg.class);
 		assertThat(msg).isEqualTo(testMsg);
 	}
 
 	@Test
-	public void convertTo() throws IOException {
+	public void convertTo() {
 		final Message<?> message = converter.toMessage(this.testMsg, this.message.getHeaders());
 		assertThat(message).isNotNull();
 		assertThat(message.getPayload()).isEqualTo(this.message.getPayload());
@@ -106,19 +111,19 @@ class ProtobufMessageConverterTest {
 
 
 	@Test
-	public void convertFromNoContentType() throws IOException {
+	public void convertFromNoContentType(){
 		Msg result = (Msg) converter.fromMessage(messageWithoutContentType, Msg.class);
 		assertThat(result).isEqualTo(testMsg);
 	}
 
 
 	@Test
-	public void defaultContentType() throws Exception {
+	public void defaultContentType() {
 		assertThat(converter.getDefaultContentType(testMsg)).isEqualTo(ProtobufMessageConverter.PROTOBUF);
 	}
 
 	@Test
-	public void testJsonWithGoogleProtobuf() throws Exception {
+	public void testJsonWithGoogleProtobuf() {
 		this.converter = new ProtobufMessageConverter(
 				new ProtobufMessageConverter.ProtobufJavaUtilSupport(null, null),
 				extensionRegistry);

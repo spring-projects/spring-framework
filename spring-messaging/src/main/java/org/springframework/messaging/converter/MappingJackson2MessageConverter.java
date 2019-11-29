@@ -22,7 +22,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.annotation.JsonView;
