@@ -13,6 +13,7 @@ dependencies {
 	optional("io.rsocket:rsocket-transport-netty")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("javax.xml.bind:jaxb-api")
+	optional("com.google.protobuf:protobuf-java-util")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testCompile("javax.inject:javax.inject-tck")

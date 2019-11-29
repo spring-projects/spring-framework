@@ -52,6 +52,7 @@
 	<suppress files="StompHeaderAccessor" checks="JavadocVariable" />
 	<suppress files="StompHeaders" checks="JavadocVariable" />
 	<suppress files="org[\\/]springframework[\\/]messaging[\\/]handler[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]messaging[\\/]protobuf[\\/].*" checks=".*" />
 
 	<!-- spring-orm -->
 	<suppress files="jpa[\\/]vendor[\\/]Database" checks="JavadocVariable|JavadocStyle"/>
