@@ -1094,13 +1094,13 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags:
 | No
 |
 | Comma-delimited list of `Exception` instances that trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 
 | `no-rollback-for`
 | No
 |
 | Comma-delimited list of `Exception` instances that do not trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 |===
 
 
