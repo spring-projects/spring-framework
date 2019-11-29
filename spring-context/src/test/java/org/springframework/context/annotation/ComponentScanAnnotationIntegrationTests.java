@@ -78,7 +78,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void controlScan() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.scan(example.scannable._package.class.getPackage().getName());
+		ctx.scan(example.scannable.PackageMarker.class.getPackage().getName());
 		ctx.refresh();
 		assertThat(ctx.containsBean("fooServiceImpl")).as(
 				"control scan for example.scannable package failed to register FooServiceImpl bean").isTrue();
@@ -326,7 +326,7 @@ public class ComponentScanAnnotationIntegrationTests {
 
 
 @Configuration
-@ComponentScan(basePackageClasses = example.scannable._package.class)
+@ComponentScan(basePackageClasses = example.scannable.PackageMarker.class)
 class ComponentScanAnnotatedConfig {
 
 	@Bean
@@ -456,7 +456,7 @@ class ComponentScanWithMultipleAnnotationIncludeFilters2 {}
 @ComponentScan(
 		value = "example.scannable",
 		basePackages = "example.scannable",
-		basePackageClasses = example.scannable._package.class)
+		basePackageClasses = example.scannable.PackageMarker.class)
 class ComponentScanWithBasePackagesAndValueAlias {}
 
 

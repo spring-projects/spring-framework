@@ -51,6 +51,14 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.InnerTypeLastCheck" />
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.OneTopLevelClassCheck" />
 
+		<!-- Type Names -->
+		<module name="TypeName">
+			<property name="format" value="^[A-Z][a-zA-Z0-9_]*(?&lt;!Test)$" />
+			<property name="tokens" value="CLASS_DEF" />
+			<message key="name.invalidPattern"
+				value="Class name ''{0}'' must not end with ''Test'' (checked pattern ''{1}'')." />
+		</module>
+
 		<!-- Coding -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.CovariantEqualsCheck" />
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.EmptyStatementCheck" />
