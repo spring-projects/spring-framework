@@ -187,15 +187,19 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+		//对import标签进行解析
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
+		//对alias标签进行解析
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
+		//对bean进行解析
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
+		//对beans标签进行处理
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
 			doRegisterBeanDefinitions(ele);
@@ -301,6 +305,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Process the given bean element, parsing the bean definition
 	 * and registering it with the registry.
+	 * 将给定的bean元素进行加工，解析bean定义并进行注册
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);

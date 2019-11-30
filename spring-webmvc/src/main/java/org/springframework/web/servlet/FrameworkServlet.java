@@ -216,7 +216,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	@Nullable
 	private WebApplicationContext webApplicationContext;
 
-	/** If the WebApplicationContext was injected via {@link #setApplicationContext}. */
+	/** If the setApplicationContext was injected via {@link #setApplicationContext}.
+	 * 判断setApplicationContext是否是通过{@link #setApplicationContext}方法注入
+	 * */
 	private boolean webApplicationContextInjected = false;
 
 	/** Flag used to detect whether onRefresh has already been called. */
