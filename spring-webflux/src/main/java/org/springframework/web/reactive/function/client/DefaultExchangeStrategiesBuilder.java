@@ -29,6 +29,7 @@ import org.springframework.http.codec.HttpMessageWriter;
  * Default implementation of {@link ExchangeStrategies.Builder}.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
 final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
@@ -79,7 +80,6 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 
 		private final List<HttpMessageWriter<?>> writers;
 
-
 		public DefaultExchangeStrategies(ClientCodecConfigurer codecConfigurer) {
 			this.codecConfigurer = codecConfigurer;
 			this.readers = unmodifiableCopy(this.codecConfigurer.getReaders());
@@ -90,9 +90,8 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 			return Collections.unmodifiableList(new ArrayList<>(list));
 		}
 
-
-		@Override
 		@Deprecated
+		@Override
 		public Builder mutate() {
 			return new DefaultExchangeStrategiesBuilder(this);
 		}

@@ -48,14 +48,14 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
  * <p>This converter supports by default {@code "application/x-protobuf"} with the official
  * {@code "com.google.protobuf:protobuf-java"} library.
  *
- * <p>{@code "application/json"} can be supported with the official {@code "com.google.protobuf:protobuf-java-util"} 3.x
- *  with 3.3 or higher recommended
+ * <p>{@code "application/json"} can be supported with the official
+ * {@code "com.google.protobuf:protobuf-java-util"} 3.x, with 3.3 or higher recommended.
  *
  * @author Parviz Rozikov
+ * @author Rossen Stoyanchev
  * @since 5.2.2
  */
 public class ProtobufMessageConverter extends AbstractMessageConverter {
-
 
 	/**
 	 * The default charset used by the converter.
@@ -187,7 +187,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 			}
 		}
 		catch (IOException ex) {
-			throw new MessageConversionException("Could not write proto message" + ex.getMessage(), ex);
+			throw new MessageConversionException("Failed to print Protobuf message: " + ex.getMessage(), ex);
 
 		}
 		return payload;

@@ -408,9 +408,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * {@linkplain #setCharset(Charset) charset} if it does not have one.
 	 * If {@code contentType} is {@code null},
 	 * {@code application/x-www-form-urlencoded; charset=UTF-8} is returned.
-	 *
 	 * <p>Subclasses can override this method to change this behavior.
-	 * @param contentType the preferred content type, can be {@code null}
+	 * @param contentType the preferred content type (can be {@code null})
 	 * @return the content type to be used
 	 * @since 5.2.2
 	 */
