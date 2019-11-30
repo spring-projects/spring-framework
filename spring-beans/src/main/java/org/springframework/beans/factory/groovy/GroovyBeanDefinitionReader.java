@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,7 +310,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
 		try {
 			Closure callable = null;
-			Collection constructorArgs = null;
+			Collection<Object> constructorArgs = null;
 			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
 				Object lastArg = args[index - 1];
@@ -318,16 +318,13 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 					callable = (Closure) lastArg;
 					index--;
 				}
-				if (index > -1) {
-					constructorArgs = resolveConstructorArguments(args, 0, index);
-				}
+				constructorArgs = resolveConstructorArguments(args, 0, index);
 			}
 			this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(null, type, constructorArgs);
 			if (callable != null) {
 				callable.call(this.currentBeanDefinition);
 			}
 			return this.currentBeanDefinition.getBeanDefinition();
-
 		}
 		finally {
 			this.currentBeanDefinition = current;
@@ -810,7 +807,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				return retVal;
 			}
 
-			public boolean addAll(Collection values) {
+			public boolean addAll(Collection<?> values) {
 				boolean retVal = (Boolean) InvokerHelper.invokeMethod(this.propertyValue, "addAll", values);
 				for (Object value : values) {
 					updateDeferredProperties(value);
