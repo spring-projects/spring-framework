@@ -84,13 +84,13 @@ configure(allprojects) { project ->
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
-			dependency "com.google.protobuf:protobuf-java-util:3.10.0"
+			dependency "com.google.protobuf:protobuf-java-util:3.11.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.2.1"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.2"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
