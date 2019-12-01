@@ -318,7 +318,6 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				callable.call(this.currentBeanDefinition);
 			}
 			return this.currentBeanDefinition.getBeanDefinition();
-
 		}
 		finally {
 			this.currentBeanDefinition = current;
@@ -681,8 +680,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
-		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(new DescriptiveResource(
-			"Groovy"));
+		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(
+				new DescriptiveResource("Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {
@@ -776,7 +775,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 
 		/**
-		 * Wraps a bean definition property an ensures that any RuntimeBeanReference
+		 * Wraps a bean definition property and ensures that any RuntimeBeanReference
 		 * additions to it are deferred for resolution later.
 		 */
 		private class GroovyPropertyValue extends GroovyObjectSupport {
