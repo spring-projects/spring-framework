@@ -646,6 +646,9 @@ final class AnnotationTypeMapping {
 					boolean isDefaultValue = (value == null ||
 							isEquivalentToDefaultValue(attribute, value, valueExtractor));
 					if (isDefaultValue || ObjectUtils.nullSafeEquals(lastValue, value)) {
+						if (result == -1) {
+							result = this.indexes[i];
+						}
 						continue;
 					}
 					if (lastValue != null && !ObjectUtils.nullSafeEquals(lastValue, value)) {

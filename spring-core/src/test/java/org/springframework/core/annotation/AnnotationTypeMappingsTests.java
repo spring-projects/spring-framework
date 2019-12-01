@@ -368,13 +368,13 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void resolveMirrorsWhenOnlyHasDefaultValuesResolvesNone() {
+	void resolveMirrorsWhenOnlyHasDefaultValuesUsesFirst() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(
 				AliasPair.class).get(0);
 		Method[] resolved = resolveMirrorSets(mapping, WithDefaultValueAliasPair.class,
 				AliasPair.class);
-		assertThat(resolved[0]).isNull();
-		assertThat(resolved[1]).isNull();
+		assertThat(resolved[0].getName()).isEqualTo("a");
+		assertThat(resolved[1].getName()).isEqualTo("a");
 	}
 
 	@Test
