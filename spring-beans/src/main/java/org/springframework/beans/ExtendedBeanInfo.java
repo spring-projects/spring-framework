@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
- * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
- * and/or non-void returning setter methods. For example:
+ * {@link Introspector#getBeanInfo(Class)}, designed to discover and register
+ * static and/or non-void returning setter methods. For example:
  *
  * <pre class="code">
  * public class Bean {
@@ -487,7 +487,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		/*
-		 * See java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
+		 * See java.beans.IndexedPropertyDescriptor#equals
 		 */
 		@Override
 		public boolean equals(@Nullable Object other) {
