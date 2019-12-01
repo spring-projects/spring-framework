@@ -201,7 +201,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.1.0') {
+			dependencySet(group: 'org.mockito', version: '3.2.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
