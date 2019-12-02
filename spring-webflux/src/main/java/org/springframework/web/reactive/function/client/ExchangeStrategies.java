@@ -47,18 +47,6 @@ public interface ExchangeStrategies {
 	 */
 	List<HttpMessageWriter<?>> messageWriters();
 
-	/**
-	 * Return a builder to create a new {@link ExchangeStrategies} instance
-	 * replicated from the current instance.
-	 * @since 5.1.12
-	 * @deprecated APIs should consume {@link ExchangeStrategies} as final or accept an
-	 * {@link ExchangeStrategies.Builder builder}.
-	 */
-	@Deprecated
-	default Builder mutate() {
-		throw new UnsupportedOperationException("This ExchangeStrategies implementation does not support mutation.");
-	}
-
 
 	// Static builder methods
 

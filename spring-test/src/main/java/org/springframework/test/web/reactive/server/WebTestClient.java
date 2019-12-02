@@ -84,7 +84,6 @@ import org.springframework.web.util.UriBuilderFactory;
  * perform integration tests on an embedded WebFlux server.
  *
  * @author Rossen Stoyanchev
- * @author Brian Clozel
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -444,33 +443,10 @@ public interface WebTestClient {
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>This is useful for changing the default settings, yet still allowing
-		 * further customizations via {@link #exchangeStrategies(Consumer)}.
-		 * By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
 		 * @param strategies the strategies to use
-		 * @deprecated as of 5.1 in favor of {@link #exchangeStrategies(ExchangeStrategies.Builder)}
 		 */
-		@Deprecated
 		Builder exchangeStrategies(ExchangeStrategies strategies);
-
-		/**
-		 * Configure the {@link ExchangeStrategies.Builder} to use.
-		 * <p>This is useful for changing the default settings, yet still allowing
-		 * further customizations via {@link #exchangeStrategies(Consumer)}.
-		 * By default {@link ExchangeStrategies#builder()} is used.
-		 * @param strategies the strategies to use
-		 * @since 5.1.12
-		 */
-		Builder exchangeStrategies(ExchangeStrategies.Builder strategies);
-
-		/**
-		 * Customize the {@link ExchangeStrategies}.
-		 * <p>Allows further customization on {@link ExchangeStrategies},
-		 * mutating them if they were {@link #exchangeStrategies(ExchangeStrategies) set},
-		 * or starting from {@link ExchangeStrategies#withDefaults() defaults}.
-		 * @since 5.1.12
-		 */
-		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
 
 		/**
 		 * Max amount of time to wait for responses.
@@ -952,7 +928,7 @@ public interface WebTestClient {
 		 * @since 5.1
 		 * @see #xpath(String, Map, Object...)
 		 */
-		default XpathAssertions xpath(String expression, Object... args) {
+		default XpathAssertions xpath(String expression, Object... args){
 			return xpath(expression, null, args);
 		}
 
@@ -966,7 +942,7 @@ public interface WebTestClient {
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */
-		XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args);
+		XpathAssertions xpath(String expression, @Nullable  Map<String, String> namespaces, Object... args);
 
 		/**
 		 * Assert the response body content with the given {@link Consumer}.

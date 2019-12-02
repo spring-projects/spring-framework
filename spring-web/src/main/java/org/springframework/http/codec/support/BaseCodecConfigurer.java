@@ -34,14 +34,13 @@ import org.springframework.util.Assert;
  * client and server specific variants.
  *
  * @author Rossen Stoyanchev
- * @author Brian Clozel
  * @since 5.0
  */
 class BaseCodecConfigurer implements CodecConfigurer {
 
-	protected final BaseDefaultCodecs defaultCodecs;
+	private final BaseDefaultCodecs defaultCodecs;
 
-	protected final DefaultCustomCodecs customCodecs;
+	private final DefaultCustomCodecs customCodecs = new DefaultCustomCodecs();
 
 
 	/**
@@ -51,16 +50,6 @@ class BaseCodecConfigurer implements CodecConfigurer {
 	BaseCodecConfigurer(BaseDefaultCodecs defaultCodecs) {
 		Assert.notNull(defaultCodecs, "'defaultCodecs' is required");
 		this.defaultCodecs = defaultCodecs;
-		this.customCodecs = new DefaultCustomCodecs();
-	}
-
-	/**
-	 * Constructor with another {@link BaseCodecConfigurer} to copy
-	 * the configuration from.
-	 */
-	BaseCodecConfigurer(BaseCodecConfigurer other) {
-		this.defaultCodecs = other.cloneDefaultCodecs();
-		this.customCodecs = new DefaultCustomCodecs(other.customCodecs);
 	}
 
 
@@ -98,17 +87,6 @@ class BaseCodecConfigurer implements CodecConfigurer {
 		return getWritersInternal(false);
 	}
 
-
-	@Override
-	public CodecConfigurer clone() {
-		return new BaseCodecConfigurer(this);
-	}
-
-	protected BaseDefaultCodecs cloneDefaultCodecs() {
-		return new BaseDefaultCodecs(this.defaultCodecs);
-	}
-
-
 	/**
 	 * Internal method that returns the configured writers.
 	 * @param forMultipart whether to returns writers for general use ("false"),
@@ -132,7 +110,7 @@ class BaseCodecConfigurer implements CodecConfigurer {
 	/**
 	 * Default implementation of {@code CustomCodecs}.
 	 */
-	protected static final class DefaultCustomCodecs implements CustomCodecs {
+	private static final class DefaultCustomCodecs implements CustomCodecs {
 
 		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
 
@@ -142,16 +120,6 @@ class BaseCodecConfigurer implements CodecConfigurer {
 
 		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
 
-
-		DefaultCustomCodecs() {
-		}
-
-		DefaultCustomCodecs(DefaultCustomCodecs other) {
-			other.typedReaders.addAll(this.typedReaders);
-			other.typedWriters.addAll(this.typedWriters);
-			other.objectReaders.addAll(this.objectReaders);
-			other.objectWriters.addAll(this.objectWriters);
-		}
 
 		@Override
 		public void decoder(Decoder<?> decoder) {
@@ -174,6 +142,7 @@ class BaseCodecConfigurer implements CodecConfigurer {
 			boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
 			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
 		}
+
 
 		// Package private accessors...
 
