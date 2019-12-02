@@ -87,12 +87,6 @@ public interface CodecConfigurer {
 	 */
 	List<HttpMessageWriter<?>> getWriters();
 
-	/**
-	 * Clone this {@link CodecConfigurer}.
-	 * @since 5.1.12
-	 */
-	CodecConfigurer clone();
-
 
 	/**
 	 * Customize or replace the HTTP message readers and writers registered by

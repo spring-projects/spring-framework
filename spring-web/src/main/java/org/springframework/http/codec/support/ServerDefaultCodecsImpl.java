@@ -46,16 +46,6 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	private Encoder<?> sseEncoder;
 
 
-	ServerDefaultCodecsImpl() {
-	}
-
-	ServerDefaultCodecsImpl(ServerDefaultCodecsImpl other) {
-		super(other);
-		this.multipartReader = other.multipartReader;
-		this.sseEncoder = other.sseEncoder;
-	}
-
-
 	@Override
 	public void multipartReader(HttpMessageReader<?> reader) {
 		this.multipartReader = reader;

@@ -38,7 +38,6 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebClient.Builder}.
  *
  * @author Rossen Stoyanchev
- * @author Brian Clozel
  * @since 5.0
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
@@ -67,16 +66,14 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
-	@Nullable
-	private ExchangeStrategies.Builder exchangeStrategies;
-
-	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+	private ExchangeStrategies exchangeStrategies;
 
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
 
 	public DefaultWebClientBuilder() {
+		this.exchangeStrategies = ExchangeStrategies.withDefaults();
 	}
 
 	public DefaultWebClientBuilder(DefaultWebClientBuilder other) {
@@ -193,23 +190,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	@Deprecated
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
-		this.exchangeStrategies = strategies.mutate();
-		return this;
-	}
-
-	@Override
-	public WebClient.Builder exchangeStrategies(ExchangeStrategies.Builder strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.exchangeStrategies = strategies;
-		return this;
-	}
-
-	@Override
-	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
-		this.strategiesConfigurers.add(configurer);
 		return this;
 	}
 
@@ -248,24 +231,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 			return this.exchangeFunction;
 		}
 		else if (this.connector != null) {
-			return ExchangeFunctions.create(this.connector, initExchangeStrategies());
+			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
 		}
 		else {
-			return ExchangeFunctions.create(new ReactorClientHttpConnector(), initExchangeStrategies());
+			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
 		}
-	}
-
-	@SuppressWarnings("deprecation")
-	private ExchangeStrategies initExchangeStrategies() {
-		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
-			return this.exchangeStrategies != null ? this.exchangeStrategies.build() : ExchangeStrategies.withDefaults();
-		}
-
-		ExchangeStrategies.Builder builder =
-				this.exchangeStrategies != null ? this.exchangeStrategies : ExchangeStrategies.builder();
-
-		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
-		return builder.build();
 	}
 
 	private UriBuilderFactory initUriBuilderFactory() {

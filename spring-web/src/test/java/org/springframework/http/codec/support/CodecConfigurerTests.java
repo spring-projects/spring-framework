@@ -267,14 +267,6 @@ public class CodecConfigurerTests {
 		assertEncoderInstance(jaxb2Encoder);
 	}
 
-	@Test
-	public void cloneConfigurer() {
-		CodecConfigurer clone = this.configurer.clone();
-		this.configurer.registerDefaults(false);
-		assertEquals(0, this.configurer.getReaders().size());
-		assertEquals(11, clone.getReaders().size());
-	}
-
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
