@@ -207,9 +207,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	@Deprecated
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
 		return this;
 	}
@@ -268,7 +266,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		throw new IllegalStateException("No suitable default ClientHttpConnector found");
 	}
 
-	@SuppressWarnings("deprecation")
 	private ExchangeStrategies initExchangeStrategies() {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
 			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
