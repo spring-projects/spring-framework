@@ -18,6 +18,7 @@ package org.springframework.http.codec.support;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -334,6 +335,18 @@ public class CodecConfigurerTests {
 
 		assertFalse(decoders.containsAll(Arrays.asList(jacksonDecoder, jaxb2Decoder, protoDecoder)));
 		assertFalse(encoders.containsAll(Arrays.asList(jacksonEncoder, jaxb2Encoder, protoEncoder)));
+	}
+
+	@Test
+	public void withDefaultCodecConfig() {
+		AtomicBoolean callbackCalled = new AtomicBoolean(false);
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+		this.configurer.customCodecs().withDefaultCodecConfig(config -> {
+			assertTrue(config.isEnableLoggingRequestDetails());
+			callbackCalled.compareAndSet(false, true);
+		});
+		this.configurer.getReaders();
+		assertTrue(callbackCalled.get());
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {

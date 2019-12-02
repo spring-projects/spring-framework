@@ -18,6 +18,7 @@ package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
@@ -38,6 +39,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 abstract class BaseCodecConfigurer implements CodecConfigurer {
+
+	protected boolean customCodecsInitialized;
 
 	protected final BaseDefaultCodecs defaultCodecs;
 
@@ -88,6 +91,7 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 
 	@Override
 	public List<HttpMessageReader<?>> getReaders() {
+		initializeCustomCodecs();
 		List<HttpMessageReader<?>> result = new ArrayList<>();
 
 		result.addAll(this.defaultCodecs.getTypedReaders());
@@ -113,6 +117,7 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	 * same except for the multipart writer itself.
 	 */
 	protected List<HttpMessageWriter<?>> getWritersInternal(boolean forMultipart) {
+		initializeCustomCodecs();
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 
 		result.addAll(this.defaultCodecs.getTypedWriters(forMultipart));
@@ -128,6 +133,13 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	@Override
 	public abstract CodecConfigurer clone();
 
+	private void initializeCustomCodecs() {
+		if(!this.customCodecsInitialized) {
+			this.customCodecs.configConsumers.forEach(consumer -> consumer.accept(this.defaultCodecs));
+			this.customCodecsInitialized = true;
+		}
+	}
+
 
 	/**
 	 * Default implementation of {@code CustomCodecs}.
@@ -142,6 +154,7 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 
 		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
 
+		private final List<Consumer<DefaultCodecConfig>> configConsumers = new ArrayList<>();
 
 		DefaultCustomCodecs() {
 		}
@@ -179,6 +192,10 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
 		}
 
+		@Override
+		public void withDefaultCodecConfig(Consumer<DefaultCodecConfig> codecsConfigConsumer) {
+			this.configConsumers.add(codecsConfigConsumer);
+		}
 
 		// Package private accessors...
 

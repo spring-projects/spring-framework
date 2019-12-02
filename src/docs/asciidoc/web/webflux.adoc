@@ -883,16 +883,44 @@ The following example shows how to do so for client-side requests:
 [subs="verbatim,quotes"]
 ----
 Consumer<ClientCodecConfigurer> consumer = configurer ->
-		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+        configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
 WebClient webClient = WebClient.builder()
-		.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
-		.build();
+        .exchangeStrategies(strategies -> strategies.codecs(consumer))
+        .build();
 ----
 ====
 
+[[webflux-codecs-custom]]
+==== Custom codecs
 
+Applications can register custom codecs for supporting additional media types,
+or specific behaviors that are not supported by the default codecs.
 
+Some configuration options expressed by developers are enforced on default codecs.
+Custom codecs might want to get a chance to align with those preferences,
+like <<webflux-codecs-limits, enforcing buffering limits>>
+or <<webflux-logging-sensitive-data, logging sensitive data>>.
+
+The following example shows how to do so for client-side requests:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	Consumer<ClientCodecConfigurer> consumer = configurer -> {
+	        CustomDecoder customDecoder = new CustomDecoder();
+	        configurer.customCodecs().decoder(customDecoder);
+			configurer.customCodecs().withDefaultCodecConfig(config ->
+				customDecoder.maxInMemorySize(config.maxInMemorySize())
+			);
+	}
+
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(strategies -> strategies.codecs(consumer))
+			.build();
+----
+====
 
 [[webflux-dispatcher-handler]]
 == `DispatcherHandler`
