@@ -61,7 +61,7 @@ configure(allprojects) { project ->
 
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
-			dependencySet(group: 'org.aspectj', version: '1.9.4') {
+			dependencySet(group: 'org.aspectj', version: '1.9.5') {
 				entry 'aspectjrt'
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
@@ -338,7 +338,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.26"
+		toolVersion = "8.27"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
