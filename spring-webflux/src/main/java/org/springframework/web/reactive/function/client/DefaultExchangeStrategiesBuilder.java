@@ -92,12 +92,6 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 		}
 
 		@Override
-		@Deprecated
-		public Builder mutate() {
-			return new DefaultExchangeStrategiesBuilder(this);
-		}
-
-		@Override
 		public List<HttpMessageReader<?>> messageReaders() {
 			return this.readers;
 		}
@@ -105,6 +99,11 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 		@Override
 		public List<HttpMessageWriter<?>> messageWriters() {
 			return this.writers;
+		}
+
+		@Override
+		public Builder mutate() {
+			return new DefaultExchangeStrategiesBuilder(this);
 		}
 	}
 

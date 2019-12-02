@@ -444,30 +444,21 @@ public interface WebTestClient {
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>This is useful for changing the default settings, yet still allowing
-		 * further customizations via {@link #exchangeStrategies(Consumer)}.
-		 * By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * <p>Note that in a scenario where the builder is configured by
+		 * multiple parties, it is preferable to use
+		 * {@link #exchangeStrategies(Consumer)} in order to customize the same
+		 * {@code ExchangeStrategies}. This method here sets the strategies that
+		 * everyone else then can customize.
+		 * <p>By default this is {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
-		 * @deprecated as of 5.1 in favor of {@link #exchangeStrategies(ExchangeStrategies.Builder)}
 		 */
-		@Deprecated
 		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
-		 * Configure the {@link ExchangeStrategies.Builder} to use.
-		 * <p>This is useful for changing the default settings, yet still allowing
-		 * further customizations via {@link #exchangeStrategies(Consumer)}.
-		 * By default {@link ExchangeStrategies#builder()} is used.
-		 * @param strategies the strategies to use
-		 * @since 5.1.12
-		 */
-		Builder exchangeStrategies(ExchangeStrategies.Builder strategies);
-
-		/**
-		 * Customize the {@link ExchangeStrategies}.
-		 * <p>Allows further customization on {@link ExchangeStrategies},
-		 * mutating them if they were {@link #exchangeStrategies(ExchangeStrategies) set},
-		 * or starting from {@link ExchangeStrategies#withDefaults() defaults}.
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
 		 * @since 5.1.12
 		 */
 		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);

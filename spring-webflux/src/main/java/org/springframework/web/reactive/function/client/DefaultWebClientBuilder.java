@@ -81,8 +81,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	private ClientHttpConnector connector;
 
 	@Nullable
-	private ExchangeStrategies.Builder strategies;
+	private ExchangeStrategies strategies;
 
+	@Nullable
 	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
 
 	@Nullable
@@ -209,19 +210,15 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Deprecated
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
-		this.strategies = strategies.mutate();
-		return this;
-	}
-
-	@Override
-	public WebClient.Builder exchangeStrategies(ExchangeStrategies.Builder strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
 		return this;
 	}
 
 	@Override
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
+		if (this.strategiesConfigurers == null) {
+			this.strategiesConfigurers = new ArrayList<>(4);
+		}
 		this.strategiesConfigurers.add(configurer);
 		return this;
 	}
@@ -274,11 +271,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@SuppressWarnings("deprecation")
 	private ExchangeStrategies initExchangeStrategies() {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
-			return this.strategies != null ? this.strategies.build() : ExchangeStrategies.withDefaults();
+			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
 		}
 
 		ExchangeStrategies.Builder builder =
-				this.strategies != null ? this.strategies : ExchangeStrategies.builder();
+				this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder();
 
 		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
 		return builder.build();

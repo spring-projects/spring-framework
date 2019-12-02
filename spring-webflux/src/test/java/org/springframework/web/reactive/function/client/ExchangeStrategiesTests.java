@@ -45,6 +45,7 @@ public class ExchangeStrategiesTests {
 		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
 		assertThat(strategies.messageReaders().isEmpty()).isTrue();
 		assertThat(strategies.messageWriters().isEmpty()).isTrue();
+
 		ExchangeStrategies mutated = strategies.mutate().codecs(codecs -> codecs.registerDefaults(true)).build();
 		assertThat(mutated.messageReaders().isEmpty()).isFalse();
 		assertThat(mutated.messageWriters().isEmpty()).isFalse();

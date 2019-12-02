@@ -41,14 +41,12 @@ The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Consumer<ExchangeStrategies.Builder> customizeCodecs = builder -> {
-		builder.codecs(configurer -> {
-			//...
-		});
-	};
-
 	WebClient client = WebClient.builder()
-			.exchangeStrategies(customizeCodecs)
+			.exchangeStrategies(builder -> {
+					return builder.codecs(codecConfigurer -> {
+						//...
+					});
+			})
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -96,12 +94,9 @@ modified copy without affecting the original instance, as the following example 
 [[webflux-client-builder-maxinmemorysize]]
 === MaxInMemorySize
 
-Spring WebFlux configures by default a maximum size for buffering data in-memory when decoding
-HTTP responses with the `WebClient`. This avoids application memory issues if the received
-response is much larger than expected.
-
-The default configured value of 256KB might not be enough for your use case, and your application
-might hit that limit with the following:
+Spring WebFlux configures <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering
+data in-memory in codec to avoid application memory issues. By the default this is
+configured to 256KB and if that's not enough for your use case, you'll see the following:
 
 ----
 org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer
@@ -113,8 +108,8 @@ You can configure this limit on all default codecs with the following code sampl
 .Java
 ----
 	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(configurer ->
-				configurer.codecs(codecs ->
+			.exchangeStrategies(builder ->
+				builder.codecs(codecs ->
 					codecs.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
 				)
 			)
@@ -124,13 +119,15 @@ You can configure this limit on all default codecs with the following code sampl
 .Kotlin
 ----
 	val webClient = WebClient.builder()
-		.exchangeStrategies { strategies ->
-				strategies.codecs {
+		.exchangeStrategies { builder ->
+				builder.codecs {
 					it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
 				}
 		}
 		.build()
 ----
+
+
 
 [[webflux-client-builder-reactor]]
 === Reactor Netty

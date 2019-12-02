@@ -62,6 +62,12 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 
+	/**
+	 * {@inheritDoc}.
+	 */
+	@Override
+	ServerCodecConfigurer clone();
+
 
 	/**
 	 * Static factory method for a {@code ServerCodecConfigurer}.

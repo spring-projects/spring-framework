@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -123,6 +124,47 @@ public class ClientCodecConfigurerTests {
 				.filter(e -> e == decoder).orElse(null)).isSameAs(decoder);
 	}
 
+	@Test
+	public void cloneConfigurer() {
+		ClientCodecConfigurer clone = this.configurer.clone();
+
+		Jackson2JsonDecoder jackson2Decoder = new Jackson2JsonDecoder();
+		clone.defaultCodecs().serverSentEventDecoder(jackson2Decoder);
+		clone.defaultCodecs().multipartCodecs().encoder(new Jackson2SmileEncoder());
+		clone.defaultCodecs().multipartCodecs().writer(new ResourceHttpMessageWriter());
+
+		// Clone has the customizations
+
+		Decoder<?> sseDecoder = clone.getReaders().stream()
+				.filter(reader -> reader instanceof ServerSentEventHttpMessageReader)
+				.map(reader -> ((ServerSentEventHttpMessageReader) reader).getDecoder())
+				.findFirst()
+				.get();
+
+		List<HttpMessageWriter<?>> multipartWriters = clone.getWriters().stream()
+				.filter(writer -> writer instanceof MultipartHttpMessageWriter)
+				.flatMap(writer -> ((MultipartHttpMessageWriter) writer).getPartWriters().stream())
+				.collect(Collectors.toList());
+
+		assertThat(sseDecoder).isSameAs(jackson2Decoder);
+		assertThat(multipartWriters).hasSize(2);
+
+		// Original does not have the customizations
+
+		sseDecoder = this.configurer.getReaders().stream()
+				.filter(reader -> reader instanceof ServerSentEventHttpMessageReader)
+				.map(reader -> ((ServerSentEventHttpMessageReader) reader).getDecoder())
+				.findFirst()
+				.get();
+
+		multipartWriters = this.configurer.getWriters().stream()
+				.filter(writer -> writer instanceof MultipartHttpMessageWriter)
+				.flatMap(writer -> ((MultipartHttpMessageWriter) writer).getPartWriters().stream())
+				.collect(Collectors.toList());
+
+		assertThat(sseDecoder).isNotSameAs(jackson2Decoder);
+		assertThat(multipartWriters).hasSize(10);
+	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());

@@ -154,6 +154,50 @@ public class ServerCodecConfigurerTests {
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}
 
+	@Test
+	public void cloneConfigurer() {
+		ServerCodecConfigurer clone = this.configurer.clone();
+
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		clone.defaultCodecs().multipartReader(reader);
+		clone.defaultCodecs().serverSentEventEncoder(encoder);
+
+		// Clone has the customizations
+
+		HttpMessageReader<?> actualReader = clone.getReaders().stream()
+				.filter(r -> r instanceof MultipartHttpMessageReader)
+				.findFirst()
+				.get();
+
+		Encoder<?> actualEncoder = clone.getWriters().stream()
+				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
+				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
+				.findFirst()
+				.get();
+
+
+		assertThat(actualReader).isSameAs(reader);
+		assertThat(actualEncoder).isSameAs(encoder);
+
+		// Original does not have the customizations
+
+		actualReader = this.configurer.getReaders().stream()
+				.filter(r -> r instanceof MultipartHttpMessageReader)
+				.findFirst()
+				.get();
+
+		actualEncoder = this.configurer.getWriters().stream()
+				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
+				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
+				.findFirst()
+				.get();
+
+
+		assertThat(actualReader).isNotSameAs(reader);
+		assertThat(actualEncoder).isNotSameAs(encoder);
+	}
+
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = nextReader(readers);
 		assertThat(reader.getClass()).isEqualTo(DecoderHttpMessageReader.class);

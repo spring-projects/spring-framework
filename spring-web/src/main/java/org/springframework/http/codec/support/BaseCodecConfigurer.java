@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Brian Clozel
  * @since 5.0
  */
-class BaseCodecConfigurer implements CodecConfigurer {
+abstract class BaseCodecConfigurer implements CodecConfigurer {
 
 	protected final BaseDefaultCodecs defaultCodecs;
 
@@ -55,13 +55,20 @@ class BaseCodecConfigurer implements CodecConfigurer {
 	}
 
 	/**
-	 * Constructor with another {@link BaseCodecConfigurer} to copy
-	 * the configuration from.
+	 * Create a deep copy of the given {@link BaseCodecConfigurer}.
+	 * @since 5.1.12
 	 */
-	BaseCodecConfigurer(BaseCodecConfigurer other) {
+	protected BaseCodecConfigurer(BaseCodecConfigurer other) {
 		this.defaultCodecs = other.cloneDefaultCodecs();
 		this.customCodecs = new DefaultCustomCodecs(other.customCodecs);
 	}
+
+	/**
+	 * Sub-classes should override this to create  deep copy of
+	 * {@link BaseDefaultCodecs} which can can be client or server specific.
+	 * @since 5.1.12
+	 */
+	protected abstract BaseDefaultCodecs cloneDefaultCodecs();
 
 
 	@Override
@@ -99,16 +106,6 @@ class BaseCodecConfigurer implements CodecConfigurer {
 	}
 
 
-	@Override
-	public CodecConfigurer clone() {
-		return new BaseCodecConfigurer(this);
-	}
-
-	protected BaseDefaultCodecs cloneDefaultCodecs() {
-		return new BaseDefaultCodecs(this.defaultCodecs);
-	}
-
-
 	/**
 	 * Internal method that returns the configured writers.
 	 * @param forMultipart whether to returns writers for general use ("false"),
@@ -128,6 +125,9 @@ class BaseCodecConfigurer implements CodecConfigurer {
 		return result;
 	}
 
+	@Override
+	public abstract CodecConfigurer clone();
+
 
 	/**
 	 * Default implementation of {@code CustomCodecs}.
@@ -146,6 +146,10 @@ class BaseCodecConfigurer implements CodecConfigurer {
 		DefaultCustomCodecs() {
 		}
 
+		/**
+		 * Create a deep copy of the given {@link DefaultCustomCodecs}.
+		 * @since 5.1.12
+		 */
 		DefaultCustomCodecs(DefaultCustomCodecs other) {
 			other.typedReaders.addAll(this.typedReaders);
 			other.typedWriters.addAll(this.typedWriters);

@@ -109,6 +109,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	BaseDefaultCodecs() {
 	}
 
+	/**
+	 * Create a deep copy of the given {@link BaseDefaultCodecs}.
+	 */
 	protected BaseDefaultCodecs(BaseDefaultCodecs other) {
 		this.jackson2JsonDecoder = other.jackson2JsonDecoder;
 		this.jackson2JsonEncoder = other.jackson2JsonEncoder;

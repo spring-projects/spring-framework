@@ -88,7 +88,10 @@ public interface CodecConfigurer {
 	List<HttpMessageWriter<?>> getWriters();
 
 	/**
-	 * Clone this {@link CodecConfigurer}.
+	 * Create a copy of this {@link CodecConfigurer}. The returned clone has its
+	 * own lists of default and custom codecs and generally can be configured
+	 * independently. Keep in mind however that codec instances (if any are
+	 * configured) are themselves not cloned.
 	 * @since 5.1.12
 	 */
 	CodecConfigurer clone();
