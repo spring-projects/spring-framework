@@ -739,14 +739,14 @@ The following examples show some common pointcut expressions:
 +
 [literal,subs="verbatim,quotes"]
 ----
-	execution(* com.xyz.service.*.*(..))
+	execution(* com.xyz.service.\*.*(..))
 ----
 
 * The execution of any method defined in the service package or one of its sub-packages:
 +
 [literal,subs="verbatim,quotes"]
 ----
-	execution(* com.xyz.service..*.*(..))
+	execution(* com.xyz.service..\*.*(..))
 ----
 
 * Any join point (method execution only in Spring AOP) within the service package:
