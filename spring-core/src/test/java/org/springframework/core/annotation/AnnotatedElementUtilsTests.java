@@ -489,6 +489,20 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getMergedAnnotationWithImplicitAliasesWithDefaultsInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ImplicitAliasesWithDefaultsClass.class;
+		String name = AliasesWithDefaults.class.getName();
+		AliasesWithDefaults annotation = getMergedAnnotation(element, AliasesWithDefaults.class);
+
+		assertNotNull("Should find @AliasesWithDefaults on " + element.getSimpleName(), annotation);
+		assertEquals("a1", "ImplicitAliasesWithDefaults", annotation.a1());
+		assertEquals("a2", "ImplicitAliasesWithDefaults", annotation.a2());
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
 	public void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
 		exception.expect(AnnotationConfigurationException.class);
@@ -958,7 +972,6 @@ public class AnnotatedElementUtilsTests {
 		String[] xmlConfigFiles() default {};
 	}
 
-
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedComposedContextConfig {
@@ -997,6 +1010,27 @@ public class AnnotatedElementUtilsTests {
 	@ImplicitAliasesContextConfig(xmlFiles = {"A.xml", "B.xml"})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedImplicitAliasesContextConfig {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasesWithDefaults {
+
+		@AliasFor("a2")
+		String a1() default "AliasesWithDefaults";
+
+		@AliasFor("a1")
+		String a2() default "AliasesWithDefaults";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@AliasesWithDefaults
+	@interface ImplicitAliasesWithDefaults {
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a1")
+		String b1() default "ImplicitAliasesWithDefaults";
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a2")
+		String b2() default "ImplicitAliasesWithDefaults";
 	}
 
 	@ImplicitAliasesContextConfig
@@ -1294,6 +1328,10 @@ public class AnnotatedElementUtilsTests {
 
 	@ImplicitAliasesContextConfig(xmlFiles = "baz.xml")
 	static class ImplicitAliasesContextConfigClass3 {
+	}
+
+	@ImplicitAliasesWithDefaults
+	static class ImplicitAliasesWithDefaultsClass {
 	}
 
 	@TransitiveImplicitAliasesContextConfig(groovy = "test.groovy")
