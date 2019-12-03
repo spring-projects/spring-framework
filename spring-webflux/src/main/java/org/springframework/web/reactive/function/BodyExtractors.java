@@ -59,6 +59,8 @@ public abstract class BodyExtractors {
 
 	private static final ResolvableType VOID_TYPE = ResolvableType.forClass(Void.class);
 
+	private static MediaType defaultContentType = MediaType.APPLICATION_OCTET_STREAM;
+
 
 	/**
 	 * Extractor to decode the input content into {@code Mono<T>}.
@@ -187,7 +189,7 @@ public abstract class BodyExtractors {
 			return emptySupplier.get();
 		}
 		MediaType contentType = Optional.ofNullable(message.getHeaders().getContentType())
-				.orElse(MediaType.APPLICATION_OCTET_STREAM);
+				.orElse(defaultContentType);
 
 		return context.messageReaders().stream()
 				.filter(reader -> reader.canRead(elementType, contentType))
@@ -278,4 +280,11 @@ public abstract class BodyExtractors {
 	private static class ReadCancellationException extends RuntimeException {
 	}
 
+	public static MediaType getDefaultContentType() {
+		return defaultContentType;
+	}
+
+	public static void setDefaultContentType(MediaType defaultContentType) {
+		BodyExtractors.defaultContentType = defaultContentType;
+	}
 }
