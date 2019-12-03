@@ -638,7 +638,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Normalize the path by suppressing sequences like "path/.." and
+	 * normalize the path by suppressing sequences like "path/.." and
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
 	 * notice that Windows separators ("\") are replaced by simple slashes.

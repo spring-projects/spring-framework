@@ -47,6 +47,8 @@ import org.springframework.util.StringUtils;
  * {@link java.nio.file.Path} handle in which case it will perform all file system
  * interactions via NIO.2, only resorting to {@link File} on {@link #getFile()}.
  *
+ * TODO
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see #FileSystemResource(File)
@@ -72,6 +74,15 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * will be built underneath that root: e.g. relative path "dir2" ->
 	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
 	 * at the same directory level: relative path "dir2" -> "C:/dir2".
+	 *
+	 * 从文件路径创建一个新的 {@code FileSystemResource}。
+	 * 说明：当通过 {@link #createRelative}创建相关资源时，不同根路径后缀 会有不同的结果
+	 *
+	 * 比如
+	 * 		当前path是 "C:/dir1/" 相对路径为 dir2 ，路径就是 "C:/dir1/dir2"
+	 *		当前path是 "C:/dir1" 相对路径为 dir2 ，路径就是 "C:/dir2"
+	 * 后面没有 "/" 代表与当前同级
+	 *
 	 * @param path a file path
 	 * @see #FileSystemResource(Path)
 	 */

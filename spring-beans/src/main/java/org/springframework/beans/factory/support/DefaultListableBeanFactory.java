@@ -105,6 +105,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.ListableBeanFactory} interface,
  * have a look at {@link StaticListableBeanFactory}, which manages existing
  * bean instances rather than creating new ones based on bean definitions.
+ * bean 加载的核心，Spring注册及加载 bean 的默认实现
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

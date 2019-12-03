@@ -33,6 +33,7 @@ import org.springframework.util.xml.XmlValidationModeDetector;
 /**
  * Spring's default {@link DocumentLoader} implementation.
  *
+ *
  * <p>Simply loads {@link Document documents} using the standard JAXP-configured
  * XML parser. If you want to change the {@link DocumentBuilder} that is used to
  * load documents, then one strategy is to define a corresponding Java system property
@@ -40,6 +41,9 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  * you might start your application like as follows:
  *
  * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
+ *
+ * Spring 默认 {@link DocumentLoader} 实现
+ *
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -61,19 +65,27 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	private static final Log logger = LogFactory.getLog(DefaultDocumentLoader.class);
 
 
-	/**
+	/*
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
 	 * XML parser.
+	 *
+	 * 使用 标准 JAXP-configured XML parser 在指定的{@link InputSource} 加载 {@link Document}
+	 *
+	 * JAXP（Java API for XML Processing，意为XML处理的Java API）是Java XML程序设计的应用程序接口之一，它提供解析和验证XML文档的能力
+	 *
 	 */
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
 			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
 
+		// 创建 DocumentBuilderFactory
 		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
+		// 创建 DocumentBuilder
 		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
+		// 解析 XML  返回 Document 对象
 		return builder.parse(inputSource);
 	}
 
@@ -89,8 +101,10 @@ public class DefaultDocumentLoader implements DocumentLoader {
 			throws ParserConfigurationException {
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		// 设置命名空间支持
 		factory.setNamespaceAware(namespaceAware);
 
+		// 开启校验
 		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
 			factory.setValidating(true);
 			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
@@ -129,6 +143,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 			throws ParserConfigurationException {
 
 		DocumentBuilder docBuilder = factory.newDocumentBuilder();
+		// 设置 EntityResolver
 		if (entityResolver != null) {
 			docBuilder.setEntityResolver(entityResolver);
 		}

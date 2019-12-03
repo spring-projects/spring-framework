@@ -32,7 +32,8 @@ import org.springframework.lang.Nullable;
  *
  * <p>An InputStream can be opened for every resource if it exists in
  * physical form, but a URL or File handle can just be returned for
- * certain resources. The actual behavior is implementation-specific.
+ * certajn resources. The actual behavior is implementation-specific.
+ * 对资源的抽象,每个实现都对应着不同的资源访问策略
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -56,6 +57,7 @@ public interface Resource extends InputStreamSource {
 	 * <p>This method performs a definitive existence check, whereas the
 	 * existence of a {@code Resource} handle only guarantees a valid
 	 * descriptor handle.
+	 * 存在性
 	 */
 	boolean exists();
 
@@ -69,6 +71,7 @@ public interface Resource extends InputStreamSource {
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
 	 * @see #exists()
+	 * 可读性
 	 */
 	default boolean isReadable() {
 		return exists();
@@ -79,6 +82,7 @@ public interface Resource extends InputStreamSource {
 	 * If {@code true}, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
 	 * <p>Will be {@code false} for typical resource descriptors.
+	 * 是否处于打开状态
 	 */
 	default boolean isOpen() {
 		return false;

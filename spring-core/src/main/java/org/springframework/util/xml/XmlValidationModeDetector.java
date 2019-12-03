@@ -83,6 +83,9 @@ public class XmlValidationModeDetector {
 	/**
 	 * Detect the validation mode for the XML document in the supplied {@link InputStream}.
 	 * Note that the supplied {@link InputStream} is closed by this method before returning.
+	 *
+	 * 检测 XML 的验证模式
+	 *
 	 * @param inputStream the InputStream to parse
 	 * @throws IOException in case of I/O failure
 	 * @see #VALIDATION_DTD
@@ -90,6 +93,7 @@ public class XmlValidationModeDetector {
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
+		// 查找文件 查找 DOCTYPE
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		try {
 			boolean isDtdValidated = false;
@@ -99,15 +103,18 @@ public class XmlValidationModeDetector {
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
+				// 是否存在 DOCTYPE
 				if (hasDoctype(content)) {
 					isDtdValidated = true;
 					break;
 				}
+				// 如果 < 后面紧跟着的是 字母，则为 XSD 验证模式
 				if (hasOpeningTag(content)) {
 					// End of meaningful data...
 					break;
 				}
 			}
+			// 存在 DOCTYPE 就是 DTD 否则是 XSD
 			return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
 		}
 		catch (CharConversionException ex) {
@@ -132,6 +139,9 @@ public class XmlValidationModeDetector {
 	 * Does the supplied content contain an XML opening tag. If the parse state is currently
 	 * in an XML comment then this method always returns false. It is expected that all comment
 	 * tokens will have consumed for the supplied content before passing the remainder to this method.
+	 *
+	 * 如果 < 后面紧跟着的是 字母，则为 XSD 验证模式
+	 *
 	 */
 	private boolean hasOpeningTag(String content) {
 		if (this.inComment) {

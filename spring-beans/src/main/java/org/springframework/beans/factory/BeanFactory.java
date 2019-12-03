@@ -93,6 +93,7 @@ import org.springframework.lang.Nullable;
  * <li>DisposableBean's {@code destroy}
  * <li>a custom destroy-method definition
  * </ol>
+ * 定义获取 bean 及 bean 的各种属性
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

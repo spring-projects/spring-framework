@@ -32,6 +32,8 @@ import org.springframework.lang.Nullable;
  * <p>Note that a bean definition reader does not have to implement
  * this interface. It only serves as suggestion for bean definition
  * readers that want to follow standard naming conventions.
+ * 读取 Resource 转换为 BeanDefinition 的各个功能
+ *
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -84,6 +86,9 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Load bean definitions from the specified resource.
+	 *
+	 * 从指定 resource 加载 bean definitions 定义
+	 *
 	 * @param resource the resource descriptor
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
