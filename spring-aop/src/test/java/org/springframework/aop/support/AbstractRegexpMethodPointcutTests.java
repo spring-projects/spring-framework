@@ -18,8 +18,8 @@ package org.springframework.aop.support;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
@@ -35,7 +35,7 @@ public abstract class AbstractRegexpMethodPointcutTests {
 
 	private AbstractRegexpMethodPointcut rpc;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		rpc = getRegexpMethodPointcut();
 	}

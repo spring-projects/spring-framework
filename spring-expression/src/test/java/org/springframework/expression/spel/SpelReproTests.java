@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -58,6 +58,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1177,9 +1178,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR9994_bridgeMethods() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		Object target = new GenericImplementation();
+		GenericImplementation target = new GenericImplementation();
+		accessor.write(context, target, "property", "1");
+		assertThat(target.value).isEqualTo(1);
 		TypedValue value = accessor.read(context, target, "property");
+		assertThat(value.getValue()).isEqualTo(1);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
+		assertThat(value.getTypeDescriptor().getAnnotations()).isNotEmpty();
 	}
 
 	@Test
@@ -1188,6 +1193,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new OnlyBridgeMethod();
 		TypedValue value = accessor.read(context, target, "property");
+		assertThat(value.getValue()).isNull();
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
 	}
 
@@ -1196,7 +1202,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("simpleProperty").getValueType(evaluationContext);
-		assertThat(valueType).isNotNull();
+		assertThat(valueType).isEqualTo(Boolean.class);
 	}
 
 	@Test
@@ -1204,7 +1210,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("simpleProperty").getValue(evaluationContext);
-		assertThat(value).isNotNull();
+		assertThat(value).isInstanceOf(Boolean.class);
 	}
 
 	@Test
@@ -1212,7 +1218,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("primitiveProperty").getValueType(evaluationContext);
-		assertThat(valueType).isNotNull();
+		assertThat(valueType).isEqualTo(Boolean.class);
 	}
 
 	@Test
@@ -1220,7 +1226,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
-		assertThat(value).isNotNull();
+		assertThat(value).isInstanceOf(Boolean.class);
 	}
 
 	@Test
@@ -1320,18 +1326,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 			@Override
 			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 					List<TypeDescriptor> argumentTypes) throws AccessException {
-				return new MethodExecutor() {
-					@Override
-					public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
-							throws AccessException {
-						try {
-							Method method = XYZ.class.getMethod("values");
-							Object value = method.invoke(target, arguments);
-							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-						}
-						catch (Exception ex) {
-							throw new AccessException(ex.getMessage(), ex);
-						}
+				return (context1, target, arguments) -> {
+					try {
+						Method method = XYZ.class.getMethod("values");
+						Object value = method.invoke(target, arguments);
+						return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+					}
+					catch (Exception ex) {
+						throw new AccessException(ex.getMessage(), ex);
 					}
 				};
 			}
@@ -2172,15 +2174,25 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	private interface GenericInterface<T extends Number> {
 
+		void setProperty(T value);
+
 		T getProperty();
 	}
 
 
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
+		int value;
+
 		@Override
+		public void setProperty(Integer value) {
+			this.value = value;
+		}
+
+		@Override
+		@Nullable
 		public Integer getProperty() {
-			return null;
+			return this.value;
 		}
 	}
 
@@ -2245,6 +2257,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			this.string = string;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof TestClass2 &&
 					this.string.equals(((TestClass2) other).string)));

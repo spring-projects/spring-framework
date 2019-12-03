@@ -21,7 +21,7 @@ import java.util.List;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -53,6 +53,7 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 	}
 
 
+	@Override
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;

@@ -19,7 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.HttpMethod;
@@ -53,6 +53,11 @@ public class StatusAssertionTests {
 		// Wrong status value
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.isEqualTo(408));
+	}
+
+	@Test // gh-23630
+	public void isEqualToWithCustomStatus() {
+		statusAssertions(600).isEqualTo(600);
 	}
 
 	@Test
@@ -143,6 +148,10 @@ public class StatusAssertionTests {
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
+		return statusAssertions(status.value());
+	}
+
+	private StatusAssertions statusAssertions(int status) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 

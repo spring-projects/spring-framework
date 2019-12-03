@@ -103,12 +103,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * @param rootObject the root object to use
 	 * @see #setRootObject
 	 */
-	public StandardEvaluationContext(Object rootObject) {
+	public StandardEvaluationContext(@Nullable Object rootObject) {
 		this.rootObject = new TypedValue(rootObject);
 	}
 
 
-	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
+	public void setRootObject(@Nullable Object rootObject, TypeDescriptor typeDescriptor) {
 		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 

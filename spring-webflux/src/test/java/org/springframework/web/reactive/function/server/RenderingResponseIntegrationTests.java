@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -31,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.result.view.View;
@@ -46,7 +46,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -72,8 +72,10 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 	}
 
 
-	@Test
-	public void normal() {
+	@ParameterizedHttpServerTest
+	void normal(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/normal", String.class);
 
@@ -84,8 +86,10 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		assertThat(body.get("bar")).isEqualTo("baz");
 	}
 
-	@Test
-	public void filter() {
+	@ParameterizedHttpServerTest
+	void filter(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/filter", String.class);
 

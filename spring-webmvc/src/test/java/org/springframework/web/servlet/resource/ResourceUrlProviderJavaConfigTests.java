@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockFilterChain;
@@ -52,7 +52,7 @@ public class ResourceUrlProviderJavaConfigTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();

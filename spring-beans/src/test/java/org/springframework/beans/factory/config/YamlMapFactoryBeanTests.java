@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import org.springframework.core.io.AbstractResource;

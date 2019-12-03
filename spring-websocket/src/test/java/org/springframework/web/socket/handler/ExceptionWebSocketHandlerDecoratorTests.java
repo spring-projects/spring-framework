@@ -16,8 +16,8 @@
 
 package org.springframework.web.socket.handler;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -41,7 +41,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 	private WebSocketHandler delegate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.delegate = mock(WebSocketHandler.class);

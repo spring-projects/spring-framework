@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -24,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </ul>
  * @author Rossen Stoyanchev
  */
-public class ControllerInputIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class ControllerInputIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -52,20 +52,26 @@ public class ControllerInputIntegrationTests extends AbstractRequestMappingInteg
 	}
 
 
-	@Test
-	public void handleWithParam() throws Exception {
+	@ParameterizedHttpServerTest
+	void handleWithParam(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "Hello George!";
 		assertThat(performGet("/param?name=George", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test  // SPR-15140
-	public void handleWithEncodedParam() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-15140
+	void handleWithEncodedParam(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "Hello  + \u00e0!";
 		assertThat(performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void matrixVariable() throws Exception {
+	@ParameterizedHttpServerTest
+	void matrixVariable(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "p=11, q2=22, q4=44";
 		String url = "/first;p=11/second;q=22/third-fourth;q=44";
 		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);

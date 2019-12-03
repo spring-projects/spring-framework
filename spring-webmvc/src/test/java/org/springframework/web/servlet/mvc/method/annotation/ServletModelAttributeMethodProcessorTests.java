@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -61,7 +61,7 @@ public class ServletModelAttributeMethodProcessorTests {
 	private MethodParameter testBeanWithOptionalModelAttr;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		processor = new ServletModelAttributeMethodProcessor(false);
 

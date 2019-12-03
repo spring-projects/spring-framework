@@ -27,12 +27,11 @@
 			<cache:cacheable method="nullValue" cache="testCache"/>
 		</cache:caching>
 		<cache:caching>
-			<cache:cache-evict method="invalidate" cache="testCache"/>
 			<cache:cache-evict method="evict" key="#p0" cache="testCache"/>
 			<cache:cache-evict method="evictWithException" cache="testCache"/>
 			<cache:cache-evict method="evictEarly" cache="testCache" before-invocation="true"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="testCache" before-invocation="true"/>
 			<cache:cache-evict method="evictAll" cache="testCache" all-entries="true"/>
+			<cache:cache-evict method="evictAllEarly" cache="testCache" all-entries="true" before-invocation="true"/>
 		</cache:caching>
 		<cache:caching cache="testCache">
 			<cache:cache-put method="update"/>

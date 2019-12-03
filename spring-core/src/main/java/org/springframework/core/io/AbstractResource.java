@@ -26,8 +26,10 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.NestedIOException;
-import org.springframework.core.log.LogAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
@@ -45,8 +47,6 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractResource implements Resource {
 
-	private static final LogAccessor logAccessor = new LogAccessor(AbstractResource.class);
-
 	/**
 	 * This implementation checks whether a File can be opened,
 	 * falling back to whether an InputStream can be opened.
@@ -55,20 +55,28 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public boolean exists() {
 		// Try file existence: can we find the file in the file system?
-		try {
-			return getFile().exists();
-		}
-		catch (IOException ex) {
-			// Fall back to stream existence: can we open the stream?
+		if (isFile()) {
 			try {
-				getInputStream().close();
-				return true;
+				return getFile().exists();
 			}
-			catch (Throwable isEx) {
-				logAccessor.debug(ex,
-						() -> "Could not close InputStream for resource: " + getDescription());
-				return false;
+			catch (IOException ex) {
+				Log logger = LogFactory.getLog(getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not retrieve File for existence check of " + getDescription(), ex);
+				}
 			}
+		}
+		// Fall back to stream existence: can we open the stream?
+		try {
+			getInputStream().close();
+			return true;
+		}
+		catch (Throwable ex) {
+			Log logger = LogFactory.getLog(getClass());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not retrieve InputStream for existence check of " + getDescription(), ex);
+			}
+			return false;
 		}
 	}
 
@@ -164,8 +172,10 @@ public abstract class AbstractResource implements Resource {
 				is.close();
 			}
 			catch (IOException ex) {
-				logAccessor.debug(ex,
-						() -> "Could not close InputStream for resource: " + getDescription());
+				Log logger = LogFactory.getLog(getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not close content-length InputStream for " + getDescription(), ex);
+				}
 			}
 		}
 	}

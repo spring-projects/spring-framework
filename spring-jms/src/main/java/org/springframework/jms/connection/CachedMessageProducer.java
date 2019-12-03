@@ -89,6 +89,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		return this.target.getDisableMessageTimestamp();
 	}
 
+	@Override
 	public void setDeliveryDelay(long deliveryDelay) throws JMSException {
 		if (this.originalDeliveryDelay == null) {
 			this.originalDeliveryDelay = this.target.getDeliveryDelay();
@@ -96,6 +97,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		this.target.setDeliveryDelay(deliveryDelay);
 	}
 
+	@Override
 	public long getDeliveryDelay() throws JMSException {
 		return this.target.getDeliveryDelay();
 	}

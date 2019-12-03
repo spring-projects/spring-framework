@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;

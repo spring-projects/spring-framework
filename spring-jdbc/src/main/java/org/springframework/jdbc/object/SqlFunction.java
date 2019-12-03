@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.TypeMismatchDataAccessException;

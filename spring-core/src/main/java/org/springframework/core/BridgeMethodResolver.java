@@ -149,10 +149,10 @@ public final class BridgeMethodResolver {
 	 */
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
-		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
-		if (genericParameters.length != candidateParameters.length) {
+		if (genericParameters.length != candidateMethod.getParameterCount()) {
 			return false;
 		}
+		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
 			Class<?> candidateParameter = candidateParameters[i];
@@ -235,6 +235,7 @@ public final class BridgeMethodResolver {
 			return true;
 		}
 		return (bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()) &&
+				bridgeMethod.getParameterCount() == bridgedMethod.getParameterCount() &&
 				Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()));
 	}
 

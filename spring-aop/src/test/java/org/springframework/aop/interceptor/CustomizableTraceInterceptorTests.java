@@ -18,7 +18,7 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;

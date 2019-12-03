@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.NoOpRunnable;
@@ -44,6 +45,7 @@ public class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorT
 	}
 
 	@Override
+	@AfterEach
 	public void shutdownExecutor() {
 		List<Runnable> remainingTasks = concurrentExecutor.shutdownNow();
 		for (Runnable task : remainingTasks) {

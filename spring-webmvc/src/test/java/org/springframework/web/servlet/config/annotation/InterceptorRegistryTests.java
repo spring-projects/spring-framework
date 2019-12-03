@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.core.Ordered;
@@ -67,7 +67,7 @@ public class InterceptorRegistryTests {
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.registry = new InterceptorRegistry();
 		this.webInterceptor1 = new TestWebRequestInterceptor();

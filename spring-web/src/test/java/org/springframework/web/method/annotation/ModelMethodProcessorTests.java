@@ -18,8 +18,8 @@ package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -48,7 +48,7 @@ public class ModelMethodProcessorTests {
 
 	private NativeWebRequest webRequest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		processor = new ModelMethodProcessor();
 		mavContainer = new ModelAndViewContainer();

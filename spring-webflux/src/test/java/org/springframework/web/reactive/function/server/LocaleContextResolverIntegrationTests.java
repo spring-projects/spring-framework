@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class LocaleContextResolverIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
 
@@ -50,7 +50,7 @@ public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctio
 		return RouterFunctions.route(RequestPredicates.path("/"), this::render);
 	}
 
-	public Mono<RenderingResponse> render(ServerRequest request) {
+	Mono<RenderingResponse> render(ServerRequest request) {
 		return RenderingResponse.create("foo").build();
 	}
 
@@ -62,9 +62,10 @@ public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctio
 				.build();
 	}
 
+	@ParameterizedHttpServerTest
+	void fixedLocale(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
 
-	@Test
-	public void fixedLocale() {
 		Mono<ClientResponse> result = webClient
 				.get()
 				.uri("http://localhost:" + this.port + "/")

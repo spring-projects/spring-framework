@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -501,9 +501,7 @@ class Tokenizer {
 	}
 
 	private char[] subarray(int start, int end) {
-		char[] result = new char[end - start];
-		System.arraycopy(this.charsToProcess, start, result, 0, end - start);
-		return result;
+		return Arrays.copyOfRange(this.charsToProcess, start, end);
 	}
 
 	/**

@@ -19,8 +19,8 @@ package org.springframework.messaging.handler.annotation.support;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
@@ -51,7 +51,7 @@ public class MessageMethodArgumentResolverTests {
 	private Method method;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
 				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class, Message.class);

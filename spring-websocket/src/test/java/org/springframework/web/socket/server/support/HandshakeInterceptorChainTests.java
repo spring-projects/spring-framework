@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
@@ -53,7 +53,8 @@ public class HandshakeInterceptorChainTests extends AbstractHttpRequestTests {
 	private Map<String, Object> attributes;
 
 
-	@Before
+	@Override
+	@BeforeEach
 	public void setup() {
 		super.setup();
 

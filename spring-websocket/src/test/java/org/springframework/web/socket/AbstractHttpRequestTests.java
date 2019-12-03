@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
@@ -44,7 +44,7 @@ public abstract class AbstractHttpRequestTests {
 	protected ServerHttpAsyncRequestControl asyncControl;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		resetRequestAndResponse();
 	}

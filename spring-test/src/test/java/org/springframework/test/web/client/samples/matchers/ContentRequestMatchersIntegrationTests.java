@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -51,7 +51,7 @@ public class ContentRequestMatchersIntegrationTests {
 	private RestTemplate restTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());

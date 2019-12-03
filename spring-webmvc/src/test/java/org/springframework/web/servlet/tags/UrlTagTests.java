@@ -20,12 +20,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
@@ -42,7 +43,7 @@ public class UrlTagTests extends AbstractTagTests {
 	private MockPageContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		context = createPageContext();
 		tag = new UrlTag();

@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Enumeration;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -26,8 +27,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -59,7 +60,7 @@ public class ForwardedHeaderFilterTests {
 	private MockFilterChain filterChain;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("serial")
 	public void setup() throws Exception {
 		this.request = new MockHttpServletRequest();
@@ -313,7 +314,7 @@ public class ForwardedHeaderFilterTests {
 	public void forwardedRequestWithServletForward() throws Exception {
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
-		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.com");
+		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.example");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 
 		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
@@ -328,7 +329,7 @@ public class ForwardedHeaderFilterTests {
 
 		assertThat(actual).isNotNull();
 		assertThat(actual.getRequestURI()).isEqualTo("/bar");
-		assertThat(actual.getRequestURL().toString()).isEqualTo("https://www.mycompany.com/bar");
+		assertThat(actual.getRequestURL().toString()).isEqualTo("https://www.mycompany.example/bar");
 	}
 
 	@Test
@@ -440,7 +441,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_HOST, "example.com");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 
-		String location = "http://example.org/foo/bar";
+		String location = "http://company.example/foo/bar";
 		String redirectedUrl = sendRedirect(location);
 		assertThat(redirectedUrl).isEqualTo(location);
 	}

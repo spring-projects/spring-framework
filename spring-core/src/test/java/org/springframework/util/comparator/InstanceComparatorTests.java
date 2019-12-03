@@ -18,7 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class InstanceComparatorTests {
+class InstanceComparatorTests {
 
 	private C1 c1 = new C1();
 
@@ -39,7 +39,7 @@ public class InstanceComparatorTests {
 	private C4 c4 = new C4();
 
 	@Test
-	public void shouldCompareClasses() throws Exception {
+	void shouldCompareClasses() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(C1.class, C2.class);
 		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
 		assertThat(comparator.compare(c1, c2)).isEqualTo(-1);
@@ -50,7 +50,7 @@ public class InstanceComparatorTests {
 	}
 
 	@Test
-	public void shouldCompareInterfaces() throws Exception {
+	void shouldCompareInterfaces() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, I2.class);
 		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
 		assertThat(comparator.compare(c1, c2)).isEqualTo(0);
@@ -61,7 +61,7 @@ public class InstanceComparatorTests {
 	}
 
 	@Test
-	public void shouldCompareMix() throws Exception {
+	void shouldCompareMix() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, C3.class);
 		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
 		assertThat(comparator.compare(c3, c4)).isEqualTo(-1);

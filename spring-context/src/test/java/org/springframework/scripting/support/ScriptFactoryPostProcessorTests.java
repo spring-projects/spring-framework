@@ -16,8 +16,7 @@
 
 package org.springframework.scripting.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,19 +27,20 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class ScriptFactoryPostProcessorTests {
 
 	private static final String MESSAGE_TEXT = "Bingo";
@@ -77,10 +77,6 @@ public class ScriptFactoryPostProcessorTests {
 			"  }\n" +
 			"}";
 
-	@Before
-	public void setUp() {
-		Assume.group(TestGroup.PERFORMANCE);
-	}
 
 	@Test
 	public void testDoesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() throws Exception {

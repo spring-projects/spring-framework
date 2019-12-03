@@ -36,7 +36,6 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -223,8 +222,6 @@ class ControllerMethodResolver {
 
 	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
-		AnnotationAwareOrderComparator.sort(beans);
-
 		for (ControllerAdviceBean bean : beans) {
 			Class<?> beanType = bean.getBeanType();
 			if (beanType != null) {

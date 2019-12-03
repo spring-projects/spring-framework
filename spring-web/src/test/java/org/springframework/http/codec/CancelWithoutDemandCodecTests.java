@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.google.protobuf.Message;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -56,7 +56,7 @@ public class CancelWithoutDemandCodecTests {
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.bufferFactory.checkForLeaks();
 	}

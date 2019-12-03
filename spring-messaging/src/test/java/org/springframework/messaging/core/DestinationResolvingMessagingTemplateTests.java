@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -47,7 +47,7 @@ public class DestinationResolvingMessagingTemplateTests {
 	private TestMessagePostProcessor postProcessor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		TestMessageChannelDestinationResolver resolver = new TestMessageChannelDestinationResolver();

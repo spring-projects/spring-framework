@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -35,7 +35,7 @@ public class LookupMethodTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);

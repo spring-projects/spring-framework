@@ -20,7 +20,6 @@ package org.springframework.tests.sample.beans;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-@SuppressWarnings("serial")
 public class Colour {
 
 	public static final Colour RED = new Colour("RED");

@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.sql.Connection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;

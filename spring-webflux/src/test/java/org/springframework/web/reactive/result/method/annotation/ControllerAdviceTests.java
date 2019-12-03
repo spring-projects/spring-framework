@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;

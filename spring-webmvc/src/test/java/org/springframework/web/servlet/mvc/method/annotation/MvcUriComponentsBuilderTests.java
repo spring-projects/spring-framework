@@ -24,13 +24,14 @@ import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -83,12 +84,12 @@ public class MvcUriComponentsBuilderTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
-	@After
+	@AfterEach
 	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
@@ -578,6 +579,7 @@ public class MvcUriComponentsBuilderTests {
 
 	static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
+		@Override
 		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 		public Person get(@PathVariable Long id) {
 			return new Person();

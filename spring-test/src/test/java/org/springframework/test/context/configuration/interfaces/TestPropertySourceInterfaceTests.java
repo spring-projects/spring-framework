@@ -16,30 +16,29 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@RunWith(SpringRunner.class)
-public class TestPropertySourceInterfaceTests implements TestPropertySourceTestInterface {
+@ExtendWith(SpringExtension.class)
+class TestPropertySourceInterfaceTests implements TestPropertySourceTestInterface {
 
 	@Autowired
 	Environment env;
 
 
 	@Test
-	public void propertiesAreAvailableInEnvironment() {
+	void propertiesAreAvailableInEnvironment() {
 		assertThat(property("foo")).isEqualTo("bar");
 		assertThat(property("enigma")).isEqualTo("42");
 	}

@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;

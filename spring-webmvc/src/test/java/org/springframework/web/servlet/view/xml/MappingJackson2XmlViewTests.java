@@ -33,8 +33,8 @@ import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
@@ -65,7 +65,7 @@ public class MappingJackson2XmlViewTests {
 	private ScriptableObject jsScope;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

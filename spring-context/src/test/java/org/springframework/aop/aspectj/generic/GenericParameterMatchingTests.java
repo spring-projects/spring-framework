@@ -21,7 +21,7 @@ import java.util.Collection;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -42,7 +42,7 @@ public class GenericParameterMatchingTests {
 
 
 	@SuppressWarnings("unchecked")
-	@org.junit.Before
+	@org.junit.jupiter.api.BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());

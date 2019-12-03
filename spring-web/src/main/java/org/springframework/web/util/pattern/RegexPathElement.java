@@ -203,6 +203,7 @@ class RegexPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}

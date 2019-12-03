@@ -21,9 +21,9 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.FatalBeanException;
@@ -75,7 +75,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	private MockHttpServletResponse response;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void setupOnce() {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
 		resolver.afterPropertiesSet();
@@ -83,7 +83,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		HANDLER_COUNT = resolver.getReturnValueHandlers().getHandlers().size();
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
 		this.resolver.setWarnLogCategory(this.resolver.getClass().getName());
@@ -377,8 +377,10 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Controller
 	static class ResponseBodyController extends WebApplicationObjectSupport implements ResponseBodyInterface {
 
+		@Override
 		public void handle() {}
 
+		@Override
 		@ExceptionHandler
 		@ResponseBody
 		public String handleException(IllegalArgumentException ex) {

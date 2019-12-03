@@ -16,7 +16,7 @@
 
 package org.springframework.beans;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -41,7 +41,6 @@ public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 	public void withShadowedField() {
 		final StringBuilder sb = new StringBuilder();
 
-		@SuppressWarnings("serial")
 		TestBean target = new TestBean() {
 			@SuppressWarnings("unused")
 			StringBuilder name = sb;

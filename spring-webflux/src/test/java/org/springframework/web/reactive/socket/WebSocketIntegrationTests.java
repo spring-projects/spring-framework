@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -34,8 +33,10 @@ import reactor.core.publisher.ReplayProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,8 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests with server-side {@link WebSocketHandler}s.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketIntegrationTests.class);
 
@@ -57,8 +59,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	}
 
 
-	@Test
-	public void echo() throws Exception {
+	@ParameterizedWebSocketTest
+	void echo(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		startServer(client, server, serverConfigClass);
+
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
 		ReplayProcessor<Object> output = ReplayProcessor.create(count);
@@ -73,8 +77,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		assertThat(output.collectList().block(TIMEOUT)).isEqualTo(input.collectList().block(TIMEOUT));
 	}
 
-	@Test
-	public void subProtocol() throws Exception {
+	@ParameterizedWebSocketTest
+	void subProtocol(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		startServer(client, server, serverConfigClass);
+
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
 		MonoProcessor<Object> output = MonoProcessor.create();
@@ -103,8 +109,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		assertThat(output.block(TIMEOUT)).as("Wrong protocol detected on the server side").isEqualTo(protocol);
 	}
 
-	@Test
-	public void customHeader() throws Exception {
+	@ParameterizedWebSocketTest
+	void customHeader(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		startServer(client, server, serverConfigClass);
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("my-header", "my-value");
 		MonoProcessor<Object> output = MonoProcessor.create();
@@ -119,8 +127,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		assertThat(output.block(TIMEOUT)).isEqualTo("my-header:my-value");
 	}
 
-	@Test
-	public void sessionClosing() throws Exception {
+	@ParameterizedWebSocketTest
+	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		startServer(client, server, serverConfigClass);
+
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
@@ -145,12 +155,8 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			map.put("/sub-protocol", new SubProtocolWebSocketHandler());
 			map.put("/custom-header", new CustomHeaderHandler());
 			map.put("/close", new SessionClosingHandler());
-
-			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-			mapping.setUrlMap(map);
-			return mapping;
+			return new SimpleUrlHandlerMapping(map);
 		}
-
 	}
 
 

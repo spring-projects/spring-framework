@@ -51,7 +51,7 @@ public abstract class Jackson2CodecSupport {
 	/**
 	 * The key for the hint to specify a "JSON View" for encoding or decoding
 	 * with the value expected to be a {@link Class}.
-	 * @see <a href="https://wiki.fasterxml.com/JacksonJsonViews">Jackson JSON Views</a>
+	 * @see <a href="https://www.baeldung.com/jackson-json-view-annotation">Jackson JSON Views</a>
 	 */
 	public static final String JSON_VIEW_HINT = Jackson2CodecSupport.class.getName() + ".jsonView";
 

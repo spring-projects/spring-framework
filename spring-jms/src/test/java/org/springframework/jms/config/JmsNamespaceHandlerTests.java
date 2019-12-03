@@ -20,14 +20,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -67,12 +68,12 @@ public class JmsNamespaceHandlerTests {
 	private ToolingTestApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.context.close();
 	}

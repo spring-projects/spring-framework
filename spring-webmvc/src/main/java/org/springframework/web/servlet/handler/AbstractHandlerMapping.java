@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -484,7 +485,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.2
 	 */
 	protected boolean hasCorsConfigurationSource(Object handler) {
-		return handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null;
+		if (handler instanceof HandlerExecutionChain) {
+			handler = ((HandlerExecutionChain) handler).getHandler();
+		}
+		return (handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null);
 	}
 
 	/**

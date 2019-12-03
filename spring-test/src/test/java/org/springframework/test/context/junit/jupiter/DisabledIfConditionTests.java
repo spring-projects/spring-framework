@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation

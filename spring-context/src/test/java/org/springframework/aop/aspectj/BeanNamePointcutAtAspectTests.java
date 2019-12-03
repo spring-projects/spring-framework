@@ -18,7 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
@@ -44,7 +44,7 @@ public class BeanNamePointcutAtAspectTests {
 	private CounterAspect counterAspect;
 
 
-	@org.junit.Before
+	@org.junit.jupiter.api.BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());

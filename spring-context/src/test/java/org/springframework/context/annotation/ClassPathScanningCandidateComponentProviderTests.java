@@ -38,7 +38,7 @@ import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
 import example.scannable.sub.BarComponent;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;

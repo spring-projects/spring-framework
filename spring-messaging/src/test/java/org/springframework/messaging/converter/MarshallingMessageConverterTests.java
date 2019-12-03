@@ -18,10 +18,11 @@ package org.springframework.messaging.converter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xmlunit.diff.DifferenceEvaluator;
 
 import org.springframework.messaging.Message;
@@ -44,7 +45,7 @@ public class MarshallingMessageConverterTests {
 	private MarshallingMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void createMarshaller() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(MyBean.class);

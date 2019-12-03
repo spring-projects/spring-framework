@@ -19,8 +19,8 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -46,7 +46,7 @@ public class ViewControllerRegistryTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registry = new ViewControllerRegistry(new StaticApplicationContext());
 		this.request = new MockHttpServletRequest("GET", "/");

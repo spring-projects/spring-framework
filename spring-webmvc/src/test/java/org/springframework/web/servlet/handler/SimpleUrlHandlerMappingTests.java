@@ -16,10 +16,9 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -72,12 +71,10 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	public void testNewlineInRequest() throws Exception {
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setUrlDecode(false);
 		Object controller = new Object();
-		Map<String, Object> urlMap = new LinkedHashMap<>();
-		urlMap.put("/*/baz", controller);
-		handlerMapping.setUrlMap(urlMap);
+		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping(
+			Collections.singletonMap("/*/baz", controller));
+		handlerMapping.setUrlDecode(false);
 		handlerMapping.setApplicationContext(new StaticApplicationContext());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo%0a%0dbar/baz");

@@ -19,7 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;

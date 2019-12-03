@@ -22,8 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -66,7 +66,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramMono;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

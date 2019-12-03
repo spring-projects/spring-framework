@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.UnicastProcessor;
@@ -32,7 +32,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -52,7 +52,7 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
+public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final MultipartHttpMessageWriter writer =
 			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());

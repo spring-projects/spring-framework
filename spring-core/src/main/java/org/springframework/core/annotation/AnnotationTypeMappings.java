@@ -47,15 +47,22 @@ final class AnnotationTypeMappings {
 
 	private static final IntrospectionFailureLogger failureLogger = IntrospectionFailureLogger.DEBUG;
 
-	private static final Map<AnnotationFilter, Cache> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<AnnotationFilter, Cache> standardRepeatablesCache = new ConcurrentReferenceHashMap<>();
 
+	private static final Map<AnnotationFilter, Cache> noRepeatablesCache = new ConcurrentReferenceHashMap<>();
+
+
+	private final RepeatableContainers repeatableContainers;
 
 	private final AnnotationFilter filter;
 
 	private final List<AnnotationTypeMapping> mappings;
 
 
-	private AnnotationTypeMappings(AnnotationFilter filter, Class<? extends Annotation> annotationType) {
+	private AnnotationTypeMappings(RepeatableContainers repeatableContainers,
+			AnnotationFilter filter, Class<? extends Annotation> annotationType) {
+
+		this.repeatableContainers = repeatableContainers;
 		this.filter = filter;
 		this.mappings = new ArrayList<>();
 		addAllMappings(annotationType);
@@ -80,7 +87,7 @@ final class AnnotationTypeMappings {
 			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
-			Annotation[] repeatedAnnotations = RepeatableContainers.standardRepeatables()
+			Annotation[] repeatedAnnotations = this.repeatableContainers
 					.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
@@ -178,11 +185,37 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(
 			Class<? extends Annotation> annotationType, AnnotationFilter annotationFilter) {
 
-		return cache.computeIfAbsent(annotationFilter, Cache::new).get(annotationType);
+		return forAnnotationType(annotationType,
+				RepeatableContainers.standardRepeatables(), annotationFilter);
+	}
+
+	/**
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
+	 * @param annotationType the source annotation type
+	 * @param annotationFilter the annotation filter used to limit which
+	 * annotations are considered
+	 * @return type mappings for the annotation type
+	 */
+	static AnnotationTypeMappings forAnnotationType(
+			Class<? extends Annotation> annotationType,
+			RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
+
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter,
+				annotationType);
 	}
 
 	static void clearCache() {
-		cache.clear();
+		standardRepeatablesCache.clear();
+		noRepeatablesCache.clear();
 	}
 
 
@@ -190,6 +223,8 @@ final class AnnotationTypeMappings {
 	 * Cache created per {@link AnnotationFilter}.
 	 */
 	private static class Cache {
+
+		private final RepeatableContainers repeatableContainers;
 
 		private final AnnotationFilter filter;
 
@@ -199,22 +234,23 @@ final class AnnotationTypeMappings {
 		 * Create a cache instance with the specified filter.
 		 * @param filter the annotation filter
 		 */
-		Cache(AnnotationFilter filter) {
+		Cache(RepeatableContainers repeatableContainers, AnnotationFilter filter) {
+			this.repeatableContainers = repeatableContainers;
 			this.filter = filter;
 			this.mappings = new ConcurrentReferenceHashMap<>();
 		}
 
 		/**
-		 * Return or create {@link AnnotationTypeMappings} for the specified annotation type.
+		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
-		 * @return a new or existing {@link AnnotationTypeMapping} instance
+		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType) {
 			return this.mappings.computeIfAbsent(annotationType, this::createMappings);
 		}
 
 		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
-			return new AnnotationTypeMappings(this.filter, annotationType);
+			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType);
 		}
 	}
 

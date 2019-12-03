@@ -19,6 +19,7 @@ package org.springframework.context.index.processor;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

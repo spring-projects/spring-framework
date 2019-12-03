@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.Connector;
@@ -30,10 +31,10 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,7 +86,7 @@ public class RequestPartIntegrationTests {
 	private static String baseUrl;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void startServer() throws Exception {
 		// Let server pick its own random, available port.
 		server = new Server(0);
@@ -114,14 +115,14 @@ public class RequestPartIntegrationTests {
 		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer() throws Exception {
 		if (server != null) {
 			server.stop();
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
 		emptyBodyConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));

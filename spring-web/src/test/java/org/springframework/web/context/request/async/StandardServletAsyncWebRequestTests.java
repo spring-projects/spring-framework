@@ -17,10 +17,11 @@
 package org.springframework.web.context.request.async;
 
 import java.util.function.Consumer;
+
 import javax.servlet.AsyncEvent;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,7 +45,7 @@ public class StandardServletAsyncWebRequestTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setAsyncSupported(true);

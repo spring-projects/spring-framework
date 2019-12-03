@@ -21,11 +21,11 @@ import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 
 import com.google.protobuf.Message;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.codec.AbstractEncoderTestCase;
+import org.springframework.core.codec.AbstractEncoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ import static org.springframework.core.ResolvableType.forClass;
  *
  * @author Sebastien Deleuze
  */
-public class ProtobufEncoderTests extends AbstractEncoderTestCase<ProtobufEncoder> {
+public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
 
 	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 

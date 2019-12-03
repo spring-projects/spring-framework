@@ -25,8 +25,8 @@ import java.util.List;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 import test.mixin.LockedException;
 
@@ -90,7 +90,7 @@ public class ProxyFactoryBeanTests {
 	private BeanFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestListener.class));

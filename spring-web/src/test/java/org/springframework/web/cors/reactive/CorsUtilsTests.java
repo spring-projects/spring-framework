@@ -18,7 +18,7 @@ package org.springframework.web.cors.reactive;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -39,7 +39,7 @@ public class CorsUtilsTests {
 
 	@Test
 	public void isCorsRequest() {
-		ServerHttpRequest request = get("http://domain.com/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
+		ServerHttpRequest request = get("http://domain.example/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
 		assertThat(CorsUtils.isCorsRequest(request)).isTrue();
 	}
 
@@ -69,32 +69,32 @@ public class CorsUtilsTests {
 
 	@Test  // SPR-16262
 	public void isSameOriginWithXForwardedHeaders() {
-		String server = "mydomain1.com";
-		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
 	}
 
 	@Test  // SPR-16262
 	public void isSameOriginWithForwardedHeader() {
-		String server = "mydomain1.com";
-		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
 	}
 
 	@Test  // SPR-16362
 	@SuppressWarnings("deprecation")
 	public void isSameOriginWithDifferentSchemes() {
 		MockServerHttpRequest request = MockServerHttpRequest
-				.get("http://mydomain1.com")
-				.header(HttpHeaders.ORIGIN, "https://mydomain1.com")
+				.get("http://mydomain1.example")
+				.header(HttpHeaders.ORIGIN, "https://mydomain1.example")
 				.build();
 		assertThat(CorsUtils.isSameOrigin(request)).isFalse();
 	}

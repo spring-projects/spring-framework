@@ -19,16 +19,17 @@ package org.springframework.http.codec.xml;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.XMLEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
+public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 	private static final String POJO_ROOT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +

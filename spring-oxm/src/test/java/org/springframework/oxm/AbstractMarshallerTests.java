@@ -18,6 +18,7 @@ package org.springframework.oxm;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -28,8 +29,8 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,7 +55,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 
 	protected Object flights;
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		marshaller = createMarshaller();
 		flights = createFlights();

@@ -16,7 +16,7 @@
 
 package org.springframework.aop.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;

@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -46,7 +46,7 @@ public class AspectJNamespaceHandlerTests {
 	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);

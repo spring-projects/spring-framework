@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.foo.example/schema/component"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         targetNamespace="http://www.foo.example/schema/component"
+         elementFormDefault="qualified"
+         attributeFormDefault="unqualified">
+
+   <xsd:element name="component">
+      <xsd:complexType>
+         <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element ref="component"/>
+         </xsd:choice>
+         <xsd:attribute name="id" type="xsd:ID"/>
+         <xsd:attribute name="name" use="required" type="xsd:string"/>
+      </xsd:complexType>
+   </xsd:element>
+
+</xsd:schema>

@@ -18,8 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -29,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -41,20 +40,13 @@ import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
 
 /**
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
-public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
 
 	private WebClient webClient;
-
-
-	@Override
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port);
-	}
 
 
 	@Override
@@ -66,8 +58,17 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(this.wac)).build();
 	}
 
-	@Test
-	public void jsonStreaming() {
+	@Override
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
+		this.webClient = WebClient.create("http://localhost:" + this.port);
+	}
+
+
+	@ParameterizedHttpServerTest
+	void jsonStreaming(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Person> result = this.webClient.get()
 				.uri("/stream")
 				.accept(APPLICATION_STREAM_JSON)
@@ -81,8 +82,10 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 				.verify();
 	}
 
-	@Test
-	public void smileStreaming() {
+	@ParameterizedHttpServerTest
+	void smileStreaming(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Person> result = this.webClient.get()
 				.uri("/stream")
 				.accept(new MediaType("application", "stream+x-jackson-smile"))
@@ -95,6 +98,7 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 				.thenCancel()
 				.verify();
 	}
+
 
 	@RestController
 	@SuppressWarnings("unused")

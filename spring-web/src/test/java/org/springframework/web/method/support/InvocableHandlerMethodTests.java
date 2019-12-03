@@ -18,8 +18,8 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -46,7 +46,7 @@ public class InvocableHandlerMethodTests {
 	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.request = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}

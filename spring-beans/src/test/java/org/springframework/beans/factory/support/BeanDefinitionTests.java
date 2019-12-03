@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.tests.sample.beans.TestBean;
@@ -109,6 +109,27 @@ public class BeanDefinitionTests {
 		boolean condition = !otherBd.equals(bd);
 		assertThat(condition).isTrue();
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5), "long");
+		assertThat(bd.equals(otherBd)).isTrue();
+		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+	}
+
+	@Test
+	public void genericBeanDefinitionEquality() {
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setParentName("parent");
+		bd.setScope("request");
+		bd.setAbstract(true);
+		bd.setLazyInit(true);
+		GenericBeanDefinition otherBd = new GenericBeanDefinition();
+		otherBd.setScope("request");
+		otherBd.setAbstract(true);
+		otherBd.setLazyInit(true);
+		boolean condition1 = !bd.equals(otherBd);
+		assertThat(condition1).isTrue();
+		boolean condition = !otherBd.equals(bd);
+		assertThat(condition).isTrue();
+		otherBd.setParentName("parent");
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
 		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();

@@ -18,7 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.sockjs.transport.TransportType;
 

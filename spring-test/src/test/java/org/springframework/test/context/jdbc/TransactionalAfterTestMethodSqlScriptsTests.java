@@ -16,20 +16,18 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.FixMethodOrder;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.AfterTransaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
@@ -40,43 +38,42 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
  * @author Sam Brannen
  * @since 4.1
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @DirtiesContext
-public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransactionalTests {
 
-	@Rule
-	public TestName testName = new TestName();
+	String testName;
 
+
+	@BeforeEach
+	void trackTestName(TestInfo testInfo) {
+		this.testName = testInfo.getTestMethod().get().getName();
+	}
 
 	@AfterTransaction
-	public void afterTransaction() {
-		if ("test01".equals(testName.getMethodName())) {
+	void afterTransaction() {
+		if ("test01".equals(testName)) {
 			// Should throw a BadSqlGrammarException after test01, assuming 'drop-schema.sql' was executed
-			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
-					assertNumUsers(99));
+			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() -> assertNumUsers(99));
 		}
 	}
 
 	@Test
-	@SqlGroup({//
-	@Sql({ "schema.sql", "data.sql" }),//
-		@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_METHOD) //
+	@SqlGroup({
+		@Sql({ "schema.sql", "data.sql" }),
+		@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_METHOD)
 	})
-	// test## is required for @FixMethodOrder.
-	public void test01() {
+	// test## is required for @TestMethodOrder.
+	void test01() {
 		assertNumUsers(1);
 	}
 
 	@Test
 	@Sql({ "schema.sql", "data.sql", "data-add-dogbert.sql" })
-	// test## is required for @FixMethodOrder.
-	public void test02() {
+	// test## is required for @TestMethodOrder.
+	void test02() {
 		assertNumUsers(2);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }

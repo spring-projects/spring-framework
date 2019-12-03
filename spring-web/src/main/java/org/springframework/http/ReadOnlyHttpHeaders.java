@@ -16,9 +16,10 @@
 
 package org.springframework.http;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.springframework.util.MultiValueMap;
  * {@code HttpHeaders} object that can only be read, not written to.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.1.1
  */
 class ReadOnlyHttpHeaders extends HttpHeaders {
@@ -141,9 +143,10 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return Collections.unmodifiableSet(this.headers.entrySet().stream()
-				.map(AbstractMap.SimpleImmutableEntry::new)
-				.collect(Collectors.toSet()));
+		return this.headers.entrySet().stream().map(SimpleImmutableEntry::new)
+				.collect(Collectors.collectingAndThen(
+						Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
+						Collections::unmodifiableSet));
 	}
 
 }

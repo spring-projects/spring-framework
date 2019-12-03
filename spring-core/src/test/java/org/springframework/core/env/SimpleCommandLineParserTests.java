@@ -19,23 +19,22 @@ package org.springframework.core.env;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
-public class SimpleCommandLineParserTests {
+class SimpleCommandLineParserTests {
 
 	@Test
-	public void withNoOptions() {
+	void withNoOptions() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThat(parser.parse().getOptionValues("foo")).isNull();
 	}
 
 	@Test
-	public void withSingleOptionAndNoValue() {
+	void withSingleOptionAndNoValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1");
 		assertThat(args.containsOption("o1")).isTrue();
@@ -43,7 +42,7 @@ public class SimpleCommandLineParserTests {
 	}
 
 	@Test
-	public void withSingleOptionAndValue() {
+	void withSingleOptionAndValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1");
 		assertThat(args.containsOption("o1")).isTrue();
@@ -51,7 +50,7 @@ public class SimpleCommandLineParserTests {
 	}
 
 	@Test
-	public void withMixOfOptionsHavingValueAndOptionsHavingNoValue() {
+	void withMixOfOptionsHavingValueAndOptionsHavingNoValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "--o2");
 		assertThat(args.containsOption("o1")).isTrue();
@@ -63,35 +62,35 @@ public class SimpleCommandLineParserTests {
 	}
 
 	@Test
-	public void withEmptyOptionText() {
+	void withEmptyOptionText() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				parser.parse("--"));
 	}
 
 	@Test
-	public void withEmptyOptionName() {
+	void withEmptyOptionName() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				parser.parse("--=v1"));
 	}
 
 	@Test
-	public void withEmptyOptionValue() {
+	void withEmptyOptionValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				parser.parse("--o1="));
 	}
 
 	@Test
-	public void withEmptyOptionNameAndEmptyOptionValue() {
+	void withEmptyOptionNameAndEmptyOptionValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				parser.parse("--="));
 	}
 
 	@Test
-	public void withNonOptionArguments() {
+	void withNonOptionArguments() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "noa1", "--o2=v2", "noa2");
 		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
@@ -104,14 +103,14 @@ public class SimpleCommandLineParserTests {
 	}
 
 	@Test
-	public void assertOptionNamesIsUnmodifiable() {
+	void assertOptionNamesIsUnmodifiable() {
 		CommandLineArgs args = new SimpleCommandLineArgsParser().parse();
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				args.getOptionNames().add("bogus"));
 	}
 
 	@Test
-	public void assertNonOptionArgsIsUnmodifiable() {
+	void assertNonOptionArgsIsUnmodifiable() {
 		CommandLineArgs args = new SimpleCommandLineArgsParser().parse();
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				args.getNonOptionArgs().add("foo"));

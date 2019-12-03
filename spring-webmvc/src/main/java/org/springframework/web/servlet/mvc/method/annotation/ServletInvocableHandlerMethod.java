@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -165,7 +166,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	private void disableContentCachingIfNecessary(ServletWebRequest webRequest) {
-		if (!isRequestNotModified(webRequest)) {
+		if (isRequestNotModified(webRequest)) {
 			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 			Assert.notNull(response, "Expected HttpServletResponse");
 			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {

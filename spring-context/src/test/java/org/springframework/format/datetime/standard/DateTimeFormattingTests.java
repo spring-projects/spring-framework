@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -62,7 +62,7 @@ public class DateTimeFormattingTests {
 	private DataBinder binder;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		setup(registrar);
@@ -84,7 +84,7 @@ public class DateTimeFormattingTests {
 		DateTimeContextHolder.setDateTimeContext(context);
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		LocaleContextHolder.setLocale(null);
 		DateTimeContextHolder.setDateTimeContext(null);

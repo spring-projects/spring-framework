@@ -19,9 +19,9 @@ package org.springframework.cache.config;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
@@ -46,13 +46,13 @@ public class CustomInterceptorTests {
 
 	protected CacheableService<?> cs;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 		this.cs = ctx.getBean("service", CacheableService.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.ctx.close();
 	}

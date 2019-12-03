@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.support;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -401,7 +402,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where a {@linkplain org.springframework.http.converter.HttpMessageConverter message converter}
-	 * cannot read from a HTTP request.
+	 * cannot read from an HTTP request.
 	 * <p>The default implementation sends an HTTP 400 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotReadableException could be
 	 * rethrown as-is.
@@ -422,7 +423,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	/**
 	 * Handle the case where a
 	 * {@linkplain org.springframework.http.converter.HttpMessageConverter message converter}
-	 * cannot write to a HTTP request.
+	 * cannot write to an HTTP request.
 	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
 	 * be rethrown as-is.

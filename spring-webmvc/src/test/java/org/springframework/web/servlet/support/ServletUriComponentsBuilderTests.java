@@ -18,8 +18,8 @@ package org.springframework.web.servlet.support;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -42,7 +42,7 @@ public class ServletUriComponentsBuilderTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");

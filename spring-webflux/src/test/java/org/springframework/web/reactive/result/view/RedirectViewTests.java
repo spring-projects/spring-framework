@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,7 +44,7 @@ public class RedirectViewTests {
 	private MockServerWebExchange exchange;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/context/path").contextPath("/context"));
 	}
@@ -97,13 +97,13 @@ public class RedirectViewTests {
 
 		assertThat(view.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(view.isRemoteHost("/path")).isFalse();
-		assertThat(view.isRemoteHost("http://url.somewhereelse.com")).isFalse();
+		assertThat(view.isRemoteHost("http://somewhereelse.example")).isFalse();
 
 		view.setHosts("url.somewhere.com");
 
 		assertThat(view.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(view.isRemoteHost("/path")).isFalse();
-		assertThat(view.isRemoteHost("http://url.somewhereelse.com")).isTrue();
+		assertThat(view.isRemoteHost("http://somewhereelse.example")).isTrue();
 	}
 
 	@Test

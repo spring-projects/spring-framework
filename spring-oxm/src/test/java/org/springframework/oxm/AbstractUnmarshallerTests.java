@@ -18,6 +18,7 @@ package org.springframework.oxm;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,8 +31,8 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -54,7 +55,7 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 					"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		unmarshaller = createUnmarshaller();
 	}

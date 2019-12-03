@@ -16,15 +16,15 @@
 
 package org.springframework.test.web.servlet.samples.context;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration("src/test/resources/META-INF/web-resources")
 @ContextHierarchy({
 	@ContextConfiguration("root-context.xml"),
@@ -61,7 +61,7 @@ public class XmlConfigTests {
 	private MockMvc mockMvc;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));

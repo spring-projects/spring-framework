@@ -16,22 +16,15 @@
 
 package org.springframework.web.server.adapter;
 
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
@@ -44,38 +37,23 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  *
  * @author Rossen Stoyanchev
  */
-@RunWith(Parameterized.class)
-public class DefaultServerWebExchangeCheckNotModifiedTests {
+class DefaultServerWebExchangeCheckNotModifiedTests {
 
 	private static final String CURRENT_TIME = "Wed, 09 Apr 2014 09:57:42 GMT";
 
+	private final Instant currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
-	private SimpleDateFormat dateFormat;
-
-	private Instant currentDate;
-
-	@Parameter
-	public HttpMethod method;
-
-	@Parameters(name = "{0}")
-	static public Iterable<Object[]> safeMethods() {
-		return Arrays.asList(new Object[][] {
-				{HttpMethod.GET},
-				{HttpMethod.HEAD}
-		});
-	}
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
 
-	@Before
-	public void setup() throws URISyntaxException {
-		this.currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+	@BeforeEach
+	void setup() {
 		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 
 	@Test
-	public void checkNotModifiedNon2xxStatus() {
+	void checkNotModifiedNon2xxStatus() {
 		MockServerHttpRequest request = get("/").ifModifiedSince(this.currentDate.toEpochMilli()).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		exchange.getResponse().setStatusCode(HttpStatus.NOT_MODIFIED);
@@ -86,7 +64,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test // SPR-14559
-	public void checkNotModifiedInvalidIfNoneMatchHeader() {
+	void checkNotModifiedInvalidIfNoneMatchHeader() {
 		String eTag = "\"etagvalue\"";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("missingquotes"));
 		assertThat(exchange.checkNotModified(eTag)).isFalse();
@@ -95,7 +73,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedHeaderAlreadySet() {
+	void checkNotModifiedHeaderAlreadySet() {
 		MockServerHttpRequest request = get("/").ifModifiedSince(currentDate.toEpochMilli()).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		exchange.getResponse().getHeaders().add("Last-Modified", CURRENT_TIME);
@@ -107,7 +85,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimestamp() throws Exception {
+	void checkNotModifiedTimestamp() throws Exception {
 		MockServerHttpRequest request = get("/").ifModifiedSince(currentDate.toEpochMilli()).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
@@ -118,7 +96,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkModifiedTimestamp() {
+	void checkModifiedTimestamp() {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
 		MockServerHttpRequest request = get("/").ifModifiedSince(oneMinuteAgo.toEpochMilli()).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -130,7 +108,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedETag() {
+	void checkNotModifiedETag() {
 		String eTag = "\"Foo\"";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
@@ -141,7 +119,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedETagWithSeparatorChars() {
+	void checkNotModifiedETagWithSeparatorChars() {
 		String eTag = "\"Foo, Bar\"";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
@@ -151,9 +129,8 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo(eTag);
 	}
 
-
 	@Test
-	public void checkModifiedETag() {
+	void checkModifiedETag() {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
@@ -165,7 +142,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedUnpaddedETag() {
+	void checkNotModifiedUnpaddedETag() {
 		String eTag = "Foo";
 		String paddedEtag = String.format("\"%s\"", eTag);
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(paddedEtag));
@@ -177,7 +154,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkModifiedUnpaddedETag() {
+	void checkModifiedUnpaddedETag() {
 		String currentETag = "Foo";
 		String oldEtag = "Bar";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
@@ -189,7 +166,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedWildcardIsIgnored() {
+	void checkNotModifiedWildcardIsIgnored() {
 		String eTag = "\"Foo\"";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("*"));
 		assertThat(exchange.checkNotModified(eTag)).isFalse();
@@ -199,7 +176,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedETagAndTimestamp() {
+	void checkNotModifiedETagAndTimestamp() {
 		String eTag = "\"Foo\"";
 		long time = currentDate.toEpochMilli();
 		MockServerHttpRequest request = get("/").ifNoneMatch(eTag).ifModifiedSince(time).build();
@@ -214,7 +191,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 
 	// SPR-14224
 	@Test
-	public void checkNotModifiedETagAndModifiedTimestamp() {
+	void checkNotModifiedETagAndModifiedTimestamp() {
 		String eTag = "\"Foo\"";
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
@@ -230,7 +207,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkModifiedETagAndNotModifiedTimestamp() throws Exception {
+	void checkModifiedETagAndNotModifiedTimestamp() throws Exception {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "\"Bar\"";
 		long time = currentDate.toEpochMilli();
@@ -245,7 +222,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedETagWeakStrong() {
+	void checkNotModifiedETagWeakStrong() {
 		String eTag = "\"Foo\"";
 		String weakEtag = String.format("W/%s", eTag);
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
@@ -257,7 +234,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedETagStrongWeak() {
+	void checkNotModifiedETagStrongWeak() {
 		String eTag = "\"Foo\"";
 		MockServerHttpRequest request = get("/").ifNoneMatch(String.format("W/%s", eTag)).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -269,7 +246,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedMultipleETags() {
+	void checkNotModifiedMultipleETags() {
 		String eTag = "\"Bar\"";
 		String multipleETags = String.format("\"Foo\", %s", eTag);
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(multipleETags));
@@ -281,7 +258,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimestampWithLengthPart() throws Exception {
+	void checkNotModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		String header = "Wed, 09 Apr 2014 09:57:42 GMT; length=13774";
 		MockServerHttpRequest request = get("/").header("If-Modified-Since", header).build();
@@ -294,7 +271,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkModifiedTimestampWithLengthPart() throws Exception {
+	void checkModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		String header = "Tue, 08 Apr 2014 09:57:42 GMT; length=13774";
 		MockServerHttpRequest request = get("/").header("If-Modified-Since", header).build();
@@ -307,7 +284,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimestampConditionalPut() throws Exception {
+	void checkNotModifiedTimestampConditionalPut() throws Exception {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
 		long millis = currentDate.toEpochMilli();
 		MockServerHttpRequest request = MockServerHttpRequest.put("/").ifUnmodifiedSince(millis).build();
@@ -319,7 +296,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
-	public void checkNotModifiedTimestampConditionalPutConflict() throws Exception {
+	void checkNotModifiedTimestampConditionalPutConflict() throws Exception {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
 		long millis = oneMinuteAgo.toEpochMilli();
 		MockServerHttpRequest request = MockServerHttpRequest.put("/").ifUnmodifiedSince(millis).build();

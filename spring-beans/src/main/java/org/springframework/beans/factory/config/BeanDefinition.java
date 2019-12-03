@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -40,16 +41,18 @@ import org.springframework.lang.Nullable;
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
-	 * Scope identifier for the standard singleton scope: "singleton".
+	 * Scope identifier for the standard singleton scope: {@value}.
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
+	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
 	 */
 	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 	/**
-	 * Scope identifier for the standard prototype scope: "prototype".
+	 * Scope identifier for the standard prototype scope: {@value}.
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
+	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -303,6 +306,17 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	// Read-only attributes
+
+	/**
+	 * Return a resolvable type for this bean definition,
+	 * based on the bean class or other specific metadata.
+	 * <p>This is typically fully resolved on a runtime-merged bean definition
+	 * but not necessarily on a configuration-time definition instance.
+	 * @return the resolvable type (potentially {@link ResolvableType#NONE})
+	 * @since 5.2
+	 * @see ConfigurableBeanFactory#getMergedBeanDefinition
+	 */
+	ResolvableType getResolvableType();
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance

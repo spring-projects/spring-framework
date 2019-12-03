@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -125,7 +126,7 @@ public class SimpleNamingContext implements Context {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Static JNDI lookup: [" + name + "]");
 		}
-		if ("".equals(name)) {
+		if (name.isEmpty()) {
 			return new SimpleNamingContext(this.root, this.boundObjects, this.environment);
 		}
 		Object found = this.boundObjects.get(name);
@@ -305,7 +306,7 @@ public class SimpleNamingContext implements Context {
 		private Iterator<T> iterator;
 
 		private AbstractNamingEnumeration(SimpleNamingContext context, String proot) throws NamingException {
-			if (!"".equals(proot) && !proot.endsWith("/")) {
+			if (!proot.isEmpty() && !proot.endsWith("/")) {
 				proot = proot + "/";
 			}
 			String root = context.root + proot;

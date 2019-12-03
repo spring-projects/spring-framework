@@ -24,10 +24,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
@@ -81,6 +82,7 @@ public class DefaultEntityResponseBuilderTests {
 				EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(result.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test

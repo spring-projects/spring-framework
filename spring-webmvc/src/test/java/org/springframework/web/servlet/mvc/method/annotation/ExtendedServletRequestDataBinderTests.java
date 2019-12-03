@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.TestBean;
@@ -39,7 +39,7 @@ public class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 	}

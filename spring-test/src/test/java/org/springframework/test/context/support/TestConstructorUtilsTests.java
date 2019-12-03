@@ -18,13 +18,16 @@ package org.springframework.test.context.support;
 
 import java.lang.reflect.Constructor;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.SpringProperties;
 import org.springframework.test.context.TestConstructor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
+import static org.springframework.test.context.TestConstructor.AutowireMode.ANNOTATED;
 
 /**
  * Unit tests for {@link TestConstructorUtils}.
@@ -32,38 +35,58 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 5.2
  */
-public class TestConstructorUtilsTests {
+class TestConstructorUtilsTests {
 
-	@After
-	public void clearGlobalFlag() {
-		System.clearProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME);
+	@AfterEach
+	void clearGlobalFlag() {
+		setGlobalFlag(null);
 	}
 
 	@Test
-	public void notAutowirable() throws Exception {
+	void notAutowirable() throws Exception {
 		assertNotAutowirable(NotAutowirableTestCase.class);
 	}
 
 	@Test
-	public void autowiredAnnotation() throws Exception {
+	void autowiredAnnotation() throws Exception {
 		assertAutowirable(AutowiredAnnotationTestCase.class);
 	}
 
 	@Test
-	public void testConstructorAnnotation() throws Exception {
+	void testConstructorAnnotation() throws Exception {
 		assertAutowirable(TestConstructorAnnotationTestCase.class);
 	}
 
 	@Test
-	public void automaticallyAutowired() throws Exception {
+	void automaticallyAutowired() throws Exception {
 		setGlobalFlag();
 		assertAutowirable(AutomaticallyAutowiredTestCase.class);
 	}
 
 	@Test
-	public void automaticallyAutowiredButOverriddenLocally() throws Exception {
+	void automaticallyAutowiredButOverriddenLocally() throws Exception {
 		setGlobalFlag();
 		assertNotAutowirable(TestConstructorAnnotationOverridesGlobalFlagTestCase.class);
+	}
+
+	@Test
+	void globalFlagVariations() throws Exception {
+		Class<?> testClass = AutomaticallyAutowiredTestCase.class;
+
+		setGlobalFlag(ALL.name());
+		assertAutowirable(testClass);
+
+		setGlobalFlag(ALL.name().toLowerCase());
+		assertAutowirable(testClass);
+
+		setGlobalFlag("\t" + ALL.name().toLowerCase() + "   ");
+		assertAutowirable(testClass);
+
+		setGlobalFlag("bogus");
+		assertNotAutowirable(testClass);
+
+		setGlobalFlag("        ");
+		assertNotAutowirable(testClass);
 	}
 
 	private void assertAutowirable(Class<?> testClass) throws NoSuchMethodException {
@@ -77,14 +100,20 @@ public class TestConstructorUtilsTests {
 	}
 
 	private void setGlobalFlag() {
-		System.setProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME, "true");
+		setGlobalFlag(ALL.name());
+	}
+
+	private void setGlobalFlag(String flag) {
+		SpringProperties.setProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, flag);
 	}
 
 
 	static class NotAutowirableTestCase {
 	}
 
-	@TestConstructor(autowire = false)
+	// The following declaration simply verifies that @Autowired on the constructor takes
+	// precedence.
+	@TestConstructor(autowireMode = ANNOTATED)
 	static class AutowiredAnnotationTestCase {
 
 		@Autowired
@@ -92,14 +121,14 @@ public class TestConstructorUtilsTests {
 		}
 	}
 
-	@TestConstructor(autowire = true)
+	@TestConstructor(autowireMode = ALL)
 	static class TestConstructorAnnotationTestCase {
 	}
 
 	static class AutomaticallyAutowiredTestCase {
 	}
 
-	@TestConstructor(autowire = false)
+	@TestConstructor(autowireMode = ANNOTATED)
 	static class TestConstructorAnnotationOverridesGlobalFlagTestCase {
 	}
 

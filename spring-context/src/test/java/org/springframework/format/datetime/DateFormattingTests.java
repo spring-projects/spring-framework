@@ -22,10 +22,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -45,18 +45,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DateFormattingTests {
 
-	private final FormattingConversionService conversionService = new FormattingConversionService();
+	private FormattingConversionService conversionService;
 
 	private DataBinder binder;
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		setup(registrar);
 	}
 
 	private void setup(DateFormatterRegistrar registrar) {
+		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
@@ -68,14 +69,14 @@ public class DateFormattingTests {
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
 
 
 	@Test
-	public void testBindLong() {
+	void testBindLong() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("millis", "1256961600");
 		binder.bind(propertyValues);
@@ -84,7 +85,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindLongAnnotated() {
+	void testBindLongAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("millisAnnotated", "10/31/09");
 		binder.bind(propertyValues);
@@ -93,7 +94,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindCalendarAnnotated() {
+	void testBindCalendarAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("calendarAnnotated", "10/31/09");
 		binder.bind(propertyValues);
@@ -102,7 +103,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindDateAnnotated() {
+	void testBindDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "10/31/09");
 		binder.bind(propertyValues);
@@ -111,7 +112,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindDateArray() {
+	void testBindDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", new String[]{"10/31/09 12:00 PM"});
 		binder.bind(propertyValues);
@@ -119,7 +120,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindDateAnnotatedWithError() {
+	void testBindDateAnnotatedWithError() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "Oct X31, 2009");
 		binder.bind(propertyValues);
@@ -128,8 +129,8 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	@Ignore
-	public void testBindDateAnnotatedWithFallbackError() {
+	@Disabled
+	void testBindDateAnnotatedWithFallbackError() {
 		// TODO This currently passes because of the Date(String) constructor fallback is used
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "Oct 031, 2009");
@@ -139,7 +140,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindDateAnnotatedPattern() {
+	void testBindDateAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
 		binder.bind(propertyValues);
@@ -148,7 +149,21 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindDateTimeOverflow() {
+	void testBindDateAnnotatedPatternWithGlobalFormat() {
+		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		DateFormatter dateFormatter = new DateFormatter();
+		dateFormatter.setIso(ISO.DATE_TIME);
+		registrar.setFormatter(dateFormatter);
+		setup(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
+	}
+
+	@Test
+	void testBindDateTimeOverflow() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
@@ -156,7 +171,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindISODate() {
+	void testBindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
 		binder.bind(propertyValues);
@@ -165,7 +180,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindISOTime() {
+	void testBindISOTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
@@ -174,7 +189,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindISODateTime() {
+	void testBindISODateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDateTime", "2009-10-31T12:00:00.000-08:00");
 		binder.bind(propertyValues);
@@ -183,7 +198,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void testBindNestedDateAnnotated() {
+	void testBindNestedDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].dateAnnotated", "10/31/09");
 		binder.bind(propertyValues);
@@ -192,7 +207,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void dateToStringWithoutGlobalFormat() {
+	void dateToStringWithoutGlobalFormat() {
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = date.toString();
@@ -200,7 +215,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void dateToStringWithGlobalFormat() {
+	void dateToStringWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		registrar.setFormatter(new DateFormatter());
 		setup(registrar);
@@ -212,14 +227,14 @@ public class DateFormattingTests {
 
 	@Test  // SPR-10105
 	@SuppressWarnings("deprecation")
-	public void stringToDateWithoutGlobalFormat() {
+	void stringToDateWithoutGlobalFormat() {
 		String string = "Sat, 12 Aug 1995 13:30:00 GM";
 		Date date = this.conversionService.convert(string, Date.class);
 		assertThat(date).isEqualTo(new Date(string));
 	}
 
 	@Test  // SPR-10105
-	public void stringToDateWithGlobalFormat() {
+	void stringToDateWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		DateFormatter dateFormatter = new DateFormatter();
 		dateFormatter.setIso(ISO.DATE_TIME);

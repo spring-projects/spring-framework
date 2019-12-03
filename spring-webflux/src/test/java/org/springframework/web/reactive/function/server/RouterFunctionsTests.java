@@ -19,7 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -195,6 +195,10 @@ public class RouterFunctionsTests {
 						return HttpStatus.OK;
 					}
 					@Override
+					public int rawStatusCode() {
+						return 200;
+					}
+					@Override
 					public HttpHeaders headers() {
 						return new HttpHeaders();
 					}
@@ -227,6 +231,10 @@ public class RouterFunctionsTests {
 					@Override
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
+					}
+					@Override
+					public int rawStatusCode() {
+						return 200;
 					}
 					@Override
 					public HttpHeaders headers() {

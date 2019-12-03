@@ -1,0 +1,28 @@
+description = "Spring Integration Tests"
+
+apply plugin: "org.springframework.build.test-sources"
+
+dependencies {
+	testCompile(project(":spring-aop"))
+	testCompile(project(":spring-beans"))
+	testCompile(project(":spring-context"))
+	testCompile(project(":spring-core"))
+	testCompile(project(":spring-expression"))
+	testCompile(project(":spring-jdbc"))
+	testCompile(project(":spring-orm"))
+	testCompile(project(":spring-test"))
+	testCompile(project(":spring-tx"))
+	testCompile(project(":spring-web"))
+	testCompile("javax.inject:javax.inject")
+	testCompile("javax.resource:javax.resource-api")
+	testCompile("javax.servlet:javax.servlet-api")
+	testCompile("org.aspectj:aspectjweaver")
+	testCompile("org.hsqldb:hsqldb")
+	testCompile("org.hibernate:hibernate-core")
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}

@@ -16,7 +16,7 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.aop.PerTargetAspect;
 
 import org.springframework.aop.Pointcut;

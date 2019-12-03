@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.handler;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -41,7 +41,7 @@ public class PathMatchingUrlHandlerMappingTests {
 
 	private ConfigurableWebApplicationContext wac;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();

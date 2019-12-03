@@ -24,7 +24,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jca.cci.connection.CciLocalTransactionManager;

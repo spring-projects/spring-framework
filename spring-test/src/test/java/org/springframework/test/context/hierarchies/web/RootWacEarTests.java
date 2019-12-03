@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.hierarchies.web;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @WebAppConfiguration
 @ContextHierarchy(@ContextConfiguration)
-public class RootWacEarTests extends EarTests {
+class RootWacEarTests extends EarTests {
 
 	@Configuration
 	static class RootWacConfig {
 
 		@Bean
-		public String root() {
+		String root() {
 			return "root";
 		}
 	}
@@ -60,15 +60,15 @@ public class RootWacEarTests extends EarTests {
 	private String root;
 
 
-	@Ignore("Superseded by verifyRootWacConfig()")
+	@Disabled("Superseded by verifyRootWacConfig()")
 	@Test
 	@Override
-	public void verifyEarConfig() {
+	void verifyEarConfig() {
 		/* no-op */
 	}
 
 	@Test
-	public void verifyRootWacConfig() {
+	void verifyRootWacConfig() {
 		ApplicationContext parent = wac.getParent();
 		assertThat(parent).isNotNull();
 		boolean condition = parent instanceof WebApplicationContext;

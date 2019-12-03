@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import org.springframework.beans.BeansException;
@@ -69,7 +69,7 @@ public class ImportSelectorTests {
 	static Map<Class<?>, String> importFrom = new HashMap<>();
 
 
-	@Before
+	@BeforeEach
 	public void cleanup() {
 		ImportSelectorTests.importFrom.clear();
 		SampleImportSelector.cleanup();

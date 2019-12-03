@@ -20,12 +20,10 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.NoOpRunnable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -34,6 +32,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Rick Evans
@@ -44,8 +43,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	@Test
 	public void testThrowsExceptionIfPoolSizeIsLessThanZero() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				factory.setPoolSize(-1));
+		assertThatIllegalArgumentException().isThrownBy(() -> factory.setPoolSize(-1));
 	}
 
 	@Test
@@ -90,9 +88,8 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
@@ -107,9 +104,8 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
@@ -126,9 +122,8 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();
 
@@ -146,8 +141,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		verify(runnable, atLeast(2)).run();
 	}
 
-	@Ignore
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 
@@ -166,8 +161,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		verify(runnable, never()).run();
 	}
 
-	@Ignore
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();

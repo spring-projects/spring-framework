@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import example.scannable.FooService;
 import example.scannable.ScopedProxyTestBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;

@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.util.LinkedList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 
@@ -28,25 +28,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AutoPopulatingListTests {
+class AutoPopulatingListTests {
 
 	@Test
-	public void withClass() throws Exception {
+	void withClass() throws Exception {
 		doTestWithClass(new AutoPopulatingList<>(TestObject.class));
 	}
 
 	@Test
-	public void withClassAndUserSuppliedBackingList() throws Exception {
+	void withClassAndUserSuppliedBackingList() throws Exception {
 		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<>(), TestObject.class));
 	}
 
 	@Test
-	public void withElementFactory() throws Exception {
+	void withElementFactory() throws Exception {
 		doTestWithElementFactory(new AutoPopulatingList<>(new MockElementFactory()));
 	}
 
 	@Test
-	public void withElementFactoryAndUserSuppliedBackingList() throws Exception {
+	void withElementFactoryAndUserSuppliedBackingList() throws Exception {
 		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<>(), new MockElementFactory()));
 	}
 
@@ -88,7 +88,7 @@ public class AutoPopulatingListTests {
 	}
 
 	@Test
-	public void serialization() throws Exception {
+	void serialization() throws Exception {
 		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestObject.class);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(list)).isEqualTo(list);
 	}

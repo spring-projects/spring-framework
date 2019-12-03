@@ -21,8 +21,8 @@ import java.util.Map;
 import org.apache.tiles.request.AbstractRequest;
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -55,7 +55,7 @@ public class TilesViewTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();

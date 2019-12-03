@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.MethodParameter;
@@ -47,6 +47,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -59,6 +60,7 @@ import static java.time.Instant.ofEpochMilli;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -127,7 +129,7 @@ public class HttpEntityMethodProcessorMockTests {
 	private ServletWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
 
@@ -313,6 +315,22 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
 				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest));
+	}
+
+	@Test // gh-23205
+	public void shouldFailWithServerErrorIfContentTypeFromResponseEntity() {
+		ResponseEntity<String> returnValue = ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_XML)
+				.body("<foo/>");
+
+		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
+		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+
+		assertThatThrownBy(() ->
+				processor.handleReturnValue(
+						returnValue, returnTypeResponseEntity, mavContainer, webRequest))
+				.isInstanceOf(HttpMessageNotWritableException.class)
+				.hasMessageContaining("with preset Content-Type");
 	}
 
 	@Test

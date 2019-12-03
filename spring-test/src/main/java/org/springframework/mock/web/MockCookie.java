@@ -16,6 +16,10 @@
 
 package org.springframework.mock.web;
 
+import java.time.DateTimeException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javax.servlet.http.Cookie;
 
 import org.springframework.lang.Nullable;
@@ -28,6 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Vedran Pavic
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.1
  */
 public class MockCookie extends Cookie {
@@ -36,11 +41,14 @@ public class MockCookie extends Cookie {
 
 
 	@Nullable
+	private ZonedDateTime expires;
+
+	@Nullable
 	private String sameSite;
 
 
 	/**
-	 * Constructor with the cookie name and value.
+	 * Construct a new {@link MockCookie} with the supplied name and value.
 	 * @param name the name
 	 * @param value the value
 	 * @see Cookie#Cookie(String, String)
@@ -49,12 +57,29 @@ public class MockCookie extends Cookie {
 		super(name, value);
 	}
 
+	/**
+	 * Set the "Expires" attribute for this cookie.
+	 * @since 5.1.11
+	 */
+	public void setExpires(@Nullable ZonedDateTime expires) {
+		this.expires = expires;
+	}
 
 	/**
-	 * Add the "SameSite" attribute to the cookie.
+	 * Get the "Expires" attribute for this cookie.
+	 * @since 5.1.11
+	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
+	 */
+	@Nullable
+	public ZonedDateTime getExpires() {
+		return this.expires;
+	}
+
+	/**
+	 * Set the "SameSite" attribute for this cookie.
 	 * <p>This limits the scope of the cookie such that it will only be attached
-	 * to same site requests if {@code "Strict"} or cross-site requests if
-	 * {@code "Lax"}.
+	 * to same-site requests if the supplied value is {@code "Strict"} or cross-site
+	 * requests if the supplied value is {@code "Lax"}.
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 	 */
 	public void setSameSite(@Nullable String sameSite) {
@@ -62,7 +87,8 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
-	 * Return the "SameSite" attribute, or {@code null} if not set.
+	 * Get the "SameSite" attribute for this cookie.
+	 * @return the "SameSite" attribute for this cookie, or {@code null} if not set
 	 */
 	@Nullable
 	public String getSameSite() {
@@ -71,7 +97,7 @@ public class MockCookie extends Cookie {
 
 
 	/**
-	 * Factory method that parses the value of a "Set-Cookie" header.
+	 * Factory method that parses the value of the supplied "Set-Cookie" header.
 	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
 	 */
@@ -93,6 +119,15 @@ public class MockCookie extends Cookie {
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Max-Age")) {
 				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
+			}
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Expires")) {
+				try {
+					cookie.setExpires(ZonedDateTime.parse(extractAttributeValue(attribute, setCookieHeader),
+							DateTimeFormatter.RFC_1123_DATE_TIME));
+				}
+				catch (DateTimeException ex) {
+					// ignore invalid date formats
+				}
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Path")) {
 				cookie.setPath(extractAttributeValue(attribute, setCookieHeader));

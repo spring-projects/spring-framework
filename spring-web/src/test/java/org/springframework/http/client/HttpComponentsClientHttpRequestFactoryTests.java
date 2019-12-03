@@ -26,7 +26,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.withSettings;
 /**
  * @author Stephane Nicoll
  */
-public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {

@@ -742,7 +742,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @throws IllegalArgumentException if either {@code user} or
 	 * {@code password} contain characters that cannot be encoded to ISO-8859-1
 	 * @since 5.1
+	 * @see #setBasicAuth(String)
 	 * @see #setBasicAuth(String, String, Charset)
+	 * @see #encodeBasicAuth(String, String, Charset)
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
 	public void setBasicAuth(String username, String password) {
@@ -759,24 +761,33 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @throws IllegalArgumentException if {@code username} or {@code password}
 	 * contains characters that cannot be encoded to the given charset
 	 * @since 5.1
+	 * @see #setBasicAuth(String)
+	 * @see #setBasicAuth(String, String)
+	 * @see #encodeBasicAuth(String, String, Charset)
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
 	public void setBasicAuth(String username, String password, @Nullable Charset charset) {
-		Assert.notNull(username, "Username must not be null");
-		Assert.notNull(password, "Password must not be null");
-		if (charset == null) {
-			charset = StandardCharsets.ISO_8859_1;
-		}
+		setBasicAuth(encodeBasicAuth(username, password, charset));
+	}
 
-		CharsetEncoder encoder = charset.newEncoder();
-		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
-			throw new IllegalArgumentException(
-					"Username or password contains characters that cannot be encoded to " + charset.displayName());
-		}
-
-		String credentialsString = username + ":" + password;
-		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
-		String encodedCredentials = new String(encodedBytes, charset);
+	/**
+	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
+	 * Basic Authentication based on the given {@linkplain #encodeBasicAuth
+	 * encoded credentials}.
+	 * <p>Favor this method over {@link #setBasicAuth(String, String)} and
+	 * {@link #setBasicAuth(String, String, Charset)} if you wish to cache the
+	 * encoded credentials.
+	 * @param encodedCredentials the encoded credentials
+	 * @throws IllegalArgumentException if supplied credentials string is
+	 * {@code null} or blank
+	 * @since 5.2
+	 * @see #setBasicAuth(String, String)
+	 * @see #setBasicAuth(String, String, Charset)
+	 * @see #encodeBasicAuth(String, String, Charset)
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public void setBasicAuth(String encodedCredentials) {
+		Assert.hasText(encodedCredentials, "'encodedCredentials' must not be null or blank");
 		set(AUTHORIZATION, "Basic " + encodedCredentials);
 	}
 
@@ -1779,6 +1790,41 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
 				})
 				.collect(Collectors.joining(", ", "[", "]"));
+	}
+
+	/**
+	 * Encode the given username and password into Basic Authentication credentials.
+	 * <p>The encoded credentials returned by this method can be supplied to
+	 * {@link #setBasicAuth(String)} to set the Basic Authentication header.
+	 * @param username the username
+	 * @param password the password
+	 * @param charset the charset to use to convert the credentials into an octet
+	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}.
+	 * @throws IllegalArgumentException if {@code username} or {@code password}
+	 * contains characters that cannot be encoded to the given charset
+	 * @since 5.2
+	 * @see #setBasicAuth(String)
+	 * @see #setBasicAuth(String, String)
+	 * @see #setBasicAuth(String, String, Charset)
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public static String encodeBasicAuth(String username, String password, @Nullable Charset charset) {
+		Assert.notNull(username, "Username must not be null");
+		Assert.doesNotContain(username, ":", "Username must not contain a colon");
+		Assert.notNull(password, "Password must not be null");
+		if (charset == null) {
+			charset = StandardCharsets.ISO_8859_1;
+		}
+
+		CharsetEncoder encoder = charset.newEncoder();
+		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
+			throw new IllegalArgumentException(
+					"Username or password contains characters that cannot be encoded to " + charset.displayName());
+		}
+
+		String credentialsString = username + ":" + password;
+		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
+		return new String(encodedBytes, charset);
 	}
 
 	// Package-private: used in ResponseCookie

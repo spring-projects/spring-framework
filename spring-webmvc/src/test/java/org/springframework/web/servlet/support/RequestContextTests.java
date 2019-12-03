@@ -19,8 +19,8 @@ package org.springframework.web.servlet.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -45,7 +45,7 @@ public class RequestContextTests {
 
 	private Map<String, Object> model = new HashMap<>();
 
-	@Before
+	@BeforeEach
 	public void init() {
 		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
 		applicationContext.refresh();

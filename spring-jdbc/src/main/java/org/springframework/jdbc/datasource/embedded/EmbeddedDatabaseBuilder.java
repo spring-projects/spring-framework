@@ -201,9 +201,22 @@ public class EmbeddedDatabaseBuilder {
 	 * @param commentPrefix the prefix for single-line comments
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
+	 * @see #setCommentPrefixes(String...)
 	 */
 	public EmbeddedDatabaseBuilder setCommentPrefix(String commentPrefix) {
 		this.databasePopulator.setCommentPrefix(commentPrefix);
+		return this;
+	}
+
+	/**
+	 * Specify the prefixes that identify single-line comments within all SQL scripts.
+	 * <p>Defaults to {@code ["--"]}.
+	 * @param commentPrefixes the prefixes for single-line comments
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 */
+	public EmbeddedDatabaseBuilder setCommentPrefixes(String... commentPrefixes) {
+		this.databasePopulator.setCommentPrefixes(commentPrefixes);
 		return this;
 	}
 

@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.reactive.server.samples;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

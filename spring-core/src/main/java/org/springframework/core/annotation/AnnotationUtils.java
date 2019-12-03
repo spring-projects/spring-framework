@@ -112,7 +112,7 @@ public abstract class AnnotationUtils {
 	private static final AnnotationFilter JAVA_LANG_ANNOTATION_FILTER =
 			AnnotationFilter.packages("java.lang.annotation");
 
-	private static Map<Class<? extends Annotation>, Map<String, DefaultValueHolder>> defaultValuesCache =
+	private static final Map<Class<? extends Annotation>, Map<String, DefaultValueHolder>> defaultValuesCache =
 			new ConcurrentReferenceHashMap<>();
 
 
@@ -126,6 +126,7 @@ public abstract class AnnotationUtils {
 	 * if {@code true} is being returned here.
 	 * @since 5.2
 	 * @see #isCandidateClass(Class, Class)
+	 * @see #isCandidateClass(Class, String)
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, Collection<Class<? extends Annotation>> annotationTypes) {
 		for (Class<? extends Annotation> annotationType : annotationTypes) {
@@ -160,6 +161,7 @@ public abstract class AnnotationUtils {
 	 * {@code true} otherwise. Callers will usually perform full method/field introspection
 	 * if {@code true} is being returned here.
 	 * @since 5.2
+	 * @see #isCandidateClass(Class, Class)
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
 		if (annotationName.startsWith("java.")) {
@@ -168,7 +170,6 @@ public abstract class AnnotationUtils {
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
 			return false;
 		}
-		// TODO: annotation presence registry to be integrated here
 		return true;
 	}
 
@@ -196,8 +197,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(null, new Annotation[] {annotation},
-					RepeatableContainers.none(), AnnotationFilter.PLAIN)
+		return MergedAnnotations.from(annotation, new Annotation[] {annotation}, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(AnnotationUtils::isSingleLevelPresent).orElse(null);
 	}
@@ -222,8 +222,7 @@ public abstract class AnnotationUtils {
 			return annotatedElement.getAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS,
-						RepeatableContainers.none(), AnnotationFilter.PLAIN)
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(AnnotationUtils::isSingleLevelPresent).orElse(null);
 	}
@@ -375,8 +374,8 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = (containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables());
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS,
-						repeatableContainers, AnnotationFilter.PLAIN)
+
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS, repeatableContainers)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(MergedAnnotation::withNonMergedAttributes)
@@ -457,8 +456,9 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables();
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.DIRECT,
-						repeatableContainers, AnnotationFilter.PLAIN).stream(annotationType)
+
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.DIRECT, repeatableContainers)
+				.stream(annotationType)
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toAnnotationSet());
 	}
@@ -486,14 +486,15 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotatedElement.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS,
-					RepeatableContainers.none(), AnnotationFilter.PLAIN)
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
@@ -518,14 +519,15 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(method)) {
 			return method.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE,
-					RepeatableContainers.none(), AnnotationFilter.PLAIN)
+		return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
@@ -557,14 +559,25 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
-			return clazz.getDeclaredAnnotation(annotationType);
+			A annotation = clazz.getDeclaredAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
+			}
+			// For backwards compatibility, perform a superclass search with plain annotations
+			// even if not marked as @Inherited: e.g. a findAnnotation search for @Deprecated
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass == null || superclass == Object.class) {
+				return null;
+			}
+			return findAnnotation(superclass, annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE,
-					RepeatableContainers.none(), AnnotationFilter.PLAIN)
+		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
@@ -714,7 +727,7 @@ public abstract class AnnotationUtils {
 		}
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(annotationType, SearchStrategy.INHERITED_ANNOTATIONS,
-				RepeatableContainers.none(), AnnotationFilter.PLAIN).isPresent(metaAnnotationType);
+				RepeatableContainers.none()).isPresent(metaAnnotationType);
 	}
 
 	/**

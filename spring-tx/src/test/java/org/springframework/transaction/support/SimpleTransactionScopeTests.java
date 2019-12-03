@@ -19,7 +19,7 @@ package org.springframework.transaction.support;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;

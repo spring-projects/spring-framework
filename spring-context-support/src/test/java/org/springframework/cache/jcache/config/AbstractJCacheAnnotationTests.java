@@ -19,10 +19,9 @@ package org.springframework.cache.jcache.config;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -43,8 +42,8 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	public static final String EXCEPTION_CACHE = "exception";
 
-	@Rule
-	public final TestName name = new TestName();
+
+	protected String keyItem;
 
 	protected ApplicationContext ctx;
 
@@ -54,19 +53,18 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	protected abstract ApplicationContext getApplicationContext();
 
-	@Before
-	public void setUp() {
-		ctx = getApplicationContext();
-		service = ctx.getBean(JCacheableService.class);
-		cacheManager = ctx.getBean("cacheManager", CacheManager.class);
+	@BeforeEach
+	public void setUp(TestInfo testInfo) {
+		this.keyItem = testInfo.getTestMethod().get().getName();
+		this.ctx = getApplicationContext();
+		this.service = this.ctx.getBean(JCacheableService.class);
+		this.cacheManager = this.ctx.getBean("cacheManager", CacheManager.class);
 	}
 
 	@Test
 	public void cache() {
-		String keyItem = name.getMethodName();
-
-		Object first = service.cache(keyItem);
-		Object second = service.cache(keyItem);
+		Object first = service.cache(this.keyItem);
+		Object second = service.cache(this.keyItem);
 		assertThat(second).isSameAs(first);
 	}
 
@@ -74,14 +72,13 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void cacheNull() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		String keyItem = name.getMethodName();
-		assertThat(cache.get(keyItem)).isNull();
+		assertThat(cache.get(this.keyItem)).isNull();
 
-		Object first = service.cacheNull(keyItem);
-		Object second = service.cacheNull(keyItem);
+		Object first = service.cacheNull(this.keyItem);
+		Object second = service.cacheNull(this.keyItem);
 		assertThat(second).isSameAs(first);
 
-		Cache.ValueWrapper wrapper = cache.get(keyItem);
+		Cache.ValueWrapper wrapper = cache.get(this.keyItem);
 		assertThat(wrapper).isNotNull();
 		assertThat(wrapper.get()).isSameAs(first);
 		assertThat(wrapper.get()).as("Cached value should be null").isNull();
@@ -89,14 +86,13 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void cacheException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(EXCEPTION_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		assertThat(cache.get(key)).isNull();
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.cacheWithException(keyItem, true));
+				service.cacheWithException(this.keyItem, true));
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -105,26 +101,24 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void cacheExceptionVetoed() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(EXCEPTION_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		assertThat(cache.get(key)).isNull();
 
 		assertThatNullPointerException().isThrownBy(() ->
-				service.cacheWithException(keyItem, false));
+				service.cacheWithException(this.keyItem, false));
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void cacheCheckedException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(EXCEPTION_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		assertThat(cache.get(key)).isNull();
 		assertThatIOException().isThrownBy(() ->
-				service.cacheWithCheckedException(keyItem, true));
+				service.cacheWithCheckedException(this.keyItem, true));
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -135,16 +129,15 @@ public abstract class AbstractJCacheAnnotationTests {
 	@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 	@Test
 	public void cacheExceptionRewriteCallStack() {
-		String keyItem = name.getMethodName();
 		long ref = service.exceptionInvocations();
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.cacheWithException(keyItem, true))
+				service.cacheWithException(this.keyItem, true))
 			.satisfies(first -> {
 				// Sanity check, this particular call has called the service
 				// First call should not have been cached
 				assertThat(service.exceptionInvocations()).isEqualTo(ref + 1);
 
-				UnsupportedOperationException second = methodInCallStack(keyItem);
+				UnsupportedOperationException second = methodInCallStack(this.keyItem);
 				// Sanity check, this particular call has *not* called the service
 				// Second call should have been cached
 				assertThat(service.exceptionInvocations()).isEqualTo(ref + 1);
@@ -159,30 +152,25 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void cacheAlwaysInvoke() {
-		String keyItem = name.getMethodName();
-
-		Object first = service.cacheAlwaysInvoke(keyItem);
-		Object second = service.cacheAlwaysInvoke(keyItem);
+		Object first = service.cacheAlwaysInvoke(this.keyItem);
+		Object second = service.cacheAlwaysInvoke(this.keyItem);
 		assertThat(second).isNotSameAs(first);
 	}
 
 	@Test
 	public void cacheWithPartialKey() {
-		String keyItem = name.getMethodName();
-
-		Object first = service.cacheWithPartialKey(keyItem, true);
-		Object second = service.cacheWithPartialKey(keyItem, false);
+		Object first = service.cacheWithPartialKey(this.keyItem, true);
+		Object second = service.cacheWithPartialKey(this.keyItem, false);
 		// second argument not used, see config
 		assertThat(second).isSameAs(first);
 	}
 
 	@Test
 	public void cacheWithCustomCacheResolver() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
-		service.cacheWithCustomCacheResolver(keyItem);
+		Object key = createKey(this.keyItem);
+		service.cacheWithCustomCacheResolver(this.keyItem);
 
 		// Cache in mock cache
 		assertThat(cache.get(key)).isNull();
@@ -190,25 +178,23 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void cacheWithCustomKeyGenerator() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
-		service.cacheWithCustomKeyGenerator(keyItem, "ignored");
+		Object key = createKey(this.keyItem);
+		service.cacheWithCustomKeyGenerator(this.keyItem, "ignored");
 
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void put() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 
-		service.put(keyItem, value);
+		service.put(this.keyItem, value);
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -217,15 +203,14 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void putWithException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.putWithException(keyItem, value, true));
+				service.putWithException(this.keyItem, value, true));
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -234,28 +219,26 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void putWithExceptionVetoPut() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 
 		assertThatNullPointerException().isThrownBy(() ->
-				service.putWithException(keyItem, value, false));
+				service.putWithException(this.keyItem, value, false));
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void earlyPut() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 
-		service.earlyPut(keyItem, value);
+		service.earlyPut(this.keyItem, value);
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -264,15 +247,14 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void earlyPutWithException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.earlyPutWithException(keyItem, value, true));
+				service.earlyPutWithException(this.keyItem, value, true));
 
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -281,14 +263,13 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void earlyPutWithExceptionVetoPut() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		assertThat(cache.get(key)).isNull();
 		assertThatNullPointerException().isThrownBy(() ->
-				service.earlyPutWithException(keyItem, value, false));
+				service.earlyPutWithException(this.keyItem, value, false));
 		// This will be cached anyway as the earlyPut has updated the cache before
 		Cache.ValueWrapper result = cache.get(key);
 		assertThat(result).isNotNull();
@@ -297,44 +278,41 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void remove() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
-		service.remove(keyItem);
+		service.remove(this.keyItem);
 
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void removeWithException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.removeWithException(keyItem, true));
+				service.removeWithException(this.keyItem, true));
 
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void removeWithExceptionVetoRemove() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
 		assertThatNullPointerException().isThrownBy(() ->
-				service.removeWithException(keyItem, false));
+				service.removeWithException(this.keyItem, false));
 		Cache.ValueWrapper wrapper = cache.get(key);
 		assertThat(wrapper).isNotNull();
 		assertThat(wrapper.get()).isEqualTo(value);
@@ -342,43 +320,40 @@ public abstract class AbstractJCacheAnnotationTests {
 
 	@Test
 	public void earlyRemove() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
-		service.earlyRemove(keyItem);
+		service.earlyRemove(this.keyItem);
 
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void earlyRemoveWithException() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				service.earlyRemoveWithException(keyItem, true));
+				service.earlyRemoveWithException(this.keyItem, true));
 		assertThat(cache.get(key)).isNull();
 	}
 
 	@Test
 	public void earlyRemoveWithExceptionVetoRemove() {
-		String keyItem = name.getMethodName();
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(keyItem);
+		Object key = createKey(this.keyItem);
 		Object value = new Object();
 		cache.put(key, value);
 
 		assertThatNullPointerException().isThrownBy(() ->
-				service.earlyRemoveWithException(keyItem, false));
+				service.earlyRemoveWithException(this.keyItem, false));
 		// This will be remove anyway as the earlyRemove has removed the cache before
 		assertThat(cache.get(key)).isNull();
 	}
@@ -387,7 +362,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void removeAll() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		service.removeAll();
@@ -399,7 +374,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void removeAllWithException() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
@@ -412,7 +387,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void removeAllWithExceptionVetoRemove() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		assertThatNullPointerException().isThrownBy(() ->
@@ -424,7 +399,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void earlyRemoveAll() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		service.earlyRemoveAll();
@@ -436,7 +411,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void earlyRemoveAllWithException() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
@@ -448,7 +423,7 @@ public abstract class AbstractJCacheAnnotationTests {
 	public void earlyRemoveAllWithExceptionVetoRemove() {
 		Cache cache = getCache(DEFAULT_CACHE);
 
-		Object key = createKey(name.getMethodName());
+		Object key = createKey(this.keyItem);
 		cache.put(key, new Object());
 
 		assertThatNullPointerException().isThrownBy(() ->

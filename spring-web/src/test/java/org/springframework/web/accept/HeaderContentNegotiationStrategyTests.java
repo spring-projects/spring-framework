@@ -18,7 +18,7 @@ package org.springframework.web.accept;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;

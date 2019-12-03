@@ -18,7 +18,7 @@ package org.springframework.http.client.support;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpMethod;

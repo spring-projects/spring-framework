@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -65,11 +65,11 @@ public class DefaultClientResponseTests {
 	private DefaultClientResponse defaultClientResponse;
 
 
-	@Before
+	@BeforeEach
 	public void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
 		mockExchangeStrategies = mock(ExchangeStrategies.class);
-		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "");
+		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "", () -> null);
 	}
 
 

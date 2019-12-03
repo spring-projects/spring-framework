@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;

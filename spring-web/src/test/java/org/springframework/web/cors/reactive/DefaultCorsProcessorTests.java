@@ -16,8 +16,8 @@
 
 package org.springframework.web.cors.reactive;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,7 +48,7 @@ public class DefaultCorsProcessorTests {
 	private CorsConfiguration conf;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.conf = new CorsConfiguration();
 		this.processor = new DefaultCorsProcessor();
@@ -58,7 +58,7 @@ public class DefaultCorsProcessorTests {
 	@Test
 	public void requestWithoutOriginHeader() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://domain1.com/test.html")
+				.method(HttpMethod.GET, "http://domain1.example/test.html")
 				.build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.processor.process(this.conf, exchange);
@@ -73,8 +73,8 @@ public class DefaultCorsProcessorTests {
 	@Test
 	public void sameOriginRequest() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest
-				.method(HttpMethod.GET, "http://domain1.com/test.html")
-				.header(HttpHeaders.ORIGIN, "http://domain1.com")
+				.method(HttpMethod.GET, "http://domain1.example/test.html")
+				.header(HttpHeaders.ORIGIN, "http://domain1.example")
 				.build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.processor.process(this.conf, exchange);
@@ -129,7 +129,7 @@ public class DefaultCorsProcessorTests {
 		ServerWebExchange exchange = actualRequest();
 		this.conf.addAllowedOrigin("https://domain1.com");
 		this.conf.addAllowedOrigin("https://domain2.com");
-		this.conf.addAllowedOrigin("http://domain3.com");
+		this.conf.addAllowedOrigin("http://domain3.example");
 		this.conf.setAllowCredentials(true);
 		this.processor.process(this.conf, exchange);
 
@@ -306,7 +306,7 @@ public class DefaultCorsProcessorTests {
 
 		this.conf.addAllowedOrigin("https://domain1.com");
 		this.conf.addAllowedOrigin("https://domain2.com");
-		this.conf.addAllowedOrigin("http://domain3.com");
+		this.conf.addAllowedOrigin("http://domain3.example");
 		this.conf.addAllowedHeader("Header1");
 		this.conf.setAllowCredentials(true);
 
@@ -330,7 +330,7 @@ public class DefaultCorsProcessorTests {
 
 		this.conf.addAllowedOrigin("https://domain1.com");
 		this.conf.addAllowedOrigin("*");
-		this.conf.addAllowedOrigin("http://domain3.com");
+		this.conf.addAllowedOrigin("http://domain3.example");
 		this.conf.addAllowedHeader("Header1");
 		this.conf.setAllowCredentials(true);
 

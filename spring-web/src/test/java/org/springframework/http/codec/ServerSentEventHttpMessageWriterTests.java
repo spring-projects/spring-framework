@@ -23,15 +23,14 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
@@ -47,27 +46,21 @@ import static org.springframework.core.ResolvableType.forClass;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 @SuppressWarnings("rawtypes")
-public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
+class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTests {
 
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
 	private ServerSentEventHttpMessageWriter messageWriter =
 			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
 
-	private MockServerHttpResponse outputMessage;
 
+	@ParameterizedDataBufferAllocatingTest
+	void canWrite(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
 
-	@Before
-	public void setUp() {
-		this.outputMessage = new MockServerHttpResponse(this.bufferFactory);
-	}
-
-
-
-	@Test
-	public void canWrite() {
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), null)).isTrue();
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar"))).isFalse();
 
@@ -79,11 +72,14 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		assertThat(this.messageWriter.canWrite(ResolvableType.NONE, new MediaType("foo", "bar"))).isFalse();
 	}
 
-	@Test
-	public void writeServerSentEvent() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeServerSentEvent(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
 				.comment("bla\nbla bla\nbla bla bla").retry(Duration.ofMillis(123L)).build();
 
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Mono<ServerSentEvent> source = Mono.just(event);
 		testWrite(source, outputMessage, ServerSentEvent.class);
 
@@ -94,8 +90,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test
-	public void writeString() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeString(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<String> source = Flux.just("foo", "bar");
 		testWrite(source, outputMessage, String.class);
 
@@ -106,8 +105,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test
-	public void writeMultiLineString() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeMultiLineString(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		testWrite(source, outputMessage, String.class);
 
@@ -118,8 +120,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test // SPR-16516
-	public void writeStringWithCustomCharset() {
+	@ParameterizedDataBufferAllocatingTest // SPR-16516
+	void writeStringWithCustomCharset(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<String> source = Flux.just("\u00A3");
 		Charset charset = StandardCharsets.ISO_8859_1;
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
@@ -136,8 +141,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test
-	public void writePojo() {
+	@ParameterizedDataBufferAllocatingTest
+	void writePojo(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		testWrite(source, outputMessage, Pojo.class);
 
@@ -148,11 +156,14 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test  // SPR-14899
-	public void writePojoWithPrettyPrint() {
+	@ParameterizedDataBufferAllocatingTest  // SPR-14899
+	void writePojoWithPrettyPrint(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
 		this.messageWriter = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder(mapper));
 
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		testWrite(source, outputMessage, Pojo.class);
 
@@ -167,8 +178,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test // SPR-16516, SPR-16539
-	public void writePojoWithCustomEncoding() {
+	@ParameterizedDataBufferAllocatingTest // SPR-16516, SPR-16539
+	void writePojoWithCustomEncoding(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foo\uD834\uDD1E", "bar\uD834\uDD1E"));
 		Charset charset = StandardCharsets.UTF_16LE;
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
@@ -196,8 +210,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Mono<Void> result =
 				this.messageWriter.write(source, forClass(clazz), mediaType, response, HINTS);
 
-		StepVerifier.create(result)
-				.verifyComplete();
+		StepVerifier.create(result).verifyComplete();
 	}
 
 }

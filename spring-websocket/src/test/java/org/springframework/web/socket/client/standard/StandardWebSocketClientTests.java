@@ -21,12 +21,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Endpoint;
 import javax.websocket.WebSocketContainer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -57,7 +58,7 @@ public class StandardWebSocketClientTests {
 	private WebSocketHttpHeaders headers;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.headers = new WebSocketHttpHeaders();
 		this.wsHandler = new AbstractWebSocketHandler() {

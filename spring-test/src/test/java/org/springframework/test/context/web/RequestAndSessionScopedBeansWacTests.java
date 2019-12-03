@@ -16,14 +16,12 @@
 
 package org.springframework.test.context.web;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,25 +34,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@WebAppConfiguration
-public class RequestAndSessionScopedBeansWacTests {
+@SpringJUnitWebConfig
+class RequestAndSessionScopedBeansWacTests {
 
 	@Autowired
-	private WebApplicationContext wac;
+	WebApplicationContext wac;
 
 	@Autowired
-	private MockHttpServletRequest request;
+	MockHttpServletRequest request;
 
 	@Autowired
-	private MockHttpSession session;
+	MockHttpSession session;
 
 
 	@Test
-	public void requestScope() throws Exception {
-		final String beanName = "requestScopedTestBean";
-		final String contextPath = "/path";
+	void requestScope() throws Exception {
+		String beanName = "requestScopedTestBean";
+		String contextPath = "/path";
 
 		assertThat(request.getAttribute(beanName)).isNull();
 
@@ -67,8 +63,8 @@ public class RequestAndSessionScopedBeansWacTests {
 	}
 
 	@Test
-	public void sessionScope() throws Exception {
-		final String beanName = "sessionScopedTestBean";
+	void sessionScope() throws Exception {
+		String beanName = "sessionScopedTestBean";
 
 		assertThat(session.getAttribute(beanName)).isNull();
 

@@ -23,13 +23,14 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 
 import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockHttpServletRequest;

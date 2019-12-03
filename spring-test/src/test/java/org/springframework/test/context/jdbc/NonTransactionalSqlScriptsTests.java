@@ -16,18 +16,15 @@
 
 package org.springframework.test.context.jdbc;
 
-import javax.sql.DataSource;
-
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,35 +36,29 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Sql({ "schema.sql", "data.sql" })
 @DirtiesContext
-public class NonTransactionalSqlScriptsTests {
-
-	protected JdbcTemplate jdbcTemplate;
-
+class NonTransactionalSqlScriptsTests {
 
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+	JdbcTemplate jdbcTemplate;
 
 	@Test
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
+	@Order(1)
+	void classLevelScripts() {
 		assertNumUsers(1);
 	}
 
 	@Test
 	@Sql("data-add-dogbert.sql")
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
+	@Order(2)
+	void methodLevelScripts() {
 		assertNumUsers(2);
 	}
 
-	protected void assertNumUsers(int expected) {
+	void assertNumUsers(int expected) {
 		assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 

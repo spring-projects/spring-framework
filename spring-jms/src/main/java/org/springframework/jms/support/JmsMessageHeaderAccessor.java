@@ -18,6 +18,7 @@ package org.springframework.jms.support;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.jms.Destination;
 
 import org.springframework.lang.Nullable;

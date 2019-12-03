@@ -60,7 +60,7 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 

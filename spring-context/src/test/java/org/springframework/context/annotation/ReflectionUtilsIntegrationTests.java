@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 

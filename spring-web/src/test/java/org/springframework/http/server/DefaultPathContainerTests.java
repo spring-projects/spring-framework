@@ -20,14 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link DefaultPathContainer}.
@@ -36,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class DefaultPathContainerTests {
 
 	@Test
-	public void pathSegment() throws Exception {
+	public void pathSegment() {
 		// basic
 		testPathSegment("cars", "cars", new LinkedMultiValueMap<>());
 
@@ -92,7 +91,7 @@ public class DefaultPathContainerTests {
 	}
 
 	@Test
-	public void path() throws Exception {
+	public void path() {
 		// basic
 		testPath("/a/b/c", "/a/b/c", Arrays.asList("/", "a", "/", "b", "/", "c"));
 
@@ -112,20 +111,20 @@ public class DefaultPathContainerTests {
 		testPath("//%20/%20", "//%20/%20", Arrays.asList("/", "/", "%20", "/", "%20"));
 	}
 
-	private void testPath(String input, String separator, String value, List<String> expectedElements) {
-		PathContainer path = PathContainer.parsePath(input, separator);
+	private void testPath(String input, PathContainer.Options options, String value, List<String> expectedElements) {
+		PathContainer path = PathContainer.parsePath(input, options);
 
 		assertThat(path.value()).as("value: '" + input + "'").isEqualTo(value);
-		assertThat(path.elements().stream()
-				.map(PathContainer.Element::value).collect(Collectors.toList())).as("elements: " + input).isEqualTo(expectedElements);
+		assertThat(path.elements().stream().map(PathContainer.Element::value).collect(Collectors.toList()))
+				.as("elements: " + input).isEqualTo(expectedElements);
 	}
 
 	private void testPath(String input, String value, List<String> expectedElements) {
-		testPath(input, "/", value, expectedElements);
+		testPath(input, PathContainer.Options.HTTP_PATH, value, expectedElements);
 	}
 
 	@Test
-	public void subPath() throws Exception {
+	public void subPath() {
 		// basic
 		PathContainer path = PathContainer.parsePath("/a/b/c");
 		assertThat(path.subPath(0)).isSameAs(path);
@@ -141,14 +140,16 @@ public class DefaultPathContainerTests {
 		assertThat(path.subPath(2).value()).isEqualTo("/b/");
 	}
 
-	@Test
-	public void pathWithCustomSeparator() throws Exception {
-		testPath("a.b.c", ".", "a.b.c", Arrays.asList("a", ".", "b", ".", "c"));
-	}
+	@Test // gh-23310
+	public void pathWithCustomSeparator() {
+		PathContainer path = PathContainer.parsePath("a.b%2Eb.c", PathContainer.Options.MESSAGE_ROUTE);
 
-	@Test
-	public void emptySeparator() {
-		assertThatIllegalArgumentException().isThrownBy(() -> PathContainer.parsePath("path", ""));
+		List<String> decodedSegments = path.elements().stream()
+				.filter(e -> e instanceof PathSegment)
+				.map(e -> ((PathSegment) e).valueToMatch())
+				.collect(Collectors.toList());
+
+		assertThat(decodedSegments).isEqualTo(Arrays.asList("a", "b.b", "c"));
 	}
 
 }

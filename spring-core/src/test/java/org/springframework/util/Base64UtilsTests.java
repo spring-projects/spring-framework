@@ -17,9 +17,10 @@
 package org.springframework.util;
 
 import java.io.UnsupportedEncodingException;
+
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 4.2
  */
-public class Base64UtilsTests {
+class Base64UtilsTests {
 
 	@Test
-	public void encode() throws UnsupportedEncodingException {
+	void encode() throws UnsupportedEncodingException {
 		byte[] bytes = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 		assertThat(Base64Utils.decode(Base64Utils.encode(bytes))).isEqualTo(bytes);
@@ -53,7 +54,7 @@ public class Base64UtilsTests {
 	}
 
 	@Test
-	public void encodeToStringWithJdk8VsJaxb() throws UnsupportedEncodingException {
+	void encodeToStringWithJdk8VsJaxb() throws UnsupportedEncodingException {
 		byte[] bytes = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 		assertThat(DatatypeConverter.printBase64Binary(bytes)).isEqualTo(Base64Utils.encodeToString(bytes));
@@ -77,7 +78,7 @@ public class Base64UtilsTests {
 	}
 
 	@Test
-	public void encodeDecodeUrlSafe() {
+	void encodeDecodeUrlSafe() {
 		byte[] bytes = new byte[] { (byte) 0xfb, (byte) 0xf0 };
 		assertThat(Base64Utils.encodeUrlSafe(bytes)).isEqualTo("-_A=".getBytes());
 		assertThat(Base64Utils.decodeUrlSafe(Base64Utils.encodeUrlSafe(bytes))).isEqualTo(bytes);

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -138,6 +138,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		}
 	}
 
+	@Override
 	@Test  // Can't be shared: no type mismatch with a field
 	public void setPropertyTypeMismatch() {
 		PropertyTypeMismatch target = new PropertyTypeMismatch();
@@ -235,10 +236,12 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 		private String name;
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			if (this.name == null) {
 				throw new RuntimeException("name property must be set");

@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -194,16 +195,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	// UriTemplateHandler
 
+	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
+	@Override
 	public URI expand(String uriTemplate, Object... uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
 	// UriBuilderFactory
 
+	@Override
 	public UriBuilder uriString(String uriTemplate) {
 		return new DefaultUriBuilder(uriTemplate);
 	}
@@ -327,7 +331,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder queryParam(String name, @Nullable Collection<?> values) {
+			this.uriComponentsBuilder.queryParam(name, values);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, Object... values) {
+			this.uriComponentsBuilder.replaceQueryParam(name, values);
+			return this;
+		}
+
+		@Override
+		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
 		}

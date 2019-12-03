@@ -18,8 +18,8 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -35,7 +35,7 @@ public class RequestPredicateAttributesTests {
 
 	private DefaultServerRequest request;
 
-	@Before
+	@BeforeEach
 	public void createRequest() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com/path").build();
 		MockServerWebExchange webExchange = MockServerWebExchange.from(request);

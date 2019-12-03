@@ -23,13 +23,13 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {

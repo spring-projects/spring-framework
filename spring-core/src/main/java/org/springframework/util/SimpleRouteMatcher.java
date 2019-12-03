@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.util;
 
 import java.util.Comparator;
@@ -36,12 +37,18 @@ public class SimpleRouteMatcher implements RouteMatcher {
 	private final PathMatcher pathMatcher;
 
 
+	/**
+	 * Create a new {@code SimpleRouteMatcher} for the given
+	 * {@link PathMatcher} delegate.
+	 */
 	public SimpleRouteMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher is required");
 		this.pathMatcher = pathMatcher;
 	}
 
-
+	/**
+	 * Return the underlying {@link PathMatcher} delegate.
+	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -86,15 +93,18 @@ public class SimpleRouteMatcher implements RouteMatcher {
 
 		private final String path;
 
-
 		DefaultRoute(String path) {
 			this.path = path;
 		}
 
-
 		@Override
 		public String value() {
 			return this.path;
+		}
+
+		@Override
+		public String toString() {
+			return value();
 		}
 	}
 

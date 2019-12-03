@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -34,7 +35,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;

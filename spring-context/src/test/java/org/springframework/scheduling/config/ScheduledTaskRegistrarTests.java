@@ -17,11 +17,12 @@
 package org.springframework.scheduling.config;
 
 import java.util.Collections;
-import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -29,59 +30,69 @@ import static org.mockito.Mockito.mock;
  *
  * @author Tobias Montagna-Hay
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.2
  */
-public class ScheduledTaskRegistrarTests {
+class ScheduledTaskRegistrarTests {
+
+	private static final Runnable no_op = () -> {};
 
 	private final ScheduledTaskRegistrar taskRegistrar = new ScheduledTaskRegistrar();
 
 
-	@Test
-	public void emptyTaskLists() {
-		assertThat(this.taskRegistrar.getTriggerTaskList().isEmpty()).isTrue();
-		assertThat(this.taskRegistrar.getCronTaskList().isEmpty()).isTrue();
-		assertThat(this.taskRegistrar.getFixedRateTaskList().isEmpty()).isTrue();
-		assertThat(this.taskRegistrar.getFixedDelayTaskList().isEmpty()).isTrue();
+	@BeforeEach
+	void preconditions() {
+		assertThat(this.taskRegistrar.getTriggerTaskList()).isEmpty();
+		assertThat(this.taskRegistrar.getCronTaskList()).isEmpty();
+		assertThat(this.taskRegistrar.getFixedRateTaskList()).isEmpty();
+		assertThat(this.taskRegistrar.getFixedDelayTaskList()).isEmpty();
 	}
 
 	@Test
-	public void getTriggerTasks() {
+	void getTriggerTasks() {
 		TriggerTask mockTriggerTask = mock(TriggerTask.class);
-		List<TriggerTask> triggerTaskList = Collections.singletonList(mockTriggerTask);
-		this.taskRegistrar.setTriggerTasksList(triggerTaskList);
-		List<TriggerTask> retrievedList = this.taskRegistrar.getTriggerTaskList();
-		assertThat(retrievedList.size()).isEqualTo(1);
-		assertThat(retrievedList.get(0)).isEqualTo(mockTriggerTask);
+		this.taskRegistrar.setTriggerTasksList(Collections.singletonList(mockTriggerTask));
+		assertThat(this.taskRegistrar.getTriggerTaskList()).containsExactly(mockTriggerTask);
 	}
 
 	@Test
-	public void getCronTasks() {
+	void getCronTasks() {
 		CronTask mockCronTask = mock(CronTask.class);
-		List<CronTask> cronTaskList = Collections.singletonList(mockCronTask);
-		this.taskRegistrar.setCronTasksList(cronTaskList);
-		List<CronTask> retrievedList = this.taskRegistrar.getCronTaskList();
-		assertThat(retrievedList.size()).isEqualTo(1);
-		assertThat(retrievedList.get(0)).isEqualTo(mockCronTask);
+		this.taskRegistrar.setCronTasksList(Collections.singletonList(mockCronTask));
+		assertThat(this.taskRegistrar.getCronTaskList()).containsExactly(mockCronTask);
 	}
 
 	@Test
-	public void getFixedRateTasks() {
+	void getFixedRateTasks() {
 		IntervalTask mockFixedRateTask = mock(IntervalTask.class);
-		List<IntervalTask> fixedRateTaskList = Collections.singletonList(mockFixedRateTask);
-		this.taskRegistrar.setFixedRateTasksList(fixedRateTaskList);
-		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedRateTaskList();
-		assertThat(retrievedList.size()).isEqualTo(1);
-		assertThat(retrievedList.get(0)).isEqualTo(mockFixedRateTask);
+		this.taskRegistrar.setFixedRateTasksList(Collections.singletonList(mockFixedRateTask));
+		assertThat(this.taskRegistrar.getFixedRateTaskList()).containsExactly(mockFixedRateTask);
 	}
 
 	@Test
-	public void getFixedDelayTasks() {
+	void getFixedDelayTasks() {
 		IntervalTask mockFixedDelayTask = mock(IntervalTask.class);
-		List<IntervalTask> fixedDelayTaskList = Collections.singletonList(mockFixedDelayTask);
-		this.taskRegistrar.setFixedDelayTasksList(fixedDelayTaskList);
-		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedDelayTaskList();
-		assertThat(retrievedList.size()).isEqualTo(1);
-		assertThat(retrievedList.get(0)).isEqualTo(mockFixedDelayTask);
+		this.taskRegistrar.setFixedDelayTasksList(Collections.singletonList(mockFixedDelayTask));
+		assertThat(this.taskRegistrar.getFixedDelayTaskList()).containsExactly(mockFixedDelayTask);
+	}
+
+	@Test
+	void addCronTaskWithValidExpression() {
+		this.taskRegistrar.addCronTask(no_op, "* * * * * ?");
+		assertThat(this.taskRegistrar.getCronTaskList()).size().isEqualTo(1);
+	}
+
+	@Test
+	void addCronTaskWithInvalidExpression() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.taskRegistrar.addCronTask(no_op, "* * *"))
+			.withMessage("Cron expression must consist of 6 fields (found 3 in \"* * *\")");
+	}
+
+	@Test
+	void addCronTaskWithDisabledExpression() {
+		this.taskRegistrar.addCronTask(no_op, ScheduledTaskRegistrar.CRON_DISABLED);
+		assertThat(this.taskRegistrar.getCronTaskList()).isEmpty();
 	}
 
 }

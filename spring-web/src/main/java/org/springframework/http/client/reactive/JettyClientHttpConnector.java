@@ -54,21 +54,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
-	 * @param resourceFactory the {@link JettyResourceFactory} to use
-	 * @param customizer the lambda used to customize the {@link HttpClient}
-	 * @deprecated in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
-	 */
-	@Deprecated
-	public JettyClientHttpConnector(
-			JettyResourceFactory resourceFactory, @Nullable Consumer<HttpClient> customizer) {
-		this(new HttpClient(), resourceFactory);
-		if (customizer != null) {
-			customizer.accept(this.httpClient);
-		}
-	}
-
-	/**
 	 * Constructor with an initialized {@link HttpClient}.
 	 */
 	public JettyClientHttpConnector(HttpClient httpClient) {
@@ -80,9 +65,9 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	 * with the given {@link JettyResourceFactory}.
 	 * @param httpClient the {@link HttpClient} to use
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
+	 * @since 5.2
 	 */
-	public JettyClientHttpConnector(HttpClient httpClient,
-			@Nullable JettyResourceFactory resourceFactory) {
+	public JettyClientHttpConnector(HttpClient httpClient, @Nullable JettyResourceFactory resourceFactory) {
 		Assert.notNull(httpClient, "HttpClient is required");
 		if (resourceFactory != null) {
 			httpClient.setExecutor(resourceFactory.getExecutor());
@@ -90,6 +75,20 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 			httpClient.setScheduler(resourceFactory.getScheduler());
 		}
 		this.httpClient = httpClient;
+	}
+
+	/**
+	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
+	 * @param resourceFactory the {@link JettyResourceFactory} to use
+	 * @param customizer the lambda used to customize the {@link HttpClient}
+	 * @deprecated as of 5.2, in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
+	 */
+	@Deprecated
+	public JettyClientHttpConnector(JettyResourceFactory resourceFactory, @Nullable Consumer<HttpClient> customizer) {
+		this(new HttpClient(), resourceFactory);
+		if (customizer != null) {
+			customizer.accept(this.httpClient);
+		}
 	}
 
 

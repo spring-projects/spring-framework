@@ -20,8 +20,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -56,7 +56,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();

@@ -26,10 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -66,10 +68,10 @@ public class TransactionalEventListenerTests {
 
 	private EventCollector eventCollector;
 
-	private TransactionTemplate transactionTemplate = new TransactionTemplate(new CallCountingTransactionManager());
+	private TransactionTemplate transactionTemplate;
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
@@ -148,7 +150,7 @@ public class TransactionalEventListenerTests {
 
 	@Test
 	public void afterCommitWithTransactionalComponentListenerProxiedViaDynamicProxy() {
-		load(TransactionalConfiguration.class, TransactionalComponentTestListener.class);
+		load(TransactionalComponentTestListener.class);
 		this.transactionTemplate.execute(status -> {
 			getContext().publishEvent("SKIP");
 			getEventCollector().assertNoEventReceived();
@@ -251,6 +253,38 @@ public class TransactionalEventListenerTests {
 	}
 
 	@Test
+	public void transactionDemarcationWithNotSupportedPropagation() {
+		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class);
+		getContext().getBean(TestBean.class).notSupported();
+		getEventCollector().assertTotalEventsCount(0);
+	}
+
+	@Test
+	public void transactionDemarcationWithSupportsPropagationAndNoTransaction() {
+		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class);
+		getContext().getBean(TestBean.class).supports();
+		getEventCollector().assertTotalEventsCount(0);
+	}
+
+	@Test
+	public void transactionDemarcationWithSupportsPropagationAndExistingTransaction() {
+		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().getBean(TestBean.class).supports();
+			getEventCollector().assertNoEventReceived();
+			return null;
+		});
+		getEventCollector().assertTotalEventsCount(2);
+	}
+
+	@Test
+	public void transactionDemarcationWithRequiredPropagation() {
+		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class);
+		getContext().getBean(TestBean.class).required();
+		getEventCollector().assertTotalEventsCount(2);
+	}
+
+	@Test
 	public void noTransactionWithFallbackExecution() {
 		load(FallbackExecutionTestListener.class);
 		this.context.publishEvent("test");
@@ -299,48 +333,49 @@ public class TransactionalEventListenerTests {
 
 
 	protected EventCollector getEventCollector() {
-		return eventCollector;
+		return this.eventCollector;
 	}
 
 	protected ConfigurableApplicationContext getContext() {
-		return context;
+		return this.context;
 	}
 
 	private void load(Class<?>... classes) {
 		List<Class<?>> allClasses = new ArrayList<>();
 		allClasses.add(BasicConfiguration.class);
 		allClasses.addAll(Arrays.asList(classes));
-		doLoad(allClasses.toArray(new Class<?>[allClasses.size()]));
+		doLoad(allClasses.toArray(new Class<?>[0]));
 	}
 
 	private void doLoad(Class<?>... classes) {
 		this.context = new AnnotationConfigApplicationContext(classes);
 		this.eventCollector = this.context.getBean(EventCollector.class);
+		this.transactionTemplate = this.context.getBean(TransactionTemplate.class);
 	}
 
 
 	@Configuration
+	@EnableTransactionManagement
 	static class BasicConfiguration {
-
-		@Bean // set automatically with tx management
-		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
-			return new TransactionalEventListenerFactory();
-		}
 
 		@Bean
 		public EventCollector eventCollector() {
 			return new EventCollector();
 		}
-	}
 
-
-	@EnableTransactionManagement
-	@Configuration
-	static class TransactionalConfiguration {
+		@Bean
+		public TestBean testBean(ApplicationEventPublisher eventPublisher) {
+			return new TestBean(eventPublisher);
+		}
 
 		@Bean
 		public CallCountingTransactionManager transactionManager() {
 			return new CallCountingTransactionManager();
+		}
+
+		@Bean
+		public TransactionTemplate transactionTemplate() {
+			return new TransactionTemplate(transactionManager());
 		}
 	}
 
@@ -395,6 +430,31 @@ public class TransactionalEventListenerTests {
 			}
 			assertThat(size).as("Wrong number of total events (" + this.events.size() + ") " +
 						"registered phase(s)").isEqualTo(number);
+		}
+	}
+
+
+	static class TestBean {
+
+		private final ApplicationEventPublisher eventPublisher;
+
+		TestBean(ApplicationEventPublisher eventPublisher) {
+			this.eventPublisher = eventPublisher;
+		}
+
+		@Transactional(propagation = Propagation.NOT_SUPPORTED)
+		public void notSupported() {
+			this.eventPublisher.publishEvent("test");
+		}
+
+		@Transactional(propagation = Propagation.SUPPORTS)
+		public void supports() {
+			this.eventPublisher.publishEvent("test");
+		}
+
+		@Transactional(propagation = Propagation.REQUIRED)
+		public void required() {
+			this.eventPublisher.publishEvent("test");
 		}
 	}
 

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -31,6 +30,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class LocaleContextResolverIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class LocaleContextResolverIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
 
@@ -61,8 +61,11 @@ public class LocaleContextResolverIntegrationTests extends AbstractRequestMappin
 		return context;
 	}
 
-	@Test
-	public void fixedLocale() {
+
+	@ParameterizedHttpServerTest
+	void fixedLocale(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<ClientResponse> result = webClient
 				.get()
 				.uri("http://localhost:" + this.port + "/")

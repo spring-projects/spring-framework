@@ -125,10 +125,7 @@ public class ViewControllerRegistry {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
 
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setUrlMap(urlMap);
-		handlerMapping.setOrder(this.order);
-		return handlerMapping;
+		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
 }

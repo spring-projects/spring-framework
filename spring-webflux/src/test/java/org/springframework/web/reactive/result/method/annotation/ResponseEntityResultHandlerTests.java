@@ -28,8 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -51,6 +51,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
@@ -80,7 +81,7 @@ public class ResponseEntityResultHandlerTests {
 	private ResponseEntityResultHandler resultHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resultHandler = createHandler();
 	}
@@ -337,7 +338,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test // SPR-17082
-	public void handleResponseEntityWithExistingResponseHeaders() throws Exception {
+	public void handleWithPresetContentType() {
 		ResponseEntity<Void> value = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
 		HandlerResult result = handlerResult(value, returnType);
@@ -351,6 +352,24 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBodyIsEmpty(exchange);
 	}
 
+	@Test // gh-23205
+	public void handleWithPresetContentTypeShouldFailWithServerError() {
+		ResponseEntity<String> value = ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body("<foo/>");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		HandlerResult result = handlerResult(value, returnType);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		ResponseEntityResultHandler resultHandler = new ResponseEntityResultHandler(
+				Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
+				new RequestedContentTypeResolverBuilder().build()
+		);
+
+		StepVerifier.create(resultHandler.handleResult(exchange, result))
+				.consumeErrorWith(ex -> assertThat(ex)
+						.isInstanceOf(HttpMessageNotWritableException.class)
+						.hasMessageContaining("with preset Content-Type"))
+				.verify();
+	}
 
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {

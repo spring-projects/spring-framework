@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.event.CustomTestEventTests.CustomEventPublishingTestExecutionListener;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
@@ -43,14 +43,14 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  * @author Sam Brannen
  * @since 5.2
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @TestExecutionListeners(listeners = CustomEventPublishingTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
 public class CustomTestEventTests {
 
 	private static final List<CustomEvent> events = new ArrayList<>();
 
 
-	@Before
+	@BeforeEach
 	public void clearEvents() {
 		events.clear();
 	}

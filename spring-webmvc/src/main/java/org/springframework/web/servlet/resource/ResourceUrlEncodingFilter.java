@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -96,10 +97,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				if (this.indexLookupPath == -1) {
-					throw new IllegalStateException(
-							"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
-							"Does the path have invalid encoded characters for characterEncoding '" +
-							getRequest().getCharacterEncoding() + "'?");
+					throw new LookupPathIndexException(lookupPath, requestUri);
 				}
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
@@ -161,6 +159,21 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return super.encodeURL(urlPath);
 			}
 			return super.encodeURL(url);
+		}
+	}
+
+
+	/**
+	 * Runtime exception to get far enough (to ResourceUrlProviderExposingInterceptor)
+	 * where it can be re-thrown as ServletRequestBindingException to result in
+	 * a 400 response.
+	 */
+	@SuppressWarnings("serial")
+	static class LookupPathIndexException extends IllegalArgumentException {
+
+		LookupPathIndexException(String lookupPath, String requestUri) {
+			super("Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
+					"This could be because the path has invalid encoded characters or isn't normalized.");
 		}
 	}
 

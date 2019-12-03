@@ -19,7 +19,7 @@ package org.springframework.validation;
 import java.beans.PropertyEditorSupport;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;

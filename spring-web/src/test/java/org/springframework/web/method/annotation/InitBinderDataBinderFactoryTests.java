@@ -19,7 +19,7 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.convert.ConversionService;

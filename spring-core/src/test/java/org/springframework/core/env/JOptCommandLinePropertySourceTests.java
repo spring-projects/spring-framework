@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class JOptCommandLinePropertySourceTests {
+class JOptCommandLinePropertySourceTests {
 
 	@Test
-	public void withRequiredArg_andArgIsPresent() {
+	void withRequiredArg_andArgIsPresent() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withRequiredArg();
 		OptionSet options = parser.parse("--foo=bar");
@@ -43,7 +43,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withOptionalArg_andArgIsMissing() {
+	void withOptionalArg_andArgIsMissing() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withOptionalArg();
 		OptionSet options = parser.parse("--foo");
@@ -54,7 +54,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withNoArg() {
+	void withNoArg() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("o1");
 		parser.accepts("o2");
@@ -68,7 +68,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withRequiredArg_andMultipleArgsPresent_usingDelimiter() {
+	void withRequiredArg_andMultipleArgsPresent_usingDelimiter() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withRequiredArg().withValuesSeparatedBy(',');
 		OptionSet options = parser.parse("--foo=bar,baz,biz");
@@ -79,7 +79,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withRequiredArg_andMultipleArgsPresent_usingRepeatedOption() {
+	void withRequiredArg_andMultipleArgsPresent_usingRepeatedOption() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withRequiredArg().withValuesSeparatedBy(',');
 		OptionSet options = parser.parse("--foo=bar", "--foo=baz", "--foo=biz");
@@ -90,7 +90,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withMissingOption() {
+	void withMissingOption() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withRequiredArg().withValuesSeparatedBy(',');
 		OptionSet options = parser.parse(); // <-- no options whatsoever
@@ -100,7 +100,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withDottedOptionName() {
+	void withDottedOptionName() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("spring.profiles.active").withRequiredArg();
 		OptionSet options = parser.parse("--spring.profiles.active=p1");
@@ -110,7 +110,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
+	void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		OptionParser parser = new OptionParser();
 		parser.acceptsAll(Arrays.asList("o1","option1")).withRequiredArg();
 		parser.accepts("o2");
@@ -127,7 +127,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withDefaultNonOptionArgsNameAndNonOptionArgsPresent() {
+	void withDefaultNonOptionArgsNameAndNonOptionArgsPresent() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("o1").withRequiredArg();
 		parser.accepts("o2");
@@ -143,7 +143,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withCustomNonOptionArgsNameAndNoNonOptionArgsPresent() {
+	void withCustomNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("o1").withRequiredArg();
 		parser.accepts("o2");
@@ -160,7 +160,7 @@ public class JOptCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withRequiredArg_ofTypeEnum() {
+	void withRequiredArg_ofTypeEnum() {
 		OptionParser parser = new OptionParser();
 		parser.accepts("o1").withRequiredArg().ofType(OptionEnum.class);
 		OptionSet options = parser.parse("--o1=VAL_1");

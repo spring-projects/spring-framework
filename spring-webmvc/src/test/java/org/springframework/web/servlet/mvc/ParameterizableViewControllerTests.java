@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.mvc;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -40,7 +40,7 @@ public class ParameterizableViewControllerTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.controller = new ParameterizableViewController();
 		this.request = new MockHttpServletRequest("GET", "/");

@@ -118,7 +118,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 					getRestTemplate().execute(receiveUrl, HttpMethod.POST, requestCallback, responseExtractor);
 					requestCallback = requestCallbackAfterHandshake;
 				}
-				catch (Throwable ex) {
+				catch (Exception ex) {
 					if (!connectFuture.isDone()) {
 						connectFuture.setException(ex);
 					}

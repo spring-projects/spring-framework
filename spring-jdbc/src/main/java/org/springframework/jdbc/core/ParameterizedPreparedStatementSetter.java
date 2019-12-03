@@ -45,7 +45,7 @@ public interface ParameterizedPreparedStatementSetter<T> {
 	 * Set parameter values on the given PreparedStatement.
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @param argument the object containing the values to be set
-	 * @throws SQLException if a SQLException is encountered (i.e. there is no need to catch SQLException)
+	 * @throws SQLException if an SQLException is encountered (i.e. there is no need to catch SQLException)
 	 */
 	void setValues(PreparedStatement ps, T argument) throws SQLException;
 

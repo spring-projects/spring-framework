@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.MethodParameterTypeProvider;
@@ -1012,7 +1013,7 @@ public class ResolvableType implements Serializable {
 			}
 			@Override
 			public boolean isAssignableFrom(ResolvableType other) {
-				Class<?> otherClass = other.getRawClass();
+				Class<?> otherClass = other.resolve();
 				return (otherClass != null && (clazz == null || ClassUtils.isAssignable(clazz, otherClass)));
 			}
 		};
@@ -1199,8 +1200,7 @@ public class ResolvableType implements Serializable {
 			Class<?> implementationClass) {
 
 		Assert.notNull(constructor, "Constructor must not be null");
-		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex);
-		methodParameter.setContainingClass(implementationClass);
+		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex, implementationClass);
 		return forMethodParameter(methodParameter);
 	}
 
@@ -1226,8 +1226,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodReturnType(Method method, Class<?> implementationClass) {
 		Assert.notNull(method, "Method must not be null");
-		MethodParameter methodParameter = new MethodParameter(method, -1);
-		methodParameter.setContainingClass(implementationClass);
+		MethodParameter methodParameter = new MethodParameter(method, -1, implementationClass);
 		return forMethodParameter(methodParameter);
 	}
 
@@ -1257,8 +1256,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodParameter(Method method, int parameterIndex, Class<?> implementationClass) {
 		Assert.notNull(method, "Method must not be null");
-		MethodParameter methodParameter = new MethodParameter(method, parameterIndex);
-		methodParameter.setContainingClass(implementationClass);
+		MethodParameter methodParameter = new MethodParameter(method, parameterIndex, implementationClass);
 		return forMethodParameter(methodParameter);
 	}
 
@@ -1302,22 +1300,26 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter, @Nullable Type targetType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
-		return forType(targetType, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
-				getNested(methodParameter.getNestingLevel(), methodParameter.typeIndexesPerLevel);
+		return forMethodParameter(methodParameter, targetType, methodParameter.getNestingLevel());
 	}
 
 	/**
-	 * Resolve the top-level parameter type of the given {@code MethodParameter}.
-	 * @param methodParameter the method parameter to resolve
-	 * @since 4.1.9
-	 * @see MethodParameter#setParameterType
+	 * Return a {@link ResolvableType} for the specified {@link MethodParameter} at
+	 * a specific nesting level, overriding the target type to resolve with a specific
+	 * given type.
+	 * @param methodParameter the source method parameter (must not be {@code null})
+	 * @param targetType the type to resolve (a part of the method parameter's type)
+	 * @param nestingLevel the nesting level to use
+	 * @return a {@link ResolvableType} for the specified method parameter
+	 * @since 5.2
+	 * @see #forMethodParameter(Method, int)
 	 */
-	static void resolveMethodParameter(MethodParameter methodParameter) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
+	static ResolvableType forMethodParameter(
+			MethodParameter methodParameter, @Nullable Type targetType, int nestingLevel) {
+
 		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
-		methodParameter.setParameterType(
-				forType(null, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).resolve());
+		return forType(targetType, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
+				getNested(nestingLevel, methodParameter.typeIndexesPerLevel);
 	}
 
 	/**
@@ -1518,18 +1520,15 @@ public class ResolvableType implements Serializable {
 
 		@Override
 		public String getTypeName() {
-			StringBuilder result = new StringBuilder(this.rawType.getTypeName());
+			String typeName = this.rawType.getTypeName();
 			if (this.typeArguments.length > 0) {
-				result.append('<');
-				for (int i = 0; i < this.typeArguments.length; i++) {
-					if (i > 0) {
-						result.append(", ");
-					}
-					result.append(this.typeArguments[i].getTypeName());
+				StringJoiner stringJoiner = new StringJoiner(", ", "<", ">");
+				for (Type argument : this.typeArguments) {
+					stringJoiner.add(argument.getTypeName());
 				}
-				result.append('>');
+				return typeName + stringJoiner;
 			}
-			return result.toString();
+			return typeName;
 		}
 
 		@Override

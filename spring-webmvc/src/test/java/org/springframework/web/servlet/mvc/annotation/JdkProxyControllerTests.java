@@ -18,9 +18,10 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Writer;
+
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;

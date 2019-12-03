@@ -21,11 +21,12 @@ import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+
 import javax.ejb.TransactionAttributeType;
 
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;

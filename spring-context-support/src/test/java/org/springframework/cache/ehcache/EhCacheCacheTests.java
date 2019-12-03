@@ -21,15 +21,15 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.AbstractCacheTests;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.tests.TestGroup.LONG_RUNNING;
 
 /**
  * @author Costin Leau
@@ -45,7 +45,7 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 	private EhCacheCache cache;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		cacheManager = new CacheManager(new Configuration().name("EhCacheCacheTests")
 				.defaultCache(new CacheConfiguration("default", 100)));
@@ -55,7 +55,7 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 		cache = new EhCacheCache(nativeCache);
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		cacheManager.shutdown();
 	}
@@ -73,9 +73,8 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 
 
 	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void testExpiredElements() throws Exception {
-		Assume.group(TestGroup.LONG_RUNNING);
-
 		String key = "brancusi";
 		String value = "constantin";
 		Element brancusi = new Element(key, value);

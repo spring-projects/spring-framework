@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -42,7 +43,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.mock.web.test.MockFilterConfig;
@@ -405,7 +406,6 @@ public class CommonsMultipartResolverTests {
 	}
 
 
-	@SuppressWarnings("serial")
 	private static class MockFileItem implements FileItem {
 
 		private String fieldName;

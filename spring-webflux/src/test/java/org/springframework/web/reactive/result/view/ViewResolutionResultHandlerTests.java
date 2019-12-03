@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -114,7 +114,12 @@ public class ViewResolutionResultHandlerTests {
 	private void testSupports(MethodParameter returnType, boolean supports) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertThat(resultHandler.supports(handlerResult)).isEqualTo(supports);
+		if (supports) {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should be supported").isTrue();
+		}
+		else {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should not be supported").isFalse();
+		}
 	}
 
 	@Test

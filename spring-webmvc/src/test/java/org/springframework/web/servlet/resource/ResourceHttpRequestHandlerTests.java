@@ -21,10 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -66,7 +67,7 @@ public class ResourceHttpRequestHandlerTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));

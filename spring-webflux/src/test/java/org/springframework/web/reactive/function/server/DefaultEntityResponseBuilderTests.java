@@ -24,7 +24,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
+import io.reactivex.Single;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -77,11 +78,20 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
+	public void fromProducer() {
+		Single<String> body = Single.just("foo");
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		EntityResponse<Single<String>> response = EntityResponse.fromProducer(body, typeReference).build().block();
+		assertThat(response.entity()).isSameAs(body);
+	}
+
+	@Test
 	public void status() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()))
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
+						response.rawStatusCode() == 201)
 				.expectComplete()
 				.verify();
 	}

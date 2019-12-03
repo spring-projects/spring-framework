@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.stereotype.Controller;

@@ -19,8 +19,8 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -64,7 +64,7 @@ public class ModelFactoryTests {
 	private ModelAndViewContainer mavContainer;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 		this.attributeStore = new DefaultSessionAttributeStore();

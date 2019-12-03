@@ -26,10 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -673,13 +674,13 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		}
 	}
 
-// @Ignore("ControllerClassNameHandlerMapping")
+// @Disabled("ControllerClassNameHandlerMapping")
 //	public void controllerClassName() throws Exception {
 
-//	@Ignore("useDefaultSuffixPattern property not supported")
+//	@Disabled("useDefaultSuffixPattern property not supported")
 //	public void doubles() throws Exception {
 
-//	@Ignore("useDefaultSuffixPattern property not supported")
+//	@Disabled("useDefaultSuffixPattern property not supported")
 //	public void noDefaultSuffixPattern() throws Exception {
 
 }

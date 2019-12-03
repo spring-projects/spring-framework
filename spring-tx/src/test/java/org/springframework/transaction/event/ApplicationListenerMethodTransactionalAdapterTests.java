@@ -18,7 +18,7 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;

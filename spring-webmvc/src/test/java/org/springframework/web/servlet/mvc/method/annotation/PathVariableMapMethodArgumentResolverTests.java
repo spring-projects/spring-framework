@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -54,7 +54,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	private MethodParameter paramMapNoAnnot;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new PathVariableMapMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();

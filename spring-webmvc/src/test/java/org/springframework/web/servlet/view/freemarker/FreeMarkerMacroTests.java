@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -28,8 +29,8 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -69,7 +70,7 @@ public class FreeMarkerMacroTests {
 	private FreeMarkerConfigurer fc;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		ServletContext sc = new MockServletContext();
 		wac = new StaticWebApplicationContext();

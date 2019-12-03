@@ -19,6 +19,8 @@ package org.springframework.core.type.classreading;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+import org.junit.jupiter.api.Test;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -35,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Phillip Webb
  */
 @SuppressWarnings("deprecation")
-public class MethodMetadataReadingVisitorTests extends AbstractMethodMetadataTests {
+class MethodMetadataReadingVisitorTests extends AbstractMethodMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
@@ -61,6 +63,7 @@ public class MethodMetadataReadingVisitorTests extends AbstractMethodMetadataTes
 	}
 
 	@Override
+	@Test
 	public void getAnnotationsReturnsDirectAnnotations() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
 				super::getAnnotationsReturnsDirectAnnotations);

@@ -18,13 +18,11 @@ package org.springframework.test.context.expression;
 
 import java.util.Properties;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,9 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Andy Clement
  * @author Dave Syer
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-public class ExpressionUsageTests {
+@SpringJUnitConfig
+class ExpressionUsageTests {
 
 	@Autowired
 	@Qualifier("derived")
@@ -50,7 +47,7 @@ public class ExpressionUsageTests {
 
 
 	@Test
-	public void testSpr5906() throws Exception {
+	void testSpr5906() throws Exception {
 		// verify the property values have been evaluated as expressions
 		assertThat(props.getProperty("user.name")).isEqualTo("Dave");
 		assertThat(props.getProperty("username")).isEqualTo("Andy");
@@ -61,7 +58,7 @@ public class ExpressionUsageTests {
 	}
 
 	@Test
-	public void testSpr5847() throws Exception {
+	void testSpr5847() throws Exception {
 		assertThat(andy2.getName()).isEqualTo("Andy");
 		assertThat(andy.getName()).isEqualTo("Andy");
 	}

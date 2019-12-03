@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
-public class TestContextManagerTests {
+class TestContextManagerTests {
 
 	private static final List<String> executionOrder = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class TestContextManagerTests {
 
 
 	@Test
-	public void listenerExecutionOrder() throws Exception {
+	void listenerExecutionOrder() throws Exception {
 		// @formatter:off
 		assertThat(this.testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(3);
 
@@ -121,7 +121,7 @@ public class TestContextManagerTests {
 		private final String name;
 
 
-		public NamedTestExecutionListener(String name) {
+		NamedTestExecutionListener(String name) {
 			this.name = name;
 		}
 

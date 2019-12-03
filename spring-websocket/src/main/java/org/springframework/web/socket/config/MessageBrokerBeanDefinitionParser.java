@@ -200,7 +200,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(WebSocketHandlerMapping.class);
 
 		String orderAttribute = element.getAttribute("order");
-		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
+		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.parseInt(orderAttribute);
 		handlerMappingDef.getPropertyValues().add("order", order);
 
 		String pathHelper = element.getAttribute("path-helper");
@@ -485,7 +485,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				converters.add(object);
 			}
 		}
-		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+		if (convertersElement == null || Boolean.parseBoolean(convertersElement.getAttribute("register-defaults"))) {
 			converters.setSource(source);
 			converters.add(new RootBeanDefinition(StringMessageConverter.class));
 			converters.add(new RootBeanDefinition(ByteArrayMessageConverter.class));

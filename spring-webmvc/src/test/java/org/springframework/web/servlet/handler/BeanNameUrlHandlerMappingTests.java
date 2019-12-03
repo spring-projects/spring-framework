@@ -18,8 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -43,7 +43,7 @@ public class BeanNameUrlHandlerMappingTests {
 	private ConfigurableWebApplicationContext wac;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();

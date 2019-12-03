@@ -21,9 +21,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -92,41 +93,41 @@ public class WebUtilsTests {
 	@Test
 	public void isValidOrigin() {
 		List<String> allowed = Collections.emptyList();
-		assertThat(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed)).isTrue();
-		assertThat(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed)).isFalse();
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain1.example", allowed)).isTrue();
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain2.example", allowed)).isFalse();
 
 		allowed = Collections.singletonList("*");
-		assertThat(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed)).isTrue();
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain2.example", allowed)).isTrue();
 
-		allowed = Collections.singletonList("http://mydomain1.com");
-		assertThat(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed)).isTrue();
-		assertThat(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed)).isFalse();
+		allowed = Collections.singletonList("http://mydomain1.example");
+		assertThat(checkValidOrigin("mydomain2.example", -1, "http://mydomain1.example", allowed)).isTrue();
+		assertThat(checkValidOrigin("mydomain2.example", -1, "http://mydomain3.example", allowed)).isFalse();
 	}
 
 	@Test
 	public void isSameOrigin() {
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80")).isTrue();
-		assertThat(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com")).isTrue();
-		assertThat(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com:443")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain1.com", 123, "http://mydomain1.com:123")).isTrue();
-		assertThat(checkSameOrigin("ws", "mydomain1.com", -1, "ws://mydomain1.com")).isTrue();
-		assertThat(checkSameOrigin("wss", "mydomain1.com", 443, "wss://mydomain1.com")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80")).isTrue();
+		assertThat(checkSameOrigin("https", "mydomain1.example", 443, "https://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("https", "mydomain1.example", 443, "https://mydomain1.example:443")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", 123, "http://mydomain1.example:123")).isTrue();
+		assertThat(checkSameOrigin("ws", "mydomain1.example", -1, "ws://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("wss", "mydomain1.example", 443, "wss://mydomain1.example")).isTrue();
 
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain2.com")).isFalse();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com")).isFalse();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "invalid-origin")).isFalse();
-		assertThat(checkSameOrigin("https", "mydomain1.com", -1, "http://mydomain1.com")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain2.example")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "https://mydomain1.example")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "invalid-origin")).isFalse();
+		assertThat(checkSameOrigin("https", "mydomain1.example", -1, "http://mydomain1.example")).isFalse();
 
 		// Handling of invalid origins as described in SPR-13478
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/path")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/path")).isTrue();
-		assertThat(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/")).isFalse();
-		assertThat(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/")).isFalse();
-		assertThat(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/path")).isFalse();
-		assertThat(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/path")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example/")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80/")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example/path")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80/path")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example/")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example:80/")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example/path")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example:80/path")).isFalse();
 
 		// Handling of IPv6 hosts as described in SPR-13525
 		assertThat(checkSameOrigin("http", "[::1]", -1, "http://[::1]")).isTrue();
@@ -144,24 +145,24 @@ public class WebUtilsTests {
 
 	@Test  // SPR-16262
 	public void isSameOriginWithXForwardedHeaders() throws Exception {
-		String server = "mydomain1.com";
-		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
 	}
 
 	@Test  // SPR-16262
 	public void isSameOriginWithForwardedHeader() throws Exception {
-		String server = "mydomain1.com";
-		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
 	}
 
 

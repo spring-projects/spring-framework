@@ -28,6 +28,7 @@ import static java.lang.String.format;
 /**
  * A test group used to limit when certain tests are run.
  *
+ * @see EnabledForTestGroups @EnabledForTestGroups
  * @see Assume#group(TestGroup)
  * @author Phillip Webb
  * @author Chris Beams
@@ -48,13 +49,34 @@ public enum TestGroup {
 	 * {@code StopWatch}, etc. should be considered a candidate as their successful
 	 * execution is likely to be based on events occurring within a given time window.
 	 */
-	PERFORMANCE,
+	PERFORMANCE;
+
 
 	/**
-	 * Tests that should only be run on the continuous integration server.
+	 * Determine if this {@link TestGroup} is active.
+	 * @since 5.2
 	 */
-	CI;
+	public boolean isActive() {
+		return loadTestGroups().contains(this);
+	}
 
+
+	private static final String TEST_GROUPS_SYSTEM_PROPERTY = "testGroups";
+
+	/**
+	 * Load test groups dynamically instead of during static initialization in
+	 * order to avoid a {@link NoClassDefFoundError} being thrown while attempting
+	 * to load collaborator classes.
+	 */
+	static Set<TestGroup> loadTestGroups() {
+		try {
+			return TestGroup.parse(System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY));
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY +
+					"' system property: " + ex.getMessage(), ex);
+		}
+	}
 
 	/**
 	 * Parse the specified comma separated string of groups.
@@ -63,7 +85,7 @@ public enum TestGroup {
 	 * @throws IllegalArgumentException if any specified group name is not a
 	 * valid {@link TestGroup}
 	 */
-	public static Set<TestGroup> parse(String value) throws IllegalArgumentException {
+	static Set<TestGroup> parse(String value) throws IllegalArgumentException {
 		if (!StringUtils.hasText(value)) {
 			return Collections.emptySet();
 		}

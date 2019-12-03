@@ -19,8 +19,8 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -62,7 +62,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler, null);
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		super.setUp();

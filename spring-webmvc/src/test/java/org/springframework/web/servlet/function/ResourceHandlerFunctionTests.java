@@ -21,10 +21,11 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -52,7 +53,7 @@ public class ResourceHandlerFunctionTests {
 
 	private ResourceHttpMessageConverter messageConverter;
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		this.messageConverter = new ResourceHttpMessageConverter();
 		this.context = new ServerResponse.Context() {

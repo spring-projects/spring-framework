@@ -17,10 +17,11 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+
 import javax.servlet.http.Cookie;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -55,7 +56,7 @@ public class CookieValueMethodArgumentResolverTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		resolver = new TestCookieValueMethodArgumentResolver();
 

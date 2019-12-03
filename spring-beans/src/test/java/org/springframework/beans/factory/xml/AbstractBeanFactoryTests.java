@@ -19,10 +19,10 @@ package org.springframework.beans.factory.xml;
 import java.beans.PropertyEditorSupport;
 import java.util.StringTokenizer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyBatchUpdateException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
@@ -191,17 +191,11 @@ public abstract class AbstractBeanFactoryTests {
 		assertThat(ve.getName() == null && ve.getAge() == 0 && ve.getSpouse() == null).as("Valid empty has defaults").isTrue();
 	}
 
-	public void xtestTypeMismatch() {
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				getBeanFactory().getBean("typeMismatch"))
-			.withCauseInstanceOf(PropertyBatchUpdateException.class)
-			.satisfies(ex -> {
-				assertThat(ex.getBeanName()).isEqualTo("typeMismatch");
-				PropertyBatchUpdateException pex = (PropertyBatchUpdateException) ex.getCause();
-				assertThat(pex.getExceptionCount()).isEqualTo(1);
-				assertThat(pex.getPropertyAccessException("age")).isNotNull();
-				assertThat(pex.getPropertyAccessException("age").getPropertyChangeEvent().getNewValue()).isEqualTo("34x");
-			});
+	@Test
+	public void typeMismatch() {
+		assertThatExceptionOfType(BeanCreationException.class)
+			.isThrownBy(() -> getBeanFactory().getBean("typeMismatch"))
+			.withCauseInstanceOf(TypeMismatchException.class);
 	}
 
 	@Test

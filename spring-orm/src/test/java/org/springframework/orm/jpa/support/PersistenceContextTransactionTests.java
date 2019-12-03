@@ -23,9 +23,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.SynchronizationType;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -56,7 +56,7 @@ public class PersistenceContextTransactionTests {
 	private EntityManagerHoldingBean bean;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
@@ -83,7 +83,7 @@ public class PersistenceContextTransactionTests {
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 
-	@After
+	@AfterEach
 	public void clear() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

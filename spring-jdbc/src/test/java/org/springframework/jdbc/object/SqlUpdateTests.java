@@ -24,11 +24,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
@@ -80,7 +81,7 @@ public class SqlUpdateTests {
 	private ResultSetMetaData resultSetMetaData;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		dataSource = mock(DataSource.class);
 		connection = mock(Connection.class);
@@ -90,7 +91,7 @@ public class SqlUpdateTests {
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
-	@After
+	@AfterEach
 	public void verifyClosed() throws Exception {
 		verify(preparedStatement).close();
 		verify(connection).close();

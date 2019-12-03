@@ -24,9 +24,9 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -60,7 +60,7 @@ public class RowMapperTests {
 
 	private List<TestBean> result;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws SQLException {
 		given(connection.createStatement()).willReturn(statement);
 		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
@@ -75,13 +75,12 @@ public class RowMapperTests {
 		template.afterPropertiesSet();
 	}
 
-	@After
+	@AfterEach
 	public void verifyClosed() throws Exception {
 		verify(resultSet).close();
-		// verify(connection).close();
 	}
 
-	@After
+	@AfterEach
 	public void verifyResults() {
 		assertThat(result).isNotNull();
 		assertThat(result.size()).isEqualTo(2);

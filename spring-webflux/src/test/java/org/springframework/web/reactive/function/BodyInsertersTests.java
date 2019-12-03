@@ -30,8 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import io.reactivex.Single;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -81,7 +82,7 @@ public class BodyInsertersTests {
 	private Map<String, Object> hints;
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -116,7 +117,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofString() {
 		String body = "foo";
-		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -133,7 +134,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObject() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
@@ -147,7 +148,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObjectWithHints() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -155,6 +156,51 @@ public class BodyInsertersTests {
 
 		StepVerifier.create(response.getBodyAsString())
 				.expectNext("{\"username\":\"foo\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofProducerWithMono() {
+		Mono<User> body = Mono.just(new User("foo", "bar"));
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofProducerWithFlux() {
+		Flux<String> body = Flux.just("foo");
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, String.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(buf -> {
+					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					assertThat(actual).isEqualTo("foo");
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofProducerWithSingle() {
+		Single<User> body = Single.just(new User("foo", "bar"));
+		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
 				.expectComplete()
 				.verify();
 	}

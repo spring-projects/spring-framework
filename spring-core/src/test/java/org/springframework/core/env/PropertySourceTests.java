@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Unit tests for {@link PropertySource} implementations.
@@ -33,11 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class PropertySourceTests {
+class PropertySourceTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void equals() {
+	void equals() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{
 			put("a", "b");
 		}};
@@ -69,7 +68,7 @@ public class PropertySourceTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void collectionsOperations() {
+	void collectionsOperations() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{
 			put("a", "b");
 		}};

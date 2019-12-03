@@ -23,9 +23,9 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
@@ -60,13 +60,13 @@ public class ScopingTests {
 	private GenericApplicationContext ctx;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		customScope = new CustomScope();
 		ctx = createContext(ScopedConfigurationClass.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		if (ctx != null) {
 			ctx.close();

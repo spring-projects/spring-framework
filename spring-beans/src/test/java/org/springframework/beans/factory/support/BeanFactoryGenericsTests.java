@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -49,8 +49,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
@@ -58,6 +57,7 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.tests.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
@@ -651,9 +651,8 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void testSetBean() throws Exception {
-		Assume.group(TestGroup.LONG_RUNNING);
-
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));

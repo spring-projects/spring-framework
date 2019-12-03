@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Spliterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -36,23 +36,23 @@ import static org.mockito.Mockito.mock;
  *
  * @author Phillip Webb
  */
-public class MergedAnnotationsCollectionTests {
+class MergedAnnotationsCollectionTests {
 
 	@Test
-	public void ofWhenDirectAnnotationsIsNullThrowsException() {
+	void ofWhenDirectAnnotationsIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(
 				() -> MergedAnnotationsCollection.of(null)).withMessage(
 						"Annotations must not be null");
 	}
 
 	@Test
-	public void ofWhenEmptyReturnsSharedNoneInstance() {
+	void ofWhenEmptyReturnsSharedNoneInstance() {
 		MergedAnnotations annotations = MergedAnnotationsCollection.of(new ArrayList<>());
 		assertThat(annotations).isSameAs(TypeMappedAnnotations.NONE);
 	}
 
 	@Test
-	public void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
+	void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(false);
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -61,7 +61,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void createWhenAnnotationAggregateIndexIsNotZeroThrowsException() {
+	void createWhenAnnotationAggregateIndexIsNotZeroThrowsException() {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(true);
 		given(annotation.getAggregateIndex()).willReturn(1);
@@ -71,7 +71,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void interateIteratesInCorrectOrder() {
+	void interateIteratesInCorrectOrder() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		List<Class<?>> types = new ArrayList<>();
 		for (MergedAnnotation<?> annotation : annotations) {
@@ -82,7 +82,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void spliteratorIteratesInCorrectOrder() {
+	void spliteratorIteratesInCorrectOrder() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		Spliterator<MergedAnnotation<Annotation>> spliterator = annotations.spliterator();
 		List<Class<?>> types = new ArrayList<>();
@@ -92,7 +92,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void spliteratorEstimatesSize() {
+	void spliteratorEstimatesSize() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		Spliterator<MergedAnnotation<Annotation>> spliterator = annotations.spliterator();
 		assertThat(spliterator.estimateSize()).isEqualTo(5);
@@ -102,21 +102,21 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void isPresentWhenDirectlyPresentReturnsTrue() {
+	void isPresentWhenDirectlyPresentReturnsTrue() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isPresent(Direct.class)).isTrue();
 		assertThat(annotations.isPresent(Direct.class.getName())).isTrue();
 	}
 
 	@Test
-	public void isPresentWhenMetaPresentReturnsTrue() {
+	void isPresentWhenMetaPresentReturnsTrue() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isPresent(Meta11.class)).isTrue();
 		assertThat(annotations.isPresent(Meta11.class.getName())).isTrue();
 	}
 
 	@Test
-	public void isPresentWhenNotPresentReturnsFalse() {
+	void isPresentWhenNotPresentReturnsFalse() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isPresent(Missing.class)).isFalse();
 		assertThat(annotations.isPresent(Missing.class.getName())).isFalse();
@@ -124,28 +124,28 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void isDirectlyPresentWhenDirectlyPresentReturnsTrue() {
+	void isDirectlyPresentWhenDirectlyPresentReturnsTrue() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isDirectlyPresent(Direct.class)).isTrue();
 		assertThat(annotations.isDirectlyPresent(Direct.class.getName())).isTrue();
 	}
 
 	@Test
-	public void isDirectlyPresentWhenMetaPresentReturnsFalse() {
+	void isDirectlyPresentWhenMetaPresentReturnsFalse() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isDirectlyPresent(Meta11.class)).isFalse();
 		assertThat(annotations.isDirectlyPresent(Meta11.class.getName())).isFalse();
 	}
 
 	@Test
-	public void isDirectlyPresentWhenNotPresentReturnsFalse() {
+	void isDirectlyPresentWhenNotPresentReturnsFalse() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.isDirectlyPresent(Missing.class)).isFalse();
 		assertThat(annotations.isDirectlyPresent(Missing.class.getName())).isFalse();
 	}
 
 	@Test
-	public void getReturnsAppropriateAnnotation() {
+	void getReturnsAppropriateAnnotation() {
 		MergedAnnotations annotations = getMutiRoute1();
 		assertThat(annotations.get(MutiRouteTarget.class).getString(
 				MergedAnnotation.VALUE)).isEqualTo("12");
@@ -154,13 +154,13 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void getWhenNotPresentReturnsMissing() {
+	void getWhenNotPresentReturnsMissing() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		assertThat(annotations.get(Missing.class)).isEqualTo(MergedAnnotation.missing());
 	}
 
 	@Test
-	public void getWithPredicateReturnsOnlyMatching() {
+	void getWithPredicateReturnsOnlyMatching() {
 		MergedAnnotations annotations = getMutiRoute1();
 		assertThat(annotations.get(MutiRouteTarget.class,
 				annotation -> annotation.getDistance() >= 3).getString(
@@ -168,7 +168,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void getWithSelectorReturnsSelected() {
+	void getWithSelectorReturnsSelected() {
 		MergedAnnotations annotations = getMutiRoute1();
 		MergedAnnotationSelector<MutiRouteTarget> deepest = (existing,
 				candidate) -> candidate.getDistance() > existing.getDistance() ? candidate
@@ -178,7 +178,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void streamStreamsInCorrectOrder() {
+	void streamStreamsInCorrectOrder() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		List<Class<?>> types = new ArrayList<>();
 		annotations.stream().forEach(annotation -> types.add(annotation.getType()));
@@ -187,7 +187,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void streamWithTypeStreamsInCorrectOrder() {
+	void streamWithTypeStreamsInCorrectOrder() {
 		MergedAnnotations annotations = getMutiRoute1();
 		List<String> values = new ArrayList<>();
 		annotations.stream(MutiRouteTarget.class).forEach(
@@ -196,7 +196,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void getMetaWhenRootHasAttributeValuesShouldAlaisAttributes() {
+	void getMetaWhenRootHasAttributeValuesShouldAlaisAttributes() {
 		MergedAnnotation<Alaised> root = MergedAnnotation.of(null, null, Alaised.class,
 				Collections.singletonMap("testAlias", "test"));
 		MergedAnnotations annotations = MergedAnnotationsCollection.of(
@@ -206,7 +206,7 @@ public class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	public void getMetaWhenRootHasNoAttributeValuesShouldAlaisAttributes() {
+	void getMetaWhenRootHasNoAttributeValuesShouldAlaisAttributes() {
 		MergedAnnotation<Alaised> root = MergedAnnotation.of(null, null, Alaised.class,
 				Collections.emptyMap());
 		MergedAnnotations annotations = MergedAnnotationsCollection.of(

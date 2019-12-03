@@ -38,7 +38,7 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.cglib.core.ClassGenerator;
+import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
@@ -49,12 +49,12 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
-import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * CGLIB-based {@link AopProxy} implementation for the Spring AOP framework.
@@ -189,7 +189,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setStrategy(new ClassLoaderAwareUndeclaredThrowableStrategy(classLoader));
+			enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader));
 
 			Callback[] callbacks = getCallbacks(rootClass);
 			Class<?>[] types = new Class<?>[callbacks.length];
@@ -634,8 +634,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-			MethodInvocation invocation = new CglibMethodInvocation(proxy, this.target, method, args,
-					this.targetClass, this.adviceChain, methodProxy);
+			MethodInvocation invocation = new CglibMethodInvocation(
+					proxy, this.target, method, args, this.targetClass, this.adviceChain, methodProxy);
 			// If we get here, we need to create a MethodInvocation.
 			Object retVal = invocation.proceed();
 			retVal = processReturnType(proxy, this.target, method, retVal);
@@ -738,6 +738,25 @@ class CglibAopProxy implements AopProxy, Serializable {
 					method.getDeclaringClass() != Object.class && !AopUtils.isEqualsMethod(method) &&
 					!AopUtils.isHashCodeMethod(method) && !AopUtils.isToStringMethod(method) ?
 					methodProxy : null);
+		}
+
+		@Override
+		@Nullable
+		public Object proceed() throws Throwable {
+			try {
+				return super.proceed();
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				if (ReflectionUtils.declaresException(getMethod(), ex.getClass())) {
+					throw ex;
+				}
+				else {
+					throw new UndeclaredThrowableException(ex);
+				}
+			}
 		}
 
 		/**
@@ -965,54 +984,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 			hashCode = 13 * hashCode + (this.advised.isOptimize() ? 1 : 0);
 			hashCode = 13 * hashCode + (this.advised.isOpaque() ? 1 : 0);
 			return hashCode;
-		}
-	}
-
-
-	/**
-	 * CGLIB GeneratorStrategy variant which exposes the application ClassLoader
-	 * as thread context ClassLoader for the time of class generation
-	 * (in order for ASM to pick it up when doing common superclass resolution).
-	 */
-	private static class ClassLoaderAwareUndeclaredThrowableStrategy extends UndeclaredThrowableStrategy {
-
-		@Nullable
-		private final ClassLoader classLoader;
-
-		public ClassLoaderAwareUndeclaredThrowableStrategy(@Nullable ClassLoader classLoader) {
-			super(UndeclaredThrowableException.class);
-			this.classLoader = classLoader;
-		}
-
-		@Override
-		public byte[] generate(ClassGenerator cg) throws Exception {
-			if (this.classLoader == null) {
-				return super.generate(cg);
-			}
-
-			Thread currentThread = Thread.currentThread();
-			ClassLoader threadContextClassLoader;
-			try {
-				threadContextClassLoader = currentThread.getContextClassLoader();
-			}
-			catch (Throwable ex) {
-				// Cannot access thread context ClassLoader - falling back...
-				return super.generate(cg);
-			}
-
-			boolean overrideClassLoader = !this.classLoader.equals(threadContextClassLoader);
-			if (overrideClassLoader) {
-				currentThread.setContextClassLoader(this.classLoader);
-			}
-			try {
-				return super.generate(cg);
-			}
-			finally {
-				if (overrideClassLoader) {
-					// Reset original thread context ClassLoader.
-					currentThread.setContextClassLoader(threadContextClassLoader);
-				}
-			}
 		}
 	}
 

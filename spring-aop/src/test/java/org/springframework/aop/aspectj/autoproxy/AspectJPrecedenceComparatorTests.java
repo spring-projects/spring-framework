@@ -18,8 +18,8 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
@@ -33,7 +33,6 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +55,7 @@ public class AspectJPrecedenceComparatorTests {
 	private AspectJExpressionPointcut anyOldPointcut;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.comparator = new AspectJPrecedenceComparator();
 		this.anyOldMethod = getClass().getMethods()[0];
@@ -195,10 +194,7 @@ public class AspectJPrecedenceComparatorTests {
 	}
 
 	private Advisor createSpringAOPAfterAdvice(int order) {
-		AfterReturningAdvice advice = new AfterReturningAdvice() {
-			@Override
-			public void afterReturning(@Nullable Object returnValue, Method method, Object[] args, @Nullable Object target) throws Throwable {
-			}
+		AfterReturningAdvice advice = (returnValue, method, args, target) -> {
 		};
 		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut, advice);
 		advisor.setOrder(order);

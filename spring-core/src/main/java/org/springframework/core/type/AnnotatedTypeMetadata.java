@@ -49,6 +49,7 @@ public interface AnnotatedTypeMetadata {
 	 * Return annotation details based on the direct annotations of the
 	 * underlying element.
 	 * @return merged annotations based on the direct annotations
+	 * @since 5.2
 	 */
 	MergedAnnotations getAnnotations();
 

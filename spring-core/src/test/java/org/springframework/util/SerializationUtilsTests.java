@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.math.BigInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Dave Syer
  * @since 3.0.5
  */
-public class SerializationUtilsTests {
+class SerializationUtilsTests {
 
 	private static BigInteger FOO = new BigInteger(
 			"-9702942423549012526722364838327831379660941553432801565505143675386108883970811292563757558516603356009681061" +
@@ -38,36 +38,36 @@ public class SerializationUtilsTests {
 
 
 	@Test
-	public void serializeCycleSunnyDay() throws Exception {
+	void serializeCycleSunnyDay() throws Exception {
 		assertThat(SerializationUtils.deserialize(SerializationUtils.serialize("foo"))).isEqualTo("foo");
 	}
 
 	@Test
-	public void deserializeUndefined() throws Exception {
+	void deserializeUndefined() throws Exception {
 		byte[] bytes = FOO.toByteArray();
 		assertThatIllegalStateException().isThrownBy(() ->
 				SerializationUtils.deserialize(bytes));
 	}
 
 	@Test
-	public void serializeNonSerializable() throws Exception {
+	void serializeNonSerializable() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				SerializationUtils.serialize(new Object()));
 	}
 
 	@Test
-	public void deserializeNonSerializable() throws Exception {
+	void deserializeNonSerializable() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				SerializationUtils.deserialize("foo".getBytes()));
 	}
 
 	@Test
-	public void serializeNull() throws Exception {
+	void serializeNull() throws Exception {
 		assertThat(SerializationUtils.serialize(null)).isNull();
 	}
 
 	@Test
-	public void deserializeNull() throws Exception {
+	void deserializeNull() throws Exception {
 		assertThat(SerializationUtils.deserialize(null)).isNull();
 	}
 

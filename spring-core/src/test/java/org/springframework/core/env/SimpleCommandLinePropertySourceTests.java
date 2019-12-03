@@ -18,10 +18,9 @@ package org.springframework.core.env;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Unit tests for {@link SimpleCommandLinePropertySource}.
@@ -29,30 +28,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class SimpleCommandLinePropertySourceTests {
+class SimpleCommandLinePropertySourceTests {
 
 	@Test
-	public void withDefaultName() {
+	void withDefaultName() {
 		PropertySource<?> ps = new SimpleCommandLinePropertySource();
 		assertThat(ps.getName())
 				.isEqualTo(CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME);
 	}
 
 	@Test
-	public void withCustomName() {
+	void withCustomName() {
 		PropertySource<?> ps = new SimpleCommandLinePropertySource("ps1", new String[0]);
 		assertThat(ps.getName()).isEqualTo("ps1");
 	}
 
 	@Test
-	public void withNoArgs() {
+	void withNoArgs() {
 		PropertySource<?> ps = new SimpleCommandLinePropertySource();
 		assertThat(ps.containsProperty("foo")).isFalse();
 		assertThat(ps.getProperty("foo")).isNull();
 	}
 
 	@Test
-	public void withOptionArgsOnly() {
+	void withOptionArgsOnly() {
 		CommandLinePropertySource<?> ps =
 			new SimpleCommandLinePropertySource("--o1=v1", "--o2");
 		assertThat(ps.containsProperty("o1")).isTrue();
@@ -64,7 +63,7 @@ public class SimpleCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
+	void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		EnumerablePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "--o2");
 
 		assertThat(ps.containsProperty("nonOptionArgs")).isFalse();
@@ -77,7 +76,7 @@ public class SimpleCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withDefaultNonOptionArgsNameAndNonOptionArgsPresent() {
+	void withDefaultNonOptionArgsNameAndNonOptionArgsPresent() {
 		CommandLinePropertySource<?> ps =
 			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 
@@ -90,7 +89,7 @@ public class SimpleCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void withCustomNonOptionArgsNameAndNoNonOptionArgsPresent() {
+	void withCustomNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		CommandLinePropertySource<?> ps =
 			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 		ps.setNonOptionArgsPropertyName("NOA");
@@ -104,7 +103,7 @@ public class SimpleCommandLinePropertySourceTests {
 	}
 
 	@Test
-	public void covertNonOptionArgsToStringArrayAndList() {
+	void covertNonOptionArgsToStringArrayAndList() {
 		CommandLinePropertySource<?> ps =
 			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 		StandardEnvironment env = new StandardEnvironment();

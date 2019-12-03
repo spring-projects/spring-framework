@@ -16,7 +16,7 @@
 
 package org.springframework.aop.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
@@ -98,6 +98,14 @@ public class ControlFlowPointcutTests {
 		assertThat(new ControlFlowPointcut(One.class).hashCode()).isEqualTo(new ControlFlowPointcut(One.class).hashCode());
 		assertThat(new ControlFlowPointcut(One.class, "getAge").hashCode()).isEqualTo(new ControlFlowPointcut(One.class, "getAge").hashCode());
 		assertThat(new ControlFlowPointcut(One.class, "getAge").hashCode() == new ControlFlowPointcut(One.class).hashCode()).isFalse();
+	}
+
+	@Test
+	public void testToString() {
+		assertThat(new ControlFlowPointcut(One.class).toString())
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = null");
+		assertThat(new ControlFlowPointcut(One.class, "getAge").toString())
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = getAge");
 	}
 
 	public class One {

@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -58,7 +59,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -3230,11 +3231,13 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@RequestMapping(path = ApiConstants.ARTICLES_PATH)
 	public static class ArticleController implements ApiConstants, ResourceEndpoint<Article, ArticlePredicate> {
 
+		@Override
 		@GetMapping(params = "page")
 		public Collection<Article> find(String pageable, ArticlePredicate predicate) {
 			throw new UnsupportedOperationException("not implemented");
 		}
 
+		@Override
 		@GetMapping
 		public List<Article> find(boolean sort, ArticlePredicate predicate) {
 			throw new UnsupportedOperationException("not implemented");
