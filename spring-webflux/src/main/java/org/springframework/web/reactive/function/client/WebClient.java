@@ -498,9 +498,15 @@ public interface WebClient {
 		 *     .exchange()
 		 *     .flatMapMany(response -&gt; response.bodyToFlux(Person.class));
 		 * </pre>
-		 * <p><strong>NOTE:</strong> You must always use one of the body or
-		 * entity methods of the response to ensure resources are released.
-		 * See {@link ClientResponse} for more details.
+		 * <p><strong>NOTE:</strong> Unlike {@link #retrieve()}, when using
+		 * {@code exchange()}, it is the responsibility of the application to
+		 * consume any response content regardless of the scenario (success,
+		 * error, unexpected data, etc). Not doing so can cause a memory leak.
+		 * See {@link ClientResponse} for a list of all the available options
+		 * for consuming the body. Generally prefer using {@link #retrieve()}
+		 * unless you have a good reason to use {@code exchange()} which does
+		 * allow to check the response status and headers before deciding how or
+		 * if to consume the response.
 		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */

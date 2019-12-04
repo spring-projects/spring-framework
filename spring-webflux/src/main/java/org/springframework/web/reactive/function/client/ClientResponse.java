@@ -62,9 +62,11 @@ import org.springframework.web.reactive.function.BodyExtractor;
 *  <li>{@link #toBodilessEntity()}</li>
  * <li>{@link #releaseBody()}</li>
  * </ul>
- * You can use {@code bodyToMono(Void.class)} if no response content is
- * expected. However keep in mind that if the response does have content, the
- * connection will be closed and will not be placed back in the pool.
+ * You can also use {@code bodyToMono(Void.class)} if no response content is
+ * expected. However keep in mind the connection will be closed, instead of
+ * being placed back in the pool, if any content does arrive. This is in
+ * contrast to {@link #releaseBody()} which does consume the full body and
+ * releases any content received.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
