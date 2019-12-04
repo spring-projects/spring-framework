@@ -5400,7 +5400,6 @@ The following example shows corresponding bean definitions.
 is qualified with the same value.
 <2> The bean with the `action` qualifier value is wired with the constructor argument that
 is qualified with the same value.
-====
 
 For a fallback match, the bean name is considered a default qualifier value. Thus, you
 can define the bean with an `id` of `main` instead of the nested qualifier element, leading
