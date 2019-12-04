@@ -356,6 +356,45 @@ public abstract class CollectionUtils {
 	}
 
 	/**
+	 * Retrieve the first element of the given Set, using {@link SortedSet#first()}
+	 * or otherwise using the iterator.
+	 * @param set the Set to check (may be {@code null} or empty)
+	 * @return the first element, or {@code null} if none
+	 * @see SortedSet
+	 * @see LinkedHashMap#keySet()
+	 * @see java.util.LinkedHashSet
+	 */
+	@Nullable
+	public static <T> T firstElement(@Nullable Set<T> set) {
+		if (isEmpty(set)) {
+			return null;
+		}
+		if (set instanceof SortedSet) {
+			return ((SortedSet<T>) set).first();
+		}
+
+		Iterator<T> it = set.iterator();
+		T first = null;
+		if (it.hasNext()) {
+			first = it.next();
+		}
+		return first;
+	}
+
+	/**
+	 * Retrieve the first element of the given List, accessing the zero index.
+	 * @param list the List to check (may be {@code null} or empty)
+	 * @return the first element, or {@code null} if none
+	 */
+	@Nullable
+	public static <T> T firstElement(@Nullable List<T> list) {
+		if (isEmpty(list)) {
+			return null;
+		}
+		return list.get(0);
+	}
+
+	/**
 	 * Marshal the elements from the given enumeration into an array of the given type.
 	 * Enumeration elements must be assignable to the type of the given array. The array
 	 * returned will be a different instance than the array given.
