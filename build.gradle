@@ -134,7 +134,7 @@ configure(allprojects) { project ->
 			dependency "org.hibernate:hibernate-validator:6.1.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
-			dependency "com.hotels.beans:bull-bean-transformer:1.6.3-jdk8"
+			dependency "com.hotels.beans:bull-bean-transformer:1.6.4-jdk8-SNAPSHOT"
 
 			dependencySet(group: 'org.apache.tomcat', version: '9.0.29') {
 				entry 'tomcat-util'
@@ -294,6 +294,7 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
+			mavenLocal()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}

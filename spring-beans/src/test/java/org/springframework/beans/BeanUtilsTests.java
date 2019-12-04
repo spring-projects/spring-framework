@@ -281,7 +281,7 @@ class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
 	}
 
-	//@Test
+	@Test
 	public void testCopyPropertiesForImmutableBean() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");

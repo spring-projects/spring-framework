@@ -1,6 +1,7 @@
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
+		mavenLocal()
 		maven { url 'https://repo.spring.io/plugins-release' }
 	}
 }
