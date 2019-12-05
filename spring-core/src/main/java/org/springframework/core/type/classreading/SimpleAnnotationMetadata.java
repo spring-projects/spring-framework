@@ -156,6 +156,4 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 		return this.annotations;
 	}
 
-
-
 }
