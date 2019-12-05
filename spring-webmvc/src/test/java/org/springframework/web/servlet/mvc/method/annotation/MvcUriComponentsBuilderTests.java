@@ -435,6 +435,20 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromMappingNameWithNonSlashPath() {
+
+		initWebApplicationContext(NonSlashPathWebConfig.class);
+
+		this.request.setServerName("example.org");
+		this.request.setServerPort(9999);
+		this.request.setContextPath("/base");
+
+		String mappingName = "NSPC#getAddressesForCountry";
+		String url = fromMappingName(mappingName).arg(0, "DE;FR").encode().buildAndExpand("_+_");
+		assertThat(url).isEqualTo("/base/people/DE%3BFR");
+	}
+
+	@Test
 	public void fromControllerWithPrefix() {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
@@ -498,6 +512,15 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
+	@RequestMapping({"people"})
+	static class NonSlashPathController {
+
+		@RequestMapping("/{country}")
+		HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+			return null;
+		}
+	}
 
 	@RequestMapping({"/persons", "/people"})
 	private class InvalidController {
@@ -618,6 +641,16 @@ public class MvcUriComponentsBuilderTests {
 		@Bean
 		public PersonsAddressesController controller() {
 			return new PersonsAddressesController();
+		}
+	}
+
+
+	@EnableWebMvc
+	static class NonSlashPathWebConfig implements WebMvcConfigurer {
+
+		@Bean
+		public NonSlashPathController controller() {
+			return new NonSlashPathController();
 		}
 	}
 
