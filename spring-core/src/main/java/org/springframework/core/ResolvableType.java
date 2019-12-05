@@ -873,6 +873,12 @@ public class ResolvableType implements Serializable {
 				return forType(ownerType, this.variableResolver).resolveVariable(variable);
 			}
 		}
+		if (this.type instanceof WildcardType) {
+			ResolvableType resolved = resolveType().resolveVariable(variable);
+			if (resolved != null) {
+				return resolved;
+			}
+		}
 		if (this.variableResolver != null) {
 			return this.variableResolver.resolveVariable(variable);
 		}
