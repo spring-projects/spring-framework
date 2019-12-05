@@ -688,6 +688,13 @@ class ResolvableTypeTests {
 		assertThat(type.resolve()).isEqualTo(CharSequence.class);
 	}
 
+
+	@Test
+	void resolveBoundedTypeVariableWildcardResult() throws Exception {
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVaraibleWildcardResult"));
+		assertThat(type.getGeneric(1).asCollection().resolveGeneric()).isEqualTo(CharSequence.class);
+	}
+
 	@Test
 	void resolveVariableNotFound() throws Exception {
 		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("typedReturn"));
@@ -1416,6 +1423,8 @@ class ResolvableTypeTests {
 		void charSequenceParameter(List<CharSequence> cs);
 
 		<R extends CharSequence & Serializable> R boundedTypeVaraibleResult();
+
+		Map<String, ? extends List<? extends CharSequence>> boundedTypeVaraibleWildcardResult();
 
 		void nested(Map<Map<String, Integer>, Map<Byte, Long>> p);
 
