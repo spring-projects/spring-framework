@@ -102,6 +102,8 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
+	/** Path separator: "/". */
+	public static final String PATH_SEPARATOR = "/";
 
 	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
 
@@ -545,7 +547,7 @@ public class MvcUriComponentsBuilder {
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		builder.path(path);
+		builder.path(path.startsWith(PATH_SEPARATOR) ? path : PATH_SEPARATOR + path);
 
 		return applyContributors(builder, method, args);
 	}
@@ -576,11 +578,11 @@ public class MvcUriComponentsBuilder {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		RequestMapping mapping = AnnotatedElementUtils.findMergedAnnotation(controllerType, RequestMapping.class);
 		if (mapping == null) {
-			return "/";
+			return PATH_SEPARATOR;
 		}
 		String[] paths = mapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return "/";
+			return PATH_SEPARATOR;
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + controllerType.getName());
@@ -596,7 +598,7 @@ public class MvcUriComponentsBuilder {
 		}
 		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return "/";
+			return PATH_SEPARATOR;
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + method.toGenericString());
