@@ -3612,7 +3612,7 @@ as the following example shows:
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
 304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
-to 409 (PRECONDITION_FAILED) to prevent concurrent modification.
+to 412 (PRECONDITION_FAILED) to prevent concurrent modification.
 
 
 
