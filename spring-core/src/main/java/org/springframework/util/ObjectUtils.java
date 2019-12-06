@@ -611,7 +611,9 @@ public abstract class ObjectUtils {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
-		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
+		String className = obj.getClass().getName();
+		String identityHexString = getIdentityHexString(obj);
+		return className + '@' + identityHexString;
 	}
 
 	/**
