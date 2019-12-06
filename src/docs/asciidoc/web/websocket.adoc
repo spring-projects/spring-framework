@@ -1592,7 +1592,7 @@ in both the XML namespace and Java configuration as the `systemLogin` and
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials that are used for all TCP
 connections created on behalf of clients. This is exposed in both the XML namespace
-and Java configuration as the `clientLogin and `clientPasscode` properties with default
+and Java configuration as the `clientLogin` and `clientPasscode` properties with default
 values of `guest`and `guest`.
 
 NOTE: The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
