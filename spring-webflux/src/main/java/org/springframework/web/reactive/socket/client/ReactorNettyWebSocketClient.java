@@ -46,6 +46,8 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
 
+	private boolean proxyPing = false;
+
 	private final HttpClient httpClient;
 
 
@@ -95,6 +97,28 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		return this.maxFramePayloadLength;
 	}
 
+	/**
+	 * Configure how the client handles incoming Websocket Ping frames. Setting this value to
+	 * {@code true} causes the client to handle Ping frames as any other, allowing the
+	 * Ping to be sent downstream if the client is used within a proxying application. Setting
+	 * this value to {@code false} causes the client to respond automatically with a Pong frame.
+	 * Default is {@code false}.
+	 *
+	 * @param proxyPing whether the client should proxy Ping frames or respond automatically
+	 * @since 5.2
+	 */
+	public void setProxyPing(boolean proxyPing) {
+		this.proxyPing = proxyPing;
+	}
+
+	/**
+	 * Return the configured {@link #setProxyPing(boolean)}
+	 *
+	 * @since 5.2
+	 */
+	public boolean getProxyPing() {
+		return this.proxyPing;
+	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -106,7 +130,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(protocols, getMaxFramePayloadLength())
+				.websocket(protocols, getMaxFramePayloadLength(), this.proxyPing)
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);

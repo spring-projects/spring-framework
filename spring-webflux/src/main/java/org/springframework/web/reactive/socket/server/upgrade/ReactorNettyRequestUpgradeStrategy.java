@@ -44,6 +44,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
 
+	private boolean proxyPing = false;
 
 	/**
 	 * Configure the maximum allowable frame payload length. Setting this value
@@ -68,6 +69,29 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return this.maxFramePayloadLength;
 	}
 
+	/**
+	 * Configure how the server handles incoming Websocket Ping frames. Setting this value to
+	 * {@code true} causes the server to handle Ping frames as any other, allowing the
+	 * Ping to be sent downstream if the server is used within a proxying application. Setting
+	 * this value to {@code false} causes the server to respond automatically with a Pong frame.
+	 * Default is {@code false}.
+	 *
+	 * @param proxyPing whether the server should proxy Ping frames or respond automatically
+	 * @since 5.2
+	 */
+	public void setProxyPing(boolean proxyPing) {
+		this.proxyPing = proxyPing;
+	}
+
+	/**
+	 * Return the configured {@link #setProxyPing(boolean)}
+	 *
+	 * @since 5.2
+	 */
+	public boolean getProxyPing() {
+		return this.proxyPing;
+	}
+
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
@@ -78,7 +102,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		return reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength,
+		return reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength, this.proxyPing,
 				(in, out) -> {
 					ReactorNettyWebSocketSession session =
 							new ReactorNettyWebSocketSession(
