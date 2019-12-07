@@ -37,6 +37,8 @@ import org.springframework.lang.Nullable;
  * Your job simply is to {@link #doParse parse} the custom XML {@link Element}
  * into a single {@code BeanDefinition}.
  *
+ *
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -65,11 +67,13 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		if (parentName != null) {
 			builder.getRawBeanDefinition().setParentName(parentName);
 		}
+		// 获取自定义标签中的class，此时会调用自定义解析器如 UserBeanDefinitionParser 中的 getBeanClass 方法
 		Class<?> beanClass = getBeanClass(element);
 		if (beanClass != null) {
 			builder.getRawBeanDefinition().setBeanClass(beanClass);
 		}
 		else {
+			// 若子类没有重写 getBeanClass 方法则尝试检查子类是否重写 getBeanClassName 方法
 			String beanClassName = getBeanClassName(element);
 			if (beanClassName != null) {
 				builder.getRawBeanDefinition().setBeanClassName(beanClassName);
@@ -79,12 +83,15 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		BeanDefinition containingBd = parserContext.getContainingBeanDefinition();
 		if (containingBd != null) {
 			// Inner bean definition must receive same scope as containing bean.
+			// 若存在父类则使用父类的scope属性
 			builder.setScope(containingBd.getScope());
 		}
 		if (parserContext.isDefaultLazyInit()) {
 			// Default-lazy-init applies to custom bean definitions as well.
+			// 配置延迟加载
 			builder.setLazyInit(true);
 		}
+		// 调用子类重写的 doParse 方法进行解析
 		doParse(element, parserContext, builder);
 		return builder.getBeanDefinition();
 	}

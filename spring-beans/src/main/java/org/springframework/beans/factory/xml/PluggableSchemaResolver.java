@@ -51,6 +51,8 @@ import org.springframework.util.CollectionUtils;
  * <p>The pattern for the mapping files can be overridden using the
  * {@link #PluggableSchemaResolver(ClassLoader, String)} constructor.
  *
+ * 验证xsd
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -118,6 +120,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 				// Retrieve canonical http schema mapping even for https declaration
 				resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
 			}
+			// 到META-INF/Spring.schemas文件中找到systemid对应的XSD文件并加载
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				try {

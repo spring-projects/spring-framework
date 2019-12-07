@@ -37,6 +37,8 @@ import org.springframework.util.ClassUtils;
  * always needs to be last, as it will attempt to resolve any view name,
  * no matter whether the underlying resource actually exists.
  *
+ *
+ *
  * @author Juergen Hoeller
  * @since 17.02.2003
  * @see #setViewClass

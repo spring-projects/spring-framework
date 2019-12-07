@@ -47,6 +47,8 @@ import org.springframework.web.servlet.HandlerExecutionChain;
  * current request path. The most exact match is defined as the longest
  * path pattern that matches the current request path.
  *
+ *
+ *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 16.04.2003
@@ -119,14 +121,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 截取用于匹配的 url 有效路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
+		// 根据路径寻找 handler
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
 			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
+				// 如果路径是"/", 那么使用 RootHandler 进行处理
 				rawHandler = getRootHandler();
 			}
 			if (rawHandler == null) {
@@ -134,10 +139,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 			if (rawHandler != null) {
 				// Bean name or resolved handler?
+				// 根据 beanName 获取对应的 bean
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
+				// 模板方法
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
@@ -161,6 +168,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
 		// Direct match?
+		// 直接匹配情况处理
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			// Bean name or resolved handler?
@@ -173,6 +181,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 
 		// Pattern match?
+		// 通配符情况处理
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
@@ -226,6 +235,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (logger.isTraceEnabled() && uriTemplateVariables.size() > 0) {
 				logger.trace("URI variables " + uriTemplateVariables);
 			}
+			// 将 Handler 封装成 HandlerExecutionChain
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
 

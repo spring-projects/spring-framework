@@ -98,6 +98,8 @@ import org.springframework.util.StringUtils;
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
  * interoperate effectively with lazy class loading in a Spring ApplicationContext.
  *
+ *
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
@@ -280,6 +282,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		// 处理 @ComponentScan 注解
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
 		if (!componentScans.isEmpty() &&
@@ -294,7 +297,9 @@ class ConfigurationClassParser {
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					// 对扫描出来的类进行过滤
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+						// 将所有扫描出来的类委托到 parse 方法中递归处理
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}

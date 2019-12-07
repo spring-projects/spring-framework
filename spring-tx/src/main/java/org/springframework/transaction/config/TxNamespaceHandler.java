@@ -33,6 +33,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * in combination with the {@code <tx:annotation-driven>} element.
  * Both approached are detailed to great extent in the Spring reference manual.
  *
+ *
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

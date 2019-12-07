@@ -42,6 +42,8 @@ import org.springframework.util.StringUtils;
  * {@link AbstractSingleBeanDefinitionParser} and
  * {@link AbstractSimpleBeanDefinitionParser}.
  *
+ * 解析器
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -60,6 +62,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	@Override
 	@Nullable
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 真正解析的事情委托给 parseInternal
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
 			try {
@@ -76,9 +79,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 						aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
 					}
 				}
+				// 将 AbstractBeanDefinition 转换为 BeanDefinitionHolder 并注册
 				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
 				registerBeanDefinition(holder, parserContext.getRegistry());
 				if (shouldFireEvents()) {
+					// 需要通知监听器则进行处理
 					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 					postProcessComponentDefinition(componentDefinition);
 					parserContext.registerComponent(componentDefinition);

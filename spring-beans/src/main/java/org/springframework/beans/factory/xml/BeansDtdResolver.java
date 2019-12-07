@@ -37,6 +37,8 @@ import org.springframework.lang.Nullable;
  * no matter whether specified as some local URL that includes "spring-beans"
  * in the DTD name or as "https://www.springframework.org/dtd/spring-beans-2.0.dtd".
  *
+ * 验证dtd
+ *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @since 04.06.2003
@@ -61,6 +63,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
 			int lastPathSeparator = systemId.lastIndexOf('/');
+			// 截取systemId最后的xx.dtd然后去当前路径下寻找
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
 			if (dtdNameStart != -1) {
 				String dtdFile = DTD_NAME + DTD_EXTENSION;

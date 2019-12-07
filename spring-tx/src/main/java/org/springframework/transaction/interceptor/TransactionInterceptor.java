@@ -42,6 +42,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  * <p>TransactionInterceptors are thread-safe.
  *
+ *
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see TransactionProxyFactoryBean

@@ -46,6 +46,8 @@ import org.springframework.util.StringValueResolver;
  * <p>Application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
  *
+ *
+ *
  * @author Juergen Hoeller
  * @author Costin Leau
  * @author Chris Beams
@@ -100,6 +102,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 	private void invokeAwareInterfaces(Object bean) {
+		// Aware设置
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {
 				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());

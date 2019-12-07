@@ -389,8 +389,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// 根据 request 获取对应的 handler
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
+			// 没有则使用默认的 handler
 			handler = getDefaultHandler();
 		}
 		if (handler == null) {
@@ -401,7 +403,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
-
+		// 主要目的是将配置中的对应拦截器加入到执行链中, 以保证这些拦截器可以有效作用于目标对象
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {

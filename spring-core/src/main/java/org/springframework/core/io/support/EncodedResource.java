@@ -35,6 +35,8 @@ import org.springframework.util.ObjectUtils;
  * <p>Used as an argument for operations that support reading content with
  * a specific encoding, typically via a {@code java.io.Reader}.
  *
+ * 对资源的编码进行处理
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.6

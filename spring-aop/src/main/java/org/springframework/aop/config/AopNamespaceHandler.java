@@ -47,6 +47,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  *     pointcut-ref=&quot;getNameCalls&quot;
  *     advice-ref=&quot;getNameCounter&quot;/&gt;</pre>
  *
+ *
+ *
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Juergen Hoeller

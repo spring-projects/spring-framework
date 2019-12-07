@@ -32,6 +32,8 @@ import org.springframework.lang.Nullable;
  * enabling the automatic application of @AspectJ-style aspects found in
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
+ * aop解析器
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -41,7 +43,9 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 注册 AspectJAnnotationAutoProxyCreator
 		AopNamespaceUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(parserContext, element);
+		// 对于注解中子类的处理
 		extendBeanDefinition(element, parserContext);
 		return null;
 	}

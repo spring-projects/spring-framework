@@ -31,6 +31,8 @@ import java.io.InputStream;
  * This makes this interface useful as an abstract content source for mail
  * attachments, for example.
  *
+ * 封装任何能返回InputStream的类
+ *
  * @author Juergen Hoeller
  * @since 20.01.2004
  * @see java.io.InputStream

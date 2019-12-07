@@ -29,6 +29,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * {@code registerBeanDefinitions} method &mdash; for example, global
  * settings that are defined for all bean definitions in the document.
  *
+ * 定义读取Document并注册BeanDefinition功能
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 18.12.2003

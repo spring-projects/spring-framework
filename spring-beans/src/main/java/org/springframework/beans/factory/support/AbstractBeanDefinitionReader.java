@@ -41,6 +41,8 @@ import org.springframework.util.Assert;
  * <p>Provides common properties like the bean factory to work on
  * and the class loader to use for loading bean classes.
  *
+ *
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 11.12.2003

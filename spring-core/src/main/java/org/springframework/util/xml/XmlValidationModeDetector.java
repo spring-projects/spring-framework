@@ -28,6 +28,8 @@ import org.springframework.util.StringUtils;
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
  *
+ *
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -95,6 +97,7 @@ public class XmlValidationModeDetector {
 			String content;
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
+				// 如果行是注释或者空略过
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
@@ -102,6 +105,7 @@ public class XmlValidationModeDetector {
 					isDtdValidated = true;
 					break;
 				}
+				// 读取到<开始符号
 				if (hasOpeningTag(content)) {
 					// End of meaningful data...
 					break;

@@ -41,16 +41,18 @@ import org.springframework.util.ClassUtils;
  * {@link javax.ejb.TransactionAttribute} annotation (if present).
  * This class may also serve as base class for a custom TransactionAttributeSource,
  * or get customized through {@link TransactionAnnotationParser} strategies.
+ * <p>
+ * 它是一个源，用于检测一个类方法上是否被 @Transaction 注解，如果有的话还可以获取这个注解属性
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
- * @since 1.2
  * @see Transactional
  * @see TransactionAnnotationParser
  * @see SpringTransactionAnnotationParser
  * @see Ejb3TransactionAnnotationParser
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#setTransactionAttributeSource
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean#setTransactionAttributeSource
+ * @since 1.2
  */
 @SuppressWarnings("serial")
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
@@ -84,10 +86,11 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * Create a custom AnnotationTransactionAttributeSource, supporting
 	 * public methods that carry the {@code Transactional} annotation
 	 * or the EJB3 {@link javax.ejb.TransactionAttribute} annotation.
+	 *
 	 * @param publicMethodsOnly whether to support public methods that carry
-	 * the {@code Transactional} annotation only (typically for use
-	 * with proxy-based AOP), or protected/private methods as well
-	 * (typically used with AspectJ class weaving)
+	 *                          the {@code Transactional} annotation only (typically for use
+	 *                          with proxy-based AOP), or protected/private methods as well
+	 *                          (typically used with AspectJ class weaving)
 	 */
 	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
@@ -100,14 +103,14 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 			if (ejb3Present) {
 				this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
 			}
-		}
-		else {
+		} else {
 			this.annotationParsers = Collections.singleton(new SpringTransactionAnnotationParser());
 		}
 	}
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParser the TransactionAnnotationParser to use
 	 */
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser annotationParser) {
@@ -118,6 +121,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParsers the TransactionAnnotationParsers to use
 	 */
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser... annotationParsers) {
@@ -128,6 +132,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParsers the TransactionAnnotationParsers to use
 	 */
 	public AnnotationTransactionAttributeSource(Set<TransactionAnnotationParser> annotationParsers) {
@@ -147,12 +152,24 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		return false;
 	}
 
+	/**
+	 * 类上找事务属性
+	 *
+	 * @param clazz the class to retrieve the attribute for
+	 * @return
+	 */
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
 	}
 
+	/**
+	 * 方法上找事务属性
+	 *
+	 * @param method the method to retrieve the attribute for
+	 * @return
+	 */
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Method method) {
@@ -166,11 +183,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * for parsing known annotations into Spring's metadata attribute class.
 	 * Returns {@code null} if it's not transactional.
 	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
+	 *
 	 * @param element the annotated method or class
 	 * @return the configured transaction attribute, or {@code null} if none was found
 	 */
 	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+		// SpringTransactionAnnotationParser
 		for (TransactionAnnotationParser parser : this.annotationParsers) {
 			TransactionAttribute attr = parser.parseTransactionAnnotation(element);
 			if (attr != null) {

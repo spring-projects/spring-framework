@@ -29,6 +29,8 @@ import org.springframework.util.StringUtils;
  * Utility methods that are useful for bean definition reader implementations.
  * Mainly intended for internal use.
  *
+ *
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1
@@ -58,8 +60,10 @@ public abstract class BeanDefinitionReaderUtils {
 			@Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
+		// parentName可能为空
 		bd.setParentName(parentName);
 		if (className != null) {
+			// 如果classLoader不为空，则使用传入的classLoader加载类对象，否则只是记录className
 			if (classLoader != null) {
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
@@ -162,10 +166,12 @@ public abstract class BeanDefinitionReaderUtils {
 			throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
+		// 使用beanName做唯一标识注册
 		String beanName = definitionHolder.getBeanName();
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		// 注册所有的别名
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String alias : aliases) {
