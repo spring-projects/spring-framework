@@ -340,7 +340,7 @@ public abstract class DataBufferUtils {
 	/**
 	 * Write the given stream of {@link DataBuffer DataBuffers} to the given
 	 * file {@link Path}. The optional {@code options} parameter specifies
-	 * how the created or opened (defaults to
+	 * how the file is created or opened (defaults to
 	 * {@link StandardOpenOption#CREATE CREATE},
 	 * {@link StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING}, and
 	 * {@link StandardOpenOption#WRITE WRITE}).
@@ -470,7 +470,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Retain the given data buffer, it it is a {@link PooledDataBuffer}.
+	 * Retain the given data buffer, if it is a {@link PooledDataBuffer}.
 	 * @param dataBuffer the data buffer to retain
 	 * @return the retained buffer
 	 */
