@@ -54,7 +54,8 @@ public class ControllerAdviceBean implements Ordered {
 	 */
 	private final Object beanOrName;
 
-	private final boolean isSingletonBean;
+	private final boolean isSingleton;
+
 	/**
 	 * Reference to the resolved bean instance, potentially lazily retrieved
 	 * via the {@code BeanFactory}.
@@ -81,11 +82,11 @@ public class ControllerAdviceBean implements Ordered {
 	public ControllerAdviceBean(Object bean) {
 		Assert.notNull(bean, "Bean must not be null");
 		this.beanOrName = bean;
+		this.isSingleton = true;
 		this.resolvedBean = bean;
 		this.beanType = ClassUtils.getUserClass(bean.getClass());
 		this.beanTypePredicate = createBeanTypePredicate(this.beanType);
 		this.beanFactory = null;
-		this.isSingletonBean = true;
 	}
 
 	/**
@@ -117,7 +118,7 @@ public class ControllerAdviceBean implements Ordered {
 				"] does not contain specified controller advice bean '" + beanName + "'");
 
 		this.beanOrName = beanName;
-		this.isSingletonBean = beanFactory.isSingleton(beanName);
+		this.isSingleton = beanFactory.isSingleton(beanName);
 		this.beanType = getBeanType(beanName, beanFactory);
 		this.beanTypePredicate = (controllerAdvice != null ? createBeanTypePredicate(controllerAdvice) :
 				createBeanTypePredicate(this.beanType));
@@ -191,13 +192,19 @@ public class ControllerAdviceBean implements Ordered {
 	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
 	 * resolving the bean name through the {@link BeanFactory}.
 	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
-	 * will be cached, thereby avoiding repeated lookups in the {@code BeanFactory}.
+	 * will be cached if it is a singleton, thereby avoiding repeated lookups in
+	 * the {@code BeanFactory}.
 	 */
 	public Object resolveBean() {
-		if (!this.isSingletonBean || this.resolvedBean == null) {
+		if (this.resolvedBean == null) {
 			// this.beanOrName must be a String representing the bean name if
 			// this.resolvedBean is null.
-			this.resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
+			Object resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
+			// Don't cache non-singletons (e.g., prototypes).
+			if (!this.isSingleton) {
+				return resolvedBean;
+			}
+			this.resolvedBean = resolvedBean;
 		}
 		return this.resolvedBean;
 	}

@@ -207,18 +207,17 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void prototypePageControllerAdvice() throws Exception {
+	public void prototypeControllerAdvice() throws Exception {
 		this.webAppContext.registerPrototype("maa", ModelAttributeAdvice.class);
 		this.webAppContext.refresh();
 
 		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
 		this.handlerAdapter.afterPropertiesSet();
-		ModelAndView mav1 = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
-		ModelAndView mav2 = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+		Map<String, Object> model1 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
+		Map<String, Object> model2 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
 
-		assertThat(mav1.getModel().get("modelAttributeAdviceInstance")).isNotEqualTo(mav2.getModel().get("modelAttributeAdviceInstance"));
+		assertThat(model1.get("instance")).isNotSameAs(model2.get("instance"));
 	}
-
 
 	@Test
 	public void modelAttributeAdviceInParentContext() throws Exception {
@@ -336,7 +335,7 @@ public class RequestMappingHandlerAdapterTests {
 		public void addAttributes(Model model) {
 			model.addAttribute("attr1", "gAttr1");
 			model.addAttribute("attr2", "gAttr2");
-			model.addAttribute("modelAttributeAdviceInstance", this);
+			model.addAttribute("instance", this);
 		}
 	}
 
