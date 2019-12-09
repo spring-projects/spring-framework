@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -414,12 +414,8 @@ public class ResolvableTypeTests {
 			interfaces.add(interfaceType.toString());
 		}
 		assertThat(interfaces.toString(), equalTo(
-				  "["
-				+ "java.io.Serializable, "
-				+ "java.lang.Cloneable, "
-				+ "java.util.List<java.lang.CharSequence>, "
-				+ "java.util.RandomAccess"
-				+ "]"));
+				"[java.io.Serializable, java.lang.Cloneable, " +
+				"java.util.List<java.lang.CharSequence>, java.util.RandomAccess]"));
 	}
 
 	@Test
@@ -659,7 +655,7 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void resolveBoundedTypeVariableResult() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVaraibleResult"));
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVariableResult"));
 		assertThat(type.resolve(), equalTo((Class) CharSequence.class));
 	}
 
@@ -670,27 +666,14 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
-	public void resolveTypeVaraibleFromMethodReturn() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("typedReturn"));
-		assertThat(type.resolve(), nullValue());
-	}
-
-	@Test
-	public void resolveTypeVaraibleFromMethodReturnWithInstanceClass() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(
-				Methods.class.getMethod("typedReturn"), TypedMethods.class);
-		assertThat(type.resolve(), equalTo((Class) String.class));
-	}
-
-	@Test
-	public void resolveTypeVaraibleFromSimpleInterfaceType() {
+	public void resolveTypeVariableFromSimpleInterfaceType() {
 		ResolvableType type = ResolvableType.forClass(
 				MySimpleInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric(), equalTo((Class) String.class));
 	}
 
 	@Test
-	public void resolveTypeVaraibleFromSimpleCollectionInterfaceType() {
+	public void resolveTypeVariableFromSimpleCollectionInterfaceType() {
 		ResolvableType type = ResolvableType.forClass(
 				MyCollectionInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric(), equalTo((Class) Collection.class));
@@ -698,14 +681,14 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
-	public void resolveTypeVaraibleFromSimpleSuperclassType() {
+	public void resolveTypeVariableFromSimpleSuperclassType() {
 		ResolvableType type = ResolvableType.forClass(
 				MySimpleSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric(), equalTo((Class) String.class));
 	}
 
 	@Test
-	public void resolveTypeVaraibleFromSimpleCollectionSuperclassType() {
+	public void resolveTypeVariableFromSimpleCollectionSuperclassType() {
 		ResolvableType type = ResolvableType.forClass(
 				MyCollectionSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric(), equalTo((Class) Collection.class));
@@ -1426,7 +1409,7 @@ public class ResolvableTypeTests {
 
 		void charSequenceParameter(List<CharSequence> cs);
 
-		<R extends CharSequence & Serializable> R boundedTypeVaraibleResult();
+		<R extends CharSequence & Serializable> R boundedTypeVariableResult();
 
 		void nested(Map<Map<String, Integer>, Map<Byte, Long>> p);
 
