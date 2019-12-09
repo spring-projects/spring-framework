@@ -372,7 +372,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://tiles.apache.org/tiles-request/apidocs/",
 			"https://tiles.apache.org/framework/apidocs/",
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-			"https://www.ehcache.org/apidocs/2.10.4",
+			"https://www.ehcache.org/apidocs/2.10.4/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
