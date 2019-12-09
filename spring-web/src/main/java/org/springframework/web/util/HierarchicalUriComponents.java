@@ -335,8 +335,21 @@ final class HierarchicalUriComponents extends UriComponents {
 		Assert.notNull(type, "Type must not be null");
 
 		byte[] bytes = source.getBytes(charset);
+		boolean original = true;
+		for (byte b : bytes) {
+			if (b < 0) {
+				b += 256;
+			}
+			if (!type.isAllowed(b)) {
+				original = false;
+				break;
+			}
+		}
+		if (original) {
+			return source;
+		}
+
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
-		boolean changed = false;
 		for (byte b : bytes) {
 			if (b < 0) {
 				b += 256;
@@ -350,10 +363,9 @@ final class HierarchicalUriComponents extends UriComponents {
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 				bos.write(hex1);
 				bos.write(hex2);
-				changed = true;
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), charset) : source);
+		return new String(bos.toByteArray(), charset);
 	}
 
 	private Type getHostType() {
@@ -416,12 +428,10 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
-
 		Assert.state(!this.encodeState.equals(EncodeState.FULLY_ENCODED),
 				"URI components already encoded, and could not possibly contain '{' or '}'.");
 
-		// Array-based vars rely on the below order..
-
+		// Array-based vars rely on the order below...
 		String schemeTo = expandUriComponent(getScheme(), uriVariables, this.variableEncoder);
 		String userInfoTo = expandUriComponent(this.userInfo, uriVariables, this.variableEncoder);
 		String hostTo = expandUriComponent(this.host, uriVariables, this.variableEncoder);
