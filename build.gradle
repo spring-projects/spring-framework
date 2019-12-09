@@ -84,7 +84,7 @@ configure(allprojects) { project ->
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
-			dependency "com.google.protobuf:protobuf-java-util:3.11.0"
+			dependency "com.google.protobuf:protobuf-java-util:3.11.1"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
 				exclude group: "xpp3", name: "xpp3_min"
@@ -116,7 +116,7 @@ configure(allprojects) { project ->
 				entry 'activemq-stomp'
 			}
 			dependency "org.apache.bcel:bcel:6.0"
-			dependency "org.apache.commons:commons-pool2:2.6.0"
+			dependency "org.apache.commons:commons-pool2:2.7.0"
 			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
 				entry 'derby'
 				entry 'derbyclient'
@@ -130,7 +130,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.9.Final"
+			dependency "org.hibernate:hibernate-core:5.4.10.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
@@ -239,7 +239,7 @@ configure(allprojects) { project ->
 
 			dependency "com.ibm.websphere:uow:6.0.2.17"
 			dependency "com.jamonapi:jamon:2.81"
-			dependency "joda-time:joda-time:2.10.4"
+			dependency "joda-time:joda-time:2.10.5"
 			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.5"
 			dependency "org.javamoney:moneta:1.3"
 
