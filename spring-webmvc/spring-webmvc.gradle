@@ -55,7 +55,7 @@ dependencies {
 	}
 	testCompile("commons-fileupload:commons-fileupload:1.4")
 	testCompile("commons-io:commons-io:2.5")
-	testCompile("joda-time:joda-time:2.10.4")
+	testCompile("joda-time:joda-time:2.10.5")
 	testCompile("org.mozilla:rhino:1.7.10")
 	testCompile("dom4j:dom4j:1.6.1") {
 		exclude group: "xml-apis", module: "xml-apis"
