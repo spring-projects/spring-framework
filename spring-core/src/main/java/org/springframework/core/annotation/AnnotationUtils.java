@@ -1087,16 +1087,17 @@ public abstract class AnnotationUtils {
 	 * <p>If the supplied exception is an {@link AnnotationConfigurationException},
 	 * it will simply be thrown, allowing it to propagate to the caller, and
 	 * nothing will be logged.
-	 * <p>Otherwise, this method logs an introspection failure (in particular
-	 * {@code TypeNotPresentExceptions}) before moving on, assuming nested
-	 * Class values were not resolvable within annotation attributes and
+	 * <p>Otherwise, this method logs an introspection failure (in particular for
+	 * a {@link TypeNotPresentException}) before moving on, assuming nested
+	 * {@code Class} values were not resolvable within annotation attributes and
 	 * thereby effectively pretending there were no annotations on the specified
 	 * element.
 	 * @param element the element that we tried to introspect annotations on
 	 * @param ex the exception that we encountered
 	 * @see #rethrowAnnotationConfigurationException
+	 * @see IntrospectionFailureLogger
 	 */
-	private static void handleIntrospectionFailure(@Nullable AnnotatedElement element, Throwable ex) {
+	static void handleIntrospectionFailure(@Nullable AnnotatedElement element, Throwable ex) {
 		rethrowAnnotationConfigurationException(ex);
 		IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
 		boolean meta = false;
