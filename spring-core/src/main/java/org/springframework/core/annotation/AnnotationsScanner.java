@@ -230,12 +230,14 @@ abstract class AnnotationsScanner {
 				return superclassResult;
 			}
 		}
-		Class<?> enclosingClass = source.getEnclosingClass();
-		if (includeEnclosing && enclosingClass != null) {
-			R enclosingResult = processClassHierarchy(context, aggregateIndex,
+		if (includeEnclosing) {
+			Class<?> enclosingClass = source.getEnclosingClass();
+			if (enclosingClass != null) {
+				R enclosingResult = processClassHierarchy(context, aggregateIndex,
 					enclosingClass, processor, classFilter, includeInterfaces, true);
-			if (enclosingResult != null) {
-				return enclosingResult;
+				if (enclosingResult != null) {
+					return enclosingResult;
+				}
 			}
 		}
 		return null;
