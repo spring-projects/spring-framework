@@ -160,11 +160,28 @@ class AnnotationTypeMappingsTests {
 
 	@Test
 	void forAnnotationTypeWhenAliasForToSelfAnnotatedToOtherAttribute() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				AnnotationTypeMappings.forAnnotationType(AliasForToSelfAnnotatedToOtherAttribute.class))
-			.withMessage("Attribute 'b' in annotation ["
-								+ AliasForToSelfAnnotatedToOtherAttribute.class.getName()
-								+ "] must be declared as an @AliasFor 'a', not 'c'.");
+		String annotationType = AliasForToSelfAnnotatedToOtherAttribute.class.getName();
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForToSelfAnnotatedToOtherAttribute.class))
+				.withMessage("Attribute 'b' in annotation [" + annotationType
+						+ "] must be declared as an @AliasFor attribute 'a' in annotation [" + annotationType
+						+ "], not attribute 'c' in annotation [" + annotationType + "].");
+	}
+
+	@Test
+	void forAnnotationTypeWhenAliasForHasMixedImplicitAndExplicitAliases() {
+		assertMixedImplicitAndExplicitAliases(AliasForWithMixedImplicitAndExplicitAliasesV1.class, "b");
+		assertMixedImplicitAndExplicitAliases(AliasForWithMixedImplicitAndExplicitAliasesV2.class, "a");
+	}
+
+	private void assertMixedImplicitAndExplicitAliases(Class<? extends Annotation> annotationType, String overriddenAttribute) {
+		String annotationName = annotationType.getName();
+		String metaAnnotationName = AliasPair.class.getName();
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(annotationType))
+				.withMessage("Attribute 'b' in annotation [" + annotationName
+						+ "] must be declared as an @AliasFor attribute 'a' in annotation [" + annotationName
+						+ "], not attribute '" + overriddenAttribute + "' in annotation [" + metaAnnotationName + "].");
 	}
 
 	@Test
@@ -642,6 +659,42 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasPair {
+
+		@AliasFor("b")
+		String a() default "";
+
+		@AliasFor("a")
+		String b() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@AliasPair
+	@interface AliasForWithMixedImplicitAndExplicitAliasesV1 {
+
+		// attempted implicit alias via attribute override
+		@AliasFor(annotation = AliasPair.class, attribute = "b")
+		String b() default "";
+
+		// explicit local alias
+		@AliasFor("b")
+		String a() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@AliasPair
+	@interface AliasForWithMixedImplicitAndExplicitAliasesV2 {
+
+		// attempted implicit alias via attribute override
+		@AliasFor(annotation = AliasPair.class, attribute = "a")
+		String b() default "";
+
+		// explicit local alias
+		@AliasFor("b")
+		String a() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForNonMetaAnnotated {
 
 		@AliasFor(annotation = AliasForNonMetaAnnotatedTarget.class)
@@ -710,16 +763,6 @@ class AnnotationTypeMappingsTests {
 
 		@AliasFor(annotation = MappedTarget.class, attribute = "aliasTarget")
 		String alias() default "";
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface AliasPair {
-
-		@AliasFor("b")
-		String a() default "";
-
-		@AliasFor("a")
-		String b() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
