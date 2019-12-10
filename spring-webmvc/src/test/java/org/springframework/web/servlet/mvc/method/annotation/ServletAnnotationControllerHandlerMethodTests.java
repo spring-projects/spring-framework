@@ -1011,7 +1011,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json");
 	}
 
 	@Test
@@ -1548,7 +1548,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json");
 		assertThat(response.getContentAsString()).isEqualTo("homeJson");
 	}
 

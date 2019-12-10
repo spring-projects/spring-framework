@@ -70,6 +70,16 @@ public class StringHttpMessageConverterTests {
 		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
+	@Test // gh-24123
+	public void readJson() throws IOException {
+		String body = "{\"result\":\"\u0414\u0410\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		String result = this.converter.read(String.class, inputMessage);
+
+		assertThat(result).as("Invalid result").isEqualTo(body);
+	}
+
 	@Test
 	public void writeDefaultCharset() throws IOException {
 		String body = "H\u00e9llo W\u00f6rld";
@@ -79,6 +89,18 @@ public class StringHttpMessageConverterTests {
 		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1)).isEqualTo(body);
 		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.ISO_8859_1).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
+	}
+
+	@Test // gh-24123
+	public void writeJson() throws IOException {
+		String body = "{\"foo\":\"bar\"}";
+		this.converter.write(body, MediaType.APPLICATION_JSON, this.outputMessage);
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 

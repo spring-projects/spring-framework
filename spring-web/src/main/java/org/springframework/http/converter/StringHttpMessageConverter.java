@@ -100,6 +100,18 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		return (long) str.getBytes(charset).length;
 	}
 
+
+	@Override
+	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType mediaType) throws IOException {
+		if (headers.getContentType() == null ) {
+			if (mediaType != null && mediaType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+				// Prevent charset parameter for JSON..
+				headers.setContentType(mediaType);
+			}
+		}
+		super.addDefaultHeaders(headers, s, mediaType);
+	}
+
 	@Override
 	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
 		HttpHeaders headers = outputMessage.getHeaders();
@@ -129,6 +141,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	private Charset getContentTypeCharset(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
+		}
+		else if (contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+			// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
+			return StandardCharsets.UTF_8;
 		}
 		else {
 			Charset charset = getDefaultCharset();
