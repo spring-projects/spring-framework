@@ -1857,9 +1857,8 @@ and others) and is equivalent to `required=false`.
   See "`Any other argument`" later in this table.
 
 | `Errors`, `BindingResult`
-| For access to errors from validation and data binding for a command object
-  (that is, a `@ModelAttribute` argument) or errors from the validation of a `@RequestBody` or
-  `@RequestPart` argument. An `Errors`, or `BindingResult` argument must be declared
+| For access to errors from validation and data binding for a command object, i.e. a
+  `@ModelAttribute` argument. An `Errors`, or `BindingResult` argument must be declared
   immediately after the validated method argument.
 
 | `SessionStatus` + class-level `@SessionAttributes`
@@ -2707,35 +2706,30 @@ you can declare a concrete target `Object`, instead of `Part`, as the following 
 ----
 <1> Using `@RequestPart` to get the metadata.
 
-You can use `@RequestPart` combination with `javax.validation.Valid` or Spring's
-`@Validated` annotation, which causes Standard Bean Validation to be applied.
-By default, validation errors cause a `WebExchangeBindException`, which is turned
-into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
-within the controller through an `Errors` or `BindingResult` argument, as the following example shows:
+You can use `@RequestPart` in combination with `javax.validation.Valid` or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
+errors lead to a `WebExchangeBindException` that results in a 400 (BAD_REQUEST) response.
+The exception contains a `BindingResult` with the error details and can also be handled
+in the controller method by declaring the argument with an async wrapper and then using
+error related operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	@PostMapping("/")
-	public String handle(@Valid @RequestPart("meta-data") MetaData metadata, // <1>
-			BindingResult result) { <2>
-		// ...
+	public String handle(@Valid @RequestPart("meta-data") Mono<MetaData> metadata) {
+		// use one of the onError* operators...
 	}
 ----
-<1> Using a `@Valid` annotation.
-<2> Using a `BindingResult` argument.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PostMapping("/")
-	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData, // <1> 
-			result: BindingResult): String { // <2>
+	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData): String {
 		// ...
 	}
 ----
-<1> Using a `@Valid` annotation.
-<2> Using a `BindingResult` argument.
 
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
@@ -2835,25 +2829,25 @@ You can use the <<webflux-config-message-codecs>> option of the <<webflux-config
 configure or customize message readers.
 
 You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
-`@Validated` annotation, which causes Standard Bean Validation to be applied.
-By default, validation errors cause a `WebExchangeBindException`, which is turned
-into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
-within the controller through an `Errors` or a `BindingResult` argument. The following
-example uses a `BindingResult` argument`:
+`@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
+errors cause a `WebExchangeBindException`, which results in a 400 (BAD_REQUEST) response.
+The exception contains a `BindingResult` with error details and can be handled in the
+controller method by declaring the argument with an async wrapper and then using error
+related operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	@PostMapping("/accounts")
-	public void handle(@Valid @RequestBody Account account, BindingResult result) {
-		// ...
+	public void handle(@Valid @RequestBody Mono<Account> account) {
+		// use one of the onError* operators...
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PostMapping("/accounts")
-	fun handle(@Valid @RequestBody account: Account, result: BindingResult) {
+	fun handle(@Valid @RequestBody account: Mono<Account>) {
 		// ...
 	}
 ----
