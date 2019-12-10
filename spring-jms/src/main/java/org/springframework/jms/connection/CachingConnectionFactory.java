@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -519,10 +520,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == other || destinationEquals((DestinationCacheKey) other));
+			return (this == other || (other instanceof DestinationCacheKey &&
+					destinationEquals((DestinationCacheKey) other)));
 		}
 
 		@Override
@@ -573,9 +575,12 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
+			}
+			if (!(other instanceof ConsumerCacheKey)) {
+				return false;
 			}
 			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
@@ -587,7 +592,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public int hashCode() {
-			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
+			return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector));
 		}
 
 		@Override

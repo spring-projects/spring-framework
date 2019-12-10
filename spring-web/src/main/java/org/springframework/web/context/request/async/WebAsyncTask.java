@@ -118,6 +118,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * <p>This factory reference will automatically be set when
 	 * {@code WebAsyncTask} is used within a Spring MVC controller.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

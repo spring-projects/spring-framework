@@ -61,8 +61,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 		this.originalMethod = method;
 		this.methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method);
 		if (method.isVarArgs()) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			this.varargsPosition = paramTypes.length - 1;
+			this.varargsPosition = method.getParameterCount() - 1;
 		}
 		else {
 			this.varargsPosition = null;

@@ -28,6 +28,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
@@ -106,7 +108,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public HttpStatus getStatusCode() {
-		return this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null;
+		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
 	}
 
 	/**
@@ -172,16 +174,22 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)))
+		// Write as Mono if possible as an optimization hint to Reactor Netty
+		// ChannelSendOperator not necessary for Mono
+		if (body instanceof Mono) {
+			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
+					doCommit(() -> writeWithInternal(Mono.just(buffer)))
+							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+		}
+		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
 				.doOnError(t -> removeContentLength());
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)))
+		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeAndFlushWithInternal(inner)))
 				.doOnError(t -> removeContentLength());
 	}
 
@@ -251,8 +259,13 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Apply header changes from {@link #getHeaders()} to the underlying response.
-	 * This method is called once only.
+	 * Invoked when the response is getting committed allowing sub-classes to
+	 * make apply header values to the underlying response.
+	 * <p>Note that most sub-classes use an {@link HttpHeaders} instance that
+	 * wraps an adapter to the native response headers such that changes are
+	 * propagated to the underlying response on the go. That means this callback
+	 * is typically not used other than for specialized updates such as setting
+	 * the contentType or characterEncoding fields in a Servlet response.
 	 */
 	protected abstract void applyHeaders();
 

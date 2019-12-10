@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import org.hibernate.Session;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 
 /**
@@ -44,7 +45,7 @@ public class SpringFlushSynchronization extends TransactionSynchronizationAdapte
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SpringFlushSynchronization &&
 				this.session == ((SpringFlushSynchronization) other).session));
 	}

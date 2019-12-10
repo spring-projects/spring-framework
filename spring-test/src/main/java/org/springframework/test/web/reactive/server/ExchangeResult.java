@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,10 +155,19 @@ public class ExchangeResult {
 
 
 	/**
-	 * Return the status of the executed request.
+	 * Return the HTTP status code as an {@link HttpStatus} enum value.
 	 */
 	public HttpStatus getStatus() {
 		return this.response.getStatusCode();
+	}
+
+	/**
+	 * Return the HTTP status code (potentially non-standard and not resolvable
+	 * through the {@link HttpStatus} enum) as an integer.
+	 * @since 5.1.10
+	 */
+	public int getRawStatusCode() {
+		return this.response.getRawStatusCode();
 	}
 
 	/**
@@ -210,14 +219,10 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatusReason() + "\n" +
+				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n";
-	}
-
-	private String getStatusReason() {
-		return getStatus().getReasonPhrase();
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

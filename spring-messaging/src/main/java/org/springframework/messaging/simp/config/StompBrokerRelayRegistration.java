@@ -231,6 +231,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 
+	@Override
 	protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 
 		StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(

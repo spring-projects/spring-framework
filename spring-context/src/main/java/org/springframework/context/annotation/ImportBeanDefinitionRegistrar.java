@@ -40,6 +40,15 @@ import org.springframework.core.type.AnnotationMetadata;
  * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}
  * </ul>
  *
+ * <p>Alternatively, the class may provide a single constructor with one or more of
+ * the following supported parameter types:
+ * <ul>
+ * <li>{@link org.springframework.core.env.Environment Environment}</li>
+ * <li>{@link org.springframework.beans.factory.BeanFactory BeanFactory}</li>
+ * <li>{@link java.lang.ClassLoader ClassLoader}</li>
+ * <li>{@link org.springframework.core.io.ResourceLoader ResourceLoader}</li>
+ * </ul>
+ *
  * <p>See implementations and associated unit tests for usage examples.
  *
  * @author Chris Beams
@@ -61,9 +70,15 @@ public interface ImportBeanDefinitionRegistrar {
 	 * {@link #registerBeanDefinitions(AnnotationMetadata, BeanDefinitionRegistry)}.
 	 * @param importingClassMetadata annotation metadata of the importing class
 	 * @param registry current bean definition registry
-	 * @param importBeanNameGenerator the configuration-level bean name generator
-	 * strategy for imported beans
+	 * @param importBeanNameGenerator the bean name generator strategy for imported beans:
+	 * {@link ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR} by default, or a
+	 * user-provided one if {@link ConfigurationClassPostProcessor#setBeanNameGenerator}
+	 * has been set. In the latter case, the passed-in strategy will be the same used for
+	 * component scanning in the containing application context (otherwise, the default
+	 * component-scan naming strategy is {@link AnnotationBeanNameGenerator#INSTANCE}).
 	 * @since 5.2
+	 * @see ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR
+	 * @see ConfigurationClassPostProcessor#setBeanNameGenerator
 	 */
 	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
 			BeanNameGenerator importBeanNameGenerator) {

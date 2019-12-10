@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.List;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * General cache-related test utilities.
@@ -52,7 +52,7 @@ public class CacheTestUtils {
 	 */
 	public static void assertCacheMiss(Object key, Cache... caches) {
 		for (Cache cache : caches) {
-			assertNull("No entry in " + cache + " should have been found with key " + key, cache.get(key));
+			assertThat(cache.get(key)).as("No entry in " + cache + " should have been found with key " + key).isNull();
 		}
 	}
 
@@ -62,8 +62,8 @@ public class CacheTestUtils {
 	public static void assertCacheHit(Object key, Object value, Cache... caches) {
 		for (Cache cache : caches) {
 			Cache.ValueWrapper wrapper = cache.get(key);
-			assertNotNull("An entry in " + cache + " should have been found with key " + key, wrapper);
-			assertEquals("Wrong value in " + cache + " for entry with key " + key, value, wrapper.get());
+			assertThat(wrapper).as("An entry in " + cache + " should have been found with key " + key).isNotNull();
+			assertThat(wrapper.get()).as("Wrong value in " + cache + " for entry with key " + key).isEqualTo(value);
 		}
 	}
 

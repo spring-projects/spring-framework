@@ -62,7 +62,7 @@ public class FactoryMethods {
 	}
 
 	@SuppressWarnings("unused")
-	private static List listInstance() {
+	private static List<?> listInstance() {
 		return Collections.EMPTY_LIST;
 	}
 

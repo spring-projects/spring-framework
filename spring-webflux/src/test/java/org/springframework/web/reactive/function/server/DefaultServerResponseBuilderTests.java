@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -43,7 +43,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
@@ -65,11 +66,17 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void from() {
-		ServerResponse other = ServerResponse.ok().header("foo", "bar").build().block();
+		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
+		ServerResponse other = ServerResponse.ok().header("foo", "bar")
+				.cookie(cookie)
+				.hint("foo", "bar")
+				.build().block();
+
 		Mono<ServerResponse> result = ServerResponse.from(other).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.OK.equals(response.statusCode()) &&
-						"bar".equals(response.headers().getFirst("foo")))
+						"bar".equals(response.headers().getFirst("foo")) &&
+						cookie.equals(response.cookies().getFirst("foo")))
 				.expectComplete()
 				.verify();
 	}
@@ -78,7 +85,8 @@ public class DefaultServerResponseBuilderTests {
 	public void status() {
 		Mono<ServerResponse> result = ServerResponse.status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()))
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
+						response.rawStatusCode() == 201)
 				.expectComplete()
 				.verify();
 	}
@@ -297,6 +305,23 @@ public class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	public void copyCookies() {
+		Mono<ServerResponse> serverResponse = ServerResponse.ok()
+				.cookie(ResponseCookie.from("foo", "bar").build())
+				.bodyValue("body");
+
+		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();
+
+		serverResponse = ServerResponse.ok()
+				.cookie(ResponseCookie.from("foo", "bar").build())
+				.bodyValue("body");
+
+
+		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();
+	}
+
+
+	@Test
 	public void build() {
 		ResponseCookie cookie = ResponseCookie.from("name", "value").build();
 		Mono<ServerResponse>
@@ -310,9 +335,9 @@ public class DefaultServerResponseBuilderTests {
 		result.flatMap(res -> res.writeTo(exchange, EMPTY_CONTEXT)).block();
 
 		MockServerHttpResponse response = exchange.getResponse();
-		assertEquals(HttpStatus.CREATED, response.getStatusCode());
-		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
-		assertEquals("value", response.getCookies().getFirst("name").getValue());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(response.getHeaders().getFirst("MyKey")).isEqualTo("MyValue");
+		assertThat(response.getCookies().getFirst("name").getValue()).isEqualTo("value");
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
@@ -330,11 +355,12 @@ public class DefaultServerResponseBuilderTests {
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void bodyObjectPublisher() {
 		Mono<Void> mono = Mono.empty();
 
-		ServerResponse.ok().syncBody(mono);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ServerResponse.ok().bodyValue(mono));
 	}
 
 	@Test
@@ -342,7 +368,7 @@ public class DefaultServerResponseBuilderTests {
 		String etag = "\"foo\"";
 		ServerResponse responseMono = ServerResponse.ok()
 				.eTag(etag)
-				.syncBody("bar")
+				.bodyValue("bar")
 				.block();
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
@@ -353,7 +379,7 @@ public class DefaultServerResponseBuilderTests {
 		responseMono.writeTo(exchange, EMPTY_CONTEXT);
 
 		MockServerHttpResponse response = exchange.getResponse();
-		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
 		StepVerifier.create(response.getBody())
 				.expectError(IllegalStateException.class)
 				.verify();
@@ -366,7 +392,7 @@ public class DefaultServerResponseBuilderTests {
 
 		ServerResponse responseMono = ServerResponse.ok()
 				.lastModified(oneMinuteBeforeNow)
-				.syncBody("bar")
+				.bodyValue("bar")
 				.block();
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
@@ -378,7 +404,7 @@ public class DefaultServerResponseBuilderTests {
 		responseMono.writeTo(exchange, EMPTY_CONTEXT);
 
 		MockServerHttpResponse response = exchange.getResponse();
-		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
 		StepVerifier.create(response.getBody())
 				.expectError(IllegalStateException.class)
 				.verify();

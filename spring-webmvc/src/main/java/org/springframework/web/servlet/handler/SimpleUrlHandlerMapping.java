@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,14 @@ import org.springframework.util.CollectionUtils;
  * bean references, e.g. via the map element in XML bean definitions.
  *
  * <p>Mappings to bean names can be set via the "mappings" property, in a form
- * accepted by the {@code java.util.Properties} class, like as follows:<br>
- * {@code
+ * accepted by the {@code java.util.Properties} class, as follows:
+ *
+ * <pre class="code">
  * /welcome.html=ticketController
- * /show.html=ticketController
- * }<br>
- * The syntax is {@code PATH=HANDLER_BEAN_NAME}.
- * If the path doesn't begin with a slash, one is prepended.
+ * /show.html=ticketController</pre>
+ *
+ * <p>The syntax is {@code PATH=HANDLER_BEAN_NAME}. If the path doesn't begin
+ * with a slash, one is prepended.
  *
  * <p>Supports direct matches (given "/test" -&gt; registered "/test") and "*"
  * pattern matches (given "/test" -&gt; registered "/t*"). Note that the default
@@ -50,6 +51,7 @@ import org.springframework.util.CollectionUtils;
 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see #setMappings
  * @see #setUrlMap
  * @see BeanNameUrlHandlerMapping
@@ -57,6 +59,38 @@ import org.springframework.util.CollectionUtils;
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	private final Map<String, Object> urlMap = new LinkedHashMap<>();
+
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} with default settings.
+	 */
+	public SimpleUrlHandlerMapping() {
+	}
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} using the supplied URL map.
+	 * @param urlMap map with URL paths as keys and handler beans (or handler
+	 * bean names) as values
+	 * @since 5.2
+	 * @see #setUrlMap(Map)
+	 */
+	public SimpleUrlHandlerMapping(Map<String, ?> urlMap) {
+		setUrlMap(urlMap);
+	}
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} using the supplied URL map and order.
+	 * @param urlMap map with URL paths as keys and handler beans (or handler
+	 * bean names) as values
+	 * @param order the order value for this {@code SimpleUrlHandlerMapping}
+	 * @since 5.2
+	 * @see #setUrlMap(Map)
+	 * @see #setOrder(int)
+	 */
+	public SimpleUrlHandlerMapping(Map<String, ?> urlMap, int order) {
+		setUrlMap(urlMap);
+		setOrder(order);
+	}
 
 
 	/**

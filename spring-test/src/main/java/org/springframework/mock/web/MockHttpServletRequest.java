@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -58,6 +60,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -199,7 +202,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
 	/** List of locales in descending order. */
-	private final List<Locale> locales = new LinkedList<>();
+	private final LinkedList<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
 
@@ -779,7 +782,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
-		this.locales.add(0, locale);
+		this.locales.addFirst(locale);
 		updateAcceptLanguageHeader();
 	}
 
@@ -817,7 +820,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	@Override
 	public Locale getLocale() {
-		return this.locales.get(0);
+		return this.locales.getFirst();
 	}
 
 	/**
@@ -973,12 +976,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setCookies(@Nullable Cookie... cookies) {
 		this.cookies = (ObjectUtils.isEmpty(cookies) ? null : cookies);
-		this.headers.remove(HttpHeaders.COOKIE);
-		if (this.cookies != null) {
-			Arrays.stream(this.cookies)
-					.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
-					.forEach(value -> doAddHeaderValue(HttpHeaders.COOKIE, value, false));
+		if (this.cookies == null) {
+			removeHeader(HttpHeaders.COOKIE);
 		}
+		else {
+			doAddHeaderValue(HttpHeaders.COOKIE, encodeCookies(this.cookies), true);
+		}
+	}
+
+	private static String encodeCookies(@NonNull Cookie... cookies) {
+		return Arrays.stream(cookies)
+				.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
+				.collect(Collectors.joining("; "));
 	}
 
 	@Override
@@ -1015,6 +1024,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				List<Locale> locales = headers.getAcceptLanguageAsLocales();
 				this.locales.clear();
 				this.locales.addAll(locales);
+				if (this.locales.isEmpty()) {
+					this.locales.add(Locale.ENGLISH);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				// Invalid Accept-Language format -> just store plain header
@@ -1027,7 +1039,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void doAddHeaderValue(String name, @Nullable Object value, boolean replace) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
 		if (header == null || replace) {
 			header = new HeaderValueHolder();
@@ -1067,7 +1079,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	@Override
 	public long getDateHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
@@ -1104,13 +1116,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return (header != null ? header.getStringValue() : null);
 	}
 
 	@Override
 	public Enumeration<String> getHeaders(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<>());
 	}
 
@@ -1121,7 +1133,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getIntHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
@@ -1294,6 +1306,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * Otherwise it simply returns the current session id.
 	 * @since 4.0.3
 	 */
+	@Override
 	public String changeSessionId() {
 		Assert.isTrue(this.session != null, "The request does not have a session");
 		if (this.session instanceof MockHttpSession) {

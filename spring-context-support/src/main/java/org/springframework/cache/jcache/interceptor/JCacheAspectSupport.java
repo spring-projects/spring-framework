@@ -88,6 +88,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 		return this.cacheOperationSource;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		getCacheOperationSource();
 

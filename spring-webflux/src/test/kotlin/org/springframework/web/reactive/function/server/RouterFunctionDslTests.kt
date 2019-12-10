@@ -16,10 +16,12 @@
 
 package org.springframework.web.reactive.function.server
 
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
 import reactor.core.publisher.Mono
@@ -55,6 +57,18 @@ class RouterFunctionDslTests {
 				.method(POST)
 				.uri(URI("/api/foo/"))
 				.header(ACCEPT, APPLICATION_JSON_VALUE)
+				.build()
+		StepVerifier.create(sampleRouter().route(request))
+				.expectNextCount(1)
+				.verifyComplete()
+	}
+
+	@Test
+	fun acceptAndPOSTWithRequestPredicate() {
+		val request = builder()
+				.method(POST)
+				.uri(URI("/api/bar/"))
+				.header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build()
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
@@ -120,9 +134,11 @@ class RouterFunctionDslTests {
 				.verifyComplete()
 	}
 
-	@Test(expected = IllegalStateException::class)
+	@Test
 	fun emptyRouter() {
-		router { }
+		assertThatExceptionOfType(IllegalStateException::class.java).isThrownBy {
+			router { }
+		}
 	}
 
 
@@ -130,6 +146,7 @@ class RouterFunctionDslTests {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
 			POST("/foo/", ::handleFromClass)
+			POST("/bar/", contentType(APPLICATION_JSON), ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
 			PATCH("/foo/") {
 				ok().build()
@@ -157,11 +174,33 @@ class RouterFunctionDslTests {
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }
+		add(otherRouter)
 	}
-}
 
-@Suppress("UNUSED_PARAMETER")
-private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+	private val otherRouter = router {
+		"/other" {
+			ok().build()
+		}
+		filter { request, next ->
+			next(request)
+		}
+		before {
+			it
+		}
+		after { _, response ->
+			response
+		}
+		onError({it is IllegalStateException}) { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
+		onError<IllegalStateException> { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
+	}
+
+	@Suppress("UNUSED_PARAMETER")
+	private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+}
 
 @Suppress("UNUSED_PARAMETER")
 private fun handle(req: ServerRequest) = ServerResponse.ok().build()

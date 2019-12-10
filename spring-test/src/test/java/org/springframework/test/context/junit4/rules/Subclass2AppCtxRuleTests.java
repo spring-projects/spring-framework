@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Subclass #2 of {@link BaseAppCtxRuleTests}.
@@ -40,7 +40,7 @@ public class Subclass2AppCtxRuleTests extends BaseAppCtxRuleTests {
 
 	@Test
 	public void baz() {
-		assertEquals("baz", baz);
+		assertThat(baz).isEqualTo("baz");
 	}
 
 

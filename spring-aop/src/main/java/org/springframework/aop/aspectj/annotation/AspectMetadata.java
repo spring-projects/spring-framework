@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class AspectMetadata implements Serializable {
 			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
 		if (ajType.getDeclarePrecedence().length > 0) {
-			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
+			throw new IllegalArgumentException("DeclarePrecedence not presently supported in Spring AOP");
 		}
 		this.aspectClass = ajType.getJavaClass();
 		this.ajType = ajType;
@@ -127,9 +127,9 @@ public class AspectMetadata implements Serializable {
 	 */
 	private String findPerClause(Class<?> aspectClass) {
 		String str = aspectClass.getAnnotation(Aspect.class).value();
-		str = str.substring(str.indexOf('(') + 1);
-		str = str.substring(0, str.length() - 1);
-		return str;
+		int beginIndex = str.indexOf('(') + 1;
+		int endIndex = str.length() - 1;
+		return str.substring(beginIndex, endIndex);
 	}
 
 

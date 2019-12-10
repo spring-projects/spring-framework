@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.object;
 
 import java.sql.SQLException;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;

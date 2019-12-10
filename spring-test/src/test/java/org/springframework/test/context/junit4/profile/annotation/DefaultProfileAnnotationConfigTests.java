@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -45,13 +45,13 @@ public class DefaultProfileAnnotationConfigTests {
 
 	@Test
 	public void pet() {
-		assertNotNull(pet);
-		assertEquals("Fido", pet.getName());
+		assertThat(pet).isNotNull();
+		assertThat(pet.getName()).isEqualTo("Fido");
 	}
 
 	@Test
 	public void employee() {
-		assertNull("employee bean should not be created for the default profile", employee);
+		assertThat(employee).as("employee bean should not be created for the default profile").isNull();
 	}
 
 }

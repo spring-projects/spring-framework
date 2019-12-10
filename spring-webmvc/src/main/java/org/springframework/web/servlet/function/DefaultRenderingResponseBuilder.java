@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -138,8 +139,8 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	}
 
 	@Override
-	public RenderingResponse.Builder headers(HttpHeaders headers) {
-		this.headers.putAll(headers);
+	public RenderingResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 

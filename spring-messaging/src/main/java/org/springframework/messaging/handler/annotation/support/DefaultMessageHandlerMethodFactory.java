@@ -100,7 +100,7 @@ public class DefaultMessageHandlerMethodFactory
 	/**
 	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
-	 * @see org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver
+	 * @see PayloadMethodArgumentResolver
 	 */
 	public void setValidator(Validator validator) {
 		this.validator = validator;
@@ -173,7 +173,7 @@ public class DefaultMessageHandlerMethodFactory
 		}
 
 		Assert.notNull(this.messageConverter, "MessageConverter not configured");
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
+		resolvers.add(new PayloadMethodArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}

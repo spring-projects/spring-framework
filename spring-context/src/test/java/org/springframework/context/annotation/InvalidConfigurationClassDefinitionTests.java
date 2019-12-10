@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
  * Unit tests covering cases where a user defines an invalid Configuration
@@ -42,14 +42,10 @@ public class InvalidConfigurationClassDefinitionTests {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", configBeanDef);
 
-		try {
-			ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-			pp.postProcessBeanFactory(beanFactory);
-			fail("expected exception");
-		}
-		catch (BeanDefinitionParsingException ex) {
-			assertTrue(ex.getMessage(), ex.getMessage().contains("Remove the final modifier"));
-		}
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				pp.postProcessBeanFactory(beanFactory))
+			.withMessageContaining("Remove the final modifier");
 	}
 
 }

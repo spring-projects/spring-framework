@@ -54,7 +54,7 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Return the list of {@link MediaType} objects supported by this converter.
-	 * @return the list of supported media types
+	 * @return the list of supported media types, potentially an immutable copy
 	 */
 	List<MediaType> getSupportedMediaTypes();
 

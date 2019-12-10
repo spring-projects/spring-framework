@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,17 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Context holder for request-specific state, like the {@link MessageSource} to
  * use, current locale, binding errors, etc. Provides easy access to localized
  * messages and Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within FreeMarker templates,
+ * <p>Suitable for exposition to views, and usage within FreeMarker templates
  * and tag libraries.
  *
- * <p>Can be instantiated manually, or automatically exposed to views as model
+ * <p>Can be instantiated manually or automatically exposed to views as a model
  * attribute via AbstractView's "requestContextAttribute" property.
  *
  * @author Rossen Stoyanchev
@@ -218,8 +218,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
-		UriTemplate template = new UriTemplate(url);
-		url = template.expand(params).toASCIIString();
+		url = UriComponentsBuilder.fromUriString(url).buildAndExpand(params).encode().toUri().toASCIIString();
 		return getExchange().transformUrl(url);
 	}
 

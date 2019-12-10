@@ -25,6 +25,7 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Provides a quick way to access the attribute methods of an {@link Annotation}
@@ -73,15 +74,11 @@ final class AttributeMethods {
 			if (method.getDefaultValue() != null) {
 				foundDefaultValueMethod = true;
 			}
-			if (type.isAnnotation() ||
-					(type.isArray() && type.getComponentType().isAnnotation())) {
+			if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
 				foundNestedAnnotation = true;
 			}
-			method.setAccessible(true);
-			this.canThrowTypeNotPresentException[i] =
-					type == Class.class ||
-					type == Class[].class ||
-					type.isEnum();
+			ReflectionUtils.makeAccessible(method);
+			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class || type.isEnum());
 		}
 		this.hasDefaultValueMethod = foundDefaultValueMethod;
 		this.hasNestedAnnotation = foundNestedAnnotation;
@@ -89,20 +86,19 @@ final class AttributeMethods {
 
 
 	/**
-	 * Return if this instance only contains only a single attribute named
+	 * Determine if this instance only contains a single attribute named
 	 * {@code value}.
-	 * @return {@code true} if this is only a value attribute
+	 * @return {@code true} if there is only a value attribute
 	 */
-	boolean isOnlyValueAttribute() {
+	boolean hasOnlyValueAttribute() {
 		return (this.attributeMethods.length == 1 &&
 				MergedAnnotation.VALUE.equals(this.attributeMethods[0].getName()));
 	}
 
 
 	/**
-	 * Returns {@code true} if values from the given annotation can be safely
-	 * accessed without causing any {@link TypeNotPresentException
-	 * TypeNotPresentExceptions}.
+	 * Determine if values from the given annotation can be safely accessed without
+	 * causing any {@link TypeNotPresentException TypeNotPresentExceptions}.
 	 * @param annotation the annotation to check
 	 * @return {@code true} if all values are present
 	 * @see #validate(Annotation)
@@ -123,7 +119,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Checks if values from the given annotation can be safely accessed without causing
+	 * Check if values from the given annotation can be safely accessed without causing
 	 * any {@link TypeNotPresentException TypeNotPresentExceptions}. In particular,
 	 * this method is designed to cover Google App Engine's late arrival of such
 	 * exceptions for {@code Class} values (instead of the more typical early
@@ -155,7 +151,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return the attribute with the specified name or {@code null} if no
+	 * Get the attribute with the specified name or {@code null} if no
 	 * matching attribute exists.
 	 * @param name the attribute name to find
 	 * @return the attribute method or {@code null}
@@ -167,7 +163,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return the attribute at the specified index.
+	 * Get the attribute at the specified index.
 	 * @param index the index of the attribute to return
 	 * @return the attribute method
 	 * @throws IndexOutOfBoundsException if the index is out of range
@@ -178,7 +174,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return {@code true} if the attribute at the specified index could throw a
+	 * Determine if the attribute at the specified index could throw a
 	 * {@link TypeNotPresentException} when accessed.
 	 * @param index the index of the attribute to check
 	 * @return {@code true} if the attribute can throw a
@@ -189,7 +185,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return the index of the attribute with the specified name, or {@code -1}
+	 * Get the index of the attribute with the specified name, or {@code -1}
 	 * if there is no attribute with the name.
 	 * @param name the name to find
 	 * @return the index of the attribute, or {@code -1}
@@ -204,8 +200,8 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return the index of the specified attribute , or {@code -1} if the
-	 * attribute is not not in this collection.
+	 * Get the index of the specified attribute, or {@code -1} if the
+	 * attribute is not in this collection.
 	 * @param attribute the attribute to find
 	 * @return the index of the attribute, or {@code -1}
 	 */
@@ -219,7 +215,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return the number of attributes in this collection.
+	 * Get the number of attributes in this collection.
 	 * @return the number of attributes
 	 */
 	int size() {
@@ -227,16 +223,17 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return if at least one of the attribute methods has a default value.
-	 * @return if there is at least one attribute method with a default value
+	 * Determine if at least one of the attribute methods has a default value.
+	 * @return {@code true} if there is at least one attribute method with a default value
 	 */
 	boolean hasDefaultValueMethod() {
 		return this.hasDefaultValueMethod;
 	}
 
 	/**
-	 * Return if at least on of the attribute methods is a nested annotation.
-	 * @return if there is at least one attribute method with a annotation type
+	 * Determine if at least one of the attribute methods is a nested annotation.
+	 * @return {@code true} if there is at least one attribute method with a nested
+	 * annotation type
 	 */
 	boolean hasNestedAnnotation() {
 		return this.hasNestedAnnotation;
@@ -244,9 +241,9 @@ final class AttributeMethods {
 
 
 	/**
-	 * Return the attribute methods for the given annotation type.
+	 * Get the attribute methods for the given annotation type.
 	 * @param annotationType the annotation type
-	 * @return the attribute methods for the annotation
+	 * @return the attribute methods for the annotation type
 	 */
 	static AttributeMethods forAnnotationType(@Nullable Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
@@ -268,8 +265,7 @@ final class AttributeMethods {
 			return NONE;
 		}
 		Arrays.sort(methods, methodComparator);
-		Method[] attributeMethods = new Method[size];
-		System.arraycopy(methods, 0, attributeMethods, 0, size);
+		Method[] attributeMethods = Arrays.copyOf(methods, size);
 		return new AttributeMethods(annotationType, attributeMethods);
 	}
 
@@ -278,7 +274,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return a description for the given attribute method suitable to use in
+	 * Create a description for the given attribute method suitable to use in
 	 * exception messages and logs.
 	 * @param attribute the attribute to describe
 	 * @return a description of the attribute
@@ -291,7 +287,7 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Return a description for the given attribute method suitable to use in
+	 * Create a description for the given attribute method suitable to use in
 	 * exception messages and logs.
 	 * @param annotationType the annotation type
 	 * @param attributeName the attribute name

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import reactor.test.StepVerifier;
 
@@ -31,20 +32,24 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.resource.EncodedResourceResolver.EncodedResource;
+import org.springframework.web.reactive.resource.GzipSupport.GzippedFiles;
 
-import static org.junit.Assert.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
+@ExtendWith(GzipSupport.class)
 public class CssLinkResourceTransformerTests {
 
 	private ResourceTransformerChain transformerChain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -88,7 +93,7 @@ public class CssLinkResourceTransformerTests {
 				.consumeNextWith(transformedResource -> {
 					String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 					result = StringUtils.deleteAny(result, "\r");
-					assertEquals(expected, result);
+					assertThat(result).isEqualTo(expected);
 				})
 				.expectComplete()
 				.verify();
@@ -100,7 +105,7 @@ public class CssLinkResourceTransformerTests {
 		Resource expected = getResource("foo.css");
 
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
-				.consumeNextWith(resource -> assertSame(expected, resource))
+				.consumeNextWith(resource -> assertThat(resource).isSameAs(expected))
 				.expectComplete().verify();
 	}
 
@@ -122,7 +127,7 @@ public class CssLinkResourceTransformerTests {
 				.consumeNextWith(transformedResource -> {
 					String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 					result = StringUtils.deleteAny(result, "\r");
-					assertEquals(expected, result);
+					assertThat(result).isEqualTo(expected);
 				})
 				.expectComplete()
 				.verify();
@@ -145,9 +150,8 @@ public class CssLinkResourceTransformerTests {
 	}
 
 	@Test
-	public void transformSkippedForGzippedResource() throws Exception {
-
-		EncodedResourceResolverTests.createGzippedFile("main.css");
+	public void transformSkippedForGzippedResource(GzippedFiles gzippedFiles) throws Exception {
+		gzippedFiles.create("main.css");
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/main.css"));
 		Resource resource = getResource("main.css");
@@ -155,6 +159,26 @@ public class CssLinkResourceTransformerTests {
 
 		StepVerifier.create(this.transformerChain.transform(exchange, gzipped))
 				.expectNext(gzipped)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test // https://github.com/spring-projects/spring-framework/issues/22602
+	public void transformEmptyUrlFunction() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/empty_url_function.css"));
+		Resource css = getResource("empty_url_function.css");
+		String expected =
+				".fooStyle {\n" +
+				"\tbackground: transparent url() no-repeat left top;\n" +
+				"}";
+
+		StepVerifier.create(this.transformerChain.transform(exchange, css)
+				.cast(TransformedResource.class))
+				.consumeNextWith(transformedResource -> {
+					String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
+					result = StringUtils.deleteAny(result, "\r");
+					assertThat(result).isEqualTo(expected);
+				})
 				.expectComplete()
 				.verify();
 	}

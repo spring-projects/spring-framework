@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private Environment environment;
 
-	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
+	private BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
 
 
 	/**
@@ -171,7 +171,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * <p>Default is a {@link DefaultBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : DefaultBeanNameGenerator.INSTANCE);
 	}
 
 	@Override

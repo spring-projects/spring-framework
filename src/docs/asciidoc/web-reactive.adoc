@@ -23,7 +23,6 @@ include::web/webflux-websocket.adoc[leveloffset=+1]
 
 
 
-
 [[webflux-test]]
 == Testing
 [.small]#<<web.adoc#testing, Same in Spring MVC>>#
@@ -39,12 +38,7 @@ server. You can use the `WebTestClient` for end-to-end integration tests, too.
 
 
 
-
-//[[webflux-threading-model]]
-//=== Threading model
-// TODO Once we have content for this heading, we should un-comment the heading and
-// anchor. Until then, we should leave it commented.
-
+include::rsocket.adoc[leveloffset=+1]
 
 
 

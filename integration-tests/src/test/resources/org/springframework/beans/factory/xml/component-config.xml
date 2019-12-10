@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:foo="http://www.foo.example/schema/component"
+      xsi:schemaLocation="
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.foo.example/schema/component http://www.foo.example/schema/component/component.xsd">
+
+   <foo:component id="bionic-family" name="Bionic-1">
+      <foo:component name="Mother-1">
+      	<foo:component name="Karate-1"/>
+  		<foo:component name="Sport-1"/>
+      </foo:component>
+      <foo:component name="Rock-1"/>
+   </foo:component>
+
+</beans>

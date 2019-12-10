@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.context.transaction;
 
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -202,7 +204,14 @@ public abstract class TestContextTransactionUtils {
 				Assert.state(configurers.size() <= 1,
 						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
 				if (configurers.size() == 1) {
-					return configurers.values().iterator().next().annotationDrivenTransactionManager();
+					TransactionManager tm = configurers.values().iterator().next().annotationDrivenTransactionManager();
+					if (tm instanceof PlatformTransactionManager) {
+						return (PlatformTransactionManager) tm;
+					}
+					else {
+						throw new IllegalStateException(
+								"Specified transaction manager is not a PlatformTransactionManager: " + tm);
+					}
 				}
 			}
 

@@ -33,7 +33,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * root {@link Annotation}.
  *
  * <p>Supports convention based merging of meta-annotations as well as implicit
- * and explicit {@link AliasFor @AliasFor} aliases. Also provide information
+ * and explicit {@link AliasFor @AliasFor} aliases. Also provides information
  * about mirrored attributes.
  *
  * <p>This class is designed to be cached so that meta-annotations only need to
@@ -47,16 +47,22 @@ final class AnnotationTypeMappings {
 
 	private static final IntrospectionFailureLogger failureLogger = IntrospectionFailureLogger.DEBUG;
 
-	private static final Map<AnnotationFilter, Cache> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<AnnotationFilter, Cache> standardRepeatablesCache = new ConcurrentReferenceHashMap<>();
 
+	private static final Map<AnnotationFilter, Cache> noRepeatablesCache = new ConcurrentReferenceHashMap<>();
+
+
+	private final RepeatableContainers repeatableContainers;
 
 	private final AnnotationFilter filter;
 
 	private final List<AnnotationTypeMapping> mappings;
 
 
-	private AnnotationTypeMappings(AnnotationFilter filter,
-			Class<? extends Annotation> annotationType) {
+	private AnnotationTypeMappings(RepeatableContainers repeatableContainers,
+			AnnotationFilter filter, Class<? extends Annotation> annotationType) {
+
+		this.repeatableContainers = repeatableContainers;
 		this.filter = filter;
 		this.mappings = new ArrayList<>();
 		addAllMappings(annotationType);
@@ -74,74 +80,72 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent) {
+	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source) {
 		Annotation[] metaAnnotations =
-				AnnotationsScanner.getDeclaredAnnotations(parent.getAnnotationType(), false);
+				AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
-			if (!isMappable(parent, metaAnnotation)) {
+			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
-			Annotation[] repeatedAnnotations = RepeatableContainers.standardRepeatables()
+			Annotation[] repeatedAnnotations = this.repeatableContainers
 					.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
-					if (!isMappable(parent, metaAnnotation)) {
+					if (!isMappable(source, metaAnnotation)) {
 						continue;
 					}
-					addIfPossible(queue, parent, repeatedAnnotation);
+					addIfPossible(queue, source, repeatedAnnotation);
 				}
 			}
 			else {
-				addIfPossible(queue, parent, metaAnnotation);
+				addIfPossible(queue, source, metaAnnotation);
 			}
 		}
 	}
 
 	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
-			AnnotationTypeMapping parent, Annotation annotation) {
-		addIfPossible(queue, parent, annotation.annotationType(), annotation);
+			AnnotationTypeMapping source, Annotation ann) {
+
+		addIfPossible(queue, source, ann.annotationType(), ann);
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
-			@Nullable AnnotationTypeMapping parent,
-			Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping source,
+			Class<? extends Annotation> annotationType, @Nullable Annotation ann) {
 
 		try {
-			queue.addLast(new AnnotationTypeMapping(parent, annotationType, annotation));
+			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann));
 		}
 		catch (Exception ex) {
 			if (ex instanceof AnnotationConfigurationException) {
 				throw (AnnotationConfigurationException) ex;
 			}
 			if (failureLogger.isEnabled()) {
-				failureLogger.log(
-						"Failed to introspect meta-annotation "
-								+ annotationType.getName(),
-						(parent != null) ? parent.getAnnotationType() : null, ex);
+				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
+						(source != null ? source.getAnnotationType() : null), ex);
 			}
 		}
 	}
 
-	private boolean isMappable(AnnotationTypeMapping parent, @Nullable Annotation metaAnnotation) {
+	private boolean isMappable(AnnotationTypeMapping source, @Nullable Annotation metaAnnotation) {
 		return (metaAnnotation != null && !this.filter.matches(metaAnnotation) &&
-				!AnnotationFilter.PLAIN.matches(parent.getAnnotationType()) &&
-				!isAlreadyMapped(parent, metaAnnotation));
+				!AnnotationFilter.PLAIN.matches(source.getAnnotationType()) &&
+				!isAlreadyMapped(source, metaAnnotation));
 	}
 
-	private boolean isAlreadyMapped(AnnotationTypeMapping parent, Annotation metaAnnotation) {
+	private boolean isAlreadyMapped(AnnotationTypeMapping source, Annotation metaAnnotation) {
 		Class<? extends Annotation> annotationType = metaAnnotation.annotationType();
-		AnnotationTypeMapping mapping = parent;
+		AnnotationTypeMapping mapping = source;
 		while (mapping != null) {
 			if (mapping.getAnnotationType() == annotationType) {
 				return true;
 			}
-			mapping = mapping.getParent();
+			mapping = mapping.getSource();
 		}
 		return false;
 	}
 
 	/**
-	 * Return the total number of contained mappings.
+	 * Get the total number of contained mappings.
 	 * @return the total number of mappings
 	 */
 	int size() {
@@ -149,9 +153,9 @@ final class AnnotationTypeMappings {
 	}
 
 	/**
-	 * Return an individual mapping from this instance. Index {@code 0} will
-	 * always be return the root mapping, higer indexes will return
-	 * meta-annotation mappings.
+	 * Get an individual mapping from this instance.
+	 * <p>Index {@code 0} will always return the root mapping; higher indexes
+	 * will return meta-annotation mappings.
 	 * @param index the index to return
 	 * @return the {@link AnnotationTypeMapping}
 	 * @throws IndexOutOfBoundsException if the index is out of range
@@ -161,17 +165,18 @@ final class AnnotationTypeMappings {
 		return this.mappings.get(index);
 	}
 
+
 	/**
-	 * Return {@link AnnotationTypeMappings} for the specified annotation type.
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
 	 * @return type mappings for the annotation type
 	 */
 	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType) {
-		return forAnnotationType(annotationType, AnnotationFilter.mostAppropriateFor(annotationType));
+		return forAnnotationType(annotationType, AnnotationFilter.PLAIN);
 	}
 
 	/**
-	 * Return {@link AnnotationTypeMappings} for the specified annotation type.
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
 	 * @param annotationFilter the annotation filter used to limit which
 	 * annotations are considered
@@ -180,11 +185,37 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(
 			Class<? extends Annotation> annotationType, AnnotationFilter annotationFilter) {
 
-		return cache.computeIfAbsent(annotationFilter, Cache::new).get(annotationType);
+		return forAnnotationType(annotationType,
+				RepeatableContainers.standardRepeatables(), annotationFilter);
+	}
+
+	/**
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
+	 * @param annotationType the source annotation type
+	 * @param annotationFilter the annotation filter used to limit which
+	 * annotations are considered
+	 * @return type mappings for the annotation type
+	 */
+	static AnnotationTypeMappings forAnnotationType(
+			Class<? extends Annotation> annotationType,
+			RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
+
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter,
+				annotationType);
 	}
 
 	static void clearCache() {
-		cache.clear();
+		standardRepeatablesCache.clear();
+		noRepeatablesCache.clear();
 	}
 
 
@@ -193,36 +224,34 @@ final class AnnotationTypeMappings {
 	 */
 	private static class Cache {
 
+		private final RepeatableContainers repeatableContainers;
+
 		private final AnnotationFilter filter;
 
 		private final Map<Class<? extends Annotation>, AnnotationTypeMappings> mappings;
-
 
 		/**
 		 * Create a cache instance with the specified filter.
 		 * @param filter the annotation filter
 		 */
-		Cache(AnnotationFilter filter) {
+		Cache(RepeatableContainers repeatableContainers, AnnotationFilter filter) {
+			this.repeatableContainers = repeatableContainers;
 			this.filter = filter;
 			this.mappings = new ConcurrentReferenceHashMap<>();
 		}
 
-
 		/**
-		 * Return or create {@link AnnotationTypeMappings} for the specified
-		 * annotation type.
+		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
-		 * @return a new or existing {@link AnnotationTypeMapping} instance
+		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType) {
 			return this.mappings.computeIfAbsent(annotationType, this::createMappings);
 		}
 
-		AnnotationTypeMappings createMappings(
-				Class<? extends Annotation> annotationType) {
-			return new AnnotationTypeMappings(this.filter, annotationType);
+		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
+			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType);
 		}
-
 	}
 
 }

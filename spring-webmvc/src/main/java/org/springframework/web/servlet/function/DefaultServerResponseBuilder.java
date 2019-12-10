@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +71,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		this.statusCode = (other instanceof AbstractServerResponse ?
 				((AbstractServerResponse) other).statusCode : other.statusCode().value());
 		this.headers.addAll(other.headers());
+		this.cookies.addAll(other.cookies());
 	}
 
 	public DefaultServerResponseBuilder(HttpStatus status) {
@@ -188,24 +190,27 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse body(Object body) {
 		return DefaultEntityResponseBuilder.fromObject(body)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.build();
 	}
 
 	@Override
 	public <T> ServerResponse body(T body, ParameterizedTypeReference<T> bodyType) {
 		return DefaultEntityResponseBuilder.fromObject(body, bodyType)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.build();
 	}
 
 	@Override
 	public ServerResponse render(String name, Object... modelAttributes) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(modelAttributes)
 				.build();
 	}
@@ -213,8 +218,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse render(String name, Map<String, ?> model) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(model)
 				.build();
 	}
@@ -257,6 +263,11 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		@Override
 		public final HttpStatus statusCode() {
 			return HttpStatus.valueOf(this.statusCode);
+		}
+
+		@Override
+		public int rawStatusCode() {
+			return this.statusCode;
 		}
 
 		@Override

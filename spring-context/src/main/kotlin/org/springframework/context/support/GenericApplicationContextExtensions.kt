@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ inline fun <reified T : Any> GenericApplicationContext.registerBean(name: String
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Deprecated("Use regular apply method instead.", replaceWith = ReplaceWith("GenericApplicationContext().apply(configure)"))
 fun GenericApplicationContext(configure: GenericApplicationContext.() -> Unit) =
 		GenericApplicationContext().apply(configure)
 

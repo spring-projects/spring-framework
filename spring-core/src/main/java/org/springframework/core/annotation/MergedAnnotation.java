@@ -21,6 +21,7 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Proxy;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -47,10 +48,12 @@ import org.springframework.lang.Nullable;
  * {@code String} and {@code String[]} respectively to prevent potential early
  * class initialization.
  *
- * <p>If necessary, a {@link MergedAnnotation} can be {@link #synthesize()
+ * <p>If necessary, a {@code MergedAnnotation} can be {@linkplain #synthesize()
  * synthesized} back into an actual {@link java.lang.annotation.Annotation}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.2
  * @param <A> the annotation type
  * @see MergedAnnotations
@@ -65,52 +68,54 @@ public interface MergedAnnotation<A extends Annotation> {
 
 
 	/**
-	 * Return the class name of the actual annotation type.
+	 * Get the {@code Class} reference for the actual annotation type.
 	 * @return the annotation type
 	 */
-	String getType();
+	Class<A> getType();
 
 	/**
-	 * Return if the annotation is present on the source. Considers
-	 * {@link #isDirectlyPresent() direct annotations}, and
-	 * {@link #isMetaPresent() meta-annotation} annotations within the context
+	 * Determine if the annotation is present on the source. Considers
+	 * {@linkplain #isDirectlyPresent() directly present} and
+	 * {@linkplain #isMetaPresent() meta-present} annotations within the context
 	 * of the {@link SearchStrategy} used.
 	 * @return {@code true} if the annotation is present
 	 */
 	boolean isPresent();
 
 	/**
-	 * Return if the annotation is directly present on the source. A directly
-	 * present annotation is one that the user has explicitly defined and not
-	 * one that is {@link #isMetaPresent() meta-present} or
-	 * {@link Inherited @Inherited}.
+	 * Determine if the annotation is directly present on the source.
+	 * <p>A directly present annotation is one that the user has explicitly
+	 * declared and not one that is {@linkplain #isMetaPresent() meta-present}
+	 * or {@link Inherited @Inherited}.
 	 * @return {@code true} if the annotation is directly present
 	 */
 	boolean isDirectlyPresent();
 
 	/**
-	 * Return if the annotation is meta-present on the source. A meta-present
-	 * annotation is an annotation that the user hasn't explicitly defined, but
-	 * has been used as a meta-annotation somewhere in the annotation hierarchy.
+	 * Determine if the annotation is meta-present on the source.
+	 * <p>A meta-present annotation is an annotation that the user hasn't
+	 * explicitly declared, but has been used as a meta-annotation somewhere in
+	 * the annotation hierarchy.
 	 * @return {@code true} if the annotation is meta-present
 	 */
 	boolean isMetaPresent();
 
 	/**
-	 * Return the depth of this annotation related to its use as a
-	 * meta-annotation. A directly declared annotation has a depth of {@code 0},
-	 * a meta-annotation has a depth of {@code 1}, a meta-annotation on a
-	 * meta-annotation has a depth of {@code 2}, etc. A {@link #missing()
-	 * missing} annotation will always return a depth of {@code -1}.
-	 * @return the annotation depth or {@code -1} if the annotation is missing
+	 * Get the distance of this annotation related to its use as a
+	 * meta-annotation.
+	 * <p>A directly declared annotation has a distance of {@code 0}, a
+	 * meta-annotation has a distance of {@code 1}, a meta-annotation on a
+	 * meta-annotation has a distance of {@code 2}, etc. A {@linkplain #missing()
+	 * missing} annotation will always return a distance of {@code -1}.
+	 * @return the annotation distance or {@code -1} if the annotation is missing
 	 */
-	int getDepth();
+	int getDistance();
 
 	/**
-	 * Return the index of the aggregate collection containing this annotation.
-	 * Can be used to reorder a stream of annotations, for example, to give a
+	 * Get the index of the aggregate collection containing this annotation.
+	 * <p>Can be used to reorder a stream of annotations, for example, to give a
 	 * higher priority to annotations declared on a superclass or interface. A
-	 * {@link #missing() missing} annotation will always return an aggregate
+	 * {@linkplain #missing() missing} annotation will always return an aggregate
 	 * index of {@code -1}.
 	 * @return the aggregate index (starting at {@code 0}) or {@code -1} if the
 	 * annotation is missing
@@ -118,28 +123,53 @@ public interface MergedAnnotation<A extends Annotation> {
 	int getAggregateIndex();
 
 	/**
-	 * Return the source that ultimately declared the annotation, or
-	 * {@code null} if the source is not known. If this merged annotation was
-	 * created {@link MergedAnnotations#from(java.lang.reflect.AnnotatedElement)
-	 * from} an {@link AnnotatedElement} then this source will be an element of
-	 * the same type. If the annotation was loaded without using reflection, the
-	 * source can be of any type, but should have a sensible {@code toString()}.
-	 * Meta-annotations will return the same source as the {@link #getParent()}.
+	 * Get the source that ultimately declared the root annotation, or
+	 * {@code null} if the source is not known.
+	 * <p>If this merged annotation was created
+	 * {@link MergedAnnotations#from(AnnotatedElement) from} an
+	 * {@link AnnotatedElement} then this source will be an element of the same
+	 * type. If the annotation was loaded without using reflection, the source
+	 * can be of any type, but should have a sensible {@code toString()}.
+	 * Meta-annotations will always return the same source as the
+	 * {@link #getRoot() root}.
 	 * @return the source, or {@code null}
 	 */
 	@Nullable
 	Object getSource();
 
 	/**
-	 * Return the parent of the meta-annotation, or {@code null} if the
-	 * annotation is not {@link #isMetaPresent() meta-present}.
-	 * @return the parent annotation or {@code null}
+	 * Get the source of the meta-annotation, or {@code null} if the
+	 * annotation is not {@linkplain #isMetaPresent() meta-present}.
+	 * <p>The meta-source is the annotation that was meta-annotated with this
+	 * annotation.
+	 * @return the meta-annotation source or {@code null}
+	 * @see #getRoot()
 	 */
 	@Nullable
-	MergedAnnotation<?> getParent();
+	MergedAnnotation<?> getMetaSource();
 
 	/**
-	 * Return if the specified attribute name as a non-default value when
+	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}
+	 * annotation as directly declared on the source.
+	 * @return the root annotation
+	 * @see #getMetaSource()
+	 */
+	MergedAnnotation<?> getRoot();
+
+	/**
+	 * Get the complete list of annotation types within the annotation hierarchy
+	 * from this annotation to the {@link #getRoot() root}.
+	 * <p>Provides a useful way to uniquely identify a merged annotation instance.
+	 * @return the meta types for the annotation
+	 * @see MergedAnnotationPredicates#unique(Function)
+	 * @see #getRoot()
+	 * @see #getMetaSource()
+	 */
+	List<Class<? extends Annotation>> getMetaTypes();
+
+
+	/**
+	 * Determine if the specified attribute name has a non-default value when
 	 * compared to the annotation declaration.
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is different from the default
@@ -148,7 +178,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean hasNonDefaultValue(String attributeName);
 
 	/**
-	 * Return if the specified attribute name as a default value when compared
+	 * Determine if the specified attribute name has a default value when compared
 	 * to the annotation declaration.
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is the same as the default
@@ -157,7 +187,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean hasDefaultValue(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required byte attribute value from the annotation.
+	 * Get a required byte attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a byte
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -165,7 +195,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	byte getByte(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required byte array attribute value from the annotation.
+	 * Get a required byte array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a byte array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -173,7 +203,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	byte[] getByteArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required boolean attribute value from the annotation.
+	 * Get a required boolean attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a boolean
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -181,7 +211,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean getBoolean(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required boolean array attribute value from the annotation.
+	 * Get a required boolean array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a boolean array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -189,7 +219,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean[] getBooleanArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required char attribute value from the annotation.
+	 * Get a required char attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a char
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -197,7 +227,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	char getChar(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required char array attribute value from the annotation.
+	 * Get a required char array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a char array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -205,7 +235,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	char[] getCharArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required short attribute value from the annotation.
+	 * Get a required short attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a short
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -213,7 +243,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	short getShort(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required short array attribute value from the annotation.
+	 * Get a required short array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a short array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -221,7 +251,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	short[] getShortArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required int attribute value from the annotation.
+	 * Get a required int attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as an int
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -229,7 +259,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	int getInt(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required int array attribute value from the annotation.
+	 * Get a required int array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as an int array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -237,7 +267,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	int[] getIntArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required long attribute value from the annotation.
+	 * Get a required long attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a long
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -245,7 +275,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	long getLong(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required long array attribute value from the annotation.
+	 * Get a required long array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a long array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -253,7 +283,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	long[] getLongArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required double attribute value from the annotation.
+	 * Get a required double attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a double
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -261,7 +291,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	double getDouble(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required double array attribute value from the annotation.
+	 * Get a required double array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a double array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -269,7 +299,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	double[] getDoubleArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required float attribute value from the annotation.
+	 * Get a required float attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a float
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -277,7 +307,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	float getFloat(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required float array attribute value from the annotation.
+	 * Get a required float array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a float array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -285,7 +315,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	float[] getFloatArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required string attribute value from the annotation.
+	 * Get a required string attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a string
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -293,7 +323,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	String getString(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required string array attribute value from the annotation.
+	 * Get a required string array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a string array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -301,7 +331,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	String[] getStringArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required class attribute value from the annotation.
+	 * Get a required class attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a class
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -309,7 +339,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	Class<?> getClass(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required class array attribute value from the annotation.
+	 * Get a required class array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return the value as a class array
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -317,27 +347,25 @@ public interface MergedAnnotation<A extends Annotation> {
 	Class<?>[] getClassArray(String attributeName) throws NoSuchElementException;
 
 	/**
-	 * Return a required enum attribute value from the annotation.
+	 * Get a required enum attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the enum type
 	 * @return the value as a enum
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<E extends Enum<E>> E getEnum(String attributeName, Class<E> type)
-			throws NoSuchElementException;
+	<E extends Enum<E>> E getEnum(String attributeName, Class<E> type) throws NoSuchElementException;
 
 	/**
-	 * Return a required enum array attribute value from the annotation.
+	 * Get a required enum array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the enum type
 	 * @return the value as a enum array
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type)
-			throws NoSuchElementException;
+	<E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) throws NoSuchElementException;
 
 	/**
-	 * Return a required annotation attribute value from the annotation.
+	 * Get a required annotation attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the annotation type
 	 * @return the value as a {@link MergedAnnotation}
@@ -347,17 +375,17 @@ public interface MergedAnnotation<A extends Annotation> {
 			throws NoSuchElementException;
 
 	/**
-	 * Return a required annotation array attribute value from the annotation.
+	 * Get a required annotation array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the annotation type
 	 * @return the value as a {@link MergedAnnotation} array
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<T extends Annotation> MergedAnnotation<T>[] getAnnotationArray(String attributeName,
-			Class<T> type) throws NoSuchElementException;
+	<T extends Annotation> MergedAnnotation<T>[] getAnnotationArray(String attributeName, Class<T> type)
+			throws NoSuchElementException;
 
 	/**
-	 * Return an optional attribute value from the annotation.
+	 * Get an optional attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @return an optional value or {@link Optional#empty()} if there is no
 	 * matching attribute
@@ -365,7 +393,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	Optional<Object> getValue(String attributeName);
 
 	/**
-	 * Return an optional attribute value from the annotation.
+	 * Get an optional attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the attribute type. Must be compatible with the underlying
 	 * attribute type or {@code Object.class}.
@@ -375,7 +403,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	<T> Optional<T> getValue(String attributeName, Class<T> type);
 
 	/**
-	 * Return the default attribute value from the annotation as specified in
+	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
 	 * @param attributeName the attribute name
 	 * @return an optional of the default value or {@link Optional#empty()} if
@@ -384,7 +412,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	Optional<Object> getDefaultValue(String attributeName);
 
 	/**
-	 * Return the default attribute value from the annotation as specified in
+	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
 	 * @param attributeName the attribute name
 	 * @param type the attribute type. Must be compatible with the underlying
@@ -395,7 +423,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	<T> Optional<T> getDefaultValue(String attributeName, Class<T> type);
 
 	/**
-	 * Return a new view of the annotation with all attributes that have default
+	 * Create a new view of the annotation with all attributes that have default
 	 * values removed.
 	 * @return a filtered view of the annotation without any attributes that
 	 * have a default value
@@ -404,7 +432,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> filterDefaultValues();
 
 	/**
-	 * Return a new view of the annotation with only attributes that match the
+	 * Create a new view of the annotation with only attributes that match the
 	 * given predicate.
 	 * @param predicate a predicate used to filter attribute names
 	 * @return a filtered view of the annotation
@@ -414,58 +442,68 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> filterAttributes(Predicate<String> predicate);
 
 	/**
-	 * Return a new view of the annotation that exposes non-merged attribute values.
-	 * Methods from this view will return attribute values with only alias mirroring
-	 * rules applied. Aliases to parent attributes will not be applied.
+	 * Create a new view of the annotation that exposes non-merged attribute values.
+	 * <p>Methods from this view will return attribute values with only alias mirroring
+	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
+	 * not be applied.
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
 
 	/**
-	 * Return an immutable {@link Map} that contains all the annotation
-	 * attributes. The {@link MapValues} options may be used to change the way
-	 * that values are added.
-	 * @param options map value options
-	 * @return a map containing the attributes and values
+	 * Create a new mutable {@link AnnotationAttributes} instance from this
+	 * merged annotation.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values
+	 * are added.
+	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @return an immutable map containing the attributes and values
 	 */
-	Map<String, Object> asMap(MapValues... options);
+	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
 
 	/**
-	 * Return a {@link Map} of the supplied type that contains all the annotation
-	 * attributes. The {@link MapValues} options may be used to change the way
-	 * that values are added.
-	 * @param factory a map factory or {@code null} to return an immutable map.
-	 * @param options map value options
-	 * @return a map containing the attributes and values
+	 * Get an immutable {@link Map} that contains all the annotation attributes.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @return an immutable map containing the attributes and values
 	 */
-	<T extends Map<String, Object>> T asMap(
-			@Nullable Function<MergedAnnotation<?>, T> factory, MapValues... options);
+	Map<String, Object> asMap(Adapt... adaptations);
 
 	/**
-	 * Return a type-safe synthesized version of this annotation that can be
-	 * used directly in code. The result is synthesized using a JDK {@link Proxy}
-	 * and as a result may incur a computational cost when first invoked.
+	 * Create a new {@link Map} instance of the given type that contains all the annotation
+	 * attributes.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 * @param factory a map factory
+	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @return a map containing the attributes and values
+	 */
+	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
+
+	/**
+	 * Create a type-safe synthesized version of this annotation that can be
+	 * used directly in code.
+	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
+	 * incur a computational cost when first invoked.
 	 * @return a synthesized version of the annotation.
 	 * @throws NoSuchElementException on a missing annotation
 	 */
 	A synthesize() throws NoSuchElementException;
 
 	/**
-	 * Optionally return type-safe synthesized version of this annotation based
-	 * on a condition predicate. The result is synthesized using a JDK {@link Proxy}
-	 * and as a result may incur a computational cost when first invoked.
+	 * Optionally create a type-safe synthesized version of this annotation based
+	 * on a condition predicate.
+	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
+	 * incur a computational cost when first invoked.
 	 * @param condition the test to determine if the annotation can be synthesized
 	 * @return a optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
 	 * @throws NoSuchElementException on a missing annotation
 	 * @see MergedAnnotationPredicates
 	 */
-	Optional<A> synthesize(@Nullable Predicate<? super MergedAnnotation<A>> condition)
-			throws NoSuchElementException;
+	Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition) throws NoSuchElementException;
 
 
 	/**
-	 * Return an {@link MergedAnnotation} that represents a missing annotation
+	 * Create a {@link MergedAnnotation} that represents a missing annotation
 	 * (i.e. one that is not present).
 	 * @return an instance representing a missing annotation
 	 */
@@ -484,11 +522,11 @@ public interface MergedAnnotation<A extends Annotation> {
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotations} instance from the specified
+	 * Create a new {@link MergedAnnotation} instance from the specified
 	 * annotation.
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
-	 * the specified annotations and it will not be searched.
+	 * the specified annotations, and it will not be searched.
 	 * @param annotation the annotation to include
 	 * @return a {@link MergedAnnotation} instance for the annotation
 	 */
@@ -497,70 +535,88 @@ public interface MergedAnnotation<A extends Annotation> {
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotations} instance from the specified
+	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type. The resulting annotation will not have any attribute
-	 * values, but may still be used to query default values.
+	 * values but may still be used to query default values.
 	 * @param annotationType the annotation type
 	 * @return a {@link MergedAnnotation} instance for the annotation
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(Class<A> annotationType) {
-		return from(null, annotationType, null);
+	static <A extends Annotation> MergedAnnotation<A> of(Class<A> annotationType) {
+		return of(null, annotationType, null);
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotations} instance from the specified
-	 * annotation type and attributes maps.
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
 	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just
-	 * default values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and
-	 * attributes
-	 * @see #from(AnnotatedElement, Class, Map)
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 * @see #of(AnnotatedElement, Class, Map)
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(
+	static <A extends Annotation> MergedAnnotation<A> of(
 			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		return from(null, annotationType, attributes);
+		return of(null, annotationType, attributes);
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotations} instance from the specified
-	 * annotation type and attributes maps.
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations and it will not be searched.
 	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just
-	 * default values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and
-	 * attributes
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(
+	static <A extends Annotation> MergedAnnotation<A> of(
 			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		return TypeMappedAnnotation.from(source, annotationType, attributes);
+		return of(null, source, annotationType, attributes);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
+	 * @param classLoader the class loader used to resolve class attributes
+	 * @param source the source for the annotation. This source is used only for
+	 * information and logging. It does not need to <em>actually</em> contain
+	 * the specified annotations and it will not be searched.
+	 * @param annotationType the annotation type
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(
+			@Nullable ClassLoader classLoader, @Nullable Object source,
+			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
+		return TypeMappedAnnotation.of(classLoader, source, annotationType, attributes);
 	}
 
 
 	/**
-	 * Options that effect the way map values are
-	 * {@link MergedAnnotation#asMap(MapValues...) converted}.
+	 * Adaptations that can be applied to attribute values when creating
+	 * {@linkplain MergedAnnotation#asMap(Adapt...) Maps} or
+	 * {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes}.
 	 */
-	enum MapValues {
+	enum Adapt {
 
 		/**
-		 * Add class or class array attributes as strings.
+		 * Adapt class or class array attributes to strings.
 		 */
 		CLASS_TO_STRING,
 
 		/**
-		 * Convert any nested annotation or annotation arrays to maps rather
+		 * Adapt nested annotation or annotation arrays to maps rather
 		 * than synthesizing the values.
 		 */
 		ANNOTATION_TO_MAP;
 
-		protected final boolean isIn(MapValues... options) {
-			for (MapValues candidate : options) {
+		protected final boolean isIn(Adapt... adaptations) {
+			for (Adapt candidate : adaptations) {
 				if (candidate == this) {
 					return true;
 				}
@@ -569,16 +625,16 @@ public interface MergedAnnotation<A extends Annotation> {
 		}
 
 		/**
-		 * Factory method to create a {@link MapValues} array from a set of boolean flags.
-		 * @param classToString if {@link MapValues#CLASS_TO_STRING} is included
-		 * @param annotationsToMap if {@link MapValues#ANNOTATION_TO_MAP} is included
-		 * @return a new {@link MapValues} array
+		 * Factory method to create an {@link Adapt} array from a set of boolean flags.
+		 * @param classToString if {@link Adapt#CLASS_TO_STRING} is included
+		 * @param annotationsToMap if {@link Adapt#ANNOTATION_TO_MAP} is included
+		 * @return a new {@link Adapt} array
 		 */
-		public static MapValues[] of(boolean classToString, boolean annotationsToMap) {
-			EnumSet<MapValues> result = EnumSet.noneOf(MapValues.class);
-			addIfTrue(result, MapValues.CLASS_TO_STRING, classToString);
-			addIfTrue(result, MapValues.ANNOTATION_TO_MAP, annotationsToMap);
-			return result.toArray(new MapValues[0]);
+		public static Adapt[] values(boolean classToString, boolean annotationsToMap) {
+			EnumSet<Adapt> result = EnumSet.noneOf(Adapt.class);
+			addIfTrue(result, Adapt.CLASS_TO_STRING, classToString);
+			addIfTrue(result, Adapt.ANNOTATION_TO_MAP, annotationsToMap);
+			return result.toArray(new Adapt[0]);
 		}
 
 		private static <T> void addIfTrue(Set<T> result, T value, boolean test) {

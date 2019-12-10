@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public abstract class HandlerMethodArgumentResolverSupport implements HandlerMet
 
 	private IllegalStateException buildReactiveWrapperException(MethodParameter parameter) {
 		return new IllegalStateException(getClass().getSimpleName() +
-				" doesn't support reactive type wrapper: " + parameter.getGenericParameterType());
+				" does not support reactive type wrapper: " + parameter.getGenericParameterType());
 	}
 
 	/**

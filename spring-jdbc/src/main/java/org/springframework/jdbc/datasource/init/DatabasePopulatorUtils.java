@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;

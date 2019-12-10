@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -44,7 +45,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
@@ -61,7 +64,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(HttpMethod.HEAD, request.method());
+		assertThat(request.method()).isEqualTo(HttpMethod.HEAD);
 	}
 
 	@Test
@@ -74,7 +77,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(URI.create("https://example.com/"), request.uri());
+		assertThat(request.uri()).isEqualTo(URI.create("https://example.com/"));
 	}
 
 	@Test
@@ -86,11 +89,11 @@ public class DefaultServerRequestTests {
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		URI result = request.uriBuilder().build();
-		assertEquals("http", result.getScheme());
-		assertEquals("localhost", result.getHost());
-		assertEquals(-1, result.getPort());
-		assertEquals("/path", result.getPath());
-		assertEquals("a=1", result.getQuery());
+		assertThat(result.getScheme()).isEqualTo("http");
+		assertThat(result.getHost()).isEqualTo("localhost");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
+		assertThat(result.getQuery()).isEqualTo("a=1");
 	}
 
 	@Test
@@ -101,7 +104,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(Optional.of("bar"), request.attribute("foo"));
+		assertThat(request.attribute("foo")).isEqualTo(Optional.of("bar"));
 	}
 
 	@Test
@@ -112,7 +115,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(Optional.of("bar"), request.param("foo"));
+		assertThat(request.param("foo")).isEqualTo(Optional.of("bar"));
 	}
 
 	@Test
@@ -123,7 +126,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(Optional.of(""), request.param("foo"));
+		assertThat(request.param("foo")).isEqualTo(Optional.of(""));
 	}
 
 	@Test
@@ -134,7 +137,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertEquals(Optional.empty(), request.param("bar"));
+		assertThat(request.param("bar")).isEqualTo(Optional.empty());
 	}
 
 	@Test
@@ -147,10 +150,10 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		assertEquals("bar", request.pathVariable("foo"));
+		assertThat(request.pathVariable("foo")).isEqualTo("bar");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void pathVariableNotFound() {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
@@ -160,7 +163,8 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		request.pathVariable("baz");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.pathVariable("baz"));
 	}
 
 	@Test
@@ -173,7 +177,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		assertEquals(pathVariables, request.pathVariables());
+		assertThat(request.pathVariables()).isEqualTo(pathVariables);
 	}
 
 	@Test
@@ -201,11 +205,11 @@ public class DefaultServerRequestTests {
 				this.messageConverters);
 
 		ServerRequest.Headers headers = request.headers();
-		assertEquals(accept, headers.accept());
-		assertEquals(acceptCharset, headers.acceptCharset());
-		assertEquals(OptionalLong.of(contentLength), headers.contentLength());
-		assertEquals(Optional.of(contentType), headers.contentType());
-		assertEquals(httpHeaders, headers.asHttpHeaders());
+		assertThat(headers.accept()).isEqualTo(accept);
+		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
+		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
+		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
 	}
 
 	@Test
@@ -221,7 +225,7 @@ public class DefaultServerRequestTests {
 		MultiValueMap<String, Cookie> expected = new LinkedMultiValueMap<>();
 		expected.add("foo", cookie);
 
-		assertEquals(expected, request.cookies());
+		assertThat(request.cookies()).isEqualTo(expected);
 
 	}
 
@@ -235,7 +239,7 @@ public class DefaultServerRequestTests {
 				this.messageConverters);
 
 		String result = request.body(String.class);
-		assertEquals("foo", result);
+		assertThat(result).isEqualTo("foo");
 	}
 
 	@Test
@@ -248,12 +252,12 @@ public class DefaultServerRequestTests {
 				Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
 		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
-		assertEquals(2, result.size());
-		assertEquals("foo", result.get(0));
-		assertEquals("bar", result.get(1));
+		assertThat(result.size()).isEqualTo(2);
+		assertThat(result.get(0)).isEqualTo("foo");
+		assertThat(result.get(1)).isEqualTo("bar");
 	}
 
-	@Test(expected = HttpMediaTypeNotSupportedException.class)
+	@Test
 	public void bodyUnacceptable() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
@@ -262,7 +266,8 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, Collections.emptyList());
 
-		request.body(String.class);
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				request.body(String.class));
 	}
 
 	@Test
@@ -274,7 +279,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		assertEquals(session, request.session());
+		assertThat(request.session()).isEqualTo(session);
 
 	}
 
@@ -292,7 +297,7 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		assertEquals(principal, request.principal().get());
+		assertThat(request.principal().get()).isEqualTo(principal);
 
 	}
 

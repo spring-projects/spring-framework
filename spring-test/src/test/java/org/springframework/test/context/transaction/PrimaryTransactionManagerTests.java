@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.test.context.transaction;
 
 import javax.sql.DataSource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,15 +30,14 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.test.transaction.TransactionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Integration tests that ensure that <em>primary</em> transaction managers
@@ -49,34 +47,32 @@ import static org.junit.Assert.*;
  * @since 4.3
  * @see org.springframework.test.context.jdbc.PrimaryDataSourceTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @DirtiesContext
-public final class PrimaryTransactionManagerTests {
+final class PrimaryTransactionManagerTests {
 
 	private JdbcTemplate jdbcTemplate;
 
 
 	@Autowired
-	public void setDataSource(DataSource dataSource1) {
+	void setDataSource(DataSource dataSource1) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource1);
 	}
 
-
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		assertNumUsers(0);
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
+	void afterTransaction() {
 		assertNumUsers(0);
 	}
 
 	@Test
 	@Transactional
-	public void transactionalTest() {
-		TransactionTestUtils.assertInTransaction(true);
+	void transactionalTest() {
+		assertThatTransaction().isActive();
 
 		ClassPathResource resource = new ClassPathResource("/org/springframework/test/context/jdbc/data.sql");
 		new ResourceDatabasePopulator(resource).execute(jdbcTemplate.getDataSource());
@@ -85,8 +81,7 @@ public final class PrimaryTransactionManagerTests {
 	}
 
 	private void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table", expected,
-				JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user"));
+		assertThat(JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user")).as("Number of rows in the 'user' table").isEqualTo(expected);
 	}
 
 
@@ -96,17 +91,17 @@ public final class PrimaryTransactionManagerTests {
 
 		@Primary
 		@Bean
-		public PlatformTransactionManager primaryTransactionManager() {
+		PlatformTransactionManager primaryTransactionManager() {
 			return new DataSourceTransactionManager(dataSource1());
 		}
 
 		@Bean
-		public PlatformTransactionManager additionalTransactionManager() {
+		PlatformTransactionManager additionalTransactionManager() {
 			return new DataSourceTransactionManager(dataSource2());
 		}
 
 		@Bean
-		public DataSource dataSource1() {
+		DataSource dataSource1() {
 			return new EmbeddedDatabaseBuilder()
 					.generateUniqueName(true)
 					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")
@@ -114,7 +109,7 @@ public final class PrimaryTransactionManagerTests {
 		}
 
 		@Bean
-		public DataSource dataSource2() {
+		DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
 		}
 	}

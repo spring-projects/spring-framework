@@ -18,6 +18,7 @@ package org.springframework.transaction.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
+
 import javax.ejb.ApplicationException;
 import javax.ejb.TransactionAttributeType;
 
@@ -59,7 +60,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || other instanceof Ejb3TransactionAnnotationParser);
 	}
 

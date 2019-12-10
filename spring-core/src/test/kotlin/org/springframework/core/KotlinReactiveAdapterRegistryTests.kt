@@ -19,12 +19,16 @@ package org.springframework.core
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 import java.time.Duration
 import kotlin.reflect.KClass
 
@@ -36,17 +40,40 @@ class KotlinReactiveAdapterRegistryTests {
 	fun deferredToPublisher() {
 		val source = GlobalScope.async { 1 }
 		val target: Publisher<Int> = getAdapter(Deferred::class).toPublisher(source)
-		assertTrue("Expected Mono Publisher: " + target.javaClass.name, target is Mono<*>)
-		assertEquals(1, (target as Mono<Int>).block(Duration.ofMillis(1000)))
+		assertThat(target).isInstanceOf(Mono::class.java)
+		assertThat((target as Mono<Int>).block(Duration.ofMillis(1000))).isEqualTo(1)
 	}
 
 	@Test
 	fun publisherToDeferred() {
 		val source = Mono.just(1)
 		val target = getAdapter(Deferred::class).fromPublisher(source)
-		assertTrue(target is Deferred<*>)
-		assertEquals(1, runBlocking { (target as Deferred<*>).await() })
+		assertThat(target).isInstanceOf(Deferred::class.java)
+		assertThat(runBlocking { (target as Deferred<*>).await() }).isEqualTo(1)
+	}
 
+	@Test
+	fun flowToPublisher() {
+		val source = flow {
+			emit(1)
+			emit(2)
+			emit(3)
+		}
+		val target: Publisher<Int> = getAdapter(Flow::class).toPublisher(source)
+		assertThat(target).isInstanceOf(Flux::class.java)
+		StepVerifier.create(target)
+				.expectNext(1)
+				.expectNext(2)
+				.expectNext(3)
+				.verifyComplete()
+	}
+
+	@Test
+	fun publisherToFlow() {
+		val source = Flux.just(1, 2, 3)
+		val target = getAdapter(Flow::class).fromPublisher(source)
+		assertThat(target).isInstanceOf(Flow::class.java)
+		assertThat(runBlocking { (target as Flow<*>).toList() }).contains(1, 2, 3)
 	}
 
 	private fun getAdapter(reactiveType: KClass<*>): ReactiveAdapter {

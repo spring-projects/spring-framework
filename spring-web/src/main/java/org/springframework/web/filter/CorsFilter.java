@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +49,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  *
  * @author Sebastien Deleuze
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsFilter extends OncePerRequestFilter {
 
@@ -83,16 +84,11 @@ public class CorsFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(request);
-			if (corsConfiguration != null) {
-				boolean isValid = this.processor.processRequest(corsConfiguration, request, response);
-				if (!isValid || CorsUtils.isPreFlightRequest(request)) {
-					return;
-				}
-			}
+		CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(request);
+		boolean isValid = this.processor.processRequest(corsConfiguration, request, response);
+		if (!isValid || CorsUtils.isPreFlightRequest(request)) {
+			return;
 		}
-
 		filterChain.doFilter(request, response);
 	}
 

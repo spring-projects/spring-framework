@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -89,6 +90,10 @@ public class HandlerExecutionChain {
 
 	public void addInterceptor(HandlerInterceptor interceptor) {
 		initInterceptorList().add(interceptor);
+	}
+
+	public void addInterceptor(int index, HandlerInterceptor interceptor) {
+		initInterceptorList().add(index, interceptor);
 	}
 
 	public void addInterceptors(HandlerInterceptor... interceptors) {

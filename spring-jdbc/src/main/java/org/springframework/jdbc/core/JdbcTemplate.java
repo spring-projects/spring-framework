@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -182,7 +183,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Set whether or not we want to ignore SQLWarnings.
 	 * <p>Default is "true", swallowing and logging all warnings. Switch this flag
-	 * to "false" to make the JdbcTemplate throw a SQLWarningException instead.
+	 * to "false" to make the JdbcTemplate throw an SQLWarningException instead.
 	 * @see java.sql.SQLWarning
 	 * @see org.springframework.jdbc.SQLWarningException
 	 * @see #handleWarnings
@@ -576,7 +577,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 
 			private String appendSql(@Nullable String sql, String statement) {
-				return (StringUtils.isEmpty(sql) ? statement : sql + "; " + statement);
+				return (StringUtils.hasLength(sql) ? sql + "; " + statement : statement);
 			}
 
 			@Override
@@ -1395,7 +1396,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw a SQLWarningException if we're not ignoring warnings,
+	 * Throw an SQLWarningException if we're not ignoring warnings,
 	 * otherwise log the warnings at debug level.
 	 * @param stmt the current JDBC statement
 	 * @throws SQLWarningException if not ignoring warnings
@@ -1418,7 +1419,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw a SQLWarningException if encountering an actual warning.
+	 * Throw an SQLWarningException if encountering an actual warning.
 	 * @param warning the warnings object from the current statement.
 	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
@@ -1446,7 +1447,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object which is potentially a SqlProvider
+	 * @param sqlProvider object which is potentially an SqlProvider
 	 * @return the SQL string, or {@code null} if not known
 	 * @see SqlProvider
 	 */

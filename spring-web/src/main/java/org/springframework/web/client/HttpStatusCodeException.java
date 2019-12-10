@@ -83,8 +83,25 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super(getMessage(statusCode, statusText), statusCode.value(), statusText,
-				responseHeaders, responseBody, responseCharset);
+		this(getMessage(statusCode, statusText),
+				statusCode, statusText, responseHeaders, responseBody, responseCharset);
+	}
+
+	/**
+	 * Construct instance with an {@link HttpStatus}, status text, content, and
+	 * a response charset.
+	 * @param message the exception message
+	 * @param statusCode the status code
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers, may be {@code null}
+	 * @param responseBody the response body content, may be {@code null}
+	 * @param responseCharset the response body charset, may be {@code null}
+	 * @since 5.2.2
+	 */
+	protected HttpStatusCodeException(String message, HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+
+		super(message, statusCode.value(), statusText, responseHeaders, responseBody, responseCharset);
 		this.statusCode = statusCode;
 	}
 

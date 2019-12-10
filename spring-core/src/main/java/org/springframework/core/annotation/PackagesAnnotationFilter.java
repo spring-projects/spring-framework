@@ -37,11 +37,11 @@ final class PackagesAnnotationFilter implements AnnotationFilter {
 
 
 	PackagesAnnotationFilter(String... packages) {
-		Assert.notNull(packages, "Packages must not be null");
+		Assert.notNull(packages, "Packages array must not be null");
 		this.prefixes = new String[packages.length];
 		for (int i = 0; i < packages.length; i++) {
 			String pkg = packages[i];
-			Assert.hasText(pkg, "Package must not have empty elements");
+			Assert.hasText(pkg, "Packages array must not have empty elements");
 			this.prefixes[i] = pkg + ".";
 		}
 		Arrays.sort(this.prefixes);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test for {@link CompoundComparator}.
@@ -30,16 +30,13 @@ import org.junit.rules.ExpectedException;
  * @author Phillip Webb
  */
 @Deprecated
-public class CompoundComparatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+class CompoundComparatorTests {
 
 	@Test
-	public void shouldNeedAtLeastOneComparator() {
+	void shouldNeedAtLeastOneComparator() {
 		Comparator<String> c = new CompoundComparator<>();
-		thrown.expect(IllegalStateException.class);
-		c.compare("foo", "bar");
+		assertThatIllegalStateException().isThrownBy(() ->
+				c.compare("foo", "bar"));
 	}
 
 }

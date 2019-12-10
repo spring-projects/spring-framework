@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,33 +41,33 @@ public abstract class MergedAnnotationPredicates {
 
 
 	/**
-	 * Returns a new {@link Predicate} that evaluates {@code true} if the
-	 * {@link MergedAnnotation#getType() merged annotation type} is contained in
+	 * Create a new {@link Predicate} that evaluates to {@code true} if the name of the
+	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
 	 * @param <A> the annotation type
 	 * @param typeNames the names that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(String... typeNames) {
-		return annotation -> ObjectUtils.containsElement(typeNames, annotation.getType());
+		return annotation -> ObjectUtils.containsElement(typeNames, annotation.getType().getName());
 	}
 
 	/**
-	 * Returns a new {@link Predicate} that evaluates {@code true} if the
-	 * {@link MergedAnnotation#getType() merged annotation type} is contained in
+	 * Create a new {@link Predicate} that evaluates to {@code true} if the
+	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
 	 * @param <A> the annotation type
 	 * @param types the types that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Class<?>... types) {
-		return annotation -> Arrays.stream(types).anyMatch(type -> type.getName().equals(annotation.getType()));
+		return annotation -> ObjectUtils.containsElement(types, annotation.getType());
 	}
 
 	/**
-	 * Returns a new {@link Predicate} that evaluates {@code true} if the
-	 * {@link MergedAnnotation#getType() merged annotation type} is contained in
-	 * the collection.
+	 * Create a new {@link Predicate} that evaluates to {@code true} if the
+	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
+	 * the specified collection.
 	 * @param <A> the annotation type
 	 * @param types the type names or classes that should be matched
 	 * @return a {@link Predicate} to test the annotation type
@@ -76,16 +75,19 @@ public abstract class MergedAnnotationPredicates {
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Collection<?> types) {
 		return annotation -> types.stream()
 				.map(type -> type instanceof Class ? ((Class<?>) type).getName() : type.toString())
-				.anyMatch(typeName -> typeName.equals(annotation.getType()));
+				.anyMatch(typeName -> typeName.equals(annotation.getType().getName()));
 	}
 
 	/**
-	 * Returns a new stateful, single use {@link Predicate} that matches only
+	 * Create a new stateful, single use {@link Predicate} that matches only
 	 * the first run of an extracted value. For example,
-	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::depth)}
-	 * will return the first annotation and a subsequent run of the same depth.
-	 * NOTE: this predicate only matches the first first run, once the extracted
-	 * value changes the predicate always returns {@code false}.
+	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::distance)}
+	 * will match the first annotation, and any subsequent runs that have the
+	 * same distance.
+	 * <p>NOTE: This predicate only matches the first run. Once the extracted
+	 * value changes, the predicate always returns {@code false}. For example,
+	 * if you have a set of annotations with distances {@code [1, 1, 2, 1]} then
+	 * only the first two will match.
 	 * @param valueExtractor function used to extract the value to check
 	 * @return a {@link Predicate} that matches the first run of the extracted
 	 * values
@@ -97,13 +99,13 @@ public abstract class MergedAnnotationPredicates {
 	}
 
 	/**
-	 * Returns a new stateful, single use {@link Predicate} that matches
-	 * annotations that are unique based on extracted key. For example
-	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::type)} will
-	 * match the first time a unique type is seen.
+	 * Create a new stateful, single use {@link Predicate} that matches
+	 * annotations that are unique based on the extracted key. For example
+	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::getType)} will
+	 * match the first time a unique type is encountered.
 	 * @param keyExtractor function used to extract the key used to test for
 	 * uniqueness
-	 * @return a {@link Predicate} that matches unique annotation based on the
+	 * @return a {@link Predicate} that matches a unique annotation based on the
 	 * extracted key
 	 */
 	public static <A extends Annotation, K> Predicate<MergedAnnotation<A>> unique(
@@ -141,7 +143,6 @@ public abstract class MergedAnnotationPredicates {
 			return ObjectUtils.nullSafeEquals(value, this.lastValue);
 
 		}
-
 	}
 
 
@@ -165,7 +166,6 @@ public abstract class MergedAnnotationPredicates {
 			K key = this.keyExtractor.apply(annotation);
 			return this.seen.add(key);
 		}
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.util.pattern;
+
+import org.springframework.http.server.PathContainer;
 
 /**
  * Parser for URI path patterns producing {@link PathPattern} instances that can
@@ -35,6 +37,8 @@ public class PathPatternParser {
 	private boolean matchOptionalTrailingSeparator = true;
 
 	private boolean caseSensitive = true;
+
+	private PathContainer.Options pathOptions = PathContainer.Options.HTTP_PATH;
 
 
 	/**
@@ -75,14 +79,22 @@ public class PathPatternParser {
 	}
 
 	/**
-	 * Accessor used for the separator to use.
-	 * <p>Currently not exposed for configuration with URI path patterns and
-	 * mainly for use in InternalPathPatternParser and PathPattern. If required
-	 * in the future, a similar option would also need to be exposed in
-	 * {@link org.springframework.http.server.PathContainer PathContainer}.
+	 * Set options for parsing patterns. These should be the same as the
+	 * options used to parse input paths.
+	 * <p>{@link org.springframework.http.server.PathContainer.Options#HTTP_PATH}
+	 * is used by default.
+	 * @since 5.2
 	 */
-	char getSeparator() {
-		return '/';
+	public void setPathOptions(PathContainer.Options pathOptions) {
+		this.pathOptions = pathOptions;
+	}
+
+	/**
+	 * Return the {@link #setPathOptions configured} pattern parsing options.
+	 * @since 5.2
+	 */
+	public PathContainer.Options getPathOptions() {
+		return this.pathOptions;
 	}
 
 

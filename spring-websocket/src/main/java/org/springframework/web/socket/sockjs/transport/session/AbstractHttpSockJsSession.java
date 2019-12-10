@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -137,6 +138,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Return the selected sub-protocol to use.
 	 */
+	@Override
 	@Nullable
 	public String getAcceptedProtocol() {
 		return this.acceptedProtocol;

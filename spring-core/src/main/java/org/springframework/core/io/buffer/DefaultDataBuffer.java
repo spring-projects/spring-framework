@@ -21,9 +21,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -80,10 +82,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	/**
-	 * Directly exposes the native {@code ByteBuffer} that this buffer is based on.
+	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
+	 * on also updating the {@code ByteBuffer's} position and limit to match
+	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
+		this.byteBuffer.position(this.readPosition);
+		this.byteBuffer.limit(readableByteCount());
 		return this.byteBuffer;
 	}
 
@@ -376,6 +382,28 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 
+	@Override
+	public String toString(int index, int length, Charset charset) {
+		checkIndex(index, length);
+		Assert.notNull(charset, "Charset must not be null");
+
+		byte[] bytes;
+		int offset;
+
+		if (this.byteBuffer.hasArray()) {
+			bytes = this.byteBuffer.array();
+			offset = this.byteBuffer.arrayOffset() + index;
+		}
+		else {
+			bytes = new byte[length];
+			offset = 0;
+			ByteBuffer duplicate = this.byteBuffer.duplicate();
+			duplicate.clear().position(index).limit(index + length);
+			duplicate.get(bytes, 0, length);
+		}
+		return new String(bytes, offset, length, charset);
+	}
+
 	/**
 	 * Calculate the capacity of the buffer.
 	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
@@ -407,7 +435,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

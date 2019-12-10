@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.samples.standalone;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
@@ -33,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.validation.Valid;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

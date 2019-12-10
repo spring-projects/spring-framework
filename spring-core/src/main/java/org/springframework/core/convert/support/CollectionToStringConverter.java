@@ -19,6 +19,7 @@ package org.springframework.core.convert.support;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -64,18 +65,13 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 		if (sourceCollection.isEmpty()) {
 			return "";
 		}
-		StringBuilder sb = new StringBuilder();
-		int i = 0;
+		StringJoiner sj = new StringJoiner(DELIMITER);
 		for (Object sourceElement : sourceCollection) {
-			if (i > 0) {
-				sb.append(DELIMITER);
-			}
 			Object targetElement = this.conversionService.convert(
 					sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType);
-			sb.append(targetElement);
-			i++;
+			sj.add(String.valueOf(targetElement));
 		}
-		return sb.toString();
+		return sj.toString();
 	}
 
 }

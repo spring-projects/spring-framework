@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -242,11 +243,10 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 * null elements altogether.
 		 */
 		public static String toDelimitedString(String... elements) {
-			StringBuilder rtn = new StringBuilder();
+			StringJoiner rtn = new StringJoiner(CODE_SEPARATOR);
 			for (String element : elements) {
 				if (StringUtils.hasLength(element)) {
-					rtn.append(rtn.length() == 0 ? "" : CODE_SEPARATOR);
-					rtn.append(element);
+					rtn.add(element);
 				}
 			}
 			return rtn.toString();

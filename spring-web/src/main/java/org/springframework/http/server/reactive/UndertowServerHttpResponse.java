@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	}
 
 	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
-		UndertowHeadersAdapter headersMap =
-				new UndertowHeadersAdapter(exchange.getResponseHeaders());
+		UndertowHeadersAdapter headersMap = new UndertowHeadersAdapter(exchange.getResponseHeaders());
 		return new HttpHeaders(headersMap);
 	}
 
@@ -84,7 +83,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	@Override
 	public HttpStatus getStatusCode() {
 		HttpStatus httpStatus = super.getStatusCode();
-		return httpStatus != null ? httpStatus : HttpStatus.resolve(this.exchange.getStatusCode());
+		return (httpStatus != null ? httpStatus : HttpStatus.resolve(this.exchange.getStatusCode()));
 	}
 
 
@@ -116,6 +115,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				cookie.setSameSiteMode(httpCookie.getSameSite());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
 			}
 		}

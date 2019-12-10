@@ -74,32 +74,32 @@ final class CompositeLog implements Log {
 
 	@Override
 	public boolean isFatalEnabled() {
-		return this.fatalLogger != NO_OP_LOG;
+		return (this.fatalLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return this.errorLogger != NO_OP_LOG;
+		return (this.errorLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isWarnEnabled() {
-		return this.warnLogger != NO_OP_LOG;
+		return (this.warnLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return this.infoLogger != NO_OP_LOG;
+		return (this.infoLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isDebugEnabled() {
-		return this.debugLogger != NO_OP_LOG;
+		return (this.debugLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return this.traceLogger != NO_OP_LOG;
+		return (this.traceLogger != NO_OP_LOG);
 	}
 
 	@Override

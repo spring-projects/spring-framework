@@ -112,6 +112,7 @@ class CaptureTheRestPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "CaptureTheRest(/{*" + this.variableName + "})";
 	}

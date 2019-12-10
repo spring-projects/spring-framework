@@ -16,11 +16,9 @@
 
 package org.springframework.web.context.support;
 
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -37,12 +35,13 @@ import org.springframework.web.context.ContextLoader;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext WebApplicationContext}
- * implementation which accepts annotated classes as input - in particular
+ * implementation which accepts <em>component classes</em> as input &mdash; in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
  * classes, but also plain {@link org.springframework.stereotype.Component @Component}
- * classes and JSR-330 compliant classes using {@code javax.inject} annotations. Allows
- * for registering classes one by one (specifying class names as config location) as well
- * as for classpath scanning (specifying base packages as config location).
+ * classes and JSR-330 compliant classes using {@code javax.inject} annotations.
+ *
+ * <p>Allows for registering classes one by one (specifying class names as config
+ * location) as well as for classpath scanning (specifying base packages as config location).
  *
  * <p>This is essentially the equivalent of
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -55,7 +54,7 @@ import org.springframework.web.context.ContextLoader;
  *
  * <p>As of Spring 3.1, this class may also be directly instantiated and injected into
  * Spring's {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
- * new {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
+ * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
  * code-based alternative to {@code web.xml}. See its Javadoc for details and usage examples.
  *
  * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
@@ -76,7 +75,8 @@ import org.springframework.web.context.ContextLoader;
  *
  * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
- * to deliberately override certain bean definitions via an extra Configuration class.
+ * to deliberately override certain bean definitions via an extra {@code @Configuration}
+ * class.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -92,11 +92,9 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	@Nullable
 	private ScopeMetadataResolver scopeMetadataResolver;
 
-	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
+	private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
 
 	private final Set<String> basePackages = new LinkedHashSet<>();
-
-	private final Set<BeanRegistration> registeredBeans = new LinkedHashSet<>();
 
 
 	/**
@@ -141,76 +139,36 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 
 	/**
-	 * Register one or more annotated classes to be processed.
+	 * Register one or more component classes to be processed.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
-	 * @param annotatedClasses one or more annotated classes, e.g.
-	 * {@link org.springframework.context.annotation.Configuration @Configuration} classes
+	 * @param componentClasses one or more component classes,
+	 * e.g. {@link org.springframework.context.annotation.Configuration @Configuration} classes
 	 * @see #scan(String...)
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * @see #setConfigLocation(String)
 	 * @see #refresh()
 	 */
 	@Override
-	public final void register(Class<?>... annotatedClasses) {
-		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		Collections.addAll(this.annotatedClasses, annotatedClasses);
+	public void register(Class<?>... componentClasses) {
+		Assert.notEmpty(componentClasses, "At least one component class must be specified");
+		Collections.addAll(this.componentClasses, componentClasses);
 	}
 
 	/**
 	 * Perform a scan within the specified base packages.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
-	 * @param basePackages the packages to check for annotated classes
-	 * @see #register(Class...)
+	 * @param basePackages the packages to check for component classes
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * @see #register(Class...)
+	 * @see #setConfigLocation(String)
 	 * @see #refresh()
 	 */
 	@Override
-	public final void scan(String... basePackages) {
+	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Collections.addAll(this.basePackages, basePackages);
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations.
-	 * <p>Note that {@link #refresh()} must be called in order for the context
-	 * to fully process the new classes.
-	 * @param annotatedClass the class of the bean
-	 * @param qualifiers specific qualifier annotations to consider,
-	 * in addition to qualifiers at the bean class level (may be empty)
-	 * @since 5.2
-	 * @see #register(Class...)
-	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
-	 * @see #refresh()
-	 */
-	@Override
-	@SafeVarargs
-	@SuppressWarnings("varargs")
-	public final <T> void registerBean(Class<T> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		this.registeredBeans.add(new BeanRegistration(annotatedClass, null, qualifiers));
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations.
-	 * <p>Note that {@link #refresh()} must be called in order for the context
-	 * to fully process the new classes.
-	 * @param annotatedClass the class of the bean
-	 * @param qualifiers specific qualifier annotations to consider,
-	 * in addition to qualifiers at the bean class level (may be empty)
-	 * @since 5.2
-	 * @see #register(Class...)
-	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
-	 * @see #refresh()
-	 */
-	@Override
-	@SafeVarargs
-	@SuppressWarnings("varargs")
-	public final <T> void registerBean(
-			Class<T> annotatedClass, Supplier<T> supplier, Class<? extends Annotation>... qualifiers) {
-
-		this.registeredBeans.add(new BeanRegistration(annotatedClass, supplier, qualifiers));
 	}
 
 
@@ -222,7 +180,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * {@link #setConfigLocations(String[])}, attempt first to load each location as a
 	 * class, registering a {@code BeanDefinition} if class loading is successful,
 	 * and if class loading fails (i.e. a {@code ClassNotFoundException} is raised),
-	 * assume the value is a package and attempt to scan it for annotated classes.
+	 * assume the value is a package and attempt to scan it for component classes.
 	 * <p>Enables the default set of annotation configuration post processors, such that
 	 * {@code @Autowired}, {@code @Required}, and associated annotations can be used.
 	 * <p>Configuration class bean definitions are registered with generated bean
@@ -237,7 +195,6 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see ClassPathBeanDefinitionScanner
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
 		AnnotatedBeanDefinitionReader reader = getAnnotatedBeanDefinitionReader(beanFactory);
 		ClassPathBeanDefinitionScanner scanner = getClassPathBeanDefinitionScanner(beanFactory);
@@ -255,12 +212,12 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
 		}
 
-		if (!this.annotatedClasses.isEmpty()) {
+		if (!this.componentClasses.isEmpty()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Registering annotated classes: [" +
-						StringUtils.collectionToCommaDelimitedString(this.annotatedClasses) + "]");
+				logger.debug("Registering component classes: [" +
+						StringUtils.collectionToCommaDelimitedString(this.componentClasses) + "]");
 			}
-			reader.register(ClassUtils.toClassArray(this.annotatedClasses));
+			reader.register(ClassUtils.toClassArray(this.componentClasses));
 		}
 
 		if (!this.basePackages.isEmpty()) {
@@ -269,15 +226,6 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 						StringUtils.collectionToCommaDelimitedString(this.basePackages) + "]");
 			}
 			scanner.scan(StringUtils.toStringArray(this.basePackages));
-		}
-
-		if (!this.registeredBeans.isEmpty()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Registering supplied beans: [" +
-						StringUtils.collectionToCommaDelimitedString(this.registeredBeans) + "]");
-			}
-			this.registeredBeans.forEach(reg ->
-					reader.registerBean(reg.getAnnotatedClass(), reg.getSupplier(), reg.getQualifiers()));
 		}
 
 		String[] configLocations = getConfigLocations();
@@ -297,7 +245,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 					}
 					int count = scanner.scan(configLocation);
 					if (count == 0 && logger.isDebugEnabled()) {
-						logger.debug("No annotated classes found for specified class/package [" + configLocation + "]");
+						logger.debug("No component classes found for specified class/package [" + configLocation + "]");
 					}
 				}
 			}
@@ -331,48 +279,6 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	protected ClassPathBeanDefinitionScanner getClassPathBeanDefinitionScanner(DefaultListableBeanFactory beanFactory) {
 		return new ClassPathBeanDefinitionScanner(beanFactory, true, getEnvironment());
-	}
-
-
-	/**
-	 * Holder for a programmatic bean registration.
-	 * @see #registerBean(Class, Class[])
-	 * @see #registerBean(Class, Supplier, Class[])
-	 */
-	private static class BeanRegistration {
-
-		private final Class<?> annotatedClass;
-
-		@Nullable
-		private final Supplier<?> supplier;
-
-		private final Class<? extends Annotation>[] qualifiers;
-
-		public BeanRegistration(
-				Class<?> annotatedClass, @Nullable Supplier<?> supplier, Class<? extends Annotation>[] qualifiers) {
-			this.annotatedClass = annotatedClass;
-			this.supplier = supplier;
-			this.qualifiers = qualifiers;
-		}
-
-		public Class<?> getAnnotatedClass() {
-			return this.annotatedClass;
-		}
-
-		@Nullable
-		@SuppressWarnings("rawtypes")
-		public Supplier getSupplier() {
-			return this.supplier;
-		}
-
-		public Class<? extends Annotation>[] getQualifiers() {
-			return this.qualifiers;
-		}
-
-		@Override
-		public String toString() {
-			return this.annotatedClass.getName();
-		}
 	}
 
 }

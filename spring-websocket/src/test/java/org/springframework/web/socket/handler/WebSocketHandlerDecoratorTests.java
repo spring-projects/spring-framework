@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket.handler;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link WebSocketHandlerDecorator}.
@@ -34,7 +34,7 @@ public class WebSocketHandlerDecoratorTests {
 		WebSocketHandlerDecorator h2 = new WebSocketHandlerDecorator(h1);
 		WebSocketHandlerDecorator h3 = new WebSocketHandlerDecorator(h2);
 
-		assertSame(h1, h3.getLastHandler());
+		assertThat(h3.getLastHandler()).isSameAs(h1);
 	}
 
 }

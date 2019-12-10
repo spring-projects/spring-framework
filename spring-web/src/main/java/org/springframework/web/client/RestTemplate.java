@@ -84,6 +84,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * @author Brian Clozel
  * @author Roy Clarkson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -198,10 +199,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 3.2.7
 	 */
 	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
+		validateConverters(messageConverters);
 		this.messageConverters.addAll(messageConverters);
 		this.uriTemplateHandler = initUriTemplateHandler();
 	}
+
 
 	private static DefaultUriBuilderFactory initUriTemplateHandler() {
 		DefaultUriBuilderFactory uriFactory = new DefaultUriBuilderFactory();
@@ -215,12 +217,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
+		validateConverters(messageConverters);
 		// Take getMessageConverters() List as-is when passed in here
 		if (this.messageConverters != messageConverters) {
 			this.messageConverters.clear();
 			this.messageConverters.addAll(messageConverters);
 		}
+	}
+
+	private void validateConverters(List<HttpMessageConverter<?>> messageConverters) {
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter is required");
+		Assert.noNullElements(messageConverters, "The HttpMessageConverter list must not contain null elements");
 	}
 
 	/**
@@ -950,9 +957,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						return;
 					}
 				}
-				String message = "No HttpMessageConverter for [" + requestBodyClass.getName() + "]";
+				String message = "No HttpMessageConverter for " + requestBodyClass.getName();
 				if (requestContentType != null) {
-					message += " and content type [" + requestContentType + "]";
+					message += " and content type \"" + requestContentType + "\"";
 				}
 				throw new RestClientException(message);
 			}
@@ -964,8 +971,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					logger.debug("Writing [" + body + "] as \"" + mediaType + "\"");
 				}
 				else {
-					String classname = converter.getClass().getName();
-					logger.debug("Writing [" + body + "] with " + classname);
+					logger.debug("Writing [" + body + "] with " + converter.getClass().getName());
 				}
 			}
 		}

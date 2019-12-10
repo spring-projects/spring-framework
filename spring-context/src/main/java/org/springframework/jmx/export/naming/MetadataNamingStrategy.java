@@ -17,6 +17,7 @@
 package org.springframework.jmx.export.naming;
 
 import java.util.Hashtable;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 

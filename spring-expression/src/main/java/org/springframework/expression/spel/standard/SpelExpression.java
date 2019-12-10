@@ -180,7 +180,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Object getValue(Object rootObject) throws EvaluationException {
+	public Object getValue(@Nullable Object rootObject) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
 				return this.compiledAst.getValue(rootObject, getEvaluationContext());
@@ -208,7 +208,7 @@ public class SpelExpression implements Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T getValue(Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(@Nullable Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
 				Object result = this.compiledAst.getValue(rootObject, getEvaluationContext());
@@ -306,7 +306,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 
 		if (this.compiledAst != null) {
@@ -335,7 +335,7 @@ public class SpelExpression implements Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> expectedResultType)
+	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");
@@ -377,7 +377,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Class<?> getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(@Nullable Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
@@ -392,7 +392,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
 		return (typeDescriptor != null ? typeDescriptor.getType() : null);
@@ -406,7 +406,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
+	public TypeDescriptor getValueTypeDescriptor(@Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
@@ -422,7 +422,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject)
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");
@@ -431,7 +431,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public boolean isWritable(Object rootObject) throws EvaluationException {
+	public boolean isWritable(@Nullable Object rootObject) throws EvaluationException {
 		return this.ast.isWritable(
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration));
 	}
@@ -443,13 +443,13 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public boolean isWritable(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 		return this.ast.isWritable(new ExpressionState(context, toTypedValue(rootObject), this.configuration));
 	}
 
 	@Override
-	public void setValue(Object rootObject, @Nullable Object value) throws EvaluationException {
+	public void setValue(@Nullable Object rootObject, @Nullable Object value) throws EvaluationException {
 		this.ast.setValue(
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration), value);
 	}
@@ -461,7 +461,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	public void setValue(EvaluationContext context, Object rootObject, @Nullable Object value)
+	public void setValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Object value)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext is required");

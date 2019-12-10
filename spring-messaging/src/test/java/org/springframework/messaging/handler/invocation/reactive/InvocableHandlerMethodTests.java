@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -32,8 +32,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.messaging.handler.invocation.ResolvableMethod;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -55,11 +58,11 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invokeAndBlock(new Handler(), method);
 
-		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
-		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
-		assertEquals("99-value", value);
-		assertEquals("intArg", getStubResolver(0).getResolvedParameters().get(0).getParameterName());
-		assertEquals("stringArg", getStubResolver(1).getResolvedParameters().get(0).getParameterName());
+		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(value).isEqualTo("99-value");
+		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("intArg");
+		assertThat(getStubResolver(1).getResolvedParameters().get(0).getParameterName()).isEqualTo("stringArg");
 	}
 
 	@Test
@@ -69,22 +72,17 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invokeAndBlock(new Handler(), method);
 
-		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
-		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
-		assertEquals("null-null", value);
+		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(value).isEqualTo("null-null");
 	}
 
 	@Test
 	public void cannotResolveArg() {
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (MethodArgumentResolutionException ex) {
-			assertNotNull(ex.getMessage());
-			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatExceptionOfType(MethodArgumentResolutionException.class).isThrownBy(() ->
+				invokeAndBlock(new Handler(), method))
+			.withMessageContaining("Could not resolve parameter [0]");
 	}
 
 	@Test
@@ -92,9 +90,9 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invokeAndBlock(new Handler(), method, 99, "value");
 
-		assertNotNull(value);
-		assertEquals(String.class, value.getClass());
-		assertEquals("99-value", value);
+		assertThat(value).isNotNull();
+		assertThat(value.getClass()).isEqualTo(String.class);
+		assertThat(value).isEqualTo("99-value");
 	}
 
 	@Test
@@ -104,40 +102,30 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invokeAndBlock(new Handler(), method, 2, "value2");
 
-		assertEquals("2-value2", value);
+		assertThat(value).isEqualTo("2-value2");
 	}
 
 	@Test
 	public void exceptionInResolvingArg() {
 		this.resolvers.add(new InvocableHandlerMethodTests.ExceptionRaisingArgumentResolver());
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected -  allow HandlerMethodArgumentResolver exceptions to propagate
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				invokeAndBlock(new Handler(), method));
 	}
 
 	@Test
 	public void illegalArgumentException() {
 		this.resolvers.add(new StubArgumentResolver(Integer.class, "__not_an_int__"));
 		this.resolvers.add(new StubArgumentResolver("value"));
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertNotNull("Exception not wrapped", ex.getCause());
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-			assertTrue(ex.getMessage().contains("Endpoint ["));
-			assertTrue(ex.getMessage().contains("Method ["));
-			assertTrue(ex.getMessage().contains("with argument values:"));
-			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__not_an_int__]"));
-			assertTrue(ex.getMessage().contains("[1] [type=java.lang.String] [value=value"));
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeAndBlock(new Handler(), method))
+			.withCauseInstanceOf(IllegalArgumentException.class)
+			.withMessageContaining("Endpoint [")
+			.withMessageContaining("Method [")
+			.withMessageContaining("with argument values:")
+			.withMessageContaining("[0] [type=java.lang.String] [value=__not_an_int__]")
+			.withMessageContaining("[1] [type=java.lang.String] [value=value");
 	}
 
 	@Test
@@ -146,7 +134,7 @@ public class InvocableHandlerMethodTests {
 
 		Throwable expected = new Throwable("error");
 		Mono<Object> result = invoke(new Handler(), method, expected);
-		StepVerifier.create(result).expectErrorSatisfies(actual -> assertSame(expected, actual)).verify();
+		StepVerifier.create(result).expectErrorSatisfies(actual -> assertThat(actual).isSameAs(expected)).verify();
 	}
 
 	@Test
@@ -156,10 +144,10 @@ public class InvocableHandlerMethodTests {
 		Handler handler = new Handler();
 		Object value = invokeAndBlock(handler, method);
 
-		assertNull(value);
-		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
-		assertEquals("5.25", handler.getResult());
-		assertEquals("amount", getStubResolver(0).getResolvedParameters().get(0).getParameterName());
+		assertThat(value).isNull();
+		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(handler.getResult()).isEqualTo("5.25");
+		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("amount");
 	}
 
 	@Test
@@ -168,8 +156,8 @@ public class InvocableHandlerMethodTests {
 		Handler handler = new Handler();
 		Object value = invokeAndBlock(handler, method);
 
-		assertNull(value);
-		assertEquals("success", handler.getResult());
+		assertThat(value).isNull();
+		assertThat(handler.getResult()).isEqualTo("success");
 	}
 
 

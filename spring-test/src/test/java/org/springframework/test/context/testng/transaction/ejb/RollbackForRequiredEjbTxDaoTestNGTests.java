@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.test.context.testng.transaction.ejb;
 
+import org.testng.annotations.Test;
+
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Extension of {@link CommitForRequiredEjbTxDaoTestNGTests} which sets the default
@@ -52,10 +52,10 @@ public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjb
 		// participate in the existing transaction (if present), which in this case is the
 		// transaction managed by the TestContext framework which will be rolled back
 		// after each test method.
-		assertEquals("Expected count=0 after test2IncrementCount1().", 0, count);
+		assertThat(count).as("Expected count=0 after test2IncrementCount1().").isEqualTo(0);
 
 		count = dao.incrementCount(TEST_NAME);
-		assertEquals("Expected count=1 now.", 1, count);
+		assertThat(count).as("Expected count=1 now.").isEqualTo(1);
 	}
 
 }

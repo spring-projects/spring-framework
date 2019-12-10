@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -154,7 +155,9 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 				}
 				catch (IllegalArgumentException ex) {
 					if (isIgnoreInvalidLocale()) {
-						logger.debug("Ignoring invalid locale value [" + newLocale + "]: " + ex.getMessage());
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring invalid locale value [" + newLocale + "]: " + ex.getMessage());
+						}
 					}
 					else {
 						throw ex;

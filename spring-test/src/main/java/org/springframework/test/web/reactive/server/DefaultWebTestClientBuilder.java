@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,6 +139,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Override
 	public WebTestClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		this.webClientBuilder.exchangeStrategies(strategies);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
+		this.webClientBuilder.exchangeStrategies(configurer);
 		return this;
 	}
 

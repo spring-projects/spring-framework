@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
@@ -37,7 +37,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for static application context with custom application event multicaster.
@@ -89,7 +89,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	public void events() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
 		super.events();
-		assertEquals(1, TestApplicationEventMulticaster.counter);
+		assertThat(TestApplicationEventMulticaster.counter).isEqualTo(1);
 	}
 
 
