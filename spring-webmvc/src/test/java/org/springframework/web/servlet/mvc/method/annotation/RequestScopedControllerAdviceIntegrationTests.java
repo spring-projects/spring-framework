@@ -51,7 +51,7 @@ class RequestScopedControllerAdviceIntegrationTests {
 		assertThatCode(context::refresh).doesNotThrowAnyException();
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
-		assertThat(adviceBeans).size().isEqualTo(1);
+		assertThat(adviceBeans).hasSize(1);
 		assertThat(adviceBeans.get(0))//
 				.returns(RequestScopedControllerAdvice.class, ControllerAdviceBean::getBeanType)//
 				.returns(42, ControllerAdviceBean::getOrder);
