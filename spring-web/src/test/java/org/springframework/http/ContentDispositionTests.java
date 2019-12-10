@@ -70,6 +70,14 @@ public class ContentDispositionTests {
 						.build());
 	}
 
+	@Test // gh-24112
+	public void parseEncodedFilenameWithPaddedCharset() {
+		assertThat(parse("attachment; filename*= UTF-8''some-file.zip"))
+				.isEqualTo(ContentDisposition.builder("attachment")
+						.filename("some-file.zip", StandardCharsets.UTF_8)
+						.build());
+	}
+
 	@Test
 	public void parseEncodedFilenameWithoutCharset() {
 		assertThat(parse("form-data; name=\"name\"; filename*=test.txt"))
