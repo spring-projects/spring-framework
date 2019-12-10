@@ -79,7 +79,7 @@ class ScheduledTaskRegistrarTests {
 	@Test
 	void addCronTaskWithValidExpression() {
 		this.taskRegistrar.addCronTask(no_op, "* * * * * ?");
-		assertThat(this.taskRegistrar.getCronTaskList()).size().isEqualTo(1);
+		assertThat(this.taskRegistrar.getCronTaskList()).hasSize(1);
 	}
 
 	@Test
