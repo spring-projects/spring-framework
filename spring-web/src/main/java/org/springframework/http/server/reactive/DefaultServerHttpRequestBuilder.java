@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,9 +182,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		private final MultiValueMap<String, HttpCookie> cookies;
 
 		@Nullable
-		private final InetSocketAddress remoteAddress;
-
-		@Nullable
 		private final SslInfo sslInfo;
 
 		private final Flux<DataBuffer> body;
@@ -199,7 +196,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			super(uri, contextPath, headers);
 			this.methodValue = methodValue;
 			this.cookies = cookies;
-			this.remoteAddress = originalRequest.getRemoteAddress();
 			this.sslInfo = sslInfo != null ? sslInfo : originalRequest.getSslInfo();
 			this.body = body;
 			this.originalRequest = originalRequest;
@@ -218,7 +214,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Nullable
 		@Override
 		public InetSocketAddress getRemoteAddress() {
-			return this.remoteAddress;
+			return this.originalRequest.getRemoteAddress();
+		}
+
+		@Nullable
+		@Override
+		public InetSocketAddress getLocalAddress() {
+			return this.originalRequest.getLocalAddress();
 		}
 
 		@Nullable
