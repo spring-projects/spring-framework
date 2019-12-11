@@ -536,6 +536,51 @@ public class XmlBeanFactoryTests {
 		assertThat(complexEgo.getSpouse().getSpouse() == complexEgo).as("Correct circular reference").isTrue();
 	}
 
+
+	@Test
+	public void testCircularReferencesWithConstructor() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jennyc"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("davidc"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+
+	@Test
+	public void testCircularReferencesWithPrototype() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		xbf.getBean("jennys");
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jennys"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("davids"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+
+	@Test
+	public void testCircularReferencesWithDependOn() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jennyd"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("davidd"));
+	}
+
+
 	@Test
 	public void testCircularReferenceWithFactoryBeanFirst() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();

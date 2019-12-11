@@ -14,6 +14,28 @@
 		<property name="spouse" ref="jenny"/>
 	</bean>
 
+	<bean id="jennyc"  class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="davidc"/></constructor-arg>
+	</bean>
+
+	<bean id="davidc" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="jennyc"/></constructor-arg>
+	</bean>
+
+	<bean id="jennys"  class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse"><ref bean="davids"/></property>
+	</bean>
+
+	<bean id="davids" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse"><ref bean="jennys"/></property>
+	</bean>
+
+	<bean id="jennyd"  class="org.springframework.tests.sample.beans.TestBean" depends-on="davidd">
+	</bean>
+
+	<bean id="davidd" class="org.springframework.tests.sample.beans.TestBean" depends-on="jennyd">
+	</bean>
+
 	<bean id="jenks" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Andrew</value></property>
 		<property name="age"><value>36</value></property>
