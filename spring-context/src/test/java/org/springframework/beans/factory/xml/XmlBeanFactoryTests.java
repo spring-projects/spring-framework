@@ -536,7 +536,6 @@ public class XmlBeanFactoryTests {
 		assertThat(complexEgo.getSpouse().getSpouse() == complexEgo).as("Correct circular reference").isTrue();
 	}
 
-
 	@Test
 	public void testCircularReferencesWithConstructor() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
@@ -551,14 +550,12 @@ public class XmlBeanFactoryTests {
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
-
 	@Test
 	public void testCircularReferencesWithPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
-		xbf.getBean("jennys");
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				xbf.getBean("jennys"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
@@ -566,7 +563,6 @@ public class XmlBeanFactoryTests {
 				xbf.getBean("davids"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
-
 
 	@Test
 	public void testCircularReferencesWithDependOn() {
@@ -579,7 +575,6 @@ public class XmlBeanFactoryTests {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				xbf.getBean("davidd"));
 	}
-
 
 	@Test
 	public void testCircularReferenceWithFactoryBeanFirst() {
