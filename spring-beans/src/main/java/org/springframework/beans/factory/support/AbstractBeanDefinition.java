@@ -1161,30 +1161,30 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			return false;
 		}
 		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
-		return ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName())
-				&& ObjectUtils.nullSafeEquals(this.scope, that.scope)
-				&& this.abstractFlag == that.abstractFlag
-				&& this.lazyInit == that.lazyInit
-				&& this.autowireMode == that.autowireMode
-				&& this.dependencyCheck == that.dependencyCheck
-				&& Arrays.equals(this.dependsOn, that.dependsOn)
-				&& this.autowireCandidate == that.autowireCandidate
-				&& ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers)
-				&& this.primary == that.primary
-				&& this.nonPublicAccessAllowed == that.nonPublicAccessAllowed
-				&& this.lenientConstructorResolution == that.lenientConstructorResolution
-				&& ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)
-				&& ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)
-				&& ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)
-				&& ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName)
-				&& ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName)
-				&& ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName)
-				&& this.enforceInitMethod == that.enforceInitMethod
-				&& ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)
-				&& this.enforceDestroyMethod == that.enforceDestroyMethod
-				&& this.synthetic == that.synthetic
-				&& this.role == that.role
-				&& super.equals(other);
+		return (ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
+				ObjectUtils.nullSafeEquals(this.scope, that.scope) &&
+				this.abstractFlag == that.abstractFlag &&
+				this.lazyInit == that.lazyInit &&
+				this.autowireMode == that.autowireMode &&
+				this.dependencyCheck == that.dependencyCheck &&
+				Arrays.equals(this.dependsOn, that.dependsOn) &&
+				this.autowireCandidate == that.autowireCandidate &&
+				ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers) &&
+				this.primary == that.primary &&
+				this.nonPublicAccessAllowed == that.nonPublicAccessAllowed &&
+				this.lenientConstructorResolution == that.lenientConstructorResolution &&
+				ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues) &&
+				ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues) &&
+				ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides) &&
+				ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName) &&
+				ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName) &&
+				ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName) &&
+				this.enforceInitMethod == that.enforceInitMethod &&
+				ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName) &&
+				this.enforceDestroyMethod == that.enforceDestroyMethod &&
+				this.synthetic == that.synthetic &&
+				this.role == that.role &&
+				super.equals(other));
 	}
 
 	@Override
