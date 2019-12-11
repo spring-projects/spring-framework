@@ -14,26 +14,26 @@
 		<property name="spouse" ref="jenny"/>
 	</bean>
 
-	<bean id="jennyc"  class="org.springframework.tests.sample.beans.TestBean">
-		<constructor-arg index="1"><ref bean="davidc"/></constructor-arg>
+	<bean id="jenny_constructor"  class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="david_constructor"/></constructor-arg>
 	</bean>
 
-	<bean id="davidc" class="org.springframework.tests.sample.beans.TestBean">
-		<constructor-arg index="1"><ref bean="jennyc"/></constructor-arg>
+	<bean id="david_constructor" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="jenny_constructor"/></constructor-arg>
 	</bean>
 
-	<bean id="jennys"  class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
-		<property name="spouse"><ref bean="davids"/></property>
+	<bean id="jenny_prototype"  class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse"><ref bean="david_prototype"/></property>
 	</bean>
 
-	<bean id="davids" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
-		<property name="spouse"><ref bean="jennys"/></property>
+	<bean id="david_prototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse"><ref bean="jenny_prototype"/></property>
 	</bean>
 
-	<bean id="jennyd"  class="org.springframework.tests.sample.beans.TestBean" depends-on="davidd">
+	<bean id="jenny_depends_on"  class="org.springframework.tests.sample.beans.TestBean" depends-on="david_depends_on">
 	</bean>
 
-	<bean id="davidd" class="org.springframework.tests.sample.beans.TestBean" depends-on="jennyd">
+	<bean id="david_depends_on" class="org.springframework.tests.sample.beans.TestBean" depends-on="jenny_depends_on">
 	</bean>
 
 	<bean id="jenks" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">

@@ -543,10 +543,10 @@ public class XmlBeanFactoryTests {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("jennyc"))
+				xbf.getBean("jenny_constructor"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("davidc"))
+				xbf.getBean("david_constructor"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
@@ -557,10 +557,10 @@ public class XmlBeanFactoryTests {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("jennys"))
+				xbf.getBean("jenny_prototype"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("davids"))
+				xbf.getBean("david_prototype"))
 				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
@@ -571,9 +571,9 @@ public class XmlBeanFactoryTests {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("jennyd"));
+				xbf.getBean("jenny_depends_on"));
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("davidd"));
+				xbf.getBean("david_depends_on"));
 	}
 
 	@Test
