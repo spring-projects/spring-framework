@@ -537,6 +537,46 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
+	public void testCircularReferencesWithConstructor() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jenny_constructor"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("david_constructor"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+	@Test
+	public void testCircularReferencesWithPrototype() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jenny_prototype"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("david_prototype"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+	@Test
+	public void testCircularReferencesWithDependOn() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("jenny_depends_on"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("david_depends_on"));
+	}
+
+	@Test
 	public void testCircularReferenceWithFactoryBeanFirst() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
