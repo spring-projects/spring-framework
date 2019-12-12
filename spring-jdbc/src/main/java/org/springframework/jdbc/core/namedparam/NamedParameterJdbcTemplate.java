@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import javax.sql.DataSource;
@@ -77,13 +78,22 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
-	/** Cache of original SQL String to ParsedSql representation. */
+	/** Fast access cache for ParsedSqls, returning already cached instances without a global lock */
+	private final Map<String, ParsedSql> parsedSqlAccessCache = new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
+
+	/** Cache of original SQL String to ParsedSql representation, synchronized for creation */
 	@SuppressWarnings("serial")
-	private final Map<String, ParsedSql> parsedSqlCache =
+	private final Map<String, ParsedSql> parsedSqlCreationCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<String, ParsedSql> eldest) {
-					return size() > getCacheLimit();
+					if (size() > getCacheLimit()) {
+						parsedSqlAccessCache.remove(eldest.getKey());
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			};
 
@@ -429,9 +439,19 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		if (getCacheLimit() <= 0) {
 			return NamedParameterUtils.parseSqlStatement(sql);
 		}
-		synchronized (this.parsedSqlCache) {
-			return this.parsedSqlCache.computeIfAbsent(sql, NamedParameterUtils::parseSqlStatement);
+
+		ParsedSql parsedSql = this.parsedSqlAccessCache.get(sql);
+		if (parsedSql == null) {
+			synchronized (this.parsedSqlCreationCache) {
+				parsedSql = this.parsedSqlCreationCache.get(sql);
+				if (parsedSql == null) {
+					parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+					this.parsedSqlAccessCache.put(sql, parsedSql);
+					this.parsedSqlCreationCache.put(sql, parsedSql);
+				}
+			}
 		}
+		return parsedSql;
 	}
 
 	/**
