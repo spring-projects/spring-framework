@@ -54,9 +54,9 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 
 	ClientDefaultCodecsImpl(ClientDefaultCodecsImpl other) {
 		super(other);
-		this.multipartCodecs = new DefaultMultipartCodecs(other.multipartCodecs);
+		this.multipartCodecs = (other.multipartCodecs != null ?
+				new DefaultMultipartCodecs(other.multipartCodecs) : null);
 		this.sseDecoder = other.sseDecoder;
-		this.partWritersSupplier = other.partWritersSupplier;
 	}
 
 
@@ -132,10 +132,8 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		DefaultMultipartCodecs() {
 		}
 
-		DefaultMultipartCodecs(@Nullable DefaultMultipartCodecs other) {
-			if (other != null) {
-				this.writers.addAll(other.writers);
-			}
+		DefaultMultipartCodecs(DefaultMultipartCodecs other) {
+			this.writers.addAll(other.writers);
 		}
 
 

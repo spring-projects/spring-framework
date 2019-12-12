@@ -104,8 +104,8 @@ public class ClientCodecConfigurerTests {
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageWriter.class);
 		assertStringEncoder(getNextEncoder(writers), true);
-		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageWriter.class);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ProtobufHttpMessageWriter.class);
+		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageWriter.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2JsonEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2SmileEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
@@ -159,7 +159,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneConfigurer() {
+	public void clonedConfigurer() {
 		ClientCodecConfigurer clone = this.configurer.clone();
 
 		Jackson2JsonDecoder jackson2Decoder = new Jackson2JsonDecoder();
@@ -181,6 +181,30 @@ public class ClientCodecConfigurerTests {
 		writers = findCodec(this.configurer.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
 
 		assertThat(sseDecoder).isNotSameAs(jackson2Decoder);
+		assertThat(writers).hasSize(10);
+	}
+
+	@Test // gh-24194
+	public void cloneShouldNotDropMultipartCodecs() {
+
+		ClientCodecConfigurer clone = this.configurer.clone();
+		List<HttpMessageWriter<?>> writers =
+				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
+
+		assertThat(writers).hasSize(10);
+	}
+
+	@Test
+	public void cloneShouldNotBeImpactedByChangesToOriginal() {
+
+		ClientCodecConfigurer clone = this.configurer.clone();
+
+		this.configurer.registerDefaults(false);
+		this.configurer.customCodecs().register(new Jackson2JsonEncoder());
+
+		List<HttpMessageWriter<?>> writers =
+				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
+
 		assertThat(writers).hasSize(10);
 	}
 

@@ -105,25 +105,12 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	@Override
 	public List<HttpMessageWriter<?>> getWriters() {
 		this.defaultCodecs.applyDefaultConfig(this.customCodecs);
-		return getWritersInternal(false);
-	}
 
-
-	/**
-	 * Internal method that returns the configured writers.
-	 * @param forMultipart whether to returns writers for general use ("false"),
-	 * or for multipart requests only ("true"). Generally the two sets are the
-	 * same except for the multipart writer itself.
-	 */
-	protected List<HttpMessageWriter<?>> getWritersInternal(boolean forMultipart) {
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
-
 		result.addAll(this.customCodecs.getTypedWriters().keySet());
-		result.addAll(this.defaultCodecs.getTypedWriters(forMultipart));
-
+		result.addAll(this.defaultCodecs.getTypedWriters());
 		result.addAll(this.customCodecs.getObjectWriters().keySet());
-		result.addAll(this.defaultCodecs.getObjectWriters(forMultipart));
-
+		result.addAll(this.defaultCodecs.getObjectWriters());
 		result.addAll(this.defaultCodecs.getCatchAllWriters());
 		return result;
 	}
