@@ -135,14 +135,14 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.29') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.30') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.29') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.30') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
