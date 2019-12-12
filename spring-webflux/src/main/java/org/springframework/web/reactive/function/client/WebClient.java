@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -291,13 +292,21 @@ public interface WebClient {
 		Builder clientConnector(ClientHttpConnector connector);
 
 		/**
+		 * Configure the codecs for the {@code WebClient} in the
+		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
+		 * {@code ExchangeStrategies}.
+		 * @param configurer the configurer to apply
+		 * @since 5.1.13
+		 */
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+
+		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>Note that in a scenario where the builder is configured by
-		 * multiple parties, it is preferable to use
-		 * {@link #exchangeStrategies(Consumer)} in order to customize the same
-		 * {@code ExchangeStrategies}. This method here sets the strategies that
-		 * everyone else then can customize.
-		 * <p>By default this is {@link ExchangeStrategies#withDefaults()}.
+		 * <p>For most cases, prefer using {@link #codecs(Consumer)} which allows
+		 * customizing the codecs in the {@code ExchangeStrategies} rather than
+		 * replace them. That ensures multiple parties can contribute to codecs
+		 * configuration.
+		 * <p>By default this is set to {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
@@ -307,15 +316,17 @@ public interface WebClient {
 		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
 		 * designed for use in scenarios where multiple parties wish to update
 		 * the {@code ExchangeStrategies}.
-		 * @since 5.1.12
+		 * @deprecated as of 5.1.13 in favor of {@link #codecs(Consumer)}
 		 */
+		@Deprecated
 		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
 
 		/**
 		 * Provide an {@link ExchangeFunction} pre-configured with
 		 * {@link ClientHttpConnector} and {@link ExchangeStrategies}.
 		 * <p>This is an alternative to, and effectively overrides
-		 * {@link #clientConnector}, and {@link #exchangeStrategies}.
+		 * {@link #clientConnector}, and
+		 * {@link #exchangeStrategies(ExchangeStrategies)}.
 		 * @param exchangeFunction the exchange function to use
 		 */
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
