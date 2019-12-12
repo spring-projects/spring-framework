@@ -200,7 +200,7 @@ public interface CodecConfigurer {
 		 * <li>{@link Decoder} (wrapped internally with {@link DecoderHttpMessageReader})
 		 * </ul>
 		 * @param codec the codec to register
-		 * @since 5.2.3
+		 * @since 5.1.13
 		 */
 		void register(Object codec);
 
@@ -215,7 +215,7 @@ public interface CodecConfigurer {
 		 * {@link #getWriters()} are used to obtain the list of configured
 		 * readers or writers.
 		 * @param codec the codec to register and apply default config to
-		 * @since 5.2.3
+		 * @since 5.1.13
 		 */
 		void registerWithDefaultConfig(Object codec);
 
@@ -229,7 +229,7 @@ public interface CodecConfigurer {
 		 * readers or writers.
 		 * @param codec the codec to register
 		 * @param configConsumer consumer of the default config
-		 * @since 5.2.3
+		 * @since 5.1.13
 		 */
 		void registerWithDefaultConfig(Object codec, Consumer<DefaultCodecConfig> configConsumer);
 
