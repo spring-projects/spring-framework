@@ -354,13 +354,23 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	/**
-	 * Return writers that support specific types.
-	 * @param forMultipart whether to returns writers for general use ("false"),
-	 * or for multipart requests only ("true"). Generally the two sets are the
-	 * same except for the multipart writer itself.
+	 * Return all writers that support specific types.
+	 */
+	@SuppressWarnings({"rawtypes" })
+	final List<HttpMessageWriter<?>> getTypedWriters() {
+		if (!this.registerDefaults) {
+			return Collections.emptyList();
+		}
+		List<HttpMessageWriter<?>> writers = getBaseTypedWriters();
+		extendTypedWriters(writers);
+		return writers;
+	}
+
+	/**
+	 * Return "base" typed writers only, i.e. common to client and server.
 	 */
 	@SuppressWarnings("unchecked")
-	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
+	final List<HttpMessageWriter<?>> getBaseTypedWriters() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
 		}
@@ -370,10 +380,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
 		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		// No client or server specific multipart writers currently..
-		if (!forMultipart) {
-			extendTypedWriters(writers);
-		}
 		if (protobufPresent) {
 			Encoder<?> encoder = this.protobufEncoder != null ? this.protobufEncoder : new ProtobufEncoder();
 			writers.add(new ProtobufHttpMessageWriter((Encoder) encoder));
@@ -389,14 +395,20 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	/**
 	 * Return Object writers (JSON, XML, SSE).
-	 * @param forMultipart whether to returns writers for general use ("false"),
-	 * or for multipart requests only ("true"). Generally the two sets are the
-	 * same except for the multipart writer itself.
 	 */
-	final List<HttpMessageWriter<?>> getObjectWriters(boolean forMultipart) {
+	final List<HttpMessageWriter<?>> getObjectWriters() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
 		}
+		List<HttpMessageWriter<?>> writers = getBaseObjectWriters();
+		extendObjectWriters(writers);
+		return writers;
+	}
+
+	/**
+	 * Return "base" object writers only, i.e. common to client and server.
+	 */
+	final List<HttpMessageWriter<?>> getBaseObjectWriters() {
 		List<HttpMessageWriter<?>> writers = new ArrayList<>();
 		if (jackson2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
@@ -407,10 +419,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (jaxb2Present) {
 			Encoder<?> encoder = this.jaxb2Encoder != null ? this.jaxb2Encoder : new Jaxb2XmlEncoder();
 			writers.add(new EncoderHttpMessageWriter<>(encoder));
-		}
-		// No client or server specific multipart writers currently..
-		if (!forMultipart) {
-			extendObjectWriters(writers);
 		}
 		return writers;
 	}

@@ -106,8 +106,8 @@ public class ClientCodecConfigurerTests {
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
-		assertEquals(MultipartHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(ProtobufHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
+		assertEquals(MultipartHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
@@ -161,7 +161,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneConfigurer() {
+	public void clonedConfigurer() {
 		ClientCodecConfigurer clone = this.configurer.clone();
 
 		Jackson2JsonDecoder jackson2Decoder = new Jackson2JsonDecoder();
@@ -183,6 +183,30 @@ public class ClientCodecConfigurerTests {
 		writers = findCodec(this.configurer.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
 
 		assertNotSame(jackson2Decoder, sseDecoder);
+		assertEquals(10, writers.size());
+	}
+
+	@Test // gh-24194
+	public void cloneShouldNotDropMultipartCodecs() {
+
+		ClientCodecConfigurer clone = this.configurer.clone();
+		List<HttpMessageWriter<?>> writers =
+				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
+
+		assertEquals(10, writers.size());
+	}
+
+	@Test
+	public void cloneShouldNotBeImpactedByChangesToOriginal() {
+
+		ClientCodecConfigurer clone = this.configurer.clone();
+
+		this.configurer.registerDefaults(false);
+		this.configurer.customCodecs().register(new Jackson2JsonEncoder());
+
+		List<HttpMessageWriter<?>> writers =
+				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
+
 		assertEquals(10, writers.size());
 	}
 
