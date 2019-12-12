@@ -149,6 +149,16 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		return Collections.unmodifiableList(this.partWriters);
 	}
 
+
+	/**
+	 * Return the configured form writer.
+	 * @since 5.1.13
+	 */
+	@Nullable
+	public HttpMessageWriter<MultiValueMap<String, String>> getFormWriter() {
+		return this.formWriter;
+	}
+
 	/**
 	 * Set the character set to use for part headers such as
 	 * "Content-Disposition" (and its filename parameter).

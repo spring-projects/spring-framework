@@ -154,6 +154,20 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
+	public void enableRequestLoggingDetails() {
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertTrue(findCodec(readers, FormHttpMessageReader.class).isEnableLoggingRequestDetails());
+
+		MultipartHttpMessageReader multipartReader = findCodec(readers, MultipartHttpMessageReader.class);
+		assertTrue(multipartReader.isEnableLoggingRequestDetails());
+
+		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		assertTrue(reader.isEnableLoggingRequestDetails());
+	}
+
+	@Test
 	public void cloneConfigurer() {
 		ServerCodecConfigurer clone = this.configurer.clone();
 
@@ -164,37 +178,22 @@ public class ServerCodecConfigurerTests {
 
 		// Clone has the customizations
 
-		HttpMessageReader<?> actualReader = clone.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
+		HttpMessageReader<?> actualReader =
+				findCodec(clone.getReaders(), MultipartHttpMessageReader.class);
 
-		Encoder<?> actualEncoder = clone.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		ServerSentEventHttpMessageWriter actualWriter =
+				findCodec(clone.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertSame(reader, actualReader);
-		assertSame(encoder, actualEncoder);
+		assertSame(encoder, actualWriter.getEncoder());
 
 		// Original does not have the customizations
 
-		actualReader = this.configurer.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
-
-		actualEncoder = this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		actualReader = findCodec(this.configurer.getReaders(), MultipartHttpMessageReader.class);
+		actualWriter = findCodec(this.configurer.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertNotSame(reader, actualReader);
-		assertNotSame(encoder, actualEncoder);
+		assertNotSame(encoder, actualWriter.getEncoder());
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
@@ -211,6 +210,11 @@ public class ServerCodecConfigurerTests {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(EncoderHttpMessageWriter.class, writer.getClass());
 		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T findCodec(List<?> codecs, Class<T> type) {
+		return (T) codecs.stream().filter(type::isInstance).findFirst().get();
 	}
 
 	@SuppressWarnings("unchecked")
