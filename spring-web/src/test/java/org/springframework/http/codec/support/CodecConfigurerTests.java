@@ -121,11 +121,11 @@ public class CodecConfigurerTests {
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodecs().decoder(customDecoder1);
-		this.configurer.customCodecs().decoder(customDecoder2);
+		this.configurer.customCodecs().register(customDecoder1);
+		this.configurer.customCodecs().register(customDecoder2);
 
-		this.configurer.customCodecs().reader(customReader1);
-		this.configurer.customCodecs().reader(customReader2);
+		this.configurer.customCodecs().register(customReader1);
+		this.configurer.customCodecs().register(customReader2);
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
@@ -161,11 +161,11 @@ public class CodecConfigurerTests {
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodecs().encoder(customEncoder1);
-		this.configurer.customCodecs().encoder(customEncoder2);
+		this.configurer.customCodecs().register(customEncoder1);
+		this.configurer.customCodecs().register(customEncoder2);
 
-		this.configurer.customCodecs().writer(customWriter1);
-		this.configurer.customCodecs().writer(customWriter2);
+		this.configurer.customCodecs().register(customWriter1);
+		this.configurer.customCodecs().register(customWriter2);
 
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
@@ -200,11 +200,11 @@ public class CodecConfigurerTests {
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodecs().decoder(customDecoder1);
-		this.configurer.customCodecs().decoder(customDecoder2);
+		this.configurer.customCodecs().register(customDecoder1);
+		this.configurer.customCodecs().register(customDecoder2);
 
-		this.configurer.customCodecs().reader(customReader1);
-		this.configurer.customCodecs().reader(customReader2);
+		this.configurer.customCodecs().register(customReader1);
+		this.configurer.customCodecs().register(customReader2);
 
 		this.configurer.registerDefaults(false);
 
@@ -231,11 +231,11 @@ public class CodecConfigurerTests {
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodecs().encoder(customEncoder1);
-		this.configurer.customCodecs().encoder(customEncoder2);
+		this.configurer.customCodecs().register(customEncoder1);
+		this.configurer.customCodecs().register(customEncoder2);
 
-		this.configurer.customCodecs().writer(customWriter1);
-		this.configurer.customCodecs().writer(customWriter2);
+		this.configurer.customCodecs().register(customWriter1);
+		this.configurer.customCodecs().register(customWriter2);
 
 		this.configurer.registerDefaults(false);
 
@@ -277,10 +277,10 @@ public class CodecConfigurerTests {
 		this.configurer.registerDefaults(false);
 		CodecConfigurer clone = this.configurer.clone();
 
-		clone.customCodecs().encoder(new Jackson2JsonEncoder());
-		clone.customCodecs().decoder(new Jackson2JsonDecoder());
-		clone.customCodecs().reader(new ServerSentEventHttpMessageReader());
-		clone.customCodecs().writer(new ServerSentEventHttpMessageWriter());
+		clone.customCodecs().register(new Jackson2JsonEncoder());
+		clone.customCodecs().register(new Jackson2JsonDecoder());
+		clone.customCodecs().register(new ServerSentEventHttpMessageReader());
+		clone.customCodecs().register(new ServerSentEventHttpMessageWriter());
 
 		assertEquals(0, this.configurer.getReaders().size());
 		assertEquals(0, this.configurer.getWriters().size());
@@ -337,6 +337,7 @@ public class CodecConfigurerTests {
 		assertFalse(encoders.containsAll(Arrays.asList(jacksonEncoder, jaxb2Encoder, protoEncoder)));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void withDefaultCodecConfig() {
 		AtomicBoolean callbackCalled = new AtomicBoolean(false);
