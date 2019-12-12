@@ -17,7 +17,9 @@
 package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.core.ResolvableType;
@@ -39,8 +41,6 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 abstract class BaseCodecConfigurer implements CodecConfigurer {
-
-	protected boolean customCodecsInitialized;
 
 	protected final BaseDefaultCodecs defaultCodecs;
 
@@ -91,21 +91,20 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 
 	@Override
 	public List<HttpMessageReader<?>> getReaders() {
-		initializeCustomCodecs();
+		this.defaultCodecs.applyDefaultConfig(this.customCodecs);
+
 		List<HttpMessageReader<?>> result = new ArrayList<>();
-
-		result.addAll(this.customCodecs.getTypedReaders());
+		result.addAll(this.customCodecs.getTypedReaders().keySet());
 		result.addAll(this.defaultCodecs.getTypedReaders());
-
-		result.addAll(this.customCodecs.getObjectReaders());
+		result.addAll(this.customCodecs.getObjectReaders().keySet());
 		result.addAll(this.defaultCodecs.getObjectReaders());
-
 		result.addAll(this.defaultCodecs.getCatchAllReaders());
 		return result;
 	}
 
 	@Override
 	public List<HttpMessageWriter<?>> getWriters() {
+		this.defaultCodecs.applyDefaultConfig(this.customCodecs);
 		return getWritersInternal(false);
 	}
 
@@ -117,13 +116,12 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	 * same except for the multipart writer itself.
 	 */
 	protected List<HttpMessageWriter<?>> getWritersInternal(boolean forMultipart) {
-		initializeCustomCodecs();
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 
-		result.addAll(this.customCodecs.getTypedWriters());
+		result.addAll(this.customCodecs.getTypedWriters().keySet());
 		result.addAll(this.defaultCodecs.getTypedWriters(forMultipart));
 
-		result.addAll(this.customCodecs.getObjectWriters());
+		result.addAll(this.customCodecs.getObjectWriters().keySet());
 		result.addAll(this.defaultCodecs.getObjectWriters(forMultipart));
 
 		result.addAll(this.defaultCodecs.getCatchAllWriters());
@@ -133,28 +131,21 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	@Override
 	public abstract CodecConfigurer clone();
 
-	private void initializeCustomCodecs() {
-		if(!this.customCodecsInitialized) {
-			this.customCodecs.configConsumers.forEach(consumer -> consumer.accept(this.defaultCodecs));
-			this.customCodecsInitialized = true;
-		}
-	}
-
 
 	/**
 	 * Default implementation of {@code CustomCodecs}.
 	 */
 	protected static final class DefaultCustomCodecs implements CustomCodecs {
 
-		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
+		private final Map<HttpMessageReader<?>, Boolean> typedReaders = new LinkedHashMap<>(4);
 
-		private final List<HttpMessageWriter<?>> typedWriters = new ArrayList<>();
+		private final Map<HttpMessageWriter<?>, Boolean> typedWriters = new LinkedHashMap<>(4);
 
-		private final List<HttpMessageReader<?>> objectReaders = new ArrayList<>();
+		private final Map<HttpMessageReader<?>, Boolean> objectReaders = new LinkedHashMap<>(4);
 
-		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
+		private final Map<HttpMessageWriter<?>, Boolean> objectWriters = new LinkedHashMap<>(4);
 
-		private final List<Consumer<DefaultCodecConfig>> configConsumers = new ArrayList<>();
+		private final List<Consumer<DefaultCodecConfig>> defaultConfigConsumers = new ArrayList<>(4);
 
 		DefaultCustomCodecs() {
 		}
@@ -164,55 +155,102 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 		 * @since 5.1.12
 		 */
 		DefaultCustomCodecs(DefaultCustomCodecs other) {
-			other.typedReaders.addAll(this.typedReaders);
-			other.typedWriters.addAll(this.typedWriters);
-			other.objectReaders.addAll(this.objectReaders);
-			other.objectWriters.addAll(this.objectWriters);
+			other.typedReaders.putAll(this.typedReaders);
+			other.typedWriters.putAll(this.typedWriters);
+			other.objectReaders.putAll(this.objectReaders);
+			other.objectWriters.putAll(this.objectWriters);
 		}
 
+		@Override
+		public void register(Object codec) {
+			addCodec(codec, false);
+		}
+
+		@Override
+		public void registerWithDefaultConfig(Object codec) {
+			addCodec(codec, true);
+		}
+
+		@Override
+		public void registerWithDefaultConfig(Object codec, Consumer<DefaultCodecConfig> configConsumer) {
+			addCodec(codec, false);
+			this.defaultConfigConsumers.add(configConsumer);
+		}
+
+		@SuppressWarnings("deprecation")
 		@Override
 		public void decoder(Decoder<?> decoder) {
-			reader(new DecoderHttpMessageReader<>(decoder));
+			addCodec(decoder, false);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void encoder(Encoder<?> encoder) {
-			writer(new EncoderHttpMessageWriter<>(encoder));
+			addCodec(encoder, false);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void reader(HttpMessageReader<?> reader) {
-			boolean canReadToObject = reader.canRead(ResolvableType.forClass(Object.class), null);
-			(canReadToObject ? this.objectReaders : this.typedReaders).add(reader);
+			addCodec(reader, false);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void writer(HttpMessageWriter<?> writer) {
-			boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
-			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
+			addCodec(writer, false);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void withDefaultCodecConfig(Consumer<DefaultCodecConfig> codecsConfigConsumer) {
-			this.configConsumers.add(codecsConfigConsumer);
+			this.defaultConfigConsumers.add(codecsConfigConsumer);
+		}
+
+		private void addCodec(Object codec, boolean applyDefaultConfig) {
+
+			if (codec instanceof Decoder) {
+				codec = new DecoderHttpMessageReader<>((Decoder<?>) codec);
+			}
+			else if (codec instanceof Encoder) {
+				codec = new EncoderHttpMessageWriter<>((Encoder<?>) codec);
+			}
+
+			if (codec instanceof HttpMessageReader) {
+				HttpMessageReader<?> reader = (HttpMessageReader<?>) codec;
+				boolean canReadToObject = reader.canRead(ResolvableType.forClass(Object.class), null);
+				(canReadToObject ? this.objectReaders : this.typedReaders).put(reader, applyDefaultConfig);
+			}
+			else if (codec instanceof HttpMessageWriter) {
+				HttpMessageWriter<?> writer = (HttpMessageWriter<?>) codec;
+				boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
+				(canWriteObject ? this.objectWriters : this.typedWriters).put(writer, applyDefaultConfig);
+			}
+			else {
+				throw new IllegalArgumentException("Unexpected codec type: " + codec.getClass().getName());
+			}
 		}
 
 		// Package private accessors...
 
-		List<HttpMessageReader<?>> getTypedReaders() {
+		Map<HttpMessageReader<?>, Boolean> getTypedReaders() {
 			return this.typedReaders;
 		}
 
-		List<HttpMessageWriter<?>> getTypedWriters() {
+		Map<HttpMessageWriter<?>, Boolean> getTypedWriters() {
 			return this.typedWriters;
 		}
 
-		List<HttpMessageReader<?>> getObjectReaders() {
+		Map<HttpMessageReader<?>, Boolean> getObjectReaders() {
 			return this.objectReaders;
 		}
 
-		List<HttpMessageWriter<?>> getObjectWriters() {
+		Map<HttpMessageWriter<?>, Boolean> getObjectWriters() {
 			return this.objectWriters;
+		}
+
+		List<Consumer<DefaultCodecConfig>> getDefaultConfigConsumers() {
+			return this.defaultConfigConsumers;
 		}
 	}
 

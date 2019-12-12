@@ -40,6 +40,7 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
@@ -129,8 +130,8 @@ public class ServerCodecConfigurerTests {
 	public void maxInMemorySize() {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
+
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(13);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
@@ -151,6 +152,28 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
+	public void maxInMemorySizeWithCustomCodecs() {
+
+		int size = 99;
+		this.configurer.defaultCodecs().maxInMemorySize(size);
+		this.configurer.registerDefaults(false);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new ByteArrayDecoder());
+		customCodecs.registerWithDefaultConfig(new ByteArrayDecoder());
+		customCodecs.register(new Jackson2JsonDecoder());
+		customCodecs.registerWithDefaultConfig(new Jackson2JsonDecoder());
+
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+	}
+
+	@Test
 	public void enableRequestLoggingDetails() {
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
@@ -162,6 +185,21 @@ public class ServerCodecConfigurerTests {
 
 		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
 		assertThat(reader.isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
+	public void enableRequestLoggingDetailsWithCustomCodecs() {
+
+		this.configurer.registerDefaults(false);
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new FormHttpMessageReader());
+		customCodecs.registerWithDefaultConfig(new FormHttpMessageReader());
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((FormHttpMessageReader) readers.get(0)).isEnableLoggingRequestDetails()).isFalse();
+		assertThat(((FormHttpMessageReader) readers.get(1)).isEnableLoggingRequestDetails()).isTrue();
 	}
 
 	@Test

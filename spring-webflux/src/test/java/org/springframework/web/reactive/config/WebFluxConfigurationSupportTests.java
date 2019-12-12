@@ -350,10 +350,10 @@ public class WebFluxConfigurationSupportTests {
 		@Override
 		protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 			configurer.registerDefaults(false);
-			configurer.customCodecs().decoder(StringDecoder.textPlainOnly());
-			configurer.customCodecs().decoder(new Jaxb2XmlDecoder());
-			configurer.customCodecs().encoder(CharSequenceEncoder.textPlainOnly());
-			configurer.customCodecs().encoder(new Jaxb2XmlEncoder());
+			configurer.customCodecs().register(StringDecoder.textPlainOnly());
+			configurer.customCodecs().register(new Jaxb2XmlDecoder());
+			configurer.customCodecs().register(CharSequenceEncoder.textPlainOnly());
+			configurer.customCodecs().register(new Jaxb2XmlEncoder());
 		}
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.http.codec.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -431,6 +432,21 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 		result.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		return result;
+	}
+
+	void applyDefaultConfig(BaseCodecConfigurer.DefaultCustomCodecs customCodecs) {
+		applyDefaultConfig(customCodecs.getTypedReaders());
+		applyDefaultConfig(customCodecs.getObjectReaders());
+		applyDefaultConfig(customCodecs.getTypedWriters());
+		applyDefaultConfig(customCodecs.getObjectWriters());
+		customCodecs.getDefaultConfigConsumers().forEach(consumer -> consumer.accept(this));
+	}
+
+	private void applyDefaultConfig(Map<?, Boolean> readers) {
+		readers.entrySet().stream()
+				.filter(Map.Entry::getValue)
+				.map(Map.Entry::getKey)
+				.forEach(this::initCodec);
 	}
 
 
