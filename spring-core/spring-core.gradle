@@ -53,7 +53,7 @@ dependencies {
 	optional("io.reactivex.rxjava2:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
+	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("com.google.code.findbugs:jsr305")
 	testCompile("org.xmlunit:xmlunit-assertj")
 	testCompile("org.xmlunit:xmlunit-matchers")

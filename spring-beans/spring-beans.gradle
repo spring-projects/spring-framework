@@ -10,7 +10,7 @@ dependencies {
 	optional("org.codehaus.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
-	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
+	testCompile("javax.annotation:javax.annotation-api")
 }
 
 // This module does joint compilation for Java and Groovy code with the compileGroovy task.
