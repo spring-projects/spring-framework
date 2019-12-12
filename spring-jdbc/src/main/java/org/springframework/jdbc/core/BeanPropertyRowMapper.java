@@ -388,4 +388,16 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		return new BeanPropertyRowMapper<>(mappedClass);
 	}
 
+	/**
+	 * Static factory method to create a new {@code BeanPropertyRowMapper}
+	 * (with the required type specified only once).
+	 * @param mappedClass the class that each row should be mapped to
+	 * @param conversionService the {@link ConversionService} for binding JDBC values to bean properties, or {@code null} for none
+	 */
+	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass, @Nullable ConversionService conversionService) {
+		BeanPropertyRowMapper<T> rowMapper = newInstance(mappedClass);
+		rowMapper.setConversionService(conversionService);
+		return rowMapper;
+	}
+
 }
