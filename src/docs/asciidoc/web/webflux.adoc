@@ -908,19 +908,15 @@ The following example shows how to do so for client-side requests:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Consumer<ClientCodecConfigurer> consumer = configurer -> {
-	        CustomDecoder customDecoder = new CustomDecoder();
-	        configurer.customCodecs().decoder(customDecoder);
-			configurer.customCodecs().withDefaultCodecConfig(config ->
-				customDecoder.maxInMemorySize(config.maxInMemorySize())
-			);
-	}
-
 	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(strategies -> strategies.codecs(consumer))
+			.codecs(configurer -> {
+					CustomDecoder decoder = new CustomDecoder();
+                    configurer.customCodecs().registerWithDefaultConfig(decoder);
+			})
 			.build();
 ----
 ====
+
 
 [[webflux-dispatcher-handler]]
 == `DispatcherHandler`
