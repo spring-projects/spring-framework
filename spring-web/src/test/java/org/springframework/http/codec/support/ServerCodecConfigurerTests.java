@@ -134,11 +134,7 @@ public class ServerCodecConfigurerTests {
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-
-		ResourceHttpMessageReader resourceReader = (ResourceHttpMessageReader) nextReader(readers);
-		ResourceDecoder decoder = (ResourceDecoder) resourceReader.getDecoder();
-		assertThat(decoder.getMaxInMemorySize()).isEqualTo(size);
-
+		assertThat(((ResourceDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
 		assertThat(((FormHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
@@ -155,6 +151,20 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
+	public void enableRequestLoggingDetails() {
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(findCodec(readers, FormHttpMessageReader.class).isEnableLoggingRequestDetails()).isTrue();
+
+		MultipartHttpMessageReader multipartReader = findCodec(readers, MultipartHttpMessageReader.class);
+		assertThat(multipartReader.isEnableLoggingRequestDetails()).isTrue();
+
+		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		assertThat(reader.isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
 	public void cloneConfigurer() {
 		ServerCodecConfigurer clone = this.configurer.clone();
 
@@ -165,42 +175,27 @@ public class ServerCodecConfigurerTests {
 
 		// Clone has the customizations
 
-		HttpMessageReader<?> actualReader = clone.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
+		HttpMessageReader<?> actualReader =
+				findCodec(clone.getReaders(), MultipartHttpMessageReader.class);
 
-		Encoder<?> actualEncoder = clone.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		ServerSentEventHttpMessageWriter actualWriter =
+				findCodec(clone.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertThat(actualReader).isSameAs(reader);
-		assertThat(actualEncoder).isSameAs(encoder);
+		assertThat(actualWriter.getEncoder()).isSameAs(encoder);
 
 		// Original does not have the customizations
 
-		actualReader = this.configurer.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
-
-		actualEncoder = this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		actualReader = findCodec(this.configurer.getReaders(), MultipartHttpMessageReader.class);
+		actualWriter = findCodec(this.configurer.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertThat(actualReader).isNotSameAs(reader);
-		assertThat(actualEncoder).isNotSameAs(encoder);
+		assertThat(actualWriter.getEncoder()).isNotSameAs(encoder);
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = nextReader(readers);
-		assertThat(reader.getClass()).isEqualTo(DecoderHttpMessageReader.class);
+		assertThat(reader).isInstanceOf(DecoderHttpMessageReader.class);
 		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
@@ -212,6 +207,11 @@ public class ServerCodecConfigurerTests {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertThat(writer.getClass()).isEqualTo(EncoderHttpMessageWriter.class);
 		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T findCodec(List<?> codecs, Class<T> type) {
+		return (T) codecs.stream().filter(type::isInstance).findFirst().get();
 	}
 
 	@SuppressWarnings("unchecked")

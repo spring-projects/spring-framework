@@ -109,6 +109,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Jackson JSON {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonDecoder
 		 */
@@ -123,6 +125,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @since 5.1
 		 * @see org.springframework.http.codec.protobuf.ProtobufDecoder
@@ -140,6 +144,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default JAXB2 {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @since 5.1.3
 		 * @see org.springframework.http.codec.xml.Jaxb2XmlDecoder
@@ -245,7 +251,8 @@ public interface CodecConfigurer {
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 */
-		boolean isEnableLoggingRequestDetails();
+		@Nullable
+		Boolean isEnableLoggingRequestDetails();
 	}
 
 }
