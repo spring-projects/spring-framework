@@ -289,7 +289,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Content-Type' header of the request.
+	 * Set the 'Content-Type' header of the request as a raw String value,
+	 * possibly not even well formed (for testing purposes).
 	 * @param contentType the content type
 	 * @since 4.1.2
 	 */
@@ -310,14 +311,14 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Accept' header to the given media type(s).
-	 * @param mediaTypes one or more media types
+	 * Set the 'Accept' header using raw String values, possibly not even well
+	 * formed (for testing purposes).
+	 * @param mediaTypes one or more media types; internally joined as
+	 * comma-separated String
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		List<String> result = new ArrayList<>(mediaTypes.length);
-		result.addAll(Arrays.asList(mediaTypes));
-		this.headers.set("Accept", String.join(", ", result));
+		this.headers.set("Accept", String.join(", ", mediaTypes));
 		return this;
 	}
 
@@ -711,10 +712,15 @@ public class MockHttpServletRequestBuilder
 
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
-			if (requestContentType != null && isValidContentType(requestContentType)) {
-				MediaType mediaType = MediaType.parseMediaType(requestContentType);
-				if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
-					addRequestParams(request, parseFormData(mediaType));
+			if (requestContentType != null) {
+				try {
+					MediaType mediaType = MediaType.parseMediaType(requestContentType);
+					if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+						addRequestParams(request, parseFormData(mediaType));
+					}
+				}
+				catch (Exception ex) {
+					// Must be invalid, ignore..
 				}
 			}
 		}
@@ -739,26 +745,6 @@ public class MockHttpServletRequestBuilder
 		flashMapManager.saveOutputFlashMap(flashMap, request, new MockHttpServletResponse());
 
 		return request;
-	}
-
-	/**
-	 * Some validation checks to find out if processing of a string value make sense.
-	 */
-	private boolean isValidContentType(String mimeType) {
-		if (!StringUtils.hasLength(mimeType)) {
-			return false;
-		}
-
-		int index = mimeType.indexOf(';');
-		String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
-		if (fullType.isEmpty()) {
-			return false;
-		}
-		int subIndex = fullType.indexOf('/');
-		if (subIndex == -1) {
-			return false;
-		}
-		return subIndex != fullType.length() - 1;
 	}
 
 	/**

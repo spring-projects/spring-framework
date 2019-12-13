@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
@@ -339,19 +337,11 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(result.get(1).toString()).isEqualTo("application/xml");
 	}
 
-	@Test
-	public void anyAcceptMultipleContentTypeViaStringArray() {
+	@Test // gh-2079
+	public void acceptHeaderWithInvalidValues() {
 		this.builder.accept("any", "any2");
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		List<String> accept = Collections.list(request.getHeaders("Accept"));
-		List<String> result = Stream.of(accept.get(0).split(","))
-				.map(String::trim)
-				.collect(Collectors.toList());
-
-		assertThat(result.get(0)).isEqualTo("any");
-		assertThat(result).hasSize(2);
-		assertThat(result.get(1)).isEqualTo("any2");
+		assertThat(request.getHeader("Accept")).isEqualTo("any, any2");
 	}
 
 	@Test
@@ -380,17 +370,11 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(contentTypes.get(0)).isEqualTo("text/html");
 	}
 
-	@Test
-	public void anyContentTypeViaString() {
+	@Test // gh-2079
+	public void contentTypeWithInvalidValue() {
 		this.builder.contentType("any");
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		String contentType = request.getContentType();
-		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
-
-		assertThat(contentType).isEqualTo("any");
-		assertThat(contentTypes).hasSize(1);
-		assertThat(contentTypes.get(0)).isEqualTo("any");
+		assertThat(request.getContentType()).isEqualTo("any");
 	}
 
 	@Test  // SPR-11308
@@ -402,14 +386,11 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(contentType).isEqualTo("text/html");
 	}
 
-	@Test  // SPR-17643
-	public void invalidContentTypeViaHeader() {
+	@Test // gh-2079
+	public void contentTypeViaHeaderWithInvalidValue() {
 		this.builder.header("Content-Type", "yaml");
-		this.builder.content("some content");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		String contentType = request.getContentType();
-
-		assertThat(contentType).isEqualTo("yaml");
+		assertThat(request.getContentType()).isEqualTo("yaml");
 	}
 
 	@Test  // SPR-11308
