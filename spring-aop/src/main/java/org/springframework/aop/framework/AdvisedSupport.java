@@ -283,16 +283,16 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 					"This configuration only has " + this.advisors.size() + " advisors.");
 		}
 
-		Advisor advisor = this.advisors.get(index);
+		Advisor advisor = this.advisors.remove(index);
 		if (advisor instanceof IntroductionAdvisor) {
 			IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
 			// We need to remove introduction interfaces.
-			for (int j = 0; j < ia.getInterfaces().length; j++) {
-				removeInterface(ia.getInterfaces()[j]);
+			Class<?>[] interfaces = ia.getInterfaces();
+			for (Class<?> iface : interfaces) {
+				removeInterface(iface);
 			}
 		}
 
-		this.advisors.remove(index);
 		updateAdvisorArray();
 		adviceChanged();
 	}
