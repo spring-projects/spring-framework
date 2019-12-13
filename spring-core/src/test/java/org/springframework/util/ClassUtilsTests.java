@@ -36,6 +36,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.tests.sample.objects.DerivedTestObject;
@@ -153,6 +154,29 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader1)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader2)).isFalse();
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"boolean, boolean",
+		"byte, byte",
+		"char, char",
+		"short, short",
+		"int, int",
+		"long, long",
+		"float, float",
+		"double, double",
+		"[Z, boolean[]",
+		"[B, byte[]",
+		"[C, char[]",
+		"[S, short[]",
+		"[I, int[]",
+		"[J, long[]",
+		"[F, float[]",
+		"[D, double[]"
+	})
+	void resolvePrimitiveClassName(String input, Class<?> output) {
+		assertThat(ClassUtils.resolvePrimitiveClassName(input)).isEqualTo(output);
 	}
 
 	@Test
