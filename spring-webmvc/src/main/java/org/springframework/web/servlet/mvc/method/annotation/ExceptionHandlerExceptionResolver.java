@@ -235,7 +235,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * {@code HttpMessageConverter}.
 	 */
 	public void setResponseBodyAdvice(@Nullable List<ResponseBodyAdvice<?>> responseBodyAdvice) {
-		this.responseBodyAdvice.clear();
 		if (responseBodyAdvice != null) {
 			this.responseBodyAdvice.addAll(responseBodyAdvice);
 		}
