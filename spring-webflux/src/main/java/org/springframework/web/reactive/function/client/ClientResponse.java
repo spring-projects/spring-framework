@@ -204,6 +204,19 @@ public interface ClientResponse {
 	 */
 	Mono<WebClientResponseException> createException();
 
+	/**
+	 * Return a log message prefix to use to correlate messages for this response.
+	 * The prefix is based on the {@linkplain ClientRequest#logPrefix() client
+	 * log prefix}, which itself is based on the value of the request attribute
+	 * {@link ClientRequest#LOG_ID_ATTRIBUTE} along with some extra formatting
+	 * so that the prefix can be conveniently prepended with no further
+	 * formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link ClientRequest#LOG_ID_ATTRIBUTE} was not set.
+	 * @since 5.2.3
+	 */
+	String logPrefix();
+
 
 	// Static builder methods
 
