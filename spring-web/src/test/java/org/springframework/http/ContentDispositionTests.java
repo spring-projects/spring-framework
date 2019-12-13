@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,14 @@ public class ContentDispositionTests {
 				.parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123");
 		assertEquals(ContentDisposition.builder("form-data")
 				.name("foo").filename("foo.txt").size(123L).build(), disposition);
+	}
+
+	@Test // gh-24112
+	public void parseEncodedFilenameWithPaddedCharset() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; filename*= UTF-8''some-file.zip");
+		assertEquals(ContentDisposition.builder("attachment")
+				.filename("some-file.zip", StandardCharsets.UTF_8).build(), disposition);
 	}
 
 	@Test

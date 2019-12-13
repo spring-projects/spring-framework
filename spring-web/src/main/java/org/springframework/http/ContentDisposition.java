@@ -277,7 +277,7 @@ public final class ContentDisposition {
 				}
 				else if (attribute.equals("filename*") ) {
 					filename = decodeHeaderFieldParam(value);
-					charset = Charset.forName(value.substring(0, value.indexOf('\'')));
+					charset = Charset.forName(value.substring(0, value.indexOf('\'')).trim());
 					Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 							"Charset should be UTF-8 or ISO-8859-1");
 				}
@@ -371,7 +371,7 @@ public final class ContentDisposition {
 		if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
 			return input;
 		}
-		Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
+		Charset charset = Charset.forName(input.substring(0, firstQuoteIndex).trim());
 		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 				"Charset should be UTF-8 or ISO-8859-1");
 		byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
