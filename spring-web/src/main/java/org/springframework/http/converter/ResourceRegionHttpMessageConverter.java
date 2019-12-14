@@ -22,7 +22,11 @@ import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
@@ -178,12 +182,28 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
 		responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
 		OutputStream out = outputMessage.getBody();
+		// Allows reuse of streams
+		Map<Resource, InputStream> cleanup = new HashMap<>();
+		List<IOException> exs = new ArrayList<>();
 
-		for (ResourceRegion region : resourceRegions) {
-			long start = region.getPosition();
-			long end = start + region.getCount() - 1;
-			InputStream in = region.getResource().getInputStream();
-			try {
+		try {
+			for (ResourceRegion region : resourceRegions) {
+				long start = region.getPosition();
+				long end = start + region.getCount() - 1;
+
+				InputStream in = cleanup.computeIfAbsent(region.getResource(), r -> {
+					try {
+						return r.getInputStream();
+					} catch (IOException e) {
+						exs.add(e);
+						return null;
+					}
+				});
+
+				if (!exs.isEmpty()) {
+					throw exs.get(0);
+				}
+
 				// Writing MIME header.
 				println(out);
 				print(out, "--" + boundaryString);
@@ -200,11 +220,11 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				// Printing content
 				StreamUtils.copyRange(in, out, start, end);
 			}
-			finally {
+		} finally {
+			for (InputStream in : cleanup) {
 				try {
 					in.close();
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					// ignore
 				}
 			}
