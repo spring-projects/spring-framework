@@ -179,11 +179,10 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
 		OutputStream out = outputMessage.getBody();
 
-		for (ResourceRegion region : resourceRegions) {
-			long start = region.getPosition();
-			long end = start + region.getCount() - 1;
-			InputStream in = region.getResource().getInputStream();
-			try {
+		try (InputStream in = region.getResource().getInputStream()) {
+			for (ResourceRegion region : resourceRegions) {
+				long start = region.getPosition();
+				long end = start + region.getCount() - 1;
 				// Writing MIME header.
 				println(out);
 				print(out, "--" + boundaryString);
@@ -200,14 +199,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				// Printing content
 				StreamUtils.copyRange(in, out, start, end);
 			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-			}
+		} catch (IOException ex) {
+			// ignore
 		}
 
 		println(out);
