@@ -49,7 +49,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * <p>An instance of this class is typically accessed via {@link ContentRequestMatchers#multipart()}
  *
  * @author Valentin Spac
- * @since 5.2
+ * @since 5.3
  */
 public class MultipartFormDataRequestMatchers {
 
@@ -68,105 +68,85 @@ public class MultipartFormDataRequestMatchers {
 	}
 
 	public RequestMatcher param(String parameter, Matcher<Iterable<? extends String>> matchers) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				Map<String, String[]> requestParams = request.getParameterMap();
-				assertValueCount(parameter, requestParams, 1);
+		return request -> {
+			Map<String, String[]> requestParams = MultipartRequestParser.parameterMap(request);
+			assertValueCount(parameter, requestParams, 1);
 
-				String[] values = requestParams.get(parameter);
-				assertThat("Request parameter [" + parameter + "]", Arrays.asList(values), matchers);
-			}
+			String[] values = requestParams.get(parameter);
+			assertThat("Request parameter [" + parameter + "]", Arrays.asList(values), matchers);
 		};
 	}
 
 	private RequestMatcher param(String parameter, List<Matcher<? super String>> matchers) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				Map<String, String[]> requestParams = request.getParameterMap();
-				assertValueCount(parameter, requestParams, matchers.size());
+		return request -> {
+			Map<String, String[]> requestParams = MultipartRequestParser.parameterMap(request);
+			assertValueCount(parameter, requestParams, matchers.size());
 
-				String[] values = requestParams.get(parameter);
+			String[] values = requestParams.get(parameter);
 
-				Assert.state(values != null, "No values for request parameter " + parameter);
-				for (int i = 0; i < matchers.size(); i++) {
-					assertThat("Request parameter [" + parameter + "]", values[i], matchers.get(i));
-				}
+			Assert.state(values != null, "No values for request parameter " + parameter);
+			for (int i = 0; i < matchers.size(); i++) {
+				assertThat("Request parameter [" + parameter + "]", values[i], matchers.get(i));
 			}
 		};
 	}
 
 	public RequestMatcher params(MultiValueMap<String, String> expectedParameters) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				Map<String, String[]> requestParams = request.getParameterMap();
+		return request -> {
+			Map<String, String[]> requestParams = MultipartRequestParser.parameterMap(request);
 
-				expectedParameters.forEach((param, values) -> {
-					String[] actualValues = requestParams.get(param);
-					Assert.state(actualValues != null, "No values for request parameter " + param);
+			expectedParameters.forEach((param, values) -> {
+				String[] actualValues = requestParams.get(param);
+				Assert.state(actualValues != null, "No values for request parameter " + param);
 
-					assertValueCount(param, requestParams, values.size());
+				assertValueCount(param, requestParams, values.size());
 
-					assertEquals("Parameter " + param, values, Arrays.asList(actualValues));
-				});
-			}
+				assertEquals("Parameter " + param, values, Arrays.asList(actualValues));
+			});
 		};
 	}
 
 	public RequestMatcher file(String parameter, byte[]... resources) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				MultiValueMap<String, MultipartFile> files = request.getMultiFileMap();
-				assertValueCount(parameter, files, resources.length);
+		return request -> {
+			MultiValueMap<String, MultipartFile> files = MultipartRequestParser.multiFileMap(request);
 
-				assertByteArrayMatch(parameter, Arrays.asList(resources), files.get(parameter));
-			}
+			assertValueCount(parameter, files, resources.length);
+
+			assertByteArrayMatch(parameter, Arrays.asList(resources), files.get(parameter));
 		};
 	}
 
 	@SafeVarargs
 	@SuppressWarnings("varargs")
 	public final RequestMatcher file(String parameter, Matcher<? super Resource>... matchers) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				MultiValueMap<String, MultipartFile> files = request.getMultiFileMap();
-				assertValueCount(parameter, files, matchers.length);
-				List<MultipartFile> parts = files.get(parameter);
+		return request -> {
+			MultiValueMap<String, MultipartFile> files = MultipartRequestParser.multiFileMap(request);
+			assertValueCount(parameter, files, matchers.length);
+			List<MultipartFile> parts = files.get(parameter);
 
-				for (int i = 0; i < matchers.length; i++) {
-					assertThat("File [" + parameter + "]", parts.get(i).getResource(), matchers[i]);
-				}
+			for (int i = 0; i < matchers.length; i++) {
+				assertThat("File [" + parameter + "]", parts.get(i).getResource(), matchers[i]);
 			}
 		};
 	}
 
 	public RequestMatcher file(String parameter, Resource... resources) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				MultiValueMap<String, MultipartFile> files = request.getMultiFileMap();
-				assertValueCount(parameter, files, resources.length);
+		return request -> {
+			MultiValueMap<String, MultipartFile> files = MultipartRequestParser.multiFileMap(request);
+			assertValueCount(parameter, files, resources.length);
 
-				assertResourceMatch(parameter, Arrays.asList(resources), files.get(parameter));
-			}
+			assertResourceMatch(parameter, Arrays.asList(resources), files.get(parameter));
 		};
 	}
 
 	public RequestMatcher files(MultiValueMap<String, Resource> expectedFiles) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultipartHttpServletRequest request) {
-				MultiValueMap<String, MultipartFile> actualFiles = request.getMultiFileMap();
+		return request -> {
+			MultiValueMap<String, MultipartFile> actualFiles = MultipartRequestParser.multiFileMap(request);
 
-				expectedFiles.forEach((param, parts) -> {
-					assertValueCount(param, actualFiles, parts.size());
-					assertResourceMatch(param, parts, actualFiles.get(param));
-				});
-			}
+			expectedFiles.forEach((param, parts) -> {
+				assertValueCount(param, actualFiles, parts.size());
+				assertResourceMatch(param, parts, actualFiles.get(param));
+			});
 		};
 	}
 
@@ -185,7 +165,8 @@ public class MultipartFormDataRequestMatchers {
 		}
 	}
 
-	private void assertResourceMatch(String parameterName, List<Resource> expectedFiles, List<MultipartFile> actualFiles) {
+	private void assertResourceMatch(String parameterName, List<Resource> expectedFiles,
+									List<MultipartFile> actualFiles) {
 		for (int index = 0; index < actualFiles.size(); index++) {
 			MultipartFile multiPartFile = actualFiles.get(index);
 			Resource expectedResource = expectedFiles.get(index);
@@ -221,24 +202,18 @@ public class MultipartFormDataRequestMatchers {
 		}
 	}
 
-	private abstract static class AbstractFormDataRequestMatcher implements RequestMatcher {
 
-		@Override
-		public final void match(ClientHttpRequest request) throws IOException, AssertionError {
+	private static class MultipartRequestParser {
+		private static MultipartHttpServletRequest extract(ClientHttpRequest request) {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			final MockHttpServletRequest mockHttpServletRequest = toMockHttpServletRequest(mockRequest);
 
 			CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-			MultipartHttpServletRequest multipartHttpServletRequest = multipartResolver.resolveMultipart(mockHttpServletRequest);
-
-			matchInternal(multipartHttpServletRequest);
+			return multipartResolver.resolveMultipart(mockHttpServletRequest);
 		}
 
-		abstract void matchInternal(MultipartHttpServletRequest requestParams) throws IOException;
-
-
 		@NotNull
-		private MockHttpServletRequest toMockHttpServletRequest(MockClientHttpRequest mockRequest) {
+		private static MockHttpServletRequest toMockHttpServletRequest(MockClientHttpRequest mockRequest) {
 			final MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
 			mockHttpServletRequest.setContent(mockRequest.getBodyAsBytes());
 
@@ -247,6 +222,14 @@ public class MultipartFormDataRequestMatchers {
 					.forEach((headerName, headerValue) ->
 							headerValue.forEach(value -> mockHttpServletRequest.addHeader(headerName, value)));
 			return mockHttpServletRequest;
+		}
+
+		private static Map<String, String[]> parameterMap(ClientHttpRequest request) {
+			return extract(request).getParameterMap();
+		}
+
+		private static MultiValueMap<String, MultipartFile> multiFileMap(ClientHttpRequest request) {
+			return extract(request).getMultiFileMap();
 		}
 	}
 }
