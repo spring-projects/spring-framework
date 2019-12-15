@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.5.2"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.12.1') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.13.0') {
 				entry 'log4j-api'
 				entry 'log4j-core'
 				entry 'log4j-slf4j-impl'
@@ -76,7 +76,7 @@ configure(allprojects) { project ->
 
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
-			dependency "io.reactivex.rxjava2:rxjava:2.2.15"
+			dependency "io.reactivex.rxjava2:rxjava:2.2.16"
 
 			dependency "com.caucho:hessian:4.0.62"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
