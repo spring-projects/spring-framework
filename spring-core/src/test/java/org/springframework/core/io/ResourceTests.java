@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -124,6 +125,14 @@ public class ResourceTests {
 	@Test
 	public void testFileSystemResource() throws IOException {
 		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
+		doTestResource(resource);
+		assertEquals(new FileSystemResource(file), resource);
+	}
+
+	@Test
+	public void fileSystemResourceWithFile() throws IOException {
+		File file = new File(getClass().getResource("Resource.class").getFile());
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
 		assertEquals(new FileSystemResource(file), resource);
