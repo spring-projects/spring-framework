@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class CacheReproTests {
 
 
 	@Test
-	public void spr11124MultipleAnnotations() throws Exception {
+	public void spr11124MultipleAnnotations() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11124Config.class);
 		Spr11124Service bean = context.getBean(Spr11124Service.class);
 		bean.single(2);
@@ -71,7 +71,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11249PrimitiveVarargs() throws Exception {
+	public void spr11249PrimitiveVarargs() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11249Config.class);
 		Spr11249Service bean = context.getBean(Spr11249Service.class);
 		Object result = bean.doSomething("op", 2, 3);
