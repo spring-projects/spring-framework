@@ -22,11 +22,13 @@ import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
@@ -183,17 +185,15 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
 		OutputStream out = outputMessage.getBody();
 		// Allows reuse of streams
-		Map<Resource, InputStream> cleanup = new HashMap<>();
+		Map<Resource, Entry<InputStream, Long>> currStreams = new HashMap<>();
 		List<IOException> exs = new ArrayList<>();
 
 		try {
 			for (ResourceRegion region : resourceRegions) {
-				long start = region.getPosition();
-				long end = start + region.getCount() - 1;
-
-				InputStream in = cleanup.computeIfAbsent(region.getResource(), r -> {
+				// retrieve an existing stream or generate a new one
+				Entry<InputStream, Long> input = currStreams.computeIfAbsent(region.getResource(), r -> {
 					try {
-						return r.getInputStream();
+						return new SimpleEntry<>(r.getInputStream(), 0L);
 					} catch (IOException e) {
 						exs.add(e);
 						return null;
@@ -203,6 +203,33 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				if (!exs.isEmpty()) {
 					throw exs.get(0);
 				}
+
+				// offset the existing stream location from the byte start so appropriate number of bytes are skipped
+				long start = region.getPosition() - input.getValue();
+
+				// check if range is out of order (stream pointer has advanced beyond what the range is requesting)
+				if (start < 0) {
+					// close existing
+					input.getKey().close();
+					// open new stream
+					input = currStreams.computeIfPresent(region.getResource(), (r, i) -> {
+						try {
+							return new SimpleEntry<>(r.getInputStream(), 0L);
+						} catch (IOException e) {
+							exs.add(e);
+							return null;
+						}
+					});
+
+					if (!exs.isEmpty()) {
+						throw exs.get(0);
+					}
+
+					// reset start
+					start = region.getPosition();
+				}
+
+				long end = start + region.getCount() - 1;
 
 				// Writing MIME header.
 				println(out);
@@ -218,16 +245,19 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				println(out);
 				println(out);
 				// Printing content
-				StreamUtils.copyRange(in, out, start, end);
+				StreamUtils.copyRange(input.getKey(), out, start, end);
+
+				//set stream position to reuse for next time
+				input.setValue(end + 1);
 			}
 		} finally {
-			for (InputStream in : cleanup) {
+			currStreams.values().stream().map(e -> e.getKey()).forEach(in -> {
 				try {
 					in.close();
 				} catch (IOException ex) {
 					// ignore
 				}
-			}
+			});
 		}
 
 		println(out);
