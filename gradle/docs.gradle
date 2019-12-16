@@ -128,11 +128,7 @@ asciidoctor {
 	}
 	logDocuments = true
 	outputOptions {
-		backends = ["html5"]
-		// only ouput PDF documentation for non-SNAPSHOT builds
-		if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
-			backends += "pdf"
-		}
+		backends = ["html5", "pdf"]
 	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
