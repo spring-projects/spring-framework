@@ -155,7 +155,9 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		Assert.notNull(elementType, "'elementType' must not be null");
 		MethodParameter param = getParameter(elementType);
 		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
-		JavaType javaType = getJavaType(elementType.getType(), contextClass);
+		// fix #23791
+		Type type = elementType.resolve() == null ? elementType.getType() : elementType.resolve();
+		JavaType javaType = getJavaType(type, contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		return jsonView != null ?
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
