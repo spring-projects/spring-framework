@@ -36,6 +36,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * The default implementation of {@link CorsProcessor}, as defined by the
@@ -59,6 +60,10 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	@SuppressWarnings("resource")
 	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
+
+		if (WebAsyncUtils.getAsyncManager(request).hasConcurrentResult()) {
+			return true;
+		}
 
 		response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 		response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
