@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -58,6 +59,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -103,6 +105,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Tadaya Tsuyukubo
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -781,15 +784,24 @@ class ConfigurationClassParser {
 
 	private class DeferredImportSelectorGroupingHandler {
 
-		private final Map<Object, DeferredImportSelectorGrouping> groupings = new LinkedHashMap<>();
+		private final Map<DeferredImportSelectorGroupingKey, DeferredImportSelectorGrouping> groupings = new LinkedHashMap<>();
 
 		private final Map<AnnotationMetadata, ConfigurationClass> configurationClasses = new HashMap<>();
 
 		public void register(DeferredImportSelectorHolder deferredImport) {
-			Class<? extends Group> group = deferredImport.getImportSelector()
-					.getImportGroup();
-			DeferredImportSelectorGrouping grouping = this.groupings.computeIfAbsent(
-					(group != null ? group : deferredImport),
+			DeferredImportSelector importSelector = deferredImport.getImportSelector();
+			Integer order = (importSelector instanceof Ordered) ?
+					(Integer) ((Ordered) importSelector).getOrder() : OrderUtils.getOrder(importSelector.getClass());
+			Class<? extends Group> group = importSelector.getImportGroup();
+			DeferredImportSelectorGroupingKey groupingKey;
+			if (group != null) {
+				groupingKey = new DeferredImportSelectorGroupingKey(group, order);
+			}
+			else {
+				groupingKey = new DeferredImportSelectorGroupingKey(deferredImport, order);
+			}
+
+			DeferredImportSelectorGrouping grouping = this.groupings.computeIfAbsent(groupingKey,
 					key -> new DeferredImportSelectorGrouping(createGroup(group)));
 			grouping.add(deferredImport);
 			this.configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
@@ -875,6 +887,49 @@ class ConfigurationClassParser {
 						deferredImport.getImportSelector());
 			}
 			return this.group.selectImports();
+		}
+	}
+
+	private static class DeferredImportSelectorGroupingKey {
+
+		@Nullable
+		private final Class<? extends Group> group;
+
+		@Nullable
+		private final DeferredImportSelectorHolder deferredImports;
+
+		@Nullable
+		private final Integer order;
+
+		DeferredImportSelectorGroupingKey(Class<? extends Group> group, @Nullable Integer order) {
+			this.group = group;
+			this.order = order;
+			this.deferredImports = null;
+		}
+
+		DeferredImportSelectorGroupingKey(DeferredImportSelectorHolder deferredImports, @Nullable Integer order) {
+			this.deferredImports = deferredImports;
+			this.order = order;
+			this.group = null;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			DeferredImportSelectorGroupingKey that = (DeferredImportSelectorGroupingKey) o;
+			return Objects.equals(this.group, that.group) &&
+					Objects.equals(this.deferredImports, that.deferredImports) &&
+					Objects.equals(this.order, that.order);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.group, this.deferredImports, this.order);
 		}
 	}
 

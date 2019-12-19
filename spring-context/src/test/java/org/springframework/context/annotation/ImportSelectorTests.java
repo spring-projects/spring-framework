@@ -119,9 +119,9 @@ public class ImportSelectorTests {
 		InOrder ordered = inOrder(beanFactory);
 		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), any());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
-		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
+		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
+		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(2);
 		assertThat(TestImportGroup.imports.size()).isEqualTo(1);
 		assertThat(TestImportGroup.imports.values().iterator().next().size()).isEqualTo(2);
 	}
@@ -134,9 +134,9 @@ public class ImportSelectorTests {
 		context.register(GroupedConfig2.class);
 		context.refresh();
 		InOrder ordered = inOrder(beanFactory);
-		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
-		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
+		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
+		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(2);
 		assertThat(TestImportGroup.imports.size()).isEqualTo(2);
 		Iterator<AnnotationMetadata> iterator = TestImportGroup.imports.keySet().iterator();
 		assertThat(iterator.next().getClassName()).isEqualTo(GroupedConfig2.class.getName());
