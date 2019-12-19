@@ -458,7 +458,11 @@ public final class ContentDisposition {
 		Builder name(String name);
 
 		/**
-		 * Set the value of the {@literal filename} parameter.
+		 * Set the value of the {@literal filename} parameter. The given
+		 * filename will be formatted as quoted-string, as defined in RFC 2616,
+		 * section 2.2, and any quote characters within the filename value will
+		 * be escaped with a backslash, e.g. {@code "foo\"bar.txt"} becomes
+		 * {@code "foo\\\"bar.txt"}.
 		 */
 		Builder filename(String filename);
 
@@ -539,8 +543,22 @@ public final class ContentDisposition {
 
 		@Override
 		public Builder filename(String filename) {
-			this.filename = filename;
+			Assert.hasText(filename, "No filename");
+			this.filename = escapeQuotationMarks(filename);
 			return this;
+		}
+
+		private static String escapeQuotationMarks(String filename) {
+			if (filename.indexOf('"') == -1) {
+				return filename;
+			}
+			boolean escaped = false;
+			StringBuilder sb = new StringBuilder();
+			for (char c : filename.toCharArray()) {
+				sb.append((c == '"' && !escaped) ? "\\\"" : c);
+				escaped = (!escaped && c == '\\');
+			}
+			return sb.toString();
 		}
 
 		@Override
