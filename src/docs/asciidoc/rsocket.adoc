@@ -287,8 +287,8 @@ can be registered as follows:
 .Java
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
-		.encoders(encoders -> encoders.add(new Jackson2CborEncoder))
-		.decoders(decoders -> decoders.add(new Jackson2CborDecoder))
+		.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+		.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
 		.build();
 
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
