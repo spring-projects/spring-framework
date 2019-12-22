@@ -180,8 +180,8 @@ public class SimpleBrokerMessageHandlerTests {
 				this.messageHandler::start);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void startAndStopWithHeartbeatValue() {
 		ScheduledFuture future = mock(ScheduledFuture.class);
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(15000L))).willReturn(future);
@@ -199,7 +199,6 @@ public class SimpleBrokerMessageHandlerTests {
 		verifyNoMoreInteractions(future);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startWithOneZeroHeartbeatValue() {
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
