@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.tests.sample.beans;
 
 import java.io.IOException;
@@ -12,7 +28,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -20,7 +39,8 @@ import org.springframework.util.ObjectUtils;
  * @author Fabio Borriello
  * @since 04 December 2019
  */
-public class ImmutableTestBean implements Comparable<Object> {
+public class ImmutableTestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable<Object> {
+
 	private final String beanName;
 
 	private final String country;
@@ -51,23 +71,23 @@ public class ImmutableTestBean implements Comparable<Object> {
 
 	private final int[][] nestedIntArray;
 
-	private final Date date = new Date();
+	private final Date date;
 
-	private final Float myFloat = (float) 0.0;
+	private final Float myFloat;
 
-	private final Collection<? super Object> friends = new LinkedList<>();
+	private final Collection<? super Object> friends;
 
-	private final Set<?> someSet = new HashSet<>();
+	private final Set<?> someSet;
 
-	private final Map<?, ?> someMap = new HashMap<>();
+	private final Map<?, ?> someMap;
 
-	private final List<?> someList = new ArrayList<>();
+	private final List<?> someList;
 
-	private final Properties someProperties = new Properties();
+	private final Properties someProperties;
 
-	private final INestedTestBean doctor = new NestedTestBean();
+	private final INestedTestBean doctor;
 
-	private final INestedTestBean lawyer = new NestedTestBean();
+	private final INestedTestBean lawyer;
 
 	private final IndexedTestBean nestedIndexedBean;
 
@@ -83,7 +103,7 @@ public class ImmutableTestBean implements Comparable<Object> {
 
 	private final List<?> pets;
 
-	public ImmutableTestBean(final String beanName, final String country, final BeanFactory beanFactory, final boolean postProcessed, final String name, final String sex, final int age, final boolean jedi, final ITestBean spouse, final String touchy, final String[] stringArray, final Integer[] someIntegerArray, final Integer[][] nestedIntegerArray, final int[] someIntArray, final int[][] nestedIntArray, final IndexedTestBean nestedIndexedBean, final boolean destroyed, final Number someNumber, final Colour favouriteColour, final Boolean someBoolean, final List<?> otherColours, final List<?> pets) {
+	public ImmutableTestBean(final String beanName, final String country, final BeanFactory beanFactory, final boolean postProcessed, final String name, final String sex, final int age, final boolean jedi, final ITestBean spouse, final String touchy, final String[] stringArray, final Integer[] someIntegerArray, final Integer[][] nestedIntegerArray, final int[] someIntArray, final int[][] nestedIntArray, final Date date, final Float myFloat, final Collection<? super Object> friends, final Set<?> someSet, final Map<?, ?> someMap, final List<?> someList, final Properties someProperties, final INestedTestBean doctor, final INestedTestBean lawyer, final IndexedTestBean nestedIndexedBean, final boolean destroyed, final Number someNumber, final Colour favouriteColour, final Boolean someBoolean, final List<?> otherColours, final List<?> pets) {
 		this.beanName = beanName;
 		this.country = country;
 		this.beanFactory = beanFactory;
@@ -99,6 +119,15 @@ public class ImmutableTestBean implements Comparable<Object> {
 		this.nestedIntegerArray = nestedIntegerArray;
 		this.someIntArray = someIntArray;
 		this.nestedIntArray = nestedIntArray;
+		this.date = date;
+		this.myFloat = myFloat;
+		this.friends = friends;
+		this.someSet = someSet;
+		this.someMap = someMap;
+		this.someList = someList;
+		this.someProperties = someProperties;
+		this.doctor = doctor;
+		this.lawyer = lawyer;
 		this.nestedIndexedBean = nestedIndexedBean;
 		this.destroyed = destroyed;
 		this.someNumber = someNumber;
@@ -124,12 +153,22 @@ public class ImmutableTestBean implements Comparable<Object> {
 		return name;
 	}
 
+	@Override
+	public void setName(final String name) {
+
+	}
+
 	public String getSex() {
 		return sex;
 	}
 
 	public int getAge() {
 		return age;
+	}
+
+	@Override
+	public void setAge(final int age) {
+
 	}
 
 	public boolean isJedi() {
@@ -140,8 +179,14 @@ public class ImmutableTestBean implements Comparable<Object> {
 		return this.spouse;
 	}
 
+	@Override
+	public void setSpouse(final ITestBean spouse) {
+
+	}
+
+	@Override
 	public ITestBean[] getSpouses() {
-		return (spouse != null ? new ITestBean[]{spouse} : null);
+		return (spouse != null ? new ITestBean[] {spouse} : null);
 	}
 
 	public String getTouchy() {
@@ -156,8 +201,23 @@ public class ImmutableTestBean implements Comparable<Object> {
 		return stringArray;
 	}
 
+	@Override
+	public void setStringArray(final String[] stringArray) {
+
+	}
+
 	public Integer[] getSomeIntegerArray() {
 		return someIntegerArray;
+	}
+
+	@Override
+	public void setSomeIntegerArray(final Integer[] someIntegerArray) {
+
+	}
+
+	@Override
+	public void setNestedIntegerArray(final Integer[][] nestedIntegerArray) {
+
 	}
 
 	public Integer[][] getNestedIntegerArray() {
@@ -168,8 +228,18 @@ public class ImmutableTestBean implements Comparable<Object> {
 		return someIntArray;
 	}
 
+	@Override
+	public void setSomeIntArray(final int[] someIntArray) {
+
+	}
+
 	public int[][] getNestedIntArray() {
 		return nestedIntArray;
+	}
+
+	@Override
+	public void setNestedIntArray(final int[][] someNestedArray) {
+
 	}
 
 	public Date getDate() {
@@ -224,6 +294,11 @@ public class ImmutableTestBean implements Comparable<Object> {
 		return nestedIndexedBean;
 	}
 
+	@Override
+	public int haveBirthday() {
+		return 0;
+	}
+
 	public List<?> getOtherColours() {
 		return otherColours;
 	}
@@ -235,12 +310,14 @@ public class ImmutableTestBean implements Comparable<Object> {
 	/**
 	 * @see org.springframework.tests.sample.beans.ITestBean#exceptional(Throwable)
 	 */
+	@Override
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
 		}
 	}
 
+	@Override
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
@@ -248,6 +325,7 @@ public class ImmutableTestBean implements Comparable<Object> {
 	/**
 	 * @see org.springframework.tests.sample.beans.ITestBean#returnsThis()
 	 */
+	@Override
 	public Object returnsThis() {
 		return this;
 	}
@@ -255,6 +333,7 @@ public class ImmutableTestBean implements Comparable<Object> {
 	/**
 	 * @see org.springframework.tests.sample.beans.IOther#absquatulate()
 	 */
+	@Override
 	public void absquatulate() {
 	}
 
@@ -291,5 +370,15 @@ public class ImmutableTestBean implements Comparable<Object> {
 	@Override
 	public String toString() {
 		return this.name;
+	}
+
+	@Override
+	public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
+
+	}
+
+	@Override
+	public void setBeanName(final String name) {
+
 	}
 }
