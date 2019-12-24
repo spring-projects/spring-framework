@@ -71,23 +71,23 @@ public class ImmutableTestBean implements BeanNameAware, BeanFactoryAware, ITest
 
 	private final int[][] nestedIntArray;
 
-	private final Date date;
+	private final Date date = new Date();
 
-	private final Float myFloat;
+	private final Float myFloat = (float) 0.0;
 
-	private final Collection<? super Object> friends;
+	private final Collection<? super Object> friends = new LinkedList<>();
 
-	private final Set<?> someSet;
+	private final Set<?> someSet = new HashSet<>();
 
-	private final Map<?, ?> someMap;
+	private final Map<?, ?> someMap = new HashMap<>();
 
-	private final List<?> someList;
+	private final List<?> someList = new ArrayList<>();
 
-	private final Properties someProperties;
+	private final Properties someProperties = new Properties();
 
-	private final INestedTestBean doctor;
+	private final INestedTestBean doctor = new NestedTestBean();
 
-	private final INestedTestBean lawyer;
+	private final INestedTestBean lawyer = new NestedTestBean();
 
 	private final IndexedTestBean nestedIndexedBean;
 
@@ -103,7 +103,7 @@ public class ImmutableTestBean implements BeanNameAware, BeanFactoryAware, ITest
 
 	private final List<?> pets;
 
-	public ImmutableTestBean(final String beanName, final String country, final BeanFactory beanFactory, final boolean postProcessed, final String name, final String sex, final int age, final boolean jedi, final ITestBean spouse, final String touchy, final String[] stringArray, final Integer[] someIntegerArray, final Integer[][] nestedIntegerArray, final int[] someIntArray, final int[][] nestedIntArray, final Date date, final Float myFloat, final Collection<? super Object> friends, final Set<?> someSet, final Map<?, ?> someMap, final List<?> someList, final Properties someProperties, final INestedTestBean doctor, final INestedTestBean lawyer, final IndexedTestBean nestedIndexedBean, final boolean destroyed, final Number someNumber, final Colour favouriteColour, final Boolean someBoolean, final List<?> otherColours, final List<?> pets) {
+	public ImmutableTestBean(final String beanName, final String country, final BeanFactory beanFactory, final boolean postProcessed, final String name, final String sex, final int age, final boolean jedi, final ITestBean spouse, final String touchy, final String[] stringArray, final Integer[] someIntegerArray, final Integer[][] nestedIntegerArray, final int[] someIntArray, final int[][] nestedIntArray, final IndexedTestBean nestedIndexedBean, final boolean destroyed, final Number someNumber, final Colour favouriteColour, final Boolean someBoolean, final List<?> otherColours, final List<?> pets) {
 		this.beanName = beanName;
 		this.country = country;
 		this.beanFactory = beanFactory;
@@ -119,15 +119,6 @@ public class ImmutableTestBean implements BeanNameAware, BeanFactoryAware, ITest
 		this.nestedIntegerArray = nestedIntegerArray;
 		this.someIntArray = someIntArray;
 		this.nestedIntArray = nestedIntArray;
-		this.date = date;
-		this.myFloat = myFloat;
-		this.friends = friends;
-		this.someSet = someSet;
-		this.someMap = someMap;
-		this.someList = someList;
-		this.someProperties = someProperties;
-		this.doctor = doctor;
-		this.lawyer = lawyer;
 		this.nestedIndexedBean = nestedIndexedBean;
 		this.destroyed = destroyed;
 		this.someNumber = someNumber;
