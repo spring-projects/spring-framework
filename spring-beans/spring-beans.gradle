@@ -11,7 +11,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
-	implementation("com.hotels.beans:bull-bean-transformer:")
+	implementation("com.hotels.beans:bull-bean-transformer")
 }
 
 // This module does joint compilation for Java and Groovy code with the compileGroovy task.
