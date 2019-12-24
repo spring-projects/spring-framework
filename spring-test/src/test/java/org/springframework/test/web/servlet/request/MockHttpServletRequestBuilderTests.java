@@ -337,6 +337,13 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(result.get(1).toString()).isEqualTo("application/xml");
 	}
 
+	@Test // gh-2079
+	public void acceptHeaderWithInvalidValues() {
+		this.builder.accept("any", "any2");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getHeader("Accept")).isEqualTo("any, any2");
+	}
+
 	@Test
 	public void contentType() {
 		this.builder.contentType(MediaType.TEXT_HTML);
@@ -363,6 +370,13 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(contentTypes.get(0)).isEqualTo("text/html");
 	}
 
+	@Test // gh-2079
+	public void contentTypeWithInvalidValue() {
+		this.builder.contentType("any");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getContentType()).isEqualTo("any");
+	}
+
 	@Test  // SPR-11308
 	public void contentTypeViaHeader() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
@@ -370,6 +384,13 @@ public class MockHttpServletRequestBuilderTests {
 		String contentType = request.getContentType();
 
 		assertThat(contentType).isEqualTo("text/html");
+	}
+
+	@Test // gh-2079
+	public void contentTypeViaHeaderWithInvalidValue() {
+		this.builder.header("Content-Type", "yaml");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getContentType()).isEqualTo("yaml");
 	}
 
 	@Test  // SPR-11308

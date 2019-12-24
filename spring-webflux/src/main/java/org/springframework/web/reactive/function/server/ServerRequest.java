@@ -125,6 +125,12 @@ public interface ServerRequest {
 	Optional<InetSocketAddress> remoteAddress();
 
 	/**
+	 * Get the remote address to which this request is connected, if available.
+	 * @since 5.2.3
+	 */
+	Optional<InetSocketAddress> localAddress();
+
+	/**
 	 * Get the readers used to convert the body of this request.
 	 * @since 5.1
 	 */

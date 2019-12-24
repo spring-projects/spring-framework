@@ -690,8 +690,8 @@ you need to share configuration between a client and a server in the same proces
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.builder()
-				.encoders(encoders -> encoders.add(new Jackson2CborEncoder))
-				.decoders(decoders -> decoders.add(new Jackson2CborDecoder))
+				.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+				.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
 				.routeMatcher(new PathPatternRouteMatcher())
 				.build();
 		}

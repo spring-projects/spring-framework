@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,18 +264,11 @@ public abstract class BodyExtractors {
 				() -> consumeAndCancel(message).then(Mono.empty()) : Mono::empty;
 	}
 
-	private static Mono<Void> consumeAndCancel(ReactiveHttpInputMessage message) {
-		return message.getBody()
-				.map(buffer -> {
-					DataBufferUtils.release(buffer);
-					throw new ReadCancellationException();
-				})
-				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
-				.then();
-	}
-
-	@SuppressWarnings("serial")
-	private static class ReadCancellationException extends RuntimeException {
+	private static Flux<DataBuffer> consumeAndCancel(ReactiveHttpInputMessage message) {
+		return message.getBody().takeWhile(buffer -> {
+			DataBufferUtils.release(buffer);
+			return false;
+		});
 	}
 
 }

@@ -948,6 +948,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Optional<InetSocketAddress> localAddress() {
+			return this.request.localAddress();
+		}
+
+		@Override
 		public List<HttpMessageReader<?>> messageReaders() {
 			return this.request.messageReaders();
 		}

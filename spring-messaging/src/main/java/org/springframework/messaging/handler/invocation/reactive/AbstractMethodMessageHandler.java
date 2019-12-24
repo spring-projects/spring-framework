@@ -566,14 +566,6 @@ public abstract class AbstractMethodMessageHandler<T>
 			this.handlerMethod = handlerMethod;
 		}
 
-		public T getMapping() {
-			return this.mapping;
-		}
-
-		public HandlerMethod getHandlerMethod() {
-			return this.handlerMethod;
-		}
-
 		@Override
 		public String toString() {
 			return this.mapping.toString();

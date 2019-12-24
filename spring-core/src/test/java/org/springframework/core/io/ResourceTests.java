@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,6 +126,14 @@ class ResourceTests {
 	@Test
 	void fileSystemResource() throws IOException {
 		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
+		doTestResource(resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(file));
+	}
+
+	@Test
+	void fileSystemResourceWithFile() throws IOException {
+		File file = new File(getClass().getResource("Resource.class").getFile());
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
 		assertThat(resource).isEqualTo(new FileSystemResource(file));

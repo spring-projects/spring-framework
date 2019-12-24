@@ -134,8 +134,8 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	private int getValueHashCode(Object value) {
-		// Use Arrays.hashCode since ObjectUtils doesn't comply to to
-		// Annotation#hashCode()
+		// Use Arrays.hashCode(...) since Spring's ObjectUtils doesn't comply
+		// with the requirements specified in Annotation#hashCode().
 		if (value instanceof boolean[]) {
 			return Arrays.hashCode((boolean[]) value);
 		}

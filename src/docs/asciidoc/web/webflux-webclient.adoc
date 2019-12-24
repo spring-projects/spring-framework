@@ -496,17 +496,12 @@ Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error
 
 [CAUTION]
 ====
-When using `exchange()`, you have to make sure that the body is always consumed or released,
-even when an exception occurs (see <<core.adoc#databuffers-using,Using DataBuffer>>).
-Typically, you do this by invoking either `bodyTo*` or `toEntity*` on `ClientResponse`
-to convert the body into an object of the desired type, but
-you can also invoke `releaseBody()` to discard the body contents without consuming it or
-`toBodilessEntity()` to get just the status and headers (while discarding the body).
-
-Finally, there is `bodyToMono(Void.class)`, which should only be used if no response content is
-expected.
-If the response does have content, the connection is closed and is not placed back in the pool,
-because it is not left in a reusable state.
+Unlike `retrieve()`, when using `exchange(), it is the responsibility of the application
+to consume any response content regardless of the scenario (success, error, unexpected
+data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
+all the available options for consuming the body. Generally prefer using `retrieve()`
+unless you have a good reason for using `exchange()` which does allow to check the
+response status and headers before deciding how to or if to consume the response.
 ====
 
 

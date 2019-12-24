@@ -33,17 +33,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
- * Represent the Content-Disposition type and parameters as defined in RFC 2183.
+ * Represent the Content-Disposition type and parameters as defined in RFC 6266.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  */
 public final class ContentDisposition {
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
+
 
 	@Nullable
 	private final String type;
@@ -124,7 +126,11 @@ public final class ContentDisposition {
 
 	/**
 	 * Return the value of the {@literal size} parameter, or {@code null} if not defined.
+	 * @deprecated since 5.2.3 as per
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * to be removed in a future release.
 	 */
+	@Deprecated
 	@Nullable
 	public Long getSize() {
 		return this.size;
@@ -132,7 +138,11 @@ public final class ContentDisposition {
 
 	/**
 	 * Return the value of the {@literal creation-date} parameter, or {@code null} if not defined.
+	 * @deprecated since 5.2.3 as per
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * to be removed in a future release.
 	 */
+	@Deprecated
 	@Nullable
 	public ZonedDateTime getCreationDate() {
 		return this.creationDate;
@@ -140,7 +150,11 @@ public final class ContentDisposition {
 
 	/**
 	 * Return the value of the {@literal modification-date} parameter, or {@code null} if not defined.
+	 * @deprecated since 5.2.3 as per
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * to be removed in a future release.
 	 */
+	@Deprecated
 	@Nullable
 	public ZonedDateTime getModificationDate() {
 		return this.modificationDate;
@@ -148,7 +162,11 @@ public final class ContentDisposition {
 
 	/**
 	 * Return the value of the {@literal read-date} parameter, or {@code null} if not defined.
+	 * @deprecated since 5.2.3 as per
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * to be removed in a future release.
 	 */
+	@Deprecated
 	@Nullable
 	public ZonedDateTime getReadDate() {
 		return this.readDate;
@@ -188,7 +206,7 @@ public final class ContentDisposition {
 	}
 
 	/**
-	 * Return the header value for this content disposition as defined in RFC 2183.
+	 * Return the header value for this content disposition as defined in RFC 6266.
 	 * @see #parse(String)
 	 */
 	@Override
@@ -282,7 +300,7 @@ public final class ContentDisposition {
 					int idx1 = value.indexOf('\'');
 					int idx2 = value.indexOf('\'', idx1 + 1);
 					if (idx1 != -1 && idx2 != -1) {
-						charset = Charset.forName(value.substring(0, idx1));
+						charset = Charset.forName(value.substring(0, idx1).trim());
 						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 								"Charset should be UTF-8 or ISO-8859-1");
 						filename = decodeFilename(value.substring(idx2 + 1), charset);
@@ -458,7 +476,11 @@ public final class ContentDisposition {
 		Builder name(String name);
 
 		/**
-		 * Set the value of the {@literal filename} parameter.
+		 * Set the value of the {@literal filename} parameter. The given
+		 * filename will be formatted as quoted-string, as defined in RFC 2616,
+		 * section 2.2, and any quote characters within the filename value will
+		 * be escaped with a backslash, e.g. {@code "foo\"bar.txt"} becomes
+		 * {@code "foo\\\"bar.txt"}.
 		 */
 		Builder filename(String filename);
 
@@ -476,22 +498,38 @@ public final class ContentDisposition {
 
 		/**
 		 * Set the value of the {@literal size} parameter.
+		 * @deprecated since 5.2.3 as per
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * to be removed in a future release.
 		 */
+		@Deprecated
 		Builder size(Long size);
 
 		/**
 		 * Set the value of the {@literal creation-date} parameter.
+		 * @deprecated since 5.2.3 as per
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * to be removed in a future release.
 		 */
+		@Deprecated
 		Builder creationDate(ZonedDateTime creationDate);
 
 		/**
 		 * Set the value of the {@literal modification-date} parameter.
+		 * @deprecated since 5.2.3 as per
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * to be removed in a future release.
 		 */
+		@Deprecated
 		Builder modificationDate(ZonedDateTime modificationDate);
 
 		/**
 		 * Set the value of the {@literal read-date} parameter.
+		 * @deprecated since 5.2.3 as per
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * to be removed in a future release.
 		 */
+		@Deprecated
 		Builder readDate(ZonedDateTime readDate);
 
 		/**
@@ -539,8 +577,22 @@ public final class ContentDisposition {
 
 		@Override
 		public Builder filename(String filename) {
-			this.filename = filename;
+			Assert.hasText(filename, "No filename");
+			this.filename = escapeQuotationMarks(filename);
 			return this;
+		}
+
+		private static String escapeQuotationMarks(String filename) {
+			if (filename.indexOf('"') == -1) {
+				return filename;
+			}
+			boolean escaped = false;
+			StringBuilder sb = new StringBuilder();
+			for (char c : filename.toCharArray()) {
+				sb.append((c == '"' && !escaped) ? "\\\"" : c);
+				escaped = (!escaped && c == '\\');
+			}
+			return sb.toString();
 		}
 
 		@Override

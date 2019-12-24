@@ -54,9 +54,9 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 
 	ClientDefaultCodecsImpl(ClientDefaultCodecsImpl other) {
 		super(other);
-		this.multipartCodecs = new DefaultMultipartCodecs(other.multipartCodecs);
+		this.multipartCodecs = (other.multipartCodecs != null ?
+				new DefaultMultipartCodecs(other.multipartCodecs) : null);
 		this.sseDecoder = other.sseDecoder;
-		this.partWritersSupplier = other.partWritersSupplier;
 	}
 
 
@@ -95,24 +95,17 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 
 	@Override
 	protected void extendObjectReaders(List<HttpMessageReader<?>> objectReaders) {
-		objectReaders.add(new ServerSentEventHttpMessageReader(getSseDecoder()));
-	}
 
-	@Nullable
-	private Decoder<?> getSseDecoder() {
-		return (this.sseDecoder != null ? this.sseDecoder : jackson2Present ? getJackson2JsonDecoder() : null);
+		Decoder<?> decoder = (this.sseDecoder != null ?
+				this.sseDecoder :
+				jackson2Present ? getJackson2JsonDecoder() : null);
+
+		addCodec(objectReaders, new ServerSentEventHttpMessageReader(decoder));
 	}
 
 	@Override
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
-
-		FormHttpMessageWriter formWriter = new FormHttpMessageWriter();
-		formWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
-
-		MultipartHttpMessageWriter multipartWriter = new MultipartHttpMessageWriter(getPartWriters(), formWriter);
-		multipartWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
-
-		typedWriters.add(multipartWriter);
+		addCodec(typedWriters, new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 	}
 
 	private List<HttpMessageWriter<?>> getPartWriters() {
@@ -139,10 +132,8 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		DefaultMultipartCodecs() {
 		}
 
-		DefaultMultipartCodecs(@Nullable DefaultMultipartCodecs other) {
-			if (other != null) {
-				this.writers.addAll(other.writers);
-			}
+		DefaultMultipartCodecs(DefaultMultipartCodecs other) {
+			this.writers.addAll(other.writers);
 		}
 
 

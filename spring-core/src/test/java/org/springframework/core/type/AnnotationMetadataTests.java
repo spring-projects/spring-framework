@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Sam Brannen
+ * @see InheritedAnnotationsAnnotationMetadataTests
  */
 class AnnotationMetadataTests {
 

@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
+import org.junit.jupiter.api.Disabled;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -522,6 +523,16 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
+	@Disabled
+	@ParameterizedHttpServerTest // gh-23791
+	public void personCreateViaDefaultMethodWithGenerics(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+		ResponseEntity<String> entity = performPost("/23791", JSON, new Person("Robert"), null, String.class);
+
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getBody()).isEqualTo("Person");
+	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -832,6 +843,19 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return this.persons;
 		}
 
+	}
+
+
+	private interface Controller23791<E> {
+
+		@PostMapping("/23791")
+		default Mono<String> test(@RequestBody Mono<E> body) {
+			return body.map(value -> value.getClass().getSimpleName());
+		}
+	}
+
+	@RestController
+	private static class ConcreteController23791 implements Controller23791<Person> {
 	}
 
 }

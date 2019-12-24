@@ -532,7 +532,7 @@ class DefaultWebClient implements WebClient {
 		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
 			// Ensure the body is drained, even if the StatusHandler didn't consume it,
 			// but ignore exception, in case the handler did consume.
-			return (Mono<T>) response.bodyToMono(Void.class)
+			return (Mono<T>) response.releaseBody()
 					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 

@@ -1592,8 +1592,8 @@ in both the XML namespace and Java configuration as the `systemLogin` and
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials that are used for all TCP
 connections created on behalf of clients. This is exposed in both the XML namespace
-and Java configuration as the `clientLogin and `clientPasscode` properties with default
-values of `guest`and `guest`.
+and Java configuration as the `clientLogin` and `clientPasscode` properties with default
+values of `guest` and `guest`.
 
 NOTE: The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
 frame that it forwards to the broker on behalf of clients. Therefore, WebSocket clients
@@ -1787,8 +1787,8 @@ in applications that do not maintain a server-side session or in
 mobile applications where it is common to use headers for authentication).
 
 The https://tools.ietf.org/html/rfc6455#section-10.5[WebSocket protocol, RFC 6455]
-"`doesn't prescribe any particular way that servers can authenticate clients during
-the WebSocket handshake.`" In practice, however, browser clients can use only standard
+"doesn't prescribe any particular way that servers can authenticate clients during
+the WebSocket handshake." In practice, however, browser clients can use only standard
 authentication headers (that is, basic HTTP authentication) or cookies and cannot (for example)
 provide custom headers. Likewise, the SockJS JavaScript client does not provide
 a way to send HTTP headers with SockJS transport requests. See
@@ -1921,7 +1921,7 @@ session that sent the message being handled).
 
 You can send a message to user destinations from any application
 component by, for example, injecting the `SimpMessagingTemplate` created by the Java configuration or
-the XML namespace. (The bean name is `"brokerMessagingTemplate"` if required
+the XML namespace. (The bean name is `brokerMessagingTemplate` if required
 for qualification with `@Qualifier`.) The following example shows how to do so:
 
 [source,java,indent=0]

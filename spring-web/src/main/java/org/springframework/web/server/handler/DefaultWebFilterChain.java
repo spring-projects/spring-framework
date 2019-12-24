@@ -123,8 +123,8 @@ public class DefaultWebFilterChain implements WebFilterChain {
 	}
 
 	private Mono<Void> invokeFilter(WebFilter current, DefaultWebFilterChain chain, ServerWebExchange exchange) {
-		return current.filter(exchange, chain)
-				.checkpoint(current.getClass().getName() + " [DefaultWebFilterChain]");
+		String currentName = current.getClass().getName();
+		return current.filter(exchange, chain).checkpoint(currentName + " [DefaultWebFilterChain]");
 	}
 
 }

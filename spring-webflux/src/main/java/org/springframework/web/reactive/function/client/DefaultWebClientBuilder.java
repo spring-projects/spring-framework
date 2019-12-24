@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -207,11 +208,21 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder codecs(Consumer<ClientCodecConfigurer> configurer) {
+		if (this.strategiesConfigurers == null) {
+			this.strategiesConfigurers = new ArrayList<>(4);
+		}
+		this.strategiesConfigurers.add(builder -> builder.codecs(configurer));
+		return this;
+	}
+
+	@Override
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		this.strategies = strategies;
 		return this;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {

@@ -123,6 +123,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public Optional<InetSocketAddress> localAddress() {
+		return Optional.ofNullable(request().getLocalAddress());
+	}
+
+	@Override
 	public List<HttpMessageReader<?>> messageReaders() {
 		return this.messageReaders;
 	}
