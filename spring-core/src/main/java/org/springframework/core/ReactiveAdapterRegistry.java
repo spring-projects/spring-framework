@@ -28,9 +28,6 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
-import kotlinx.coroutines.flow.FlowKt;
-import kotlinx.coroutines.reactive.flow.FlowAsPublisherKt;
-import kotlinx.coroutines.reactive.flow.PublisherAsFlowKt;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>By default, depending on classpath availability, adapters are registered
  * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, Java 9+
- * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred}.
+ * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred} and {@code Flow}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -97,12 +94,8 @@ public class ReactiveAdapterRegistry {
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
 
 		// Coroutines
-		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
+		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
 			new CoroutinesRegistrar().registerAdapters(this);
-		}
-		// TODO Use a single CoroutinesRegistrar when Flow will be not experimental anymore
-		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.flow.Flow", classLoader)) {
-			new CoroutinesFlowRegistrar().registerAdapters(this);
 		}
 	}
 
@@ -353,19 +346,12 @@ public class ReactiveAdapterRegistry {
 							() -> CompletableDeferredKt.CompletableDeferred(null)),
 					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
 					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
-		}
-	}
 
-
-	private static class CoroutinesFlowRegistrar {
-
-		void registerAdapters(ReactiveAdapterRegistry registry) {
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, FlowKt::emptyFlow),
-					source -> FlowAsPublisherKt.from((kotlinx.coroutines.flow.Flow<?>) source),
-					PublisherAsFlowKt::from
+					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
+					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
+					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow
 			);
 		}
 	}
-
 }

@@ -21,10 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+
 import javax.annotation.Resource;
 import javax.inject.Provider;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -52,6 +53,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -273,6 +275,18 @@ public class ConfigurationClassProcessingTests {
 		assertThat(ctx.getBean(NestedTestBean.class).getCompany()).isEqualTo("functional");
 	}
 
+	@Test
+	public void configurationWithApplicationListener() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithApplicationListener.class);
+		ctx.refresh();
+		ConfigWithApplicationListener config = ctx.getBean(ConfigWithApplicationListener.class);
+		assertThat(config.closed).isFalse();
+		ctx.close();
+		assertThat(config.closed).isTrue();
+	}
+
+
 
 	/**
 	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition}
@@ -348,6 +362,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithProviderImplementation.class.getSimpleName());
 
+		@Override
 		@Bean(name = "customName")
 		public TestBean get() {
 			return testBean;
@@ -360,6 +375,7 @@ public class ConfigurationClassProcessingTests {
 
 		static Set<String> set = Collections.singleton("value");
 
+		@Override
 		@Bean(name = "customName")
 		public Set<String> get() {
 			return set;
@@ -564,6 +580,18 @@ public class ConfigurationClassProcessingTests {
 		@Bean
 		public NestedTestBean nestedTestBean(TestBean testBean) {
 			return new NestedTestBean(testBean.getSpouse().getName());
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithApplicationListener {
+
+		boolean closed = false;
+
+		@Bean
+		public ApplicationListener<ContextClosedEvent> listener() {
+			return (event -> this.closed = true);
 		}
 	}
 

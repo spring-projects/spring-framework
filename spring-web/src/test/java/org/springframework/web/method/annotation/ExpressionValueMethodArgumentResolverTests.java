@@ -18,9 +18,9 @@ package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
@@ -50,7 +50,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	private NativeWebRequest webRequest;
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -68,7 +68,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}

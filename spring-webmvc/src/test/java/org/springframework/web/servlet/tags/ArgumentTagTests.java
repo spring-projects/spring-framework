@@ -21,8 +21,8 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -40,7 +40,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 	private MockArgumentSupportTag parent;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		PageContext context = createPageContext();
 		parent = new MockArgumentSupportTag();

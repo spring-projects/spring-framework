@@ -19,8 +19,8 @@ package org.springframework.web.reactive.resource;
 import java.time.Duration;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
@@ -57,7 +57,7 @@ public class WebJarsResourceResolverTests {
 	private ServerWebExchange exchange;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		// for this to work, an actual WebJar must be on the test classpath
 		this.locations = singletonList(new ClassPathResource("/META-INF/resources/webjars"));

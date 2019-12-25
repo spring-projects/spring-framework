@@ -57,9 +57,13 @@ import java.lang.annotation.Target;
  * <ul>
  * <li><strong>Explicit aliases within an annotation</strong>:
  * <ol>
- * <li>Each attribute that makes up an aliased pair must be annotated with
+ * <li>Each attribute that makes up an aliased pair should be annotated with
  * {@code @AliasFor}, and either {@link #attribute} or {@link #value} must
- * reference the <em>other</em> attribute in the pair.</li>
+ * reference the <em>other</em> attribute in the pair. Since Spring Framework
+ * 5.2.1 it is technically possible to annotate only one of the attributes in an
+ * aliased pair; however, it is recommended to annotate both attributes in an
+ * aliased pair for better documentation as well as compatibility with previous
+ * versions of the Spring Framework.</li>
  * <li>Aliased attributes must declare the same return type.</li>
  * <li>Aliased attributes must declare a default value.</li>
  * <li>Aliased attributes must declare the same default value.</li>

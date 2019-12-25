@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -48,8 +49,10 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -86,9 +89,20 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private Function<Unmarshaller, Unmarshaller> unmarshallerProcessor = Function.identity();
 
+	private int maxInMemorySize = 256 * 1024;
+
 
 	public Jaxb2XmlDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
+	}
+
+	/**
+	 * Create a {@code Jaxb2XmlDecoder} with the specified MIME types.
+	 * @param supportedMimeTypes supported MIME types
+	 * @since 5.1.9
+	 */
+	public Jaxb2XmlDecoder(MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
 	}
 
 
@@ -107,6 +121,28 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	public Function<Unmarshaller, Unmarshaller> getUnmarshallerProcessor() {
 		return this.unmarshallerProcessor;
+	}
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder.
+	 * This is either the size of the entire input when decoding as a whole, or when
+	 * using async parsing with Aalto XML, it is the size of one top-level XML tree.
+	 * When the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+		this.xmlEventDecoder.setMaxInMemorySize(byteCount);
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -143,7 +179,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input)
+		return DataBufferUtils.join(input, this.maxInMemorySize)
 				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
 	}
 
@@ -186,7 +222,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 	}
 
-	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws CodecException, JAXBException {
 		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
 		return this.unmarshallerProcessor.apply(unmarshaller);
 	}

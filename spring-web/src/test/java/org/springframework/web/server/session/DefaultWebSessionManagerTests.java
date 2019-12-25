@@ -20,11 +20,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -47,8 +47,8 @@ import static org.mockito.Mockito.verify;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultWebSessionManagerTests {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class DefaultWebSessionManagerTests {
 
 	@Mock
 	private WebSessionIdResolver sessionIdResolver;
@@ -67,8 +67,8 @@ public class DefaultWebSessionManagerTests {
 	private ServerWebExchange exchange;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		given(this.createSession.save()).willReturn(Mono.empty());
 		given(this.createSession.getId()).willReturn("create-session-id");
 		given(this.updateSession.getId()).willReturn("update-session-id");
@@ -83,12 +83,11 @@ public class DefaultWebSessionManagerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, response, this.sessionManager,
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
+			ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
 	}
 
 	@Test
-	public void getSessionSaveWhenCreatedAndNotStartedThenNotSaved() {
-
+	void getSessionSaveWhenCreatedAndNotStartedThenNotSaved() {
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.emptyList());
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
 		this.exchange.getResponse().setComplete().block();
@@ -101,8 +100,7 @@ public class DefaultWebSessionManagerTests {
 	}
 
 	@Test
-	public void getSessionSaveWhenCreatedAndStartedThenSavesAndSetsId() {
-
+	void getSessionSaveWhenCreatedAndStartedThenSavesAndSetsId() {
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.emptyList());
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
 		assertThat(session).isSameAs(this.createSession);
@@ -117,8 +115,7 @@ public class DefaultWebSessionManagerTests {
 	}
 
 	@Test
-	public void existingSession() {
-
+	void existingSession() {
 		String sessionId = this.updateSession.getId();
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.singletonList(sessionId));
 
@@ -128,8 +125,7 @@ public class DefaultWebSessionManagerTests {
 	}
 
 	@Test
-	public void multipleSessionIds() {
-
+	void multipleSessionIds() {
 		List<String> ids = Arrays.asList("not-this", "not-that", this.updateSession.getId());
 		given(this.sessionStore.retrieveSession("not-this")).willReturn(Mono.empty());
 		given(this.sessionStore.retrieveSession("not-that")).willReturn(Mono.empty());
@@ -139,4 +135,5 @@ public class DefaultWebSessionManagerTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual.getId()).isEqualTo(this.updateSession.getId());
 	}
+
 }

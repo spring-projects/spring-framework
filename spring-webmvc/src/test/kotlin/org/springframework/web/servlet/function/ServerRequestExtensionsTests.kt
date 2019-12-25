@@ -19,9 +19,8 @@ package org.springframework.web.servlet.function
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import java.net.InetSocketAddress
@@ -41,25 +40,25 @@ class ServerRequestExtensionsTests {
 
 	@Test
 	fun `remoteAddressOrNull with value`() {
-		val remoteAddress = mockk<InetSocketAddress>()
+		val remoteAddress = InetSocketAddress(1234)
 		every { request.remoteAddress() } returns Optional.of(remoteAddress)
-		assertEquals(remoteAddress, request.remoteAddressOrNull())
+		assertThat(remoteAddress).isEqualTo(request.remoteAddressOrNull())
 		verify { request.remoteAddress() }
 	}
 
 	@Test
 	fun `remoteAddressOrNull with null`() {
 		every { request.remoteAddress() } returns Optional.empty()
-		assertNull(request.remoteAddressOrNull())
+		assertThat(request.remoteAddressOrNull()).isNull()
 		verify { request.remoteAddress() }
 	}
 
 	@Test
 	fun body() {
-		val body = Arrays.asList("foo", "bar")
+		val body = listOf("foo", "bar")
 		val typeReference = object: ParameterizedTypeReference<List<String>>() {}
 		every { request.body(typeReference) } returns body
-		assertEquals(body, request.body<List<String>>())
+		assertThat(request.body<List<String>>()).isEqualTo(body)
 		verify { request.body(typeReference) }
 	}
 
@@ -67,14 +66,14 @@ class ServerRequestExtensionsTests {
 	fun `attributeOrNull with value`() {
 		val attribute = mockk<Any>()
 		every { request.attribute("foo") } returns Optional.of(attribute)
-		assertEquals(attribute, request.attributeOrNull("foo"))
+		assertThat(request.attributeOrNull("foo")).isEqualTo(attribute)
 		verify { request.attribute("foo") }
 	}
 
 	@Test
 	fun `attributeOrNull with null`() {
 		every { request.attribute("foo") } returns Optional.empty()
-		assertNull(request.attributeOrNull("foo"))
+		assertThat(request.attributeOrNull("foo")).isNull()
 		verify { request.attribute("foo") }
 	}
 
@@ -82,14 +81,14 @@ class ServerRequestExtensionsTests {
 	fun `paramOrNull with value`() {
 		val param = "bar"
 		every { request.param("foo") } returns Optional.of(param)
-		assertEquals(param, request.paramOrNull("foo"))
+		assertThat(request.paramOrNull("foo")).isEqualTo(param)
 		verify { request.param("foo") }
 	}
 
 	@Test
 	fun `paramOrNull with null`() {
 		every { request.param("foo") } returns Optional.empty()
-		assertNull(request.paramOrNull("foo"))
+		assertThat(request.paramOrNull("foo")).isNull()
 		verify { request.param("foo") }
 	}
 
@@ -97,14 +96,14 @@ class ServerRequestExtensionsTests {
 	fun `principalOrNull with value`() {
 		val principal = mockk<Principal>()
 		every { request.principal() } returns Optional.of(principal)
-		assertEquals(principal, request.principalOrNull())
+		assertThat(request.principalOrNull()).isEqualTo(principal)
 		verify { request.principal() }
 	}
 
 	@Test
 	fun `principalOrNull with null`() {
 		every { request.principal() } returns Optional.empty()
-		assertNull(request.principalOrNull())
+		assertThat(request.principalOrNull()).isNull()
 		verify { request.principal() }
 	}
 
@@ -112,14 +111,14 @@ class ServerRequestExtensionsTests {
 	fun `contentLengthOrNull with value`() {
 		val contentLength: Long = 123
 		every { headers.contentLength() } returns OptionalLong.of(contentLength)
-		assertEquals(contentLength, headers.contentLengthOrNull())
+		assertThat(headers.contentLengthOrNull()).isEqualTo(contentLength)
 		verify { headers.contentLength() }
 	}
 
 	@Test
 	fun `contentLengthOrNull with null`() {
 		every { headers.contentLength() } returns OptionalLong.empty()
-		assertNull(headers.contentLengthOrNull())
+		assertThat(headers.contentLengthOrNull()).isNull()
 		verify { headers.contentLength() }
 	}
 
@@ -127,14 +126,14 @@ class ServerRequestExtensionsTests {
 	fun `contentTypeOrNull with value`() {
 		val contentType = mockk<MediaType>()
 		every { headers.contentType() } returns Optional.of(contentType)
-		assertEquals(contentType, headers.contentTypeOrNull())
+		assertThat(headers.contentTypeOrNull()).isEqualTo(contentType)
 		verify { headers.contentType() }
 	}
 
 	@Test
 	fun `contentTypeOrNull with null`() {
 		every { headers.contentType() } returns Optional.empty()
-		assertNull(headers.contentTypeOrNull())
+		assertThat(headers.contentTypeOrNull()).isNull()
 		verify { headers.contentType() }
 	}
 }

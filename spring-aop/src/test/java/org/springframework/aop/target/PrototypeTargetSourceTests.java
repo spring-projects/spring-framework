@@ -16,8 +16,8 @@
 
 package org.springframework.aop.target;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -38,7 +38,7 @@ public class PrototypeTargetSourceTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(

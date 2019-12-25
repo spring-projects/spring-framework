@@ -18,14 +18,15 @@ package org.springframework.orm.jpa;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -64,7 +65,7 @@ public class JpaTransactionManagerTests {
 	private TransactionTemplate tt;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
@@ -78,7 +79,7 @@ public class JpaTransactionManagerTests {
 		given(manager.isOpen()).willReturn(true);
 	}
 
-	@After
+	@AfterEach
 	public void verifyTransactionSynchronizationManagerState() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

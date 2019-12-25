@@ -18,7 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,13 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEncoder> {
+class DataBufferEncoderTests extends AbstractEncoderTests<DataBufferEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
-	public DataBufferEncoderTests() {
+	DataBufferEncoderTests() {
 		super(new DataBufferEncoder());
 	}
 
@@ -57,6 +57,7 @@ public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEn
 	}
 
 	@Override
+	@Test
 	public void encode() throws Exception {
 		Flux<DataBuffer> input = Flux.just(this.fooBytes, this.barBytes)
 				.flatMap(bytes -> Mono.defer(() -> {
@@ -71,6 +72,5 @@ public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBufferEn
 				.verifyComplete());
 
 	}
-
 
 }

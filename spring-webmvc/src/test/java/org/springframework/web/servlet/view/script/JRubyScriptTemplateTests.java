@@ -18,11 +18,12 @@ package org.springframework.web.servlet.view.script;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Sebastien Deleuze
  */
-@Ignore("JRuby not compatible with JDK 9 yet")
+@Disabled("JRuby not compatible with JDK 9 yet")
 public class JRubyScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
@@ -48,7 +49,7 @@ public class JRubyScriptTemplateTests {
 	private ServletContext servletContext;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
 		this.servletContext = new MockServletContext();

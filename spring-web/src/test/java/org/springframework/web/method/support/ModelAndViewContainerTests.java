@@ -16,8 +16,8 @@
 
 package org.springframework.web.method.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.ui.ModelMap;
 
@@ -34,7 +34,7 @@ public class ModelAndViewContainerTests {
 	private ModelAndViewContainer mavContainer;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mavContainer = new ModelAndViewContainer();
 	}

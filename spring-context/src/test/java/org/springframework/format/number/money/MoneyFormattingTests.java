@@ -17,12 +17,13 @@
 package org.springframework.format.number.money;
 
 import java.util.Locale;
+
 import javax.money.CurrencyUnit;
 import javax.money.MonetaryAmount;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -42,12 +43,12 @@ public class MoneyFormattingTests {
 	private final FormattingConversionService conversionService = new DefaultFormattingConversionService();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}

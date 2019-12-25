@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
@@ -49,31 +49,31 @@ public class DefaultUriBuilderFactoryTests {
 
 	@Test
 	public void baseUri() {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1?id=123");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.example/v1?id=123");
 		URI uri = factory.uriString("/bar").port(8080).build();
-		assertThat(uri.toString()).isEqualTo("https://foo.com:8080/v1/bar?id=123");
+		assertThat(uri.toString()).isEqualTo("https://foo.example:8080/v1/bar?id=123");
 	}
 
 	@Test
 	public void baseUriWithFullOverride() {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1?id=123");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.example/v1?id=123");
 		URI uri = factory.uriString("https://example.com/1/2").build();
 		assertThat(uri.toString()).as("Use of host should case baseUri to be completely ignored").isEqualTo("https://example.com/1/2");
 	}
 
 	@Test
 	public void baseUriWithPathOverride() {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.example/v1");
 		URI uri = factory.builder().replacePath("/baz").build();
-		assertThat(uri.toString()).isEqualTo("https://foo.com/baz");
+		assertThat(uri.toString()).isEqualTo("https://foo.example/baz");
 	}
 
 	@Test
 	public void defaultUriVars() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://{host}/v1");
-		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
+		factory.setDefaultUriVariables(singletonMap("host", "foo.example"));
 		URI uri = factory.uriString("/{id}").build(singletonMap("id", "123"));
-		assertThat(uri.toString()).isEqualTo("https://foo.com/v1/123");
+		assertThat(uri.toString()).isEqualTo("https://foo.example/v1/123");
 	}
 
 	@Test
@@ -87,9 +87,9 @@ public class DefaultUriBuilderFactoryTests {
 	@Test
 	public void defaultUriVarsWithEmptyVarArg() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://{host}/v1");
-		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
+		factory.setDefaultUriVariables(singletonMap("host", "foo.example"));
 		URI uri = factory.uriString("/bar").build();
-		assertThat(uri.toString()).as("Expected delegation to build(Map) method").isEqualTo("https://foo.com/v1/bar");
+		assertThat(uri.toString()).as("Expected delegation to build(Map) method").isEqualTo("https://foo.example/v1/bar");
 	}
 
 	@Test

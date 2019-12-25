@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link MergedAnnotations} implementation backed by a {@link Collection}
+ * {@link MergedAnnotations} implementation backed by a {@link Collection} of
  * {@link MergedAnnotation} instances that represent direct annotations.
  *
  * @author Phillip Webb

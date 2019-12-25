@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -204,7 +205,14 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		@Override
 		protected void applyHeaders() {
 			HttpServletResponse response = getNativeResponse();
-			MediaType contentType = getHeaders().getContentType();
+			MediaType contentType = null;
+			try {
+				contentType = getHeaders().getContentType();
+			}
+			catch (Exception ex) {
+				String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+				response.setContentType(rawContentType);
+			}
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}

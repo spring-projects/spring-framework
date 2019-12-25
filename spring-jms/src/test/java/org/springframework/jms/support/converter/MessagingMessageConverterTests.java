@@ -17,12 +17,13 @@
 package org.springframework.jms.support.converter;
 
 import java.io.Serializable;
+
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTextMessage;
 import org.springframework.messaging.Message;

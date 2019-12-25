@@ -18,18 +18,17 @@ package org.springframework.core.type;
 
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.springframework.tests.TestGroup.LONG_RUNNING;
 
 /**
  * Unit tests for checking the behaviour of {@link CachingMetadataReaderFactory} under
@@ -39,16 +38,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Costin Leau
  * @author Sam Brannen
  */
-public class CachingMetadataReaderLeakTests {
+@EnabledForTestGroups(LONG_RUNNING)
+class CachingMetadataReaderLeakTests {
 
 	private static final int ITEMS_TO_LOAD = 9999;
 
 	private final MetadataReaderFactory mrf = new CachingMetadataReaderFactory();
 
 	@Test
-	public void testSignificantLoad() throws Exception {
-		Assume.group(TestGroup.LONG_RUNNING);
-
+	void significantLoad() throws Exception {
 		// the biggest public class in the JDK (>60k)
 		URL url = getClass().getResource("/java/awt/Component.class");
 		assertThat(url).isNotNull();

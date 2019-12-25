@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -43,9 +44,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,7 +78,7 @@ public class XStreamMarshallerTests {
 	private Flight flight;
 
 
-	@Before
+	@BeforeEach
 	public void createMarshaller() {
 		marshaller = new XStreamMarshaller();
 		Map<String, String> aliases = new HashMap<>();
@@ -236,7 +236,6 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringClassMap() throws Exception {
 		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
@@ -250,7 +249,6 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringStringMap() throws Exception {
 		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());

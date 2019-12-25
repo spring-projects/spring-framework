@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
@@ -60,7 +60,7 @@ public class CacheResolverCustomizationTests {
 	private SimpleService simpleService;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cacheManager = context.getBean("cacheManager", CacheManager.class);

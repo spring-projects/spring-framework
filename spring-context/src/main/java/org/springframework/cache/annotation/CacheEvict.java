@@ -142,7 +142,7 @@ public @interface CacheEvict {
 	 * occur irrespective of the method outcome (i.e., whether it threw an
 	 * exception or not).
 	 * <p>Defaults to {@code false}, meaning that the cache eviction operation
-	 * will occur <em>after</em> the advised method is invoked successfully (i.e.,
+	 * will occur <em>after</em> the advised method is invoked successfully (i.e.
 	 * only if the invocation did not throw an exception).
 	 */
 	boolean beforeInvocation() default false;

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.server.reactive;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -28,10 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link MockServerHttpRequest}.
  * @author Rossen Stoyanchev
  */
-public class MockServerHttpRequestTests {
+class MockServerHttpRequestTests {
 
 	@Test
-	public void cookieHeaderSet() throws Exception {
+	void cookieHeaderSet() throws Exception {
 		HttpCookie foo11 = new HttpCookie("foo1", "bar1");
 		HttpCookie foo12 = new HttpCookie("foo1", "bar2");
 		HttpCookie foo21 = new HttpCookie("foo2", "baz1");
@@ -46,7 +47,7 @@ public class MockServerHttpRequestTests {
 	}
 
 	@Test
-	public void queryParams() throws Exception {
+	void queryParams() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/foo bar?a=b")
 				.queryParam("name A", "value A1", "value A2")
 				.queryParam("name B", "value B1")

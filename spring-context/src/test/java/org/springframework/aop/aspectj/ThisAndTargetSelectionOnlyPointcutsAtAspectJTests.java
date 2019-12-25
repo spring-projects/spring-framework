@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -42,7 +42,7 @@ public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	private Counter counter;
 
 
-	@org.junit.Before
+	@org.junit.jupiter.api.BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());

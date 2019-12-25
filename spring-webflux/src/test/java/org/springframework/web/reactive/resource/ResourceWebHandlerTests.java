@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -78,7 +78,7 @@ public class ResourceWebHandlerTests {
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<Resource> locations = new ArrayList<>(2);
 		locations.add(new ClassPathResource("test/", getClass()));

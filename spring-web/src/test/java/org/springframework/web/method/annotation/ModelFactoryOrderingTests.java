@@ -25,8 +25,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -65,7 +65,7 @@ public class ModelFactoryOrderingTests {
 	private SessionAttributeStore sessionAttributeStore;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.sessionAttributeStore = new DefaultSessionAttributeStore();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());

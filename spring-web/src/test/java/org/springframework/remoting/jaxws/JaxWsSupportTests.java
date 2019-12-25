@@ -18,6 +18,7 @@ package org.springframework.remoting.jaxws;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
@@ -27,7 +28,7 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.WebServiceRef;
 import javax.xml.ws.soap.AddressingFeature;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;

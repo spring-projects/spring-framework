@@ -17,11 +17,12 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Date;
+
 import javax.inject.Provider;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
@@ -46,7 +47,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -54,7 +55,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		this.beanFactory.setSerializationId("test");
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		this.beanFactory.setSerializationId(null);
 	}

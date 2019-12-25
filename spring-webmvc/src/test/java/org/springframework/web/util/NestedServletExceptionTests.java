@@ -16,7 +16,7 @@
 
 package org.springframework.web.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.NestedExceptionUtils;
 

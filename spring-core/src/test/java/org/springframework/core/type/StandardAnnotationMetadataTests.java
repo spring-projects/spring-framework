@@ -21,7 +21,7 @@ package org.springframework.core.type;
  *
  * @author Phillip Webb
  */
-public class StandardAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
+class StandardAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 
 	@Override
 	@SuppressWarnings("deprecation")

@@ -20,11 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link AbstractServerHttpRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ServerHttpRequestTests {
 
@@ -89,7 +91,6 @@ public class ServerHttpRequestTests {
 
 	@Test
 	public void mutateRequest() throws Exception {
-
 		SslInfo sslInfo = mock(SslInfo.class);
 		ServerHttpRequest request = createHttpRequest("/").mutate().sslInfo(sslInfo).build();
 		assertThat(request.getSslInfo()).isSameAs(sslInfo);
@@ -123,6 +124,43 @@ public class ServerHttpRequestTests {
 
 		assertThat(request.getURI().getRawPath()).isEqualTo("/mutatedPath");
 		assertThat(request.getURI().getRawQuery()).isEqualTo("name=%E6%89%8E%E6%A0%B9");
+	}
+
+	@Test
+	public void mutateHeadersViaConsumer() throws Exception {
+		String headerName = "key";
+		String headerValue1 = "value1";
+		String headerValue2 = "value2";
+
+		ServerHttpRequest request = createHttpRequest("/path");
+		assertThat(request.getHeaders().get(headerName)).isNull();
+
+		request = request.mutate().headers(headers -> headers.add(headerName, headerValue1)).build();
+
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1);
+
+		request = request.mutate().headers(headers -> headers.add(headerName, headerValue2)).build();
+
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1, headerValue2);
+	}
+
+	@Test
+	public void mutateHeaderBySettingHeaderValues() throws Exception {
+		String headerName = "key";
+		String headerValue1 = "value1";
+		String headerValue2 = "value2";
+		String headerValue3 = "value3";
+
+		ServerHttpRequest request = createHttpRequest("/path");
+		assertThat(request.getHeaders().get(headerName)).isNull();
+
+		request = request.mutate().header(headerName, headerValue1, headerValue2).build();
+
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1, headerValue2);
+
+		request = request.mutate().header(headerName, headerValue3).build();
+
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue3);
 	}
 
 	private ServerHttpRequest createHttpRequest(String uriString) throws Exception {

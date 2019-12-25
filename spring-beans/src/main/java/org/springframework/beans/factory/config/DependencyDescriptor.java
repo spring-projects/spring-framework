@@ -33,7 +33,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -280,13 +279,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Increase this descriptor's nesting level.
-	 * @see MethodParameter#increaseNestingLevel()
 	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			this.methodParameter.increaseNestingLevel();
+			this.methodParameter = this.methodParameter.nested();
 		}
 	}
 
@@ -300,7 +298,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		this.containingClass = containingClass;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			GenericTypeResolver.resolveParameterType(this.methodParameter, containingClass);
+			this.methodParameter = this.methodParameter.withContainingClass(containingClass);
 		}
 	}
 
@@ -430,7 +428,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass);
+		return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass));
 	}
 
 
@@ -457,7 +455,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 							this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
 				}
 				for (int i = 1; i < this.nestingLevel; i++) {
-					this.methodParameter.increaseNestingLevel();
+					this.methodParameter = this.methodParameter.nested();
 				}
 			}
 		}

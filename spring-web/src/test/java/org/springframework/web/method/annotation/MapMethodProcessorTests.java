@@ -18,8 +18,8 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -51,7 +51,7 @@ public class MapMethodProcessorTests {
 			ResolvableMethod.on(getClass()).annotPresent(RequestMapping.class).build();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.processor = new MapMethodProcessor();
 		this.mavContainer = new ModelAndViewContainer();

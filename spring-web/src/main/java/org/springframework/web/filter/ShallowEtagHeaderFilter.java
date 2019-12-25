@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -112,7 +113,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 				WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
 		Assert.notNull(responseWrapper, "ContentCachingResponseWrapper not found");
 		HttpServletResponse rawResponse = (HttpServletResponse) responseWrapper.getResponse();
-		int statusCode = responseWrapper.getStatusCode();
+		int statusCode = responseWrapper.getStatus();
 
 		if (rawResponse.isCommitted()) {
 			responseWrapper.copyBodyToResponse();

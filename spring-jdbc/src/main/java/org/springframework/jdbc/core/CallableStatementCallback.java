@@ -72,7 +72,7 @@ public interface CallableStatementCallback<T> {
 	 * @param cs active JDBC CallableStatement
 	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
-	 * into a DataAccessException by a SQLExceptionTranslator
+	 * into a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 */
 	@Nullable

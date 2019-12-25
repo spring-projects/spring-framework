@@ -17,6 +17,7 @@
 package example.scannable;
 
 import java.util.concurrent.Future;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;

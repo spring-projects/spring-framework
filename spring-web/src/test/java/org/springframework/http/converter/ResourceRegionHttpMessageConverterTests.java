@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 
@@ -142,6 +142,45 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(ranges[13]).isEqualTo("Content-Type: text/plain");
 		assertThat(ranges[14]).isEqualTo("Content-Range: bytes 22-38/39");
 		assertThat(ranges[15]).isEqualTo("resource content.");
+	}
+
+	@Test
+	public void partialContentMultipleByteRangesInRandomOrderAndOverlapping() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
+		List<HttpRange> rangeList = HttpRange.parseRanges("bytes=7-15,0-5,17-20,20-29");
+		List<ResourceRegion> regions = new ArrayList<>();
+		for(HttpRange range : rangeList) {
+			regions.add(range.toResourceRegion(body));
+		}
+
+		converter.write(regions, MediaType.TEXT_PLAIN, outputMessage);
+
+		HttpHeaders headers = outputMessage.getHeaders();
+		assertThat(headers.getContentType().toString()).startsWith("multipart/byteranges;boundary=");
+		String boundary = "--" + headers.getContentType().toString().substring(30);
+		String content = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
+		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
+
+		assertThat(ranges[0]).isEqualTo(boundary);
+		assertThat(ranges[1]).isEqualTo("Content-Type: text/plain");
+		assertThat(ranges[2]).isEqualTo("Content-Range: bytes 7-15/39");
+		assertThat(ranges[3]).isEqualTo("Framework");
+
+		assertThat(ranges[4]).isEqualTo(boundary);
+		assertThat(ranges[5]).isEqualTo("Content-Type: text/plain");
+		assertThat(ranges[6]).isEqualTo("Content-Range: bytes 0-5/39");
+		assertThat(ranges[7]).isEqualTo("Spring");
+
+		assertThat(ranges[8]).isEqualTo(boundary);
+		assertThat(ranges[9]).isEqualTo("Content-Type: text/plain");
+		assertThat(ranges[10]).isEqualTo("Content-Range: bytes 17-20/39");
+		assertThat(ranges[11]).isEqualTo("test");
+
+		assertThat(ranges[12]).isEqualTo(boundary);
+		assertThat(ranges[13]).isEqualTo("Content-Type: text/plain");
+		assertThat(ranges[14]).isEqualTo("Content-Range: bytes 20-29/39");
+		assertThat(ranges[15]).isEqualTo("t resource");
 	}
 
 	@Test // SPR-15041

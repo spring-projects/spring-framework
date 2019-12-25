@@ -18,10 +18,11 @@ package org.springframework.web.servlet.resource;
 
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -51,7 +52,7 @@ public class WebJarsResourceResolverTests {
 	private HttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		// for this to work, an actual WebJar must be on the test classpath
 		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars"));

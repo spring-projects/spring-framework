@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,6 +35,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -66,8 +66,10 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	}
 
 
-	@Test
-	public void testRequestToFooHandler() throws Exception {
+	@ParameterizedHttpServerTest
+	void testRequestToFooHandler(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + this.port + "/foo");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -76,8 +78,10 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		assertThat(response.getBody()).isEqualTo("foo".getBytes("UTF-8"));
 	}
 
-	@Test
-	public void testRequestToBarHandler() throws Exception {
+	@ParameterizedHttpServerTest
+	public void testRequestToBarHandler(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + this.port + "/bar");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -86,8 +90,10 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		assertThat(response.getBody()).isEqualTo("bar".getBytes("UTF-8"));
 	}
 
-	@Test
-	public void testRequestToHeaderSettingHandler() throws Exception {
+	@ParameterizedHttpServerTest
+	void testRequestToHeaderSettingHandler(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + this.port + "/header");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -96,8 +102,10 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		assertThat(response.getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
-	@Test
-	public void testHandlerNotFound() throws Exception {
+	@ParameterizedHttpServerTest
+	void testHandlerNotFound(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + this.port + "/oops");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		try {
@@ -119,20 +127,16 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Bean
 		public SimpleUrlHandlerMapping handlerMapping() {
-			return new SimpleUrlHandlerMapping() {
-				{
-					Map<String, Object> map = new HashMap<>();
-					map.put("/foo", (WebHandler) exchange ->
-							exchange.getResponse().writeWith(Flux.just(asDataBuffer("foo"))));
-					map.put("/bar", (WebHandler) exchange ->
-							exchange.getResponse().writeWith(Flux.just(asDataBuffer("bar"))));
-					map.put("/header", (WebHandler) exchange -> {
-						exchange.getResponse().getHeaders().add("foo", "bar");
-						return Mono.empty();
-					});
-					setUrlMap(map);
-				}
-			};
+			Map<String, Object> map = new HashMap<>();
+			map.put("/foo", (WebHandler) exchange ->
+				exchange.getResponse().writeWith(Flux.just(asDataBuffer("foo"))));
+			map.put("/bar", (WebHandler) exchange ->
+				exchange.getResponse().writeWith(Flux.just(asDataBuffer("bar"))));
+			map.put("/header", (WebHandler) exchange -> {
+				exchange.getResponse().getHeaders().add("foo", "bar");
+				return Mono.empty();
+			});
+			return new SimpleUrlHandlerMapping(map);
 		}
 
 		@Bean

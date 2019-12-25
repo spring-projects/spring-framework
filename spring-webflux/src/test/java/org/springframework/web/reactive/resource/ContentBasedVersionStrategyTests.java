@@ -18,8 +18,8 @@ package org.springframework.web.reactive.resource;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -38,7 +38,7 @@ public class ContentBasedVersionStrategyTests {
 	private ContentVersionStrategy strategy = new ContentVersionStrategy();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResourceResolver = new VersionResourceResolver();
 		versionResourceResolver.setStrategyMap(Collections.singletonMap("/**", this.strategy));

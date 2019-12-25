@@ -26,9 +26,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -67,6 +68,7 @@ public class DefaultServerResponseBuilderTests {
 	public void status() {
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(response.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test

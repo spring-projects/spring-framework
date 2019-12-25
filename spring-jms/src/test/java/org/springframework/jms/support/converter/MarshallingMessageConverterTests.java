@@ -22,8 +22,8 @@ import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
@@ -49,7 +49,7 @@ public class MarshallingMessageConverterTests {
 	private Session sessionMock;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		marshallerMock = mock(Marshaller.class);
 		unmarshallerMock = mock(Unmarshaller.class);

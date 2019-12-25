@@ -14,6 +14,9 @@ its https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features
 https://spring.io/guides/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
 will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
+As of Spring Framework 5.2, most of the code samples of the reference documentation are
+provided in Kotlin in addition to Java.
+
 Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
@@ -100,7 +103,7 @@ For kotlin versions 1.1+, the default behavior is the same as `-Xjsr305=warn`.
 The `strict` value is required to have Spring Framework API null-safety taken into account
 in Kotlin types inferred from Spring API but should be used with the knowledge that Spring
 API nullability declaration could evolve even between minor releases and that more checks may
-be added in the future).
+be added in the future.
 
 NOTE: Generic type arguments, varargs, and array elements nullability are not supported yet,
 but should be in an upcoming release. See https://github.com/Kotlin/KEEP/issues/79[this discussion]
@@ -130,9 +133,9 @@ since the later requires a reference to the outer class.
 == Annotations
 
 The Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
-to determine if a HTTP parameter is required without having to explicitly
-define the `required` attribute.  That means `@RequestParam name: String?` is treated
-as not required and, conversely,  `@RequestParam name: String` is treated as being required.
+to determine if an HTTP parameter is required without having to explicitly
+define the `required` attribute. That means `@RequestParam name: String?` is treated
+as not required and, conversely, `@RequestParam name: String` is treated as being required.
 This feature is also supported on the Spring Messaging `@Header` annotation.
 
 In a similar fashion, Spring bean injection with `@Autowired`, `@Bean`, or `@Inject` uses
@@ -337,39 +340,49 @@ mockMvc.get("/person/{name}", "Lee") {
 
 === Kotlin Script Templates
 
-As of version 4.3, Spring Framework provides a
+Spring Framework provides a
 https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
-to render templates by using script engines. It supports
-https://www.jcp.org/en/jsr/detail?id=223[JSR-223].
-Spring Framework 5 goes even further by extending this feature to WebFlux and supporting
-https://jira.spring.io/browse/SPR-15064[i18n and nested templates].
+which supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223] to render templates by using script engines.
 
-Kotlin provides similar support and allows the rendering of Kotlin-based templates. See
-https://github.com/spring-projects/spring-framework/commit/badde3a479a53e1dd0777dd1bd5b55cb1021cf9e[this commit] for details.
+By leveraging `kotlin-script-runtime` and `scripting-jsr223-embeddable` dependencies, it
+is possible to use such feature to render Kotlin-based templates with
+https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
 
-This enables some interesting use cases - such as writing type-safe templates by using
-https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or by a using Kotlin multiline `String` with interpolation.
-
-This can let you write Kotlin templates with full autocompletion and
-refactoring support in a supported IDE, as the following example shows:
-
+`build.gradle.kts`
 [source,kotlin,indent=0]
 ----
-	import io.spring.demo.*
-
-	"""
-	${include("header")}
-	<h1>${i18n("title")}</h1>
-	<ul>
-	${users.joinToLine{ "<li>${i18n("user")} ${it.firstname} ${it.lastname}</li>" }}
-	</ul>
-	${include("footer")}
-	"""
+dependencies {
+	compile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:${kotlinVersion}")
+}
 ----
 
-WARNING: Kotlin Script Templates support is experimental and not compatible yet with Spring Boot fatjar mechanism, see related
-https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
-issues.
+Configuration is usually done with `ScriptTemplateConfigurer` and `ScriptTemplateViewResolver`
+beans.
+
+
+`KotlinScriptConfiguration.kt`
+[source,kotlin,indent=0]
+----
+@Configuration
+class KotlinScriptConfiguration {
+
+    @Bean
+	fun kotlinScriptConfigurer() = ScriptTemplateConfigurer().apply {
+		engineName = "kotlin"
+		setScripts("scripts/render.kts")
+		renderFunction = "render"
+		isSharedEngine = false
+	}
+
+    @Bean
+    fun kotlinScriptViewResolver() = ScriptTemplateViewResolver().apply {
+        setPrefix("templates/")
+        setSuffix(".kts")
+    }
+}
+----
+
 
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
@@ -379,7 +392,7 @@ project for more details.
 Kotlin https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] are Kotlin
 lightweight threads allowing to write non-blocking code in an imperative way. On language side,
 suspending functions provides an abstraction for asynchronous operations while on library side
-https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions likes
+https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions like
 https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html[`async { }`]
 and types like https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`].
 
@@ -392,12 +405,29 @@ Spring Framework provides support for Coroutines on the following scope:
 * Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
 * Extensions for {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
 
+=== Dependencies
+
+Coroutines support is enabled when `kotlinx-coroutines-core` and `kotlinx-coroutines-reactor`
+dependencies are in the classpath:
+
+`build.gradle.kts`
+[source,kotlin,indent=0]
+----
+dependencies {
+
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
+}
+----
+
+Version `1.3.0` and above are supported.
+
 === How Reactive translates to Coroutines?
 
 For return values, the translation from Reactive to Coroutines APIs is the following:
 
 * `fun handler(): Mono<Void>` becomes `suspend fun handler()`
-* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of beeing more statically typed)
+* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of being more statically typed)
 * `fun handler(): Flux<T>` becomes `fun handler(): Flow<T>`
 
 For input parameters:
@@ -516,7 +546,7 @@ class CoroutinesViewController(banner: Banner) {
 
 === WebFlux.fn
 
-Here is an example of Coroutines router definined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+Here is an example of Coroutines router defined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
 
 [source,kotlin,indent=0]
 ----
@@ -546,6 +576,55 @@ class UserHandler(builder: WebClient.Builder) {
 				client.get().uri("...").awaitExchange().awaitBody<User>())
 }
 ----
+
+=== Transactions
+
+Transactions on Coroutines are supported via the programmatic variant of the Reactive
+transaction management provided as of Spring Framework 5.2.
+
+For suspending functions, a `TransactionalOperator.executeAndAwait` extension is provided.
+
+[source,kotlin,indent=0]
+----
+    import org.springframework.transaction.reactive.executeAndAwait
+
+    class PersonRepository(private val operator: TransactionalOperator) {
+
+        suspend fun initDatabase() = operator.executeAndAwait {
+            insertPerson1()
+            insertPerson2()
+        }
+
+        private suspend fun insertPerson1() {
+            // INSERT SQL statement
+        }
+
+        private suspend fun insertPerson2() {
+            // INSERT SQL statement
+        }
+    }
+----
+
+For Kotlin `Flow`, a  `Flow<T>.transactional` extension is provided.
+
+[source,kotlin,indent=0]
+----
+    import org.springframework.transaction.reactive.transactional
+
+    class PersonRepository(private val operator: TransactionalOperator) {
+
+        fun updatePeople() = findPeople().map(::updatePerson).transactional(operator)
+
+        private fun findPeople(): Flow<Person> {
+            // SELECT SQL statement
+        }
+
+        private suspend fun updatePerson(person: Person): Person {
+            // UPDATE SQL statement
+        }
+    }
+----
+
 
 [[kotlin-spring-projects-in-kotlin]]
 == Spring Projects in Kotlin
@@ -768,6 +847,9 @@ all HTTP methods will be matched, not only the `GET` one.
 This section addresses testing with the combination of Kotlin and Spring Framework.
 The recommended testing framework is https://junit.org/junit5/[JUnit 5], as well as
 https://mockk.io/[Mockk] for mocking.
+
+NOTE: If you are using Spring Boot, see
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-kotlin-testing[this related documentation].
 
 ==== Constructor injection
 

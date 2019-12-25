@@ -16,15 +16,15 @@
 
 package org.springframework.web.bind;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -279,8 +279,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -293,8 +293,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -307,8 +307,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -321,8 +321,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -335,8 +335,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -349,8 +349,8 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();

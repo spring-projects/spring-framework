@@ -19,7 +19,7 @@ package org.springframework.http.converter.xml;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.MediaType;

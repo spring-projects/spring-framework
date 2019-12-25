@@ -18,8 +18,8 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -51,7 +51,7 @@ public class EnableCachingIntegrationTests {
 	private ConfigurableApplicationContext context;
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();

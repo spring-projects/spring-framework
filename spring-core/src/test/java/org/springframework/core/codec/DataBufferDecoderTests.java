@@ -19,7 +19,7 @@ package org.springframework.core.codec;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
@@ -32,14 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDecoder> {
+class DataBufferDecoderTests extends AbstractDecoderTests<DataBufferDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public DataBufferDecoderTests() {
+	DataBufferDecoderTests() {
 		super(new DataBufferDecoder());
 	}
 
@@ -55,6 +55,7 @@ public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDe
 	}
 
 	@Override
+	@Test
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(
 				this.bufferFactory.wrap(this.fooBytes),
@@ -67,6 +68,7 @@ public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDe
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() throws Exception {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
@@ -90,4 +92,5 @@ public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDe
 			DataBufferUtils.release(actual);
 		};
 	}
+
 }

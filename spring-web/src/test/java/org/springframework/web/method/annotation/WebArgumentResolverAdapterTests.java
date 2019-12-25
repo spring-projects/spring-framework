@@ -16,9 +16,9 @@
 
 package org.springframework.web.method.annotation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -50,7 +50,7 @@ public class WebArgumentResolverAdapterTests {
 
 	private NativeWebRequest webRequest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		adaptee = mock(WebArgumentResolver.class);
 		adapter = new TestWebArgumentResolverAdapter(adaptee);
@@ -61,7 +61,7 @@ public class WebArgumentResolverAdapterTests {
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestContextHolder() {
 		RequestContextHolder.resetRequestAttributes();
 	}

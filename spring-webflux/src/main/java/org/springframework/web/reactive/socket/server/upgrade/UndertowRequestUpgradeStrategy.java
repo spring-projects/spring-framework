@@ -33,8 +33,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
@@ -55,9 +55,7 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
-		ServerHttpRequest request = exchange.getRequest();
-		Assert.isInstanceOf(AbstractServerHttpRequest.class, request);
-		HttpServerExchange httpExchange = ((AbstractServerHttpRequest) request).getNativeRequest();
+		HttpServerExchange httpExchange = getNativeRequest(exchange.getRequest());
 
 		Set<String> protocols = (subProtocol != null ? Collections.singleton(subProtocol) : Collections.emptySet());
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
@@ -75,6 +73,19 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		}
 
 		return Mono.empty();
+	}
+
+	private static HttpServerExchange getNativeRequest(ServerHttpRequest request) {
+		if (request instanceof AbstractServerHttpRequest) {
+			return ((AbstractServerHttpRequest) request).getNativeRequest();
+		}
+		else if (request instanceof ServerHttpRequestDecorator) {
+			return getNativeRequest(((ServerHttpRequestDecorator) request).getDelegate());
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Couldn't find HttpServerExchange in " + request.getClass().getName());
+		}
 	}
 
 

@@ -18,8 +18,8 @@ package org.springframework.aop.config;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 
@@ -39,7 +39,7 @@ public class MethodLocatingFactoryBeanTests {
 	private MethodLocatingFactoryBean factory;
 	private BeanFactory beanFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		factory = new MethodLocatingFactoryBean();
 		beanFactory = mock(BeanFactory.class);
@@ -95,7 +95,7 @@ public class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSunnyDayPath() throws Exception {
 		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);
@@ -110,7 +110,7 @@ public class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhereMethodCannotBeResolved() {
 		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);

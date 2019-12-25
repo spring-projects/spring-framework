@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -58,7 +59,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -1010,7 +1011,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json");
 	}
 
 	@Test
@@ -1547,7 +1548,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json");
 		assertThat(response.getContentAsString()).isEqualTo("homeJson");
 	}
 
@@ -3230,11 +3231,13 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@RequestMapping(path = ApiConstants.ARTICLES_PATH)
 	public static class ArticleController implements ApiConstants, ResourceEndpoint<Article, ArticlePredicate> {
 
+		@Override
 		@GetMapping(params = "page")
 		public Collection<Article> find(String pageable, ArticlePredicate predicate) {
 			throw new UnsupportedOperationException("not implemented");
 		}
 
+		@Override
 		@GetMapping
 		public List<Article> find(boolean sort, ArticlePredicate predicate) {
 			throw new UnsupportedOperationException("not implemented");

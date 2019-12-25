@@ -17,11 +17,12 @@
 package org.springframework.util.xml;
 
 import java.io.StringReader;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -34,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unit tests for {@link DomContentHandler}.
  */
-public class DomContentHandlerTests {
+class DomContentHandlerTests {
 
 	private static final String XML_1 =
 			"<?xml version='1.0' encoding='UTF-8'?>" + "<?pi content?>" + "<root xmlns='namespace'>" +
@@ -60,9 +61,9 @@ public class DomContentHandlerTests {
 	private DocumentBuilder documentBuilder;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")  // on JDK 9
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -72,7 +73,7 @@ public class DomContentHandlerTests {
 
 
 	@Test
-	public void contentHandlerDocumentNamespacePrefixes() throws Exception {
+	void contentHandlerDocumentNamespacePrefixes() throws Exception {
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		handler = new DomContentHandler(result);
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
@@ -82,7 +83,7 @@ public class DomContentHandlerTests {
 	}
 
 	@Test
-	public void contentHandlerDocumentNoNamespacePrefixes() throws Exception {
+	void contentHandlerDocumentNoNamespacePrefixes() throws Exception {
 		handler = new DomContentHandler(result);
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
@@ -91,7 +92,7 @@ public class DomContentHandlerTests {
 	}
 
 	@Test
-	public void contentHandlerElement() throws Exception {
+	void contentHandlerElement() throws Exception {
 		Element rootElement = result.createElementNS("namespace", "root");
 		result.appendChild(rootElement);
 		handler = new DomContentHandler(rootElement);

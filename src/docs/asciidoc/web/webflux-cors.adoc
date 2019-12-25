@@ -1,6 +1,6 @@
 [[webflux-cors]]
 = CORS
-[.small]#<<web.adoc#mvc-cors, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors, Web MVC>>#
 
 Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This section
 describes how to do so.
@@ -10,7 +10,7 @@ describes how to do so.
 
 [[webflux-cors-intro]]
 == Introduction
-[.small]#<<web.adoc#mvc-cors-intro, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-intro, Web MVC>>#
 
 For security reasons, browsers prohibit AJAX calls to resources outside the current origin.
 For example, you could have your bank account in one tab and evil.com in another. Scripts
@@ -27,7 +27,7 @@ powerful workarounds based on IFRAME or JSONP.
 
 [[webflux-cors-processing]]
 == Processing
-[.small]#<<web.adoc#mvc-cors-processing, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-processing, Web MVC>>#
 
 The CORS specification distinguishes between preflight, simple, and actual requests.
 To learn how CORS works, you can read
@@ -77,30 +77,49 @@ To learn more from the source or to make advanced customizations, see:
 
 [[webflux-cors-controller]]
 == `@CrossOrigin`
-[.small]#<<web.adoc#mvc-cors-controller, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-controller, Web MVC>>#
 
 The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods, as the
 following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@RestController
-@RequestMapping("/account")
-public class AccountController {
+	@RestController
+	@RequestMapping("/account")
+	public class AccountController {
 
-	@CrossOrigin
-	@GetMapping("/{id}")
-	public Mono<Account> retrieve(@PathVariable Long id) {
-		// ...
-	}
+		@CrossOrigin
+		@GetMapping("/{id}")
+		public Mono<Account> retrieve(@PathVariable Long id) {
+			// ...
+		}
 
-	@DeleteMapping("/{id}")
-	public Mono<Void> remove(@PathVariable Long id) {
-		// ...
+		@DeleteMapping("/{id}")
+		public Mono<Void> remove(@PathVariable Long id) {
+			// ...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@CrossOrigin
+		@GetMapping("/{id}")
+		suspend fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		suspend fun remove(@PathVariable id: Long) {
+			// ...
+		}
+	}
 ----
 
 By default, `@CrossOrigin` allows:
@@ -119,48 +138,90 @@ should be used only where appropriate.
 `@CrossOrigin` is supported at the class level, too, and inherited by all methods.
 The following example specifies a certain domain and sets `maxAge` to an hour:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
-@RestController
-@RequestMapping("/account")
-public class AccountController {
+	@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
+	@RestController
+	@RequestMapping("/account")
+	public class AccountController {
 
-	@GetMapping("/{id}")
-	public Mono<Account> retrieve(@PathVariable Long id) {
-		// ...
-	}
+		@GetMapping("/{id}")
+		public Mono<Account> retrieve(@PathVariable Long id) {
+			// ...
+		}
 
-	@DeleteMapping("/{id}")
-	public Mono<Void> remove(@PathVariable Long id) {
-		// ...
+		@DeleteMapping("/{id}")
+		public Mono<Void> remove(@PathVariable Long id) {
+			// ...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@CrossOrigin("https://domain2.com", maxAge = 3600)
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@GetMapping("/{id}")
+		suspend fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		suspend fun remove(@PathVariable id: Long) {
+			// ...
+		}
+	}
 ----
 
 You can use `@CrossOrigin` at both the class and the method level,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@CrossOrigin(maxAge = 3600) <1>
-@RestController
-@RequestMapping("/account")
-public class AccountController {
+	@CrossOrigin(maxAge = 3600) // <1>
+	@RestController
+	@RequestMapping("/account")
+	public class AccountController {
 
-	@CrossOrigin("https://domain2.com") <2>
-	@GetMapping("/{id}")
-	public Mono<Account> retrieve(@PathVariable Long id) {
-		// ...
-	}
+		@CrossOrigin("https://domain2.com") // <2>
+		@GetMapping("/{id}")
+		public Mono<Account> retrieve(@PathVariable Long id) {
+			// ...
+		}
 
-	@DeleteMapping("/{id}")
-	public Mono<Void> remove(@PathVariable Long id) {
-		// ...
+		@DeleteMapping("/{id}")
+		public Mono<Void> remove(@PathVariable Long id) {
+			// ...
+		}
 	}
-}
+----
+<1> Using `@CrossOrigin` at the class level.
+<2> Using `@CrossOrigin` at the method level.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@CrossOrigin(maxAge = 3600) // <1>
+	@RestController
+	@RequestMapping("/account")
+	class AccountController {
+
+		@CrossOrigin("https://domain2.com") // <2>
+		@GetMapping("/{id}")
+		suspend fun retrieve(@PathVariable id: Long): Account {
+			// ...
+		}
+
+		@DeleteMapping("/{id}")
+		suspend fun remove(@PathVariable id: Long) {
+			// ...
+		}
+	}
 ----
 <1> Using `@CrossOrigin` at the class level.
 <2> Using `@CrossOrigin` at the method level.
@@ -169,7 +230,7 @@ public class AccountController {
 
 [[webflux-cors-global]]
 == Global Configuration
-[.small]#<<web.adoc#mvc-cors-global, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-global, Web MVC>>#
 
 In addition to fine-grained, controller method-level configuration, you probably want to
 define some global CORS configuration, too. You can set URL-based `CorsConfiguration`
@@ -191,26 +252,46 @@ should be used only where appropriate.
 To enable CORS in the WebFlux Java configuration, you can use the `CorsRegistry` callback,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Configuration
-@EnableWebFlux
-public class WebConfig implements WebFluxConfigurer {
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
 
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
+		@Override
+		public void addCorsMappings(CorsRegistry registry) {
 
-		registry.addMapping("/api/**")
-			.allowedOrigins("https://domain2.com")
-			.allowedMethods("PUT", "DELETE")
-			.allowedHeaders("header1", "header2", "header3")
-			.exposedHeaders("header1", "header2")
-			.allowCredentials(true).maxAge(3600);
+			registry.addMapping("/api/**")
+				.allowedOrigins("https://domain2.com")
+				.allowedMethods("PUT", "DELETE")
+				.allowedHeaders("header1", "header2", "header3")
+				.exposedHeaders("header1", "header2")
+				.allowCredentials(true).maxAge(3600);
 
-		// Add more mappings...
+			// Add more mappings...
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addCorsMappings(registry: CorsRegistry) {
+
+			registry.addMapping("/api/**")
+					.allowedOrigins("https://domain2.com")
+					.allowedMethods("PUT", "DELETE")
+					.allowedHeaders("header1", "header2", "header3")
+					.exposedHeaders("header1", "header2")
+					.allowCredentials(true).maxAge(3600)
+
+			// Add more mappings...
+		}
+	}
 ----
 
 
@@ -218,7 +299,7 @@ public class WebConfig implements WebFluxConfigurer {
 
 [[webflux-cors-webfilter]]
 == CORS `WebFilter`
-[.small]#<<web.adoc#mvc-cors-filter, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-filter, Web MVC>>#
 
 You can apply CORS support through the built-in
 {api-spring-framework}/web/cors/reactive/CorsWebFilter.html[`CorsWebFilter`], which is a
@@ -232,25 +313,47 @@ for CORS.
 To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
 ----
-@Bean
-CorsWebFilter corsFilter() {
+	@Bean
+	CorsWebFilter corsFilter() {
 
-	CorsConfiguration config = new CorsConfiguration();
+		CorsConfiguration config = new CorsConfiguration();
 
-	// Possibly...
-	// config.applyPermitDefaultValues()
+		// Possibly...
+		// config.applyPermitDefaultValues()
 
-	config.setAllowCredentials(true);
-	config.addAllowedOrigin("https://domain1.com");
-	config.addAllowedHeader("*");
-	config.addAllowedMethod("*");
+		config.setAllowCredentials(true);
+		config.addAllowedOrigin("https://domain1.com");
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
 
-	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	source.registerCorsConfiguration("/**", config);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
 
-	return new CorsWebFilter(source);
-}
+		return new CorsWebFilter(source);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Bean
+	fun corsFilter(): CorsWebFilter {
+
+		val config = CorsConfiguration()
+
+		// Possibly...
+		// config.applyPermitDefaultValues()
+
+		config.allowCredentials = true
+		config.addAllowedOrigin("https://domain1.com")
+		config.addAllowedHeader("*")
+		config.addAllowedMethod("*")
+
+		val source = UrlBasedCorsConfigurationSource().apply {
+			registerCorsConfiguration("/**", config)
+		}
+		return CorsWebFilter(source)
+	}
 ----

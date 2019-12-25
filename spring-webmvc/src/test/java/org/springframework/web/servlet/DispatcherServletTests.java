@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -26,8 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -83,7 +84,7 @@ public class DispatcherServletTests {
 	private DispatcherServlet complexDispatcherServlet;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws ServletException {
 		MockServletConfig complexConfig = new MockServletConfig(getServletContext(), "complex");
 		complexConfig.addInitParameter("publishContext", "false");

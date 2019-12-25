@@ -22,12 +22,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -103,7 +104,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private MethodParameter optionalRequestPart;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
 		messageConverter = mock(HttpMessageConverter.class);

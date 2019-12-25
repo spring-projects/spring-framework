@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -68,7 +68,7 @@ public class PayloadMethodArgumentResolverTests {
 	private MethodParameter paramValidated;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new PayloadMethodArgumentResolver(new StringMessageConverter(), testValidator());
 

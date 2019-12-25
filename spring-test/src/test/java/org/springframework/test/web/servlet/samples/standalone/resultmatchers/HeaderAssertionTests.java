@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +73,7 @@ public class HeaderAssertionTests {
 	private SimpleDateFormat dateFormat;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -103,7 +103,6 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().stringValues(VARY, "foo", "bar"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void multiStringHeaderValueWithMatchers() throws Exception {
 		this.mockMvc.perform(get("/persons/1"))

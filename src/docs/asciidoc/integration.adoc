@@ -16,28 +16,29 @@ a number of Java EE (and related) technologies.
 
 
 [[remoting]]
-== Remoting and Web Services with Spring
+== Remoting and Web Services
 
-Spring features integration classes for remoting support with various technologies.
+Spring provides support for remoting with various technologies.
 The remoting support eases the development of remote-enabled services, implemented
-by your usual POJOs. Currently, Spring supports the following remoting technologies:
+via Java interfaces and objects as input and output. Currently, Spring supports the
+following remoting technologies:
 
-* *Remote Method Invocation (RMI)*: Through the use of  `RmiProxyFactoryBean` and
+* <<remoting-rmi,Remote Method Invocation (RMI)>>: Through the use of  `RmiProxyFactoryBean` and
   `RmiServiceExporter`, Spring supports both traditional RMI (with `java.rmi.Remote`
   interfaces and `java.rmi.RemoteException`) and transparent remoting through RMI
   invokers (with any Java interface).
-* *Spring's HTTP invoker*: Spring provides a special remoting strategy that allows
+* <<remoting-httpinvoker>>: Spring provides a special remoting strategy that allows
   for Java serialization though HTTP, supporting any Java interface (as the RMI
   invoker does). The corresponding support classes are `HttpInvokerProxyFactoryBean`
   and `HttpInvokerServiceExporter`.
-* *Hessian*: By using Spring's `HessianProxyFactoryBean` and the
+* <<remoting-caucho-protocols-hessian>>: By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter`, you can transparently expose your services through the
   lightweight binary HTTP-based protocol provided by Caucho.
-* *JAX-WS*: Spring provides remoting support for web services through JAX-WS.
-* *JMS*: Remoting via JMS as the underlying protocol is supported through the
+* <<remoting-web-services>>: Spring provides remoting support for web services through JAX-WS.
+* <<remoting-jms>>: Remoting via JMS as the underlying protocol is supported through the
   `JmsInvokerServiceExporter` and `JmsInvokerProxyFactoryBean` classes in the
    `spring-jms` module.
-* *AMQP*: Remoting via AMQP as the underlying protocol is supported by the
+* <<remoting-amqp>>: Remoting via AMQP as the underlying protocol is supported by the
   separate Spring AMQP project.
 
 While discussing the remoting capabilities of Spring, we use the following domain
@@ -94,7 +95,7 @@ the protocol.
 
 
 [[remoting-rmi]]
-=== Exposing Services by Using RMI
+=== RMI
 
 By using Spring's support for RMI, you can transparently expose your services through the
 RMI infrastructure. After having this set up, you basically have a configuration similar
@@ -200,7 +201,7 @@ and you can find more information about Hessian itself at https://www.caucho.com
 
 
 [[remoting-caucho-protocols-hessian]]
-==== Wiring up `DispatcherServlet` for Hessian
+==== Hessian
 
 Hessian communicates through HTTP and does so by using a custom servlet. By using Spring's
 `DispatcherServlet` principles (see <<webmvc.adoc#mvc-servlet>>), we can wire up such a
@@ -346,7 +347,7 @@ at https://projects.spring.io/spring-security/.
 
 
 [[remoting-httpinvoker]]
-=== Exposing Services by Using HTTP Invokers
+=== Spring HTTP Invoker
 
 As opposed to Hessian, Spring HTTP invokers are both lightweight protocols that use their own slim
 serialization mechanisms and use the standard Java serialization
@@ -464,7 +465,7 @@ The following example shows how to do so:
 
 
 [[remoting-web-services]]
-=== Web Services
+=== Java Web Services
 
 Spring provides full support for the standard Java web services APIs:
 
@@ -682,7 +683,7 @@ accordingly first. Check the JAX-WS documentation for details on those requireme
 
 
 [[remoting-jms]]
-=== Exposing Services through JMS
+=== JMS
 
 You can also expose services transparently by using JMS as the underlying communication
 protocol. The JMS remoting support in the Spring Framework is pretty basic. It sends
@@ -842,8 +843,9 @@ The following example defines beans that you can inject into other client-side o
 
 [[remoting-amqp]]
 === AMQP
-See the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Reference Guide's
-'Spring Remoting with AMQP' section] for more information.
+Remoting via AMQP as the underlying protocol is supported in the Spring AMQP project.
+For further details please visit the {doc-spring-amqp}/html/#remoting[Spring Remoting]
+section of the Spring AMQP reference.
 
 [[remoting-autodection-remote-interfaces]]
 [NOTE]
@@ -925,7 +927,7 @@ major new features added going forward.
 
 
 [[rest-resttemplate]]
-==== Using `RestTemplate`
+==== `RestTemplate`
 
 The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
 easy to invoke REST endpoints in a single line. It exposes the following groups of
@@ -1111,7 +1113,7 @@ converters to use explicitly.
 
 [[rest-message-conversion]]
 ===== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
 
 The `spring-web` module contains the `HttpMessageConverter` contract for reading and
 writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
@@ -1142,7 +1144,10 @@ request and response. By default, this converter supports all text media types
 | An `HttpMessageConverter` implementation that can read and write form data from the HTTP
 request and response. By default, this converter reads and writes the
 `application/x-www-form-urlencoded` media type. Form data is read from and written into a
-`MultiValueMap<String, String>`.
+`MultiValueMap<String, String>`. The converter can also write (but not read) multipart
+data read from a `MultiValueMap<String, Object>`. By default, `multipart/form-data` is
+supported. As of Spring Framework 5.2, additional multipart subtypes can be supported for
+writing form data. Consult the javadoc for `FormHttpMessageConverter` for further details.
 
 | `ByteArrayHttpMessageConverter`
 | An `HttpMessageConverter` implementation that can read and write byte arrays from the
@@ -1190,7 +1195,7 @@ and writes the media type supported by the Java I/O API.
 [[rest-template-jsonview]]
 ===== Jackson JSON Views
 
-You can specify a https://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
+You can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View]
 to serialize only a subset of the object properties, as the following example shows:
 
 [source,java,indent=0]
@@ -1208,41 +1213,42 @@ to serialize only a subset of the object properties, as the following example sh
 [[rest-template-multipart]]
 ===== Multipart
 
-To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
-either `Object` instances that represent part content or `HttpEntity` instances that represent the content and
-headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
-multipart request, as the following example shows:
+To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
+may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
+part content with headers. For example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	MultipartBodyBuilder builder = new MultipartBodyBuilder();
-	builder.part("fieldPart", "fieldValue");
-	builder.part("filePart", new FileSystemResource("...logo.png"));
-	builder.part("jsonPart", new Person("Jason"));
+	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 
-	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+	parts.add("fieldPart", "fieldValue");
+	parts.add("filePart", new FileSystemResource("...logo.png"));
+	parts.add("jsonPart", new Person("Jason"));
+
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_XML);
+	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
 ----
 
 In most cases, you do not have to specify the `Content-Type` for each part. The content
-type is determined automatically based on the `HttpMessageConverter` chosen to serialize it
-or, in the case of a `Resource`, based on the file extension. If necessary, you can
-explicitly provide the `MediaType` to use for each part through one of the overloaded
-builder `part` methods.
+type is determined automatically based on the `HttpMessageConverter` chosen to serialize
+it or, in the case of a `Resource` based on the file extension. If necessary, you can
+explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
-Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as the following example shows:
+Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	MultipartBodyBuilder builder = ...;
-	template.postForObject("https://example.com/upload", builder.build(), Void.class);
+	MultiValueMap<String, Object> parts = ...;
+	template.postForObject("https://example.com/upload", parts, Void.class);
 ----
 
-If the `MultiValueMap` contains at least one non-`String` value, which could also be
-represent regular form data (that is, `application/x-www-form-urlencoded`), you need not
-set the `Content-Type` to `multipart/form-data`. This is always the case when you use
-`MultipartBodyBuilder` which ensures an `HttpEntity` wrapper.
+If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set
+to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMap` has
+`String` values the `Content-Type` is defaulted to `application/x-www-form-urlencoded`.
+If necessary the `Content-Type` may also be set explicitly.
 
 
 [[rest-async-resttemplate]]
@@ -2096,11 +2102,11 @@ Consider the following interface definition:
 	}
 ----
 
-Notice that, although the interface extends
-neither the `MessageListener` nor the `SessionAwareMessageListener` interface, you can still use it
-as a MDP by using the `MessageListenerAdapter` class. Notice also how the
-various message handling methods are strongly typed according to the contents of the
-various `Message` types that they can receive and handle.
+Notice that, although the interface extends neither the `MessageListener` nor the
+`SessionAwareMessageListener` interface, you can still use it as an MDP by using the
+`MessageListenerAdapter` class. Notice also how the various message handling methods are
+strongly typed according to the contents of the various `Message` types that they can
+receive and handle.
 
 Now consider the following implementation of the `MessageDelegate` interface:
 
@@ -5647,12 +5653,12 @@ The following example shows the bean definitions for the preceding code:
 [subs="verbatim,quotes"]
 ----
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="mail.mycompany.com"/>
+		<property name="host" value="mail.mycompany.example"/>
 	</bean>
 
 	<!-- this is a template message that we can pre-load with default state -->
 	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="customerservice@mycompany.com"/>
+		<property name="from" value="customerservice@mycompany.example"/>
 		<property name="subject" value="Your order"/>
 	</bean>
 
@@ -5699,7 +5705,7 @@ callback interface. In the following example, the `mailSender` property is of ty
 				public void prepare(MimeMessage mimeMessage) throws Exception {
 					mimeMessage.setRecipient(Message.RecipientType.TO,
 							new InternetAddress(order.getCustomer().getEmailAddress()));
-					mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
+					mimeMessage.setFrom(new InternetAddress("mail@mycompany.example"));
 					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
 							order.getCustomer().getLastName() + ", thanks for your order. " +
 							"Your order number is " + order.getOrderNumber() + ".");

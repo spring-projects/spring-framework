@@ -22,8 +22,8 @@ import java.time.Duration;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
@@ -62,7 +62,7 @@ public class FreeMarkerViewTests {
 	private Configuration freeMarkerConfig;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.context.refresh();
 

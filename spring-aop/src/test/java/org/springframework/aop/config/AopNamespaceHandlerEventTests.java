@@ -19,8 +19,8 @@ package org.springframework.aop.config;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
@@ -56,7 +56,7 @@ public class AopNamespaceHandlerEventTests {
 	private XmlBeanDefinitionReader reader;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setEventListener(this.eventListener);

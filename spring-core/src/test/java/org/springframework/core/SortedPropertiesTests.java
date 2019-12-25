@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,40 +35,40 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Sam Brannen
  * @since 5.2
  */
-public class SortedPropertiesTests {
+class SortedPropertiesTests {
 
 	@Test
-	public void keys() {
+	void keys() {
 		assertKeys(createSortedProps());
 	}
 
 	@Test
-	public void keysFromPrototype() {
+	void keysFromPrototype() {
 		assertKeys(createSortedPropsFromPrototype());
 	}
 
 	@Test
-	public void keySet() {
+	void keySet() {
 		assertKeySet(createSortedProps());
 	}
 
 	@Test
-	public void keySetFromPrototype() {
+	void keySetFromPrototype() {
 		assertKeySet(createSortedPropsFromPrototype());
 	}
 
 	@Test
-	public void entrySet() {
+	void entrySet() {
 		assertEntrySet(createSortedProps());
 	}
 
 	@Test
-	public void entrySetFromPrototype() {
+	void entrySetFromPrototype() {
 		assertEntrySet(createSortedPropsFromPrototype());
 	}
 
 	@Test
-	public void sortsPropertiesUsingOutputStream() throws IOException {
+	void sortsPropertiesUsingOutputStream() throws IOException {
 		SortedProperties sortedProperties = createSortedProps();
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -83,7 +83,7 @@ public class SortedPropertiesTests {
 	}
 
 	@Test
-	public void sortsPropertiesUsingWriter() throws IOException {
+	void sortsPropertiesUsingWriter() throws IOException {
 		SortedProperties sortedProperties = createSortedProps();
 
 		StringWriter writer = new StringWriter();
@@ -98,7 +98,7 @@ public class SortedPropertiesTests {
 	}
 
 	@Test
-	public void sortsPropertiesAndOmitsCommentsUsingOutputStream() throws IOException {
+	void sortsPropertiesAndOmitsCommentsUsingOutputStream() throws IOException {
 		SortedProperties sortedProperties = createSortedProps(true);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -111,7 +111,7 @@ public class SortedPropertiesTests {
 	}
 
 	@Test
-	public void sortsPropertiesAndOmitsCommentsUsingWriter() throws IOException {
+	void sortsPropertiesAndOmitsCommentsUsingWriter() throws IOException {
 		SortedProperties sortedProperties = createSortedProps(true);
 
 		StringWriter writer = new StringWriter();
@@ -124,7 +124,7 @@ public class SortedPropertiesTests {
 	}
 
 	@Test
-	public void storingAsXmlSortsPropertiesAndOmitsComments() throws IOException {
+	void storingAsXmlSortsPropertiesAndOmitsComments() throws IOException {
 		SortedProperties sortedProperties = createSortedProps(true);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

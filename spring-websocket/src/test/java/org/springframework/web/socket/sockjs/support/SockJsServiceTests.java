@@ -19,11 +19,12 @@ package org.springframework.web.socket.sockjs.support;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -57,7 +58,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setup();
 		this.service = new TestSockJsService(new ThreadPoolTaskScheduler());
@@ -105,7 +106,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		body = this.servletResponse.getContentAsString();
 		assertThat(body.substring(body.indexOf(','))).isEqualTo(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}");
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.example"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 		assertThat(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
 		assertThat(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS)).isNull();
@@ -114,8 +115,8 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoGetWithOrigin() throws IOException {
-		this.servletRequest.setServerName("mydomain2.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		this.servletRequest.setServerName("mydomain2.example");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertThat(this.servletResponse.getContentType()).isEqualTo("application/json;charset=UTF-8");
@@ -125,17 +126,17 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertThat(body.substring(0, body.indexOf(':'))).isEqualTo("{\"entropy\"");
 		assertThat(body.substring(body.indexOf(','))).isEqualTo(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}");
 
-		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.example"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.example", "http://mydomain2.example", "http://mydomain3.example"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.service.setAllowedOrigins(Collections.singletonList("*"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.servletRequest.setServerName("mydomain3.com");
-		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.example"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
@@ -168,25 +169,25 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNull();
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNull();
 	}
 
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoOptionsWithAllowedOrigin() {
-		this.servletRequest.setServerName("mydomain2.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		this.servletRequest.setServerName("mydomain2.example");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNotNull();
 
-		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNotNull();
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.example", "http://mydomain2.example", "http://mydomain3.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNotNull();
 
@@ -198,22 +199,22 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	@Test  // SPR-16304
 	public void handleInfoOptionsWithForbiddenOrigin() {
 		this.servletRequest.setServerName("mydomain3.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.example");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		CorsConfiguration corsConfiguration = this.service.getCorsConfiguration(this.servletRequest);
 		assertThat(corsConfiguration.getAllowedOrigins().isEmpty()).isTrue();
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		corsConfiguration = this.service.getCorsConfiguration(this.servletRequest);
-		assertThat(corsConfiguration.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://mydomain1.com"));
+		assertThat(corsConfiguration.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://mydomain1.example"));
 	}
 
 	@Test  // SPR-12283
 	public void handleInfoOptionsWithOriginAndCorsHeadersDisabled() {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.example");
 		this.service.setAllowedOrigins(Collections.singletonList("*"));
 		this.service.setSuppressCors(true);
 
@@ -221,11 +222,11 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNull();
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNull();
 
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "https://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertThat(this.service.getCorsConfiguration(this.servletRequest)).isNull();
 	}

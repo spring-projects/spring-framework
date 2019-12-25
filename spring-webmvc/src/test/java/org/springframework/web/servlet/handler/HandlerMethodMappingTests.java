@@ -21,10 +21,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -60,7 +61,7 @@ public class HandlerMethodMappingTests {
 	private Method method2;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.mapping = new MyHandlerMethodMapping();
 		this.handler = new MyHandler();

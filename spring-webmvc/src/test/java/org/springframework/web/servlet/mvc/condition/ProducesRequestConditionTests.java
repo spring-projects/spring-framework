@@ -19,9 +19,10 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;

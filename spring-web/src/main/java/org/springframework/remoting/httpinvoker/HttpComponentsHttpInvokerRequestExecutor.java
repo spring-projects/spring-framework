@@ -202,7 +202,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	}
 
 	/**
-	 * Create a HttpPost for the given configuration.
+	 * Create an HttpPost for the given configuration.
 	 * <p>The default implementation creates a standard HttpPost with
 	 * "application/x-java-serialized-object" as "Content-Type" header.
 	 * @param config the HTTP invoker configuration that specifies the

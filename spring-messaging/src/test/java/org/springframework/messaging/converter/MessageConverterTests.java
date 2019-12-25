@@ -16,13 +16,10 @@
 
 package org.springframework.messaging.converter;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -81,14 +78,14 @@ public class MessageConverterTests {
 	public void supportsMimeTypeNoneConfigured() {
 		Message<String> message = MessageBuilder.withPayload(
 				"ABC").setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
-		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
+		this.converter = new TestMessageConverter(new MimeType[0]);
 
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("success-from");
 	}
 
 	@Test
 	public void canConvertFromStrictContentTypeMatch() {
-		this.converter = new TestMessageConverter(Arrays.asList(MimeTypeUtils.TEXT_PLAIN));
+		this.converter = new TestMessageConverter(MimeTypeUtils.TEXT_PLAIN);
 		this.converter.setStrictContentTypeMatch(true);
 
 		Message<String> message = MessageBuilder.withPayload("ABC").build();
@@ -102,9 +99,8 @@ public class MessageConverterTests {
 
 	@Test
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
-		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.converter.setStrictContentTypeMatch(true));
+		this.converter = new TestMessageConverter(new MimeType[0]);
+		assertThatIllegalArgumentException().isThrownBy(() -> this.converter.setStrictContentTypeMatch(true));
 	}
 
 	@Test
@@ -149,7 +145,7 @@ public class MessageConverterTests {
 			super(MimeTypeUtils.TEXT_PLAIN);
 		}
 
-		public TestMessageConverter(Collection<MimeType> supportedMimeTypes) {
+		public TestMessageConverter(MimeType... supportedMimeTypes) {
 			super(supportedMimeTypes);
 		}
 
@@ -159,15 +155,15 @@ public class MessageConverterTests {
 		}
 
 		@Override
-		protected Object convertFromInternal(Message<?> message, Class<?> targetClass,
-				@Nullable Object conversionHint) {
+		protected Object convertFromInternal(
+				Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 
 			return "success-from";
 		}
 
 		@Override
-		protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
-				@Nullable Object conversionHint) {
+		protected Object convertToInternal(
+				Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 			return "success-to";
 		}

@@ -282,7 +282,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		if (rawValues == null) {
 			return null;
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	/**

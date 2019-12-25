@@ -21,12 +21,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * User tests for {@link UserRegistryMessageHandler}.
  * @author Rossen Stoyanchev
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserRegistryMessageHandlerTests {
 
 	private UserRegistryMessageHandler handler;
@@ -69,9 +69,8 @@ public class UserRegistryMessageHandlerTests {
 	private TaskScheduler taskScheduler;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		given(this.brokerChannel.send(any())).willReturn(true);
 		this.converter = new MappingJackson2MessageConverter();
 
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.brokerChannel);
@@ -90,8 +89,8 @@ public class UserRegistryMessageHandlerTests {
 		assertThat(runnable).isNotNull();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void brokerUnavailableEvent() throws Exception {
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
@@ -107,7 +106,9 @@ public class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void broadcastRegistry() throws Exception {
+		given(this.brokerChannel.send(any())).willReturn(true);
 
 		TestSimpUser simpUser1 = new TestSimpUser("joe");
 		TestSimpUser simpUser2 = new TestSimpUser("jane");

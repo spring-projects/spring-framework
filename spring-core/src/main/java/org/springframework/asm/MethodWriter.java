@@ -775,6 +775,9 @@ final class MethodWriter extends MethodVisitor {
       }
       visitFrameEnd();
     } else {
+      if (symbolTable.getMajorVersion() < Opcodes.V1_6) {
+        throw new IllegalArgumentException("Class versions V1_5 or less must use F_NEW frames.");
+      }
       int offsetDelta;
       if (stackMapTableEntries == null) {
         stackMapTableEntries = new ByteVector();

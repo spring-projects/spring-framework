@@ -17,7 +17,7 @@
 			</websocket:decorator-factories>
 		</websocket:transport>
 
-		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="https://mydomain1.com,https://mydomain2.com">
+		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="https://mydomain1.example,https://mydomain2.example">
 			<websocket:handshake-handler ref="myHandler"/>
 			<websocket:handshake-interceptors>
 				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>

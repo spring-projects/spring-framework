@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.io.File;
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
@@ -28,12 +27,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * @author Arjen Poutsma
@@ -49,10 +49,12 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	}
 
 
-	@Test
-	public void zeroCopy() throws Exception {
-		// Zero-copy only does not support servlet
-		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
+	@ParameterizedHttpServerTest
+	public void zeroCopy(HttpServer httpServer) throws Exception {
+		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer,
+			"Zero-copy only does not support servlet");
+
+		startServer(httpServer);
 
 		URI url = new URI("http://localhost:" + port);
 		RequestEntity<?> request = RequestEntity.get(url).build();

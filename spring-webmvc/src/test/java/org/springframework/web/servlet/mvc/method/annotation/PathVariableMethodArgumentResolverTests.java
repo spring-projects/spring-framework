@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -65,7 +65,7 @@ public class PathVariableMethodArgumentResolverTests {
 	private MethodParameter paramOptional;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new PathVariableMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();

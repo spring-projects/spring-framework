@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -47,7 +47,7 @@ public class ViewMethodReturnValueHandlerTests {
 	private ServletWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.handler = new ViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();

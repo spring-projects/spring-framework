@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
 
@@ -35,30 +35,30 @@ import static org.springframework.test.context.support.AnnotationConfigContextLo
  * @author Sam Brannen
  * @since 4.1.5
  */
-public class AnnotationConfigContextLoaderUtilsTests {
+class AnnotationConfigContextLoaderUtilsTests {
 
 	@Test
-	public void detectDefaultConfigurationClassesWithNullDeclaringClass() {
+	void detectDefaultConfigurationClassesWithNullDeclaringClass() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				detectDefaultConfigurationClasses(null));
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithoutConfigurationClass() {
+	void detectDefaultConfigurationClassesWithoutConfigurationClass() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(NoConfigTestCase.class);
 		assertThat(configClasses).isNotNull();
 		assertThat(configClasses.length).isEqualTo(0);
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithExplicitConfigurationAnnotation() {
+	void detectDefaultConfigurationClassesWithExplicitConfigurationAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(ExplicitConfigTestCase.class);
 		assertThat(configClasses).isNotNull();
 		assertThat(configClasses).isEqualTo(new Class<?>[] { ExplicitConfigTestCase.Config.class });
 	}
 
 	@Test
-	public void detectDefaultConfigurationClassesWithConfigurationMetaAnnotation() {
+	void detectDefaultConfigurationClassesWithConfigurationMetaAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(MetaAnnotatedConfigTestCase.class);
 		assertThat(configClasses).isNotNull();
 		assertThat(configClasses).isEqualTo(new Class<?>[] { MetaAnnotatedConfigTestCase.Config.class });

@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
@@ -45,7 +45,7 @@ import org.springframework.transaction.TransactionStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Test cases for AOP transaction management.
@@ -59,7 +59,7 @@ public class BeanFactoryTransactionTests {
 	private DefaultListableBeanFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(
@@ -148,7 +148,7 @@ public class BeanFactoryTransactionTests {
 		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
 
 		// Expect no methods
-		verifyZeroInteractions(ptm);
+		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
 		final TransactionStatus ts = mock(TransactionStatus.class);

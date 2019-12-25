@@ -18,7 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -32,32 +32,32 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Phillip Webb
  */
 @Deprecated
-public class InvertibleComparatorTests {
+class InvertibleComparatorTests {
 
 	private final Comparator<Integer> comparator = new ComparableComparator<>();
 
 
 	@Test
-	public void shouldNeedComparator() throws Exception {
+	void shouldNeedComparator() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new InvertibleComparator<>(null));
 	}
 
 	@Test
-	public void shouldNeedComparatorWithAscending() throws Exception {
+	void shouldNeedComparatorWithAscending() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new InvertibleComparator<>(null, true));
 	}
 
 	@Test
-	public void shouldDefaultToAscending() throws Exception {
+	void shouldDefaultToAscending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator);
 		assertThat(invertibleComparator.isAscending()).isTrue();
 		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
 	}
 
 	@Test
-	public void shouldInvert() throws Exception {
+	void shouldInvert() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator);
 		assertThat(invertibleComparator.isAscending()).isTrue();
 		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
@@ -67,13 +67,13 @@ public class InvertibleComparatorTests {
 	}
 
 	@Test
-	public void shouldCompareAscending() throws Exception {
+	void shouldCompareAscending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator, true);
 		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
 	}
 
 	@Test
-	public void shouldCompareDescending() throws Exception {
+	void shouldCompareDescending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator, false);
 		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(1);
 	}

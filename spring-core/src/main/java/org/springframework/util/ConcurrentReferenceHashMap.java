@@ -980,8 +980,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Strategy class used to manage {@link Reference References}. This class can be overridden if
-	 * alternative reference types need to be supported.
+	 * Strategy class used to manage {@link Reference References}.
+	 * This class can be overridden if alternative reference types need to be supported.
 	 */
 	protected class ReferenceManager {
 

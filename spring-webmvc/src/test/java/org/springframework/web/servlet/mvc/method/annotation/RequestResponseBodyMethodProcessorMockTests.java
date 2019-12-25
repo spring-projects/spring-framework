@@ -22,11 +22,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ByteArrayResource;
@@ -107,7 +108,7 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	private MethodParameter returnTypeResource;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
 		stringMessageConverter = mock(HttpMessageConverter.class);

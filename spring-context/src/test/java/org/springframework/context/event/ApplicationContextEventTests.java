@@ -23,10 +23,11 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -355,7 +356,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void nonSingletonListenerInApplicationContext() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		RootBeanDefinition listener = new RootBeanDefinition(MyNonSingletonListener.class);
-		listener.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listener.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("listener", listener);
 		context.refresh();
 
@@ -578,6 +579,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
 
 		public final Set<Object> seenPayloads = new HashSet<>();
@@ -633,6 +635,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		private ApplicationContext applicationContext;
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}

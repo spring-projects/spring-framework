@@ -19,9 +19,9 @@ package org.springframework.context.support;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -42,8 +42,8 @@ public class SerializableBeanFactoryMemoryLeakTests {
 	 * Defensively zero-out static factory count - other tests
 	 * may have misbehaved before us.
 	 */
-	@BeforeClass
-	@AfterClass
+	@BeforeAll
+	@AfterAll
 	public static void zeroOutFactoryCount() throws Exception {
 		getSerializableFactoryMap().clear();
 	}

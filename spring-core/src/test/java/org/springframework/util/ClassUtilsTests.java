@@ -18,6 +18,10 @@ package org.springframework.util;
 
 import java.io.Externalizable;
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -29,8 +33,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.tests.sample.objects.DerivedTestObject;
 import org.springframework.tests.sample.objects.ITestInterface;
@@ -40,18 +47,21 @@ import org.springframework.tests.sample.objects.TestObject;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link ClassUtils}.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Sam Brannen
  */
-public class ClassUtilsTests {
+class ClassUtilsTests {
 
-	private ClassLoader classLoader = getClass().getClassLoader();
+	private final ClassLoader classLoader = getClass().getClassLoader();
 
 
-	@Before
-	public void clearStatics() {
+	@BeforeEach
+	void clearStatics() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
 		InnerClass.overloadedCalled = false;
@@ -59,13 +69,13 @@ public class ClassUtilsTests {
 
 
 	@Test
-	public void testIsPresent() {
+	void isPresent() {
 		assertThat(ClassUtils.isPresent("java.lang.String", classLoader)).isTrue();
 		assertThat(ClassUtils.isPresent("java.lang.MySpecialString", classLoader)).isFalse();
 	}
 
 	@Test
-	public void testForName() throws ClassNotFoundException {
+	void forName() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("java.lang.String", classLoader)).isEqualTo(String.class);
 		assertThat(ClassUtils.forName("java.lang.String[]", classLoader)).isEqualTo(String[].class);
 		assertThat(ClassUtils.forName(String[].class.getName(), classLoader)).isEqualTo(String[].class);
@@ -80,7 +90,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
+	void forNameWithPrimitiveClasses() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("boolean", classLoader)).isEqualTo(boolean.class);
 		assertThat(ClassUtils.forName("byte", classLoader)).isEqualTo(byte.class);
 		assertThat(ClassUtils.forName("char", classLoader)).isEqualTo(char.class);
@@ -93,7 +103,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testForNameWithPrimitiveArrays() throws ClassNotFoundException {
+	void forNameWithPrimitiveArrays() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("boolean[]", classLoader)).isEqualTo(boolean[].class);
 		assertThat(ClassUtils.forName("byte[]", classLoader)).isEqualTo(byte[].class);
 		assertThat(ClassUtils.forName("char[]", classLoader)).isEqualTo(char[].class);
@@ -105,7 +115,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testForNameWithPrimitiveArraysInternalName() throws ClassNotFoundException {
+	void forNameWithPrimitiveArraysInternalName() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName(boolean[].class.getName(), classLoader)).isEqualTo(boolean[].class);
 		assertThat(ClassUtils.forName(byte[].class.getName(), classLoader)).isEqualTo(byte[].class);
 		assertThat(ClassUtils.forName(char[].class.getName(), classLoader)).isEqualTo(char[].class);
@@ -117,7 +127,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testIsCacheSafe() {
+	void isCacheSafe() {
 		ClassLoader childLoader1 = new ClassLoader(classLoader) {};
 		ClassLoader childLoader2 = new ClassLoader(classLoader) {};
 		ClassLoader childLoader3 = new ClassLoader(classLoader) {
@@ -146,92 +156,115 @@ public class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		"boolean, boolean",
+		"byte, byte",
+		"char, char",
+		"short, short",
+		"int, int",
+		"long, long",
+		"float, float",
+		"double, double",
+		"[Z, boolean[]",
+		"[B, byte[]",
+		"[C, char[]",
+		"[S, short[]",
+		"[I, int[]",
+		"[J, long[]",
+		"[F, float[]",
+		"[D, double[]"
+	})
+	void resolvePrimitiveClassName(String input, Class<?> output) {
+		assertThat(ClassUtils.resolvePrimitiveClassName(input)).isEqualTo(output);
+	}
+
 	@Test
-	public void testGetShortName() {
+	void getShortName() {
 		String className = ClassUtils.getShortName(getClass());
 		assertThat(className).as("Class name did not match").isEqualTo("ClassUtilsTests");
 	}
 
 	@Test
-	public void testGetShortNameForObjectArrayClass() {
+	void getShortNameForObjectArrayClass() {
 		String className = ClassUtils.getShortName(Object[].class);
 		assertThat(className).as("Class name did not match").isEqualTo("Object[]");
 	}
 
 	@Test
-	public void testGetShortNameForMultiDimensionalObjectArrayClass() {
+	void getShortNameForMultiDimensionalObjectArrayClass() {
 		String className = ClassUtils.getShortName(Object[][].class);
 		assertThat(className).as("Class name did not match").isEqualTo("Object[][]");
 	}
 
 	@Test
-	public void testGetShortNameForPrimitiveArrayClass() {
+	void getShortNameForPrimitiveArrayClass() {
 		String className = ClassUtils.getShortName(byte[].class);
 		assertThat(className).as("Class name did not match").isEqualTo("byte[]");
 	}
 
 	@Test
-	public void testGetShortNameForMultiDimensionalPrimitiveArrayClass() {
+	void getShortNameForMultiDimensionalPrimitiveArrayClass() {
 		String className = ClassUtils.getShortName(byte[][][].class);
 		assertThat(className).as("Class name did not match").isEqualTo("byte[][][]");
 	}
 
 	@Test
-	public void testGetShortNameForInnerClass() {
+	void getShortNameForInnerClass() {
 		String className = ClassUtils.getShortName(InnerClass.class);
 		assertThat(className).as("Class name did not match").isEqualTo("ClassUtilsTests.InnerClass");
 	}
 
 	@Test
-	public void testGetShortNameAsProperty() {
+	void getShortNameAsProperty() {
 		String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
 		assertThat(shortName).as("Class name did not match").isEqualTo("classUtilsTests");
 	}
 
 	@Test
-	public void testGetClassFileName() {
+	void getClassFileName() {
 		assertThat(ClassUtils.getClassFileName(String.class)).isEqualTo("String.class");
 		assertThat(ClassUtils.getClassFileName(getClass())).isEqualTo("ClassUtilsTests.class");
 	}
 
 	@Test
-	public void testGetPackageName() {
+	void getPackageName() {
 		assertThat(ClassUtils.getPackageName(String.class)).isEqualTo("java.lang");
 		assertThat(ClassUtils.getPackageName(getClass())).isEqualTo(getClass().getPackage().getName());
 	}
 
 	@Test
-	public void testGetQualifiedName() {
+	void getQualifiedName() {
 		String className = ClassUtils.getQualifiedName(getClass());
 		assertThat(className).as("Class name did not match").isEqualTo("org.springframework.util.ClassUtilsTests");
 	}
 
 	@Test
-	public void testGetQualifiedNameForObjectArrayClass() {
+	void getQualifiedNameForObjectArrayClass() {
 		String className = ClassUtils.getQualifiedName(Object[].class);
 		assertThat(className).as("Class name did not match").isEqualTo("java.lang.Object[]");
 	}
 
 	@Test
-	public void testGetQualifiedNameForMultiDimensionalObjectArrayClass() {
+	void getQualifiedNameForMultiDimensionalObjectArrayClass() {
 		String className = ClassUtils.getQualifiedName(Object[][].class);
 		assertThat(className).as("Class name did not match").isEqualTo("java.lang.Object[][]");
 	}
 
 	@Test
-	public void testGetQualifiedNameForPrimitiveArrayClass() {
+	void getQualifiedNameForPrimitiveArrayClass() {
 		String className = ClassUtils.getQualifiedName(byte[].class);
 		assertThat(className).as("Class name did not match").isEqualTo("byte[]");
 	}
 
 	@Test
-	public void testGetQualifiedNameForMultiDimensionalPrimitiveArrayClass() {
+	void getQualifiedNameForMultiDimensionalPrimitiveArrayClass() {
 		String className = ClassUtils.getQualifiedName(byte[][].class);
 		assertThat(className).as("Class name did not match").isEqualTo("byte[][]");
 	}
 
 	@Test
-	public void testHasMethod() {
+	void hasMethod() {
 		assertThat(ClassUtils.hasMethod(Collection.class, "size")).isTrue();
 		assertThat(ClassUtils.hasMethod(Collection.class, "remove", Object.class)).isTrue();
 		assertThat(ClassUtils.hasMethod(Collection.class, "remove")).isFalse();
@@ -239,7 +272,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testGetMethodIfAvailable() {
+	void getMethodIfAvailable() {
 		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size");
 		assertThat(method).isNotNull();
 		assertThat(method.getName()).isEqualTo("size");
@@ -253,13 +286,13 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testGetMethodCountForName() {
+	void getMethodCountForName() {
 		assertThat(ClassUtils.getMethodCountForName(OverloadedMethodsClass.class, "print")).as("Verifying number of overloaded 'print' methods for OverloadedMethodsClass.").isEqualTo(2);
 		assertThat(ClassUtils.getMethodCountForName(SubOverloadedMethodsClass.class, "print")).as("Verifying number of overloaded 'print' methods for SubOverloadedMethodsClass.").isEqualTo(4);
 	}
 
 	@Test
-	public void testCountOverloadedMethods() {
+	void countOverloadedMethods() {
 		assertThat(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "foobar")).isFalse();
 		// no args
 		assertThat(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "hashCode")).isTrue();
@@ -268,28 +301,28 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testNoArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
+	void noArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod");
 		method.invoke(null, (Object[]) null);
 		assertThat(InnerClass.noArgCalled).as("no argument method was not invoked.").isTrue();
 	}
 
 	@Test
-	public void testArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
+	void argsStaticMethod() throws IllegalAccessException, InvocationTargetException {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod", String.class);
 		method.invoke(null, "test");
 		assertThat(InnerClass.argCalled).as("argument method was not invoked.").isTrue();
 	}
 
 	@Test
-	public void testOverloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
+	void overloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", String.class);
 		method.invoke(null, "test");
 		assertThat(InnerClass.overloadedCalled).as("argument method was not invoked.").isTrue();
 	}
 
 	@Test
-	public void testIsAssignable() {
+	void isAssignable() {
 		assertThat(ClassUtils.isAssignable(Object.class, Object.class)).isTrue();
 		assertThat(ClassUtils.isAssignable(String.class, String.class)).isTrue();
 		assertThat(ClassUtils.isAssignable(Object.class, String.class)).isTrue();
@@ -305,13 +338,13 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testClassPackageAsResourcePath() {
+	void classPackageAsResourcePath() {
 		String result = ClassUtils.classPackageAsResourcePath(Proxy.class);
 		assertThat(result).isEqualTo("java/lang/reflect");
 	}
 
 	@Test
-	public void testAddResourcePathToPackagePath() {
+	void addResourcePathToPackagePath() {
 		String result = "java/lang/reflect/xyzabc.xml";
 		assertThat(ClassUtils.addResourcePathToPackagePath(Proxy.class, "xyzabc.xml")).isEqualTo(result);
 		assertThat(ClassUtils.addResourcePathToPackagePath(Proxy.class, "/xyzabc.xml")).isEqualTo(result);
@@ -320,7 +353,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testGetAllInterfaces() {
+	void getAllInterfaces() {
 		DerivedTestObject testBean = new DerivedTestObject();
 		List<Class<?>> ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
 		assertThat(ifcs.size()).as("Correct number of interfaces").isEqualTo(4);
@@ -330,7 +363,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testClassNamesToString() {
+	void classNamesToString() {
 		List<Class<?>> ifcs = new LinkedList<>();
 		ifcs.add(Serializable.class);
 		ifcs.add(Runnable.class);
@@ -351,7 +384,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testDetermineCommonAncestor() {
+	void determineCommonAncestor() {
 		assertThat(ClassUtils.determineCommonAncestor(Integer.class, Number.class)).isEqualTo(Number.class);
 		assertThat(ClassUtils.determineCommonAncestor(Number.class, Integer.class)).isEqualTo(Number.class);
 		assertThat(ClassUtils.determineCommonAncestor(Number.class, null)).isEqualTo(Number.class);
@@ -380,6 +413,38 @@ public class ClassUtilsTests {
 		assertThat(ClassUtils.determineCommonAncestor(String.class, List.class)).isNull();
 	}
 
+	@ParameterizedTest
+	@WrapperTypes
+	void isPrimitiveWrapper(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveWrapper(type)).isTrue();
+	}
+
+	@ParameterizedTest
+	@PrimitiveTypes
+	void isPrimitiveOrWrapperWithPrimitive(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveOrWrapper(type)).isTrue();
+	}
+
+	@ParameterizedTest
+	@WrapperTypes
+	void isPrimitiveOrWrapperWithWrapper(Class<?> type) {
+		assertThat(ClassUtils.isPrimitiveOrWrapper(type)).isTrue();
+	}
+
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueSource(classes = { Boolean.class, Character.class, Byte.class, Short.class,
+		Integer.class, Long.class, Float.class, Double.class, Void.class })
+	@interface WrapperTypes {
+	}
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueSource(classes = { boolean.class, char.class, byte.class, short.class,
+		int.class, long.class, float.class, double.class, void.class })
+	@interface PrimitiveTypes {
+	}
 
 	public static class InnerClass {
 

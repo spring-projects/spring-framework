@@ -18,9 +18,10 @@ package org.springframework.scheduling.quartz;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,8 +38,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -95,9 +96,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithTaskExecutor() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
@@ -137,9 +137,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithQuartzJobBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -171,9 +170,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactory() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -207,9 +205,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -244,8 +241,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
@@ -278,8 +275,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -327,8 +324,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
 		try {
@@ -346,8 +343,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerAccessorBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml");
 		Thread.sleep(3000);
 		try {
@@ -401,8 +398,6 @@ public class QuartzSupportTests {
 	 */
 	@Test
 	public void schedulerWithHsqlDataSource() throws Exception {
-		// Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 

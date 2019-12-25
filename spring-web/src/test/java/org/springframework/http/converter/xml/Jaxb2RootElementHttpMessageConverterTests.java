@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import java.nio.charset.StandardCharsets;
+
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -26,8 +27,8 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xmlunit.diff.DifferenceEvaluator;
 
 import org.springframework.aop.framework.AdvisedSupport;
@@ -64,7 +65,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	private RootElement rootElementCglib;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		converter = new Jaxb2RootElementHttpMessageConverter();
 		rootElement = new RootElement();

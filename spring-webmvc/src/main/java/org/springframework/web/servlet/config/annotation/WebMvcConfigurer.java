@@ -90,15 +90,9 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
-	 * controller method invocations. Interceptors can be registered to apply
-	 * to all requests or be limited to a subset of URL patterns.
-	 * <p><strong>Note</strong> that interceptors registered here only apply to
-	 * controllers and not to resource handler requests. To intercept requests for
-	 * static resources either declare a
-	 * {@link org.springframework.web.servlet.handler.MappedInterceptor MappedInterceptor}
-	 * bean or switch to advanced configuration mode by extending
-	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
-	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * controller method invocations and resource handler requests.
+	 * Interceptors can be registered to apply to all requests or be limited
+	 * to a subset of URL patterns.
 	 */
 	default void addInterceptors(InterceptorRegistry registry) {
 	}

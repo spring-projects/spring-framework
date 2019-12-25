@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,6 +246,17 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					super.onSubscribe(processor, subscription);
 				}
 			}
+
+			@Override
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
+				// This can happen on (very early) completion notification from container..
+				if (processor.changeState(this, COMPLETED)) {
+					processor.resultPublisher.publishComplete();
+				}
+				else {
+					processor.state.get().onComplete(processor);
+				}
+			}
 		},
 
 		REQUESTED {
@@ -282,17 +293,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				}
 				if (processor.changeState(this, REQUESTED)) {
 					if (processor.subscriberCompleted) {
-						if (processor.isFlushPending()) {
-							// Ensure the final flush
-							processor.changeState(REQUESTED, FLUSHING);
-							processor.flushIfPossible();
-						}
-						else if (processor.changeState(REQUESTED, COMPLETED)) {
-							processor.resultPublisher.publishComplete();
-						}
-						else {
-							processor.state.get().onComplete(processor);
-						}
+						handleSubscriberCompleted(processor);
 					}
 					else {
 						Assert.state(processor.subscription != null, "No subscription");
@@ -303,6 +304,24 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					handleSubscriberCompleted(processor);
+				}
+			}
+
+			private <T> void handleSubscriberCompleted(AbstractListenerWriteFlushProcessor<T> processor) {
+				if (processor.isFlushPending()) {
+					// Ensure the final flush
+					processor.changeState(State.REQUESTED, State.FLUSHING);
+					processor.flushIfPossible();
+				}
+				else if (processor.changeState(State.REQUESTED, State.COMPLETED)) {
+					processor.resultPublisher.publishComplete();
+				}
+				else {
+					processor.state.get().onComplete(processor);
+				}
 			}
 		},
 

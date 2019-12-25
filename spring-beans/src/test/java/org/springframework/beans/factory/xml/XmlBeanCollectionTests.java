@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -58,7 +58,7 @@ public class XmlBeanCollectionTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void loadBeans() {
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("collections.xml", getClass()));

@@ -18,7 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.lang.Nullable;

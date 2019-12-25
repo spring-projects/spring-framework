@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 
@@ -40,7 +40,7 @@ public class SseEmitterTests {
 	private TestHandler handler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		this.handler = new TestHandler();
 		this.emitter = new SseEmitter();

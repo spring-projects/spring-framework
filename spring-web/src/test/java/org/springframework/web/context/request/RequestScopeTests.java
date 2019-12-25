@@ -16,9 +16,9 @@
 
 package org.springframework.web.context.request;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -46,7 +46,7 @@ public class RequestScopeTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.beanFactory.registerScope("request", new RequestScope());
 		this.beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
@@ -55,7 +55,7 @@ public class RequestScopeTests {
 		this.beanFactory.preInstantiateSingletons();
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestAttributes() {
 		RequestContextHolder.setRequestAttributes(null);
 	}

@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration.Dynamic;
@@ -30,8 +31,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +72,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	private Map<String, MockFilterRegistration> filterRegistrations;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		servletContext = new MyMockServletContext();
 		initializer = new MyAnnotationConfigDispatcherServletInitializer();

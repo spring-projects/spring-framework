@@ -44,6 +44,9 @@ import org.springframework.util.MultiValueMap;
  * @author Chris Beams
  * @author Phillip Webb
  * @since 3.0
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
 @Deprecated
 public class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {

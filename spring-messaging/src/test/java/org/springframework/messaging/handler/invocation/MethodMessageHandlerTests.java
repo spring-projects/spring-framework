@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
@@ -59,7 +59,7 @@ public class MethodMessageHandlerTests {
 	private TestController testController;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		List<String> destinationPrefixes = Arrays.asList("/test");
@@ -190,6 +190,7 @@ public class MethodMessageHandlerTests {
 			super.detectHandlerMethods(handler);
 		}
 
+		@Override
 		public void registerHandlerMethod(Object handler, Method method, String mapping) {
 			super.registerHandlerMethod(handler, method, mapping);
 		}

@@ -18,6 +18,7 @@ package org.springframework.jndi;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 

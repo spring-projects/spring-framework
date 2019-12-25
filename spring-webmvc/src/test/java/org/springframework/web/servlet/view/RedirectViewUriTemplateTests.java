@@ -19,8 +19,8 @@ package org.springframework.web.servlet.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -39,7 +39,7 @@ public class RedirectViewUriTemplateTests {
 
 	private MockHttpServletResponse response;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();

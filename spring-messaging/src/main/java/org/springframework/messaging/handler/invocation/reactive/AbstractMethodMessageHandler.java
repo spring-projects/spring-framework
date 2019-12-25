@@ -86,6 +86,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Nullable
+	private Predicate<Class<?>> handlerPredicate;
+
+	@Nullable
+	List<Object> handlers;
+
 	private ArgumentResolverConfigurer argumentResolverConfigurer = new ArgumentResolverConfigurer();
 
 	private ReturnValueHandlerConfigurer returnValueHandlerConfigurer = new ReturnValueHandlerConfigurer();
@@ -102,6 +108,38 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
 
+
+	/**
+	 * Configure a predicate for selecting which Spring beans to check for the
+	 * presence of message handler methods.
+	 * <p>This is not set by default. However sub-classes may initialize it to
+	 * some default strategy (e.g. {@code @Controller} classes).
+	 * @see #setHandlers(List)
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
+
+	/**
+	 * Return the {@link #setHandlerPredicate configured} handler predicate.
+	 */
+	@Nullable
+	public Predicate<Class<?>> getHandlerPredicate() {
+		return this.handlerPredicate;
+	}
+
+	/**
+	 * Manually configure the handlers to check for the presence of message
+	 * handling methods, which also disables auto-detection via a
+	 * {@link #setHandlerPredicate(Predicate) handlerPredicate}. If you do not
+	 * want to disable auto-detection, then call this method first, and then set
+	 * the handler predicate.
+	 * @param handlers the handlers to check
+	 */
+	public void setHandlers(List<Object> handlers) {
+		this.handlers = handlers;
+		this.handlerPredicate = null;
+	}
 
 	/**
 	 * Configure custom resolvers for handler method arguments.
@@ -194,6 +232,15 @@ public abstract class AbstractMethodMessageHandler<T>
 		return CollectionUtils.unmodifiableMultiValueMap(this.destinationLookup);
 	}
 
+	/**
+	 * Return the argument resolvers initialized during {@link #afterPropertiesSet()}.
+	 * Primarily for internal use in sub-classes.
+	 * @since 5.2.2
+	 */
+	protected HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.invocableHelper.getArgumentResolvers();
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -229,13 +276,20 @@ public abstract class AbstractMethodMessageHandler<T>
 
 
 	private void initHandlerMethods() {
-		if (this.applicationContext == null) {
-			logger.warn("No ApplicationContext available for detecting beans with message handling methods.");
+		if (this.handlers != null) {
+			for (Object handler : this.handlers) {
+				detectHandlerMethods(handler);
+			}
+		}
+		Predicate<Class<?>> predicate = this.handlerPredicate;
+		if (predicate == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("[" + getBeanName() + "] Skip auto-detection of message handling methods");
+			}
 			return;
 		}
-		Predicate<Class<?>> handlerPredicate = initHandlerPredicate();
-		if (handlerPredicate == null) {
-			logger.warn("[" + getBeanName() + "] No auto-detection of handler methods (e.g. in @Controller).");
+		if (this.applicationContext == null) {
+			logger.warn("No ApplicationContext for auto-detection of beans with message handling methods.");
 			return;
 		}
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
@@ -250,20 +304,12 @@ public abstract class AbstractMethodMessageHandler<T>
 						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
 					}
 				}
-				if (beanType != null && handlerPredicate.test(beanType)) {
+				if (beanType != null && predicate.test(beanType)) {
 					detectHandlerMethods(beanName);
 				}
 			}
 		}
 	}
-
-	/**
-	 * Return the predicate to use to check whether a given Spring bean should
-	 * be introspected for message handling methods. If {@code null} is
-	 * returned, auto-detection is effectively disabled.
-	 */
-	@Nullable
-	protected abstract Predicate<Class<?>> initHandlerPredicate();
 
 	/**
 	 * Detect if the given handler has any methods that can handle messages and if
@@ -340,6 +386,7 @@ public abstract class AbstractMethodMessageHandler<T>
 					oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
+		mapping = extendMapping(mapping, newHandlerMethod);
 		this.handlerMethods.put(mapping, newHandlerMethod);
 
 		for (String pattern : getDirectLookupMappings(mapping)) {
@@ -366,6 +413,21 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
+	 * This method is invoked just before mappings are added. It allows
+	 * sub-classes to update the mapping with the {@link HandlerMethod} in mind.
+	 * This can be useful when the method signature is used to refine the
+	 * mapping, e.g. based on the cardinality of input and output.
+	 * <p>By default this method returns the mapping that is passed in.
+	 * @param mapping the mapping to be added
+	 * @param handlerMethod the target handler for the mapping
+	 * @return a new mapping or the same
+	 * @since 5.2.2
+	 */
+	protected T extendMapping(T mapping, HandlerMethod handlerMethod) {
+		return mapping;
+	}
+
+	/**
 	 * Return String-based destinations for the given mapping, if any, that can
 	 * be used to find matches with a direct lookup (i.e. non-patterns).
 	 * <p><strong>Note:</strong> This is completely optional. The mapping
@@ -377,7 +439,13 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	@Override
 	public Mono<Void> handleMessage(Message<?> message) throws MessagingException {
-		Match<T> match = getHandlerMethod(message);
+		Match<T> match = null;
+		try {
+			match = getHandlerMethod(message);
+		}
+		catch (Exception ex) {
+			return Mono.error(ex);
+		}
 		if (match == null) {
 			// handleNoMatch would have been invoked already
 			return Mono.empty();
@@ -496,14 +564,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
-		}
-
-		public T getMapping() {
-			return this.mapping;
-		}
-
-		public HandlerMethod getHandlerMethod() {
-			return this.handlerMethod;
 		}
 
 		@Override

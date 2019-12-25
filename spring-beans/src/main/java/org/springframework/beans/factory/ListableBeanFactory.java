@@ -122,6 +122,40 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * in the case of FactoryBeans.
 	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
 	 * check nested beans which might match the specified type as well.
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
+	 * to include beans in ancestor factories too.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * <p>Bean names returned by this method should always return bean names <i>in the
+	 * order of definition</i> in the backend configuration, as far as possible.
+	 * @param type the generically typed class or interface to match
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty array if none
+	 * @since 5.2
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, ResolvableType, boolean, boolean)
+	 */
+	String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit);
+
+	/**
+	 * Return the names of beans matching the given type (including subclasses),
+	 * judging from either bean definitions or the value of {@code getObjectType}
+	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.

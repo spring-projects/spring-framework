@@ -17,11 +17,12 @@
 package org.springframework.web.context;
 
 import java.util.EventListener;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -44,7 +45,7 @@ public class ContextLoaderInitializerTests {
 
 	private EventListener eventListener;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		servletContext = new MyMockServletContext();
 		initializer = new MyContextLoaderInitializer();

@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 

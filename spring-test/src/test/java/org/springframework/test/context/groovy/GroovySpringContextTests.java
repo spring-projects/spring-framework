@@ -18,15 +18,15 @@ package org.springframework.test.context.groovy;
 
 import javax.annotation.Resource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
@@ -39,9 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration("context.groovy")
-public class GroovySpringContextTests implements BeanNameAware, InitializingBean {
+class GroovySpringContextTests implements BeanNameAware, InitializingBean {
 
 	private Employee employee;
 
@@ -86,18 +86,18 @@ public class GroovySpringContextTests implements BeanNameAware, InitializingBean
 
 
 	@Test
-	public void verifyBeanNameSet() {
+	void verifyBeanNameSet() {
 		assertThat(this.beanName.startsWith(getClass().getName())).as("The bean name of this test instance should have been set to the fully qualified class name " +
 				"due to BeanNameAware semantics.").isTrue();
 	}
 
 	@Test
-	public void verifyBeanInitialized() {
+	void verifyBeanInitialized() {
 		assertThat(this.beanInitialized).as("This test bean should have been initialized due to InitializingBean semantics.").isTrue();
 	}
 
 	@Test
-	public void verifyAnnotationAutowiredFields() {
+	void verifyAnnotationAutowiredFields() {
 		assertThat(this.nonrequiredLong).as("The nonrequiredLong property should NOT have been autowired.").isNull();
 		assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
 		assertThat(this.pet).as("The pet field should have been autowired.").isNotNull();
@@ -105,18 +105,18 @@ public class GroovySpringContextTests implements BeanNameAware, InitializingBean
 	}
 
 	@Test
-	public void verifyAnnotationAutowiredMethods() {
+	void verifyAnnotationAutowiredMethods() {
 		assertThat(this.employee).as("The employee setter method should have been autowired.").isNotNull();
 		assertThat(this.employee.getName()).isEqualTo("Dilbert");
 	}
 
 	@Test
-	public void verifyResourceAnnotationWiredFields() {
+	void verifyResourceAnnotationWiredFields() {
 		assertThat(this.foo).as("The foo field should have been wired via @Resource.").isEqualTo("Foo");
 	}
 
 	@Test
-	public void verifyResourceAnnotationWiredMethods() {
+	void verifyResourceAnnotationWiredMethods() {
 		assertThat(this.bar).as("The bar method should have been wired via @Resource.").isEqualTo("Bar");
 	}
 

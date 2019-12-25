@@ -17,13 +17,14 @@
 package org.springframework.web.socket.adapter.standard;
 
 import java.net.URI;
+
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
@@ -51,7 +52,7 @@ public class StandardWebSocketHandlerAdapterTests {
 	private Session session;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.session = mock(Session.class);
 		this.webSocketHandler = mock(WebSocketHandler.class);

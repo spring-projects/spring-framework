@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.setup;
 
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.json.SpringHandlerInstantiator;
 import org.springframework.mock.web.test.MockHttpServletRequest;

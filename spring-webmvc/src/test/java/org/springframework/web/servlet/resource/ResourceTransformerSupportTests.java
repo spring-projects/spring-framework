@@ -18,10 +18,11 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -44,7 +45,7 @@ public class ResourceTransformerSupportTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));

@@ -16,17 +16,17 @@
 
 package org.springframework.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
  */
-public class SimpleAliasRegistryTests {
+class SimpleAliasRegistryTests {
 
 	@Test
-	public void testAliasChaining() {
+	void aliasChaining() {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("test", "testAlias");
 		registry.registerAlias("testAlias", "testAlias2");
@@ -41,7 +41,7 @@ public class SimpleAliasRegistryTests {
 	}
 
 	@Test  // SPR-17191
-	public void testAliasChainingWithMultipleAliases() {
+	void testAliasChainingWithMultipleAliases() {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("name", "alias_a");
 		registry.registerAlias("name", "alias_b");

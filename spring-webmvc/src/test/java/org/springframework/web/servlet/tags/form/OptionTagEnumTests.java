@@ -19,7 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.GenericBean;

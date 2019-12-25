@@ -20,8 +20,8 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FixedLocaleContextResolverTests {
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Locale.setDefault(US);
 	}

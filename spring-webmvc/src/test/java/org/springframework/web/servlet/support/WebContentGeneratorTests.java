@@ -17,7 +17,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.MockHttpServletResponse;
 

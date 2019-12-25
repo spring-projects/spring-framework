@@ -19,12 +19,12 @@ package org.springframework.test.context.transaction.programmatic;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -37,8 +37,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.context.transaction.TestTransaction;
@@ -48,6 +47,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
@@ -58,38 +58,36 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @Transactional
-public class ProgrammaticTxMgmtTests {
+class ProgrammaticTxMgmtTests {
 
-	private String sqlScriptEncoding;
-
-	protected JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	protected ApplicationContext applicationContext;
-
-	@Rule
-	public TestName testName = new TestName();
-
+	String sqlScriptEncoding;
+	JdbcTemplate jdbcTemplate;
+	String methodName;
 
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
+	ApplicationContext applicationContext;
+
+	@Autowired
+	void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+	@BeforeEach
+	void trackTestName(TestInfo testInfo) {
+		this.methodName = testInfo.getTestMethod().get().getName();
+	}
 
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		deleteFromTables("user");
 		executeSqlScript("classpath:/org/springframework/test/context/jdbc/data.sql", false);
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
-		String method = testName.getMethodName();
-		switch (method) {
+	void afterTransaction() {
+		switch (this.methodName) {
 			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
@@ -106,54 +104,54 @@ public class ProgrammaticTxMgmtTests {
 				break;
 			}
 			default: {
-				fail("missing 'after transaction' assertion for test method: " + method);
+				fail("missing 'after transaction' assertion for test method: " + this.methodName);
 			}
 		}
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void isActiveWithNonExistentTransactionContext() {
+	void isActiveWithNonExistentTransactionContext() {
 		assertThat(TestTransaction.isActive()).isFalse();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void flagForRollbackWithNonExistentTransactionContext() {
-		TestTransaction.flagForRollback();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void flagForCommitWithNonExistentTransactionContext() {
-		TestTransaction.flagForCommit();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void isFlaggedForRollbackWithNonExistentTransactionContext() {
-		TestTransaction.isFlaggedForRollback();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void startTxWithNonExistentTransactionContext() {
-		TestTransaction.start();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void startTxWithExistingTransaction() {
-		TestTransaction.start();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void endTxWithNonExistentTransactionContext() {
-		TestTransaction.end();
+	void flagForRollbackWithNonExistentTransactionContext() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::flagForRollback);
 	}
 
 	@Test
-	public void commitTxAndStartNewTx() {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void flagForCommitWithNonExistentTransactionContext() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::flagForCommit);
+	}
+
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void isFlaggedForRollbackWithNonExistentTransactionContext() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::isFlaggedForRollback);
+	}
+
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void startTxWithNonExistentTransactionContext() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::start);
+	}
+
+	@Test
+	void startTxWithExistingTransaction() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::start);
+	}
+
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void endTxWithNonExistentTransactionContext() {
+		assertThatIllegalStateException().isThrownBy(TestTransaction::end);
+	}
+
+	@Test
+	void commitTxAndStartNewTx() {
 		assertThatTransaction().isActive();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
@@ -177,7 +175,7 @@ public class ProgrammaticTxMgmtTests {
 	}
 
 	@Test
-	public void commitTxButDoNotStartNewTx() {
+	void commitTxButDoNotStartNewTx() {
 		assertThatTransaction().isActive();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
@@ -197,7 +195,7 @@ public class ProgrammaticTxMgmtTests {
 	}
 
 	@Test
-	public void rollbackTxAndStartNewTx() {
+	void rollbackTxAndStartNewTx() {
 		assertThatTransaction().isActive();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
@@ -222,7 +220,7 @@ public class ProgrammaticTxMgmtTests {
 	}
 
 	@Test
-	public void rollbackTxButDoNotStartNewTx() {
+	void rollbackTxButDoNotStartNewTx() {
 		assertThatTransaction().isActive();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
@@ -239,7 +237,7 @@ public class ProgrammaticTxMgmtTests {
 
 	@Test
 	@Commit
-	public void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
+	void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
 		assertThatTransaction().isActive();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
@@ -286,12 +284,12 @@ public class ProgrammaticTxMgmtTests {
 	static class Config {
 
 		@Bean
-		public PlatformTransactionManager transactionManager() {
+		PlatformTransactionManager transactionManager() {
 			return new DataSourceTransactionManager(dataSource());
 		}
 
 		@Bean
-		public DataSource dataSource() {
+		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
 			.generateUniqueName(true)//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql") //

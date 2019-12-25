@@ -18,7 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 

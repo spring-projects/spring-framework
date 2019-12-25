@@ -22,11 +22,12 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.SqlInOutParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -55,7 +56,7 @@ public class CallMetaDataContextTests {
 	private CallMetaDataContext context = new CallMetaDataContext();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		connection = mock(Connection.class);
 		databaseMetaData = mock(DatabaseMetaData.class);
@@ -64,7 +65,7 @@ public class CallMetaDataContextTests {
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
-	@After
+	@AfterEach
 	public void verifyClosed() throws Exception {
 		verify(connection).close();
 	}

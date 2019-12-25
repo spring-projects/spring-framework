@@ -17,6 +17,7 @@
 package org.springframework.jca.endpoint;
 
 import java.lang.reflect.Method;
+
 import javax.resource.ResourceException;
 import javax.resource.spi.ApplicationServerInternalException;
 import javax.resource.spi.UnavailableException;

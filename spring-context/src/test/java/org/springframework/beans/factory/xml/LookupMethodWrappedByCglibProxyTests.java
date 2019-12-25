@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.context.ApplicationContext;
@@ -42,7 +42,7 @@ public class LookupMethodWrappedByCglibProxyTests {
 
 	private ApplicationContext applicationContext;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.applicationContext = new ClassPathXmlApplicationContext(CONTEXT, CLASS);
 		resetInterceptor();

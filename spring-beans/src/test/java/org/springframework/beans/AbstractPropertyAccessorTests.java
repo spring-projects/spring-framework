@@ -36,7 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -49,7 +49,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.BooleanTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
@@ -62,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.
@@ -76,14 +77,12 @@ import static org.assertj.core.api.Assertions.within;
  */
 public abstract class AbstractPropertyAccessorTests {
 
-
 	protected abstract AbstractPropertyAccessor createAccessor(Object target);
 
 
 	@Test
 	public void createWithNullTarget() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				createAccessor(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> createAccessor(null));
 	}
 
 	@Test
@@ -114,8 +113,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isReadablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isReadableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isReadableProperty(null));
 	}
 
 	@Test
@@ -129,8 +127,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isWritablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isWritableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isWritableProperty(null));
 	}
 
 	@Test
@@ -519,7 +516,6 @@ public abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getSpouse() == null).as("spouse is now null").isTrue();
 	}
 
-
 	@Test
 	public void setIndexedPropertyIgnored() {
 		MutablePropertyValues values = new MutablePropertyValues();
@@ -692,7 +688,6 @@ public abstract class AbstractPropertyAccessorTests {
 
 		assertThat(target.getMyPrimitiveDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
 		assertThat(target.getMyDouble().doubleValue()).isCloseTo(Double.MAX_VALUE, within(0.001));
-
 	}
 
 	@Test
@@ -966,8 +961,8 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void setPrimitiveArrayPropertyLargeMatching() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
 
 		PrimitiveArrayBean target = new PrimitiveArrayBean();
@@ -1104,7 +1099,6 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("object", array);
 		assertThat(target.getObject()).isEqualTo(array);
 	}
-
 
 	@Test
 	public void setCollectionProperty() {
@@ -1915,9 +1909,8 @@ public abstract class AbstractPropertyAccessorTests {
 
 	@SuppressWarnings("unused")
 	private static class DifferentTestBean extends TestBean {
-		// class to test naming of beans in a error message
+		// class to test naming of beans in an error message
 	}
-
 
 	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {

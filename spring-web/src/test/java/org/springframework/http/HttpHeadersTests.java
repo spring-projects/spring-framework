@@ -32,12 +32,17 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -570,6 +575,91 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void keySetOperations() {
+		headers.add("Alpha", "apple");
+		headers.add("Bravo", "banana");
+		Set<String> keySet = headers.keySet();
+
+		// Please DO NOT simplify the following with AssertJ's fluent API.
+		//
+		// We explicitly invoke methods directly on HttpHeaders#keySet()
+		// here to check the behavior of the entire contract.
+
+		// isEmpty() and size()
+		assertThat(keySet.isEmpty()).isFalse();
+		assertThat(keySet.size()).isEqualTo(2);
+
+		// contains()
+		assertThat(keySet.contains("Alpha")).as("Alpha should be present").isTrue();
+		assertThat(keySet.contains("alpha")).as("alpha should be present").isTrue();
+		assertThat(keySet.contains("Bravo")).as("Bravo should be present").isTrue();
+		assertThat(keySet.contains("BRAVO")).as("BRAVO should be present").isTrue();
+		assertThat(keySet.contains("Charlie")).as("Charlie should not be present").isFalse();
+
+		// toArray()
+		assertThat(keySet.toArray()).isEqualTo(new String[] {"Alpha", "Bravo"});
+
+		// spliterator() via stream()
+		assertThat(keySet.stream().collect(toList())).isEqualTo(Arrays.asList("Alpha", "Bravo"));
+
+		// iterator()
+		List<String> results = new ArrayList<>();
+		keySet.iterator().forEachRemaining(results::add);
+		assertThat(results).isEqualTo(Arrays.asList("Alpha", "Bravo"));
+
+		// remove()
+		assertThat(keySet.remove("Alpha")).isTrue();
+		assertThat(keySet.size()).isEqualTo(1);
+		assertThat(headers.size()).isEqualTo(1);
+		assertThat(keySet.remove("Alpha")).isFalse();
+		assertThat(keySet.size()).isEqualTo(1);
+		assertThat(headers.size()).isEqualTo(1);
+
+		// clear()
+		keySet.clear();
+		assertThat(keySet.isEmpty()).isTrue();
+		assertThat(keySet.size()).isEqualTo(0);
+		assertThat(headers.isEmpty()).isTrue();
+		assertThat(headers.size()).isEqualTo(0);
+
+		// Unsupported operations
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+			.isThrownBy(() -> keySet.add("x"));
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+			.isThrownBy(() -> keySet.addAll(Collections.singleton("enigma")));
+	}
+
+	/**
+	 * This method intentionally checks a wider/different range of functionality
+	 * than {@link #removalFromKeySetRemovesEntryFromUnderlyingMap()}.
+	 */
+	@Test // https://github.com/spring-projects/spring-framework/issues/23633
+	public void keySetRemovalChecks() {
+		// --- Given ---
+		headers.add("Alpha", "apple");
+		headers.add("Bravo", "banana");
+		assertThat(headers).containsOnlyKeys("Alpha", "Bravo");
+
+		// --- When ---
+		boolean removed = headers.keySet().remove("Alpha");
+
+		// --- Then ---
+
+		// Please DO NOT simplify the following with AssertJ's fluent API.
+		//
+		// We explicitly invoke methods directly on HttpHeaders here to check
+		// the behavior of the entire contract.
+
+		assertThat(removed).isTrue();
+		assertThat(headers.keySet().remove("Alpha")).isFalse();
+		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers.containsKey("Alpha")).as("Alpha should have been removed").isFalse();
+		assertThat(headers.containsKey("Bravo")).as("Bravo should be present").isTrue();
+		assertThat(headers.keySet()).containsOnly("Bravo");
+		assertThat(headers.entrySet()).containsOnly(entry("Bravo", Arrays.asList("banana")));
+	}
+
+	@Test
 	public void removalFromKeySetRemovesEntryFromUnderlyingMap() {
 		String headerName = "MyHeader";
 		String headerValue = "value";
@@ -595,6 +685,22 @@ public class HttpHeadersTests {
 		assertThat(headers.isEmpty()).isTrue();
 		headers.add(headerName, headerValue);
 		assertThat(headers.get(headerName).get(0)).isEqualTo(headerValue);
+	}
+
+	@Test
+	public void readOnlyHttpHeadersRetainEntrySetOrder() {
+		headers.add("aardvark", "enigma");
+		headers.add("beaver", "enigma");
+		headers.add("cat", "enigma");
+		headers.add("dog", "enigma");
+		headers.add("elephant", "enigma");
+
+		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
+
+		assertThat(headers.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+
+		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		assertThat(readOnlyHttpHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 	}
 
 }

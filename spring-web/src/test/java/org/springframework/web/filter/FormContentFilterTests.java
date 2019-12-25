@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockFilterChain;
@@ -47,7 +47,7 @@ public class FormContentFilterTests {
 	private MockFilterChain filterChain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest("PUT", "/");
 		this.request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");

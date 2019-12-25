@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
@@ -139,7 +140,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		}
 	}
 
-	private Marshaller initMarshaller(Class<?> clazz) throws JAXBException {
+	private Marshaller initMarshaller(Class<?> clazz) throws CodecException, JAXBException {
 		Marshaller marshaller = this.jaxbContexts.createMarshaller(clazz);
 		marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 		marshaller = this.marshallerProcessor.apply(marshaller);

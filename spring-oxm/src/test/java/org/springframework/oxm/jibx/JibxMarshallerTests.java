@@ -17,17 +17,18 @@
 package org.springframework.oxm.jibx;
 
 import java.io.StringWriter;
+
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.tests.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.condition.JRE.JAVA_8;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
@@ -37,14 +38,8 @@ import static org.junit.Assume.assumeTrue;
  * @author Sam Brannen
  */
 @Deprecated
+@EnabledOnJre(JAVA_8) // JiBX compiler is currently not compatible with JDK 9
 public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller> {
-
-	@BeforeClass
-	public static void compilerAssumptions() {
-		// JiBX compiler is currently not compatible with JDK 9
-		assumeTrue(System.getProperty("java.version").startsWith("1.8."));
-	}
-
 
 	@Override
 	protected JibxMarshaller createMarshaller() throws Exception {

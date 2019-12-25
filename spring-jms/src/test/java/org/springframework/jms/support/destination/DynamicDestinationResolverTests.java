@@ -24,7 +24,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.StubTopic;

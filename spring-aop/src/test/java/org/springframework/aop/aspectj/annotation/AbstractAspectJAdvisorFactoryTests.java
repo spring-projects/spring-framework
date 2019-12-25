@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,8 +37,8 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.aop.DefaultLockable;
 import test.aop.Lockable;
 import test.aop.PerTargetAspect;
@@ -144,7 +143,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		aspect2.setOrder(5);
 		advisors.addAll(
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 
 		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
 		assertThat(itb.getAge()).as("Around advice must NOT apply").isEqualTo(realAge);
@@ -170,7 +169,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		PerTargetAspectWithOrderAnnotation5 aspect2 = new PerTargetAspectWithOrderAnnotation5();
 		advisors.addAll(
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 
 		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
 		assertThat(itb.getAge()).as("Around advice must NOT apply").isEqualTo(realAge);
@@ -414,7 +413,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 	@Test
-	@Ignore
+	@Disabled
 	public void testIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 

@@ -18,18 +18,17 @@ package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -47,22 +46,11 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFO
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MethodLevelDirtiesContextTests {
+@SpringJUnitConfig
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class MethodLevelDirtiesContextTests {
 
 	private static final AtomicInteger contextCount = new AtomicInteger();
-
-
-	@Configuration
-	static class Config {
-
-		@Bean
-		Integer count() {
-			return contextCount.incrementAndGet();
-		}
-	}
 
 
 	@Autowired
@@ -73,28 +61,28 @@ public class MethodLevelDirtiesContextTests {
 
 
 	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test01() throws Exception {
+	@Order(1)
+	void basics() throws Exception {
 		performAssertions(1);
 	}
 
 	@Test
+	@Order(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	// test## prefix required for @FixMethodOrder.
-	public void test02_dirtyContextBeforeTestMethod() throws Exception {
+	void dirtyContextBeforeTestMethod() throws Exception {
 		performAssertions(2);
 	}
 
 	@Test
+	@Order(3)
 	@DirtiesContext
-	// test## prefix required for @FixMethodOrder.
-	public void test03_dirtyContextAfterTestMethod() throws Exception {
+	void dirtyContextAfterTestMethod() throws Exception {
 		performAssertions(2);
 	}
 
 	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test04() throws Exception {
+	@Order(4)
+	void backToBasics() throws Exception {
 		performAssertions(3);
 	}
 
@@ -106,6 +94,16 @@ public class MethodLevelDirtiesContextTests {
 		assertThat(this.count.intValue()).as("count: ").isEqualTo(expectedContextCreationCount);
 
 		assertThat(contextCount.get()).as("context creation count: ").isEqualTo(expectedContextCreationCount);
+	}
+
+
+	@Configuration
+	static class Config {
+
+		@Bean
+		Integer count() {
+			return contextCount.incrementAndGet();
+		}
 	}
 
 }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
@@ -380,6 +381,28 @@ public class DefaultDataBuffer implements DataBuffer {
 		return new DefaultDataBufferOutputStream();
 	}
 
+
+	@Override
+	public String toString(int index, int length, Charset charset) {
+		checkIndex(index, length);
+		Assert.notNull(charset, "Charset must not be null");
+
+		byte[] bytes;
+		int offset;
+
+		if (this.byteBuffer.hasArray()) {
+			bytes = this.byteBuffer.array();
+			offset = this.byteBuffer.arrayOffset() + index;
+		}
+		else {
+			bytes = new byte[length];
+			offset = 0;
+			ByteBuffer duplicate = this.byteBuffer.duplicate();
+			duplicate.clear().position(index).limit(index + length);
+			duplicate.get(bytes, 0, length);
+		}
+		return new String(bytes, offset, length, charset);
+	}
 
 	/**
 	 * Calculate the capacity of the buffer.

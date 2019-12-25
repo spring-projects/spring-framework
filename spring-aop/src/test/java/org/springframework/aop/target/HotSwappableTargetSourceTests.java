@@ -16,9 +16,9 @@
 
 package org.springframework.aop.target;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
@@ -47,7 +47,7 @@ public class HotSwappableTargetSourceTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -57,7 +57,7 @@ public class HotSwappableTargetSourceTests {
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
-	@After
+	@AfterEach
 	public void close() {
 		// Will call pool.close()
 		this.beanFactory.destroySingletons();

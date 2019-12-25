@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -37,7 +37,7 @@ public class CacheAdviceNamespaceTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	public void testKeyStrategy() throws Exception {
+	public void testKeyStrategy() {
 		CacheInterceptor bean = this.ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
 		assertThat(bean.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}

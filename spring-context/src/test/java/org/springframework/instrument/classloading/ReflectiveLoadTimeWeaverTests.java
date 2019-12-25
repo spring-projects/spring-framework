@@ -19,7 +19,7 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

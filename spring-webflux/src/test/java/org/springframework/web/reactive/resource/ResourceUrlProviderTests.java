@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Condition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,7 +61,7 @@ public class ResourceUrlProviderTests {
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -152,12 +152,7 @@ public class ResourceUrlProviderTests {
 
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
-			ResourceWebHandler handler = new ResourceWebHandler();
-			HashMap<String, ResourceWebHandler> handlerMap = new HashMap<>();
-			handlerMap.put("/resources/**", handler);
-			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUrlMap(handlerMap);
-			return hm;
+			return new SimpleUrlHandlerMapping(Collections.singletonMap("/resources/**", new ResourceWebHandler()));
 		}
 
 		@Bean

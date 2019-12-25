@@ -18,16 +18,17 @@ package org.springframework.tests;
 
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.AssumptionViolatedException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.TestAbortedException;
 
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
-import static org.springframework.tests.TestGroup.CI;
 import static org.springframework.tests.TestGroup.LONG_RUNNING;
 import static org.springframework.tests.TestGroup.PERFORMANCE;
 
@@ -37,18 +38,18 @@ import static org.springframework.tests.TestGroup.PERFORMANCE;
  * @author Sam Brannen
  * @since 5.0
  */
-public class AssumeTests {
+class AssumeTests {
 
 	private String originalTestGroups;
 
 
-	@Before
-	public void trackOriginalTestGroups() {
+	@BeforeEach
+	void trackOriginalTestGroups() {
 		this.originalTestGroups = System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY);
 	}
 
-	@After
-	public void restoreOriginalTestGroups() {
+	@AfterEach
+	void restoreOriginalTestGroups() {
 		if (this.originalTestGroups != null) {
 			setTestGroups(this.originalTestGroups);
 		}
@@ -58,61 +59,56 @@ public class AssumeTests {
 	}
 
 	@Test
-	public void assumeGroupWithNoActiveTestGroups() {
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithNoActiveTestGroups() {
 		setTestGroups("");
-		Assume.group(LONG_RUNNING);
-		fail("assumption should have failed");
+
+		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> Assume.group(LONG_RUNNING));
 	}
 
 	@Test
-	public void assumeGroupWithNoMatchingActiveTestGroup() {
-		setTestGroups(PERFORMANCE, CI);
-		Assume.group(LONG_RUNNING);
-		fail("assumption should have failed");
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithNoMatchingActiveTestGroup() {
+		setTestGroups(PERFORMANCE);
+		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> Assume.group(LONG_RUNNING));
 	}
 
 	@Test
-	public void assumeGroupWithMatchingActiveTestGroup() {
+	@SuppressWarnings("deprecation")
+	void assumeGroupWithMatchingActiveTestGroup() {
 		setTestGroups(LONG_RUNNING);
-		try {
-			Assume.group(LONG_RUNNING);
-		}
-		catch (AssumptionViolatedException ex) {
-			fail("assumption should NOT have failed");
-		}
+		assertThatCode(() -> Assume.group(LONG_RUNNING))
+			.as("assumption should NOT have failed")
+			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void assumeGroupWithBogusActiveTestGroup() {
+	void assumeGroupWithBogusActiveTestGroup() {
 		assertBogusActiveTestGroupBehavior("bogus");
 	}
 
 	@Test
-	public void assumeGroupWithAllMinusBogusActiveTestGroup() {
+	void assumeGroupWithAllMinusBogusActiveTestGroup() {
 		assertBogusActiveTestGroupBehavior("all-bogus");
 	}
 
+	@SuppressWarnings("deprecation")
 	private void assertBogusActiveTestGroupBehavior(String testGroups) {
 		// Should result in something similar to the following:
 		//
 		// java.lang.IllegalStateException: Failed to parse 'testGroups' system property:
 		// Unable to find test group 'bogus' when parsing testGroups value: 'all-bogus'.
-		// Available groups include: [LONG_RUNNING,PERFORMANCE,JMXMP,CI]
+		// Available groups include: [LONG_RUNNING,PERFORMANCE]
 
 		setTestGroups(testGroups);
-		try {
-			Assume.group(LONG_RUNNING);
-			fail("assumption should have failed");
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage()).
-				startsWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: ");
-
-			assertThat(ex.getCause()).isInstanceOf(IllegalArgumentException.class);
-			assertThat(ex.getCause().getMessage()).
-				isEqualTo("Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups
-						+ "'. Available groups include: [LONG_RUNNING,PERFORMANCE,CI]");
-		}
+		assertThatIllegalStateException()
+			.isThrownBy(() -> Assume.group(LONG_RUNNING))
+			.withMessageStartingWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: ")
+			.withCauseInstanceOf(IllegalArgumentException.class)
+			.satisfies(ex ->
+				assertThat(ex.getCause().getMessage()).isEqualTo(
+					"Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups +
+					"'. Available groups include: [LONG_RUNNING,PERFORMANCE]"));
 	}
 
 	private void setTestGroups(TestGroup... testGroups) {

@@ -19,7 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.HashSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.test.server.MockWebSession;
 import org.springframework.tests.sample.beans.TestBean;

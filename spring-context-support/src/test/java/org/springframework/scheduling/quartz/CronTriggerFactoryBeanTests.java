@@ -18,7 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.text.ParseException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quartz.CronTrigger;
 
 import static org.assertj.core.api.Assertions.assertThat;

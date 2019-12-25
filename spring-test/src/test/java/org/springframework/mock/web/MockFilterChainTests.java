@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -25,8 +26,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -39,46 +40,46 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rob Winch
  */
-public class MockFilterChainTests {
+class MockFilterChainTests {
 
 	private ServletRequest request;
 
 	private ServletResponse response;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 	}
 
 	@Test
-	public void constructorNullServlet() {
+	void constructorNullServlet() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockFilterChain((Servlet) null));
 	}
 
 	@Test
-	public void constructorNullFilter() {
+	void constructorNullFilter() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockFilterChain(mock(Servlet.class), (Filter) null));
 	}
 
 	@Test
-	public void doFilterNullRequest() throws Exception {
+	void doFilterNullRequest() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				chain.doFilter(null, this.response));
 	}
 
 	@Test
-	public void doFilterNullResponse() throws Exception {
+	void doFilterNullResponse() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				chain.doFilter(this.request, null));
 	}
 
 	@Test
-	public void doFilterEmptyChain() throws Exception {
+	void doFilterEmptyChain() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
 		chain.doFilter(this.request, this.response);
 
@@ -91,7 +92,7 @@ public class MockFilterChainTests {
 	}
 
 	@Test
-	public void doFilterWithServlet() throws Exception {
+	void doFilterWithServlet() throws Exception {
 		Servlet servlet = mock(Servlet.class);
 		MockFilterChain chain = new MockFilterChain(servlet);
 		chain.doFilter(this.request, this.response);
@@ -102,7 +103,7 @@ public class MockFilterChainTests {
 	}
 
 	@Test
-	public void doFilterWithServletAndFilters() throws Exception {
+	void doFilterWithServletAndFilters() throws Exception {
 		Servlet servlet = mock(Servlet.class);
 
 		MockFilter filter2 = new MockFilter(servlet);

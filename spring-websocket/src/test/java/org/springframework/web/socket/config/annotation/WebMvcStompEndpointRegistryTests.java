@@ -18,8 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
@@ -46,7 +46,7 @@ public class WebMvcStompEndpointRegistryTests {
 	private SubProtocolWebSocketHandler webSocketHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		SubscribableChannel inChannel = mock(SubscribableChannel.class);
 		SubscribableChannel outChannel = mock(SubscribableChannel.class);

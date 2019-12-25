@@ -17,8 +17,7 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.AopInvocationException;
 
@@ -32,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class NullPrimitiveTests {
 
-	static interface Foo {
+	interface Foo {
 		int getValue();
 	}
 
@@ -48,12 +47,7 @@ public class NullPrimitiveTests {
 
 		SimpleFoo target = new SimpleFoo();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Foo foo = (Foo) factory.getProxy();
 
@@ -73,12 +67,7 @@ public class NullPrimitiveTests {
 
 		Bar target = new Bar();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Bar bar = (Bar) factory.getProxy();
 

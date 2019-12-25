@@ -29,8 +29,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.IllegalReferenceCountException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -81,7 +81,7 @@ public class BodyExtractorsTests {
 	private Optional<ServerHttpResponse> serverResponse = Optional.empty();
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));

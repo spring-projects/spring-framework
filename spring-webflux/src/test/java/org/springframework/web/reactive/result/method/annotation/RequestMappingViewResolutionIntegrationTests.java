@@ -21,8 +21,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Optional;
 
-import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -61,14 +60,18 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	}
 
 
-	@Test
-	public void html() throws Exception {
+	@ParameterizedHttpServerTest
+	void html(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "<html><body>Hello: Jason!</body></html>";
 		assertThat(performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void etagCheckWithNotModifiedResponse() throws Exception {
+	@ParameterizedHttpServerTest
+	void etagCheckWithNotModifiedResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI uri = new URI("http://localhost:" + this.port + "/html");
 		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
 		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
@@ -77,8 +80,10 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		assertThat(response.getBody()).isNull();
 	}
 
-	@Test  // SPR-15291
-	public void redirect() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-15291
+	void redirect(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
 			@Override
 			protected void prepareConnection(HttpURLConnection conn, String method) throws IOException {

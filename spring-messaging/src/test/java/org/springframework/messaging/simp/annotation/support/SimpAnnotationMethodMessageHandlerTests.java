@@ -25,13 +25,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
@@ -81,7 +81,7 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static final String TEST_INVALID_VALUE = "invalidValue";
@@ -101,7 +101,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private TestController testController = new TestController();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.channel);
 		brokerTemplate.setMessageConverter(this.converter);

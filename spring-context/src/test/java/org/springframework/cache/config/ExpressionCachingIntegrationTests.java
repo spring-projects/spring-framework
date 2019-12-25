@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;

@@ -377,6 +377,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return String.valueOf(value);
 	}
 
+	@Override
 	@Nullable
 	protected <T> T getAttributeValue(String attributeName, Class<T> type) {
 		int attributeIndex = getAttributeIndex(attributeName, false);
@@ -435,11 +436,15 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	private Object getValueFromMetaAnnotation(int attributeIndex,
 			boolean forMirrorResolution) {
 
-		if (this.useMergedValues && !forMirrorResolution) {
-			return this.mapping.getMappedAnnotationValue(attributeIndex);
+		Object value = null;
+		if (this.useMergedValues || forMirrorResolution) {
+			value = this.mapping.getMappedAnnotationValue(attributeIndex, forMirrorResolution);
 		}
-		Method attribute = this.mapping.getAttributes().get(attributeIndex);
-		return ReflectionUtils.invokeMethod(attribute, this.mapping.getAnnotation());
+		if (value == null) {
+			Method attribute = this.mapping.getAttributes().get(attributeIndex);
+			value = ReflectionUtils.invokeMethod(attribute, this.mapping.getAnnotation());
+		}
+		return value;
 	}
 
 	@Nullable

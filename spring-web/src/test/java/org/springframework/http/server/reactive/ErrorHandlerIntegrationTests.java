@@ -18,12 +18,12 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final ErrorHandler handler = new ErrorHandler();
 
@@ -43,8 +43,10 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 	}
 
 
-	@Test
-	public void responseBodyError() throws Exception {
+	@ParameterizedHttpServerTest
+	void responseBodyError(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -54,8 +56,10 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@Test
-	public void handlingError() throws Exception {
+	@ParameterizedHttpServerTest
+	void handlingError(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -65,8 +69,9 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@Test // SPR-15560
-	public void emptyPathSegments() throws Exception {
+	@ParameterizedHttpServerTest // SPR-15560
+	void emptyPathSegments(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);

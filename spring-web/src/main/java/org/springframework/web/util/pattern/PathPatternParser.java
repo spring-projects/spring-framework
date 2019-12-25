@@ -16,6 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.PathContainer;
+
 /**
  * Parser for URI path patterns producing {@link PathPattern} instances that can
  * then be matched to requests.
@@ -36,7 +38,7 @@ public class PathPatternParser {
 
 	private boolean caseSensitive = true;
 
-	private char separator = '/';
+	private PathContainer.Options pathOptions = PathContainer.Options.HTTP_PATH;
 
 
 	/**
@@ -77,20 +79,22 @@ public class PathPatternParser {
 	}
 
 	/**
-	 * Char that represents the separator to use in the patterns.
-	 * <p>The default is {@code '/'}.
+	 * Set options for parsing patterns. These should be the same as the
+	 * options used to parse input paths.
+	 * <p>{@link org.springframework.http.server.PathContainer.Options#HTTP_PATH}
+	 * is used by default.
 	 * @since 5.2
 	 */
-	public void setSeparator(char separator) {
-		this.separator = separator;
+	public void setPathOptions(PathContainer.Options pathOptions) {
+		this.pathOptions = pathOptions;
 	}
 
 	/**
-	 * Char that represents the separator to use in the patterns.
+	 * Return the {@link #setPathOptions configured} pattern parsing options.
 	 * @since 5.2
 	 */
-	public char getSeparator() {
-		return this.separator;
+	public PathContainer.Options getPathOptions() {
+		return this.pathOptions;
 	}
 
 

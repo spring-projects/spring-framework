@@ -18,10 +18,11 @@ package org.springframework.web.cors.reactive;
 
 import java.io.IOException;
 import java.util.Arrays;
+
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -51,7 +52,7 @@ public class CorsWebFilterTests {
 
 	private final CorsConfiguration config = new CorsConfiguration();
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		config.setAllowedOrigins(Arrays.asList("https://domain1.com", "https://domain2.com"));
 		config.setAllowedMethods(Arrays.asList("GET", "POST"));

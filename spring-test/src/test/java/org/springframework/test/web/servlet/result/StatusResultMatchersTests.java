@@ -20,8 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpStatus;
@@ -42,23 +41,14 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class StatusResultMatchersTests {
 
-	private StatusResultMatchers matchers;
+	private final StatusResultMatchers matchers = new StatusResultMatchers();
 
-	private MockHttpServletRequest request;
-
-
-	@Before
-	public void setup() {
-		this.matchers = new StatusResultMatchers();
-		this.request = new MockHttpServletRequest();
-	}
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Test
 	public void testHttpStatusCodeResultMatchers() throws Exception {
-
 		List<AssertionError> failures = new ArrayList<>();
-
 		for (HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
@@ -77,7 +67,6 @@ public class StatusResultMatchersTests {
 				throw new Exception("Failed to obtain ResultMatcher for status " + status, ex);
 			}
 		}
-
 		if (!failures.isEmpty()) {
 			fail("Failed status codes: " + failures);
 		}

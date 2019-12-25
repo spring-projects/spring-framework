@@ -20,14 +20,15 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
@@ -57,7 +58,7 @@ public class GroovyMarkupViewTests {
 	private ServletContext servletContext;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
 		this.servletContext = new MockServletContext();

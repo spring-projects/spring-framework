@@ -29,11 +29,12 @@ import java.security.ProtectionDomain;
 import java.util.PropertyPermission;
 import java.util.Set;
 import java.util.function.Consumer;
+
 import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -44,7 +45,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SecurityContextProvider;
@@ -297,7 +298,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		final ProtectionDomain empty = new ProtectionDomain(null,
@@ -441,7 +442,7 @@ public class CallbacksSecurityTests {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder
 				.genericBeanDefinition(NonPrivilegedBean.class).setScope(
-						ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+						BeanDefinition.SCOPE_PROTOTYPE)
 				.setInitMethodName("init").setDestroyMethodName("destroy")
 				.addConstructorArgValue("user1");
 		lbf.registerBeanDefinition("test", bdb.getBeanDefinition());

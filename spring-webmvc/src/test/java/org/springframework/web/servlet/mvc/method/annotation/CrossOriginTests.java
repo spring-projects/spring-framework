@@ -24,8 +24,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -70,7 +70,7 @@ public class CrossOriginTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -211,7 +211,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[] {"GET"});
-		assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[] {"http://www.foo.com/"});
+		assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[] {"http://www.foo.example/"});
 		assertThat((boolean) config.getAllowCredentials()).isTrue();
 	}
 
@@ -224,7 +224,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[] {"GET"});
-		assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[] {"http://www.foo.com/"});
+		assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[] {"http://www.foo.example/"});
 		assertThat((boolean) config.getAllowCredentials()).isTrue();
 	}
 
@@ -418,7 +418,7 @@ public class CrossOriginTests {
 
 
 	@Controller
-	@ComposedCrossOrigin(origins = "http://www.foo.com/", allowCredentials = "true")
+	@ComposedCrossOrigin(origins = "http://www.foo.example/", allowCredentials = "true")
 	private static class ClassLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
@@ -431,7 +431,7 @@ public class CrossOriginTests {
 	private static class MethodLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
-		@ComposedCrossOrigin(origins = "http://www.foo.com/", allowCredentials = "true")
+		@ComposedCrossOrigin(origins = "http://www.foo.example/", allowCredentials = "true")
 		public void foo() {
 		}
 	}

@@ -19,8 +19,8 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -35,7 +35,7 @@ public class CorsRegistryTests {
 
 	private CorsRegistry registry;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.registry = new CorsRegistry();
 	}

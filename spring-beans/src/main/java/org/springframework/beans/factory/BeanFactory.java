@@ -323,7 +323,8 @@ public interface BeanFactory {
 	 * Determine the type of the bean with the given name. More specifically,
 	 * determine the type of object that {@link #getBean} would return for the given name.
 	 * <p>For a {@link FactoryBean}, return the type of object that the FactoryBean creates,
-	 * as exposed by {@link FactoryBean#getObjectType()}.
+	 * as exposed by {@link FactoryBean#getObjectType()}. This may lead to the initialization
+	 * of a previously uninitialized {@code FactoryBean} (see {@link #getType(String, boolean)}).
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
@@ -335,6 +336,27 @@ public interface BeanFactory {
 	 */
 	@Nullable
 	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Determine the type of the bean with the given name. More specifically,
+	 * determine the type of object that {@link #getBean} would return for the given name.
+	 * <p>For a {@link FactoryBean}, return the type of object that the FactoryBean creates,
+	 * as exposed by {@link FactoryBean#getObjectType()}. Depending on the
+	 * {@code allowFactoryBeanInit} flag, this may lead to the initialization of a previously
+	 * uninitialized {@code FactoryBean} if no early type information is available.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * @param name the name of the bean to query
+	 * @param allowFactoryBeanInit whether a {@code FactoryBean} may get initialized
+	 * just for the purpose of determining its object type
+	 * @return the type of the bean, or {@code null} if not determinable
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 5.2
+	 * @see #getBean
+	 * @see #isTypeMatch
+	 */
+	@Nullable
+	Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Return the aliases for the given bean name, if any.

@@ -28,13 +28,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTestCase;
+import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -61,7 +61,7 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2JsonDecoder> {
+public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder> {
 
 	private Pojo pojo1 = new Pojo("f1", "b1");
 
@@ -115,6 +115,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 	}
 
 	@Override
+	@Test
 	public void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},"),

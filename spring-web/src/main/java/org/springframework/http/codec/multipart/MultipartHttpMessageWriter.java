@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -150,6 +149,16 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		return Collections.unmodifiableList(this.partWriters);
 	}
 
+
+	/**
+	 * Return the configured form writer.
+	 * @since 5.1.13
+	 */
+	@Nullable
+	public HttpMessageWriter<MultiValueMap<String, String>> getFormWriter() {
+		return this.formWriter;
+	}
+
 	/**
 	 * Set the character set to use for part headers such as
 	 * "Content-Disposition" (and its filename parameter).
@@ -249,8 +258,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	private Flux<DataBuffer> encodePartValues(
 			byte[] boundary, String name, List<?> values, DataBufferFactory bufferFactory) {
 
-		return Flux.concat(values.stream().map(v ->
-				encodePart(boundary, name, v, bufferFactory)).collect(Collectors.toList()));
+		return Flux.fromIterable(values)
+				.concatMap(value -> encodePart(boundary, name, value, bufferFactory));
 	}
 
 	@SuppressWarnings("unchecked")

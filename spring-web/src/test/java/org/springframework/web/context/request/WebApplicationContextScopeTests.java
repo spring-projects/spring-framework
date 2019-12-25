@@ -18,7 +18,7 @@ package org.springframework.web.context.request;
 
 import javax.servlet.ServletContextEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.mock.web.test.MockHttpServletRequest;

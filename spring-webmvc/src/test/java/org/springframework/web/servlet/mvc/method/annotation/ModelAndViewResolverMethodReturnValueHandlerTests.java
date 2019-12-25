@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -52,7 +52,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private ServletWebRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);

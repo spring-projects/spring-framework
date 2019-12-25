@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -52,7 +52,8 @@ public class HeaderMethodArgumentResolverTests {
 	private final ResolvableMethod resolvable = ResolvableMethod.on(getClass()).named("handleMessage").build();
 
 
-	@Before
+	@BeforeEach
+	@SuppressWarnings("resource")
 	public void setup() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.refresh();

@@ -19,8 +19,8 @@ package org.springframework.web.socket.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -37,7 +37,7 @@ public class WebSocketHttpHeadersTests {
 
 	private WebSocketHttpHeaders headers;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		headers = new WebSocketHttpHeaders();
 	}

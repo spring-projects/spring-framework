@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <bones>
 
 	<bean id="jenny" name="jenny" class="org.springframework.tests.sample.beans.TestBean">
@@ -13,6 +12,26 @@
 		<property name="age" value="27"/>
 		<property name="spouse" ref="jenny"/>
 	</bean>
+
+	<bean id="jenny_constructor"  class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="david_constructor"/></constructor-arg>
+	</bean>
+
+	<bean id="david_constructor" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="1"><ref bean="jenny_constructor"/></constructor-arg>
+	</bean>
+
+	<bean id="jenny_prototype"  class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse" ref="david_prototype" />
+	</bean>
+
+	<bean id="david_prototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="spouse" ref="jenny_prototype" />
+	</bean>
+
+	<bean id="jenny_depends_on"  class="org.springframework.tests.sample.beans.TestBean" depends-on="david_depends_on" />
+
+	<bean id="david_depends_on" class="org.springframework.tests.sample.beans.TestBean" depends-on="jenny_depends_on" />
 
 	<bean id="jenks" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Andrew</value></property>

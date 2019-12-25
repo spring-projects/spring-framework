@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -61,15 +61,15 @@ public class ControllerMethodResolverTests {
 	private HandlerMethod handlerMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ArgumentResolverConfigurer resolvers = new ArgumentResolverConfigurer();
 		resolvers.addCustomResolver(new CustomArgumentResolver());
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
 		ServerCodecConfigurer codecs = ServerCodecConfigurer.create();
-		codecs.customCodecs().decoder(new ByteArrayDecoder());
-		codecs.customCodecs().decoder(new ByteBufferDecoder());
+		codecs.customCodecs().register(new ByteArrayDecoder());
+		codecs.customCodecs().register(new ByteBufferDecoder());
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.registerBean(TestControllerAdvice.class);

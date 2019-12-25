@@ -19,17 +19,20 @@ package org.springframework.http;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class HttpStatusTests {
 
 	private Map<Integer, String> statusCodes = new LinkedHashMap<>();
 
-	@Before
+
+	@BeforeEach
 	public void createStatusCodes() {
 		statusCodes.put(100, "CONTINUE");
 		statusCodes.put(101, "SWITCHING_PROTOCOLS");
@@ -81,6 +84,7 @@ public class HttpStatusTests {
 		statusCodes.put(422, "UNPROCESSABLE_ENTITY");
 		statusCodes.put(423, "LOCKED");
 		statusCodes.put(424, "FAILED_DEPENDENCY");
+		statusCodes.put(425, "TOO_EARLY");
 		statusCodes.put(426, "UPGRADE_REQUIRED");
 		statusCodes.put(428, "PRECONDITION_REQUIRED");
 		statusCodes.put(429, "TOO_MANY_REQUESTS");
@@ -101,6 +105,7 @@ public class HttpStatusTests {
 		statusCodes.put(511, "NETWORK_AUTHENTICATION_REQUIRED");
 	}
 
+
 	@Test
 	public void fromMapToEnum() {
 		for (Map.Entry<Integer, String> entry : statusCodes.entrySet()) {
@@ -113,7 +118,6 @@ public class HttpStatusTests {
 
 	@Test
 	public void fromEnumToMap() {
-
 		for (HttpStatus status : HttpStatus.values()) {
 			int value = status.value();
 			if (value == 302 || value == 413 || value == 414) {
@@ -123,4 +127,5 @@ public class HttpStatusTests {
 			assertThat(status.name()).as("Invalid name for [" + value + "]").isEqualTo(statusCodes.get(value));
 		}
 	}
+
 }

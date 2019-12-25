@@ -22,8 +22,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,7 +44,7 @@ public class ServletServerHttpRequestTests {
 	private MockHttpServletRequest mockRequest;
 
 
-	@Before
+	@BeforeEach
 	public void create() {
 		mockRequest = new MockHttpServletRequest();
 		request = new ServletServerHttpRequest(mockRequest);
@@ -81,18 +81,22 @@ public class ServletServerHttpRequestTests {
 
 	@Test  // SPR-16414
 	public void getUriWithQueryParam() throws URISyntaxException {
+		mockRequest.setScheme("https");
+		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
 		mockRequest.setQueryString("query=foo");
-		assertThat(request.getURI()).isEqualTo(new URI("http://example.com/path?query=foo"));
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/path?query=foo"));
 	}
 
 	@Test  // SPR-16414
 	public void getUriWithMalformedQueryParam() throws URISyntaxException {
+		mockRequest.setScheme("https");
+		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
 		mockRequest.setQueryString("query=foo%%x");
-		assertThat(request.getURI()).isEqualTo(new URI("http://example.com/path"));
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/path"));
 	}
 
 	@Test  // SPR-13876

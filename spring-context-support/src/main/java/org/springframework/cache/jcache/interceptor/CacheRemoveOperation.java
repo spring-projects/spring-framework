@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ class CacheRemoveOperation extends AbstractJCacheKeyOperation<CacheRemove> {
 	}
 
 	/**
-	 * Specify if the cache entry should be remove before invoking the method. By default, the
-	 * cache entry is removed after the method invocation.
+	 * Specify if the cache entry should be removed before invoking the method.
+	 * <p>By default, the cache entry is removed after the method invocation.
 	 * @see javax.cache.annotation.CacheRemove#afterInvocation()
 	 */
 	public boolean isEarlyRemove() {

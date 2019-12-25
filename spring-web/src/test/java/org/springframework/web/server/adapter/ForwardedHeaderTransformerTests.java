@@ -18,7 +18,7 @@ package org.springframework.web.server.adapter;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -87,6 +87,22 @@ public class ForwardedHeaderTransformerTests {
 
 		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/prefix/path"));
 		assertThat(request.getPath().value()).isEqualTo("/prefix/path");
+		assertForwardedHeadersRemoved(request);
+	}
+
+	@Test // gh-23305
+	public void xForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/prefix");
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, new URI("https://example.com/a%20b?q=a%2Bb"))
+				.headers(headers)
+				.build();
+
+		request = this.requestMutator.apply(request);
+
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/prefix/a%20b?q=a%2Bb"));
+		assertThat(request.getPath().value()).isEqualTo("/prefix/a%20b");
 		assertForwardedHeadersRemoved(request);
 	}
 

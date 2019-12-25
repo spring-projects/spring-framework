@@ -22,8 +22,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.AbstractListableBeanFactoryTests;
@@ -50,7 +50,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestListener parentListener = new TestListener();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.applicationContext = createContext();
 	}

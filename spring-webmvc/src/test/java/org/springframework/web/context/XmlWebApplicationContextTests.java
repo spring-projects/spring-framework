@@ -17,9 +17,10 @@
 package org.springframework.web.context;
 
 import java.util.Locale;
+
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;

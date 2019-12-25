@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
@@ -63,9 +63,10 @@ fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
+class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunctionDsl.() -> Unit)) {
 
-	private val builder = RouterFunctions.route()
+	@PublishedApi
+	internal val builder = RouterFunctions.route()
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -150,11 +151,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun String.nest(r: (CoRouterFunctionDsl.() -> Unit)) = path(this).nest(r)
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun GET(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.GET(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun GET(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.GET(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -165,11 +178,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun GET(pattern: String): RequestPredicate = RequestPredicates.GET(pattern)
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun HEAD(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.HEAD(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun HEAD(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.HEAD(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -180,11 +205,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun HEAD(pattern: String): RequestPredicate = RequestPredicates.HEAD(pattern)
 
 	/**
-	 * Route to the given handler function if the given `POST` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun POST(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.POST(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun POST(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.POST(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -195,11 +232,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun POST(pattern: String): RequestPredicate = RequestPredicates.POST(pattern)
 
 	/**
-	 * Route to the given handler function if the given `PUT` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun PUT(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.PUT(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PUT(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.PUT(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -210,11 +259,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun PUT(pattern: String): RequestPredicate = RequestPredicates.PUT(pattern)
 
 	/**
-	 * Route to the given handler function if the given `PATCH` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun PATCH(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.PATCH(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PATCH(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.PATCH(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -227,11 +288,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun PATCH(pattern: String): RequestPredicate = RequestPredicates.PATCH(pattern)
 
 	/**
-	 * Route to the given handler function if the given `DELETE` predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun DELETE(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.DELETE(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun DELETE(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.DELETE(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -244,11 +317,23 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	fun DELETE(pattern: String): RequestPredicate = RequestPredicates.DELETE(pattern)
 
 	/**
-	 * Route to the given handler function if the given OPTIONS predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun OPTIONS(pattern: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.OPTIONS(pattern, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun OPTIONS(pattern: String, predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.OPTIONS(pattern, predicate, asHandlerFunction(f))
 	}
 
 	/**
@@ -421,9 +506,83 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	 */
 	fun resources(lookupFunction: suspend (ServerRequest) -> Resource?) {
 		builder.resources {
-			GlobalScope.mono(Dispatchers.Unconfined) {
+			mono(Dispatchers.Unconfined) {
 				lookupFunction.invoke(it)
 			}
+		}
+	}
+
+	/**
+	 * Merge externally defined router functions into this one.
+	 * @param routerFunction the router function to be added
+	 * @since 5.2
+	 */
+	fun add(routerFunction: RouterFunction<ServerResponse>) {
+		builder.add(routerFunction)
+	}
+
+	/**
+	 * Filters all routes created by this router with the given filter function. Filter
+	 * functions are typically used to address cross-cutting concerns, such as logging,
+	 * security, etc.
+	 * @param filterFunction the function to filter all routes built by this router
+	 * @since 5.2
+	 */
+	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
+		builder.filter { serverRequest, handlerFunction ->
+			mono(Dispatchers.Unconfined) {
+				filterFunction(serverRequest) {
+					handlerFunction.handle(serverRequest).awaitFirst()
+				}
+			}
+		}
+	}
+
+	/**
+	 * Filter the request object for all routes created by this builder with the given request
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param requestProcessor a function that transforms the request
+	 * @since 5.2
+	 */
+	fun before(requestProcessor: (ServerRequest) -> ServerRequest) {
+		builder.before(requestProcessor)
+	}
+
+	/**
+	 * Filter the response object for all routes created by this builder with the given response
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param responseProcessor a function that transforms the response
+	 * @since 5.2
+	 */
+	fun after(responseProcessor: (ServerRequest, ServerResponse) -> ServerResponse) {
+		builder.after(responseProcessor)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param predicate the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	fun onError(predicate: (Throwable) -> Boolean, responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
+		builder.onError(predicate) { throwable, request ->
+			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+		}
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param E the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	inline fun <reified E : Throwable> onError(noinline responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
+		builder.onError({it is E}) { throwable, request ->
+			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
 		}
 	}
 
@@ -436,7 +595,7 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	}
 
 	private fun asHandlerFunction(init: suspend (ServerRequest) -> ServerResponse) = HandlerFunction {
-		GlobalScope.mono(Dispatchers.Unconfined) {
+		mono(Dispatchers.Unconfined) {
 			init(it)
 		}
 	}

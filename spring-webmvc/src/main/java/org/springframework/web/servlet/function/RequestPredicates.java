@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -347,7 +348,7 @@ public abstract class RequestPredicates {
 		void pathExtension(String extension);
 
 		/**
-		 * Receive notification of a HTTP header predicate.
+		 * Receive notification of an HTTP header predicate.
 		 * @param name the name of the HTTP header to check
 		 * @param value the desired value of the HTTP header
 		 * @see RequestPredicates#headers(Predicate)

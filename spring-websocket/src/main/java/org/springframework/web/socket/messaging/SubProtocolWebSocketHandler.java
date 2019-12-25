@@ -187,6 +187,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
+	@Override
 	public List<String> getSubProtocols() {
 		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
@@ -368,6 +369,9 @@ public class SubProtocolWebSocketHandler
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Terminating '" + session + "'", ex);
+				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("Terminating '" + session + "': " + ex.getMessage());
 				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
@@ -591,6 +595,7 @@ public class SubProtocolWebSocketHandler
 		int getTransportErrorSessions();
 	}
 
+
 	private class DefaultStats implements Stats {
 
 		private final AtomicInteger total = new AtomicInteger();
@@ -606,7 +611,6 @@ public class SubProtocolWebSocketHandler
 		private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
 		private final AtomicInteger transportError = new AtomicInteger();
-
 
 		@Override
 		public int getTotalSessions() {
@@ -676,6 +680,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 
+		@Override
 		public String toString() {
 			return SubProtocolWebSocketHandler.this.sessions.size() +
 					" current WS(" + this.webSocket.get() +

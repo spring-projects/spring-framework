@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
@@ -139,6 +140,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 		return this.extensions;
 	}
 
+	@Override
 	public Principal getPrincipal() {
 		return this.user;
 	}
