@@ -294,7 +294,6 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
-			mavenLocal()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}
