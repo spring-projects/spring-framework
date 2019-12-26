@@ -95,6 +95,8 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		 * <p>By default if this is not set, and Jackson is available, the
 		 * {@link #jackson2JsonDecoder} override is used instead. Use this property
 		 * if you want to further customize the SSE decoder.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder to use
 		 */
 		void serverSentEventDecoder(Decoder<?> decoder);

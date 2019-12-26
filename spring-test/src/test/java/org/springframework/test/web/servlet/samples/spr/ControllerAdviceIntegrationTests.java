@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
@@ -63,46 +64,45 @@ class ControllerAdviceIntegrationTests {
 
 	@Test
 	void controllerAdviceIsAppliedOnlyOnce() throws Exception {
-		assertThat(SingletonControllerAdvice.counter).hasValue(0);
-		assertThat(RequestScopedControllerAdvice.counter).hasValue(0);
-
 		this.mockMvc.perform(get("/test").param("requestParam", "foo"))//
 				.andExpect(status().isOk())//
-				.andExpect(forwardedUrl("singleton:1;request-scoped:1;requestParam:foo"));
+				.andExpect(forwardedUrl("singleton:1;prototype:1;request-scoped:1;requestParam:foo"));
 
-		assertThat(SingletonControllerAdvice.counter).hasValue(1);
-		assertThat(RequestScopedControllerAdvice.counter).hasValue(1);
+		assertThat(SingletonControllerAdvice.invocationCount).hasValue(1);
+		assertThat(PrototypeControllerAdvice.invocationCount).hasValue(1);
+		assertThat(RequestScopedControllerAdvice.invocationCount).hasValue(1);
 	}
 
 	@Test
-	void requestScopedControllerAdviceBeanIsNotCached() throws Exception {
-		assertThat(SingletonControllerAdvice.instanceCounter).hasValue(0);
-		assertThat(RequestScopedControllerAdvice.instanceCounter).hasValue(0);
-
+	void prototypeAndRequestScopedControllerAdviceBeansAreNotCached() throws Exception {
 		this.mockMvc.perform(get("/test").param("requestParam", "foo"))//
 				.andExpect(status().isOk())//
-				.andExpect(forwardedUrl("singleton:1;request-scoped:1;requestParam:foo"));
+				.andExpect(forwardedUrl("singleton:1;prototype:1;request-scoped:1;requestParam:foo"));
 
-		// A singleton @ControllerAdvice bean should not be instantiated again.
-		assertThat(SingletonControllerAdvice.instanceCounter).hasValue(0);
-		// A request-scoped @ControllerAdvice bean should be instantiated once per request.
-		assertThat(RequestScopedControllerAdvice.instanceCounter).hasValue(1);
+		// singleton @ControllerAdvice beans should not be instantiated again.
+		assertThat(SingletonControllerAdvice.instanceCount).hasValue(0);
+		// prototype and request-scoped @ControllerAdvice beans should be instantiated once per request.
+		assertThat(PrototypeControllerAdvice.instanceCount).hasValue(1);
+		assertThat(RequestScopedControllerAdvice.instanceCount).hasValue(1);
 
 		this.mockMvc.perform(get("/test").param("requestParam", "bar"))//
 				.andExpect(status().isOk())//
-				.andExpect(forwardedUrl("singleton:2;request-scoped:2;requestParam:bar"));
+				.andExpect(forwardedUrl("singleton:2;prototype:2;request-scoped:2;requestParam:bar"));
 
-		// A singleton @ControllerAdvice bean should not be instantiated again.
-		assertThat(SingletonControllerAdvice.instanceCounter).hasValue(0);
-		// A request-scoped @ControllerAdvice bean should be instantiated once per request.
-		assertThat(RequestScopedControllerAdvice.instanceCounter).hasValue(2);
+		// singleton @ControllerAdvice beans should not be instantiated again.
+		assertThat(SingletonControllerAdvice.instanceCount).hasValue(0);
+		// prototype and request-scoped @ControllerAdvice beans should be instantiated once per request.
+		assertThat(PrototypeControllerAdvice.instanceCount).hasValue(2);
+		assertThat(RequestScopedControllerAdvice.instanceCount).hasValue(2);
 	}
 
 	private void resetCounters() {
-		SingletonControllerAdvice.counter.set(0);
-		SingletonControllerAdvice.instanceCounter.set(0);
-		RequestScopedControllerAdvice.counter.set(0);
-		RequestScopedControllerAdvice.instanceCounter.set(0);
+		SingletonControllerAdvice.invocationCount.set(0);
+		SingletonControllerAdvice.instanceCount.set(0);
+		PrototypeControllerAdvice.invocationCount.set(0);
+		PrototypeControllerAdvice.instanceCount.set(0);
+		RequestScopedControllerAdvice.invocationCount.set(0);
+		RequestScopedControllerAdvice.instanceCount.set(0);
 	}
 
 	@Configuration
@@ -120,6 +120,12 @@ class ControllerAdviceIntegrationTests {
 		}
 
 		@Bean
+		@Scope("prototype")
+		PrototypeControllerAdvice prototypeControllerAdvice() {
+			return new PrototypeControllerAdvice();
+		}
+
+		@Bean
 		@RequestScope
 		RequestScopedControllerAdvice requestScopedControllerAdvice() {
 			return new RequestScopedControllerAdvice();
@@ -129,35 +135,49 @@ class ControllerAdviceIntegrationTests {
 	@ControllerAdvice
 	static class SingletonControllerAdvice {
 
-		static final AtomicInteger counter = new AtomicInteger();
-
-		static final AtomicInteger instanceCounter = new AtomicInteger();
+		static final AtomicInteger instanceCount = new AtomicInteger();
+		static final AtomicInteger invocationCount = new AtomicInteger();
 
 		{
-			instanceCounter.incrementAndGet();
+			instanceCount.incrementAndGet();
 		}
 
 		@ModelAttribute
 		void initModel(Model model) {
-			model.addAttribute("singleton", counter.incrementAndGet());
+			model.addAttribute("singleton", invocationCount.incrementAndGet());
+		}
+	}
+
+	@ControllerAdvice
+	static class PrototypeControllerAdvice {
+
+		static final AtomicInteger instanceCount = new AtomicInteger();
+		static final AtomicInteger invocationCount = new AtomicInteger();
+
+		{
+			instanceCount.incrementAndGet();
+		}
+
+		@ModelAttribute
+		void initModel(Model model) {
+			model.addAttribute("prototype", invocationCount.incrementAndGet());
 		}
 	}
 
 	@ControllerAdvice
 	static class RequestScopedControllerAdvice {
 
-		static final AtomicInteger counter = new AtomicInteger();
-
-		static final AtomicInteger instanceCounter = new AtomicInteger();
+		static final AtomicInteger instanceCount = new AtomicInteger();
+		static final AtomicInteger invocationCount = new AtomicInteger();
 
 		{
-			instanceCounter.incrementAndGet();
+			instanceCount.incrementAndGet();
 		}
 
 		@ModelAttribute
 		void initModel(@RequestParam String requestParam, Model model) {
 			model.addAttribute("requestParam", requestParam);
-			model.addAttribute("request-scoped", counter.incrementAndGet());
+			model.addAttribute("request-scoped", invocationCount.incrementAndGet());
 		}
 	}
 
@@ -166,9 +186,10 @@ class ControllerAdviceIntegrationTests {
 
 		@GetMapping("/test")
 		String get(Model model) {
-			return "singleton:" + model.getAttribute("singleton") + ";request-scoped:"
-					+ model.getAttribute("request-scoped") + ";requestParam:"
-					+ model.getAttribute("requestParam");
+			return "singleton:" + model.getAttribute("singleton") +
+					";prototype:" + model.getAttribute("prototype") +
+					";request-scoped:" + model.getAttribute("request-scoped") +
+					";requestParam:" + model.getAttribute("requestParam");
 		}
 	}
 

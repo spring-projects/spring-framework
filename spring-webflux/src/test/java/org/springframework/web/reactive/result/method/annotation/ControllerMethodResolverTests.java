@@ -68,8 +68,8 @@ public class ControllerMethodResolverTests {
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
 		ServerCodecConfigurer codecs = ServerCodecConfigurer.create();
-		codecs.customCodecs().decoder(new ByteArrayDecoder());
-		codecs.customCodecs().decoder(new ByteBufferDecoder());
+		codecs.customCodecs().register(new ByteArrayDecoder());
+		codecs.customCodecs().register(new ByteBufferDecoder());
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.registerBean(TestControllerAdvice.class);

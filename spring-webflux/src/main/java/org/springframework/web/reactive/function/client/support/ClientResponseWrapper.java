@@ -153,6 +153,11 @@ public class ClientResponseWrapper implements ClientResponse {
 		return this.delegate.createException();
 	}
 
+	@Override
+	public String logPrefix() {
+		return this.delegate.logPrefix();
+	}
+
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed
 	  * to adapt the headers in a

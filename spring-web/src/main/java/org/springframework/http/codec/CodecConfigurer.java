@@ -109,6 +109,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Jackson JSON {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonDecoder
 		 */
@@ -123,6 +125,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @since 5.1
 		 * @see org.springframework.http.codec.protobuf.ProtobufDecoder
@@ -140,6 +144,8 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default JAXB2 {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @since 5.1.3
 		 * @see org.springframework.http.codec.xml.Jaxb2XmlDecoder
@@ -186,17 +192,65 @@ public interface CodecConfigurer {
 	interface CustomCodecs {
 
 		/**
+		 * Register a custom codec. This is expected to be one of the following:
+		 * <ul>
+		 * <li>{@link HttpMessageReader}
+		 * <li>{@link HttpMessageWriter}
+		 * <li>{@link Encoder} (wrapped internally with {@link EncoderHttpMessageWriter})
+		 * <li>{@link Decoder} (wrapped internally with {@link DecoderHttpMessageReader})
+		 * </ul>
+		 * @param codec the codec to register
+		 * @since 5.1.13
+		 */
+		void register(Object codec);
+
+		/**
+		 * Variant of {@link #register(Object)} that also applies the below
+		 * properties, if configured, via {@link #defaultCodecs()}:
+		 * <ul>
+		 * <li>{@link CodecConfigurer.DefaultCodecs#maxInMemorySize(int) maxInMemorySize}
+		 * <li>{@link CodecConfigurer.DefaultCodecs#enableLoggingRequestDetails(boolean) enableLoggingRequestDetails}
+		 * </ul>
+		 * <p>The properties are applied every time {@link #getReaders()} or
+		 * {@link #getWriters()} are used to obtain the list of configured
+		 * readers or writers.
+		 * @param codec the codec to register and apply default config to
+		 * @since 5.1.13
+		 */
+		void registerWithDefaultConfig(Object codec);
+
+		/**
+		 * Variant of {@link #register(Object)} that also allows the caller to
+		 * apply the properties from {@link DefaultCodecConfig} to the given
+		 * codec. If you want to apply all the properties, prefer using
+		 * {@link #registerWithDefaultConfig(Object)}.
+		 * <p>The consumer is called every time {@link #getReaders()} or
+		 * {@link #getWriters()} are used to obtain the list of configured
+		 * readers or writers.
+		 * @param codec the codec to register
+		 * @param configConsumer consumer of the default config
+		 * @since 5.1.13
+		 */
+		void registerWithDefaultConfig(Object codec, Consumer<DefaultCodecConfig> configConsumer);
+
+		/**
 		 * Add a custom {@code Decoder} internally wrapped with
 		 * {@link DecoderHttpMessageReader}).
 		 * @param decoder the decoder to add
+		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
+		 * {@link #registerWithDefaultConfig(Object)} instead.
 		 */
+		@Deprecated
 		void decoder(Decoder<?> decoder);
 
 		/**
 		 * Add a custom {@code Encoder}, internally wrapped with
 		 * {@link EncoderHttpMessageWriter}.
 		 * @param encoder the encoder to add
+		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
+		 * {@link #registerWithDefaultConfig(Object)} instead.
 		 */
+		@Deprecated
 		void encoder(Encoder<?> encoder);
 
 		/**
@@ -204,7 +258,10 @@ public interface CodecConfigurer {
 		 * {@link DecoderHttpMessageReader} consider using the shortcut
 		 * {@link #decoder(Decoder)} instead.
 		 * @param reader the reader to add
+		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
+		 * {@link #registerWithDefaultConfig(Object)} instead.
 		 */
+		@Deprecated
 		void reader(HttpMessageReader<?> reader);
 
 		/**
@@ -212,7 +269,10 @@ public interface CodecConfigurer {
 		 * {@link EncoderHttpMessageWriter} consider using the shortcut
 		 * {@link #encoder(Encoder)} instead.
 		 * @param writer the writer to add
+		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
+		 * {@link #registerWithDefaultConfig(Object)} instead.
 		 */
+		@Deprecated
 		void writer(HttpMessageWriter<?> writer);
 
 		/**
@@ -221,16 +281,21 @@ public interface CodecConfigurer {
 		 * guidelines applied to default ones, such as logging details and limiting
 		 * the amount of buffered data.
 		 * @param codecsConfigConsumer the default codecs configuration callback
-		 * @since 5.1.12
+		 * @deprecated as of 5.1.13, use {@link #registerWithDefaultConfig(Object)}
+		 * or {@link #registerWithDefaultConfig(Object, Consumer)} instead.
 		 */
+		@Deprecated
 		void withDefaultCodecConfig(Consumer<DefaultCodecConfig> codecsConfigConsumer);
 	}
 
 
 	/**
-	 * Common options applied to default codecs and passed in a callback to custom codecs
-	 * so they get a chance to align their behavior on the default ones.
+	 * Exposes the values of properties configured through
+	 * {@link #defaultCodecs()} that are applied to default codecs.
+	 * The main purpose of this interface is to provide access to them so they
+	 * can also be applied to custom codecs if needed.
 	 * @since 5.1.12
+	 * @see CustomCodecs#registerWithDefaultConfig(Object, Consumer)
 	 */
 	interface DefaultCodecConfig {
 
@@ -245,7 +310,8 @@ public interface CodecConfigurer {
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 */
-		boolean isEnableLoggingRequestDetails();
+		@Nullable
+		Boolean isEnableLoggingRequestDetails();
 	}
 
 }

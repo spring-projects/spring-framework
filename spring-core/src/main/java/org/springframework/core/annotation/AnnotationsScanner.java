@@ -136,51 +136,56 @@ abstract class AnnotationsScanner {
 	private static <C, R> R processClassInheritedAnnotations(C context, Class<?> source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
-		if (isWithoutHierarchy(source, searchStrategy)) {
-			return processElement(context, source, processor, classFilter);
-		}
-		Annotation[] relevant = null;
-		int remaining = Integer.MAX_VALUE;
-		int aggregateIndex = 0;
-		Class<?> root = source;
-		while (source != null && source != Object.class && remaining > 0 &&
-				!hasPlainJavaAnnotationsOnly(source)) {
-			R result = processor.doWithAggregate(context, aggregateIndex);
-			if (result != null) {
-				return result;
+		try {
+			if (isWithoutHierarchy(source, searchStrategy)) {
+				return processElement(context, source, processor, classFilter);
 			}
-			if (isFiltered(source, context, classFilter)) {
-				continue;
-			}
-			Annotation[] declaredAnnotations =
-					getDeclaredAnnotations(context, source, classFilter, true);
-			if (relevant == null && declaredAnnotations.length > 0) {
-				relevant = root.getAnnotations();
-				remaining = relevant.length;
-			}
-			for (int i = 0; i < declaredAnnotations.length; i++) {
-				if (declaredAnnotations[i] != null) {
-					boolean isRelevant = false;
-					for (int relevantIndex = 0; relevantIndex < relevant.length; relevantIndex++) {
-						if (relevant[relevantIndex] != null &&
-								declaredAnnotations[i].annotationType() == relevant[relevantIndex].annotationType()) {
-							isRelevant = true;
-							relevant[relevantIndex] = null;
-							remaining--;
-							break;
+			Annotation[] relevant = null;
+			int remaining = Integer.MAX_VALUE;
+			int aggregateIndex = 0;
+			Class<?> root = source;
+			while (source != null && source != Object.class && remaining > 0 &&
+					!hasPlainJavaAnnotationsOnly(source)) {
+				R result = processor.doWithAggregate(context, aggregateIndex);
+				if (result != null) {
+					return result;
+				}
+				if (isFiltered(source, context, classFilter)) {
+					continue;
+				}
+				Annotation[] declaredAnnotations =
+						getDeclaredAnnotations(context, source, classFilter, true);
+				if (relevant == null && declaredAnnotations.length > 0) {
+					relevant = root.getAnnotations();
+					remaining = relevant.length;
+				}
+				for (int i = 0; i < declaredAnnotations.length; i++) {
+					if (declaredAnnotations[i] != null) {
+						boolean isRelevant = false;
+						for (int relevantIndex = 0; relevantIndex < relevant.length; relevantIndex++) {
+							if (relevant[relevantIndex] != null &&
+									declaredAnnotations[i].annotationType() == relevant[relevantIndex].annotationType()) {
+								isRelevant = true;
+								relevant[relevantIndex] = null;
+								remaining--;
+								break;
+							}
+						}
+						if (!isRelevant) {
+							declaredAnnotations[i] = null;
 						}
 					}
-					if (!isRelevant) {
-						declaredAnnotations[i] = null;
-					}
 				}
+				result = processor.doWithAnnotations(context, aggregateIndex, source, declaredAnnotations);
+				if (result != null) {
+					return result;
+				}
+				source = source.getSuperclass();
+				aggregateIndex++;
 			}
-			result = processor.doWithAnnotations(context, aggregateIndex, source, declaredAnnotations);
-			if (result != null) {
-				return result;
-			}
-			source = source.getSuperclass();
-			aggregateIndex++;
+		}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(source, ex);
 		}
 		return null;
 	}
@@ -190,8 +195,7 @@ abstract class AnnotationsScanner {
 			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
 			boolean includeInterfaces, boolean includeEnclosing) {
 
-		int[] aggregateIndex = new int[] {0};
-		return processClassHierarchy(context, aggregateIndex, source, processor,
+		return processClassHierarchy(context, new int[] {0}, source, processor,
 				classFilter, includeInterfaces, includeEnclosing);
 	}
 
@@ -200,43 +204,60 @@ abstract class AnnotationsScanner {
 			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
 			boolean includeInterfaces, boolean includeEnclosing) {
 
-		R result = processor.doWithAggregate(context, aggregateIndex[0]);
-		if (result != null) {
-			return result;
-		}
-		if (hasPlainJavaAnnotationsOnly(source)) {
-			return null;
-		}
-		Annotation[] annotations = getDeclaredAnnotations(context, source, classFilter, false);
-		result = processor.doWithAnnotations(context, aggregateIndex[0], source, annotations);
-		if (result != null) {
-			return result;
-		}
-		aggregateIndex[0]++;
-		if (includeInterfaces) {
-			for (Class<?> interfaceType : source.getInterfaces()) {
-				R interfacesResult = processClassHierarchy(context, aggregateIndex,
+		try {
+			R result = processor.doWithAggregate(context, aggregateIndex[0]);
+			if (result != null) {
+				return result;
+			}
+			if (hasPlainJavaAnnotationsOnly(source)) {
+				return null;
+			}
+			Annotation[] annotations = getDeclaredAnnotations(context, source, classFilter, false);
+			result = processor.doWithAnnotations(context, aggregateIndex[0], source, annotations);
+			if (result != null) {
+				return result;
+			}
+			aggregateIndex[0]++;
+			if (includeInterfaces) {
+				for (Class<?> interfaceType : source.getInterfaces()) {
+					R interfacesResult = processClassHierarchy(context, aggregateIndex,
 						interfaceType, processor, classFilter, true, includeEnclosing);
-				if (interfacesResult != null) {
-					return interfacesResult;
+					if (interfacesResult != null) {
+						return interfacesResult;
+					}
+				}
+			}
+			Class<?> superclass = source.getSuperclass();
+			if (superclass != Object.class && superclass != null) {
+				R superclassResult = processClassHierarchy(context, aggregateIndex,
+					superclass, processor, classFilter, includeInterfaces, includeEnclosing);
+				if (superclassResult != null) {
+					return superclassResult;
+				}
+			}
+			if (includeEnclosing) {
+				// Since merely attempting to load the enclosing class may result in
+				// automatic loading of sibling nested classes that in turn results
+				// in an exception such as NoClassDefFoundError, we wrap the following
+				// in its own dedicated try-catch block in order not to preemptively
+				// halt the annotation scanning process.
+				try {
+					Class<?> enclosingClass = source.getEnclosingClass();
+					if (enclosingClass != null) {
+						R enclosingResult = processClassHierarchy(context, aggregateIndex,
+							enclosingClass, processor, classFilter, includeInterfaces, true);
+						if (enclosingResult != null) {
+							return enclosingResult;
+						}
+					}
+				}
+				catch (Throwable ex) {
+					AnnotationUtils.handleIntrospectionFailure(source, ex);
 				}
 			}
 		}
-		Class<?> superclass = source.getSuperclass();
-		if (superclass != Object.class && superclass != null) {
-			R superclassResult = processClassHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, includeInterfaces, includeEnclosing);
-			if (superclassResult != null) {
-				return superclassResult;
-			}
-		}
-		Class<?> enclosingClass = source.getEnclosingClass();
-		if (includeEnclosing && enclosingClass != null) {
-			R enclosingResult = processClassHierarchy(context, aggregateIndex,
-					enclosingClass, processor, classFilter, includeInterfaces, true);
-			if (enclosingResult != null) {
-				return enclosingResult;
-			}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(source, ex);
 		}
 		return null;
 	}
@@ -265,9 +286,15 @@ abstract class AnnotationsScanner {
 	private static <C, R> R processMethodInheritedAnnotations(C context, Method source,
 			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
-		R result = processor.doWithAggregate(context, 0);
-		return (result != null ? result :
+		try {
+			R result = processor.doWithAggregate(context, 0);
+			return (result != null ? result :
 				processMethodAnnotations(context, 0, source, processor, classFilter));
+		}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(source, ex);
+		}
+		return null;
 	}
 
 	@Nullable
@@ -276,56 +303,61 @@ abstract class AnnotationsScanner {
 			@Nullable BiPredicate<C, Class<?>> classFilter, Method rootMethod,
 			boolean includeInterfaces) {
 
-		R result = processor.doWithAggregate(context, aggregateIndex[0]);
-		if (result != null) {
-			return result;
-		}
-		if (hasPlainJavaAnnotationsOnly(sourceClass)) {
-			return null;
-		}
-		boolean calledProcessor = false;
-		if (sourceClass == rootMethod.getDeclaringClass()) {
-			result = processMethodAnnotations(context, aggregateIndex[0],
-					rootMethod, processor, classFilter);
-			calledProcessor = true;
+		try {
+			R result = processor.doWithAggregate(context, aggregateIndex[0]);
 			if (result != null) {
 				return result;
 			}
-		}
-		else {
-			for (Method candidateMethod : getBaseTypeMethods(context, sourceClass, classFilter)) {
-				if (candidateMethod != null && isOverride(rootMethod, candidateMethod)) {
-					result = processMethodAnnotations(context, aggregateIndex[0],
+			if (hasPlainJavaAnnotationsOnly(sourceClass)) {
+				return null;
+			}
+			boolean calledProcessor = false;
+			if (sourceClass == rootMethod.getDeclaringClass()) {
+				result = processMethodAnnotations(context, aggregateIndex[0],
+					rootMethod, processor, classFilter);
+				calledProcessor = true;
+				if (result != null) {
+					return result;
+				}
+			}
+			else {
+				for (Method candidateMethod : getBaseTypeMethods(context, sourceClass, classFilter)) {
+					if (candidateMethod != null && isOverride(rootMethod, candidateMethod)) {
+						result = processMethodAnnotations(context, aggregateIndex[0],
 							candidateMethod, processor, classFilter);
-					calledProcessor = true;
-					if (result != null) {
-						return result;
+						calledProcessor = true;
+						if (result != null) {
+							return result;
+						}
 					}
 				}
 			}
-		}
-		if (Modifier.isPrivate(rootMethod.getModifiers())) {
-			return null;
-		}
-		if (calledProcessor) {
-			aggregateIndex[0]++;
-		}
-		if (includeInterfaces) {
-			for (Class<?> interfaceType : sourceClass.getInterfaces()) {
-				R interfacesResult = processMethodHierarchy(context, aggregateIndex,
+			if (Modifier.isPrivate(rootMethod.getModifiers())) {
+				return null;
+			}
+			if (calledProcessor) {
+				aggregateIndex[0]++;
+			}
+			if (includeInterfaces) {
+				for (Class<?> interfaceType : sourceClass.getInterfaces()) {
+					R interfacesResult = processMethodHierarchy(context, aggregateIndex,
 						interfaceType, processor, classFilter, rootMethod, true);
-				if (interfacesResult != null) {
-					return interfacesResult;
+					if (interfacesResult != null) {
+						return interfacesResult;
+					}
+				}
+			}
+			Class<?> superclass = sourceClass.getSuperclass();
+			if (superclass != Object.class && superclass != null) {
+				R superclassResult = processMethodHierarchy(context, aggregateIndex,
+					superclass, processor, classFilter, rootMethod, includeInterfaces);
+				if (superclassResult != null) {
+					return superclassResult;
 				}
 			}
 		}
-		Class<?> superclass = sourceClass.getSuperclass();
-		if (superclass != Object.class && superclass != null) {
-			R superclassResult = processMethodHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, rootMethod, includeInterfaces);
-			if (superclassResult != null) {
-				return superclassResult;
-			}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(rootMethod, ex);
 		}
 		return null;
 	}
@@ -422,9 +454,15 @@ abstract class AnnotationsScanner {
 	private static <C, R> R processElement(C context, AnnotatedElement source,
 			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
-		R result = processor.doWithAggregate(context, 0);
-		return (result != null ? result : processor.doWithAnnotations(
+		try {
+			R result = processor.doWithAggregate(context, 0);
+			return (result != null ? result : processor.doWithAnnotations(
 				context, 0, source, getDeclaredAnnotations(context, source, classFilter, false)));
+		}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(source, ex);
+		}
+		return null;
 	}
 
 	private static <C, R> Annotation[] getDeclaredAnnotations(C context,

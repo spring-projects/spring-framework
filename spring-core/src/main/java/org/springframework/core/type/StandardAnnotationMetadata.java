@@ -100,8 +100,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<String> getAnnotationTypes() {
 		Set<String> annotationTypes = this.annotationTypes;
 		if (annotationTypes == null) {
-			annotationTypes = Collections.unmodifiableSet(
-					AnnotationMetadata.super.getAnnotationTypes());
+			annotationTypes = Collections.unmodifiableSet(AnnotationMetadata.super.getAnnotationTypes());
 			this.annotationTypes = annotationTypes;
 		}
 		return annotationTypes;
