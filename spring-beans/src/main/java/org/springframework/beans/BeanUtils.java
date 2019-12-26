@@ -756,6 +756,27 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * Copy the property values of the given source bean into the given target bean class through the given
+	 * {@link BeanTransformer} class.
+	 * <p>Note: The source and target classes have to match or even be derived.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a {@link com.hotels.beans.transformer.BeanTransformer} and its settings.
+	 * @see <a href="https://hotelsdotcom.github.io/bull/apidocs">
+	 * https://hotelsdotcom.github.io/bull/apidocs</a>
+	 * @param source the source bean
+	 * @param targetClass the target bean class
+	 * @param beanTransformer the bean transformer to use for the transformation. {@link BeanTransformer}
+	 * @param <K> the target object type
+	 * @return a copy of the source object into the destination object
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
+	 */
+	public static <K> K copyProperties(Object source, Class<K> targetClass, BeanTransformer beanTransformer) throws BeansException {
+		Assert.notNull(beanTransformer, "BeanTransformer must not be null");
+		return beanTransformer.transform(source, targetClass);
+	}
+
+	/**
 	 * Returns a bean transformer able to copy properties of any type of java bean.
 	 * <p>Note: The {@link BeanTransformer} can be configured in order to apply any type of transformation on a java bean.
 	 * @see <a href="https://hotelsdotcom.github.io/bull/apidocs/com/hotels/beans/transformer/BeanTransformer.html">
