@@ -222,7 +222,7 @@ public final class ContentDisposition {
 		if (this.filename != null) {
 			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
 				sb.append("; filename=\"");
-				sb.append(this.filename).append('\"');
+				sb.append(escapeQuotationsInFilename(this.filename)).append('\"');
 			}
 			else {
 				sb.append("; filename*=");
@@ -428,6 +428,23 @@ public final class ContentDisposition {
 				c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
 	}
 
+	private static String escapeQuotationsInFilename(String filename) {
+		if (filename.indexOf('"') == -1 && filename.indexOf('\\') == -1) {
+			return filename;
+		}
+		boolean escaped = false;
+		StringBuilder sb = new StringBuilder();
+		for (char c : filename.toCharArray()) {
+			sb.append((c == '"' && !escaped) ? "\\\"" : c);
+			escaped = (!escaped && c == '\\');
+		}
+		// Remove backslash at the end..
+		if (escaped) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Encode the given header field param as describe in RFC 5987.
 	 * @param input the header field param
@@ -437,13 +454,10 @@ public final class ContentDisposition {
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
 	private static String encodeFilename(String input, Charset charset) {
-		Assert.notNull(input, "Input String should not be null");
-		Assert.notNull(charset, "Charset should not be null");
-		if (StandardCharsets.US_ASCII.equals(charset)) {
-			return input;
-		}
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-				"Charset should be UTF-8 or ISO-8859-1");
+		Assert.notNull(input, "`input` is required");
+		Assert.notNull(charset, "`charset` is required");
+		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 supported.");
 		byte[] source = input.getBytes(charset);
 		int len = source.length;
 		StringBuilder sb = new StringBuilder(len << 1);
@@ -578,25 +592,13 @@ public final class ContentDisposition {
 		@Override
 		public Builder filename(String filename) {
 			Assert.hasText(filename, "No filename");
-			this.filename = escapeQuotationMarks(filename);
+			this.filename = filename;
 			return this;
-		}
-
-		private static String escapeQuotationMarks(String filename) {
-			if (filename.indexOf('"') == -1) {
-				return filename;
-			}
-			boolean escaped = false;
-			StringBuilder sb = new StringBuilder();
-			for (char c : filename.toCharArray()) {
-				sb.append((c == '"' && !escaped) ? "\\\"" : c);
-				escaped = (!escaped && c == '\\');
-			}
-			return sb.toString();
 		}
 
 		@Override
 		public Builder filename(String filename, Charset charset) {
+			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			this.charset = charset;
 			return this;
