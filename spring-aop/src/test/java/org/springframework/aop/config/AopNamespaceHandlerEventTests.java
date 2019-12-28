@@ -29,8 +29,8 @@ import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.test.fixtures.beans.CollectingReaderEventListener;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.beans.CollectingReaderEventListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;

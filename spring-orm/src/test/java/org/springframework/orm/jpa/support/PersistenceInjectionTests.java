@@ -37,6 +37,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.test.fixtures.SimpleMapScope;
+import org.springframework.context.test.fixtures.jndi.ExpectedLookupTemplate;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
@@ -44,8 +46,6 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;

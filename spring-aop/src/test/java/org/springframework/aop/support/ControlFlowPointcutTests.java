@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

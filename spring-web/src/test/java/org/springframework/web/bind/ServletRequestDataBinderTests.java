@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.test.fixtures.SimpleMapScope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

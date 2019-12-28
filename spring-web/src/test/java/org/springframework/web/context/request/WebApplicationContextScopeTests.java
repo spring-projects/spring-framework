@@ -21,9 +21,9 @@ import javax.servlet.ServletContextEvent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.test.fixtures.beans.DerivedTestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.web.context.ContextCleanupListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;

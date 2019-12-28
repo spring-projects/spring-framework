@@ -70,6 +70,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.test.fixtures.beans.DerivedTestBean;
+import org.springframework.beans.test.fixtures.beans.GenericBean;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.MethodParameter;
@@ -102,10 +106,6 @@ import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.GenericBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -288,7 +288,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("testBeanSet", "1", "2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("[1, 2]-org.springframework.tests.sample.beans.TestBean");
+		assertThat(response.getContentAsString()).isEqualTo("[1, 2]-org.springframework.beans.test.fixtures.beans.TestBean");
 	}
 
 	@Test  // SPR-12903

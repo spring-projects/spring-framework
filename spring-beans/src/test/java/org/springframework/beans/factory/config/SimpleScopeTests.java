@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;

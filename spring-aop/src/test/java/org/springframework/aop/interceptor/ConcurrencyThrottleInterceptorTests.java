@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.test.fixtures.beans.DerivedTestBean;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

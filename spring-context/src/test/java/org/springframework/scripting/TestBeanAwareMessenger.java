@@ -16,7 +16,7 @@
 
 package org.springframework.scripting;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 
 /**
  * @author Juergen Hoeller

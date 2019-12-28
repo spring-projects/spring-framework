@@ -25,9 +25,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.test.fixtures.beans.Employee;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

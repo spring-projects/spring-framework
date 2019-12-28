@@ -19,7 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 
 /**
  * Test class for Spring's ability to create objects using static

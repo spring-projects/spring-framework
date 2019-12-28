@@ -28,6 +28,6 @@
 
 	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
 
 </beans>

@@ -21,8 +21,8 @@ import javax.transaction.UserTransaction;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.test.fixtures.jndi.SimpleNamingContextBuilder;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;

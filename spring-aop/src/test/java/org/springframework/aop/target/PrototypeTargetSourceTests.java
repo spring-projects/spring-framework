@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.SideEffectBean;
+import org.springframework.beans.test.fixtures.beans.SideEffectBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;

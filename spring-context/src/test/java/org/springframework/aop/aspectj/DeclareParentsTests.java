@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;

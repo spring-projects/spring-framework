@@ -33,11 +33,11 @@
 	<!-- Stateful mixin. Will apply to all objects. Note that singleton property is false. -->
 	<bean id="lockableAdvisor" class="test.mixin.LockMixinAdvisor" scope="prototype"/>
 
-	<bean id="test1" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="test1" class="org.springframework.beans.test.fixtures.beans.TestBean">
 		<property name="age" value="4"/>
 	</bean>
 
-	<bean id="test2" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="test2" class="org.springframework.beans.test.fixtures.beans.TestBean">
 		<property name="age" value="4"/>
 	</bean>
 

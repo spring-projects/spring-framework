@@ -59,7 +59,7 @@ public class TestSourcesPlugin implements Plugin<Project> {
 	 * Projects which will not be automatically added as a test dependency.
 	 * <p>This is used to assist with the migration to Gradle test fixtures.
 	 */
-	private static final List<String> excludedProjects = Arrays.asList("spring-core");
+	private static final List<String> excludedProjects = Arrays.asList("spring-beans", "spring-core", "spring-context");
 
 
 	@Override

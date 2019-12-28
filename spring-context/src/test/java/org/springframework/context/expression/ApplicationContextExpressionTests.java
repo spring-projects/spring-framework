@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
@@ -54,7 +55,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.test.fixtures.Assume;
 import org.springframework.core.test.fixtures.EnabledForTestGroups;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StopWatch;
 

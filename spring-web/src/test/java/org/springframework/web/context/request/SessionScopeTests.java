@@ -28,12 +28,12 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.test.fixtures.beans.DerivedTestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

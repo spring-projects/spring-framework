@@ -31,6 +31,7 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testCompile(project(":kotlin-coroutines"))
+	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-core")))
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml:aalto-xml")

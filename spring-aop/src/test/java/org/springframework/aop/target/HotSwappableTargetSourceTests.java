@@ -25,11 +25,11 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.test.fixtures.beans.Person;
+import org.springframework.beans.test.fixtures.beans.SerializablePerson;
+import org.springframework.beans.test.fixtures.beans.SideEffectBean;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.SideEffectBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

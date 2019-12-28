@@ -28,9 +28,9 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockPageContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;

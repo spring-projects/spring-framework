@@ -21,7 +21,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

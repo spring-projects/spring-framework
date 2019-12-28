@@ -54,6 +54,8 @@ dependencies {
 	optional("org.codehaus.groovy:groovy")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
 	testCompile(testFixtures(project(":spring-core")))
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.taglibs:taglibs-standard-jstlel")

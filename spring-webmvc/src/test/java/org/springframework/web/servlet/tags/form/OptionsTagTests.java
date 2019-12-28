@@ -34,9 +34,9 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;

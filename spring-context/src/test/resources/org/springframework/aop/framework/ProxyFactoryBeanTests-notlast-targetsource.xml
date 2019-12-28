@@ -9,7 +9,7 @@
 <beans>
 
 
-	<bean id="adam" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="adam" class="org.springframework.beans.test.fixtures.beans.TestBean">
 		<property name="name"><value>Adam</value></property>
 	</bean>
 
@@ -23,7 +23,7 @@
     -->
 	<bean id="targetSourceNotLast"
 		class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.test.fixtures.beans.ITestBean</value></property>
 		<!-- this is the one used and NOT the one set by targetSource -->
 		<property name="interceptorNames"><value>adam,countingBeforeAdvice</value></property>
 	

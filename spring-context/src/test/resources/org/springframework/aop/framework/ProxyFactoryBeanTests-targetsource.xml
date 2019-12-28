@@ -8,7 +8,7 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="target" class="org.springframework.beans.test.fixtures.beans.TestBean">
 		<!-- initial value :-) -->
 		<property name="name"><value>Adam</value></property>
 	</bean>
@@ -49,7 +49,7 @@
 	-->
 	<bean id="noTarget"
 		class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.test.fixtures.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value>nopInterceptor,unsupportedInterceptor</value></property>
 	</bean>
 

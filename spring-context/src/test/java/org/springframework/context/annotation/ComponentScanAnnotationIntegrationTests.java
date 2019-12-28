@@ -51,6 +51,7 @@ import org.springframework.context.annotation.ComponentScanParserTests.KustomAnn
 import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.test.fixtures.SimpleMapScope;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -59,7 +60,6 @@ import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.tests.context.SimpleMapScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;

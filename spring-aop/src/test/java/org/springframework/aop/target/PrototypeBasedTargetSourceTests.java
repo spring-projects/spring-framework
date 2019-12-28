@@ -23,9 +23,9 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.test.fixtures.beans.SerializablePerson;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.core.test.fixtures.io.SerializationTestUtils;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

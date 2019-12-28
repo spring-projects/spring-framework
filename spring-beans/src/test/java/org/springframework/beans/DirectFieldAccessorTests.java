@@ -18,7 +18,7 @@ package org.springframework.beans;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.test.fixtures.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
