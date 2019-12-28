@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures.xml;
 
 import org.assertj.core.api.AbstractAssert;
 import org.w3c.dom.Node;
@@ -35,30 +35,30 @@ public class XmlContentAssert extends AbstractAssert<XmlContentAssert, Object> {
 	}
 
 	public XmlContentAssert isSimilarTo(Object control) {
-		XmlAssert.assertThat(actual).and(control).areSimilar();
+		XmlAssert.assertThat(super.actual).and(control).areSimilar();
 		return this;
 	}
 
 	public XmlContentAssert isSimilarTo(Object control, Predicate<Node> nodeFilter) {
-		XmlAssert.assertThat(actual).and(control).withNodeFilter(nodeFilter).areSimilar();
+		XmlAssert.assertThat(super.actual).and(control).withNodeFilter(nodeFilter).areSimilar();
 		return this;
 	}
 
 	public XmlContentAssert isSimilarTo(String control,
 			DifferenceEvaluator differenceEvaluator) {
-		XmlAssert.assertThat(actual).and(control).withDifferenceEvaluator(
+		XmlAssert.assertThat(super.actual).and(control).withDifferenceEvaluator(
 				differenceEvaluator).areSimilar();
 		return this;
 	}
 
 	public XmlContentAssert isSimilarToIgnoringWhitespace(Object control) {
-		XmlAssert.assertThat(actual).and(control).ignoreWhitespace().areSimilar();
+		XmlAssert.assertThat(super.actual).and(control).ignoreWhitespace().areSimilar();
 		return this;
 	}
 
 
 	public XmlContentAssert isSimilarToIgnoringWhitespace(String control, NodeMatcher nodeMatcher) {
-		XmlAssert.assertThat(actual).and(control).ignoreWhitespace().withNodeMatcher(nodeMatcher).areSimilar();
+		XmlAssert.assertThat(super.actual).and(control).ignoreWhitespace().withNodeMatcher(nodeMatcher).areSimilar();
 		return this;
 	}
 

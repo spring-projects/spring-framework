@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec;
+package org.springframework.core.test.fixtures.codec;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -25,9 +25,10 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.test.fixtures.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -44,7 +45,6 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @author Arjen Poutsma
  * @since 5.1.3
  */
-@SuppressWarnings("ProtectedField")
 public abstract class AbstractEncoderTests<E extends Encoder<?>> extends AbstractLeakCheckingTests {
 
 	/**

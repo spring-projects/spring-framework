@@ -40,11 +40,11 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

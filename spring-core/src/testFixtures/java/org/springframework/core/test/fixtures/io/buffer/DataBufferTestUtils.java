@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer.support;
+package org.springframework.core.test.fixtures.io.buffer;
 
 import java.nio.charset.Charset;
 

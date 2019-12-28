@@ -22,15 +22,15 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

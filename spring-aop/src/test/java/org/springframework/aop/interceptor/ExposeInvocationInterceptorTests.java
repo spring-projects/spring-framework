@@ -25,7 +25,7 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests

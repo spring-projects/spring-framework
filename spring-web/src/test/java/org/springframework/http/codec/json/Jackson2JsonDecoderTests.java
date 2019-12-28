@@ -34,10 +34,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.test.fixtures.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;

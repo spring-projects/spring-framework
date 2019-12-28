@@ -27,10 +27,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

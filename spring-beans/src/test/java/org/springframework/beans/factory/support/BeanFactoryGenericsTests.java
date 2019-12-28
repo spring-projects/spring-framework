@@ -49,7 +49,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
@@ -57,7 +57,7 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.tests.TestGroup.LONG_RUNNING;
+import static org.springframework.core.test.fixtures.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller

@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

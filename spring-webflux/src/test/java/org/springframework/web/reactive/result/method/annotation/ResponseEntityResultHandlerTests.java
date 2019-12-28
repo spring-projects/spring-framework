@@ -40,7 +40,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

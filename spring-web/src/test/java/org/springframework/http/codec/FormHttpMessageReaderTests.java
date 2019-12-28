@@ -27,8 +27,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.test.fixtures.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;

@@ -35,6 +35,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("javax.servlet:javax.servlet-api")
 	testCompile("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet"

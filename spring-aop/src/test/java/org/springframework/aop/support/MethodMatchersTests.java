@@ -21,11 +21,11 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodMatcher;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.IOther;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

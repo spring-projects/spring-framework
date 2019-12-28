@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.env;
+package org.springframework.core.test.fixtures.env;
 
 import java.util.Properties;
 

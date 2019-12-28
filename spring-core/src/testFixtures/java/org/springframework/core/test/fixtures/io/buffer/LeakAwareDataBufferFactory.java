@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer;
+package org.springframework.core.test.fixtures.io.buffer;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -28,6 +28,10 @@ import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**

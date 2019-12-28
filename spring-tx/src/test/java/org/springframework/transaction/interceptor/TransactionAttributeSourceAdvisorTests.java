@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 
 /**
  * @author Rod Johnson

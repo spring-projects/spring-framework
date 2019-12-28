@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
+import org.springframework.core.test.fixtures.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Guillaume Poirier

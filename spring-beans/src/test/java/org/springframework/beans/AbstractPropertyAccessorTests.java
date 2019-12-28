@@ -47,9 +47,9 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.test.fixtures.Assume;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.BooleanTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
@@ -62,7 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.test.fixtures.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.

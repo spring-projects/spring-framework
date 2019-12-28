@@ -15,6 +15,7 @@ dependencies {
 	optional("org.codehaus.fabric3.api:commonj")
 	optional("org.freemarker:freemarker")
 	testCompile(project(":spring-context"))
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.hibernate:hibernate-validator")
 	testCompile("javax.annotation:javax.annotation-api")

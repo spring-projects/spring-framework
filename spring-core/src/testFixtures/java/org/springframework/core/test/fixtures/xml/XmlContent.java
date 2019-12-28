@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures.xml;
 
 import java.io.StringWriter;
 
@@ -29,7 +29,7 @@ import org.xmlunit.assertj.XmlAssert;
  */
 public class XmlContent implements AssertProvider<XmlContentAssert> {
 
-	private Object source;
+	private final Object source;
 
 	private XmlContent(Object source) {
 		this.source = source;

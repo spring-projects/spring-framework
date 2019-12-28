@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.core.test.fixtures.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer;
+package org.springframework.core.test.fixtures.io.buffer;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferWrapper;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
 
 /**

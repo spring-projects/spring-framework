@@ -29,7 +29,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;

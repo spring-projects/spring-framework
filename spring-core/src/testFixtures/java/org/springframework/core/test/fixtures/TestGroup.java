@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -29,7 +29,6 @@ import static java.lang.String.format;
  * A test group used to limit when certain tests are run.
  *
  * @see EnabledForTestGroups @EnabledForTestGroups
- * @see Assume#group(TestGroup)
  * @author Phillip Webb
  * @author Chris Beams
  * @author Sam Brannen

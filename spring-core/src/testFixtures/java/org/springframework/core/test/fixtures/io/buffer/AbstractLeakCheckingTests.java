@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer;
+package org.springframework.core.test.fixtures.io.buffer;
 
 import org.junit.jupiter.api.AfterEach;
+
+import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
  * Abstract base class for unit tests that allocate data buffers via a {@link DataBufferFactory}.
@@ -32,7 +34,6 @@ public abstract class AbstractLeakCheckingTests {
 	/**
 	 * The data buffer factory.
 	 */
-	@SuppressWarnings("ProtectedField")
 	protected final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 	/**

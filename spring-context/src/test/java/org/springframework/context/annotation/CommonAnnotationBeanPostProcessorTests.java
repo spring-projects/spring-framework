@@ -37,13 +37,13 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.tests.sample.beans.INestedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

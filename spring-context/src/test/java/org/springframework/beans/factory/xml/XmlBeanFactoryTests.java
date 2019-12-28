@@ -55,6 +55,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.sample.beans.DependenciesBean;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -64,7 +65,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;

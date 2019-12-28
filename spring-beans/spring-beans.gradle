@@ -10,6 +10,7 @@ dependencies {
 	optional("org.codehaus.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("javax.annotation:javax.annotation-api")
 }
 

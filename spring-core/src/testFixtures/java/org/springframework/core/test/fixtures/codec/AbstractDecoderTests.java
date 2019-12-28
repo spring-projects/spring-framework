@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec;
+package org.springframework.core.test.fixtures.codec;
 
 import java.time.Duration;
 import java.util.Map;
@@ -27,8 +27,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.test.fixtures.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -43,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Arjen Poutsma
  * @since 5.1.3
  */
-@SuppressWarnings("ProtectedField")
 public abstract class AbstractDecoderTests<D extends Decoder<?>> extends AbstractLeakCheckingTests {
 
 	/**

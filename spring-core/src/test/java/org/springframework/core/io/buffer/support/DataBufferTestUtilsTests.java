@@ -18,9 +18,10 @@ package org.springframework.core.io.buffer.support;
 
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.test.fixtures.io.buffer.AbstractDataBufferAllocatingTests;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

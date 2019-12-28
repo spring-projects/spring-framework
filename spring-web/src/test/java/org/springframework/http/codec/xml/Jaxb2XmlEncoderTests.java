@@ -29,11 +29,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractEncoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.test.fixtures.codec.AbstractEncoderTests;
+import org.springframework.core.test.fixtures.xml.XmlContent;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
-import org.springframework.tests.XmlContent;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;

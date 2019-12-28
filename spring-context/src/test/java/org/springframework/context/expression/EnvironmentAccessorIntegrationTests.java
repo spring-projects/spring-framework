@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.test.fixtures.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;

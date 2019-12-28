@@ -55,9 +55,16 @@ public class TestSourcesPlugin implements Plugin<Project> {
 			OptionalDependenciesPlugin.OPTIONAL_CONFIGURATION_NAME,
 			JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME);
 
+	/**
+	 * Projects which will not be automatically added as a test dependency.
+	 * <p>This is used to assist with the migration to Gradle test fixtures.
+	 */
+	private static final List<String> excludedProjects = Arrays.asList("spring-core");
+
+
 	@Override
 	public void apply(Project project) {
-		project.getPlugins().withType(JavaPlugin.class, (plugin) -> addTestSourcesToProject(project));
+		project.getPlugins().withType(JavaPlugin.class, plugin -> addTestSourcesToProject(project));
 	}
 
 	private void addTestSourcesToProject(Project project) {
@@ -83,13 +90,17 @@ public class TestSourcesPlugin implements Plugin<Project> {
 		}
 	}
 
-	private void addTestSourcesFromDependency(final Project currentProject, ProjectDependency dependency) {
+	@SuppressWarnings("deprecation")
+	private void addTestSourcesFromDependency(Project currentProject, ProjectDependency dependency) {
 		Project dependencyProject = dependency.getDependencyProject();
-		dependencyProject.getPlugins().withType(JavaPlugin.class, plugin -> {
-			final JavaPluginConvention javaPlugin = dependencyProject.getConvention()
-					.getPlugin(JavaPluginConvention.class);
-			SourceSetOutput test = javaPlugin.getSourceSets().findByName(SourceSet.TEST_SOURCE_SET_NAME).getOutput();
-			currentProject.getDependencies().add(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME, test);
-		});
+		if (!excludedProjects.contains(dependencyProject.getName())) {
+			dependencyProject.getPlugins().withType(JavaPlugin.class, plugin -> {
+				JavaPluginConvention javaPlugin = dependencyProject.getConvention().getPlugin(JavaPluginConvention.class);
+				SourceSetOutput test = javaPlugin.getSourceSets().findByName(SourceSet.TEST_SOURCE_SET_NAME).getOutput();
+				// System.err.println(String.format("Adding test source dependencies from %s to %s", currentProject.getName(), dependencyProject.getName()));
+				currentProject.getDependencies().add(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME, test);
+			});
+		}
 	}
+
 }

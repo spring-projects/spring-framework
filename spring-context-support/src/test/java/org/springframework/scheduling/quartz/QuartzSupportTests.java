@@ -37,8 +37,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.test.fixtures.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller

@@ -57,10 +57,11 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
+import org.springframework.core.test.fixtures.TestGroup;
+import org.springframework.core.test.fixtures.TimeStamped;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MethodCounter;
@@ -73,7 +74,6 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -765,7 +765,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see test.util.TimeStamped#getTimeStamp()
+			 * @see org.springframework.core.test.fixtures.util.TimeStamped#getTimeStamp()
 			 */
 			@Override
 			public long getTimeStamp() {

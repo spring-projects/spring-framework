@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -26,12 +26,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link TestGroup}.
+ * Tests for {@link TestGroup} parsing.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  */
-class TestGroupTests {
+class TestGroupParsingTests {
 
 	@Test
 	void parseNull() {

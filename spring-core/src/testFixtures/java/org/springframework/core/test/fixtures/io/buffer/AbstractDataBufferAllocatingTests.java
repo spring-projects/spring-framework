@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer;
+package org.springframework.core.test.fixtures.io.buffer;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -40,7 +40,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -144,7 +148,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
-	@MethodSource("org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
+	@MethodSource("org.springframework.core.test.fixtures.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 	public @interface ParameterizedDataBufferAllocatingTest {
 	}
 

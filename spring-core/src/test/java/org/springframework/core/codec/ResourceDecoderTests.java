@@ -28,6 +28,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.test.fixtures.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.stereotype;
+package org.springframework.core.test.fixtures;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 /**
- * Copy of the standard {@code Indexed} annotation for testing purposes.
+ * {@code @EnabledForTestGroups} is used to enable the annotated test class or
+ * test method for one or more {@link TestGroup} {@linkplain #value values}.
  *
- * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @since 5.2
  */
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Indexed {
+@Inherited
+@ExtendWith(TestGroupsCondition.class)
+public @interface EnabledForTestGroups {
+
+	/**
+	 * One or more {@link TestGroup}s that must be active.
+	 */
+	TestGroup[] value();
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures;
 
 import java.util.Arrays;
 import java.util.Optional;

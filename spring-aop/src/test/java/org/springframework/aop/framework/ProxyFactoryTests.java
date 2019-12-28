@@ -36,7 +36,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
-import org.springframework.tests.TimeStamped;
+import org.springframework.core.test.fixtures.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.IOther;

@@ -48,8 +48,9 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.test.fixtures.TimeStamped;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MyThrowsHandler;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
@@ -58,7 +59,6 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

@@ -26,7 +26,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.TimeStamped;
+import org.springframework.core.test.fixtures.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;

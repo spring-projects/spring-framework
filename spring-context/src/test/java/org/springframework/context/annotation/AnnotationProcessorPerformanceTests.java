@@ -34,13 +34,13 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.Assume;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.test.fixtures.Assume;
+import org.springframework.core.test.fixtures.EnabledForTestGroups;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.test.fixtures.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller

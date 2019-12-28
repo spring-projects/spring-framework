@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

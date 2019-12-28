@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.test.fixtures.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;

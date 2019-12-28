@@ -38,7 +38,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;

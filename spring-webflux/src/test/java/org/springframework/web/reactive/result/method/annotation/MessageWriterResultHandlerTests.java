@@ -54,7 +54,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
+import static org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils.dumpString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;

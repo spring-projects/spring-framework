@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.tests;
+package org.springframework.core.test.fixtures;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,17 +29,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
-import static org.springframework.tests.TestGroup.LONG_RUNNING;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.core.test.fixtures.TestGroup.LONG_RUNNING;
+import static org.springframework.core.test.fixtures.TestGroup.PERFORMANCE;
 
 /**
- * Tests for {@link Assume}.
+ * Tests for {@link TestGroup}.
  *
  * @author Sam Brannen
  * @since 5.0
  */
-class AssumeTests {
+class TestGroupTests {
+
+	private static final String TEST_GROUPS_SYSTEM_PROPERTY = "testGroups";
+
 
 	private String originalTestGroups;
 
@@ -59,25 +63,22 @@ class AssumeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void assumeGroupWithNoActiveTestGroups() {
 		setTestGroups("");
 
-		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> Assume.group(LONG_RUNNING));
+		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> assumeGroup(LONG_RUNNING));
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void assumeGroupWithNoMatchingActiveTestGroup() {
 		setTestGroups(PERFORMANCE);
-		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> Assume.group(LONG_RUNNING));
+		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> assumeGroup(LONG_RUNNING));
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void assumeGroupWithMatchingActiveTestGroup() {
 		setTestGroups(LONG_RUNNING);
-		assertThatCode(() -> Assume.group(LONG_RUNNING))
+		assertThatCode(() -> assumeGroup(LONG_RUNNING))
 			.as("assumption should NOT have failed")
 			.doesNotThrowAnyException();
 	}
@@ -92,7 +93,6 @@ class AssumeTests {
 		assertBogusActiveTestGroupBehavior("all-bogus");
 	}
 
-	@SuppressWarnings("deprecation")
 	private void assertBogusActiveTestGroupBehavior(String testGroups) {
 		// Should result in something similar to the following:
 		//
@@ -102,7 +102,7 @@ class AssumeTests {
 
 		setTestGroups(testGroups);
 		assertThatIllegalStateException()
-			.isThrownBy(() -> Assume.group(LONG_RUNNING))
+			.isThrownBy(() -> assumeGroup(LONG_RUNNING))
 			.withMessageStartingWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: ")
 			.withCauseInstanceOf(IllegalArgumentException.class)
 			.satisfies(ex ->
@@ -117,6 +117,17 @@ class AssumeTests {
 
 	private void setTestGroups(String testGroups) {
 		System.setProperty(TEST_GROUPS_SYSTEM_PROPERTY, testGroups);
+	}
+
+	/**
+	 * Assume that a particular {@link TestGroup} is active.
+	 * @param group the group that must be active
+	 * @throws org.opentest4j.TestAbortedException if the assumption fails
+	 */
+	private static void assumeGroup(TestGroup group) {
+		Set<TestGroup> testGroups = TestGroup.loadTestGroups();
+		assumeTrue(testGroups.contains(group),
+			() -> "Requires inactive test group " + group + "; active test groups: " + testGroups);
 	}
 
 }

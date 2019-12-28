@@ -25,15 +25,15 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.test.fixtures.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

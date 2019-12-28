@@ -33,7 +33,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;

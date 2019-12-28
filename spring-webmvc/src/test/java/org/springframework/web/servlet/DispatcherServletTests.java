@@ -35,7 +35,6 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DummyEnvironment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;

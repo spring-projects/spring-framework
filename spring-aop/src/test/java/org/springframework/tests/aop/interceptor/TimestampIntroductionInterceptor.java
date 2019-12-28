@@ -17,7 +17,7 @@
 package org.springframework.tests.aop.interceptor;
 
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.tests.TimeStamped;
+import org.springframework.core.test.fixtures.TimeStamped;
 
 @SuppressWarnings("serial")
 public class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
