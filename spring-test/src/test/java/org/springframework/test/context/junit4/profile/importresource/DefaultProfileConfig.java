@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit4.profile.importresource;
 
-import org.springframework.beans.test.fixtures.beans.Pet;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;

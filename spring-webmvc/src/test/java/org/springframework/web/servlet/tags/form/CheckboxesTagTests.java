@@ -38,9 +38,9 @@ import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.beans.test.fixtures.beans.Colour;
-import org.springframework.beans.test.fixtures.beans.Pet;
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Pet;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.ObjectUtils;

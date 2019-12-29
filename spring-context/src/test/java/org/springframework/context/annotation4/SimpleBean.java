@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation4;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.Bean;
 
 /**

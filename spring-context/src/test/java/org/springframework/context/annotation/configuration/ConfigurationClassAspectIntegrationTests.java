@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -97,7 +97,7 @@ public class ConfigurationClassAspectIntegrationTests {
 			return new TestBean("name");
 		}
 
-		@Before("execution(* org.springframework.beans.test.fixtures.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
@@ -122,7 +122,7 @@ public class ConfigurationClassAspectIntegrationTests {
 	@Aspect
 	static class NameChangingAspect {
 
-		@Before("execution(* org.springframework.beans.test.fixtures.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}

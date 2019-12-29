@@ -18,7 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

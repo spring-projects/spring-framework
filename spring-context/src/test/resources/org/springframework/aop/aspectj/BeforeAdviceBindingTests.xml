@@ -26,7 +26,7 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="authenticationLogger" class="org.springframework.aop.aspectj.AuthenticationLogger"/>
 

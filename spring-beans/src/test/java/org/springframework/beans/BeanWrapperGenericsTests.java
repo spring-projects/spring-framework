@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.beans.test.fixtures.beans.GenericBean;
-import org.springframework.beans.test.fixtures.beans.GenericIntegerBean;
-import org.springframework.beans.test.fixtures.beans.GenericSetOfIntegerBean;
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.GenericBean;
+import org.springframework.beans.testfixture.beans.GenericIntegerBean;
+import org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;

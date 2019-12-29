@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.test.fixtures.beans.LifecycleBean;
-import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.beans.test.fixtures.factory.xml.AbstractListableBeanFactoryTests;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;

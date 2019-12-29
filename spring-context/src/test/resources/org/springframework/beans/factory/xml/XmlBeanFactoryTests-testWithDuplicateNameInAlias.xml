@@ -3,8 +3,8 @@
 
 <beans>
 
-	<bean id="foo" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="foo" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
-	<bean name="otherFoo,foo" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean name="otherFoo,foo" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

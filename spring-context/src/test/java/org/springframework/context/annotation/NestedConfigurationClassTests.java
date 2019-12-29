@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;

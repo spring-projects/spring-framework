@@ -19,6 +19,6 @@
 		<lang:property name="age" value="31"/>
 	</lang:groovy>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

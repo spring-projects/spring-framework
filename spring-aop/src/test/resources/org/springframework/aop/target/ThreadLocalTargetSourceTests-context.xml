@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="prototypeTest" class="org.springframework.beans.test.fixtures.beans.SideEffectBean" scope="prototype">
+	<bean id="prototypeTest" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
 
@@ -34,12 +34,12 @@
 
 	<!-- ================ Definitions for second ThreadLocalTargetSource ====== -->
 
-	<bean id="test" class="org.springframework.beans.test.fixtures.beans.TestBean" scope="prototype">
+	<bean id="test" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-	<bean id="wife" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="wife" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 

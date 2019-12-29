@@ -25,8 +25,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.test.fixtures.beans.Employee;
-import org.springframework.beans.test.fixtures.beans.Pet;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;

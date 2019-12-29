@@ -30,11 +30,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.test.fixtures.beans.ITestBean;
-import org.springframework.beans.test.fixtures.beans.LifecycleBean;
-import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.beans.test.fixtures.beans.factory.DummyFactory;
-import org.springframework.beans.test.fixtures.factory.xml.AbstractListableBeanFactoryTests;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.beans.testfixture.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;

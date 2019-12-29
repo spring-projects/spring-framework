@@ -5,7 +5,7 @@
 
 	<aop:aspectj-autoproxy/>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="aspect" class="org.springframework.aop.aspectj.autoproxy.ExceptionHandlingAspect"/>
 

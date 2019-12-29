@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.test.fixtures.beans.CustomEnum;
-import org.springframework.beans.test.fixtures.beans.GenericBean;
+import org.springframework.beans.testfixture.beans.CustomEnum;
+import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 import static org.assertj.core.api.Assertions.assertThat;

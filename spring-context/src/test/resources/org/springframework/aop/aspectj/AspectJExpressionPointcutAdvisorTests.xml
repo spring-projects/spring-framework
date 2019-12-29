@@ -5,11 +5,11 @@
 
 	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="advisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
 		<property name="expression"
-				value="execution(org.springframework.beans.test.fixtures.beans.ITestBean[] org.springframework.beans.test.fixtures.beans.ITestBean.*(..))"/>
+				value="execution(org.springframework.beans.testfixture.beans.ITestBean[] org.springframework.beans.testfixture.beans.ITestBean.*(..))"/>
 		<property name="advice" ref="interceptor"/>
 	</bean>
 

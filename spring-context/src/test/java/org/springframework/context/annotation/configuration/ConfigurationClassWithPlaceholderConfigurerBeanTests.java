@@ -19,8 +19,8 @@ package org.springframework.context.annotation.configuration;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.test.fixtures.beans.ITestBean;
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit4.profile.annotation;
 
-import org.springframework.beans.test.fixtures.beans.Employee;
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

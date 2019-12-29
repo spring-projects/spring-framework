@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +42,7 @@ public class CachedIntrospectionResultsTests {
 		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class)).isTrue();
 
 		ClassLoader child = new OverridingClassLoader(getClass().getClassLoader());
-		Class<?> tbClass = child.loadClass("org.springframework.beans.test.fixtures.beans.TestBean");
+		Class<?> tbClass = child.loadClass("org.springframework.beans.testfixture.beans.TestBean");
 		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(tbClass)).isFalse();
 		CachedIntrospectionResults.acceptClassLoader(child);
 		bw = new BeanWrapperImpl(tbClass);

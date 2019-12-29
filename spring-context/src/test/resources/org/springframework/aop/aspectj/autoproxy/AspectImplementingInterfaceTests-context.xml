@@ -13,7 +13,7 @@
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean" />
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean" />
 
 	<bean id="interfaceExtendingAspect"
 		class="org.springframework.aop.aspectj.autoproxy.InterfaceExtendingAspect"/>

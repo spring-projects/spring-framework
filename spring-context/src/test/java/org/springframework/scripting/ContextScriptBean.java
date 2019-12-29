@@ -16,7 +16,7 @@
 
 package org.springframework.scripting;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 
 /**

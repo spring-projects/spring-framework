@@ -20,7 +20,7 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 import static org.assertj.core.api.Assertions.assertThat;

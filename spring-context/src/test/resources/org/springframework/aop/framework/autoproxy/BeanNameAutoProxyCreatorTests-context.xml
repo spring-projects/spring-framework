@@ -73,11 +73,11 @@
 
 	<bean id="introductionNopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
-	<bean id="introductionUsingJdk" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>introductionUsingJdk</value></property>
 	</bean>
 
-	<bean id="second-introductionUsingJdk" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="second-introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>second-introductionUsingJdk</value></property>
 	</bean>
 
@@ -88,29 +88,29 @@
 			lazy-init="true">
 	</bean>
 
-	<bean id="jdk1" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="jdk1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>jdk1</value></property>
 	</bean>
 
-	<bean id="frozen" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="frozen" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
 
 	<alias name="frozen" alias="frozenBean"/>
 
-	<bean id="cglib1" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="cglib1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>cglib1</value></property>
 	</bean>
 
-	<bean id="onlyJdk" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="onlyJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>onlyJdk</value></property>
 	</bean>
 
-	<bean id="doubleJdk" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="doubleJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>doubleJdk</value></property>
 	</bean>
 
-	<bean id="noproxy" class="org.springframework.beans.test.fixtures.beans.TestBean">
+	<bean id="noproxy" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>noproxy</value></property>
 	</bean>
 

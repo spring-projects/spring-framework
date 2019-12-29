@@ -23,7 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
@@ -126,7 +126,7 @@ public class JeeNamespaceHandlerTests {
 		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
-		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.test.fixtures.beans.ITestBean");
+		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.testfixture.beans.ITestBean");
 		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
 		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
 	}

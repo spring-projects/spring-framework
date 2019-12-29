@@ -7,11 +7,11 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="test" class="org.springframework.beans.test.fixtures.beans.SideEffectBean">
+	<bean id="test" class="org.springframework.beans.testfixture.beans.SideEffectBean">
 		<property name="count"><value>10</value></property>
 	</bean>
 
-	<bean id="prototypeTarget" class="org.springframework.beans.test.fixtures.beans.SideEffectBean" scope="prototype">
+	<bean id="prototypeTarget" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
 

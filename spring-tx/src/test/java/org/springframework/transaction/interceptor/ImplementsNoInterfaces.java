@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 /**
  * Test for CGLIB proxying that implements no interfaces

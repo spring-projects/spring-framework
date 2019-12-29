@@ -8,7 +8,7 @@
 	<bean id="testBean"  class="org.springframework.aop.framework.ProxyFactoryBean">
 		<!-- Target is autowired, so can check type of parent without a guard -->
 		<property name="target">
-			<bean class="org.springframework.beans.test.fixtures.beans.TestBean" autowire="byType"/>
+			<bean class="org.springframework.beans.testfixture.beans.TestBean" autowire="byType"/>
 		</property>
 		<property name="interceptorNames" value="debugInterceptor"/>
 	</bean>

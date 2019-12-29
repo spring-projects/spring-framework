@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.xml;
 
 
-import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.beans.test.fixtures.beans.factory.DummyFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 
 /**
  * @author Juergen Hoeller

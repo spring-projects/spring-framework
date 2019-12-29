@@ -17,6 +17,6 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AroundAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.test.fixtures.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

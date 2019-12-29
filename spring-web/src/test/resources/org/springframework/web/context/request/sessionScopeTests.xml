@@ -3,8 +3,8 @@
 
 <beans>
 
-	<bean id="sessionScopedObject" class="org.springframework.beans.test.fixtures.beans.TestBean" scope="session"/>
+	<bean id="sessionScopedObject" class="org.springframework.beans.testfixture.beans.TestBean" scope="session"/>
 
-	<bean id="sessionScopedDisposableObject" class="org.springframework.beans.test.fixtures.beans.DerivedTestBean" scope="session"/>
+	<bean id="sessionScopedDisposableObject" class="org.springframework.beans.testfixture.beans.DerivedTestBean" scope="session"/>
 
 </beans>

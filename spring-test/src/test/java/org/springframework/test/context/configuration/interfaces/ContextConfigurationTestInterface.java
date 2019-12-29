@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import org.springframework.beans.test.fixtures.beans.Employee;
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.configuration.interfaces.ContextConfigurationTestInterface.Config;

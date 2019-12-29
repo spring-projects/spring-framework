@@ -19,7 +19,7 @@ package org.springframework.aop.support;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
-import org.springframework.beans.test.fixtures.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,6 +1,6 @@
 package org.springframework.scripting.groovy;
 
-import org.springframework.beans.test.fixtures.beans.TestBean
+import org.springframework.beans.testfixture.beans.TestBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.scripting.ContextScriptBean

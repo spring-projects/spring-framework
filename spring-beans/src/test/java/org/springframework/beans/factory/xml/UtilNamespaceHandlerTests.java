@@ -32,9 +32,9 @@ import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.test.fixtures.beans.CollectingReaderEventListener;
-import org.springframework.beans.test.fixtures.beans.CustomEnum;
-import org.springframework.beans.test.fixtures.beans.TestBean;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
+import org.springframework.beans.testfixture.beans.CustomEnum;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
