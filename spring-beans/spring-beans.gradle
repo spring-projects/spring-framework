@@ -11,7 +11,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testCompile("javax.annotation:javax.annotation-api")
-	implementation("com.hotels.beans:bull-bean-transformer")
+	optional("com.hotels.beans:bull-bean-transformer")
 }
 
 // This module does joint compilation for Java and Groovy code with the compileGroovy task.
