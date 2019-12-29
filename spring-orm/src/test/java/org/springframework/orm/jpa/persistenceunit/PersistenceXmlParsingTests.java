@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.test.fixtures.jndi.SimpleNamingContextBuilder;
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

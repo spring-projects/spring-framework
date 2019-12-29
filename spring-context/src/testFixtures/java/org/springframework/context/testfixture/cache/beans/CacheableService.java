@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.cache.beans;
+package org.springframework.context.testfixture.cache.beans;
 
 /**
  * Basic service interface for caching tests.

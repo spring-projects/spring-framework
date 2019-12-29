@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.beans;
+package org.springframework.context.testfixture.beans;
 
 import java.util.Locale;
 

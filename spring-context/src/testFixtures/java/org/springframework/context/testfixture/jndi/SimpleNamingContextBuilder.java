@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.jndi;
+package org.springframework.context.testfixture.jndi;
 
 import java.util.Hashtable;
 

@@ -31,7 +31,7 @@ import org.springframework.cache.config.AnnotatedClassCacheableService;
 import org.springframework.cache.config.CacheableService;
 import org.springframework.cache.config.TestEntity;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.test.fixtures.cache.SomeCustomKeyGenerator;
+import org.springframework.context.testfixture.cache.SomeCustomKeyGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

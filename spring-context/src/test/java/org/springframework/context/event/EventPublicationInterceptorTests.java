@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.context.test.fixtures.beans.TestApplicationListener;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

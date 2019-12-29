@@ -11,9 +11,9 @@
 		<property name="basenamePrefix"><value>org/springframework/web/context/WEB-INF/test-</value></property>
 	</bean>
 
-	<bean id="aca" class="org.springframework.context.test.fixtures.beans.ACATester"/>
+	<bean id="aca" class="org.springframework.context.testfixture.beans.ACATester"/>
 
-	<bean id="aca-prototype" class="org.springframework.context.test.fixtures.beans.ACATester" scope="prototype"/>
+	<bean id="aca-prototype" class="org.springframework.context.testfixture.beans.ACATester" scope="prototype"/>
 
 	<bean id="rod" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
@@ -21,7 +21,7 @@
 		<property name="spouse"><ref bean="father"/></property>
 	</bean>
 
-	<bean id="testListener" class="org.springframework.context.test.fixtures.beans.TestApplicationListener"/>
+	<bean id="testListener" class="org.springframework.context.testfixture.beans.TestApplicationListener"/>
 
 	<bean id="roderick" parent="rod">
 		<property name="name"><value>Roderick</value></property>

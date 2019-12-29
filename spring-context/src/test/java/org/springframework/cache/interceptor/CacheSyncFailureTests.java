@@ -32,7 +32,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.test.fixtures.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 

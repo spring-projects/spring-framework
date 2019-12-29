@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures;
+package org.springframework.context.testfixture;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,9 +33,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.test.fixtures.beans.ACATester;
-import org.springframework.context.test.fixtures.beans.BeanThatListens;
-import org.springframework.context.test.fixtures.beans.TestApplicationListener;
+import org.springframework.context.testfixture.beans.ACATester;
+import org.springframework.context.testfixture.beans.BeanThatListens;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

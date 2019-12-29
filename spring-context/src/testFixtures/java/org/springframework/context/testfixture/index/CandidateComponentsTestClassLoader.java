@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.index;
+package org.springframework.context.testfixture.index;
 
 import java.io.IOException;
 import java.net.URL;

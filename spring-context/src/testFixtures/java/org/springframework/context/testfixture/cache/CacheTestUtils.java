@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.cache;
+package org.springframework.context.testfixture.cache;
 
 import java.util.ArrayList;
 import java.util.List;

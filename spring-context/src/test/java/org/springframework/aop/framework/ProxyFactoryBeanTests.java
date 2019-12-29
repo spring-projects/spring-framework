@@ -50,7 +50,7 @@ import org.springframework.beans.testfixture.beans.Person;
 import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.test.fixtures.beans.TestApplicationListener;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.testfixture.TimeStamped;
 import org.springframework.core.testfixture.io.SerializationTestUtils;

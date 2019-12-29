@@ -33,13 +33,13 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.test.fixtures.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.context.test.fixtures.cache.CacheTestUtils.assertCacheHit;
-import static org.springframework.context.test.fixtures.cache.CacheTestUtils.assertCacheMiss;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Tests that represent real use cases with advanced configuration.

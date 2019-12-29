@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.jndi;
+package org.springframework.context.testfixture.jndi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +24,7 @@ import javax.naming.NamingException;
 import org.springframework.jndi.JndiTemplate;
 
 /**
- * Copy of the standard {@link org.springframework.context.test.fixtures.jndi.jndi.ExpectedLookupTemplate}
+ * Copy of the standard {@link org.springframework.context.testfixture.jndi.jndi.ExpectedLookupTemplate}
  * for testing purposes.
  *
  * <p>Simple extension of the JndiTemplate class that always returns a given object.

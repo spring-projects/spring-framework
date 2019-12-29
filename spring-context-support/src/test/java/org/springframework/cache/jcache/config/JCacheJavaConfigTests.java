@@ -42,7 +42,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.test.fixtures.cache.SomeKeyGenerator;
+import org.springframework.context.testfixture.cache.SomeKeyGenerator;
 import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnotationTests;
 import org.springframework.contextsupport.testfixture.jcache.JCacheableService;
 

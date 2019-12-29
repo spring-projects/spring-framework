@@ -28,7 +28,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.test.fixtures.SimpleMapScope;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 

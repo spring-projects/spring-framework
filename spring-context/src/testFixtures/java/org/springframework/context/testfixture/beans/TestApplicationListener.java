@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.beans;
+package org.springframework.context.testfixture.beans;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 
 /**
- * @author Juergen Hoeller
+ * Listener that maintains a global count of events.
+ *
+ * @author Rod Johnson
+ * @since January 21, 2001
  */
-public class BeanThatBroadcasts implements ApplicationContextAware {
+public class TestApplicationListener implements ApplicationListener<ApplicationEvent> {
 
-	public ApplicationContext applicationContext;
+	private int eventCount;
 
-	public int receivedCount;
+	public int getEventCount() {
+		return eventCount;
+	}
 
+	public void zeroCounter() {
+		eventCount = 0;
+	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-		if (applicationContext.getDisplayName().contains("listener")) {
-			applicationContext.getBean("listener");
-		}
+	public void onApplicationEvent(ApplicationEvent e) {
+		++eventCount;
 	}
 
 }

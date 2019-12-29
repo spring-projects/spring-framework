@@ -41,7 +41,7 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.NestedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.test.fixtures.jndi.ExpectedLookupTemplate;
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 

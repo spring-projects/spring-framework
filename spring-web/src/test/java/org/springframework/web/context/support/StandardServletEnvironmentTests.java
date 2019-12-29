@@ -18,7 +18,7 @@ package org.springframework.web.context.support;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.test.fixtures.jndi.SimpleNamingContextBuilder;
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.jndi;
+package org.springframework.context.testfixture.jndi;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -156,7 +156,7 @@ public class SimpleNamingContext implements Context {
 	 * Note: Not intended for direct use by applications
 	 * if setting up a JVM-level JNDI environment.
 	 * Use SimpleNamingContextBuilder to set up JNDI bindings then.
-	 * @see org.springframework.context.test.fixtures.jndi.SimpleNamingContextBuilder#bind
+	 * @see org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder#bind
 	 */
 	@Override
 	public void bind(String name, Object obj) {

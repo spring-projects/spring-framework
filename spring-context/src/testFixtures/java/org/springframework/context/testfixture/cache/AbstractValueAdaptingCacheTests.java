@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.cache;
+package org.springframework.context.testfixture.cache;
 
 import org.junit.jupiter.api.Test;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures;
+package org.springframework.context.testfixture;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -35,15 +35,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.test.fixtures.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.context.test.fixtures.cache.CacheTestUtils.assertCacheHit;
-import static org.springframework.context.test.fixtures.cache.CacheTestUtils.assertCacheMiss;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Provides various {@link CacheResolver} customisations scenario

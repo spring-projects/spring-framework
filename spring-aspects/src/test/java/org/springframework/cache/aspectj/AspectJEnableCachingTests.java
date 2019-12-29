@@ -30,9 +30,9 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.test.fixtures.cache.CacheTestUtils;
-import org.springframework.context.test.fixtures.cache.SomeCustomKeyGenerator;
-import org.springframework.context.test.fixtures.cache.SomeKeyGenerator;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.SomeCustomKeyGenerator;
+import org.springframework.context.testfixture.cache.SomeKeyGenerator;
 
 /**
  * @author Stephane Nicoll

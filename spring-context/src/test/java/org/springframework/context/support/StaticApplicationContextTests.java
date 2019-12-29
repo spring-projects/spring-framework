@@ -26,9 +26,9 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.test.fixtures.AbstractApplicationContextTests;
-import org.springframework.context.test.fixtures.beans.ACATester;
-import org.springframework.context.test.fixtures.beans.BeanThatListens;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.ACATester;
+import org.springframework.context.testfixture.beans.BeanThatListens;
 import org.springframework.core.io.ClassPathResource;
 
 /**

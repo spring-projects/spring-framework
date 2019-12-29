@@ -25,9 +25,9 @@
 	</bean>
 	-->
 
-	<bean id="beanThatListens" class="org.springframework.context.test.fixtures.beans.BeanThatListens"/>
+	<bean id="beanThatListens" class="org.springframework.context.testfixture.beans.BeanThatListens"/>
 
-	<bean id="parentListener" class="org.springframework.context.test.fixtures.beans.TestApplicationListener"/>
+	<bean id="parentListener" class="org.springframework.context.testfixture.beans.TestApplicationListener"/>
 
 	<!-- Inherited tests -->
 

@@ -51,7 +51,7 @@ import org.springframework.context.annotation.ComponentScanParserTests.KustomAnn
 import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.test.fixtures.SimpleMapScope;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;

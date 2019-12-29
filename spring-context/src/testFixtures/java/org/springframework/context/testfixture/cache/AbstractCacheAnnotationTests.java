@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.test.fixtures.cache;
+package org.springframework.context.testfixture.cache;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -28,9 +28,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.test.fixtures.cache.beans.AnnotatedClassCacheableService;
-import org.springframework.context.test.fixtures.cache.beans.CacheableService;
-import org.springframework.context.test.fixtures.cache.beans.TestEntity;
+import org.springframework.context.testfixture.cache.beans.AnnotatedClassCacheableService;
+import org.springframework.context.testfixture.cache.beans.CacheableService;
+import org.springframework.context.testfixture.cache.beans.TestEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
