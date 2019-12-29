@@ -59,7 +59,13 @@ public class TestSourcesPlugin implements Plugin<Project> {
 	 * Projects which will not be automatically added as a test dependency.
 	 * <p>This is used to assist with the migration to Gradle test fixtures.
 	 */
-	private static final List<String> excludedProjects = Arrays.asList("spring-beans", "spring-core", "spring-context");
+	private static final List<String> excludedProjects = Arrays.asList(
+			"spring-beans",
+			"spring-context",
+			"spring-context-indexer",
+			"spring-context-support",
+			"spring-core"
+		);
 
 
 	@Override
@@ -97,7 +103,7 @@ public class TestSourcesPlugin implements Plugin<Project> {
 			dependencyProject.getPlugins().withType(JavaPlugin.class, plugin -> {
 				JavaPluginConvention javaPlugin = dependencyProject.getConvention().getPlugin(JavaPluginConvention.class);
 				SourceSetOutput test = javaPlugin.getSourceSets().findByName(SourceSet.TEST_SOURCE_SET_NAME).getOutput();
-				// System.err.println(String.format("Adding test source dependencies from %s to %s", currentProject.getName(), dependencyProject.getName()));
+				System.err.println(String.format("Adding test source dependencies from %s to %s", currentProject.getName(), dependencyProject.getName()));
 				currentProject.getDependencies().add(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME, test);
 			});
 		}

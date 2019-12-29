@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.support;
+package org.springframework.contextsupport.testfixture.cache;
 
 import java.lang.annotation.Annotation;
 

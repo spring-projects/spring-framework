@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.config;
+package org.springframework.contextsupport.testfixture.jcache;
 
 import java.io.IOException;
 

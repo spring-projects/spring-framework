@@ -25,4 +25,7 @@ dependencies {
 	testRuntime("org.ehcache:ehcache")
 	testRuntime("org.glassfish:javax.el")
 	testRuntime("com.sun.mail:javax.mail")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.mockito:mockito-core")
 }
