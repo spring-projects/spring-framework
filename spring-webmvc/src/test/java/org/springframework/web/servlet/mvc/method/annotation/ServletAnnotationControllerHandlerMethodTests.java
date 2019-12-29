@@ -79,6 +79,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -2643,7 +2644,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute
 		public Principal getPrincipal() {
-			return new TestPrincipal();
+			return new TestPrincipal("test");
 		}
 
 		@RequestMapping("/myPath")
@@ -2658,14 +2659,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			assertThat(errors.hasErrors()).isFalse();
 			errors.reject("myCode");
 			writer.write("myView");
-		}
-	}
-
-	static class TestPrincipal implements Principal {
-
-		@Override
-		public String getName() {
-			return "test";
 		}
 	}
 

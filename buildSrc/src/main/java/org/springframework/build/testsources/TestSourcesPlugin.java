@@ -60,18 +60,20 @@ public class TestSourcesPlugin implements Plugin<Project> {
 	 * <p>This is used to assist with the migration to Gradle test fixtures.
 	 */
 	private static final List<String> excludedProjects = Arrays.asList(
-			// "integration-tests",
+			"integration-tests",
+			"kotlin-coroutines",
+			// "spring-aop",
 			"spring-beans",
 			"spring-context",
 			"spring-context-indexer",
 			"spring-context-support",
-			"spring-core"
-			// "spring-expression",
-			// "spring-instrument",
-			// "spring-jcl",
-			// "spring-jdbc",
-			// "spring-jms",
-			// "spring-messaging",
+			"spring-core",
+			"spring-expression",
+			"spring-instrument",
+			"spring-jcl",
+			"spring-jdbc",
+			"spring-jms",
+			"spring-messaging"
 			// "spring-orm",
 			// "spring-oxm",
 			// "spring-test",

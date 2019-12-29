@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.handler;
+package org.springframework.core.testfixture.security;
 
 import java.security.Principal;
 
@@ -25,7 +25,7 @@ import java.security.Principal;
  */
 public class TestPrincipal implements Principal {
 
-	private String name;
+	private final String name;
 
 	public TestPrincipal(String name) {
 		this.name = name;

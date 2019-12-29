@@ -98,6 +98,7 @@ import org.springframework.core.testfixture.Assume;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.testfixture.TestGroup;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
@@ -3248,38 +3249,6 @@ class DefaultListableBeanFactoryTests {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
-		}
-	}
-
-
-	private static class TestPrincipal implements Principal {
-
-		private String name;
-
-		public TestPrincipal(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if (!(obj instanceof TestPrincipal)) {
-				return false;
-			}
-			TestPrincipal p = (TestPrincipal) obj;
-			return this.name.equals(p.name);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.name.hashCode();
 		}
 	}
 
