@@ -18,7 +18,7 @@ package org.springframework.mock.env;
 
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.test.fixtures.env.MockPropertySource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 /**
  * Simple {@link ConfigurableEnvironment} implementation exposing
@@ -27,7 +27,7 @@ import org.springframework.core.test.fixtures.env.MockPropertySource;
  * @author Chris Beams
  * @author Sam Brannen
  * @since 3.2
- * @see org.springframework.mock.env.MockPropertySource
+ * @see org.springframework.core.testfixture.env.MockPropertySource
  */
 public class MockEnvironment extends AbstractEnvironment {
 

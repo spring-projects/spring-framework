@@ -21,7 +21,7 @@ import example.type.InheritedAnnotation;
 import example.type.NonInheritedAnnotation;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.test.fixtures.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;

@@ -30,7 +30,7 @@ import org.springframework.beans.test.fixtures.beans.SerializablePerson;
 import org.springframework.beans.test.fixtures.beans.SideEffectBean;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

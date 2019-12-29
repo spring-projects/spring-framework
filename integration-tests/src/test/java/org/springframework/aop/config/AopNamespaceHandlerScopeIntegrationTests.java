@@ -23,7 +23,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;

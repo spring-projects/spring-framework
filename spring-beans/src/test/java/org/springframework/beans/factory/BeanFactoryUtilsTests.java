@@ -37,7 +37,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

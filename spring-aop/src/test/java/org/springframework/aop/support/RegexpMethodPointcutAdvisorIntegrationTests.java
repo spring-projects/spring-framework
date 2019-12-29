@@ -25,12 +25,12 @@ import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.Person;
 import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.core.io.Resource;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

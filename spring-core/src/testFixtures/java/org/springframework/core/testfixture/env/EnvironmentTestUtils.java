@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures.env;
+package org.springframework.core.testfixture.env;
 
 import java.lang.reflect.Field;
 import java.util.Collections;

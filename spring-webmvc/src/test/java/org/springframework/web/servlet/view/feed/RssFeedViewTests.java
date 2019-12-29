@@ -29,7 +29,7 @@ import com.rometools.rome.feed.rss.Description;
 import com.rometools.rome.feed.rss.Item;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.test.fixtures.xml.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 

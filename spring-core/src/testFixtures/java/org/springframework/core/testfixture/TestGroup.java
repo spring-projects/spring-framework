@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures;
+package org.springframework.core.testfixture;
 
 import java.util.Collections;
 import java.util.EnumSet;

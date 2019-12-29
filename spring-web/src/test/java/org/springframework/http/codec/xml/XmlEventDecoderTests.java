@@ -28,7 +28,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
-import org.springframework.core.test.fixtures.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -24,7 +24,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.test.fixtures.beans.IOther;
 import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;

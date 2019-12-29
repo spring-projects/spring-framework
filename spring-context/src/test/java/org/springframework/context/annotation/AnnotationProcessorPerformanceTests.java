@@ -36,11 +36,11 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.test.fixtures.Assume;
-import org.springframework.core.test.fixtures.EnabledForTestGroups;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.test.fixtures.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller

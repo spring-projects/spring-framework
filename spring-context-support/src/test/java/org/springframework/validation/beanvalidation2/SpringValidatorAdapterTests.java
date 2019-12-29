@@ -52,7 +52,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures.io.buffer;
+package org.springframework.core.testfixture.io.buffer;
 
 import org.junit.jupiter.api.AfterEach;
 

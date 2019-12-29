@@ -24,7 +24,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
-import org.springframework.core.test.fixtures.TestGroup;
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;

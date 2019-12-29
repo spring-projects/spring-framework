@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures.xml;
+package org.springframework.core.testfixture.xml;
 
 import org.assertj.core.api.AbstractAssert;
 import org.w3c.dom.Node;

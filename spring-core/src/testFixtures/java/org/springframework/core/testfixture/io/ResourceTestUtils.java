@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures.io;
+package org.springframework.core.testfixture.io;
 
 import org.springframework.core.io.ClassPathResource;
 

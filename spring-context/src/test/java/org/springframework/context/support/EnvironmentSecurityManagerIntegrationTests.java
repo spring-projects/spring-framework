@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.AbstractEnvironment;
-import org.springframework.core.test.fixtures.env.EnvironmentTestUtils;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;

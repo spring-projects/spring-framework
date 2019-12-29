@@ -45,8 +45,8 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.test.fixtures.io.buffer.AbstractDataBufferAllocatingTests;
-import org.springframework.core.test.fixtures.io.buffer.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

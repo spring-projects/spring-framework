@@ -30,8 +30,8 @@ import org.springframework.beans.test.fixtures.beans.NestedTestBean;
 import org.springframework.beans.test.fixtures.beans.Person;
 import org.springframework.beans.test.fixtures.beans.SerializablePerson;
 import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.core.test.fixtures.TimeStamped;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;

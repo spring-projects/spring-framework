@@ -23,7 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnJre;
 
-import org.springframework.core.test.fixtures.xml.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.oxm.AbstractMarshallerTests;
 
 import static org.assertj.core.api.Assertions.assertThat;

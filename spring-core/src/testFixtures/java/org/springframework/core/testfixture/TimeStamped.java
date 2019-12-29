@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures;
+package org.springframework.core.testfixture;
 
 /**
  * This interface can be implemented by cacheable objects or cache entries,

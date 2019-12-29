@@ -44,7 +44,7 @@ import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.IndexedTestBean;
 import org.springframework.beans.test.fixtures.beans.NestedTestBean;
 import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

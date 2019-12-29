@@ -54,9 +54,9 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.test.fixtures.Assume;
-import org.springframework.core.test.fixtures.EnabledForTestGroups;
-import org.springframework.core.test.fixtures.TestGroup;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StopWatch;
 

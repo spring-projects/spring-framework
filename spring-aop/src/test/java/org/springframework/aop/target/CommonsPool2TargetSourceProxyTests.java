@@ -25,7 +25,7 @@ import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.test.fixtures.io.ResourceTestUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Stephane Nicoll

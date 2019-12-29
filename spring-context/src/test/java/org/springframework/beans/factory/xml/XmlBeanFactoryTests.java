@@ -61,7 +61,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;

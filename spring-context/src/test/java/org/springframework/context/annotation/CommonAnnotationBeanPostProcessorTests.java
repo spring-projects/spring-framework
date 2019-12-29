@@ -42,7 +42,7 @@ import org.springframework.beans.test.fixtures.beans.NestedTestBean;
 import org.springframework.beans.test.fixtures.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.test.fixtures.jndi.ExpectedLookupTemplate;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;

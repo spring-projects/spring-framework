@@ -62,10 +62,10 @@ import org.springframework.beans.test.fixtures.beans.ITestBean;
 import org.springframework.beans.test.fixtures.beans.Person;
 import org.springframework.beans.test.fixtures.beans.SerializablePerson;
 import org.springframework.beans.test.fixtures.beans.TestBean;
-import org.springframework.core.test.fixtures.EnabledForTestGroups;
-import org.springframework.core.test.fixtures.TestGroup;
-import org.springframework.core.test.fixtures.TimeStamped;
-import org.springframework.core.test.fixtures.io.SerializationTestUtils;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
@@ -765,7 +765,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see org.springframework.core.test.fixtures.util.TimeStamped#getTimeStamp()
+			 * @see org.springframework.core.testfixture.util.TimeStamped#getTimeStamp()
 			 */
 			@Override
 			public long getTimeStamp() {

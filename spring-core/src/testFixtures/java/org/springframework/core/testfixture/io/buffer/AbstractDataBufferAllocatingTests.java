@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.test.fixtures.io.buffer;
+package org.springframework.core.testfixture.io.buffer;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -148,7 +148,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
-	@MethodSource("org.springframework.core.test.fixtures.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
+	@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 	public @interface ParameterizedDataBufferAllocatingTest {
 	}
 

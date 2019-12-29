@@ -30,7 +30,7 @@ import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.test.fixtures.TestGroup;
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;

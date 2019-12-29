@@ -24,8 +24,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
-import org.springframework.core.test.fixtures.env.EnvironmentTestUtils;
-import org.springframework.core.test.fixtures.env.MockPropertySource;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
