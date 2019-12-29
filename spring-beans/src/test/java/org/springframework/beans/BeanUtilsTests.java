@@ -24,7 +24,6 @@ import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -38,21 +37,13 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.Colour;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.ImmutableTestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-
-import com.hotels.beans.transformer.BeanTransformer;
-import com.hotels.transformer.model.FieldTransformer;
-
-import sun.awt.image.ImageWatched;
 
 /**
  * Unit tests for {@link BeanUtils}.
@@ -288,54 +279,6 @@ class BeanUtilsTests {
 
 		desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAMultiDimensionalArray", String[][].class);
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
-	}
-
-	@Test
-	public void testCopyPropertiesForMutableBean() throws Exception {
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean tb2 = BeanUtils.copyProperties(tb, TestBean.class);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
-	}
-
-	@Test
-	public void testCopyPropertiesForImmutableBean() throws Exception {
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean spouse = new TestBean();
-		spouse.setName("mary");
-		tb.setSpouse(spouse);
-		ImmutableTestBean itb = BeanUtils.copyProperties(tb, ImmutableTestBean.class);
-		assertThat(itb.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(itb.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(itb.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
-		assertThat(itb.getSpouse().getName().equals(tb.getSpouse().getName())).as("Spouse copied").isTrue();
-	}
-
-	@Test
-	public void testCopyPropertiesUsingAPreConfiguredBeanTransformer() throws Exception {
-		FieldTransformer<Integer, Integer> ageDoubler = new FieldTransformer<>("age", age -> age * 2);
-		BeanTransformer beanTransformer = BeanUtils.getBeanTransformer()
-				.withFieldTransformer(ageDoubler);
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean tb2 = BeanUtils.copyProperties(tb, TestBean.class, beanTransformer);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == (tb.getAge() * 2)).as("Age copied and doubled").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
-	}
-
-	@Test
-	public void testGetBeanTransformer() {
-		assertThat(BeanUtils.getBeanTransformer()).isNotNull();
 	}
 
 	@Test
