@@ -222,9 +222,14 @@ public class ContentDispositionTests {
 	@Test // gh-24220
 	public void formatWithFilenameWithQuotes() {
 
-		BiConsumer<String, String> tester = (input, output) ->
+		BiConsumer<String, String> tester = (input, output) -> {
+
 			assertThat(builder("form-data").filename(input).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
+
+			assertThat(builder("form-data").filename(input, StandardCharsets.US_ASCII).build().toString())
+					.isEqualTo("form-data; filename=\"" + output + "\"");
+		};
 
 		String filename = "\"foo.txt";
 		tester.accept(filename, "\\" + filename);
@@ -243,6 +248,10 @@ public class ContentDispositionTests {
 
 		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
 		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
+
+		tester.accept("foo.txt\\", "foo.txt");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
 	}
 
 	@Test
