@@ -17,7 +17,7 @@
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
 
-	<bean id="nop" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nop" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
 	<!--
 		This will create a bean for each thread ("apartment")
@@ -40,7 +40,7 @@
 	</bean>
 
 	<!-- Serialization tests using serializable target and advice -->
-	<bean id="serializableNop" class="org.springframework.tests.aop.interceptor.SerializableNopInterceptor" />
+	<bean id="serializableNop" class="org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor" />
 
 	<bean id="prototypePerson" class="org.springframework.beans.testfixture.beans.SerializablePerson" scope="prototype"/>
 

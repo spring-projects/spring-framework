@@ -34,6 +34,7 @@ import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDec
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -57,7 +58,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;

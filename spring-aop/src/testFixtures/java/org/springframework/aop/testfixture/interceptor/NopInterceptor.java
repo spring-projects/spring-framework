@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.aop.interceptor;
+package org.springframework.aop.testfixture.interceptor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

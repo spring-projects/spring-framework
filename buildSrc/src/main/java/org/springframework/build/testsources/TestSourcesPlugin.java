@@ -62,7 +62,8 @@ public class TestSourcesPlugin implements Plugin<Project> {
 	private static final List<String> excludedProjects = Arrays.asList(
 			"integration-tests",
 			"kotlin-coroutines",
-			// "spring-aop",
+			"spring-aop",
+			"spring-aspects",
 			"spring-beans",
 			"spring-context",
 			"spring-context-indexer",

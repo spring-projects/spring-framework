@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.testfixture.beans.INestedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.NestedTestBean;
@@ -32,7 +33,6 @@ import org.springframework.beans.testfixture.beans.SerializablePerson;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.testfixture.TimeStamped;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

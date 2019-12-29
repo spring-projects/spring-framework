@@ -19,6 +19,8 @@ package org.springframework.aop.support;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -26,8 +28,6 @@ import org.springframework.beans.testfixture.beans.Person;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;

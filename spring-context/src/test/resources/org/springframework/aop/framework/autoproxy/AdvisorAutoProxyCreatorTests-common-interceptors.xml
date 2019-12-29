@@ -17,7 +17,7 @@
 		</property>
 	</bean>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
 	<bean id="pointcutAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<property name="pointcut">
@@ -26,7 +26,7 @@
 			</bean>
 		</property>
 		<property name="advice">
-			<bean class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+			<bean class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 		</property>
 	</bean>
 

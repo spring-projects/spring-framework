@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.aop.advice;
+package org.springframework.aop.testfixture.advice;
 
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
+import java.lang.reflect.Method;
+
+import org.springframework.aop.AfterReturningAdvice;
 
 /**
+ * Simple before advice example that we can use for counting checks.
+ *
  * @author Rod Johnson
  */
 @SuppressWarnings("serial")
-public class TimestampIntroductionAdvisor extends DefaultIntroductionAdvisor {
+public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
 
-	public TimestampIntroductionAdvisor() {
-		super(new DelegatingIntroductionInterceptor(new TimestampIntroductionInterceptor()));
+	@Override
+	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
+		count(m);
 	}
 
 }

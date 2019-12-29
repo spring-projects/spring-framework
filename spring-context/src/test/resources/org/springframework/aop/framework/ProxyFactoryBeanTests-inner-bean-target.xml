@@ -9,7 +9,7 @@
 
 <beans>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor">
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor">
 	</bean>
 
 	<bean id="testBean"

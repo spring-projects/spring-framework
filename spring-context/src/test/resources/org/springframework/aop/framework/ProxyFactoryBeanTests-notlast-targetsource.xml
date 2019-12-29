@@ -14,7 +14,7 @@
 	</bean>
 
 	<bean id="countingBeforeAdvice"
-		class="org.springframework.tests.aop.advice.CountingBeforeAdvice"
+		class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"
 	/>
 
 	<!--

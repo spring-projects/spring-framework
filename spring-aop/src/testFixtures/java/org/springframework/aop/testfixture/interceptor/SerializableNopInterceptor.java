@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.aop.interceptor;
+package org.springframework.aop.testfixture.interceptor;
 
 import java.io.Serializable;
 

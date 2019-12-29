@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.aop.advice;
+package org.springframework.aop.testfixture.advice;
 
-import java.lang.reflect.Method;
-
-import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
 
 /**
- * Simple before advice example that we can use for counting checks.
- *
  * @author Rod Johnson
  */
 @SuppressWarnings("serial")
-public class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
+public class TimestampIntroductionAdvisor extends DefaultIntroductionAdvisor {
 
-	@Override
-	public void before(Method m, Object[] args, Object target) throws Throwable {
-		count(m);
+	public TimestampIntroductionAdvisor() {
+		super(new DelegatingIntroductionInterceptor(new TimestampIntroductionInterceptor()));
 	}
 
 }

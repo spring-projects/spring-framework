@@ -85,7 +85,7 @@
 		<property name="pattern"><value>org.springframework.beans.testfixture.beans.ITestBean.getName</value></property>
 	</bean>
 
-	<bean id="countingAdvice" class="org.springframework.tests.aop.advice.CountingAfterReturningAdvice"/>
+	<bean id="countingAdvice" class="org.springframework.aop.testfixture.advice.CountingAfterReturningAdvice"/>
 
 	<bean id="test" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="age"><value>4</value></property>
