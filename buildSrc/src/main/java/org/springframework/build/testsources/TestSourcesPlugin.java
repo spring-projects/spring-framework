@@ -73,11 +73,11 @@ public class TestSourcesPlugin implements Plugin<Project> {
 			"spring-jcl",
 			"spring-jdbc",
 			"spring-jms",
-			"spring-messaging"
-			// "spring-orm",
-			// "spring-oxm",
+			"spring-messaging",
+			"spring-orm",
+			"spring-oxm",
 			// "spring-test",
-			// "spring-tx",
+			"spring-tx"
 			// "spring-web",
 			// "spring-webflux",
 			// "spring-webmvc",

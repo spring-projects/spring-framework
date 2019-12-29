@@ -18,6 +18,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-context")))
 	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.hibernate:hibernate-validator")
 	testCompile("javax.annotation:javax.annotation-api")

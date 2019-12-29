@@ -34,7 +34,7 @@
 	</bean>
 
 	<!-- Often we can leave the definition of such infrastructural beans to child factories -->
-	<bean id="txManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
+	<bean id="txManager" class="org.springframework.transaction.testfixture.CallCountingTransactionManager"/>
 
 	<bean id="tas" class="org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource">
 		<property name="properties">

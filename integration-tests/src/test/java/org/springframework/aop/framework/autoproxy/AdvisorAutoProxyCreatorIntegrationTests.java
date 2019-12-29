@@ -34,9 +34,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MethodCounter;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

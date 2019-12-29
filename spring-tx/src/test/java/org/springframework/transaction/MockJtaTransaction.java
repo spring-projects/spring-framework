@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.transaction;
+package org.springframework.transaction;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;

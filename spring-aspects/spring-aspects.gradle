@@ -27,6 +27,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-context")))
 	testCompile(testFixtures(project(":spring-context-support")))
 	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile("javax.mail:javax.mail-api")
 	testCompileOnly("org.aspectj:aspectjrt")
 }

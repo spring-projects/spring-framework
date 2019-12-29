@@ -9,6 +9,7 @@ dependencies {
 	testCompile(project(":spring-core"))
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile(project(":spring-expression"))
 	testCompile(project(":spring-jdbc"))
 	testCompile(project(":spring-orm"))

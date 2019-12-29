@@ -39,8 +39,8 @@ import org.springframework.context.testfixture.cache.SomeCustomKeyGenerator;
 import org.springframework.context.testfixture.cache.beans.AnnotatedClassCacheableService;
 import org.springframework.context.testfixture.cache.beans.CacheableService;
 import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 /**
  * @author Stephane Nicoll
