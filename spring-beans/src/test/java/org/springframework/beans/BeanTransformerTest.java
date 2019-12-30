@@ -26,30 +26,26 @@ public class BeanTransformerTest {
 
 	@Test
 	public void testCopyPropertiesForMutableBean() throws Exception {
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean tb2 = underTest.transform(tb, TestBean.class);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+		TestBean testBean = createTestBean("Bob", createTestBean("Mary"));
+
+		TestBean actual = underTest.transform(testBean, TestBean.class);
+
+		assertThat(actual.getName().equals(testBean.getName())).as("Name copied").isTrue();
+		assertThat(actual.getAge() == testBean.getAge()).as("Age copied").isTrue();
+		assertThat(actual.getTouchy().equals(testBean.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(actual.getSpouse().getName().equals(testBean.getSpouse().getName())).as("Spouse copied").isTrue();
 	}
 
 	@Test
 	public void testCopyPropertiesForImmutableBean() throws Exception {
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean spouse = new TestBean();
-		spouse.setName("mary");
-		tb.setSpouse(spouse);
-		ImmutableTestBean itb = underTest.transform(tb, ImmutableTestBean.class);
-		assertThat(itb.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(itb.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(itb.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
-		assertThat(itb.getSpouse().getName().equals(tb.getSpouse().getName())).as("Spouse copied").isTrue();
+		TestBean testBean = createTestBean("Bob", createTestBean("Mary"));
+
+		ImmutableTestBean actual = underTest.transform(testBean, ImmutableTestBean.class);
+
+		assertThat(actual.getName().equals(testBean.getName())).as("Name copied").isTrue();
+		assertThat(actual.getAge() == testBean.getAge()).as("Age copied").isTrue();
+		assertThat(actual.getTouchy().equals(testBean.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(actual.getSpouse().getName().equals(testBean.getSpouse().getName())).as("Spouse copied").isTrue();
 	}
 
 	@Test
@@ -57,18 +53,32 @@ public class BeanTransformerTest {
 		FieldTransformer<Integer, Integer> ageDoubler = new FieldTransformer<>("age", age -> age * 2);
 		com.hotels.beans.transformer.BeanTransformer beanTransformer = BeanTransformer.getBeanTransformer()
 				.withFieldTransformer(ageDoubler);
-		TestBean tb = new TestBean();
-		tb.setName("rod");
-		tb.setAge(32);
-		tb.setTouchy("touchy");
-		TestBean tb2 = underTest.transform(tb, TestBean.class, beanTransformer);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == (tb.getAge() * 2)).as("Age copied and doubled").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+		TestBean testBean = createTestBean("Bob", createTestBean("Mary"));
+
+		TestBean actual = underTest.transform(testBean, TestBean.class, beanTransformer);
+
+		assertThat(actual.getName().equals(testBean.getName())).as("Name copied").isTrue();
+		assertThat(actual.getAge() == (testBean.getAge() * 2)).as("Age copied and doubled").isTrue();
+		assertThat(actual.getTouchy().equals(testBean.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(actual.getSpouse().getName().equals(testBean.getSpouse().getName())).as("Spouse copied").isTrue();
 	}
 
 	@Test
 	public void testGetBeanTransformer() {
 		assertThat(BeanTransformer.getBeanTransformer()).isNotNull();
+	}
+
+	private TestBean createTestBean(final String name) throws Exception {
+		TestBean testBean = new TestBean();
+		testBean.setName(name);
+		testBean.setAge(32);
+		testBean.setTouchy("touchy");
+		return testBean;
+	}
+
+	private TestBean createTestBean(final String name, final TestBean spouse) throws Exception {
+		TestBean testBean = createTestBean(name);
+		testBean.setSpouse(spouse);
+		return testBean;
 	}
 }
