@@ -97,7 +97,7 @@ abstract class AutowireUtils {
 		// It was declared by CGLIB, but we might still want to autowire it
 		// if it was actually declared by the superclass.
 		Class<?> superclass = wm.getDeclaringClass().getSuperclass();
-		return !ClassUtils.hasMethod(superclass, wm.getName(), wm.getParameterTypes());
+		return !ClassUtils.hasMethod(superclass, wm);
 	}
 
 	/**
@@ -112,8 +112,7 @@ abstract class AutowireUtils {
 		if (setter != null) {
 			Class<?> targetClass = setter.getDeclaringClass();
 			for (Class<?> ifc : interfaces) {
-				if (ifc.isAssignableFrom(targetClass) &&
-						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
+				if (ifc.isAssignableFrom(targetClass) && ClassUtils.hasMethod(ifc, setter)) {
 					return true;
 				}
 			}

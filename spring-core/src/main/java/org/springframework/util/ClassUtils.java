@@ -1102,6 +1102,24 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine whether the given class has a public method with the given signature.
+	 * @param clazz the clazz to analyze
+	 * @param method checked method
+	 * @return whether the class has a corresponding method
+	 * @see Method#getDeclaringClass
+	 */
+	public static boolean hasMethod(Class<?> clazz, Method method) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(method, "Method must not be null");
+		if (clazz == method.getDeclaringClass()) {
+			return true;
+		}
+		String methodName = method.getName();
+		Class<?>[] paramTypes = method.getParameterTypes();
+		return getMethodOrNull(clazz, methodName, paramTypes) != null;
+	}
+
+	/**
 	 * Determine whether the given class has a public method with the given signature,
 	 * and return it if available (else throws an {@code IllegalStateException}).
 	 * <p>In case of any signature specified, only returns the method if there is a
@@ -1158,12 +1176,7 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		if (paramTypes != null) {
-			try {
-				return clazz.getMethod(methodName, paramTypes);
-			}
-			catch (NoSuchMethodException ex) {
-				return null;
-			}
+			return getMethodOrNull(clazz, methodName, paramTypes);
 		}
 		else {
 			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
@@ -1369,5 +1382,14 @@ public abstract class ClassUtils {
 			}
 		}
 		return candidates;
+	}
+
+	@Nullable
+	private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+		try {
+			return clazz.getMethod(methodName, paramTypes);
+		} catch (NoSuchMethodException ex) {
+			return null;
+		}
 	}
 }
