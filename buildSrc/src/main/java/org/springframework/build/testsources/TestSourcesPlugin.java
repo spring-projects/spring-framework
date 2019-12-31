@@ -78,11 +78,11 @@ public class TestSourcesPlugin implements Plugin<Project> {
 			"spring-orm",
 			"spring-oxm",
 			// "spring-test",
-			"spring-tx"
-			// "spring-web",
-			// "spring-webflux",
+			"spring-tx",
+			"spring-web",
+			"spring-webflux",
 			// "spring-webmvc",
-			// "spring-websocket"
+			"spring-websocket"
 		);
 
 

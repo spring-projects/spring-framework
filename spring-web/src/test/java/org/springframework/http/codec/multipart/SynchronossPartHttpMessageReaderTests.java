@@ -42,9 +42,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;

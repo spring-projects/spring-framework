@@ -29,12 +29,12 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

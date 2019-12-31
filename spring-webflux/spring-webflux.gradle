@@ -33,6 +33,7 @@ dependencies {
 	testCompile(project(":kotlin-coroutines"))
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-web")))
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml:aalto-xml")
 	testCompile("org.hibernate:hibernate-validator")

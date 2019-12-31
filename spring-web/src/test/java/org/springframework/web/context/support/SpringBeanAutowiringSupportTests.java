@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

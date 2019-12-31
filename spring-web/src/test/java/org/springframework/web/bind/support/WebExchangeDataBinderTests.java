@@ -34,12 +34,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
@@ -198,7 +198,7 @@ public class WebExchangeDataBinderTests {
 		data.add("someArray", "456");
 		data.add("part", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
 		data.add("somePartList", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
-		data.add("somePartList", new ClassPathResource("org/springframework/http/server/reactive/spring.png"));
+		data.add("somePartList", new ClassPathResource("/org/springframework/web/spring.png"));
 		binder.bind(exchangeMultipart(data)).block(Duration.ofMillis(5000));
 
 		assertThat(bean.getName()).isEqualTo("bar");

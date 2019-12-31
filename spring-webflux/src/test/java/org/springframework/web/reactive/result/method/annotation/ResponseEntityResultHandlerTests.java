@@ -52,20 +52,20 @@ import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also

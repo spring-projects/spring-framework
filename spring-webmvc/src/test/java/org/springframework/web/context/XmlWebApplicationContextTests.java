@@ -33,9 +33,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.testfixture.AbstractApplicationContextTests;
 import org.springframework.context.testfixture.beans.TestApplicationListener;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

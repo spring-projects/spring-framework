@@ -26,8 +26,8 @@ import java.util.Date;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;

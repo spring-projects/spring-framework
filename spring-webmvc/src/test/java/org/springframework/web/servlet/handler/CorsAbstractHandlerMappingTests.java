@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +38,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

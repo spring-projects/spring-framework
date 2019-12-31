@@ -38,6 +38,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-core")))
 	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-web")))
 	testCompile("javax.servlet:javax.servlet-api")
 	testCompile("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet"

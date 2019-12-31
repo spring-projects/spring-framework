@@ -32,9 +32,9 @@ import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

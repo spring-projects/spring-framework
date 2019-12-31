@@ -28,10 +28,10 @@ import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedResource;
 import org.springframework.web.servlet.resource.GzipSupport.GzippedFiles;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

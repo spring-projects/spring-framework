@@ -23,12 +23,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.options;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.options;
 
 /**
  * Test case for reactive {@link CorsUtils}.

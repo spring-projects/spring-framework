@@ -46,6 +46,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-context")))
 	testCompile(testFixtures(project(":spring-core")))
 	testCompile(testFixtures(project(":spring-tx")))
+	testCompile(testFixtures(project(":spring-web")))
 	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("javax.cache:cache-api")
 	testCompile("javax.ejb:javax.ejb-api")

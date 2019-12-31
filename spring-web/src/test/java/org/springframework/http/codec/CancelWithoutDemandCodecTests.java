@@ -46,6 +46,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
+import org.springframework.web.testfixture.xml.Pojo;
 
 /**
  * Test scenarios for data buffer leaks.
