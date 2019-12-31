@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.testfixture.beans.FactoryMethods;
 import org.springframework.beans.testfixture.beans.TestBean;
 
 /**

@@ -15,8 +15,6 @@
 		<constructor-arg ref="service"/>
 	</bean>
 
-	<bean id="nullInstance" class="org.springframework.tests.sample.beans.FactoryMethods" factory-method="nullInstance"/>
-
 	<bean id="serviceInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
 	<aop:config proxy-target-class="false">
