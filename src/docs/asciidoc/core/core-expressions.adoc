@@ -1133,9 +1133,9 @@ All of the textual operators are case-insensitive.
 
 SpEL supports the following logical operators:
 
-* `and`
-* `or`
-* `not`
+* `and` (`&&`)
+* `or` (`||`)
+* `not` (`!`)
 
 The following example shows how to use the logical operators
 
