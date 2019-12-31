@@ -1,6 +1,5 @@
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
-apply plugin: 'org.springframework.build.test-sources'
 apply from: "$rootDir/gradle/publications.gradle"
 
 jar {
