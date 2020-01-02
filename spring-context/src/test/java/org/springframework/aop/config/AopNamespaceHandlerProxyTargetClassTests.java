@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

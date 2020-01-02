@@ -58,7 +58,6 @@ import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
@@ -88,6 +87,7 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

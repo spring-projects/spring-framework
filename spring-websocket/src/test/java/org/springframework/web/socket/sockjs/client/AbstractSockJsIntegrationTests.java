@@ -49,10 +49,10 @@ import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TextMessage;
@@ -69,7 +69,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Abstract base class for integration tests using the

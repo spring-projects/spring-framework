@@ -17,7 +17,11 @@
 package org.springframework.cache.config;
 
 /**
- * Basic service interface for caching tests.
+ * Copy of the shared {@code CacheableService}: necessary
+ * due to issues with Gradle test fixtures and AspectJ configuration
+ * in the Gradle build.
+ *
+ * <p>Basic service interface for caching tests.
  *
  * @author Costin Leau
  * @author Phillip Webb

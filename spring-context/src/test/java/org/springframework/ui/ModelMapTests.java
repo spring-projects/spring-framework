@@ -30,7 +30,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 

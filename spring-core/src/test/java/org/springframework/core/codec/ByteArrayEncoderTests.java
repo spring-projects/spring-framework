@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

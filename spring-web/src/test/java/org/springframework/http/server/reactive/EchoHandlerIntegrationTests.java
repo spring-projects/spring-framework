@@ -23,8 +23,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

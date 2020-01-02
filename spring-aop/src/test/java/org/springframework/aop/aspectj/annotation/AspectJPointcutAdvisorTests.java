@@ -23,7 +23,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

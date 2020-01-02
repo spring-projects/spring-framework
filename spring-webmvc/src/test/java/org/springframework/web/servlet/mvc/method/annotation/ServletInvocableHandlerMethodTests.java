@@ -38,8 +38,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,6 +52,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

@@ -29,7 +29,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -18,11 +18,11 @@ package org.springframework.web.context.support;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

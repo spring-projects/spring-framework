@@ -24,9 +24,9 @@ import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

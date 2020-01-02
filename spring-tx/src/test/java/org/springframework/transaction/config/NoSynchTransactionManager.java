@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.config;
 
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 /**
  * @author Juergen Hoeller

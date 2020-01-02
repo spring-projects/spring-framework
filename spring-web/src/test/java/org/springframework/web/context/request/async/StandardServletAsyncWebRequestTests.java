@@ -23,9 +23,9 @@ import javax.servlet.AsyncEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;

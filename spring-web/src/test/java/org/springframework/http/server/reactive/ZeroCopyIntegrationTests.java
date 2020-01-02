@@ -27,10 +27,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -38,7 +39,9 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 /**
  * @author Arjen Poutsma
  */
-public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+
+	private static final Resource springLogoResource = new ClassPathResource("/org/springframework/web/spring.png");
 
 	private final ZeroCopyHandler handler = new ZeroCopyHandler();
 
@@ -50,9 +53,9 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 
 	@ParameterizedHttpServerTest
-	public void zeroCopy(HttpServer httpServer) throws Exception {
+	void zeroCopy(HttpServer httpServer) throws Exception {
 		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer,
-			"Zero-copy only does not support servlet");
+			"Zero-copy does not support Servlet");
 
 		startServer(httpServer);
 
@@ -60,11 +63,9 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		RequestEntity<?> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		Resource logo = new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
-
 		assertThat(response.hasBody()).isTrue();
-		assertThat(response.getHeaders().getContentLength()).isEqualTo(logo.contentLength());
-		assertThat(response.getBody().length).isEqualTo(logo.contentLength());
+		assertThat(response.getHeaders().getContentLength()).isEqualTo(springLogoResource.contentLength());
+		assertThat(response.getBody().length).isEqualTo(springLogoResource.contentLength());
 		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_PNG);
 	}
 
@@ -75,8 +76,7 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			try {
 				ZeroCopyHttpOutputMessage zeroCopyResponse = (ZeroCopyHttpOutputMessage) response;
-				Resource logo = new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
-				File logoFile = logo.getFile();
+				File logoFile = springLogoResource.getFile();
 				zeroCopyResponse.getHeaders().setContentType(MediaType.IMAGE_PNG);
 				zeroCopyResponse.getHeaders().setContentLength(logoFile.length());
 				return zeroCopyResponse.writeWith(logoFile, 0, logoFile.length());

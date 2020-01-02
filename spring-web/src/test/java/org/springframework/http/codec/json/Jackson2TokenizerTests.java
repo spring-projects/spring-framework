@@ -33,9 +33,9 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.DecodingException;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

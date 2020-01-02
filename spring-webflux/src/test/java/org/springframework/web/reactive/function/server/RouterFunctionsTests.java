@@ -27,14 +27,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

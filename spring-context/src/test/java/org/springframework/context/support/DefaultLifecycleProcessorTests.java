@@ -27,10 +27,10 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Mark Fisher

@@ -27,10 +27,10 @@ import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.tests.XmlContent;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;

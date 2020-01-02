@@ -28,9 +28,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;

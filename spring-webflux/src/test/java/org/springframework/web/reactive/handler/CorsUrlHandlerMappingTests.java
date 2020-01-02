@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

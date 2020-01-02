@@ -28,14 +28,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.GenericXmlContextLoader;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -43,21 +43,21 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.testfixture.beans.GenericBean;
+import org.springframework.beans.testfixture.beans.GenericIntegerBean;
+import org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.sample.beans.GenericBean;
-import org.springframework.tests.sample.beans.GenericIntegerBean;
-import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.tests.TestGroup.LONG_RUNNING;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller

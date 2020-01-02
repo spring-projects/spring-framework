@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

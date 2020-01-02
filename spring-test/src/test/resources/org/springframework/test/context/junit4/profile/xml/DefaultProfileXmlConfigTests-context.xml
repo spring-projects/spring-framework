@@ -2,12 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<bean id="pet" class="org.springframework.tests.sample.beans.Pet">
+	<bean id="pet" class="org.springframework.beans.testfixture.beans.Pet">
 		<constructor-arg value="Fido" />
 	</bean>
 
 	<beans profile="dev">
-		<bean id="employee" class="org.springframework.tests.sample.beans.Employee">
+		<bean id="employee" class="org.springframework.beans.testfixture.beans.Employee">
 			<property name="name" value="John Smith" />
 			<property name="age" value="42" />
 			<property name="company" value="Acme Widgets, Inc." />

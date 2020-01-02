@@ -26,6 +26,9 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
+	testCompile(testFixtures(project(":spring-aop")))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("io.projectreactor:reactor-core")
 	testCompile("org.codehaus.groovy:groovy-jsr223")
 	testCompile("org.codehaus.groovy:groovy-test")
@@ -40,4 +43,8 @@ dependencies {
 	testRuntime("org.glassfish:javax.el")
 	testRuntime("org.javamoney:moneta")
 	testRuntime("org.junit.vintage:junit-vintage-engine") // for @Inject TCK
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation(testFixtures(project(":spring-beans")))
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
+	testFixturesImplementation("org.assertj:assertj-core")
 }

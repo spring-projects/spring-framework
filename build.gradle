@@ -308,6 +308,7 @@ configure([rootProject] + javaProjects) { project ->
 	group = "org.springframework"
 
 	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
 	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.compile'
 	apply from: "${rootDir}/gradle/ide.gradle"

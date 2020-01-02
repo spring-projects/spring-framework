@@ -25,11 +25,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.cache.AbstractCacheTests;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.context.testfixture.cache.AbstractCacheTests;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.LONG_RUNNING;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Costin Leau

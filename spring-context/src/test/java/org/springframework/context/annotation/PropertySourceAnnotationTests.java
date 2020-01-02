@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -37,7 +38,6 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.io.support.PropertySourceFactory;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

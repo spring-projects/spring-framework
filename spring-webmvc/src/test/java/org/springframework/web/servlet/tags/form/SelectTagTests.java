@@ -41,9 +41,9 @@ import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -351,7 +351,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThatExceptionOfType(JspException.class).as("use a non-Collection typed value as the value of 'items'").isThrownBy(
 				this.tag::doStartTag)
 			.withMessageContaining("items")
-			.withMessageContaining("org.springframework.tests.sample.beans.TestBean");
+			.withMessageContaining("org.springframework.beans.testfixture.beans.TestBean");
 	}
 
 	@Test

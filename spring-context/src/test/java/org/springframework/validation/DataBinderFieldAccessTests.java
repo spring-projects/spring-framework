@@ -25,8 +25,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.tests.sample.beans.FieldAccessBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

@@ -27,12 +27,12 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Rob Harrop

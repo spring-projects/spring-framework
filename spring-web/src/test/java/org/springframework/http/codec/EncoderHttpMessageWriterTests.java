@@ -37,10 +37,10 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;

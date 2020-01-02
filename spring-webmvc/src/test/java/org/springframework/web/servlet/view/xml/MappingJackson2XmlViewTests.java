@@ -40,10 +40,10 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;

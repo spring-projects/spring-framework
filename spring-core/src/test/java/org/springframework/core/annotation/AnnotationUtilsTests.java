@@ -39,8 +39,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
+import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.lang.NonNullApi;
-import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -928,7 +928,7 @@ class AnnotationUtilsTests {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 		assertThatIllegalStateException().isThrownBy(() ->
 				synthesizeAnnotation(map, Component.class, null).value())
-			.withMessageContaining("Attribute 'value' in annotation org.springframework.stereotype.Component "
+			.withMessageContaining("Attribute 'value' in annotation org.springframework.core.testfixture.stereotype.Component "
 					+ "should be compatible with java.lang.String but a java.lang.Long value was returned");
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.aop.support;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

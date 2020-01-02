@@ -30,12 +30,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.HandlerFilterFunction.ofResponseProcessor;

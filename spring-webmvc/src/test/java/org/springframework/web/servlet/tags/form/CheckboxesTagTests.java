@@ -38,11 +38,11 @@ import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Pet;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.tests.sample.beans.Colour;
-import org.springframework.tests.sample.beans.Pet;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;

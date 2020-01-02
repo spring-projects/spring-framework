@@ -31,7 +31,7 @@ import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Unlike {@link org.springframework.core.io.buffer.LeakAwareDataBufferFactory}
+ * Unlike {@link org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory}
  * this one is an instance of {@link NettyDataBufferFactory} which is necessary
  * since {@link PayloadUtils} does instanceof checks, and that also allows
  * intercepting {@link NettyDataBufferFactory#wrap(ByteBuf)}.

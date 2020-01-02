@@ -34,12 +34,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

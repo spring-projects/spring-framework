@@ -58,7 +58,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.Pojo;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

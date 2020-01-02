@@ -22,13 +22,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

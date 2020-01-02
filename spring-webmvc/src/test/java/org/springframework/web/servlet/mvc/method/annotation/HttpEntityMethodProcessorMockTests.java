@@ -48,13 +48,13 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.time.Instant.ofEpochMilli;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;

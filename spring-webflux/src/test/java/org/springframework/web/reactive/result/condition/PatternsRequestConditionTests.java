@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link PatternsRequestCondition}.

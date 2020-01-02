@@ -30,7 +30,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
