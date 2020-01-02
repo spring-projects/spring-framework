@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -45,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -681,7 +683,8 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Copy the property values of the given source bean into the given target bean.
+	 * Copy the property values of the given source bean into the given target bean
+	 * and ignored if 
 	 * <p>Note: The source and target classes do not have to match or even be derived
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
@@ -714,9 +717,17 @@ public abstract class BeanUtils {
 			if (writeMethod != null && (ignoreList == null || !ignoreList.contains(targetPd.getName()))) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
+					Field sourcefield = ReflectionUtils.findField(source.getClass(), sourcePd.getName());
+					Field targetfield = ReflectionUtils.findField(target.getClass(), targetPd.getName());
+										
+					TypeDescriptor sourceTypeDescriptor = new TypeDescriptor(sourcefield);
+					TypeDescriptor targetTypeDescriptor = new TypeDescriptor(targetfield);
+					
 					Method readMethod = sourcePd.getReadMethod();
+					
 					if (readMethod != null &&
-							ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType())) {
+							ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) &&
+							sourceTypeDescriptor.getResolvableType().equals(targetTypeDescriptor.getResolvableType())) {
 						try {
 							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 								readMethod.setAccessible(true);
@@ -724,7 +735,7 @@ public abstract class BeanUtils {
 							Object value = readMethod.invoke(source);
 							if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 								writeMethod.setAccessible(true);
-							}
+							}							
 							writeMethod.invoke(target, value);
 						}
 						catch (Throwable ex) {

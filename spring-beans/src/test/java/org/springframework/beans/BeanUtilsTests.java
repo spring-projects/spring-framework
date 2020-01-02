@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -335,6 +336,49 @@ class BeanUtilsTests {
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
+	}
+	
+	@Test
+	void testCopiedParametersType() {
+		
+		A a = new A();
+		a.getList().add(42);
+		B b = new B();
+
+		BeanUtils.copyProperties(a, b);
+
+		assertThat(a.getList()).containsOnly(42);
+
+		b.getList().forEach(n -> assertThat(n).isInstanceOf(Long.class));
+		assertThat(b.getList()).isEmpty();	
+		
+	}
+	
+	class A {
+
+		private List<Integer> list = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+		
+	}
+	class B {
+
+		private List<Long> list = new ArrayList<>();
+
+		public List<Long> getList() {
+			return list;
+		}
+
+		public void setList(List<Long> list) {
+			this.list = list;
+		}
+		
 	}
 
 
