@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -72,6 +73,8 @@ public abstract class BeanUtils {
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
 	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
+	
+	private static SimpleTypeConverter SIMPLE_TYPE_CONVERTER;
 
 	static {
 		Map<Class<?>, Object> values = new HashMap<>();
@@ -81,6 +84,7 @@ public abstract class BeanUtils {
 		values.put(int.class, 0);
 		values.put(long.class, (long) 0);
 		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
+		SIMPLE_TYPE_CONVERTER = new SimpleTypeConverter();
 	}
 
 
@@ -677,7 +681,8 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Copy the property values of the given source bean into the given target bean.
+	 * Copy the property values of the given source bean into the given target bean
+	 * with possible type casting.
 	 * <p>Note: The source and target classes do not have to match or even be derived
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
@@ -721,7 +726,9 @@ public abstract class BeanUtils {
 							if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 								writeMethod.setAccessible(true);
 							}
-							writeMethod.invoke(target, value);
+							Field field = ReflectionUtils.findField(target.getClass(), targetPd.getName());
+							Object convertedValue = SIMPLE_TYPE_CONVERTER.convertIfNecessary(value, field.getType(), field);
+							writeMethod.invoke(target, convertedValue);
 						}
 						catch (Throwable ex) {
 							throw new FatalBeanException(

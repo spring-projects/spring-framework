@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -329,6 +330,70 @@ class BeanUtilsTests {
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
+	}
+	
+	@Test
+	void testCopiedParametersType() {
+		A a = new A();
+		B b = new B();
+		a.getList().add(42);
+		a.getList2().add(34.2F);		
+
+		BeanUtils.copyProperties(a, b);
+
+		assertThat(b.getList()).containsOnly(42L);
+
+		b.getList().forEach(n -> assertThat(n).isInstanceOf(Long.class));
+		assertThat(b.getList()).isNotEmpty();
+		
+		b.getList2().forEach(n -> assertThat(n).isInstanceOf(Integer.class));
+		assertThat(b.getList2()).isNotEmpty();		
+		
+	}
+	
+	class A {
+
+		private List<Integer> list = new ArrayList<>();
+		private List<Float> list2 = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+
+		public List<Float> getList2() {
+			return list2;
+		}
+
+		public void setList2(List<Float> list2) {
+			this.list2 = list2;
+		}		
+		
+	}
+	class B {
+
+		private List<Long> list = new ArrayList<>();
+		private List<Integer> list2 = new ArrayList<>();
+
+		public List<Long> getList() {
+			return list;
+		}
+
+		public void setList(List<Long> list) {
+			this.list = list;
+		}
+
+		public List<Integer> getList2() {
+			return list2;
+		}
+
+		public void setList2(List<Integer> list2) {
+			this.list2 = list2;
+		}	
+		
 	}
 
 
