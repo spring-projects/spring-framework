@@ -92,3 +92,9 @@ jar {
 
 	from configurations.coroutines
 }
+
+test {
+	// make sure the classes dir is used on the test classpath (required by ResourceTests)
+	// When test fixtures are involved, the JAR is used by default
+	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
+}

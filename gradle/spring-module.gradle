@@ -63,9 +63,5 @@ publishing {
 }
 
 // Disable publication of test fixture artifacts.
-//
-// Once we upgrade to Gradle 6.x, we will need to delete the following line ...
-components.java.variants.removeAll { it.outgoingConfiguration.name.startsWith("testFixtures") }
-// ... and uncomment the following two lines.
-// components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
-// components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
