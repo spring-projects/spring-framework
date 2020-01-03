@@ -53,7 +53,7 @@ public final class ParseState {
 	}
 
 	/**
-	 * Create a new {@code ParseState} whose {@link LinkedList} is a {@link Object#clone clone}
+	 * Create a new {@code ParseState} whose {@link LinkedList} is an {@link Object#clone clone}
 	 * of that of the passed in {@code ParseState}.
 	 */
 	@SuppressWarnings("unchecked")
