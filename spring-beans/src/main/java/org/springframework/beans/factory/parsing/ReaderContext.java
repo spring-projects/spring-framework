@@ -152,14 +152,14 @@ public class ReaderContext {
 	// Explicit parse events
 
 	/**
-	 * Fire an defaults-registered event.
+	 * Fire a defaults-registered event.
 	 */
 	public void fireDefaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.eventListener.defaultsRegistered(defaultsDefinition);
 	}
 
 	/**
-	 * Fire an component-registered event.
+	 * Fire a component-registered event.
 	 */
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
