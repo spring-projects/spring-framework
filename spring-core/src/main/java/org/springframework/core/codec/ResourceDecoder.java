@@ -83,6 +83,11 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 				public String getFilename() {
 					return filename;
 				}
+
+				@Override
+				public long contentLength() {
+					return bytes.length;
+				}
 			};
 		}
 		else if (Resource.class.isAssignableFrom(clazz)) {
