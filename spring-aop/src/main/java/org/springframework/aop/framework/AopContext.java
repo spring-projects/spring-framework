@@ -67,7 +67,8 @@ public final class AopContext {
 		Object proxy = currentProxy.get();
 		if (proxy == null) {
 			throw new IllegalStateException(
-					"Cannot find current proxy: Set 'exposeProxy' property on Advised to 'true' to make it available.");
+					"Cannot find current proxy: Set 'exposeProxy' property on Advised to 'true' to make it available. " +
+							"Also Check AopContext.currentProxy() invoke in the origin thread.");
 		}
 		return proxy;
 	}
