@@ -80,10 +80,12 @@ public class ResourceHttpMessageConverterTests {
 			inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
 			inputMessage.getHeaders().setContentDisposition(
 					ContentDisposition.builder("attachment").filename("yourlogo.jpg").build());
+			inputMessage.getHeaders().setContentLength(123);
 			Resource actualResource = converter.read(InputStreamResource.class, inputMessage);
 			assertThat(actualResource).isInstanceOf(InputStreamResource.class);
 			assertThat(actualResource.getInputStream()).isEqualTo(body);
 			assertThat(actualResource.getFilename()).isEqualTo("yourlogo.jpg");
+			assertThat(actualResource.contentLength()).isEqualTo(123);
 		}
 	}
 

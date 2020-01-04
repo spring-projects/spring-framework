@@ -84,6 +84,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
+
+				@Override
+				public long contentLength() {
+					return inputMessage.getHeaders().getContentLength();
+				}
 			};
 		}
 		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {

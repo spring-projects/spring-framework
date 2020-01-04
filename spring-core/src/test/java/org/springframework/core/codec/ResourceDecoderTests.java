@@ -105,4 +105,22 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 				Collections.singletonMap(ResourceDecoder.FILENAME_HINT, "testFile"));
 	}
 
+	@Test
+	public void decodeInputStreamResource() {
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
+		testDecodeAll(input, InputStreamResource.class, step -> step
+				.consumeNextWith(resource -> {
+					try {
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+						assertThat(new String(bytes)).isEqualTo("foobar");
+						assertThat(resource.contentLength()).isEqualTo(fooBytes.length + barBytes.length);
+					}
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
+					}
+				})
+				.expectComplete()
+				.verify());
+	}
+
 }
