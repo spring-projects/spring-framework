@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -36,6 +37,7 @@ import org.springframework.util.StringValueResolver;
  * implementations.
  *
  * @author Juergen Hoeller
+ * @author Qimiao Chen
  * @since 2.5.2
  */
 public class SimpleAliasRegistry implements AliasRegistry {
@@ -98,16 +100,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @since 4.2.1
 	 */
 	public boolean hasAlias(String name, String alias) {
-		for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
-			String registeredName = entry.getValue();
-			if (registeredName.equals(name)) {
-				String registeredAlias = entry.getKey();
-				if (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias)) {
-					return true;
-				}
-			}
-		}
-		return false;
+		String registeredName = this.aliasMap.get(alias);
+		return ObjectUtils.nullSafeEquals(registeredName, name) || (registeredName != null
+				&& hasAlias(name, registeredName));
 	}
 
 	@Override
