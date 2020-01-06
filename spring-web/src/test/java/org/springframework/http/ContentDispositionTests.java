@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,178 +17,218 @@
 package org.springframework.http;
 
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.springframework.http.ContentDisposition.builder;
+
 /**
  * Unit tests for {@link ContentDisposition}
- *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class ContentDispositionTests {
 
+	private static DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+
+
 	@Test
 	public void parse() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123");
-		assertEquals(ContentDisposition.builder("form-data")
-				.name("foo").filename("foo.txt").size(123L).build(), disposition);
+		assertEquals(builder("form-data").name("foo").filename("foo.txt").size(123L).build(),
+				parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123"));
 	}
 
 	@Test
-	public void parseType() {
-		ContentDisposition disposition = ContentDisposition.parse("form-data");
-		assertEquals(ContentDisposition.builder("form-data").build(), disposition);
-	}
-
-	@Test
-	public void parseUnquotedFilename() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("form-data; filename=unquoted");
-		assertEquals(ContentDisposition.builder("form-data").filename("unquoted").build(), disposition);
+	public void parseFilenameUnquoted() {
+		assertEquals(builder("form-data").filename("unquoted").build(),
+				parse("form-data; filename=unquoted"));
 	}
 
 	@Test  // SPR-16091
 	public void parseFilenameWithSemicolon() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("attachment; filename=\"filename with ; semicolon.txt\"");
-		assertEquals(ContentDisposition.builder("attachment")
-				.filename("filename with ; semicolon.txt").build(), disposition);
-	}
-
-	@Test
-	public void parseAndIgnoreEmptyParts() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123");
-		assertEquals(ContentDisposition.builder("form-data")
-				.name("foo").filename("foo.txt").size(123L).build(), disposition);
-	}
-
-	@Test // gh-24112
-	public void parseEncodedFilenameWithPaddedCharset() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("attachment; filename*= UTF-8''some-file.zip");
-		assertEquals(ContentDisposition.builder("attachment")
-				.filename("some-file.zip", StandardCharsets.UTF_8).build(), disposition);
+		assertEquals(builder("attachment").filename("filename with ; semicolon.txt").build(),
+				parse("attachment; filename=\"filename with ; semicolon.txt\""));
 	}
 
 	@Test
 	public void parseEncodedFilename() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt");
-		assertEquals(ContentDisposition.builder("form-data").name("name")
-				.filename("中文.txt", StandardCharsets.UTF_8).build(), disposition);
+		assertEquals(builder("form-data").name("name").filename("中文.txt", StandardCharsets.UTF_8).build(),
+				parse("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt"));
+	}
+
+	@Test // gh-24112
+	public void parseEncodedFilenameWithPaddedCharset() {
+		assertEquals(builder("attachment").filename("some-file.zip", StandardCharsets.UTF_8).build(),
+				parse("attachment; filename*= UTF-8''some-file.zip"));
+	}
+
+	@Test
+	public void parseEncodedFilenameWithoutCharset() {
+		assertEquals(builder("form-data").name("name").filename("test.txt").build(),
+				parse("form-data; name=\"name\"; filename*=test.txt"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseEncodedFilenameWithInvalidCharset() {
+		parse("form-data; name=\"name\"; filename*=UTF-16''test.txt");
+	}
+
+	@Test
+	public void parseEncodedFilenameWithInvalidName() {
+
+		Consumer<String> tester = input -> {
+			try {
+				parse(input);
+				fail();
+			}
+			catch (IllegalArgumentException ex) {
+				// expected
+			}
+		};
+
+		tester.accept("form-data; name=\"name\"; filename*=UTF-8''%A");
+		tester.accept("form-data; name=\"name\"; filename*=UTF-8''%A.txt");
 	}
 
 	@Test // gh-23077
 	public void parseWithEscapedQuote() {
-		ContentDisposition disposition = ContentDisposition.parse(
-				"form-data; name=\"file\"; filename=\"\\\"The Twilight Zone\\\".txt\"; size=123");
-		assertEquals(ContentDisposition.builder("form-data").name("file")
-				.filename("\\\"The Twilight Zone\\\".txt").size(123L).build(), disposition);
+
+		BiConsumer<String, String> tester = (description, filename) ->
+				assertEquals(description,
+						builder("form-data").name("file").filename(filename).size(123L).build(),
+						parse("form-data; name=\"file\"; filename=\"" + filename + "\"; size=123"));
+
+		tester.accept("Escaped quotes should be ignored",
+				"\\\"The Twilight Zone\\\".txt");
+
+		tester.accept("Escaped quotes preceded by escaped backslashes should be ignored",
+				"\\\\\\\"The Twilight Zone\\\\\\\".txt");
+
+		tester.accept("Escaped backslashes should not suppress quote",
+				"The Twilight Zone \\\\");
+
+		tester.accept("Escaped backslashes should not suppress quote",
+				"The Twilight Zone \\\\\\\\");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void parseEmpty() {
-		ContentDisposition.parse("");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void parseNoType() {
-		ContentDisposition.parse(";");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void parseInvalidParameter() {
-		ContentDisposition.parse("foo;bar");
+	@Test
+	public void parseWithExtraSemicolons() {
+		assertEquals(builder("form-data").name("foo").filename("foo.txt").size(123L).build(),
+				parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123"));
 	}
 
 	@Test
 	public void parseDates() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("attachment; creation-date=\"Mon, 12 Feb 2007 10:15:30 -0500\"; " +
+		assertEquals(
+				builder("attachment")
+						.creationDate(ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter))
+						.modificationDate(ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter))
+						.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter)).build(),
+				parse("attachment; creation-date=\"Mon, 12 Feb 2007 10:15:30 -0500\"; " +
 						"modification-date=\"Tue, 13 Feb 2007 10:15:30 -0500\"; " +
-						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\"");
-		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-		assertEquals(ContentDisposition.builder("attachment")
-				.creationDate(ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter))
-				.modificationDate(ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter))
-				.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter)).build(), disposition);
+						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\""));
 	}
 
 	@Test
-	public void parseInvalidDates() {
-		ContentDisposition disposition = ContentDisposition
-				.parse("attachment; creation-date=\"-1\"; modification-date=\"-1\"; " +
-						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\"");
-		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-		assertEquals(ContentDisposition.builder("attachment")
-				.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter)).build(), disposition);
+	public void parseIgnoresInvalidDates() {
+		assertEquals(
+				builder("attachment")
+						.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter))
+						.build(),
+				parse("attachment; creation-date=\"-1\"; " +
+						"modification-date=\"-1\"; " +
+						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\""));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseEmpty() {
+		parse("");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseNoType() {
+		parse(";");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseInvalidParameter() {
+		parse("foo;bar");
+	}
+
+	private static ContentDisposition parse(String input) {
+		return ContentDisposition.parse(input);
+	}
+
+
+	@Test
+	public void format() {
+		assertEquals("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123",
+				builder("form-data").name("foo").filename("foo.txt").size(123L).build().toString());
 	}
 
 	@Test
-	public void headerValue() {
-		ContentDisposition disposition = ContentDisposition.builder("form-data")
-				.name("foo").filename("foo.txt").size(123L).build();
-		assertEquals("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123", disposition.toString());
-	}
-
-	@Test
-	public void headerValueWithEncodedFilename() {
-		ContentDisposition disposition = ContentDisposition.builder("form-data")
-				.name("name").filename("中文.txt", StandardCharsets.UTF_8).build();
+	public void formatWithEncodedFilename() {
 		assertEquals("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
-				disposition.toString());
+				builder("form-data").name("name").filename("中文.txt", StandardCharsets.UTF_8).build().toString());
 	}
 
-	@Test  // SPR-14547
-	public void encodeHeaderFieldParam() {
-		Method encode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"encodeHeaderFieldParam", String.class, Charset.class);
-		ReflectionUtils.makeAccessible(encode);
+	@Test
+	public void formatWithEncodedFilenameUsingUsAscii() {
+		assertEquals("form-data; name=\"name\"; filename=\"test.txt\"",
+				builder("form-data")
+						.name("name")
+						.filename("test.txt", StandardCharsets.US_ASCII)
+						.build()
+						.toString());
+	}
 
-		String result = (String)ReflectionUtils.invokeMethod(encode, null, "test.txt",
-				StandardCharsets.US_ASCII);
-		assertEquals("test.txt", result);
+	@Test // gh-24220
+	public void formatWithFilenameWithQuotes() {
 
-		result = (String)ReflectionUtils.invokeMethod(encode, null, "中文.txt", StandardCharsets.UTF_8);
-		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
+		BiConsumer<String, String> tester = (input, output) -> {
+
+			assertEquals("form-data; filename=\"" + output + "\"",
+					builder("form-data").filename(input).build().toString());
+
+			assertEquals("form-data; filename=\"" + output + "\"",
+					builder("form-data").filename(input, StandardCharsets.US_ASCII).build().toString());
+		};
+
+		String filename = "\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		filename = "\\\"foo.txt";
+		tester.accept(filename, filename);
+
+		filename = "\\\\\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		filename = "\\\\\\\"foo.txt";
+		tester.accept(filename, filename);
+
+		filename = "\\\\\\\\\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
+		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
+
+		tester.accept("foo.txt\\", "foo.txt");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void encodeHeaderFieldParamInvalidCharset() {
-		Method encode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"encodeHeaderFieldParam", String.class, Charset.class);
-		ReflectionUtils.makeAccessible(encode);
-		ReflectionUtils.invokeMethod(encode, null, "test", StandardCharsets.UTF_16);
-	}
-
-	@Test  // SPR-14408
-	public void decodeHeaderFieldParam() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-
-		String result = (String)ReflectionUtils.invokeMethod(decode, null, "test.txt");
-		assertEquals("test.txt", result);
-
-		result = (String)ReflectionUtils.invokeMethod(decode, null, "UTF-8''%E4%B8%AD%E6%96%87.txt");
-		assertEquals("中文.txt", result);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void decodeHeaderFieldParamInvalidCharset() {
-		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
-				"decodeHeaderFieldParam", String.class);
-		ReflectionUtils.makeAccessible(decode);
-		ReflectionUtils.invokeMethod(decode, null, "UTF-16''test");
+	public void formatWithEncodedFilenameUsingInvalidCharset() {
+		builder("form-data").name("name").filename("test.txt", StandardCharsets.UTF_16).build().toString();
 	}
 
 }

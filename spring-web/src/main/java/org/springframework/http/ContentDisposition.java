@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183</a>
  */
 public final class ContentDisposition {
+
+	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
+			"Invalid header field parameter format (as defined in RFC 5987)";
+
 
 	@Nullable
 	private final String type;
@@ -201,11 +205,11 @@ public final class ContentDisposition {
 		if (this.filename != null) {
 			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
 				sb.append("; filename=\"");
-				sb.append(this.filename).append('\"');
+				sb.append(escapeQuotationsInFilename(this.filename)).append('\"');
 			}
 			else {
 				sb.append("; filename*=");
-				sb.append(encodeHeaderFieldParam(this.filename, this.charset));
+				sb.append(encodeFilename(this.filename, this.charset));
 			}
 		}
 		if (this.size != null) {
@@ -271,15 +275,23 @@ public final class ContentDisposition {
 				String attribute = part.substring(0, eqIndex);
 				String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
 						part.substring(eqIndex + 2, part.length() - 1) :
-						part.substring(eqIndex + 1, part.length()));
+						part.substring(eqIndex + 1));
 				if (attribute.equals("name") ) {
 					name = value;
 				}
 				else if (attribute.equals("filename*") ) {
-					filename = decodeHeaderFieldParam(value);
-					charset = Charset.forName(value.substring(0, value.indexOf('\'')).trim());
-					Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-							"Charset should be UTF-8 or ISO-8859-1");
+					int idx1 = value.indexOf('\'');
+					int idx2 = value.indexOf('\'', idx1 + 1);
+					if (idx1 != -1 && idx2 != -1) {
+						charset = Charset.forName(value.substring(0, idx1).trim());
+						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+								"Charset should be UTF-8 or ISO-8859-1");
+						filename = decodeFilename(value.substring(idx2 + 1), charset);
+					}
+					else {
+						// US ASCII
+						filename = decodeFilename(value, StandardCharsets.US_ASCII);
+					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
 					filename = value;
@@ -359,22 +371,15 @@ public final class ContentDisposition {
 	/**
 	 * Decode the given header field param as describe in RFC 5987.
 	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
-	 * @param input the header field param
+	 * @param filename the header field param
+	 * @param charset the charset to use
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String decodeHeaderFieldParam(String input) {
-		Assert.notNull(input, "Input String should not be null");
-		int firstQuoteIndex = input.indexOf('\'');
-		int secondQuoteIndex = input.indexOf('\'', firstQuoteIndex + 1);
-		// US_ASCII
-		if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
-			return input;
-		}
-		Charset charset = Charset.forName(input.substring(0, firstQuoteIndex).trim());
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-				"Charset should be UTF-8 or ISO-8859-1");
-		byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
+	private static String decodeFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'input' String` should not be null");
+		Assert.notNull(charset, "'charset' should not be null");
+		byte[] value = filename.getBytes(charset);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		int index = 0;
 		while (index < value.length) {
@@ -383,13 +388,18 @@ public final class ContentDisposition {
 				bos.write((char) b);
 				index++;
 			}
-			else if (b == '%') {
-				char[] array = { (char)value[index + 1], (char)value[index + 2]};
-				bos.write(Integer.parseInt(String.valueOf(array), 16));
+			else if (b == '%' && index < value.length - 2) {
+				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
+				try {
+					bos.write(Integer.parseInt(String.valueOf(array), 16));
+				}
+				catch (NumberFormatException ex) {
+					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
+				}
 				index+=3;
 			}
 			else {
-				throw new IllegalArgumentException("Invalid header field parameter format (as defined in RFC 5987)");
+				throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT);
 			}
 		}
 		return new String(bos.toByteArray(), charset);
@@ -401,6 +411,23 @@ public final class ContentDisposition {
 				c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
 	}
 
+	private static String escapeQuotationsInFilename(String filename) {
+		if (filename.indexOf('"') == -1 && filename.indexOf('\\') == -1) {
+			return filename;
+		}
+		boolean escaped = false;
+		StringBuilder sb = new StringBuilder();
+		for (char c : filename.toCharArray()) {
+			sb.append((c == '"' && !escaped) ? "\\\"" : c);
+			escaped = (!escaped && c == '\\');
+		}
+		// Remove backslash at the end..
+		if (escaped) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Encode the given header field param as describe in RFC 5987.
 	 * @param input the header field param
@@ -409,14 +436,11 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String encodeHeaderFieldParam(String input, Charset charset) {
-		Assert.notNull(input, "Input String should not be null");
-		Assert.notNull(charset, "Charset should not be null");
-		if (StandardCharsets.US_ASCII.equals(charset)) {
-			return input;
-		}
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-				"Charset should be UTF-8 or ISO-8859-1");
+	private static String encodeFilename(String input, Charset charset) {
+		Assert.notNull(input, "`input` is required");
+		Assert.notNull(charset, "`charset` is required");
+		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 supported.");
 		byte[] source = input.getBytes(charset);
 		int len = source.length;
 		StringBuilder sb = new StringBuilder(len << 1);
@@ -449,7 +473,11 @@ public final class ContentDisposition {
 		Builder name(String name);
 
 		/**
-		 * Set the value of the {@literal filename} parameter.
+		 * Set the value of the {@literal filename} parameter. The given
+		 * filename will be formatted as quoted-string, as defined in RFC 2616,
+		 * section 2.2, and any quote characters within the filename value will
+		 * be escaped with a backslash, e.g. {@code "foo\"bar.txt"} becomes
+		 * {@code "foo\\\"bar.txt"}.
 		 */
 		Builder filename(String filename);
 
@@ -530,12 +558,14 @@ public final class ContentDisposition {
 
 		@Override
 		public Builder filename(String filename) {
+			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			return this;
 		}
 
 		@Override
 		public Builder filename(String filename, Charset charset) {
+			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			this.charset = charset;
 			return this;
