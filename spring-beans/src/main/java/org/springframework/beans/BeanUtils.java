@@ -523,7 +523,8 @@ public abstract class BeanUtils {
 				return null;
 			}
 		}
-		String editorName = targetType.getName() + "Editor";
+		String targetTypeName = targetType.getName();
+		String editorName = targetTypeName + "Editor";
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
@@ -539,7 +540,7 @@ public abstract class BeanUtils {
 		catch (ClassNotFoundException ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No property editor [" + editorName + "] found for type " +
-						targetType.getName() + " according to 'Editor' suffix convention");
+						targetTypeName + " according to 'Editor' suffix convention");
 			}
 			unknownEditorTypes.add(targetType);
 			return null;
