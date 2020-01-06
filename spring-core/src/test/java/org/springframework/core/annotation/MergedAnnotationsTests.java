@@ -43,9 +43,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
+import org.springframework.core.testfixture.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Indexed;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
@@ -1770,7 +1770,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<Component> annotation = MergedAnnotation.of(Component.class, map);
 		assertThatIllegalStateException().isThrownBy(() -> annotation.synthesize().value())
 				.withMessage("Attribute 'value' in annotation " +
-						"org.springframework.stereotype.Component should be " +
+						"org.springframework.core.testfixture.stereotype.Component should be " +
 						"compatible with java.lang.String but a java.lang.Long value was returned");
 	}
 

@@ -30,6 +30,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 

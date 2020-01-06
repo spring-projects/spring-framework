@@ -24,6 +24,10 @@ dependencies {
 	optional("javax.transaction:javax.transaction-api")  // for @javax.transaction.Transactional support
 	testCompile(project(":spring-core"))  // for CodeStyleAspect
 	testCompile(project(":spring-test"))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-context-support")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile("javax.mail:javax.mail-api")
 	testCompileOnly("org.aspectj:aspectjrt")
 }

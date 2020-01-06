@@ -9,7 +9,7 @@
 
 	<bean id="adrian" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="name" value="adrian"/>
 				<property name="age" value="34"/>
 			</bean>

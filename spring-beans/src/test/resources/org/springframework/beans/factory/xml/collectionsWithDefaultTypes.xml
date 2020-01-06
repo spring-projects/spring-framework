@@ -3,7 +3,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someList">
 			<list value-type="java.lang.Integer">
 				<value>1</value>
@@ -28,7 +28,7 @@
 		</property>
 	</bean>
 
-	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean2" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someMap">
 			<map key-type="java.lang.Integer" value-type="java.lang.Boolean">
 				<entry>

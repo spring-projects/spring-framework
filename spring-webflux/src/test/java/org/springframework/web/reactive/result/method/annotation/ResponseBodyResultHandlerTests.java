@@ -42,7 +42,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also

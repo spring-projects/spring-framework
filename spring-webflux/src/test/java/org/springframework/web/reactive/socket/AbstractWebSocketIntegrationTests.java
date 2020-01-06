@@ -44,11 +44,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -64,6 +59,11 @@ import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyReques
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement

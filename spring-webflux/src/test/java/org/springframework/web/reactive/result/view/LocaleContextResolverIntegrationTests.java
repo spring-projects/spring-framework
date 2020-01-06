@@ -30,7 +30,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +41,7 @@ import org.springframework.web.reactive.result.method.annotation.AbstractRequest
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.i18n.FixedLocaleContextResolver;
 import org.springframework.web.server.i18n.LocaleContextResolver;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

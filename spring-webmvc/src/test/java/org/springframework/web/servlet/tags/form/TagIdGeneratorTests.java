@@ -22,7 +22,7 @@ import javax.servlet.jsp.PageContext;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -23,14 +23,14 @@ import test.mixin.LockedException;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.advice.CountingBeforeAdvice;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.TimeStamped;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

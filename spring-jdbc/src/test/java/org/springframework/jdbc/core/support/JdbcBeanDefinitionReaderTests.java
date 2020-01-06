@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -49,7 +49,7 @@ public class JdbcBeanDefinitionReaderTests {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(1)).willReturn("one", "one");
 		given(resultSet.getString(2)).willReturn("(class)", "age");
-		given(resultSet.getString(3)).willReturn("org.springframework.tests.sample.beans.TestBean", "53");
+		given(resultSet.getString(3)).willReturn("org.springframework.beans.testfixture.beans.TestBean", "53");
 
 		Statement statement = mock(Statement.class);
 		given(statement.executeQuery(sql)).willReturn(resultSet);
@@ -66,4 +66,5 @@ public class JdbcBeanDefinitionReaderTests {
 		verify(resultSet).close();
 		verify(statement).close();
 	}
+
 }

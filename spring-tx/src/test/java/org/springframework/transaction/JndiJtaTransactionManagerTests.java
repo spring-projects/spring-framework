@@ -23,7 +23,7 @@ import javax.transaction.UserTransaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;

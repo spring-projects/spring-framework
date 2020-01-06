@@ -21,8 +21,8 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

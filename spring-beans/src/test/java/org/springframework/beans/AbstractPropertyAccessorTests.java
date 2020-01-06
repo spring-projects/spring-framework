@@ -43,18 +43,18 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.beans.testfixture.beans.BooleanTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.NumberTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.sample.beans.BooleanTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.NumberTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -62,7 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.

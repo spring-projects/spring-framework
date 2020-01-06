@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.FactoryMethods;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 /**
  * Test class for Spring's ability to create objects using

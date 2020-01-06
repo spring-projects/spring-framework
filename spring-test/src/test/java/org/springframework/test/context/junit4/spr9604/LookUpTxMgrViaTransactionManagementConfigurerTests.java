@@ -25,10 +25,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

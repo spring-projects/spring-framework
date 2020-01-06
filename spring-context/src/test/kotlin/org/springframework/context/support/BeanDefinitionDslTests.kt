@@ -25,7 +25,7 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
-import org.springframework.mock.env.MockPropertySource
+import org.springframework.core.testfixture.env.MockPropertySource
 import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")

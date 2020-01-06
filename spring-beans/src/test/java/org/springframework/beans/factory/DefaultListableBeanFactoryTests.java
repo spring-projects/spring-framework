@@ -78,6 +78,14 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.testfixture.beans.DependenciesBean;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.NestedTestBean;
+import org.springframework.beans.testfixture.beans.SideEffectBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -86,19 +94,12 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.DependenciesBean;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.LifecycleBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.SideEffectBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
 
@@ -3248,38 +3249,6 @@ class DefaultListableBeanFactoryTests {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
-		}
-	}
-
-
-	private static class TestPrincipal implements Principal {
-
-		private String name;
-
-		public TestPrincipal(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if (!(obj instanceof TestPrincipal)) {
-				return false;
-			}
-			TestPrincipal p = (TestPrincipal) obj;
-			return this.name.equals(p.name);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.name.hashCode();
 		}
 	}
 

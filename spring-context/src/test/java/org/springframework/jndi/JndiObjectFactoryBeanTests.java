@@ -22,10 +22,10 @@ import javax.naming.NamingException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -365,7 +365,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setProxyInterface(ITestBean.class);
 		assertThatExceptionOfType(NamingException.class).isThrownBy(
 				jof::afterPropertiesSet)
-			.withMessageContaining("org.springframework.tests.sample.beans.DerivedTestBean");
+			.withMessageContaining("org.springframework.beans.testfixture.beans.DerivedTestBean");
 	}
 
 	@Test

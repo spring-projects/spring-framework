@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ public class CachedIntrospectionResultsTests {
 		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class)).isTrue();
 
 		ClassLoader child = new OverridingClassLoader(getClass().getClassLoader());
-		Class<?> tbClass = child.loadClass("org.springframework.tests.sample.beans.TestBean");
+		Class<?> tbClass = child.loadClass("org.springframework.beans.testfixture.beans.TestBean");
 		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(tbClass)).isFalse();
 		CachedIntrospectionResults.acceptClassLoader(child);
 		bw = new BeanWrapperImpl(tbClass);

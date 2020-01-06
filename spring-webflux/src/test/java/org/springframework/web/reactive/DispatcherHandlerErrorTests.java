@@ -33,8 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +47,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;

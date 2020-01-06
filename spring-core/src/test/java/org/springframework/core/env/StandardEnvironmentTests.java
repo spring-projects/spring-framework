@@ -16,17 +16,16 @@
 
 package org.springframework.core.env;
 
-import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -465,8 +464,8 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void getSystemEnvironment_withAndWithoutSecurityManager() {
-		getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
-		getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
+		EnvironmentTestUtils.getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
+		EnvironmentTestUtils.getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 
 		{
 			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
@@ -500,68 +499,8 @@ public class StandardEnvironmentTests {
 		}
 
 		System.setSecurityManager(oldSecurityManager);
-		getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
-		getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
-	}
-
-
-	@SuppressWarnings("unchecked")
-	public static Map<String, String> getModifiableSystemEnvironment() {
-		// for os x / linux
-		Class<?>[] classes = Collections.class.getDeclaredClasses();
-		Map<String, String> env = System.getenv();
-		for (Class<?> cl : classes) {
-			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
-				try {
-					Field field = cl.getDeclaredField("m");
-					field.setAccessible(true);
-					Object obj = field.get(env);
-					if (obj != null && obj.getClass().getName().equals("java.lang.ProcessEnvironment$StringEnvironment")) {
-						return (Map<String, String>) obj;
-					}
-				}
-				catch (Exception ex) {
-					throw new RuntimeException(ex);
-				}
-			}
-		}
-
-		// for windows
-		Class<?> processEnvironmentClass;
-		try {
-			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		try {
-			Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
-			theCaseInsensitiveEnvironmentField.setAccessible(true);
-			Object obj = theCaseInsensitiveEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		}
-		catch (NoSuchFieldException ex) {
-			// do nothing
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		try {
-			Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
-			theEnvironmentField.setAccessible(true);
-			Object obj = theEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		}
-		catch (NoSuchFieldException ex) {
-			// do nothing
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		throw new IllegalStateException();
+		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
+		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
 
 }

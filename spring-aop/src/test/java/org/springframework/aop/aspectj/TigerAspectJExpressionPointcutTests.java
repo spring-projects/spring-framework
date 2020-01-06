@@ -27,7 +27,7 @@ import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +56,7 @@ public class TigerAspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchGenericArgument() {
-		String expression = "execution(* set*(java.util.List<org.springframework.tests.sample.beans.TestBean>) )";
+		String expression = "execution(* set*(java.util.List<org.springframework.beans.testfixture.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
 

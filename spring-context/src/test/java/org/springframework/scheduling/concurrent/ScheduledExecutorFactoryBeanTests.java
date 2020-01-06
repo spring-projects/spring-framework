@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.NoOpRunnable;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Rick Evans

@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.index.CandidateComponentsTestClassLoader;
+import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;

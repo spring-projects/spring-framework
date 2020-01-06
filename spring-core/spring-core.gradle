@@ -60,6 +60,13 @@ dependencies {
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml.woodstox:woodstox-core")
 	testCompile(project(":kotlin-coroutines"))
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 }
 
 jar {

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
@@ -33,6 +32,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.beans.CacheableService;
+import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

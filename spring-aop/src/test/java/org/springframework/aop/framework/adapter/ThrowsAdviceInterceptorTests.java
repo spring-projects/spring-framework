@@ -17,16 +17,13 @@
 package org.springframework.aop.framework.adapter;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.ThrowsAdvice;
-import org.springframework.tests.aop.advice.MethodCounter;
+import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -126,25 +123,6 @@ public class ThrowsAdviceInterceptorTests {
 			.isSameAs(t);
 		assertThat(th.getCalls()).isEqualTo(1);
 		assertThat(th.getCalls("remoteException")).isEqualTo(1);
-	}
-
-
-	@SuppressWarnings("serial")
-	static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
-
-		// Full method signature
-		public void afterThrowing(Method m, Object[] args, Object target, IOException ex) {
-			count("ioException");
-		}
-
-		public void afterThrowing(RemoteException ex) throws Throwable {
-			count("remoteException");
-		}
-
-		/** Not valid, wrong number of arguments */
-		public void afterThrowing(Method m, Exception ex) throws Throwable {
-			throw new UnsupportedOperationException("Shouldn't be called");
-		}
 	}
 
 }
