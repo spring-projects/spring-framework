@@ -57,7 +57,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Mainly for internal use within the framework, but to some degree also
  * useful for application classes. Consider
- * <a href="http://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
+ * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
  * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
  * or similar third-party frameworks for more comprehensive bean utilities.
  *
