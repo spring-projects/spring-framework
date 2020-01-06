@@ -240,10 +240,12 @@ public final class WebHttpHandlerBuilder {
 		}
 
 		List<WebFilter> filtersToUse = this.filters.stream()
-				.peek(filter -> {
+				.map(filter -> {
 					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
 						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
 					}
+
+					return filter;
 				})
 				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))
 				.collect(Collectors.toList());
