@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		// Success and error responses may use different content types
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!exchange.getResponse().isCommitted()) {
-			exchange.getResponse().getHeaders().remove(HttpHeaders.CONTENT_TYPE);
+			HttpHeaders.clearContentHeaders(exchange.getResponse().getHeaders());
 		}
 
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);

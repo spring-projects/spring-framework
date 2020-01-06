@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,21 +181,22 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		if (body instanceof Mono) {
 			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
 					doCommit(() -> writeWithInternal(Mono.just(buffer)))
-							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))
+					.doOnError(t -> clearContentHeaders());
 		}
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
-				.doOnError(t -> removeContentLength());
+				.doOnError(t -> clearContentHeaders());
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeAndFlushWithInternal(inner)))
-				.doOnError(t -> removeContentLength());
+				.doOnError(t -> clearContentHeaders());
 	}
 
-	private void removeContentLength() {
+	private void clearContentHeaders() {
 		if (!this.isCommitted()) {
-			this.getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+			HttpHeaders.clearContentHeaders(this.getHeaders());
 		}
 	}
 

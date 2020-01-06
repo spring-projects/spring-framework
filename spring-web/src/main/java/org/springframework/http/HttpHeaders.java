@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1825,6 +1825,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String credentialsString = username + ":" + password;
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
 		return new String(encodedBytes, charset);
+	}
+
+	/**
+	 * Remove the well-known {@code "Content-*"} HTTP headers from the given instance.
+	 * <p>Such headers should be cleared, if possible, from the response if the intended
+	 * body can't be written due to errors.
+	 * @since 5.2.3
+	 */
+	public static void clearContentHeaders(HttpHeaders headers) {
+		headers.remove(HttpHeaders.CONTENT_DISPOSITION);
+		headers.remove(HttpHeaders.CONTENT_ENCODING);
+		headers.remove(HttpHeaders.CONTENT_LANGUAGE);
+		headers.remove(HttpHeaders.CONTENT_LENGTH);
+		headers.remove(HttpHeaders.CONTENT_LOCATION);
+		headers.remove(HttpHeaders.CONTENT_RANGE);
+		headers.remove(HttpHeaders.CONTENT_TYPE);
 	}
 
 	// Package-private: used in ResponseCookie
