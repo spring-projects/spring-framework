@@ -182,22 +182,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
 					doCommit(() -> writeWithInternal(Mono.just(buffer)))
 							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))
-					.doOnError(t -> clearContentHeaders());
+					.doOnError(t -> this.getHeaders().clearContentHeaders());
 		}
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
-				.doOnError(t -> clearContentHeaders());
+				.doOnError(t -> this.getHeaders().clearContentHeaders());
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeAndFlushWithInternal(inner)))
-				.doOnError(t -> clearContentHeaders());
-	}
-
-	private void clearContentHeaders() {
-		if (!this.isCommitted()) {
-			HttpHeaders.clearContentHeaders(this.getHeaders());
-		}
+				.doOnError(t -> this.getHeaders().clearContentHeaders());
 	}
 
 	@Override

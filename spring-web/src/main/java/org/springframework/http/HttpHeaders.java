@@ -1523,6 +1523,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Remove the well-known {@code "Content-*"} HTTP headers.
+	 * <p>Such headers should be cleared from the response if the intended
+	 * body can't be written due to errors.
+	 * @since 5.2.3
+	 */
+	public void clearContentHeaders() {
+		this.headers.remove(HttpHeaders.CONTENT_DISPOSITION);
+		this.headers.remove(HttpHeaders.CONTENT_ENCODING);
+		this.headers.remove(HttpHeaders.CONTENT_LANGUAGE);
+		this.headers.remove(HttpHeaders.CONTENT_LENGTH);
+		this.headers.remove(HttpHeaders.CONTENT_LOCATION);
+		this.headers.remove(HttpHeaders.CONTENT_RANGE);
+		this.headers.remove(HttpHeaders.CONTENT_TYPE);
+	}
+
+	/**
 	 * Retrieve a combined result from the field values of the ETag header.
 	 * @param headerName the header name
 	 * @return the combined result
@@ -1825,22 +1841,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String credentialsString = username + ":" + password;
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
 		return new String(encodedBytes, charset);
-	}
-
-	/**
-	 * Remove the well-known {@code "Content-*"} HTTP headers from the given instance.
-	 * <p>Such headers should be cleared, if possible, from the response if the intended
-	 * body can't be written due to errors.
-	 * @since 5.2.3
-	 */
-	public static void clearContentHeaders(HttpHeaders headers) {
-		headers.remove(HttpHeaders.CONTENT_DISPOSITION);
-		headers.remove(HttpHeaders.CONTENT_ENCODING);
-		headers.remove(HttpHeaders.CONTENT_LANGUAGE);
-		headers.remove(HttpHeaders.CONTENT_LENGTH);
-		headers.remove(HttpHeaders.CONTENT_LOCATION);
-		headers.remove(HttpHeaders.CONTENT_RANGE);
-		headers.remove(HttpHeaders.CONTENT_TYPE);
 	}
 
 	// Package-private: used in ResponseCookie
