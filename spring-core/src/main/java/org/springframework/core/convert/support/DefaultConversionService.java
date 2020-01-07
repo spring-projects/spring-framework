@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.lang.Nullable;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A specialization of {@link GenericConversionService} configured by default
@@ -36,12 +36,13 @@ import org.springframework.lang.Nullable;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 3.1
  */
 public class DefaultConversionService extends GenericConversionService {
 
-	@Nullable
-	private static volatile DefaultConversionService sharedInstance;
+	private static SingletonSupplier<DefaultConversionService> singletonSupplier = SingletonSupplier
+	.of(DefaultConversionService::new);
 
 
 	/**
@@ -65,17 +66,7 @@ public class DefaultConversionService extends GenericConversionService {
 	 * @since 4.3.5
 	 */
 	public static ConversionService getSharedInstance() {
-		DefaultConversionService cs = sharedInstance;
-		if (cs == null) {
-			synchronized (DefaultConversionService.class) {
-				cs = sharedInstance;
-				if (cs == null) {
-					cs = new DefaultConversionService();
-					sharedInstance = cs;
-				}
-			}
-		}
-		return cs;
+		return singletonSupplier.obtain();
 	}
 
 	/**

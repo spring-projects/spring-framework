@@ -36,6 +36,7 @@ import rx.RxReactiveStreams;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from
@@ -48,12 +49,13 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.0
  */
 public class ReactiveAdapterRegistry {
 
-	@Nullable
-	private static volatile ReactiveAdapterRegistry sharedInstance;
+	private static SingletonSupplier<ReactiveAdapterRegistry> singletonSupplier = SingletonSupplier
+	.of(ReactiveAdapterRegistry::new);
 
 	private final boolean reactorPresent;
 
@@ -179,17 +181,7 @@ public class ReactiveAdapterRegistry {
 	 * @since 5.0.2
 	 */
 	public static ReactiveAdapterRegistry getSharedInstance() {
-		ReactiveAdapterRegistry registry = sharedInstance;
-		if (registry == null) {
-			synchronized (ReactiveAdapterRegistry.class) {
-				registry = sharedInstance;
-				if (registry == null) {
-					registry = new ReactiveAdapterRegistry();
-					sharedInstance = registry;
-				}
-			}
-		}
-		return registry;
+		return singletonSupplier.obtain();
 	}
 
 
