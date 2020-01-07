@@ -233,7 +233,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * This implementation returns the underlying file's length.
 	 */
 	@Override
-	public long contentLength() throws IOException {
+	public Long contentLength() throws IOException {
 		return Files.size(this.path);
 	}
 

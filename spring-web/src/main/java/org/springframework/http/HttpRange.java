@@ -198,7 +198,8 @@ public abstract class HttpRange {
 
 	private static long getLengthFor(Resource resource) {
 		try {
-			long contentLength = resource.contentLength();
+			Long contentLength = resource.contentLength();
+			Assert.isTrue(contentLength != null, "Resource content length should be known");
 			Assert.isTrue(contentLength > 0, "Resource content length should be > 0");
 			return contentLength;
 		}

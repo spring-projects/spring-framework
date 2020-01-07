@@ -156,7 +156,7 @@ public abstract class AbstractResource implements Resource {
 	 * @see #getInputStream()
 	 */
 	@Override
-	public long contentLength() throws IOException {
+	public Long contentLength() throws IOException {
 		InputStream is = getInputStream();
 		try {
 			long size = 0;

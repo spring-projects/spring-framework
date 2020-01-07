@@ -222,7 +222,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	@Override
-	public long contentLength() throws IOException {
+	public Long contentLength() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url)) {
 			// Proceed with file system resolution

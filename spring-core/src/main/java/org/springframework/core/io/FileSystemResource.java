@@ -272,7 +272,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation returns the underlying File/Path length.
 	 */
 	@Override
-	public long contentLength() throws IOException {
+	public Long contentLength() throws IOException {
 		if (this.file != null) {
 			long length = this.file.length();
 			if (length == 0L && !this.file.exists()) {

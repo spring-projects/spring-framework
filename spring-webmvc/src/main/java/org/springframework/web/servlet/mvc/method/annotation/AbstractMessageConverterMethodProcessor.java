@@ -332,7 +332,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	protected boolean isResourceType(@Nullable Object value, MethodParameter returnType) {
 		Class<?> clazz = getReturnValueType(value, returnType);
-		return clazz != InputStreamResource.class && Resource.class.isAssignableFrom(clazz);
+		return clazz != InputStreamResource.class && Resource.class.isAssignableFrom(clazz) && ((Resource) value).contentLength() != null;
 	}
 
 	/**

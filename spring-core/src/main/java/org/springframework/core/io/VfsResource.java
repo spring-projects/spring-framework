@@ -97,7 +97,7 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
-	public long contentLength() throws IOException {
+	public Long contentLength() throws IOException {
 		return VfsUtils.getSize(this.resource);
 	}
 

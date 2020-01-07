@@ -153,7 +153,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		// Don't consume InputStream...
 		if (InputStreamResource.class != resource.getClass()) {
 			try {
-				return resource.contentLength();
+				Long length = resource.contentLength();
+				return length == null ? -1 : length;
 			}
 			catch (IOException ignored) {
 			}
@@ -209,7 +210,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
-			if (regions.size() == 1){
+			if (regions.size() == 1) {
 				ResourceRegion region = regions.get(0);
 				headers.setContentType(resourceMediaType);
 				long contentLength = lengthOf(resource);

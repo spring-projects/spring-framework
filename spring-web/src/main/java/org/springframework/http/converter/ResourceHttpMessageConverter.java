@@ -113,8 +113,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (InputStreamResource.class == resource.getClass()) {
 			return null;
 		}
-		long contentLength = resource.contentLength();
-		return (contentLength < 0 ? null : contentLength);
+		Long contentLength = resource.contentLength();
+		return (contentLength == null || contentLength < 0) ? null : contentLength;
 	}
 
 	@Override

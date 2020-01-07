@@ -86,7 +86,7 @@ public class ByteArrayResource extends AbstractResource {
 	 * This implementation returns the length of the underlying byte array.
 	 */
 	@Override
-	public long contentLength() {
+	public Long contentLength() {
 		return this.byteArray.length;
 	}
 

@@ -140,7 +140,7 @@ public interface Resource extends InputStreamSource {
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */
-	long contentLength() throws IOException;
+	Long contentLength() throws IOException;
 
 	/**
 	 * Determine the last-modified timestamp for this resource.
