@@ -57,6 +57,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
  * @see javax.inject.Named#value()
+ * @see FullyQualifiedAnnotationBeanNameGenerator
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
