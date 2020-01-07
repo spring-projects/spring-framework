@@ -73,7 +73,9 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 			throw new IllegalStateException(
 					"No MethodInvocation found: Check that an AOP invocation is in progress, and that the " +
 					"ExposeInvocationInterceptor is upfront in the interceptor chain. Specifically, note that " +
-					"advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!");
+					"advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor! " +
+					"Check that ExposeInvocationInterceptor and ExposeInvocationInterceptor.currentInvocation() " +
+					"invoke in one Thread");
 		}
 		return mi;
 	}
