@@ -164,10 +164,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			connectionHolder.setSynchronizedWithTransaction(true);
 
 			con.getLocalTransaction().begin();
-			int timeout = determineTimeout(definition);
-			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				connectionHolder.setTimeoutInSeconds(timeout);
-			}
+			connectionHolder.setTimeoutInSeconds(determineTimeout(definition));
 
 			txObject.setConnectionHolder(connectionHolder);
 			TransactionSynchronizationManager.bindResource(connectionFactory, connectionHolder);
