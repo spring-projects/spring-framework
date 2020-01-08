@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,10 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
-
 				@Override
-				public long contentLength() {
-					return inputMessage.getHeaders().getContentLength();
+				public long contentLength() throws IOException {
+					long length = inputMessage.getHeaders().getContentLength();
+					return (length != -1 ? length : super.contentLength());
 				}
 			};
 		}
