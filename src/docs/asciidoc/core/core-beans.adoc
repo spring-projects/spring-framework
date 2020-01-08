@@ -6941,12 +6941,19 @@ classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 	}
 ----
 
-NOTE: If you do not want to rely on the default bean-naming strategy, you can provide a
-custom bean-naming strategy. First, implement the
+If you do not want to rely on the default bean-naming strategy, you can provide a custom
+bean-naming strategy. First, implement the
 {api-spring-framework}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the fully
 qualified class name when configuring the scanner, as the following example annotation
-and bean definition show:
+and bean definition show.
+
+TIP: If you run into naming conflicts due to multiple autodetected components having the
+same non-qualified class name (i.e., classes with identical names but residing in
+different packages), you may need to configure a `BeanNameGenerator` that defaults to the
+fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+`FullyQualifiedAnnotationBeanNameGenerator` located in package
+`org.springframework.context.annotation` can be used for such purposes.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

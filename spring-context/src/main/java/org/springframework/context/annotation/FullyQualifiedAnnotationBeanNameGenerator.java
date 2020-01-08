@@ -25,6 +25,11 @@ import org.springframework.util.Assert;
  * a supported type-level annotation such as {@code @Component} (see
  * {@link AnnotationBeanNameGenerator} for details on supported annotations).
  *
+ * <p>Favor this bean naming strategy over {@code AnnotationBeanNameGenerator} if
+ * you run into naming conflicts due to multiple autodetected components having the
+ * same non-qualified class name (i.e., classes with identical names but residing in
+ * different packages).
+ *
  * <p>Note that an instance of this class is used by default for configuration-level
  * import purposes; whereas, the default for component scanning purposes is a plain
  * {@code AnnotationBeanNameGenerator}.
