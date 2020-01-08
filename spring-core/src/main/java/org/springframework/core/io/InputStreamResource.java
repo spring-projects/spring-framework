@@ -18,6 +18,7 @@ package org.springframework.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -36,6 +37,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 28.12.2003
  * @see ByteArrayResource
  * @see ClassPathResource
@@ -48,7 +50,7 @@ public class InputStreamResource extends AbstractResource {
 
 	private final String description;
 
-	private boolean read = false;
+	private AtomicBoolean read = new AtomicBoolean(false);
 
 
 	/**
@@ -93,11 +95,10 @@ public class InputStreamResource extends AbstractResource {
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException, IllegalStateException {
-		if (this.read) {
+		if (!this.read.compareAndSet(false, true)) {
 			throw new IllegalStateException("InputStream has already been read - " +
 					"do not use InputStreamResource if a stream needs to be read multiple times");
 		}
-		this.read = true;
 		return this.inputStream;
 	}
 
