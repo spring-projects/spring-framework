@@ -39,7 +39,11 @@ public class SimpleKey implements Serializable {
 
 	private final Object[] params;
 
-	private final int hashCode;
+	/** The basic Object.hashCode functionality is to derive the hash code from a runtime-specific object identity. This
+	 * makes SimpleKey hash codes unsafe to serialize and share with other JVM runtimes, since if the SimpleKey has any parameters
+	 * of an object type that uses an identity hash code a hashcode received from another runtime will not match the hashcode
+	 * the receiving runtime would produce for an equal SimpleKey instance. */
+	private transient int hashCode;
 
 
 	/**
@@ -61,6 +65,10 @@ public class SimpleKey implements Serializable {
 
 	@Override
 	public final int hashCode() {
+		// If this instance was deserialized instead of constructed its hashCode may not be initialized.
+		if (this.hashCode == 0) {
+			this.hashCode = Arrays.deepHashCode(this.params);
+		}
 		return this.hashCode;
 	}
 
