@@ -39,10 +39,20 @@ public class SimpleKey implements Serializable {
 
 	private final Object[] params;
 
-	/** The basic Object.hashCode functionality is to derive the hash code from a runtime-specific object identity. This
-	 * makes SimpleKey hash codes unsafe to serialize and share with other JVM runtimes, since if the SimpleKey has any parameters
-	 * of an object type that uses an identity hash code a hashcode received from another runtime will not match the hashcode
-	 * the receiving runtime would produce for an equal SimpleKey instance. */
+	/**
+	 * The basic Object.hashCode functionality is to derive the hash code from
+	 * a runtime-specific object identity. This makes SimpleKey hash codes unsafe
+	 * to serialize and share with other JVM runtimes, since if the SimpleKey has
+	 * any parameters of an object type that uses an identity hash code, a hash
+	 * code received from another runtime will not match the hash code the
+	 * receiving runtime would produce for an equal SimpleKey instance.
+	 *
+	 * For most object types this is not likely to cause a problem because an
+	 * identity-based hash code implies an identity-based equals method, and objects
+	 * like that are unlikely to make good cache keys in the first place. But
+	 * enums are a big exception - they are singletons with special serialization
+	 * rules and are fine cache key parameters, but it is important not to
+	 * share their identity-based hash codes. */
 	private transient int hashCode;
 
 
