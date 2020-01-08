@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,6 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
-	/** Path separator: "/". */
-	public static final String PATH_SEPARATOR = "/";
 
 	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
 
@@ -547,7 +545,10 @@ public class MvcUriComponentsBuilder {
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		builder.path(path.startsWith(PATH_SEPARATOR) ? path : PATH_SEPARATOR + path);
+		if (StringUtils.hasLength(path) && !path.startsWith("/")) {
+			path = "/" + path;
+		}
+		builder.path(path);
 
 		return applyContributors(builder, method, args);
 	}
@@ -578,11 +579,11 @@ public class MvcUriComponentsBuilder {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		RequestMapping mapping = AnnotatedElementUtils.findMergedAnnotation(controllerType, RequestMapping.class);
 		if (mapping == null) {
-			return PATH_SEPARATOR;
+			return "/";
 		}
 		String[] paths = mapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return PATH_SEPARATOR;
+			return "/";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + controllerType.getName());
@@ -598,7 +599,7 @@ public class MvcUriComponentsBuilder {
 		}
 		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return PATH_SEPARATOR;
+			return "/";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + method.toGenericString());
