@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -359,6 +360,28 @@ public class ResponseEntityResultHandlerTests {
 		HandlerResult result = handlerResult(value, returnType);
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		ResponseEntityResultHandler resultHandler = new ResponseEntityResultHandler(
+				Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
+				new RequestedContentTypeResolverBuilder().build()
+		);
+
+		StepVerifier.create(resultHandler.handleResult(exchange, result))
+				.consumeErrorWith(ex -> assertThat(ex)
+						.isInstanceOf(HttpMessageNotWritableException.class)
+						.hasMessageContaining("with preset Content-Type"))
+				.verify();
+	}
+
+	@Test // gh-23287
+	public void handleWithProducibleContentTypeShouldFailWithServerError() {
+		ResponseEntity<String> value = ResponseEntity.ok().body("<foo/>");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		HandlerResult result = handlerResult(value, returnType);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_XML);
+				exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+
 		ResponseEntityResultHandler resultHandler = new ResponseEntityResultHandler(
 				Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
 				new RequestedContentTypeResolverBuilder().build()

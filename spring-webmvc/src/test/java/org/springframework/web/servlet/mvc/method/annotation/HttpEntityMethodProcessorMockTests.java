@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -323,7 +324,24 @@ public class HttpEntityMethodProcessorMockTests {
 				.contentType(MediaType.APPLICATION_XML)
 				.body("<foo/>");
 
-		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
+		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
+		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+
+		assertThatThrownBy(() ->
+				processor.handleReturnValue(
+						returnValue, returnTypeResponseEntity, mavContainer, webRequest))
+				.isInstanceOf(HttpMessageNotWritableException.class)
+				.hasMessageContaining("with preset Content-Type");
+	}
+
+	@Test // gh-23287
+	public void shouldFailWithServerErrorIfContentTypeFromProducibleAttribute() {
+		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_XML);
+		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+
+		ResponseEntity<String> returnValue = ResponseEntity.ok().body("<foo/>");
+
+		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		assertThatThrownBy(() ->
