@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -867,8 +867,8 @@ public class MethodParameter {
 
 		/**
 		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type,
-		 * an optional parameter (with a default value in the Kotlin declaration) or a {@code Continuation} parameter
-		 * used in suspending functions.
+		 * an optional parameter (with a default value in the Kotlin declaration) or a
+		 * {@code Continuation} parameter used in suspending functions.
 		 */
 		public static boolean isOptional(MethodParameter param) {
 			Method method = param.getMethod();
@@ -880,16 +880,18 @@ public class MethodParameter {
 			KFunction<?> function;
 			Predicate<KParameter> predicate;
 			if (method != null) {
-				if (param.parameterType.getName().equals("kotlin.coroutines.Continuation")) {
+				if (param.getParameterType().getName().equals("kotlin.coroutines.Continuation")) {
 					return true;
 				}
 				function = ReflectJvmMapping.getKotlinFunction(method);
 				predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
 			}
 			else {
-				function = ReflectJvmMapping.getKotlinFunction(param.getConstructor());
-				predicate = p -> KParameter.Kind.VALUE.equals(p.getKind()) ||
-						KParameter.Kind.INSTANCE.equals(p.getKind());
+				Constructor<?> ctor = param.getConstructor();
+				Assert.state(ctor != null, "Neither method nor constructor found");
+				function = ReflectJvmMapping.getKotlinFunction(ctor);
+				predicate = p -> (KParameter.Kind.VALUE.equals(p.getKind()) ||
+						KParameter.Kind.INSTANCE.equals(p.getKind()));
 			}
 			if (function != null) {
 				int i = 0;

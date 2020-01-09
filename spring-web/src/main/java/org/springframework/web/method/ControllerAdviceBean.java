@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ControllerAdviceBean implements Ordered {
 	public int getOrder() {
 		if (this.order == null) {
 			Object resolvedBean = null;
-			if (this.beanOrName instanceof String) {
+			if (this.beanFactory != null && this.beanOrName instanceof String) {
 				String beanName = (String) this.beanOrName;
 				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
 				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);

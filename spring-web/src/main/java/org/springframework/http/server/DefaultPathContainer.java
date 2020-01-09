@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ final class DefaultPathContainer implements PathContainer {
 		}
 		List<Element> elements = new ArrayList<>();
 		int begin;
-		if (path.length() > 0 && path.charAt(0) == separator) {
+		if (path.charAt(0) == separator) {
 			begin = 1;
 			elements.add(separatorElement);
 		}
