@@ -20,11 +20,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
@@ -36,6 +39,8 @@ import org.springframework.http.ResponseCookie;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link AbstractServerHttpRequest}.
+ *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Brian Clozel
@@ -43,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ServerHttpResponseTests {
 
 	@Test
-	void writeWith() throws Exception {
+	void writeWith() {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
@@ -58,7 +63,7 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test  // SPR-14952
-	void writeAndFlushWithFluxOfDefaultDataBuffer() throws Exception {
+	void writeAndFlushWithFluxOfDefaultDataBuffer() {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		Flux<Flux<DefaultDataBuffer>> flux = Flux.just(Flux.just(wrap("foo")));
 		response.writeAndFlushWith(flux).block();
@@ -72,18 +77,18 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test
-	void writeWithFluxError() throws Exception {
+	void writeWithFluxError() {
 		IllegalStateException error = new IllegalStateException("boo");
 		writeWithError(Flux.error(error));
 	}
 
 	@Test
-	void writeWithMonoError() throws Exception {
+	void writeWithMonoError() {
 		IllegalStateException error = new IllegalStateException("boo");
 		writeWithError(Mono.error(error));
 	}
 
-	void writeWithError(Publisher<DataBuffer> body) throws Exception {
+	void writeWithError(Publisher<DataBuffer> body) {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		HttpHeaders headers = response.getHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -100,7 +105,7 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test
-	void setComplete() throws Exception {
+	void setComplete() {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.setComplete().block();
 
@@ -111,7 +116,7 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test
-	void beforeCommitWithComplete() throws Exception {
+	void beforeCommitWithComplete() {
 		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> Mono.fromRunnable(() -> response.getCookies().add(cookie.getName(), cookie)));
@@ -129,7 +134,7 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test
-	void beforeCommitActionWithSetComplete() throws Exception {
+	void beforeCommitActionWithSetComplete() {
 		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> {
@@ -143,6 +148,32 @@ public class ServerHttpResponseTests {
 		assertThat(response.cookiesWritten).isTrue();
 		assertThat(response.body.isEmpty()).isTrue();
 		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
+	}
+
+	@Test // gh-24186
+	void beforeCommitErrorShouldLeaveResponseNotCommitted() {
+
+		Consumer<Supplier<Mono<Void>>> tester = preCommitAction -> {
+			TestServerHttpResponse response = new TestServerHttpResponse();
+			response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+			response.getHeaders().setContentLength(3);
+			response.beforeCommit(preCommitAction);
+
+			StepVerifier.create(response.writeWith(Flux.just(wrap("body"))))
+					.expectErrorMessage("Max sessions")
+					.verify();
+
+			assertThat(response.statusCodeWritten).isFalse();
+			assertThat(response.headersWritten).isFalse();
+			assertThat(response.cookiesWritten).isFalse();
+			assertThat(response.isCommitted()).isFalse();
+			assertThat(response.getHeaders()).isEmpty();
+		};
+
+		tester.accept(() -> Mono.error(new IllegalStateException("Max sessions")));
+		tester.accept(() -> {
+			throw new IllegalStateException("Max sessions");
+		});
 	}
 
 

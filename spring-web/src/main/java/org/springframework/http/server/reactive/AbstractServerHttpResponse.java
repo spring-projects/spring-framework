@@ -176,22 +176,25 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		// Write as Mono if possible as an optimization hint to Reactor Netty
-		// ChannelSendOperator not necessary for Mono
+		// For Mono we can avoid ChannelSendOperator and Reactor Netty is more optimized for Mono.
+		// We must resolve value first however, for a chance to handle potential error.
 		if (body instanceof Mono) {
-			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
-					doCommit(() -> writeWithInternal(Mono.just(buffer)))
-							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))
-					.doOnError(t -> this.getHeaders().clearContentHeaders());
+			return ((Mono<? extends DataBuffer>) body)
+					.flatMap(buffer -> doCommit(() ->
+							writeWithInternal(Mono.fromCallable(() -> buffer)
+									.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))))
+					.doOnError(t -> getHeaders().clearContentHeaders());
 		}
-		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
-				.doOnError(t -> this.getHeaders().clearContentHeaders());
+		else {
+			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
+					.doOnError(t -> getHeaders().clearContentHeaders());
+		}
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeAndFlushWithInternal(inner)))
-				.doOnError(t -> this.getHeaders().clearContentHeaders());
+				.doOnError(t -> getHeaders().clearContentHeaders());
 	}
 
 	@Override
@@ -217,21 +220,30 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			return Mono.empty();
 		}
-		this.commitActions.add(() ->
-				Mono.fromRunnable(() -> {
-					applyStatusCode();
-					applyHeaders();
-					applyCookies();
-					this.state.set(State.COMMITTED);
-				}));
+
+		Flux<Void> allActions = Flux.empty();
+
+		if (!this.commitActions.isEmpty()) {
+			allActions = Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
+					.doOnError(ex -> {
+						if (this.state.compareAndSet(State.COMMITTING, State.NEW)) {
+							getHeaders().clearContentHeaders();
+						}
+					});
+		}
+
+		allActions = allActions.concatWith(Mono.fromRunnable(() -> {
+			applyStatusCode();
+			applyHeaders();
+			applyCookies();
+			this.state.set(State.COMMITTED);
+		}));
+
 		if (writeAction != null) {
-			this.commitActions.add(writeAction);
+			allActions = allActions.concatWith(writeAction.get());
 		}
-		Flux<Void> commit = Flux.empty();
-		for (Supplier<? extends Mono<Void>> action : this.commitActions) {
-			commit = commit.concatWith(action.get());
-		}
-		return commit.then();
+
+		return allActions.then();
 	}
 
 
