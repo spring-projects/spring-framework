@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 				entry 'log4j-slf4j-impl'
 				entry 'log4j-jul'
 			}
-			dependency "org.slf4j:slf4j-api:1.7.29"
+			dependency "org.slf4j:slf4j-api:1.7.30"
 
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
@@ -332,7 +332,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.27"
+		toolVersion = "8.28"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
