@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ClientCodecConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -229,6 +231,23 @@ public class DefaultWebClientTests {
 		builder1a.filters(filters -> assertThat(filters.size()).isEqualTo(2));
 		builder1a.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
 		builder1a.defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
+	}
+
+	@Test
+	void cloneBuilder() {
+		Consumer<ClientCodecConfigurer> codecsConfig = c -> {};
+		ExchangeFunction exchangeFunction = request -> Mono.empty();
+		WebClient.Builder builder = WebClient.builder().baseUrl("https://example.org")
+				.exchangeFunction(exchangeFunction)
+				.filter((request, next) -> Mono.empty())
+				.codecs(codecsConfig);
+
+		WebClient.Builder clonedBuilder = builder.clone();
+
+		assertThat(clonedBuilder).extracting("baseUrl").isEqualTo("https://example.org");
+		assertThat(clonedBuilder).extracting("filters").isNotNull();
+		assertThat(clonedBuilder).extracting("strategiesConfigurers").isNotNull();
+		assertThat(clonedBuilder).extracting("exchangeFunction").isEqualTo(exchangeFunction);
 	}
 
 	@Test
