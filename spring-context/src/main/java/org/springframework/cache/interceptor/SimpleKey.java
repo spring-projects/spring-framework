@@ -32,7 +32,9 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class SimpleKey implements Serializable {
 
-	/** An empty key. */
+	/**
+	 * An empty key.
+	 */
 	public static final SimpleKey EMPTY = new SimpleKey();
 
 
