@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void singleValue(){
+	public void singleValue() {
 		Object k1 = generateKey(new Object[] { "a" });
 		Object k2 = generateKey(new Object[] { "a" });
 		Object k3 = generateKey(new Object[] { "different" });
@@ -52,11 +52,11 @@ public class SimpleKeyGeneratorTests {
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
 		assertThat(k1, not(equalTo(k3)));
-		assertThat(k1, equalTo((Object) "a"));
+		assertThat(k1, equalTo("a"));
 	}
 
 	@Test
-	public void multipleValues()  {
+	public void multipleValues() {
 		Object k1 = generateKey(new Object[] { "a", 1, "b" });
 		Object k2 = generateKey(new Object[] { "a", 1, "b" });
 		Object k3 = generateKey(new Object[] { "b", 1, "a" });
