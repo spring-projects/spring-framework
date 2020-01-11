@@ -142,6 +142,7 @@ abstract class AutowireUtils {
 			else if(Modifier.isAbstract(requiredType.getModifiers())){
 				Enhancer enhancer = new Enhancer();
 				enhancer.setSuperclass(requiredType);
+				enhancer.setClassLoader(requiredType.getClassLoader());
 				enhancer.setCallback(new ObjectFactoryDelegatingMethodInterceptor(factory));
 				return enhancer.create();
 			}
