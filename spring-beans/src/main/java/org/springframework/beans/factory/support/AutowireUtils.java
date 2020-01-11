@@ -35,9 +35,14 @@ import java.util.Set;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Utility class that contains various methods useful for the implementation of
@@ -46,6 +51,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Qimiao Chen
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
@@ -133,6 +139,12 @@ abstract class AutowireUtils {
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
 				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
 						new Class<?>[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+			}
+			else if(Modifier.isAbstract(requiredType.getModifiers())){
+				Enhancer enhancer = new Enhancer();
+				enhancer.setSuperclass(requiredType);
+				enhancer.setCallback(new ObjectFactoryDelegatingMethodInterceptor(factory));
+				return enhancer.create();
 			}
 			else {
 				return factory.getObject();
@@ -298,5 +310,47 @@ abstract class AutowireUtils {
 			}
 		}
 	}
+
+	/**
+	 *  {@link MethodInterceptor} for lazy access to the current target object.
+	 */
+	private static class ObjectFactoryDelegatingMethodInterceptor implements MethodInterceptor, Serializable{
+
+		private final ObjectFactory<?> objectFactory;
+
+		public ObjectFactoryDelegatingMethodInterceptor(ObjectFactory<?> objectFactory) {
+			this.objectFactory = objectFactory;
+		}
+		@Override
+		public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy)
+				throws Throwable {
+			String methodName = method.getName();
+			if (methodName.equals("equals")) {
+				return (o == args[0]);
+			}
+			else if (methodName.equals("hashCode")) {
+				return System.identityHashCode(o);
+			}
+			else if (methodName.equals("toString")) {
+				return this.objectFactory.toString();
+			}
+			try {
+				Class[] parameterTypes = null;
+				if(!ObjectUtils.isEmpty(args)){
+					parameterTypes = new Class[args.length];
+					for (int i = 0 ; i < args.length ; i++){
+						parameterTypes[i] = args[i].getClass();
+					}
+				}
+				Object targetObj = this.objectFactory.getObject();
+				Method methodToUse = targetObj.getClass().getMethod(method.getName(),parameterTypes);
+				return methodToUse.invoke(targetObj,args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
+	}
+
 
 }

@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Loïc Ledoyen
+ * @author Qimiao Chen
  */
 public class AutowireUtilsTests {
 
@@ -78,6 +81,15 @@ public class AutowireUtilsTests {
 		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(extractMagicValue, new Object[]{map}, getClass().getClassLoader())).isEqualTo(Object.class);
 	}
 
+	@Test
+	public void resolveAutowiringValueForAbstractType(){
+		ObjectFactory interfaceTypeFactory = (ObjectFactory<InterfaceType>) SimpleInterfaceType::new;
+
+		Object autowiringValue = AutowireUtils.resolveAutowiringValue(interfaceTypeFactory, AbstractType.class);
+		assertThat(autowiringValue instanceof AbstractType).isTrue();
+		AbstractType abstractType = (AbstractType) autowiringValue;
+		assertThat(abstractType.getName()).isEqualTo("SimpleInterfaceType");
+	}
 
 	public interface MyInterfaceType<T> {
 	}
@@ -177,4 +189,21 @@ public class AutowireUtilsTests {
 		}
 	}
 
+}
+
+
+interface InterfaceType{
+	String getName();
+}
+
+class SimpleInterfaceType implements InterfaceType{
+
+	@Override
+	public String getName() {
+		return "SimpleInterfaceType";
+	}
+}
+
+abstract class AbstractType{
+	abstract String getName();
 }
