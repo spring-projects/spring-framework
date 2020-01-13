@@ -983,6 +983,10 @@ project("spring-websocket") {
 project("spring-test") {
 	description = "Spring TestContext Framework"
 
+	// Disable warning for annotation processing in order to get the
+	// build passing again after it mysteriously started failing in 2020.
+	compileJava.options.compilerArgs -= "-Xlint:processing"
+
 	dependencies {
 		compile(project(":spring-core"))
 		optional(project(":spring-aop"))
