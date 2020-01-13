@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import org.junit.Assume;
 import org.junit.jupiter.api.Assumptions;
 import reactor.core.publisher.Mono;
 
