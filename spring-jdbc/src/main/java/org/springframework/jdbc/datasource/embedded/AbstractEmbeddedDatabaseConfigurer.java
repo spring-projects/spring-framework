@@ -57,7 +57,7 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 				try {
 					con.close();
 				}
-				catch (Throwable ex) {
+				catch (SQLException ex) {
 					logger.debug("Could not close JDBC Connection on shutdown", ex);
 				}
 			}
