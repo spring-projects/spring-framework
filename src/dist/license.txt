@@ -255,6 +255,13 @@ CGLIB 3.2.6 is licensed under the Apache License, version 2.0, the text of
 which is included above.
 
 
+>>> Objenesis 2.6 (org.objenesis:objenesis:2.6):
+
+Per the LICENSE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html, Objenesis 2.6 is licensed under the
+Apache License, version 2.0, the text of which is included above.
+
+
 ===============================================================================
 
 To the extent any open source components are licensed under the EPL and/or
