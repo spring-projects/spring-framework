@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,9 +238,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (codec instanceof DecoderHttpMessageReader) {
 			codec = ((DecoderHttpMessageReader) codec).getDecoder();
 		}
-		else if (codec instanceof ServerSentEventHttpMessageReader) {
-			codec = ((ServerSentEventHttpMessageReader) codec).getDecoder();
-		}
 
 		if (codec == null) {
 			return;
@@ -268,6 +265,10 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			}
 			if (codec instanceof FormHttpMessageReader) {
 				((FormHttpMessageReader) codec).setMaxInMemorySize(size);
+			}
+			if (codec instanceof ServerSentEventHttpMessageReader) {
+				((ServerSentEventHttpMessageReader) codec).setMaxInMemorySize(size);
+				initCodec(((ServerSentEventHttpMessageReader) codec).getDecoder());
 			}
 			if (synchronossMultipartPresent) {
 				if (codec instanceof SynchronossPartHttpMessageReader) {
