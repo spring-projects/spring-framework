@@ -362,7 +362,7 @@ class ReflectionUtilsTests {
 	}
 
 	@Test
-	void getDecalredMethodsReturnsCopy() {
+	void getDeclaredMethodsReturnsCopy() {
 		Method[] m1 = ReflectionUtils.getDeclaredMethods(A.class);
 		Method[] m2 = ReflectionUtils.getDeclaredMethods(A.class);
 		assertThat(m1). isNotSameAs(m2);
