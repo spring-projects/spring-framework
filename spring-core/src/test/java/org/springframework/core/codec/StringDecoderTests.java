@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,17 +128,30 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLineWithLimit() {
+	public void maxInMemoryLimit() {
 		Flux<DataBuffer> input = Flux.just(
-				stringBuffer("abc\n"),
-				stringBuffer("defg\n"),
-				stringBuffer("hijkl\n")
-		);
-		this.decoder.setMaxInMemorySize(4);
+				stringBuffer("abc\n"), stringBuffer("defg\n"), stringBuffer("hijkl\n"));
 
+		this.decoder.setMaxInMemorySize(4);
 		testDecode(input, String.class, step ->
-				step.expectNext("abc", "defg")
-						.verifyError(DataBufferLimitException.class));
+				step.expectNext("abc", "defg").verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24312
+	public void maxInMemoryLimitReleaseUnprocessedLinesFromCurrentBuffer() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("TOO MUCH DATA\nanother line\n\nand another\n"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step -> step.verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24339
+	public void maxInMemoryLimitReleaseUnprocessedLinesWhenUnlimited() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("Line 1\nLine 2\nLine 3\n"));
+
+		this.decoder.setMaxInMemorySize(-1);
+		testDecodeCancel(input, ResolvableType.forClass(String.class), null, Collections.emptyMap());
 	}
 
 	@Test
