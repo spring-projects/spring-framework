@@ -71,7 +71,7 @@ public interface ConfigurableListableBeanFactory
 	 * <p>Note: There are no such default types registered in a plain BeanFactory,
 	 * not even for the BeanFactory interface itself.
 	 * @param dependencyType the dependency type to register. This will typically
-	 * be a base interface such as BeanFactory, with extensions of it resolved
+	 * be a base interface such as BeanFactory or an abstract class, with extensions of it resolved
 	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
 	 * as long as the given value actually implements the extended interface.
 	 * @param autowiredValue the corresponding autowired value. This may also be an
