@@ -745,4 +745,20 @@ class StringUtilsTests {
 		assertThat(StringUtils.parseLocale("")).isNull();
 	}
 
+	@Test
+	void split() {
+		assertThat(StringUtils.split("Hello, world", ",")).isEqualTo(new String[]{"Hello", " world"});
+		assertThat(StringUtils.split(",Hello world", ",")).isEqualTo(new String[]{"", "Hello world"});
+		assertThat(StringUtils.split("Hello world,", ",")).isEqualTo(new String[]{"Hello world", ""});
+		assertThat(StringUtils.split("Hello, world,", ",")).isEqualTo(new String[]{"Hello", " world,"});
+	}
+
+	@Test
+	void splitWithEmptyString() {
+		assertThat(StringUtils.split("Hello, world", "")).isNull();
+		assertThat(StringUtils.split("", ",")).isNull();
+		assertThat(StringUtils.split(null, ",")).isNull();
+		assertThat(StringUtils.split("Hello, world", null)).isNull();
+		assertThat(StringUtils.split(null, null)).isNull();
+	}
 }
