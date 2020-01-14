@@ -399,11 +399,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
-				else if (logger.isInfoEnabled() && beanFactory.containsSingleton(beanName)) {
-					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
-							"' since its singleton instance has been created too early. The typical cause " +
-							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
-							"return type: Consider declaring such methods as 'static'.");
+				else if (beanFactory.containsSingleton(beanName)) {
+					if(logger.isWarnEnabled()){
+						logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
+								"' since its singleton instance has been created too early. The typical cause " +
+								"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
+								"return type: Consider declaring such methods as 'static'.");
+					}
 					continue;
 				}
 				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
