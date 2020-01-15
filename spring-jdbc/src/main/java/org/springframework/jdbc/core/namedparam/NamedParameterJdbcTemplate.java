@@ -430,7 +430,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			return NamedParameterUtils.parseSqlStatement(sql);
 		}
 		synchronized (this.parsedSqlCache) {
-			return parsedSqlCache.computeIfAbsent(sql, NamedParameterUtils::parseSqlStatement);
+			return this.parsedSqlCache.computeIfAbsent(sql, NamedParameterUtils::parseSqlStatement);
 		}
 	}
 
