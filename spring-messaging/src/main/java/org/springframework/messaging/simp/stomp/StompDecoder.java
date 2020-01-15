@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,10 @@ public class StompDecoder {
 			Message<byte[]> message = decodeMessage(byteBuffer, partialMessageHeaders);
 			if (message != null) {
 				messages.add(message);
+				skipEol(byteBuffer);
+				if (!byteBuffer.hasRemaining()) {
+					break;
+				}
 			}
 			else {
 				break;
@@ -128,7 +132,7 @@ public class StompDecoder {
 	@Nullable
 	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
-		skipLeadingEol(byteBuffer);
+		skipEol(byteBuffer);
 
 		// Explicit mark/reset access via Buffer base type for compatibility
 		// with covariant return type on JDK 9's ByteBuffer...
@@ -196,9 +200,10 @@ public class StompDecoder {
 
 	/**
 	 * Skip one ore more EOL characters at the start of the given ByteBuffer.
-	 * Those are STOMP heartbeat frames.
+	 * STOMP, section 2.1 says: "The NULL octet can be optionally followed by
+	 * multiple EOLs."
 	 */
-	protected void skipLeadingEol(ByteBuffer byteBuffer) {
+	protected void skipEol(ByteBuffer byteBuffer) {
 		while (true) {
 			if (!tryConsumeEndOfLine(byteBuffer)) {
 				break;
