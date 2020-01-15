@@ -17,7 +17,8 @@ buildScan {
 	obfuscation {
 		ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
 	}
-	publishAlwaysIf(System.getenv('GRADLE_ENTERPRISE_URL') != null)
+	publishAlways()
+	publishIfAuthenticated()
 	server = 'https://ge.spring.io'
 }
 
