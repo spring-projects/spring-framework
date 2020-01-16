@@ -261,6 +261,13 @@ Per the LICENSE file in the Objenesis ZIP distribution downloaded from
 http://objenesis.org/download.html, Objenesis 2.6 is licensed under the
 Apache License, version 2.0, the text of which is included above.
 
+Per the NOTICE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html and corresponding to section 4d of the
+Apache License, Version 2.0, in this case for Objenesis:
+
+Objenesis
+Copyright 2006-2017 Joe Walnes, Henri Tremblay, Leonardo Mesquita
+
 
 ===============================================================================
 
