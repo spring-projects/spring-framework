@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,24 +36,24 @@ import org.springframework.util.ClassUtils;
  */
 public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransactionManager>, InitializingBean {
 
-	private static final String WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME =
+	private static final String WEB_LOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME =
 			"org.springframework.transaction.jta.WebLogicJtaTransactionManager";
 
-	private static final String WEBSPHERE_TRANSACTION_MANAGER_CLASS_NAME =
+	private static final String WEB_SPHERE_TRANSACTION_MANAGER_CLASS_NAME =
 			"org.springframework.transaction.jta.WebSphereUowTransactionManager";
 
 	private static final String JTA_TRANSACTION_MANAGER_CLASS_NAME =
 			"org.springframework.transaction.jta.JtaTransactionManager";
 
 
-	private static final boolean weblogicPresent;
+	private static final boolean webLogicPresent;
 
-	private static final boolean webspherePresent;
+	private static final boolean webSpherePresent;
 
 	static {
 		ClassLoader classLoader = JtaTransactionManagerFactoryBean.class.getClassLoader();
-		weblogicPresent = ClassUtils.isPresent("weblogic.transaction.UserTransaction", classLoader);
-		webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", classLoader);
+		webLogicPresent = ClassUtils.isPresent("weblogic.transaction.UserTransaction", classLoader);
+		webSpherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", classLoader);
 	}
 
 
@@ -97,11 +97,11 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 
 
 	static String resolveJtaTransactionManagerClassName() {
-		if (weblogicPresent) {
-			return WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME;
+		if (webLogicPresent) {
+			return WEB_LOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME;
 		}
-		else if (webspherePresent) {
-			return WEBSPHERE_TRANSACTION_MANAGER_CLASS_NAME;
+		else if (webSpherePresent) {
+			return WEB_SPHERE_TRANSACTION_MANAGER_CLASS_NAME;
 		}
 		else {
 			return JTA_TRANSACTION_MANAGER_CLASS_NAME;
