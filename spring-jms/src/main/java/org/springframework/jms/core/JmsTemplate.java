@@ -1100,6 +1100,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		if (!isMessageTimestampEnabled()) {
 			producer.setDisableMessageTimestamp(true);
 		}
+		producer.setDeliveryMode(this.deliveryMode);
 		return producer;
 	}
 
