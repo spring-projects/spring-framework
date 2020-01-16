@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -672,9 +672,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 					valueExtractor, aggregateIndex);
 		}
 		catch (Exception ex) {
-			if (ex instanceof AnnotationConfigurationException) {
-				throw (AnnotationConfigurationException) ex;
-			}
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			if (logger.isEnabled()) {
 				String type = mapping.getAnnotationType().getName();
 				String item = (mapping.getDistance() == 0 ? "annotation " + type :
