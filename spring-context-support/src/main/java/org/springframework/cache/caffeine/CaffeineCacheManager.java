@@ -178,17 +178,11 @@ public class CaffeineCacheManager implements CacheManager {
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
-		Cache cache = this.cacheMap.get(name);
-		if (cache == null && this.dynamic) {
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = createCaffeineCache(name);
-					this.cacheMap.put(name, cache);
-				}
-			}
+		if (this.dynamic) {
+			return this.cacheMap.computeIfAbsent(name, this::createCaffeineCache);
 		}
-		return cache;
+
+		return this.cacheMap.get(name);
 	}
 
 	/**
