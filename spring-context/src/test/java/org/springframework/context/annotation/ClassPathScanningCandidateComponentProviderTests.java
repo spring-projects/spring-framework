@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.componentscan.gh24375.MyComponent;
 import org.springframework.context.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -500,6 +501,15 @@ public class ClassPathScanningCandidateComponentProviderTests {
 			assertThat(ctx.containsBean(beanName), is(false));
 		}
 	}
+
+	@Test
+	public void gh24375() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		Set<BeanDefinition> components = provider.findCandidateComponents(MyComponent.class.getPackage().getName());
+		assertEquals(1, components.size());
+		assertEquals(MyComponent.class.getName(), components.iterator().next().getBeanClassName());
+	}
+
 
 	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class<?> beanClass) {
 		for (BeanDefinition candidate : candidates) {
