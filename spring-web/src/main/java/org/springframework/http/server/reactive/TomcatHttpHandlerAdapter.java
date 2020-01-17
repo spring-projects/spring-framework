@@ -216,6 +216,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
 			Charset charset = (contentType != null ? contentType.getCharset() : null);
 			if (response.getCharacterEncoding() == null && charset != null) {
 				response.setCharacterEncoding(charset.name());
@@ -224,6 +225,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
 		}
 
 		@Override
