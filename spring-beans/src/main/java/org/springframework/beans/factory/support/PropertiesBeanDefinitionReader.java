@@ -422,10 +422,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 
+		String prefixWithSep = prefix + SEPARATOR;
+		int beginIndex = prefix.length() + SEPARATOR.length();
+
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
-			if (key.startsWith(prefix + SEPARATOR)) {
-				String property = key.substring(prefix.length() + SEPARATOR.length());
+			if (key.startsWith(prefixWithSep)) {
+				String property = key.substring(beginIndex);
 				if (CLASS_KEY.equals(property)) {
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}

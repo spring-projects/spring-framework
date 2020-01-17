@@ -166,9 +166,10 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		if (attributes == null) {
 			return null;
 		}
+		String annotatedElement = "class '" + getClassName() + "'";
 		for (AnnotationAttributes raw : attributes) {
 			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					"class '" + getClassName() + "'", this.classLoader, raw, classValuesAsString).entrySet()) {
+					annotatedElement, this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}
