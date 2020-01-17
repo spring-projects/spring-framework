@@ -21,7 +21,7 @@ eclipse.classpath.file.whenMerged { classpath ->
 			def projectName = matcher[0][1]
 			def path = "/${projectName}"
 			if(!classpath.entries.find { e -> e instanceof ProjectDependency && e.path == path }) {
-				def dependency = new ProjectDependency(path, project(":${projectName}").path)
+				def dependency = new ProjectDependency(path)
 				dependency.exported = true
 				classpath.entries.add(dependency)
 			}

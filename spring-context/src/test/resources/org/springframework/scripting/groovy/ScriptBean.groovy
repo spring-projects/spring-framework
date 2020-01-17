@@ -1,3 +1,5 @@
+package org.springframework.scripting.groovy;
+
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.scripting.ContextScriptBean

@@ -1,3 +1,5 @@
+package org.springframework.scripting.groovy;
+
 import org.springframework.beans.factory.FactoryBean
 
 class TestFactoryBean implements FactoryBean {
