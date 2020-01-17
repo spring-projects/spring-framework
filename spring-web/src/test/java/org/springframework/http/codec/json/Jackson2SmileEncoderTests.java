@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,26 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoderTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
@@ -58,21 +61,6 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTestCase<Jackson2S
 		super(new Jackson2SmileEncoder());
 
 	}
-
-	public Consumer<DataBuffer> pojoConsumer(Pojo expected) {
-		return dataBuffer -> {
-			try {
-				Pojo actual = this.mapper.reader().forType(Pojo.class)
-						.readValue(DataBufferTestUtils.dumpBytes(dataBuffer));
-				assertEquals(expected, actual);
-				release(dataBuffer);
-			}
-			catch (IOException ex) {
-				throw new UncheckedIOException(ex);
-			}
-		};
-	}
-
 
 	@Override
 	@Test
@@ -106,7 +94,19 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTestCase<Jackson2S
 		Flux<Pojo> input = Flux.fromIterable(list);
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(expect(list, List.class)));
+				.consumeNextWith(dataBuffer -> {
+					try {
+						Object actual = this.mapper.reader().forType(List.class)
+								.readValue(dataBuffer.asInputStream());
+						assertEquals(list, actual);
+					}
+					catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+					finally {
+						release(dataBuffer);
+					}
+				}));
 	}
 
 	@Test
@@ -127,32 +127,30 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTestCase<Jackson2S
 		Flux<Pojo> input = Flux.just(pojo1, pojo2, pojo3);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
 
-		testEncodeAll(input, type, step -> step
-				.consumeNextWith(expect(pojo1, Pojo.class))
-				.consumeNextWith(expect(pojo2, Pojo.class))
-				.consumeNextWith(expect(pojo3, Pojo.class))
-				.verifyComplete(),
-		STREAM_SMILE_MIME_TYPE, null);
+		Flux<DataBuffer> result = this.encoder
+				.encode(input, bufferFactory, type, STREAM_SMILE_MIME_TYPE, null);
+
+		Mono<MappingIterator<Pojo>> joined = DataBufferUtils.join(result)
+				.map(buffer -> {
+					try {
+						return this.mapper.reader().forType(Pojo.class).readValues(buffer.asInputStream(true));
+					}
+					catch (IOException ex) {
+						throw new UncheckedIOException(ex);
+					}
+				});
+
+		StepVerifier.create(joined)
+				.assertNext(iter -> {
+					assertTrue(iter.hasNext());
+					assertEquals(pojo1, iter.next());
+					assertTrue(iter.hasNext());
+					assertEquals(pojo2, iter.next());
+					assertTrue(iter.hasNext());
+					assertEquals(pojo3, iter.next());
+					assertFalse(iter.hasNext());
+				})
+				.verifyComplete();
 	}
-
-
-	private <T> Consumer<DataBuffer> expect(T expected, Class<T> expectedType) {
-		return dataBuffer -> {
-			try {
-				Object actual = this.mapper.reader().forType(expectedType)
-						.readValue(dataBuffer.asInputStream());
-				assertEquals(expected, actual);
-			}
-			catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-			finally {
-				release(dataBuffer);
-			}
-		};
-
-	}
-
-
 
 }
