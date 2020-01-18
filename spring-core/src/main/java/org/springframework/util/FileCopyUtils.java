@@ -224,9 +224,9 @@ public abstract class FileCopyUtils {
 	}
 
 	/**
-	 * Close the {@link Closeable}
+	 * Close the {@link Closeable} as a null-safety.
 	 *
-	 * @param closeable the closeable to close
+	 * @param closeable to close, may be null.
 	 */
 	private static void close(@Nullable Closeable closeable) {
 		if (closeable == null) return;
