@@ -19,6 +19,6 @@ package example.gh24375;
 import org.springframework.stereotype.Component;
 
 @Component
-@A(other = @B)
-public class MyComponent {
+@EnclosingAnnotation(nested2 = @NestedAnnotation)
+public class AnnotatedComponent {
 }

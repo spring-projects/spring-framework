@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import example.gh24375.MyComponent;
+import example.gh24375.AnnotatedComponent;
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
 import example.profilescan.ProfileMetaAnnotatedComponent;
@@ -39,7 +39,6 @@ import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
 import example.scannable.sub.BarComponent;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -503,12 +502,11 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 	@Test
-	@Disabled("Disabled until gh-24375 is resolved")
-	public void gh24375() {
+	public void componentScanningFindsComponentsAnnotatedWithAnnotationsContainingNestedAnnotations() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
-		Set<BeanDefinition> components = provider.findCandidateComponents(MyComponent.class.getPackage().getName());
+		Set<BeanDefinition> components = provider.findCandidateComponents(AnnotatedComponent.class.getPackage().getName());
 		assertThat(components).hasSize(1);
-		assertThat(components.iterator().next().getBeanClassName()).isEqualTo(MyComponent.class.getName());
+		assertThat(components.iterator().next().getBeanClassName()).isEqualTo(AnnotatedComponent.class.getName());
 	}
 
 

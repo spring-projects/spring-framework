@@ -14,22 +14,8 @@
  * limitations under the License.
  */
 
-package example.gh24375;
+package example.type;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import org.springframework.core.annotation.AliasFor;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface A {
-
-	@AliasFor("value")
-	B other() default @B;
-
-	@AliasFor("other")
-	B value() default @B;
+@EnclosingAnnotation(nested2 = @NestedAnnotation)
+public class AnnotatedComponent {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link AnnotationTypeMappings} and {@link AnnotationTypeMapping}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class AnnotationTypeMappingsTests {
 
@@ -440,10 +441,18 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsMap() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
 		Map<String, Object> value = Collections.singletonMap("value", "java.io.InputStream");
-		assertThat(mapping.isEquivalentToDefaultValue(0, value, this::extractFromMap)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation::extractFromMap)).isTrue();
+	}
+
+	@Test // gh-24375
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsTypeMappedAnnotation() {
+		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
+		Map<String, String> attributes = Collections.singletonMap("value", "java.io.InputStream");
+		MergedAnnotation<ClassValue> value = TypeMappedAnnotation.of(getClass().getClassLoader(), null, ClassValue.class, attributes);
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation::extractFromMap)).isTrue();
 	}
 
 	@Test
@@ -502,11 +511,6 @@ class AnnotationTypeMappingsTests {
 			names.add(mirrorSet.get(i).getName());
 		}
 		return names;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object extractFromMap(Method attribute, Object map) {
-		return map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null;
 	}
 
 

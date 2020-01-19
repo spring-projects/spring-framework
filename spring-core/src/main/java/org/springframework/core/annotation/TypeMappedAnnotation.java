@@ -685,7 +685,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static Object extractFromMap(Method attribute, @Nullable Object map) {
+	static Object extractFromMap(Method attribute, @Nullable Object map) {
 		return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
 	}
 
