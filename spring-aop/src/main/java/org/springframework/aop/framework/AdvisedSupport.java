@@ -514,15 +514,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
 		this.interfaces = new ArrayList<>(other.interfaces);
-		for (Advisor advisor : advisors) {
-			if (advisor instanceof IntroductionAdvisor) {
-				validateIntroductionAdvisor((IntroductionAdvisor) advisor);
-			}
-			Assert.notNull(advisor, "Advisor must not be null");
-			this.advisors.add(advisor);
-		}
-		updateAdvisorArray();
-		adviceChanged();
+		addAdvisors(advisors);
 	}
 
 	/**
