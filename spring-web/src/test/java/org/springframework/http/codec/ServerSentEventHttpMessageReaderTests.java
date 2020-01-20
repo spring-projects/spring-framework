@@ -161,6 +161,17 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 				.verify();
 	}
 
+	@Test // gh-24389
+	void readPojoWithCommentOnly() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Flux.just(stringBuffer(":ping\n"), stringBuffer("\n")));
+
+		Flux<Object> data = this.reader.read(
+				ResolvableType.forType(String.class), request, Collections.emptyMap());
+
+		StepVerifier.create(data).expectComplete().verify();
+	}
+
 	@Test  // SPR-15331
 	public void decodeFullContentAsString() {
 		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";

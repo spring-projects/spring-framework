@@ -135,7 +135,10 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		return this.lineDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
 				.doOnNext(limitTracker::afterLineParsed)
 				.bufferUntil(String::isEmpty)
-				.map(lines -> buildEvent(lines, valueType, shouldWrap, hints));
+				.concatMap(lines -> {
+					Object event = buildEvent(lines, valueType, shouldWrap, hints);
+					return (event != null ? Mono.just(event) : Mono.empty());
+				});
 	}
 
 	@Nullable
@@ -168,7 +171,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			}
 		}
 
-		Object decodedData = data != null ? decodeData(data.toString(), valueType, hints) : null;
+		Object decodedData = (data != null ? decodeData(data.toString(), valueType, hints) : null);
 
 		if (shouldWrap) {
 			if (comment != null) {
@@ -180,7 +183,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			return sseBuilder.build();
 		}
 		else {
-			return decodedData;
+			return (decodedData);
 		}
 	}
 
