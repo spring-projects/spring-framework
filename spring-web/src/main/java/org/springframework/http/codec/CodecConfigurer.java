@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,22 @@ public interface CodecConfigurer {
 		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
 		 */
 		void jackson2JsonEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Jackson Smile {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
+		 * @param decoder the decoder instance to use
+		 * @see org.springframework.http.codec.json.Jackson2SmileDecoder
+		 */
+		void jackson2SmileDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Jackson Smile {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @see org.springframework.http.codec.json.Jackson2SmileEncoder
+		 */
+		void jackson2SmileEncoder(Encoder<?> encoder);
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.

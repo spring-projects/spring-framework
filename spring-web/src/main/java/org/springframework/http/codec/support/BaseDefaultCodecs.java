@@ -96,6 +96,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private Encoder<?> jackson2JsonEncoder;
 
 	@Nullable
+	private Encoder<?> jackson2SmileEncoder;
+
+	@Nullable
+	private Decoder<?> jackson2SmileDecoder;
+
+	@Nullable
 	private Decoder<?> protobufDecoder;
 
 	@Nullable
@@ -125,6 +131,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	protected BaseDefaultCodecs(BaseDefaultCodecs other) {
 		this.jackson2JsonDecoder = other.jackson2JsonDecoder;
 		this.jackson2JsonEncoder = other.jackson2JsonEncoder;
+		this.jackson2SmileDecoder = other.jackson2SmileDecoder;
+		this.jackson2SmileEncoder = other.jackson2SmileEncoder;
 		this.protobufDecoder = other.protobufDecoder;
 		this.protobufEncoder = other.protobufEncoder;
 		this.jaxb2Decoder = other.jaxb2Decoder;
@@ -147,6 +155,16 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	@Override
 	public void protobufDecoder(Decoder<?> decoder) {
 		this.protobufDecoder = decoder;
+	}
+
+	@Override
+	public void jackson2SmileDecoder(Decoder<?> decoder) {
+		this.jackson2SmileDecoder = decoder;
+	}
+
+	@Override
+	public void jackson2SmileEncoder(Encoder<?> encoder) {
+		this.jackson2SmileEncoder = encoder;
 	}
 
 	@Override
@@ -208,8 +226,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(readers, new ResourceHttpMessageReader(new ResourceDecoder()));
 		addCodec(readers, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 		if (protobufPresent) {
-			Decoder<?> decoder = this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder();
-			addCodec(readers, new DecoderHttpMessageReader<>(decoder));
+			addCodec(readers, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
+					(ProtobufDecoder) this.protobufDecoder : new ProtobufDecoder()));
 		}
 		addCodec(readers, new FormHttpMessageReader());
 
@@ -324,11 +342,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(readers, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 		}
 		if (jackson2SmilePresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
+			addCodec(readers, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
+					(Jackson2SmileDecoder) this.jackson2SmileDecoder : new Jackson2SmileDecoder()));
 		}
 		if (jaxb2Present) {
-			Decoder<?> decoder = this.jaxb2Decoder != null ? this.jaxb2Decoder : new Jaxb2XmlDecoder();
-			addCodec(readers, new DecoderHttpMessageReader<>(decoder));
+			addCodec(readers, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
+					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
 
 		// client vs server..
@@ -383,8 +402,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		writers.add(new ResourceHttpMessageWriter());
 		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		if (protobufPresent) {
-			Encoder<?> encoder = this.protobufEncoder != null ? this.protobufEncoder : new ProtobufEncoder();
-			writers.add(new ProtobufHttpMessageWriter((Encoder) encoder));
+			writers.add(new ProtobufHttpMessageWriter(this.protobufEncoder != null ?
+					(ProtobufEncoder) this.protobufEncoder : new ProtobufEncoder()));
 		}
 		return writers;
 	}
@@ -416,11 +435,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			writers.add(new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
 		}
 		if (jackson2SmilePresent) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jackson2SmileEncoder()));
+			writers.add(new EncoderHttpMessageWriter<>(this.jackson2SmileEncoder != null ?
+					(Jackson2SmileEncoder) this.jackson2SmileEncoder : new Jackson2SmileEncoder()));
 		}
 		if (jaxb2Present) {
-			Encoder<?> encoder = this.jaxb2Encoder != null ? this.jaxb2Encoder : new Jaxb2XmlEncoder();
-			writers.add(new EncoderHttpMessageWriter<>(encoder));
+			writers.add(new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
+					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
 		}
 		return writers;
 	}

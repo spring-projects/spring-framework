@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,6 +252,8 @@ public class CodecConfigurerTests {
 	public void encoderDecoderOverrides() {
 		Jackson2JsonDecoder jacksonDecoder = new Jackson2JsonDecoder();
 		Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
+		Jackson2SmileDecoder smileDecoder = new Jackson2SmileDecoder();
+		Jackson2SmileEncoder smileEncoder = new Jackson2SmileEncoder();
 		ProtobufDecoder protobufDecoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
 		ProtobufEncoder protobufEncoder = new ProtobufEncoder();
 		Jaxb2XmlEncoder jaxb2Encoder = new Jaxb2XmlEncoder();
@@ -259,15 +261,19 @@ public class CodecConfigurerTests {
 
 		this.configurer.defaultCodecs().jackson2JsonDecoder(jacksonDecoder);
 		this.configurer.defaultCodecs().jackson2JsonEncoder(jacksonEncoder);
+		this.configurer.defaultCodecs().jackson2SmileDecoder(smileDecoder);
+		this.configurer.defaultCodecs().jackson2SmileEncoder(smileEncoder);
 		this.configurer.defaultCodecs().protobufDecoder(protobufDecoder);
 		this.configurer.defaultCodecs().protobufEncoder(protobufEncoder);
 		this.configurer.defaultCodecs().jaxb2Decoder(jaxb2Decoder);
 		this.configurer.defaultCodecs().jaxb2Encoder(jaxb2Encoder);
 
 		assertDecoderInstance(jacksonDecoder);
+		assertDecoderInstance(smileDecoder);
 		assertDecoderInstance(protobufDecoder);
 		assertDecoderInstance(jaxb2Decoder);
 		assertEncoderInstance(jacksonEncoder);
+		assertEncoderInstance(smileEncoder);
 		assertEncoderInstance(protobufEncoder);
 		assertEncoderInstance(jaxb2Encoder);
 	}
