@@ -641,7 +641,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		RequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
-		return nonNull(doExecute(requestEntity.getUrl(), requestEntity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(requestEntity.getUrl(this.uriTemplateHandler), requestEntity.getMethod(), requestCallback, responseExtractor));
 	}
 
 	@Override
@@ -651,7 +651,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		Type type = responseType.getType();
 		RequestCallback requestCallback = httpEntityCallback(requestEntity, type);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
-		return nonNull(doExecute(requestEntity.getUrl(), requestEntity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(requestEntity.getUrl(this.uriTemplateHandler), requestEntity.getMethod(), requestCallback, responseExtractor));
 	}
 
 
