@@ -2715,7 +2715,7 @@ The following query looks for a `String`:
 ----
 	String lastName = this.jdbcTemplate.queryForObject(
 			"select last_name from t_actor where id = ?",
-			new Object[]{1212L}, String.class);
+			String.class, 1212L);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2730,17 +2730,15 @@ The following query finds and populates a single domain object:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	RowMapper<Actor> actorRowMapper = (resultRest, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultRest.getString("first_name"));
+		actor.setLastName(resultRest.getString("last_name"));
+		return actor;
+	};
 	Actor actor = this.jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
-			new Object[]{1212L},
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
-			});
+			actorRowMapper, 1212L);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2757,16 +2755,15 @@ The following query finds and populates a number of domain objects:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	RowMapper<Actor> actorRowMapper = (resultRest, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultRest.getString("first_name"));
+		actor.setLastName(resultRest.getString("last_name"));
+		return actor;
+	};
 	List<Actor> actors = this.jdbcTemplate.query(
 			"select first_name, last_name from t_actor",
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
-			});
+			actorRowMapper);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2777,26 +2774,25 @@ The following query finds and populates a number of domain objects:
 
 
 If the last two snippets of code actually existed in the same application, it would make
-sense to remove the duplication present in the two `RowMapper` anonymous inner classes
-and extract them out into a single class (typically a `static` nested class) that could
-then be referenced by DAO methods as needed. For example, it may be better to write the
+sense to remove the duplication present in the two `RowMapper` lambda expressions and
+extract them out into a single expression or class (typically a `static` nested class) that
+could then be referenced by DAO methods as needed. For example, it may be better to write the
 preceding code snippet as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", new ActorMapper());
+		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", getActorMapper());
 	}
 
-	private static final class ActorMapper implements RowMapper<Actor> {
-
-		public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
+	private RowMapper<Actor> getActorMapper() {
+		return (resultRest, rowNum) -> {
 			Actor actor = new Actor();
-			actor.setFirstName(rs.getString("first_name"));
-			actor.setLastName(rs.getString("last_name"));
+			actor.setFirstName(resultRest.getString("first_name"));
+			actor.setLastName(resultRest.getString("last_name"));
 			return actor;
-		}
+		};
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -3562,15 +3558,12 @@ on Oracle but may not work on other platforms:
 	final String name = "Rob";
 
 	KeyHolder keyHolder = new GeneratedKeyHolder();
-	jdbcTemplate.update(
-		new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] {"id"});
-				ps.setString(1, name);
-				return ps;
-			}
-		},
-		keyHolder);
+	PreparedStatementCreator statementCreator = connection -> {
+		PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] { "id" });
+		ps.setString(1, name);
+		return ps;
+	};
+	jdbcTemplate.update(statementCreator, keyHolder);
 
 	// keyHolder.getKey() now contains the generated key
 ----
@@ -4053,12 +4046,10 @@ The following example shows a batch update that uses a batch size of 100:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					actors,
 					100,
-					new ParameterizedPreparedStatementSetter<Actor>() {
-						public void setValues(PreparedStatement ps, Actor argument) throws SQLException {
-							ps.setString(1, argument.getFirstName());
-							ps.setString(2, argument.getLastName());
-							ps.setLong(3, argument.getId().longValue());
-						}
+					(PreparedStatement ps, Actor argument) -> {
+						ps.setString(1, argument.getFirstName());
+						ps.setString(2, argument.getLastName());
+						ps.setLong(3, argument.getId().longValue());
 					});
 			return updateCounts;
 		}
@@ -5567,16 +5558,14 @@ declared type `ITEM_TYPE`:
 		public TestItemStoredProcedure(DataSource dataSource) {
 			// ...
 			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
-				new SqlReturnType() {
-					public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String 	) throws SQLException {
-						STRUCT struct = (STRUCT) cs.getObject(colIndx);
-						Object[] attr = struct.getAttributes();
-						TestItem item = new TestItem();
-						item.setId(((Number) attr[0]).longValue());
-						item.setDescription((String) attr[1]);
-						item.setExpirationDate((java.util.Date) attr[2]);
-						return item;
-					}
+				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
+					STRUCT struct = (STRUCT) cs.getObject(colIndx);
+					Object[] attr = struct.getAttributes();
+					TestItem item = new TestItem();
+					item.setId(((Number) attr[0]).longValue());
+					item.setDescription((String) attr[1]);
+					item.setExpirationDate((java.util.Date) attr[2]);
+					return item;
 				}));
 			// ...
 		}
