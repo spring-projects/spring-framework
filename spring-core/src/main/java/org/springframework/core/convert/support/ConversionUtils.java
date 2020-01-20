@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,12 +63,7 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
-		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
-			// maybe
-			return true;
-		}
-		// no
-		return false;
+		return ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType());
 	}
 
 	public static Class<?> getEnumType(Class<?> targetType) {
