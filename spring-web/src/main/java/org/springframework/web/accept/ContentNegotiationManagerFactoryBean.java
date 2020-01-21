@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,15 +81,18 @@ import org.springframework.web.context.ServletContextAware;
  * </tr>
  * </table>
  *
- * <p>As of 5.0 you can set the exact strategies to use via
+ * <p>Alternatively you can avoid use of the above convenience builder
+ * methods and set the exact strategies to use via
  * {@link #setStrategies(List)}.
  *
- * <p><strong>Note:</strong> if you must use URL-based content type resolution,
- * the use of a query parameter is simpler and preferable to the use of a path
- * extension since the latter can cause issues with URI variables, path
- * parameters, and URI decoding. Consider setting {@link #setFavorPathExtension}
- * to {@literal false} or otherwise set the strategies to use explicitly via
- * {@link #setStrategies(List)}.
+ * <p><strong>Note:</strong> As of 5.2.4,
+ * {@link #setFavorPathExtension(boolean) favorPathExtension} and
+ * {@link #setIgnoreUnknownPathExtensions(boolean) ignoreUnknownPathExtensions}
+ * are deprecated in order to discourage use of path extensions for content
+ * negotiation and for request mapping (with similar deprecations in
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * RequestMappingHandlerMapping}). For further context, please read issue
+ * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -145,7 +148,10 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p>By default this is set to {@code true} in which case a request
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
 		this.favorPathExtension = favorPathExtension;
 	}
@@ -199,7 +205,10 @@ public class ContentNegotiationManagerFactoryBean
 	 * to any media type. Setting this to {@code false} will result in an
 	 * {@code HttpMediaTypeNotAcceptableException} if there is no match.
 	 * <p>By default this is set to {@code true}.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public void setIgnoreUnknownPathExtensions(boolean ignore) {
 		this.ignoreUnknownPathExtensions = ignore;
 	}
@@ -303,7 +312,7 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Actually build the {@link ContentNegotiationManager}.
+	 * Create and initialize a {@link ContentNegotiationManager} instance.
 	 * @since 5.0
 	 */
 	public ContentNegotiationManager build() {
