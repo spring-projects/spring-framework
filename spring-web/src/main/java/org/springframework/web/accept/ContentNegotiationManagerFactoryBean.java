@@ -89,7 +89,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link #setFavorPathExtension(boolean) favorPathExtension} and
  * {@link #setIgnoreUnknownPathExtensions(boolean) ignoreUnknownPathExtensions}
  * are deprecated in order to discourage use of path extensions for content
- * negotiation and for request mapping (with similar deprecations in
+ * negotiation as well as for request mapping (with similar deprecations in
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
  * RequestMappingHandlerMapping}). For further context, please read issue
  * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
@@ -157,46 +157,52 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Add a mapping from a key, extracted from a path extension or a query
-	 * parameter, to a MediaType. This is required in order for the parameter
-	 * strategy to work. Any extensions explicitly registered here are also
-	 * whitelisted for the purpose of Reflected File Download attack detection
-	 * (see Spring Framework reference documentation for more details on RFD
-	 * attack protection).
-	 * <p>The path extension strategy will also try to use
+	 * Add a mapping from a key to a MediaType where the key are normalized to
+	 * lowercase and may have been extracted from a path extension, a filename
+	 * extension, or passed as a query parameter.
+	 * <p>The {@link #setFavorParameter(boolean) parameter strategy} requires
+	 * such mappings in order to work while the {@link #setFavorPathExtension(boolean)
+	 * path extension strategy} can fall back on lookups via
 	 * {@link ServletContext#getMimeType} and
-	 * {@link org.springframework.http.MediaTypeFactory} to resolve path extensions.
+	 * {@link org.springframework.http.MediaTypeFactory}.
+	 * <p><strong>Note:</strong> Mappings registered here may be accessed via
+	 * {@link ContentNegotiationManager#getMediaTypeMappings()} and may be used
+	 * not only in the parameter and path extension strategies. For example,
+	 * with the Spring MVC config, e.g. {@code @EnableWebMvc} or
+	 * {@code <mvc:annotation-driven>}, the media type mappings are also plugged
+	 * in to:
+	 * <ul>
+	 * <li>Determine the media type of static resources served with
+	 * {@code ResourceHttpRequestHandler}.
+	 * <li>Determine the media type of views rendered with
+	 * {@code ContentNegotiatingViewResolver}.
+	 * <li>Whitelist extensions for RFD attack detection (check the Spring
+	 * Framework reference docs for details).
+	 * </ul>
 	 * @param mediaTypes media type mappings
 	 * @see #addMediaType(String, MediaType)
 	 * @see #addMediaTypes(Map)
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			mediaTypes.forEach((key, value) -> {
-				String extension = ((String) key).toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.valueOf((String) value);
-				this.mediaTypes.put(extension, mediaType);
-			});
+			mediaTypes.forEach((key, value) ->
+					addMediaType((String) key, MediaType.valueOf((String) value)));
 		}
 	}
 
 	/**
-	 * An alternative to {@link #setMediaTypes} for use in Java code.
-	 * @see #setMediaTypes
-	 * @see #addMediaTypes
+	 * An alternative to {@link #setMediaTypes} for programmatic registrations.
 	 */
-	public void addMediaType(String fileExtension, MediaType mediaType) {
-		this.mediaTypes.put(fileExtension, mediaType);
+	public void addMediaType(String key, MediaType mediaType) {
+		this.mediaTypes.put(key.toLowerCase(Locale.ENGLISH), mediaType);
 	}
 
 	/**
-	 * An alternative to {@link #setMediaTypes} for use in Java code.
-	 * @see #setMediaTypes
-	 * @see #addMediaType
+	 * An alternative to {@link #setMediaTypes} for programmatic registrations.
 	 */
 	public void addMediaTypes(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
-			this.mediaTypes.putAll(mediaTypes);
+			mediaTypes.forEach(this::addMediaType);
 		}
 	}
 
@@ -315,6 +321,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * Create and initialize a {@link ContentNegotiationManager} instance.
 	 * @since 5.0
 	 */
+	@SuppressWarnings("deprecation")
 	public ContentNegotiationManager build() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
@@ -336,7 +343,6 @@ public class ContentNegotiationManagerFactoryBean
 				}
 				strategies.add(strategy);
 			}
-
 			if (this.favorParameter) {
 				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
 				strategy.setParameterName(this.parameterName);
@@ -348,17 +354,24 @@ public class ContentNegotiationManagerFactoryBean
 				}
 				strategies.add(strategy);
 			}
-
 			if (!this.ignoreAcceptHeader) {
 				strategies.add(new HeaderContentNegotiationStrategy());
 			}
-
 			if (this.defaultNegotiationStrategy != null) {
 				strategies.add(this.defaultNegotiationStrategy);
 			}
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
+
+		// Ensure media type mappings are available via ContentNegotiationManager#getMediaTypeMappings()
+		// independent of path extension or parameter strategies.
+
+		if (!CollectionUtils.isEmpty(this.mediaTypes) && !this.favorPathExtension && !this.favorParameter) {
+			this.contentNegotiationManager.addFileExtensionResolvers(
+					new MappingMediaTypeFileExtensionResolver(this.mediaTypes));
+		}
+
 		return this.contentNegotiationManager;
 	}
 
