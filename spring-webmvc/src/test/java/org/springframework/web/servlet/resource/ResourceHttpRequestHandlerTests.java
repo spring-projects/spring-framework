@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,13 +74,15 @@ public class ResourceHttpRequestHandlerTests {
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
 		paths.add(new ClassPathResource("META-INF/resources/webjars/"));
 
+		TestServletContext servletContext = new TestServletContext();
+
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(paths);
 		this.handler.setCacheSeconds(3600);
-		this.handler.setServletContext(new TestServletContext());
+		this.handler.setServletContext(servletContext);
 		this.handler.afterPropertiesSet();
 
-		this.request = new MockHttpServletRequest("GET", "");
+		this.request = new MockHttpServletRequest(servletContext, "GET", "");
 		this.response = new MockHttpServletResponse();
 	}
 
@@ -283,14 +285,11 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
+
 		MockServletContext servletContext = new MockServletContext() {
 			@Override
 			public String getMimeType(String filePath) {
 				return "foo/bar";
-			}
-			@Override
-			public String getVirtualServerName() {
-				return "";
 			}
 		};
 
@@ -300,8 +299,9 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(paths);
 		handler.afterPropertiesSet();
 
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		handler.handleRequest(this.request, this.response);
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "");
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		handler.handleRequest(request, this.response);
 
 		assertThat(this.response.getContentType()).isEqualTo("foo/bar");
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");

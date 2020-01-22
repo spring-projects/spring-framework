@@ -1683,6 +1683,18 @@ the issues that come with file extensions. Alternatively, if you must use file e
 restricting them to a list of explicitly registered extensions through the
 `mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
+[INFO]
+====
+Starting in 5.2.4, path extension related options for request mapping in
+{api-spring-framework}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java[RequestMappingHandlerMapping]
+and for content negotiation in
+{api-spring-framework}/org.springframework.web.accept/ContentNegotiationManagerFactoryBean.java[ContentNegotiationManagerFactoryBean]
+are deprecated. See Spring Framework issue
+https://github.com/spring-projects/spring-framework/issues/24179[#24179] and related
+issues for further plans.
+====
+
+
 
 [[mvc-ann-requestmapping-rfd]]
 ==== Suffix Match and RFD
@@ -5779,13 +5791,11 @@ The following example shows how to customize path matching in Java configuration
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
-				.setUseSuffixPatternMatch(true)
 				.setUseTrailingSlashMatch(false)
 				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
 				.setUrlPathHelper(urlPathHelper())
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController.class));
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		@Bean
@@ -5813,8 +5823,7 @@ The following example shows how to customize path matching in Java configuration
 				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
 				.setUrlPathHelper(urlPathHelper())
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController::class.java))
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 
 		@Bean
@@ -5835,7 +5844,6 @@ The following example shows how to achieve the same configuration in XML:
 ----
 	<mvc:annotation-driven>
 		<mvc:path-matching
-			suffix-pattern="true"
 			trailing-slash="false"
 			registered-suffixes-only="true"
 			path-helper="pathHelper"
