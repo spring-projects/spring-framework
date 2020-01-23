@@ -40,12 +40,15 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.GenericIntegerBean;
 import org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.ResolvableType;
@@ -958,6 +961,27 @@ public class BeanFactoryGenericsTests {
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
 	}
 
+	@Test
+	void constructorDependencyWithGeneric() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setInstanceSupplier(() -> new TestBean("bob"));
+		bf.registerBeanDefinition("dependency", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(Pet.class);
+		bd2.setInstanceSupplier(() -> new Pet("tom"));
+		bf.registerBeanDefinition("dependency", bd2);
+
+		RootBeanDefinition bd3 = new RootBeanDefinition(GenericConstructor.class);
+		bd3.setTargetType(ResolvableType.forClassWithGenerics(GenericConstructor.class, TestBean.class));
+		bd3.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("test", bd3);
+
+		Object testBean = bf.getBean("test");
+		assertThat(((GenericConstructor) testBean).getDependency())
+				.isInstanceOf(TestBean.class);
+	}
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
@@ -1065,6 +1089,21 @@ public class BeanFactoryGenericsTests {
 		public static NumberStore<Float> newFloatStore() {
 			return new FloatStore();
 		}
+	}
+
+	private static class GenericConstructor<T> {
+
+		private final T dependency;
+
+		@Autowired
+		public GenericConstructor(T dependency) {
+			this.dependency = dependency;
+		}
+
+		public T getDependency() {
+			return dependency;
+		}
+
 	}
 
 }
