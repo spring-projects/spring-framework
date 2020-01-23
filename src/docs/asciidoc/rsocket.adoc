@@ -781,7 +781,7 @@ use the following method arguments:
 
 | `@DestinationVariable`
 | Value extracted from the route based on variables in the mapping pattern, e.g.
-  `@MessageMapping("find.radar.{id}")`.
+  pass:q[`@MessageMapping("find.radar.{id}")`].
 
 | `@Header`
 | Metadata value registered for extraction as described in <<rsocket-metadata-extractor>>.

@@ -538,7 +538,7 @@ RouterFunction<ServerResponse> route = route()
 	.add(otherRoute) // <4>
 	.build();
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -562,7 +562,7 @@ RouterFunction<ServerResponse> route = route()
 		POST("/person", handler::createPerson) // <3>
 	}.and(otherRoute) // <4>
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -854,4 +854,4 @@ Besides using the `filter` method on the router function builder, it is possible
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
 
 NOTE: CORS support for functional endpoints is provided through a dedicated
-<<webflux-cors-webfilter, `CorsWebFilter`>>.
+<<webflux-cors.adoc#webflux-cors-webfilter, `CorsWebFilter`>>.

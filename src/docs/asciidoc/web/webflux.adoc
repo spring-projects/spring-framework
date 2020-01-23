@@ -674,7 +674,7 @@ Spring WebFlux provides fine-grained support for CORS configuration through anno
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
 `CorsFilter`, which must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+See the section on <<webflux-cors>> and the <<webflux-cors.adoc#webflux-cors-webfilter>> for more details.
 
 
 
@@ -1960,7 +1960,7 @@ can require type conversion if the argument is declared as something other than 
 
 For such cases, type conversion is automatically applied based on the configured converters.
 By default, simple types (such as `int`, `long`, `Date`, and others) are supported. Type conversion
-can be customized through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by registering
+can be customized through a `WebDataBinder` (see <<webflux-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
 
 
@@ -2162,7 +2162,7 @@ to `false` or by declaring the argument with a `java.util.Optional`
 wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 When a `@RequestParam` annotation is declared on a `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all query parameters.
@@ -2223,7 +2223,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 When a `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
@@ -2273,7 +2273,7 @@ The following code sample demonstrates how to get the cookie value:
 
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 
 [[webflux-ann-modelattrib-method-args]]
@@ -3265,7 +3265,7 @@ controller-specific `Formatter` instances, as the following example shows:
 === Managing Exceptions
 [.small]#<<web.adoc#mvc-ann-exceptionhandler, Web MVC>>#
 
-`@Controller` and <<mvc-ann-controller-advice, @ControllerAdvice>> classes can have
+`@Controller` and <<webflux-ann-controller-advice, @ControllerAdvice>> classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 

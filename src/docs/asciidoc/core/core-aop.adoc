@@ -3956,7 +3956,7 @@ for AspectJ LTW:
 * `spring-aop.jar`
 * `aspectjweaver.jar`
 
-If you use the <<aop-aj-ltw-environment-generic, Spring-provided agent to enable
+If you use the <<aop-aj-ltw-environments-generic, Spring-provided agent to enable
 instrumentation>>, you also need:
 
 * `spring-instrument.jar`

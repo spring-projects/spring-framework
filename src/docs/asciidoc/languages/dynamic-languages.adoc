@@ -589,7 +589,7 @@ in the same place as Spring's `GroovyObjectCustomizer`.
 
 This section describes how to use BeanShell beans in Spring.
 
-The BeanShell homepage includes the following description: {JB}
+The BeanShell homepage includes the following description:
 
 "`BeanShell is a small, free, embeddable Java source interpreter with dynamic language
 features, written in Java. BeanShell dynamically executes standard Java syntax and

@@ -543,7 +543,7 @@ enforced by the container, though no longer by XML parsers.
 You are not required to supply a `name` or an `id` for a bean. If you do not supply a
 `name` or `id` explicitly, the container generates a unique name for that bean. However,
 if you want to refer to that bean by name, through the use of the `ref` element or a
-<<beans-servicelocator,Service Locator>> style lookup, you must provide a name.
+Service Locator style lookup, you must provide a name.
 Motivations for not supplying a name are related to using <<beans-inner-beans,inner
 beans>> and <<beans-factory-autowire,autowiring collaborators>>.
 
@@ -4482,7 +4482,7 @@ with placeholder values is defined:
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
 properties of the DataSource. The values to replace are specified as placeholders of the
-form `${property-name}`, which follows the Ant and log4j and JSP EL style.
+form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -9543,7 +9543,7 @@ now looks like the following listing:
 The problem is how to switch between using these two variations based on the
 current environment. Over time, Spring users have devised a number of ways to
 get this done, usually relying on a combination of system environment variables
-and XML `<import/>` statements containing `${placeholder}` tokens that resolve
+and XML `<import/>` statements containing pass:q[`${placeholder}`] tokens that resolve
 to the correct configuration file path depending on the value of an environment
 variable. Bean definition profiles is a core container feature that provides a
 solution to this problem.

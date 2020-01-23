@@ -325,7 +325,7 @@ as the following example shows:
 
 [[mvc-cors-filter]]
 == CORS Filter
-[.small]#<<web-reactive.adoc#webflux-cors-webfilter, WebFlux>>#
+[.small]#<<webflux-cors.adoc#webflux-cors-webfilter, WebFlux>>#
 
 You can apply CORS support through the built-in
 {api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].

@@ -1314,7 +1314,7 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<aop-proxying>> for a discussion of the
+interface-based proxies are created. (See <<core.adoc#aop-proxying>> for a discussion of the
 different proxy types.)
 
 NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
