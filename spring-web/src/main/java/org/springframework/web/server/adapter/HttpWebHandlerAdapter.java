@@ -247,7 +247,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Format the request for logging purposes including HTTP method and URL.
 	 * <p>By default this prints the HTTP method, the URL path, and the query.
 	 * @param request the request to format
-	 * @return the String to display, never empty or @code null}
+	 * @return the String to display, never empty or {@code null}
 	 */
 	protected String formatRequest(ServerHttpRequest request) {
 		String rawQuery = request.getURI().getRawQuery();
