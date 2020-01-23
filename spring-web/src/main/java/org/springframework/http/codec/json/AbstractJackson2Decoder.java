@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,13 +153,21 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		MethodParameter param = getParameter(elementType);
-		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
+		Class<?> contextClass = getContextClass(elementType);
+		if (contextClass == null && hints != null) {
+			contextClass = getContextClass((ResolvableType) hints.get(ACTUAL_TYPE_HINT));
+		}
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		return jsonView != null ?
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
 				getObjectMapper().readerFor(javaType);
+	}
+
+	@Nullable
+	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
+		MethodParameter param = (elementType != null ? getParameter(elementType)  : null);
+		return (param != null ? param.getContainingClass() : null);
 	}
 
 	private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
