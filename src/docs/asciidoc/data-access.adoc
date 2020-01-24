@@ -3613,20 +3613,20 @@ part of the JDBC specification and is a generalized connection factory. It lets 
 container or a framework hide connection pooling and transaction management issues
 from the application code. As a developer, you need not know details about how to
 connect to the database. That is the responsibility of the administrator who sets up
-the datasource. You most likely fill both roles as you develop and test code, but you do
-not necessarily have to know how the production data source is configured.
+the datasource. You most likely fill both roles as you develop and test code, but you
+do not necessarily have to know how the production data source is configured.
 
-When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can configure your
-own with a connection pool implementation provided by a third party. Popular
-implementations are Apache Jakarta Commons DBCP and C3P0. Implementations in the Spring
-distribution are meant only for testing purposes and do not provide pooling.
+When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can
+configure your own with a connection pool implementation provided by a third party.
+Traditional choices are Apache Commons DBCP and C3P0 with bean-style `DataSource` classes;
+for a modern JDBC connection pool, consider HikariCP with its builder-style API instead.
 
-This section uses Spring's `DriverManagerDataSource` implementation, and several
-additional implementations are covered later.
+NOTE: You should use the `DriverManagerDataSource` and `SimpleDriverDataSource` classes
+(as included in the Spring distribution) only for testing purposes! Those variants do not
+provide pooling and perform poorly when multiple requests for a connection are made.
 
-NOTE: You should use the `DriverManagerDataSource` class only for testing purposes,
-since it does not provide pooling and performs poorly when multiple requests for a
-connection are made.
+The following section uses Spring's `DriverManagerDataSource` implementation.
+Several other `DataSource` variants are covered later.
 
 To configure a `DriverManagerDataSource`:
 
