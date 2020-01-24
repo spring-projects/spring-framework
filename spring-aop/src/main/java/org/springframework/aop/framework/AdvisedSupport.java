@@ -331,6 +331,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
 		}
+		doAddAdvisors(advisors);
+	}
+
+	private void doAddAdvisors(Collection<Advisor> advisors){
 		if (!CollectionUtils.isEmpty(advisors)) {
 			for (Advisor advisor : advisors) {
 				if (advisor instanceof IntroductionAdvisor) {
@@ -514,7 +518,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
 		this.interfaces = new ArrayList<>(other.interfaces);
-		addAdvisors(advisors);
+		doAddAdvisors(advisors);
 	}
 
 	/**
