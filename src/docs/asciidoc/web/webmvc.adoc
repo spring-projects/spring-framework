@@ -1683,7 +1683,7 @@ the issues that come with file extensions. Alternatively, if you must use file e
 restricting them to a list of explicitly registered extensions through the
 `mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
-[INFO]
+[NOTE]
 ====
 Starting in 5.2.4, path extension related options for request mapping in
 {api-spring-framework}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java[RequestMappingHandlerMapping]
