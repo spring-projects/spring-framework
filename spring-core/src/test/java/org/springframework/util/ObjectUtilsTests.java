@@ -809,16 +809,16 @@ class ObjectUtilsTests {
 
 	@Test
 	void containsElement() {
-		String keyValue = "key";
-		String[] array = {"foo", "bar", "Bar", keyValue};
+		String keyObject = "key";
+		String[] array = {"foo", "bar", "Bar", keyObject};
 
-		String fakeValue = "fake";
+		String fakeObject = "fake";
 
-		assertThat(ObjectUtils.containsElement(null, keyValue)).isFalse();
+		assertThat(ObjectUtils.containsElement(null, keyObject)).isFalse();
 
-		assertThat(ObjectUtils.containsElement(array, keyValue)).isTrue();
+		assertThat(ObjectUtils.containsElement(array, keyObject)).isTrue();
 
-		assertThat(ObjectUtils.containsElement(array, fakeValue)).isFalse();
+		assertThat(ObjectUtils.containsElement(array, fakeObject)).isFalse();
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {
