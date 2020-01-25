@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Hyunjin Choi
  */
 class ObjectUtilsTests {
 
@@ -804,6 +805,20 @@ class ObjectUtilsTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
 			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
+	}
+
+	@Test
+	void containsElement() {
+		String keyValue = "key";
+		String[] array = {"foo", "bar", "Bar", keyValue};
+
+		String fakeValue = "fake";
+
+		assertThat(ObjectUtils.containsElement(null, keyValue)).isFalse();
+
+		assertThat(ObjectUtils.containsElement(array, keyValue)).isTrue();
+
+		assertThat(ObjectUtils.containsElement(array, fakeValue)).isFalse();
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {
