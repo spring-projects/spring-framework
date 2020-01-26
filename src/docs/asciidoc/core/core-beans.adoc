@@ -1565,7 +1565,7 @@ is a dependency of the bean whose property is to be set, and it is initialized o
 as needed before the property is set. (If the collaborator is a singleton bean, it may
 already be initialized by the container.) All references are ultimately a reference to
 another object. Scoping and validation depend on whether you specify the ID or name of the
-other object through the `bean`, `local,` or `parent` attributes.
+other object through the `bean`, or `parent` attributes.
 
 Specifying the target bean through the `bean` attribute of the `<ref/>` tag is the most
 general form and allows creation of a reference to any bean in the same container or
