@@ -1407,7 +1407,7 @@ is a dependency of the bean whose property will be set, and it is initialized on
 as needed before the property is set. (If the collaborator is a singleton bean, it may
 be initialized already by the container.) All references are ultimately a reference to
 another object. Scoping and validation depend on whether you specify the id/name of the
-other object through the `bean`, `local,` or `parent` attributes.
+other object through the `bean` or `parent` attributes.
 
 Specifying the target bean through the `bean` attribute of the `<ref/>` tag is the most
 general form, and allows creation of a reference to any bean in the same container or
