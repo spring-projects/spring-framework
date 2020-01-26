@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public enum HttpMethod {
 
-	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
+	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE, MERGE;
 
 
 	private static final Map<String, HttpMethod> mappings = new HashMap<>(16);
