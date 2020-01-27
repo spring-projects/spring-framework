@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,9 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +32,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriUtils;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
@@ -107,30 +110,33 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 */
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {
+			if (location instanceof ClassPathResource) {
+				resourcePath = UriUtils.decode(resourcePath, StandardCharsets.UTF_8);
+			}
 			Resource resource = location.createRelative(resourcePath);
-			if (resource.exists() && resource.isReadable()) {
+			if (resource.isReadable()) {
 				if (checkResource(resource, location)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found match: " + resource);
-					}
 					return Mono.just(resource);
 				}
-				else if (logger.isTraceEnabled()) {
+				else if (logger.isWarnEnabled()) {
 					Resource[] allowedLocations = getAllowedLocations();
-					logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
-							"but resource=\"" + resource.getURL() + "\" is neither under the " +
-							"current location=\"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations=" + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
+					logger.warn("Resource path \"" + resourcePath + "\" was successfully resolved " +
+							"but resource \"" + resource.getURL() + "\" is neither under the " +
+							"current location \"" + location.getURL() + "\" nor under any of the " +
+							"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 				}
-			}
-			else if (logger.isTraceEnabled()) {
-				logger.trace("No match for location: " + location);
 			}
 			return Mono.empty();
 		}
 		catch (IOException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Failure checking for relative resource under location + " + location, ex);
+			if (logger.isDebugEnabled()) {
+				String error = "Skip location [" + location + "] due to error";
+				if (logger.isTraceEnabled()) {
+					logger.trace(error, ex);
+				}
+				else {
+					logger.debug(error + ": " + ex.getMessage());
+				}
 			}
 			return Mono.error(ex);
 		}
@@ -184,21 +190,27 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedPath(resourcePath));
+	}
 
+	private boolean isInvalidEncodedPath(String resourcePath) {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
-			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
+					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
+					return true;
 				}
-				return false;
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
 			}
 		}
-
-		return true;
+		return false;
 	}
 
 }

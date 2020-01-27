@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -36,7 +37,9 @@ import org.springframework.util.Assert;
  * to convert the response into a type {@code T}.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 3.0
+ * @param <T> the data type
  * @see RestTemplate
  */
 public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
@@ -71,6 +74,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.noNullElements(messageConverters, "'messageConverters' must not contain null elements");
 		this.responseType = responseType;
 		this.responseClass = (responseType instanceof Class ? (Class<T>) responseType : null);
 		this.messageConverters = messageConverters;
@@ -94,8 +98,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 							(GenericHttpMessageConverter<?>) messageConverter;
 					if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Reading [" + this.responseType + "] as \"" +
-									contentType + "\" using [" + messageConverter + "]");
+							ResolvableType resolvableType = ResolvableType.forType(this.responseType);
+							logger.debug("Reading to [" + resolvableType + "]");
 						}
 						return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 					}
@@ -103,8 +107,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				if (this.responseClass != null) {
 					if (messageConverter.canRead(this.responseClass, contentType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
-									contentType + "\" using [" + messageConverter + "]");
+							String className = this.responseClass.getName();
+							logger.debug("Reading to [" + className + "] as \"" + contentType + "\"");
 						}
 						return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
 					}
@@ -120,11 +124,18 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				"for response type [" + this.responseType + "] and content type [" + contentType + "]");
 	}
 
-	private MediaType getContentType(ClientHttpResponse response) {
+	/**
+	 * Determine the Content-Type of the response based on the "Content-Type"
+	 * header or otherwise default to {@link MediaType#APPLICATION_OCTET_STREAM}.
+	 * @param response the response
+	 * @return the MediaType, possibly {@code null}.
+	 */
+	@Nullable
+	protected MediaType getContentType(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		if (contentType == null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No Content-Type header found, defaulting to application/octet-stream");
+				logger.trace("No content-type, using 'application/octet-stream'");
 			}
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}

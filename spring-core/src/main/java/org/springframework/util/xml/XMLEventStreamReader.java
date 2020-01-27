@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
@@ -95,7 +96,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	@Override
 	public boolean isStandalone() {
 		if (this.event.isStartDocument()) {
-			return ((StartDocument) event).isStandalone();
+			return ((StartDocument) this.event).isStandalone();
 		}
 		else {
 			throw new IllegalStateException();
@@ -152,7 +153,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	@Override
 	public String getText() {
 		if (this.event.isCharacters()) {
-			return event.asCharacters().getData();
+			return this.event.asCharacters().getData();
 		}
 		else if (this.event.getEventType() == XMLEvent.COMMENT) {
 			return ((Comment) this.event).getText();

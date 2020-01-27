@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -35,32 +35,32 @@
 	</bean>
 
 
-	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="jenny" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
 			<ref bean="david"/>
 		</property>
 		<property name="friends">
-			<bean class="org.springframework.tests.sample.beans.TestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 		</property>
 	</bean>
 
-	<bean id="jennyParent" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="jennyParent" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="friends">
-			<bean class="org.springframework.tests.sample.beans.TestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 		</property>
 	</bean>
 
-	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" scope="prototype">
+	<bean id="jennyChild" class="org.springframework.beans.testfixture.beans.TestBean" parent="jennyParent" scope="prototype">
 		<property name="spouse">
 			<ref bean="david"/>
 		</property>
 	</bean>
 
-	<bean id="david" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="david" class="org.springframework.beans.testfixture.beans.TestBean">
 		<description>
 			Simple bean, without any collections.
 		</description>
@@ -71,12 +71,12 @@
 		<property name="age"><value>27</value></property>
 	</bean>
 
-	<bean id="magicDavid" class="org.springframework.tests.sample.beans.TestBean" autowire="byName"/>
+	<bean id="magicDavid" class="org.springframework.beans.testfixture.beans.TestBean" autowire="byName"/>
 
 	<!--  this should be autowired as well! -->
 	<bean id="magicDavidDerived" parent="magicDavid" />
 
-	<bean id="spouse" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="spouse" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="Linda"/>
 	</bean>
 

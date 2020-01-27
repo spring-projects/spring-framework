@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
 public class AsyncHttpAccessor {
 
 	/** Logger available to subclasses. */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	@Nullable
 	private org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory;
@@ -66,7 +66,7 @@ public class AsyncHttpAccessor {
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
 	public org.springframework.http.client.AsyncClientHttpRequestFactory getAsyncRequestFactory() {
-		Assert.state(asyncRequestFactory != null, "No AsyncClientHttpRequestFactory set");
+		Assert.state(this.asyncRequestFactory != null, "No AsyncClientHttpRequestFactory set");
 		return this.asyncRequestFactory;
 	}
 

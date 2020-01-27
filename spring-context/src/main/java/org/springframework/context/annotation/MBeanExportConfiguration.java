@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.util.Map;
+
 import javax.management.MBeanServer;
 import javax.naming.NamingException;
 
@@ -131,8 +132,14 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 
+	/**
+	 * Specific platforms that might need custom MBean handling.
+	 */
 	public enum SpecificPlatform {
 
+		/**
+		 * Weblogic.
+		 */
 		WEBLOGIC("weblogic.management.Helper") {
 			@Override
 			public MBeanServer getMBeanServer() {
@@ -145,6 +152,9 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 			}
 		},
 
+		/**
+		 * Websphere.
+		 */
 		WEBSPHERE("com.ibm.websphere.management.AdminServiceFactory") {
 			@Override
 			public MBeanServer getMBeanServer() {

@@ -1,0 +1,30 @@
+plugins {
+	id 'java-gradle-plugin'
+}
+
+repositories {
+	mavenCentral()
+	gradlePluginPortal()
+}
+
+dependencies {
+	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.2.8"
+	implementation "com.google.guava:guava:18.0" // required by japicmp-gradle-plugin
+}
+
+gradlePlugin {
+	plugins {
+		apiDiffPlugin {
+			id = "org.springframework.build.api-diff"
+			implementationClass = "org.springframework.build.api.ApiDiffPlugin"
+		}
+		compileConventionsPlugin {
+			id = "org.springframework.build.compile"
+			implementationClass = "org.springframework.build.compile.CompilerConventionsPlugin"
+		}
+		optionalDependenciesPlugin {
+			id = "org.springframework.build.optional-dependencies"
+			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
+		}
+	}
+}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,6 +45,15 @@ public class DefaultConversionService extends GenericConversionService {
 
 
 	/**
+	 * Create a new {@code DefaultConversionService} with the set of
+	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
+	 */
+	public DefaultConversionService() {
+		addDefaultConverters(this);
+	}
+
+
+	/**
 	 * Return a shared default {@code ConversionService} instance,
 	 * lazily building it once needed.
 	 * <p><b>NOTE:</b> We highly recommend constructing individual
@@ -69,22 +78,10 @@ public class DefaultConversionService extends GenericConversionService {
 		return cs;
 	}
 
-
-	/**
-	 * Create a new {@code DefaultConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
-	 */
-	public DefaultConversionService() {
-		addDefaultConverters(this);
-	}
-
-
-	// static utility methods
-
 	/**
 	 * Add converters appropriate for most environments.
-	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService,
-	 * e.g. being a {@link ConfigurableConversionService})
+	 * @param converterRegistry the registry of converters to add to
+	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 */
 	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
@@ -103,9 +100,9 @@ public class DefaultConversionService extends GenericConversionService {
 	}
 
 	/**
-	 * Add collection converters.
-	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService,
-	 * e.g. being a {@link ConfigurableConversionService})
+	 * Add common collection converters.
+	 * @param converterRegistry the registry of converters to add to
+	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 * @since 4.2.3
 	 */
@@ -134,9 +131,6 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new StreamConverter(conversionService));
 	}
 
-
-	// internal helpers
-
 	private static void addScalarConverters(ConverterRegistry converterRegistry) {
 		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
 
@@ -154,7 +148,7 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
 		converterRegistry.addConverter(new EnumToStringConverter((ConversionService) converterRegistry));
-	
+
 		converterRegistry.addConverterFactory(new IntegerToEnumConverterFactory());
 		converterRegistry.addConverter(new EnumToIntegerConverter((ConversionService) converterRegistry));
 

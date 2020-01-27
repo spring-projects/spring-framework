@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,24 +18,38 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
+import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -43,10 +57,13 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
  * {@link RequestMapping @RequestMapping} annotations.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements EmbeddedValueResolverAware {
+
+	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
@@ -57,12 +74,46 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	/**
-	 * Set the {@link RequestedContentTypeResolver} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * Configure path prefixes to apply to controller methods.
+	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
+	 * method whose controller type is matched by a corresponding
+	 * {@code Predicate} in the map. The prefix for the first matching predicate
+	 * is used, assuming the input map has predictable order.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
+	 * @param prefixes a map with path prefixes as key
+	 * @since 5.1
+	 * @see org.springframework.web.method.HandlerTypePredicate
+	 */
+	public void setPathPrefixes(Map<String, Predicate<Class<?>>> prefixes) {
+		this.pathPrefixes.clear();
+		prefixes.entrySet().stream()
+				.filter(entry -> StringUtils.hasText(entry.getKey()))
+				.forEach(entry -> this.pathPrefixes.put(entry.getKey(), entry.getValue()));
+	}
+
+	/**
+	 * The configured path prefixes as a read-only, possibly empty map.
+	 * @since 5.1
+	 */
+	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
+		return Collections.unmodifiableMap(this.pathPrefixes);
+	}
+
+	/**
+	 * Set the {@link RequestedContentTypeResolver} to use to determine requested
+	 * media types. If not set, the default constructor is used.
 	 */
 	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
 		this.contentTypeResolver = contentTypeResolver;
+	}
+
+	/**
+	 * Return the configured {@link RequestedContentTypeResolver}.
+	 */
+	public RequestedContentTypeResolver getContentTypeResolver() {
+		return this.contentTypeResolver;
 	}
 
 	@Override
@@ -79,13 +130,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		super.afterPropertiesSet();
 	}
 
-
-	/**
-	 * Return the configured {@link RequestedContentTypeResolver}.
-	 */
-	public RequestedContentTypeResolver getContentTypeResolver() {
-		return this.contentTypeResolver;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -112,6 +156,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
+			}
+			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
+				if (entry.getValue().test(handlerType)) {
+					String prefix = entry.getKey();
+					if (this.embeddedValueResolver != null) {
+						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+					}
+					info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
+					break;
+				}
 			}
 		}
 		return info;
@@ -211,6 +265,31 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
+	public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
+		super.registerMapping(mapping, handler, method);
+		updateConsumesCondition(mapping, method);
+	}
+
+	@Override
+	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
+		super.registerHandlerMethod(handler, method, mapping);
+		updateConsumesCondition(mapping, method);
+	}
+
+	private void updateConsumesCondition(RequestMappingInfo info, Method method) {
+		ConsumesRequestCondition condition = info.getConsumesCondition();
+		if (!condition.isEmpty()) {
+			for (Parameter parameter : method.getParameters()) {
+				MergedAnnotation<RequestBody> annot = MergedAnnotations.from(parameter).get(RequestBody.class);
+				if (annot.isPresent()) {
+					condition.setBodyRequired(annot.getBoolean("required"));
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 		Class<?> beanType = handlerMethod.getBeanType();
@@ -275,6 +354,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		else {
 			return value;
 		}
+	}
+
+	@Override
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		return super.getHandlerInternal(exchange)
+				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
 
 }

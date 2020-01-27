@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.JoinPoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for the {@link AspectJAdviceParameterNameDiscoverer} class.
@@ -33,47 +35,6 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  */
 public class AspectJAdviceParameterNameDiscovererTests {
-
-	// methods to discover parameter names for
-	public void noArgs() {
-	}
-
-	public void tjp(JoinPoint jp) {
-	}
-
-	public void tjpsp(JoinPoint.StaticPart tjpsp) {
-	}
-
-	public void twoJoinPoints(JoinPoint jp1, JoinPoint jp2) {
-	}
-
-	public void oneThrowable(Exception ex) {
-	}
-
-	public void jpAndOneThrowable(JoinPoint jp, Exception ex) {
-	}
-
-	public void jpAndTwoThrowables(JoinPoint jp, Exception ex, Error err) {
-	}
-
-	public void oneObject(Object x) {
-	}
-
-	public void twoObjects(Object x, Object y) {
-	}
-
-	public void onePrimitive(int x) {
-	}
-
-	public void oneObjectOnePrimitive(Object x, int y) {
-	}
-
-	public void oneThrowableOnePrimitive(Throwable x, int y) {
-	}
-
-	public void theBigOne(JoinPoint jp, Throwable x, int y, Object foo) {
-	}
-
 
 	@Test
 	public void testNoArgs() {
@@ -221,22 +182,26 @@ public class AspectJAdviceParameterNameDiscovererTests {
 
 	@Test
 	public void testThisAndPrimitive() {
-		assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && this(obj)", new String[] {"obj", "count"});
+		assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && this(obj)",
+				new String[] {"obj", "count"});
 	}
 
 	@Test
 	public void testTargetAndPrimitive() {
-		assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && target(obj)", new String[] {"obj", "count"});
+		assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && target(obj)",
+				new String[] {"obj", "count"});
 	}
 
 	@Test
 	public void testThrowingAndPrimitive() {
-		assertParameterNames(getMethod("oneThrowableOnePrimitive"), "args(count)", null, "ex", new String[] {"ex", "count"});
+		assertParameterNames(getMethod("oneThrowableOnePrimitive"), "args(count)", null, "ex",
+				new String[] {"ex", "count"});
 	}
 
 	@Test
 	public void testAllTogetherNow() {
-		assertParameterNames(getMethod("theBigOne"), "this(foo) && args(x)", null, "ex", new String[] {"thisJoinPoint", "ex", "x", "foo"});
+		assertParameterNames(getMethod("theBigOne"), "this(foo) && args(x)", null, "ex",
+				new String[] {"thisJoinPoint", "ex", "x", "foo"});
 	}
 
 	@Test
@@ -253,26 +218,24 @@ public class AspectJAdviceParameterNameDiscovererTests {
 
 
 	protected Method getMethod(String name) {
-		// assumes no overloading of test methods...
-		Method[] candidates = this.getClass().getMethods();
+		// Assumes no overloading of test methods...
+		Method[] candidates = getClass().getMethods();
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(name)) {
 				return candidate;
 			}
 		}
-		fail("Bad test specification, no method '" + name + "' found in test class");
-		return null;
+		throw new AssertionError("Bad test specification, no method '" + name + "' found in test class");
 	}
 
 	protected void assertParameterNames(Method method, String pointcut, String[] parameterNames) {
 		assertParameterNames(method, pointcut, null, null, parameterNames);
 	}
 
-	protected void assertParameterNames(Method method, String pointcut, String returning, String throwing,
-			String[] parameterNames) {
+	protected void assertParameterNames(
+			Method method, String pointcut, String returning, String throwing, String[] parameterNames) {
 
-		assertEquals("bad test specification, must have same number of parameter names as method arguments",
-				method.getParameterCount(), parameterNames.length);
+		assertThat(parameterNames.length).as("bad test specification, must have same number of parameter names as method arguments").isEqualTo(method.getParameterCount());
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
@@ -283,40 +246,31 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		String formattedExpectedNames = format(parameterNames);
 		String formattedActualNames = format(discoveredNames);
 
-		assertEquals("Expecting " + parameterNames.length + " parameter names in return set '" +
+		assertThat(discoveredNames.length).as("Expecting " + parameterNames.length + " parameter names in return set '" +
 				formattedExpectedNames + "', but found " + discoveredNames.length +
-				" '" + formattedActualNames + "'",
-				parameterNames.length, discoveredNames.length);
+				" '" + formattedActualNames + "'").isEqualTo(parameterNames.length);
 
 		for (int i = 0; i < discoveredNames.length; i++) {
-			assertNotNull("Parameter names must never be null", discoveredNames[i]);
-			assertEquals("Expecting parameter " + i + " to be named '" +
-					parameterNames[i] + "' but was '" + discoveredNames[i] + "'",
-					parameterNames[i], discoveredNames[i]);
+			assertThat(discoveredNames[i]).as("Parameter names must never be null").isNotNull();
+			assertThat(discoveredNames[i]).as("Expecting parameter " + i + " to be named '" +
+						parameterNames[i] + "' but was '" + discoveredNames[i] + "'").isEqualTo(parameterNames[i]);
 		}
 	}
 
-	protected void assertException(Method method, String pointcut, Class<?> exceptionType, String message) {
+	protected void assertException(Method method, String pointcut, Class<? extends Throwable> exceptionType, String message) {
 		assertException(method, pointcut, null, null, exceptionType, message);
 	}
 
-	protected void assertException(Method method, String pointcut, String returning, String throwing,
-			Class<?> exceptionType, String message) {
+	protected void assertException(Method method, String pointcut, String returning,
+			String throwing, Class<? extends Throwable> exceptionType, String message) {
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
 		discoverer.setReturningName(returning);
 		discoverer.setThrowingName(throwing);
-
-		try {
-			discoverer.getParameterNames(method);
-			fail("Expecting " + exceptionType.getName() + " with message '" + message + "'");
-		}
-		catch (RuntimeException expected) {
-			assertEquals("Expecting exception of type " + exceptionType.getName(),
-					exceptionType, expected.getClass());
-			assertEquals("Exception message does not match expected", message, expected.getMessage());
-		}
+		assertThatExceptionOfType(exceptionType).isThrownBy(() ->
+				discoverer.getParameterNames(method))
+			.withMessageContaining(message);
 	}
 
 
@@ -331,6 +285,48 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		}
 		sb.append(")");
 		return sb.toString();
+	}
+
+
+	// Methods to discover parameter names for
+
+	public void noArgs() {
+	}
+
+	public void tjp(JoinPoint jp) {
+	}
+
+	public void tjpsp(JoinPoint.StaticPart tjpsp) {
+	}
+
+	public void twoJoinPoints(JoinPoint jp1, JoinPoint jp2) {
+	}
+
+	public void oneThrowable(Exception ex) {
+	}
+
+	public void jpAndOneThrowable(JoinPoint jp, Exception ex) {
+	}
+
+	public void jpAndTwoThrowables(JoinPoint jp, Exception ex, Error err) {
+	}
+
+	public void oneObject(Object x) {
+	}
+
+	public void twoObjects(Object x, Object y) {
+	}
+
+	public void onePrimitive(int x) {
+	}
+
+	public void oneObjectOnePrimitive(Object x, int y) {
+	}
+
+	public void oneThrowableOnePrimitive(Throwable x, int y) {
+	}
+
+	public void theBigOne(JoinPoint jp, Throwable x, int y, Object foo) {
 	}
 
 }

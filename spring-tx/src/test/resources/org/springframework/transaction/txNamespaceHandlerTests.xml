@@ -3,9 +3,9 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xmlns:tx="http://www.springframework.org/schema/tx"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+				http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 	<aop:config>
 		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
@@ -26,8 +26,8 @@
 		</tx:attributes>
 	</tx:advice>
 
-	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
+	<bean id="transactionManager" class="org.springframework.transaction.testfixture.CallCountingTransactionManager"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

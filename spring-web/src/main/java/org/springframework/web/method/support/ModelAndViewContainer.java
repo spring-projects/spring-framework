@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +30,8 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
 
 /**
  * Records model and view related decisions made by
- * {@link HandlerMethodArgumentResolver}s and
- * {@link HandlerMethodReturnValueHandler}s during the course of invocation of
+ * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
+ * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} during the course of invocation of
  * a controller method.
  *
  * <p>The {@link #setRequestHandled} flag can be used to indicate the request
@@ -172,9 +172,9 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Provide a separate model instance to use in a redirect scenario.
-	 * The provided additional model however is not used unless
-	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
-	 * a redirect scenario.
+	 * <p>The provided additional model however is not used unless
+	 * {@link #setRedirectModelScenario} gets set to {@code true}
+	 * to signal an actual redirect scenario.
 	 */
 	public void setRedirectModel(ModelMap redirectModel) {
 		this.redirectModel = redirectModel;

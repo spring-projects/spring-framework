@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,28 +16,21 @@
 
 package org.springframework.web.context.request.async;
 
-
 import java.util.function.Consumer;
 
 import javax.servlet.AsyncEvent;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * A test fixture with a {@link StandardServletAsyncWebRequest}.
@@ -52,7 +45,7 @@ public class StandardServletAsyncWebRequestTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setAsyncSupported(true);
@@ -64,9 +57,9 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void isAsyncStarted() throws Exception {
-		assertFalse(this.asyncRequest.isAsyncStarted());
+		assertThat(this.asyncRequest.isAsyncStarted()).isFalse();
 		this.asyncRequest.startAsync();
-		assertTrue(this.asyncRequest.isAsyncStarted());
+		assertThat(this.asyncRequest.isAsyncStarted()).isTrue();
 	}
 
 	@Test
@@ -74,10 +67,10 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.startAsync();
 
 		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
-		assertNotNull(context);
-		assertEquals("Timeout value not set", 44 * 1000, context.getTimeout());
-		assertEquals(1, context.getListeners().size());
-		assertSame(this.asyncRequest, context.getListeners().get(0));
+		assertThat(context).isNotNull();
+		assertThat(context.getTimeout()).as("Timeout value not set").isEqualTo((44 * 1000));
+		assertThat(context.getListeners().size()).isEqualTo(1);
+		assertThat(context.getListeners().get(0)).isSameAs(this.asyncRequest);
 	}
 
 	@Test
@@ -88,38 +81,30 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.startAsync();	// idempotent
 
 		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
-		assertNotNull(context);
-		assertEquals(1, context.getListeners().size());
+		assertThat(context).isNotNull();
+		assertThat(context.getListeners().size()).isEqualTo(1);
 	}
 
 	@Test
 	public void startAsyncNotSupported() throws Exception {
 		this.request.setAsyncSupported(false);
-		try {
-			this.asyncRequest.startAsync();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("Async support must be enabled"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this.asyncRequest::startAsync)
+			.withMessageContaining("Async support must be enabled");
 	}
 
 	@Test
 	public void startAsyncAfterCompleted() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		try {
-			this.asyncRequest.startAsync();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Async processing has already completed", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this.asyncRequest::startAsync)
+			.withMessage("Async processing has already completed");
 	}
 
 	@Test
 	public void onTimeoutDefaultBehavior() throws Exception {
 		this.asyncRequest.onTimeout(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		assertEquals(200, this.response.getStatus());
+		assertThat(this.response.getStatus()).isEqualTo(200);
 	}
 
 	@Test
@@ -140,10 +125,11 @@ public class StandardServletAsyncWebRequestTests {
 		verify(errorHandler).accept(e);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void setTimeoutDuringConcurrentHandling() {
 		this.asyncRequest.startAsync();
-		this.asyncRequest.setTimeout(25L);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.asyncRequest.setTimeout(25L));
 	}
 
 	@Test
@@ -155,7 +141,7 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
-		assertTrue(this.asyncRequest.isAsyncComplete());
+		assertThat(this.asyncRequest.isAsyncComplete()).isTrue();
 	}
 
 	// SPR-13292
@@ -182,6 +168,6 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
-		assertTrue(this.asyncRequest.isAsyncComplete());
+		assertThat(this.asyncRequest.isAsyncComplete()).isTrue();
 	}
 }

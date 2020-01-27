@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Helper class that efficiently creates multiple {@link CallableStatementCreator}
- * objects with different parameters based on a SQL statement and a single
+ * objects with different parameters based on an SQL statement and a single
  * set of parameter declarations.
  *
  * @author Rod Johnson
@@ -53,6 +53,7 @@ public class CallableStatementCreatorFactory {
 	/**
 	 * Create a new factory. Will need to add parameters via the
 	 * {@link #addParameter} method or have no parameters.
+	 * @param callString the SQL call string
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this.callString = callString;
@@ -69,6 +70,14 @@ public class CallableStatementCreatorFactory {
 		this.declaredParameters = declaredParameters;
 	}
 
+
+	/**
+	 * Return the SQL call string.
+	 * @since 5.1.3
+	 */
+	public final String getCallString() {
+		return this.callString;
+	}
 
 	/**
 	 * Add a new declared parameter.
@@ -109,7 +118,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
-	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters
+	 * @param inParamMapper the ParameterMapper implementation that will return a Map of parameters
 	 */
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
@@ -129,7 +138,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParamMapper ParameterMapper implementation for mapping input parameters
+		 * @param inParamMapper the ParameterMapper implementation for mapping input parameters
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;

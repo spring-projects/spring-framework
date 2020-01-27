@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -34,9 +35,9 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.lang.Nullable;
 
 /**
- * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed
- * DataSource instead of using a Quartz-managed connection pool. This JobStore
- * will be used if SchedulerFactoryBean's "dataSource" property is set.
+ * Subclass of Quartz's {@link JobStoreCMT} class that delegates to a Spring-managed
+ * {@link DataSource} instead of using a Quartz-managed JDBC connection pool.
+ * This JobStore will be used if SchedulerFactoryBean's "dataSource" property is set.
  *
  * <p>Supports both transactional and non-transactional DataSource access.
  * With a non-XA DataSource and local Spring transactions, a single DataSource
@@ -84,15 +85,12 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 
 	@Override
-	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
-			throws SchedulerConfigException {
-
+	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
 		// Absolutely needs thread-bound DataSource to initialize.
 		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
 		if (this.dataSource == null) {
-			throw new SchedulerConfigException(
-				"No local DataSource found for configuration - " +
-				"'dataSource' property must be set on SchedulerFactoryBean");
+			throw new SchedulerConfigException("No local DataSource found for configuration - " +
+					"'dataSource' property must be set on SchedulerFactoryBean");
 		}
 
 		// Configure transactional connection settings for Quartz.
@@ -112,7 +110,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
-					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -140,7 +138,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
-					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}

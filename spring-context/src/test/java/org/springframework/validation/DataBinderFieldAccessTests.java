@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,17 @@ package org.springframework.validation;
 import java.beans.PropertyEditorSupport;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.tests.sample.beans.FieldAccessBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -39,14 +38,11 @@ import static org.junit.Assert.*;
  */
 public class DataBinderFieldAccessTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void bindingNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		assertTrue(binder.isIgnoreUnknownFields());
+		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
@@ -56,13 +52,13 @@ public class DataBinderFieldAccessTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertTrue("changed name correctly", rod.getName().equals("Rod"));
-		assertTrue("changed age correctly", rod.getAge() == 32);
+		assertThat(rod.getName().equals("Rod")).as("changed name correctly").isTrue();
+		assertThat(rod.getAge() == 32).as("changed age correctly").isTrue();
 
 		Map<?, ?> m = binder.getBindingResult().getModel();
-		assertTrue("There is one element in map", m.size() == 2);
+		assertThat(m.size() == 2).as("There is one element in map").isTrue();
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
-		assertTrue("Same object", tb.equals(rod));
+		assertThat(tb.equals(rod)).as("Same object").isTrue();
 	}
 
 	@Test
@@ -75,14 +71,8 @@ public class DataBinderFieldAccessTests {
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
 		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
-
-		try {
-			binder.bind(pvs);
-			fail("Should have thrown NotWritablePropertyException");
-		}
-		catch (NotWritablePropertyException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				binder.bind(pvs));
 	}
 
 	@Test
@@ -94,38 +84,31 @@ public class DataBinderFieldAccessTests {
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
 		binder.bind(pvs);
+		assertThatExceptionOfType(BindException.class).isThrownBy(
+				binder::close)
+			.satisfies(ex -> {
+				assertThat(rod.getName()).isEqualTo("Rod");
+				Map<?, ?> map = binder.getBindingResult().getModel();
+				FieldAccessBean tb = (FieldAccessBean) map.get("person");
+				assertThat(tb).isEqualTo(rod);
 
-		try {
-			binder.close();
-			fail("Should have thrown BindException");
-		}
-		catch (BindException ex) {
-			assertTrue("changed name correctly", rod.getName().equals("Rod"));
-			//assertTrue("changed age correctly", rod.getAge() == 32);
-
-			Map<?, ?> map = binder.getBindingResult().getModel();
-			//assertTrue("There are 3 element in map", m.size() == 1);
-			FieldAccessBean tb = (FieldAccessBean) map.get("person");
-			assertTrue("Same object", tb.equals(rod));
-
-			BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
-			assertTrue("Added itself to map", br == binder.getBindingResult());
-			assertTrue(br.hasErrors());
-			assertTrue("Correct number of errors", br.getErrorCount() == 1);
-
-			assertTrue("Has age errors", br.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
-			assertEquals(0, tb.getAge());
-		}
+				BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
+				assertThat(br).isSameAs(binder.getBindingResult());
+				assertThat(br.hasErrors()).isTrue();
+				assertThat(br.getErrorCount()).isEqualTo(1);
+				assertThat(br.hasFieldErrors()).isTrue();
+				assertThat(br.getFieldErrorCount("age")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("age")).isEqualTo("32x");
+				assertThat(binder.getBindingResult().getFieldError("age").getRejectedValue()).isEqualTo("32x");
+				assertThat(tb.getAge()).isEqualTo(0);
+			});
 	}
 
 	@Test
 	public void nestedBindingWithDefaultConversionNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		assertTrue(binder.isIgnoreUnknownFields());
+		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "Kerry"));
@@ -134,8 +117,8 @@ public class DataBinderFieldAccessTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertEquals("Kerry", rod.getSpouse().getName());
-		assertTrue((rod.getSpouse()).isJedi());
+		assertThat(rod.getSpouse().getName()).isEqualTo("Kerry");
+		assertThat((rod.getSpouse()).isJedi()).isTrue();
 	}
 
 	@Test
@@ -147,8 +130,8 @@ public class DataBinderFieldAccessTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "Kerry"));
 
-		thrown.expect(NullValueInNestedPathException.class);
-		binder.bind(pvs);
+		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
+				binder.bind(pvs));
 	}
 
 	@Test
@@ -172,34 +155,25 @@ public class DataBinderFieldAccessTests {
 		pvs.addPropertyValue(new PropertyValue("spouse", "Kerry"));
 		binder.bind(pvs);
 
-		try {
-			binder.close();
-			fail("Should have thrown BindException");
-		}
-		catch (BindException ex) {
-			assertTrue("changed name correctly", rod.getName().equals("Rod"));
-			//assertTrue("changed age correctly", rod.getAge() == 32);
-
-			Map<?, ?> model = binder.getBindingResult().getModel();
-			//assertTrue("There are 3 element in map", m.size() == 1);
-			FieldAccessBean tb = (FieldAccessBean) model.get("person");
-			assertTrue("Same object", tb.equals(rod));
-
-			BindingResult br = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "person");
-			assertTrue("Added itself to map", br == binder.getBindingResult());
-			assertTrue(br.hasErrors());
-			assertTrue("Correct number of errors", br.getErrorCount() == 1);
-
-			assertTrue("Has age errors", br.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
-			assertEquals(0, tb.getAge());
-
-			assertTrue("Does not have spouse errors", !br.hasFieldErrors("spouse"));
-			assertEquals("Kerry", binder.getBindingResult().getFieldValue("spouse"));
-			assertNotNull(tb.getSpouse());
-		}
+		assertThatExceptionOfType(BindException.class).isThrownBy(
+				binder::close)
+			.satisfies(ex -> {
+				assertThat(rod.getName()).isEqualTo("Rod");
+				Map<?, ?> model = binder.getBindingResult().getModel();
+				FieldAccessBean tb = (FieldAccessBean) model.get("person");
+				assertThat(tb).isEqualTo(rod);
+				BindingResult br = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "person");
+				assertThat(br).isSameAs(binder.getBindingResult());
+				assertThat(br.hasErrors()).isTrue();
+				assertThat(br.getErrorCount()).isEqualTo(1);
+				assertThat(br.hasFieldErrors("age")).isTrue();
+				assertThat(br.getFieldErrorCount("age")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("age")).isEqualTo("32x");
+				assertThat(binder.getBindingResult().getFieldError("age").getRejectedValue()).isEqualTo("32x");
+				assertThat(tb.getAge()).isEqualTo(0);
+				assertThat(br.hasFieldErrors("spouse")).isFalse();
+				assertThat(binder.getBindingResult().getFieldValue("spouse")).isEqualTo("Kerry");
+				assertThat(tb.getSpouse()).isNotNull();
+			});
 	}
-
 }

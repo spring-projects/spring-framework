@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,23 @@
 
 package org.springframework.web.context.request;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rob Harrop
@@ -45,7 +46,7 @@ public class RequestScopeTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.beanFactory.registerScope("request", new RequestScope());
 		this.beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
@@ -54,7 +55,7 @@ public class RequestScopeTests {
 		this.beanFactory.preInstantiateSingletons();
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestAttributes() {
 		RequestContextHolder.setRequestAttributes(null);
 	}
@@ -68,11 +69,11 @@ public class RequestScopeTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		String name = "requestScopedObject";
-		assertNull(request.getAttribute(name));
+		assertThat(request.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertEquals("/path", bean.getName());
-		assertSame(bean, request.getAttribute(name));
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean.getName()).isEqualTo("/path");
+		assertThat(request.getAttribute(name)).isSameAs(bean);
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 	}
 
 	@Test
@@ -82,13 +83,13 @@ public class RequestScopeTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		String name = "requestScopedDisposableObject";
-		assertNull(request.getAttribute(name));
+		assertThat(request.getAttribute(name)).isNull();
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertSame(bean, request.getAttribute(name));
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(request.getAttribute(name)).isSameAs(bean);
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
-		assertTrue(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isTrue();
 	}
 
 	@Test
@@ -98,10 +99,11 @@ public class RequestScopeTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		String name = "requestScopedFactoryBean";
-		assertNull(request.getAttribute(name));
+		assertThat(request.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertTrue(request.getAttribute(name) instanceof FactoryBean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		boolean condition = request.getAttribute(name) instanceof FactoryBean;
+		assertThat(condition).isTrue();
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 	}
 
 	@Test
@@ -110,16 +112,11 @@ public class RequestScopeTests {
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
-		try {
-			String name = "requestScopedObjectCircle1";
-			assertNull(request.getAttribute(name));
-
-			this.beanFactory.getBean(name);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
-		}
+		String name = "requestScopedObjectCircle1";
+		assertThat(request.getAttribute(name)).isNull();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.beanFactory.getBean(name))
+			.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test
@@ -129,20 +126,20 @@ public class RequestScopeTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		String outerBeanName = "requestScopedOuterBean";
-		assertNull(request.getAttribute(outerBeanName));
+		assertThat(request.getAttribute(outerBeanName)).isNull();
 		TestBean outer1 = (TestBean) this.beanFactory.getBean(outerBeanName);
-		assertNotNull(request.getAttribute(outerBeanName));
+		assertThat(request.getAttribute(outerBeanName)).isNotNull();
 		TestBean inner1 = (TestBean) outer1.getSpouse();
-		assertSame(outer1, this.beanFactory.getBean(outerBeanName));
+		assertThat(this.beanFactory.getBean(outerBeanName)).isSameAs(outer1);
 		requestAttributes.requestCompleted();
-		assertTrue(outer1.wasDestroyed());
-		assertTrue(inner1.wasDestroyed());
+		assertThat(outer1.wasDestroyed()).isTrue();
+		assertThat(inner1.wasDestroyed()).isTrue();
 		request = new MockHttpServletRequest();
 		requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		TestBean outer2 = (TestBean) this.beanFactory.getBean(outerBeanName);
-		assertNotSame(outer1, outer2);
-		assertNotSame(inner1, outer2.getSpouse());
+		assertThat(outer2).isNotSameAs(outer1);
+		assertThat(outer2.getSpouse()).isNotSameAs(inner1);
 	}
 
 	@Test
@@ -153,14 +150,14 @@ public class RequestScopeTests {
 
 		String outerBeanName = "singletonOuterBean";
 		TestBean outer1 = (TestBean) this.beanFactory.getBean(outerBeanName);
-		assertNull(request.getAttribute(outerBeanName));
+		assertThat(request.getAttribute(outerBeanName)).isNull();
 		TestBean inner1 = (TestBean) outer1.getSpouse();
 		TestBean outer2 = (TestBean) this.beanFactory.getBean(outerBeanName);
-		assertSame(outer1, outer2);
-		assertSame(inner1, outer2.getSpouse());
+		assertThat(outer2).isSameAs(outer1);
+		assertThat(outer2.getSpouse()).isSameAs(inner1);
 		requestAttributes.requestCompleted();
-		assertTrue(inner1.wasDestroyed());
-		assertFalse(outer1.wasDestroyed());
+		assertThat(inner1.wasDestroyed()).isTrue();
+		assertThat(outer1.wasDestroyed()).isFalse();
 	}
 
 }

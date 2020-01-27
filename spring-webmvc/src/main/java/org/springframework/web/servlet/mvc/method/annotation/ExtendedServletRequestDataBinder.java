@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -68,7 +69,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				if (mpvs.contains(name)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Skipping URI variable '" + name +
-								"' since the request contains a bind value with the same name.");
+								"' because request contains bind value with same name.");
 					}
 				}
 				else {

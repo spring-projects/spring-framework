@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,6 @@ package org.springframework.core.codec;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -30,13 +27,14 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decoder for {@link ByteBuffer}s.
+ * Decoder for {@link ByteBuffer ByteBuffers}.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
+public class ByteBufferDecoder extends AbstractDataBufferDecoder<ByteBuffer> {
 
 	public ByteBufferDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -45,21 +43,23 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) && clazz != null && ByteBuffer.class.isAssignableFrom(clazz));
+		return (ByteBuffer.class.isAssignableFrom(elementType.toClass()) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
-	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public ByteBuffer decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream).map((dataBuffer) -> {
-			ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());
-			copy.put(dataBuffer.asByteBuffer());
-			copy.flip();
-			DataBufferUtils.release(dataBuffer);
-			return copy;
-		});
+		int byteCount = dataBuffer.readableByteCount();
+		ByteBuffer copy = ByteBuffer.allocate(byteCount);
+		copy.put(dataBuffer.asByteBuffer());
+		copy.flip();
+		DataBufferUtils.release(dataBuffer);
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + byteCount + " bytes");
+		}
+		return copy;
 	}
 
 }

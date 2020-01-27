@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,9 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -41,7 +41,7 @@ import org.springframework.web.cors.CorsUtils;
  */
 public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
-	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
+	private static final HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
 
 
 	private final Set<HeaderExpression> expressions;
@@ -58,12 +58,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		this(parseExpressions(headers));
 	}
 
-	private HeadersRequestCondition(Collection<HeaderExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
+	private HeadersRequestCondition(Set<HeaderExpression> conditions) {
+		this.expressions = conditions;
 	}
 
 
-	private static Collection<HeaderExpression> parseExpressions(String... headers) {
+	private static Set<HeaderExpression> parseExpressions(String... headers) {
 		Set<HeaderExpression> expressions = new LinkedHashSet<>();
 		for (String header : headers) {
 			HeaderExpression expr = new HeaderExpression(header);
@@ -113,7 +113,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return PRE_FLIGHT_MATCH;
 		}
-		for (HeaderExpression expression : expressions) {
+		for (HeaderExpression expression : this.expressions) {
 			if (!expression.match(request)) {
 				return null;
 			}
@@ -122,19 +122,33 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * <li>0 if the two conditions have the same number of header expressions
-	 * <li>Less than 0 if "this" instance has more header expressions
-	 * <li>Greater than 0 if the "other" instance has more header expressions
-	 * </ul>
+	 * Compare to another condition based on header expressions. A condition
+	 * is considered to be a more specific match, if it has:
+	 * <ol>
+	 * <li>A greater number of expressions.
+	 * <li>A greater number of non-negated expressions with a concrete value.
+	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching header expression only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(HeadersRequestCondition other, HttpServletRequest request) {
-		return other.expressions.size() - this.expressions.size();
+		int result = other.expressions.size() - this.expressions.size();
+		if (result != 0) {
+			return result;
+		}
+		return (int) (getValueMatchCount(other.expressions) - getValueMatchCount(this.expressions));
+	}
+
+	private long getValueMatchCount(Set<HeaderExpression> expressions) {
+		long count = 0;
+		for (HeaderExpression e : expressions) {
+			if (e.getValue() != null && !e.isNegated()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 

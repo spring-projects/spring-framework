@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.management.Descriptor;
 import javax.management.JMException;
 import javax.management.MBeanOperationInfo;
@@ -333,13 +334,13 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanAttributeInfo[0]);
 	}
 
 	/**
 	 * Iterate through all methods on the MBean class and gives subclasses the chance
 	 * to vote on their inclusion. If a particular method corresponds to the accessor
-	 * or mutator of an attribute that is inclued in the managment interface, then
+	 * or mutator of an attribute that is included in the management interface, then
 	 * the corresponding operation is exposed with the &quot;role&quot; descriptor
 	 * field set to the appropriate value.
 	 * @param managedBean the bean instance (might be an AOP proxy)
@@ -363,25 +364,23 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			ModelMBeanOperationInfo info = null;
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-			if (pd != null) {
-				if ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey)) ||
-						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey))) {
-					// Attributes need to have their methods exposed as
-					// operations to the JMX server as well.
-					info = createModelMBeanOperationInfo(method, pd.getName(), beanKey);
-					Descriptor desc = info.getDescriptor();
-					if (method.equals(pd.getReadMethod())) {
-						desc.setField(FIELD_ROLE, ROLE_GETTER);
-					}
-					else {
-						desc.setField(FIELD_ROLE, ROLE_SETTER);
-					}
-					desc.setField(FIELD_VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
-					if (isExposeClassDescriptor()) {
-						desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
-					}
-					info.setDescriptor(desc);
+			if (pd != null && ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey)) ||
+						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey)))) {
+				// Attributes need to have their methods exposed as
+				// operations to the JMX server as well.
+				info = createModelMBeanOperationInfo(method, pd.getName(), beanKey);
+				Descriptor desc = info.getDescriptor();
+				if (method.equals(pd.getReadMethod())) {
+					desc.setField(FIELD_ROLE, ROLE_GETTER);
 				}
+				else {
+					desc.setField(FIELD_ROLE, ROLE_SETTER);
+				}
+				desc.setField(FIELD_VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
+				if (isExposeClassDescriptor()) {
+					desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
+				}
+				info.setDescriptor(desc);
 			}
 
 			// allow getters and setters to be marked as operations directly
@@ -401,7 +400,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			}
 		}
 
-		return infos.toArray(new ModelMBeanOperationInfo[infos.size()]);
+		return infos.toArray(new ModelMBeanOperationInfo[0]);
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,13 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,9 +32,6 @@ import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
@@ -41,7 +40,9 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -118,17 +119,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			this.running = true;
 			try {
 				if (this.factory == null) {
-					this.factory = new WebSocketServerFactory(servletContext, this.policy);
+					this.factory = new WebSocketServerFactory(this.servletContext, this.policy);
 				}
-				this.factory.setCreator(new WebSocketCreator() {
-					@Override
-					public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
-						WebSocketHandlerContainer container = containerHolder.get();
-						Assert.state(container != null, "Expected WebSocketHandlerContainer");
-						response.setAcceptedSubProtocol(container.getSelectedProtocol());
-						response.setExtensions(container.getExtensionConfigs());
-						return container.getHandler();
-					}
+				this.factory.setCreator((request, response) -> {
+					WebSocketHandlerContainer container = containerHolder.get();
+					Assert.state(container != null, "Expected WebSocketHandlerContainer");
+					response.setAcceptedSubProtocol(container.getSelectedProtocol());
+					response.setExtensions(container.getExtensionConfigs());
+					return container.getHandler();
 				});
 				this.factory.start();
 			}
@@ -173,12 +171,27 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	}
 
 	private List<WebSocketExtension> buildWebSocketExtensions() {
-		Set<String> names = this.factory.getExtensionFactory().getExtensionNames();
+		Set<String> names = getExtensionNames();
 		List<WebSocketExtension> result = new ArrayList<>(names.size());
 		for (String name : names) {
 			result.add(new WebSocketExtension(name));
 		}
 		return result;
+	}
+
+	@SuppressWarnings({"unchecked", "deprecation"})
+	private Set<String> getExtensionNames() {
+		try {
+			return this.factory.getAvailableExtensionNames();
+		}
+		catch (IncompatibleClassChangeError ex) {
+			// Fallback for versions prior to 9.4.21:
+			// 9.4.20.v20190813: ExtensionFactory (abstract class -> interface)
+			// 9.4.21.v20190926: ExtensionFactory (interface -> abstract class) + deprecated
+			Class<?> clazz = org.eclipse.jetty.websocket.api.extensions.ExtensionFactory.class;
+			Method method = ClassUtils.getMethod(clazz, "getExtensionNames");
+			return (Set<String>) ReflectionUtils.invokeMethod(method, this.factory.getExtensionFactory());
+		}
 	}
 
 	@Override

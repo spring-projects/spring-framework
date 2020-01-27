@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,28 +31,28 @@ import org.springframework.lang.Nullable;
  * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td>name</p></td>
- * <td>true</p></td>
- * <td>true</p></td>
- * <td>The name of the parameter.</p></td>
+ * <tr>
+ * <td>name</td>
+ * <td>true</td>
+ * <td>true</td>
+ * <td>The name of the parameter.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>value</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
- * <td>The value of the parameter.</p></td>
+ * <tr>
+ * <td>value</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The value of the parameter.</td>
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * @author Scott Andrews
  * @author Nicholas Williams
  * @since 3.0

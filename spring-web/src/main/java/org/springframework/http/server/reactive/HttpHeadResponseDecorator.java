@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.function.BiFunction;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 
 /**
  * {@link ServerHttpResponse} decorator for HTTP HEAD requests.
@@ -45,23 +47,22 @@ public class HttpHeadResponseDecorator extends ServerHttpResponseDecorator {
 	 */
 	@Override
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-
-		// After Reactor Netty #171 is fixed we can return without delegating
-
-		return getDelegate().writeWith(
-				Flux.from(body)
-						.reduce(0, (current, buffer) -> {
-							int next = current + buffer.readableByteCount();
-							DataBufferUtils.release(buffer);
-							return next;
-						})
-						.doOnNext(count -> getHeaders().setContentLength(count))
-						.then(Mono.empty()));
+		return Flux.from(body)
+				.reduce(0, (current, buffer) -> {
+					int next = current + buffer.readableByteCount();
+					DataBufferUtils.release(buffer);
+					return next;
+				})
+				.doOnNext(length -> {
+					if (length > 0 || getHeaders().getFirst(HttpHeaders.CONTENT_LENGTH) == null) {
+						getHeaders().setContentLength(length);
+					}
+				})
+				.then();
 	}
 
 	/**
 	 * Invoke {@link #setComplete()} without writing.
-	 *
 	 * <p>RFC 7302 allows HTTP HEAD response without content-length and it's not
 	 * something that can be computed on a streaming response.
 	 */

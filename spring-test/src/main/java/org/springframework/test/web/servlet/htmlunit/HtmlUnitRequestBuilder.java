@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -106,6 +107,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 
+	@Override
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
@@ -295,7 +297,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 
 		if (!ObjectUtils.isEmpty(cookies)) {
-			request.setCookies(cookies.toArray(new Cookie[cookies.size()]));
+			request.setCookies(cookies.toArray(new Cookie[0]));
 		}
 	}
 
@@ -446,6 +448,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			super(servletContext, method, requestURI);
 		}
 
+		@Override
 		public HttpSession getSession(boolean create) {
 			HttpSession session = super.getSession(false);
 			if (session == null && create) {
@@ -460,14 +463,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 				session = newSession;
 			}
 			return session;
-		}
-
-		public HttpSession getSession() {
-			return super.getSession();
-		}
-
-		public void setSession(HttpSession session) {
-			super.setSession(session);
 		}
 	}
 
@@ -491,12 +486,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			this.request = request;
 		}
 
+		@Override
 		public void invalidate() {
 			super.invalidate();
 			synchronized (HtmlUnitRequestBuilder.this.sessions) {
 				HtmlUnitRequestBuilder.this.sessions.remove(getId());
 			}
-			removeSessionCookie(request, getId());
+			removeSessionCookie(this.request, getId());
 		}
 	}
 

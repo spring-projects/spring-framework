@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="parentWithList" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithList" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someList">
 			<list>
 				<value>Rob Harrop</value>
@@ -23,12 +23,12 @@
 	<bean id="childWithListOfRefs" parent="parentWithList">
 		<property name="someList">
 			<list merge="true">
-				<bean class="org.springframework.tests.sample.beans.TestBean"/>
+				<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 			</list>
 		</property>
 	</bean>
 
-	<bean id="parentWithSet" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithSet" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someSet">
 			<set>
 				<value>Rob Harrop</value>
@@ -47,14 +47,14 @@
 	<bean id="childWithSetOfRefs" parent="parentWithSet">
 		<property name="someSet">
 			<set merge="true">
-				<bean class="org.springframework.tests.sample.beans.TestBean">
+				<bean class="org.springframework.beans.testfixture.beans.TestBean">
 					<property name="name" value="Sally"/>
 				</bean>
 			</set>
 		</property>
 	</bean>
 
-	<bean id="parentWithMap" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithMap" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someMap">
 			<map>
 				<entry key="Rob" value="Sall"/>
@@ -76,7 +76,7 @@
 		<property name="someMap">
 			<map merge="true">
 				<entry key="Rob">
-					<bean class="org.springframework.tests.sample.beans.TestBean">
+					<bean class="org.springframework.beans.testfixture.beans.TestBean">
 						<property name="name" value="Sally"/>
 					</bean>
 				</entry>
@@ -84,7 +84,7 @@
 		</property>
 	</bean>
 
-	<bean id="parentWithProps" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithProps" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someProperties">
 			<props>
 				<prop key="Rob">Sall</prop>
@@ -103,7 +103,7 @@
 	</bean>
 
 
-	<bean id="parentWithListInConstructor" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithListInConstructor" class="org.springframework.beans.testfixture.beans.TestBean">
 		<constructor-arg index="0">
 			<list>
 				<value>Rob Harrop</value>
@@ -123,12 +123,12 @@
 	<bean id="childWithListOfRefsInConstructor" parent="parentWithListInConstructor">
 		<constructor-arg index="0">
 			<list merge="true">
-				<bean class="org.springframework.tests.sample.beans.TestBean"/>
+				<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 			</list>
 		</constructor-arg>
 	</bean>
 
-	<bean id="parentWithSetInConstructor" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithSetInConstructor" class="org.springframework.beans.testfixture.beans.TestBean">
 		<constructor-arg index="0">
 			<set>
 				<value>Rob Harrop</value>
@@ -147,14 +147,14 @@
 	<bean id="childWithSetOfRefsInConstructor" parent="parentWithSetInConstructor">
 		<constructor-arg index="0">
 			<set merge="true">
-				<bean class="org.springframework.tests.sample.beans.TestBean">
+				<bean class="org.springframework.beans.testfixture.beans.TestBean">
 					<property name="name" value="Sally"/>
 				</bean>
 			</set>
 		</constructor-arg>
 	</bean>
 
-	<bean id="parentWithMapInConstructor" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithMapInConstructor" class="org.springframework.beans.testfixture.beans.TestBean">
 		<constructor-arg index="0">
 			<map>
 				<entry key="Rob" value="Sall"/>
@@ -176,7 +176,7 @@
 		<constructor-arg index="0">
 			<map merge="true">
 				<entry key="Rob">
-					<bean class="org.springframework.tests.sample.beans.TestBean">
+					<bean class="org.springframework.beans.testfixture.beans.TestBean">
 						<property name="name" value="Sally"/>
 					</bean>
 				</entry>
@@ -184,7 +184,7 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="parentWithPropsInConstructor" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="parentWithPropsInConstructor" class="org.springframework.beans.testfixture.beans.TestBean">
 		<constructor-arg index="0">
 			<props>
 				<prop key="Rob">Sall</prop>

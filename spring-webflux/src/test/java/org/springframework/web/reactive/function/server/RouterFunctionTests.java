@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,27 +16,25 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-@SuppressWarnings("unchecked")
 public class RouterFunctionTests {
 
 	@Test
-	public void and() throws Exception {
+	public void and() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RouterFunction<ServerResponse> routerFunction2 = request -> Mono.just(handlerFunction);
 
 		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
@@ -48,15 +46,15 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void andOther() throws Exception {
+	public void andOther() {
 		HandlerFunction<ServerResponse> handlerFunction =
-				request -> ServerResponse.ok().body(fromObject("42"));
+				request -> ServerResponse.ok().bodyValue("42");
 		RouterFunction<?> routerFunction1 = request -> Mono.empty();
 		RouterFunction<ServerResponse> routerFunction2 =
 				request -> Mono.just(handlerFunction);
 
 		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -68,12 +66,12 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void andRoute() throws Exception {
+	public void andRoute() {
 		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RequestPredicate requestPredicate = request -> true;
 
 		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -85,7 +83,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void filter() throws Exception {
+	public void filter() {
 		Mono<String> stringMono = Mono.just("42");
 		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction =
 				request -> EntityResponse.fromPublisher(stringMono, String.class).build();
@@ -99,8 +97,9 @@ public class RouterFunctionTests {
 									.map(Integer::parseInt);
 							return EntityResponse.fromPublisher(intMono, Integer.class).build();
 						});
+
 		RouterFunction<EntityResponse<Mono<Integer>>> result = routerFunction.filter(filterFunction);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<EntityResponse<Mono<Integer>>> responseMono =
@@ -108,19 +107,19 @@ public class RouterFunctionTests {
 
 		StepVerifier.create(responseMono)
 				.consumeNextWith(
-						serverResponse -> {
+						serverResponse ->
 							StepVerifier.create(serverResponse.entity())
 									.expectNext(42)
 									.expectComplete()
-									.verify();
-						})
+									.verify()
+						)
 				.expectComplete()
 				.verify();
 	}
 
 
 	private Mono<ServerResponse> handlerMethod(ServerRequest request) {
-		return ServerResponse.ok().body(fromObject("42"));
+		return ServerResponse.ok().bodyValue("42");
 	}
 
 }

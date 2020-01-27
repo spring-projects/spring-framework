@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -37,8 +36,8 @@ import org.springframework.util.StringUtils;
  * is not available in a number of environments (e.g. Android, Java ME), so this is
  * desirable for portability of Spring's core conversion facility.
  *
- * <p>Used to build a TypeDescriptor from a property location.
- * The built TypeDescriptor can then be used to convert from/to the property type.
+ * <p>Used to build a {@link TypeDescriptor} from a property location. The built
+ * {@code TypeDescriptor} can then be used to convert from/to the property type.
  *
  * @author Keith Donald
  * @author Phillip Webb
@@ -187,7 +186,7 @@ public final class Property {
 		if (getReadMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getReadMethod(), -1));
+		return new MethodParameter(getReadMethod(), -1).withContainingClass(getObjectType());
 	}
 
 	@Nullable
@@ -195,13 +194,7 @@ public final class Property {
 		if (getWriteMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getWriteMethod(), 0));
-	}
-
-	private MethodParameter resolveParameterType(MethodParameter parameter) {
-		// needed to resolve generic property types that parameterized by sub-classes e.g. T getFoo();
-		GenericTypeResolver.resolveParameterType(parameter, getObjectType());
-		return parameter;
+		return new MethodParameter(getWriteMethod(), 0).withContainingClass(getObjectType());
 	}
 
 	private Annotation[] resolveAnnotations() {
@@ -211,7 +204,7 @@ public final class Property {
 			addAnnotationsToMap(annotationMap, getReadMethod());
 			addAnnotationsToMap(annotationMap, getWriteMethod());
 			addAnnotationsToMap(annotationMap, getField());
-			annotations = annotationMap.values().toArray(new Annotation[annotationMap.size()]);
+			annotations = annotationMap.values().toArray(new Annotation[0]);
 			annotationCache.put(this, annotations);
 		}
 		return annotations;
@@ -239,11 +232,9 @@ public final class Property {
 			field = ReflectionUtils.findField(declaringClass, name);
 			if (field == null) {
 				// Same lenient fallback checking as in CachedIntrospectionResults...
-				field = ReflectionUtils.findField(declaringClass,
-						name.substring(0, 1).toLowerCase() + name.substring(1));
+				field = ReflectionUtils.findField(declaringClass, StringUtils.uncapitalize(name));
 				if (field == null) {
-					field = ReflectionUtils.findField(declaringClass,
-							name.substring(0, 1).toUpperCase() + name.substring(1));
+					field = ReflectionUtils.findField(declaringClass, StringUtils.capitalize(name));
 				}
 			}
 		}
@@ -265,7 +256,7 @@ public final class Property {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

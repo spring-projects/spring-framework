@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,14 @@ package org.springframework.aop.interceptor;
 import com.jamonapi.MonitorFactory;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Steve Souza
@@ -39,12 +41,12 @@ public class JamonPerformanceMonitorInterceptorTests {
 	private final Log log = mock(Log.class);
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MonitorFactory.reset();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		MonitorFactory.reset();
 	}
@@ -56,9 +58,8 @@ public class JamonPerformanceMonitorInterceptorTests {
 
 		interceptor.invokeUnderTrace(mi, log);
 
-		assertTrue("jamon must track the method being invoked", MonitorFactory.getNumRows() > 0);
-		assertTrue("The jamon report must contain the toString method that was invoked",
-				MonitorFactory.getReport().contains("toString"));
+		assertThat(MonitorFactory.getNumRows() > 0).as("jamon must track the method being invoked").isTrue();
+		assertThat(MonitorFactory.getReport().contains("toString")).as("The jamon report must contain the toString method that was invoked").isTrue();
 	}
 
 	@Test
@@ -66,21 +67,13 @@ public class JamonPerformanceMonitorInterceptorTests {
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.proceed()).willThrow(new IllegalArgumentException());
 
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.invokeUnderTrace(mi, log));
 
-		assertEquals("Monitors must exist for the method invocation and 2 exceptions",
-				3, MonitorFactory.getNumRows());
-		assertTrue("The jamon report must contain the toString method that was invoked",
-				MonitorFactory.getReport().contains("toString"));
-		assertTrue("The jamon report must contain the generic exception: " + MonitorFactory.EXCEPTIONS_LABEL,
-				MonitorFactory.getReport().contains(MonitorFactory.EXCEPTIONS_LABEL));
-		assertTrue("The jamon report must contain the specific exception: IllegalArgumentException'",
-				MonitorFactory.getReport().contains("IllegalArgumentException"));
+		assertThat(MonitorFactory.getNumRows()).as("Monitors must exist for the method invocation and 2 exceptions").isEqualTo(3);
+		assertThat(MonitorFactory.getReport().contains("toString")).as("The jamon report must contain the toString method that was invoked").isTrue();
+		assertThat(MonitorFactory.getReport().contains(MonitorFactory.EXCEPTIONS_LABEL)).as("The jamon report must contain the generic exception: " + MonitorFactory.EXCEPTIONS_LABEL).isTrue();
+		assertThat(MonitorFactory.getReport().contains("IllegalArgumentException")).as("The jamon report must contain the specific exception: IllegalArgumentException'").isTrue();
 	}
 
 }

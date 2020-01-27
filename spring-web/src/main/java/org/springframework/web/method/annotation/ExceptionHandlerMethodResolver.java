@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,13 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -48,7 +47,7 @@ public class ExceptionHandlerMethodResolver {
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
+			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
@@ -90,8 +89,8 @@ public class ExceptionHandlerMethodResolver {
 		return result;
 	}
 
-	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
-		ExceptionHandler ann = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+	private void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
+		ExceptionHandler ann = AnnotatedElementUtils.findMergedAnnotation(method, ExceptionHandler.class);
 		Assert.state(ann != null, "No ExceptionHandler annotation");
 		result.addAll(Arrays.asList(ann.value()));
 	}
@@ -169,7 +168,7 @@ public class ExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			Collections.sort(matches, new ExceptionDepthComparator(exceptionType));
+			matches.sort(new ExceptionDepthComparator(exceptionType));
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {

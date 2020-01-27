@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -178,7 +178,8 @@ public abstract class NumberUtils {
 	/**
 	 * Parse the given {@code text} into a {@link Number} instance of the given
 	 * target class, using the corresponding {@code decode} / {@code valueOf} method.
-	 * <p>Trims the input {@code String} before attempting to parse the number.
+	 * <p>Trims all whitespace (leading, trailing, and in between characters) from
+	 * the input {@code String} before attempting to parse the number.
 	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#") as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into

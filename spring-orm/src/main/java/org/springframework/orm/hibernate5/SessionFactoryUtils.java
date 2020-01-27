@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -133,7 +134,7 @@ public abstract class SessionFactoryUtils {
 	 * {@link PersistenceException} wrappers accordingly.
 	 * @param session the Hibernate Session to flush
 	 * @param synch whether this flush is triggered by transaction synchronization
-	 * @throws DataAccessException
+	 * @throws DataAccessException in case of flush failures
 	 * @since 4.3.2
 	 */
 	static void flush(Session session, boolean synch) throws DataAccessException {
@@ -216,7 +217,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Convert the given HibernateException to an appropriate exception
 	 * from the {@code org.springframework.dao} hierarchy.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateExceptionTranslator#convertHibernateAccessException
 	 * @see HibernateTransactionManager#convertHibernateAccessException

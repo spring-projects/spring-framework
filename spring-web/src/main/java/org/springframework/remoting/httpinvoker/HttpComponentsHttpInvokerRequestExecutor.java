@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,11 +44,10 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.remoting.httpinvoker.HttpInvokerRequestExecutor} implementation that uses
- * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
+ * <a href="https://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
  * to execute POST requests.
  *
  * <p>Allows to use a pre-configured {@link org.apache.http.client.HttpClient}
@@ -203,7 +202,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	}
 
 	/**
-	 * Create a HttpPost for the given configuration.
+	 * Create an HttpPost for the given configuration.
 	 * <p>The default implementation creates a standard HttpPost with
 	 * "application/x-java-serialized-object" as "Content-Type" header.
 	 * @param config the HTTP invoker configuration that specifies the
@@ -223,7 +222,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 		if (localeContext != null) {
 			Locale locale = localeContext.getLocale();
 			if (locale != null) {
-				httpPost.addHeader(HTTP_HEADER_ACCEPT_LANGUAGE, StringUtils.toLanguageTag(locale));
+				httpPost.addHeader(HTTP_HEADER_ACCEPT_LANGUAGE, locale.toLanguageTag());
 			}
 		}
 

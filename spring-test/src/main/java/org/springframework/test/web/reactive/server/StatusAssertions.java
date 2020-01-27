@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,13 @@
 
 package org.springframework.test.web.reactive.server;
 
-import org.springframework.http.HttpStatus;
+import java.util.function.Consumer;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.test.util.AssertionErrors;
 
 /**
  * Assertions on the response status.
@@ -51,8 +55,8 @@ public class StatusAssertions {
 	 * Assert the response status as an integer.
 	 */
 	public WebTestClient.ResponseSpec isEqualTo(int status) {
-		int actual = this.exchangeResult.getStatus().value();
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals("Status", status, actual));
+		int actual = this.exchangeResult.getRawStatusCode();
+		this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.assertEquals("Status", status, actual));
 		return this.responseSpec;
 	}
 
@@ -135,6 +139,14 @@ public class StatusAssertions {
 	}
 
 	/**
+	 * Assert the response status code is {@code HttpStatus.FORBIDDEN} (403).
+	 * @since 5.0.2
+	 */
+	public WebTestClient.ResponseSpec isForbidden() {
+		return assertStatusAndReturn(HttpStatus.FORBIDDEN);
+	}
+
+	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_FOUND} (404).
 	 */
 	public WebTestClient.ResponseSpec isNotFound() {
@@ -147,7 +159,7 @@ public class StatusAssertions {
 	public WebTestClient.ResponseSpec reasonEquals(String reason) {
 		String actual = this.exchangeResult.getStatus().getReasonPhrase();
 		String message = "Response status reason";
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(message, reason, actual));
+		this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.assertEquals(message, reason, actual));
 		return this.responseSpec;
 	}
 
@@ -187,18 +199,41 @@ public class StatusAssertions {
 		return assertSeriesAndReturn(expected);
 	}
 
-	// Private methods
+	/**
+	 * Match the response status value with a Hamcrest matcher.
+	 * @param matcher the matcher to use
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(Matcher<Integer> matcher) {
+		int value = this.exchangeResult.getStatus().value();
+		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", value, matcher));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Consume the response status value as an integer.
+	 * @param consumer the consumer to use
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {
+		int value = this.exchangeResult.getStatus().value();
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
+		return this.responseSpec;
+	}
+
 
 	private WebTestClient.ResponseSpec assertStatusAndReturn(HttpStatus expected) {
 		HttpStatus actual = this.exchangeResult.getStatus();
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals("Status", expected, actual));
+		this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.assertEquals("Status", expected, actual));
 		return this.responseSpec;
 	}
 
 	private WebTestClient.ResponseSpec assertSeriesAndReturn(HttpStatus.Series expected) {
 		HttpStatus status = this.exchangeResult.getStatus();
-		String message = "Range for response status value " + status;
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(message, expected, status.series()));
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String message = "Range for response status value " + status;
+			AssertionErrors.assertEquals(message, expected, status.series());
+		});
 		return this.responseSpec;
 	}
 

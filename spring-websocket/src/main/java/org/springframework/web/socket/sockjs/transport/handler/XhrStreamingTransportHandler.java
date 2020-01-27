@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -41,9 +42,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	private static final byte[] PRELUDE = new byte[2049];
 
 	static {
-		for (int i = 0; i < 2048; i++) {
-			PRELUDE[i] = 'h';
-		}
+		Arrays.fill(PRELUDE, (byte) 'h');
 		PRELUDE[2048] = '\n';
 	}
 
@@ -60,7 +59,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof XhrStreamingSockJsSession;
+		return (session instanceof XhrStreamingSockJsSession);
 	}
 
 	@Override

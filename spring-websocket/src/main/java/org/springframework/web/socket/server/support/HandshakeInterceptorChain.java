@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -77,7 +77,7 @@ public class HandshakeInterceptorChain {
 			try {
 				interceptor.afterHandshake(request, response, this.wsHandler, failure);
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {
 					logger.warn(interceptor + " threw exception in afterHandshake: " + ex);
 				}

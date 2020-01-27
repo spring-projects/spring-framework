@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,9 @@ package org.springframework.transaction.config;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.ClassUtils;
 
@@ -32,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.transaction.jta.WebLogicJtaTransactionManager
  * @see org.springframework.transaction.jta.WebSphereUowTransactionManager
  */
-public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransactionManager> {
+public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransactionManager>, InitializingBean {
 
 	private static final String WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME =
 			"org.springframework.transaction.jta.WebLogicJtaTransactionManager";
@@ -44,14 +46,17 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 			"org.springframework.transaction.jta.JtaTransactionManager";
 
 
-	private static final boolean weblogicPresent = ClassUtils.isPresent(
-			"weblogic.transaction.UserTransaction", JtaTransactionManagerFactoryBean.class.getClassLoader());
+	private static final boolean weblogicPresent;
 
-	private static final boolean webspherePresent = ClassUtils.isPresent(
-			"com.ibm.wsspi.uow.UOWManager", JtaTransactionManagerFactoryBean.class.getClassLoader());
+	private static final boolean webspherePresent;
+
+	static {
+		ClassLoader classLoader = JtaTransactionManagerFactoryBean.class.getClassLoader();
+		weblogicPresent = ClassUtils.isPresent("weblogic.transaction.UserTransaction", classLoader);
+		webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", classLoader);
+	}
 
 
-	@Nullable
 	private final JtaTransactionManager transactionManager;
 
 
@@ -70,6 +75,11 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 
 
 	@Override
+	public void afterPropertiesSet() throws TransactionSystemException {
+		this.transactionManager.afterPropertiesSet();
+	}
+
+	@Override
 	@Nullable
 	public JtaTransactionManager getObject() {
 		return this.transactionManager;
@@ -77,7 +87,7 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 
 	@Override
 	public Class<?> getObjectType() {
-		return (this.transactionManager != null ? this.transactionManager.getClass() : JtaTransactionManager.class);
+		return this.transactionManager.getClass();
 	}
 
 	@Override

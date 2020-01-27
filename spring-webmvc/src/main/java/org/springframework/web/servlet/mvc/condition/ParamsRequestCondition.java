@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,10 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -98,7 +100,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	@Override
 	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		for (ParamExpression expression : expressions) {
+		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(request)) {
 				return null;
 			}
@@ -107,19 +109,33 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * <li>0 if the two conditions have the same number of parameter expressions
-	 * <li>Less than 0 if "this" instance has more parameter expressions
-	 * <li>Greater than 0 if the "other" instance has more parameter expressions
-	 * </ul>
+	 * Compare to another condition based on parameter expressions. A condition
+	 * is considered to be a more specific match, if it has:
+	 * <ol>
+	 * <li>A greater number of expressions.
+	 * <li>A greater number of non-negated expressions with a concrete value.
+	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
-		return (other.expressions.size() - this.expressions.size());
+		int result = other.expressions.size() - this.expressions.size();
+		if (result != 0) {
+			return result;
+		}
+		return (int) (getValueMatchCount(other.expressions) - getValueMatchCount(this.expressions));
+	}
+
+	private long getValueMatchCount(Set<ParamExpression> expressions) {
+		long count = 0;
+		for (ParamExpression e : expressions) {
+			if (e.getValue() != null && !e.isNegated()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 
@@ -128,8 +144,15 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	static class ParamExpression extends AbstractNameValueExpression<String> {
 
+		private final Set<String> namesToMatch = new HashSet<>(WebUtils.SUBMIT_IMAGE_SUFFIXES.length + 1);
+
+
 		ParamExpression(String expression) {
 			super(expression);
+			this.namesToMatch.add(getName());
+			for (String suffix : WebUtils.SUBMIT_IMAGE_SUFFIXES) {
+				this.namesToMatch.add(getName() + suffix);
+			}
 		}
 
 		@Override
@@ -144,8 +167,12 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return (WebUtils.hasSubmitParameter(request, this.name) ||
-					request.getParameterMap().containsKey(this.name));
+			for (String current : this.namesToMatch) {
+				if (request.getParameterMap().get(current) != null) {
+					return true;
+				}
+			}
+			return request.getParameterMap().containsKey(this.name);
 		}
 
 		@Override

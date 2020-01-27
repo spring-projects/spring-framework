@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,21 +19,24 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.util.Random;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-
+/**
+ * @author Arjen Poutsma
+ */
 public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static final int REQUEST_SIZE = 4096 * 3;
 
-	private Random rnd = new Random();
+	private final Random rnd = new Random();
 
 
 	@Override
@@ -42,15 +45,17 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 	}
 
 
-	@Test
-	public void echo() throws Exception {
+	@ParameterizedHttpServerTest
+	public void echo(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
 		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertArrayEquals(body, response.getBody());
+		assertThat(response.getBody()).isEqualTo(body);
 	}
 
 
@@ -70,4 +75,5 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 			return response.writeWith(request.getBody());
 		}
 	}
+
 }

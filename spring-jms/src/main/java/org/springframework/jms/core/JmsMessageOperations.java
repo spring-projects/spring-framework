@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jms.core;
 
 import java.util.Map;
+
 import javax.jms.Destination;
 
 import org.springframework.lang.Nullable;
@@ -30,7 +31,7 @@ import org.springframework.messaging.core.MessageSendingOperations;
 /**
  * A specialization of {@link MessageSendingOperations}, {@link MessageReceivingOperations}
  * and {@link MessageRequestReplyOperations} for JMS related operations that allow to specify
- * a destination name rather than the actual {@link javax.jms.Destination}
+ * a destination name rather than the actual {@link javax.jms.Destination}.
  *
  * @author Stephane Nicoll
  * @since 4.1

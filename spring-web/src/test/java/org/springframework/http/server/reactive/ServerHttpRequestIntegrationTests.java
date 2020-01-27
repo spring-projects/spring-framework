@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,44 +18,52 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+/**
+ * @author Sebastien Deleuze
+ */
+class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected CheckRequestHandler createHttpHandler() {
 		return new CheckRequestHandler();
 	}
 
-	@Test
-	public void checkUri() throws Exception {
+
+	@ParameterizedHttpServerTest
+	void checkUri(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI url = new URI("http://localhost:" + port + "/foo?param=bar");
 		RequestEntity<Void> request = RequestEntity.post(url).build();
 		ResponseEntity<Void> response = new RestTemplate().exchange(request, Void.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 
-	public static class CheckRequestHandler implements HttpHandler {
+	static class CheckRequestHandler implements HttpHandler {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			URI uri = request.getURI();
-			assertEquals("http", uri.getScheme());
-			assertNotNull(uri.getHost());
-			assertNotEquals(-1, uri.getPort());
-			assertNotNull(request.getRemoteAddress());
-			assertEquals("/foo", uri.getPath());
-			assertEquals("param=bar", uri.getQuery());
+			assertThat(uri.getScheme()).isEqualTo("http");
+			assertThat(uri.getHost()).isNotNull();
+			assertThat(uri.getPort()).isNotEqualTo((long) -1);
+			assertThat(request.getRemoteAddress()).isNotNull();
+			assertThat(uri.getPath()).isEqualTo("/foo");
+			assertThat(uri.getQuery()).isEqualTo("param=bar");
 			return Mono.empty();
 		}
 	}
+
 }

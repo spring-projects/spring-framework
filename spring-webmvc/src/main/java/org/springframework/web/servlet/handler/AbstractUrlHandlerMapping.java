@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,6 +121,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		request.setAttribute(LOOKUP_PATH, lookupPath);
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
@@ -142,12 +143,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
-		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath + "] to " + handler);
-		}
-		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath + "]");
-		}
 		return handler;
 	}
 
@@ -158,7 +153,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
-	 * @param urlPath URL the bean is mapped to
+	 * @param urlPath the URL the bean is mapped to
 	 * @param request current HTTP request (to expose the path within the mapping to)
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see #exposePathWithinMapping
@@ -186,7 +181,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 			else if (useTrailingSlashMatch()) {
 				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
-					matchingPatterns.add(registeredPattern +"/");
+					matchingPatterns.add(registeredPattern + "/");
 				}
 			}
 		}
@@ -194,9 +189,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
-			Collections.sort(matchingPatterns, patternComparator);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
+			matchingPatterns.sort(patternComparator);
+			if (logger.isTraceEnabled() && matchingPatterns.size() > 1) {
+				logger.trace("Matching patterns " + matchingPatterns);
 			}
 			bestMatch = matchingPatterns.get(0);
 		}
@@ -229,8 +224,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 					uriTemplateVariables.putAll(decodedVars);
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
+			if (logger.isTraceEnabled() && uriTemplateVariables.size() > 0) {
+				logger.trace("URI variables " + uriTemplateVariables);
 			}
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
@@ -298,7 +293,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	public RequestMatchResult match(HttpServletRequest request, String pattern) {
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
 		if (getPathMatcher().match(pattern, lookupPath)) {
 			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
 		}
@@ -356,28 +351,28 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 		else {
 			if (urlPath.equals("/")) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Root mapping to " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Root mapping to " + getHandlerDescription(handler));
 				}
 				setRootHandler(resolvedHandler);
 			}
 			else if (urlPath.equals("/*")) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Default mapping to " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Default mapping to " + getHandlerDescription(handler));
 				}
 				setDefaultHandler(resolvedHandler);
 			}
 			else {
 				this.handlerMap.put(urlPath, resolvedHandler);
-				if (logger.isInfoEnabled()) {
-					logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
 				}
 			}
 		}
 	}
 
 	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ? "'" + handler + "'" : "of type [" + handler.getClass() + "]");
+		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
 
 
@@ -418,6 +413,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
+			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 			request.setAttribute(INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
 			return true;
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -237,15 +237,15 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * This implementation compares the underlying ServletContext resource locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ServletContextResource) {
-			ServletContextResource otherRes = (ServletContextResource) obj;
-			return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		if (!(other instanceof ServletContextResource)) {
+			return false;
 		}
-		return false;
+		ServletContextResource otherRes = (ServletContextResource) other;
+		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,43 +31,37 @@ import org.springframework.lang.Nullable;
  * {@link MetadataReader} implementation based on an ASM
  * {@link org.springframework.asm.ClassReader}.
  *
- * <p>Package-visible in order to allow for repackaging the ASM library
- * without effect on users of the {@code core.type} package.
- *
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.5
  */
 final class SimpleMetadataReader implements MetadataReader {
 
-	private final Resource resource;
+	private static final int PARSING_OPTIONS = ClassReader.SKIP_DEBUG
+			| ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES;
 
-	private final ClassMetadata classMetadata;
+	private final Resource resource;
 
 	private final AnnotationMetadata annotationMetadata;
 
 
 	SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
-		InputStream is = new BufferedInputStream(resource.getInputStream());
-		ClassReader classReader;
-		try {
-			classReader = new ClassReader(is);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new NestedIOException("ASM ClassReader failed to parse class file - " +
-					"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
-		}
-		finally {
-			is.close();
-		}
-
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
-		classReader.accept(visitor, ClassReader.SKIP_DEBUG);
-
-		this.annotationMetadata = visitor;
-		// (since AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor)
-		this.classMetadata = visitor;
+		SimpleAnnotationMetadataReadingVisitor visitor = new SimpleAnnotationMetadataReadingVisitor(classLoader);
+		getClassReader(resource).accept(visitor, PARSING_OPTIONS);
 		this.resource = resource;
+		this.annotationMetadata = visitor.getMetadata();
+	}
+
+	private static ClassReader getClassReader(Resource resource) throws IOException {
+		try (InputStream is = new BufferedInputStream(resource.getInputStream())) {
+			try {
+				return new ClassReader(is);
+			}
+			catch (IllegalArgumentException ex) {
+				throw new NestedIOException("ASM ClassReader failed to parse class file - " +
+						"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
+			}
+		}
 	}
 
 
@@ -78,7 +72,7 @@ final class SimpleMetadataReader implements MetadataReader {
 
 	@Override
 	public ClassMetadata getClassMetadata() {
-		return this.classMetadata;
+		return this.annotationMetadata;
 	}
 
 	@Override

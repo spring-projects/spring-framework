@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  */
 public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycle, ServletContextAware {
 
-	private final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
+	private static final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
 
 	private final WebSocketHandler wsHandler;
 
@@ -77,8 +77,18 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler, HandshakeHandler handshakeHandler) {
 		Assert.notNull(wsHandler, "wsHandler must not be null");
 		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
-		this.wsHandler = new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
+		this.wsHandler = decorate(wsHandler);
 		this.handshakeHandler = handshakeHandler;
+	}
+
+	/**
+	 * Decorate the {@code WebSocketHandler} passed into the constructor.
+	 * <p>By default, {@link LoggingWebSocketHandlerDecorator} and
+	 * {@link ExceptionWebSocketHandlerDecorator} are added.
+	 * @since 5.2.2
+	 */
+	protected WebSocketHandler decorate(WebSocketHandler handler) {
+		return new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(handler));
 	}
 
 
@@ -120,10 +130,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 		}
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -143,6 +149,11 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 				((Lifecycle) this.handshakeHandler).stop();
 			}
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -166,19 +177,20 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 			}
 			this.handshakeHandler.doHandshake(request, response, this.wsHandler, attributes);
 			chain.applyAfterHandshake(request, response, null);
-			response.close();
 		}
 		catch (HandshakeFailureException ex) {
 			failure = ex;
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
 		finally {
 			if (failure != null) {
 				chain.applyAfterHandshake(request, response, failure);
+				response.close();
 				throw failure;
 			}
+			response.close();
 		}
 	}
 

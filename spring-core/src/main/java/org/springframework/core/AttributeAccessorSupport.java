@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Support class for {@link AttributeAccessor AttributeAccessors}, providing
@@ -36,8 +37,8 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AttributeAccessorSupport implements AttributeAccessor, Serializable {
 
-	/** Map with String keys and Object values */
-	private final Map<String, Object> attributes = new LinkedHashMap<>(0);
+	/** Map with String keys and Object values. */
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 
 	@Override
@@ -73,7 +74,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 
 	@Override
 	public String[] attributeNames() {
-		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
+		return StringUtils.toStringArray(this.attributes.keySet());
 	}
 
 
@@ -91,15 +92,9 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AttributeAccessorSupport)) {
-			return false;
-		}
-		AttributeAccessorSupport that = (AttributeAccessorSupport) other;
-		return this.attributes.equals(that.attributes);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof AttributeAccessorSupport &&
+				this.attributes.equals(((AttributeAccessorSupport) other).attributes)));
 	}
 
 	@Override

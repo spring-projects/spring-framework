@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
@@ -28,7 +28,8 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rick Evans
@@ -44,9 +45,10 @@ public class SQLStateSQLExceptionTranslatorTests {
 	private static final String SQL = "select count(0) from t_sheep where over_fence = ... yawn... 1";
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTranslateNullException() throws Exception {
-		new SQLStateSQLExceptionTranslator().translate("", "", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SQLStateSQLExceptionTranslator().translate("", "", null));
 	}
 
 	@Test
@@ -84,10 +86,10 @@ public class SQLStateSQLExceptionTranslatorTests {
 		SQLException ex = new SQLException(REASON, sqlState);
 		SQLExceptionTranslator translator = new SQLStateSQLExceptionTranslator();
 		DataAccessException dax = translator.translate(TASK, SQL, ex);
-		assertNotNull("Translation must *never* result in a null DataAccessException being returned.", dax);
-		assertEquals("Wrong DataAccessException type returned as the result of the translation", dataAccessExceptionType, dax.getClass());
-		assertNotNull("The original SQLException must be preserved in the translated DataAccessException", dax.getCause());
-		assertSame("The exact same original SQLException must be preserved in the translated DataAccessException", ex, dax.getCause());
+		assertThat(dax).as("Translation must *never* result in a null DataAccessException being returned.").isNotNull();
+		assertThat(dax.getClass()).as("Wrong DataAccessException type returned as the result of the translation").isEqualTo(dataAccessExceptionType);
+		assertThat(dax.getCause()).as("The original SQLException must be preserved in the translated DataAccessException").isNotNull();
+		assertThat(dax.getCause()).as("The exact same original SQLException must be preserved in the translated DataAccessException").isSameAs(ex);
 	}
 
 }

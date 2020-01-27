@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,10 +35,11 @@ import org.springframework.web.server.ServerWebExchange;
 public interface WebSocketService {
 
 	/**
-	 * Handle the HTTP request and use the given {@link WebSocketHandler}.
+	 * Handle the request with the given {@link WebSocketHandler}.
 	 * @param exchange the current exchange
 	 * @param webSocketHandler handler for WebSocket session
-	 * @return a completion Mono for the WebSocket session handling
+	 * @return a {@code Mono<Void>} that completes when application handling of
+	 * the WebSocket session completes.
 	 */
 	Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler webSocketHandler);
 

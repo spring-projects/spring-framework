@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,8 +83,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add((BeanReference) value);
 			}
 		}
-		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
-		this.beanReferences = references.toArray(new BeanReference[references.size()]);
+		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
+		this.beanReferences = references.toArray(new BeanReference[0]);
 	}
 
 
@@ -128,7 +128,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * as well, in addition to the superclass's equality requirements.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BeanComponentDefinition && super.equals(other)));
 	}
 

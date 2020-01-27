@@ -1,329 +1,284 @@
-/***
- * ASM: a very small and fast Java bytecode manipulation framework
- * Copyright (c) 2000-2011 INRIA, France Telecom
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
+// ASM: a very small and fast Java bytecode manipulation framework
+// Copyright (c) 2000-2011 INRIA, France Telecom
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
 package org.springframework.asm;
 
 /**
- * An {@link FieldVisitor} that generates Java fields in bytecode form.
- * 
+ * A {@link FieldVisitor} that generates a corresponding 'field_info' structure, as defined in the
+ * Java Virtual Machine Specification (JVMS).
+ *
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.5">JVMS
+ *     4.5</a>
  * @author Eric Bruneton
  */
 final class FieldWriter extends FieldVisitor {
 
-    /**
-     * The class writer to which this field must be added.
-     */
-    private final ClassWriter cw;
+  /** Where the constants used in this FieldWriter must be stored. */
+  private final SymbolTable symbolTable;
 
-    /**
-     * Access flags of this field.
-     */
-    private final int access;
+  // Note: fields are ordered as in the field_info structure, and those related to attributes are
+  // ordered as in Section 4.7 of the JVMS.
 
-    /**
-     * The index of the constant pool item that contains the name of this
-     * method.
-     */
-    private final int name;
+  /**
+   * The access_flags field of the field_info JVMS structure. This field can contain ASM specific
+   * access flags, such as {@link Opcodes#ACC_DEPRECATED}, which are removed when generating the
+   * ClassFile structure.
+   */
+  private final int accessFlags;
 
-    /**
-     * The index of the constant pool item that contains the descriptor of this
-     * field.
-     */
-    private final int desc;
+  /** The name_index field of the field_info JVMS structure. */
+  private final int nameIndex;
 
-    /**
-     * The index of the constant pool item that contains the signature of this
-     * field.
-     */
-    private int signature;
+  /** The descriptor_index field of the field_info JVMS structure. */
+  private final int descriptorIndex;
 
-    /**
-     * The index of the constant pool item that contains the constant value of
-     * this field.
-     */
-    private int value;
+  /**
+   * The signature_index field of the Signature attribute of this field_info, or 0 if there is no
+   * Signature attribute.
+   */
+  private int signatureIndex;
 
-    /**
-     * The runtime visible annotations of this field. May be <tt>null</tt>.
-     */
-    private AnnotationWriter anns;
+  /**
+   * The constantvalue_index field of the ConstantValue attribute of this field_info, or 0 if there
+   * is no ConstantValue attribute.
+   */
+  private int constantValueIndex;
 
-    /**
-     * The runtime invisible annotations of this field. May be <tt>null</tt>.
-     */
-    private AnnotationWriter ianns;
+  /**
+   * The last runtime visible annotation of this field. The previous ones can be accessed with the
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
+   */
+  private AnnotationWriter lastRuntimeVisibleAnnotation;
 
-    /**
-     * The runtime visible type annotations of this field. May be <tt>null</tt>.
-     */
-    private AnnotationWriter tanns;
+  /**
+   * The last runtime invisible annotation of this field. The previous ones can be accessed with the
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
+   */
+  private AnnotationWriter lastRuntimeInvisibleAnnotation;
 
-    /**
-     * The runtime invisible type annotations of this field. May be
-     * <tt>null</tt>.
-     */
-    private AnnotationWriter itanns;
+  /**
+   * The last runtime visible type annotation of this field. The previous ones can be accessed with
+   * the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
+   */
+  private AnnotationWriter lastRuntimeVisibleTypeAnnotation;
 
-    /**
-     * The non standard attributes of this field. May be <tt>null</tt>.
-     */
-    private Attribute attrs;
+  /**
+   * The last runtime invisible type annotation of this field. The previous ones can be accessed
+   * with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
+   */
+  private AnnotationWriter lastRuntimeInvisibleTypeAnnotation;
 
-    // ------------------------------------------------------------------------
-    // Constructor
-    // ------------------------------------------------------------------------
+  /**
+   * The first non standard attribute of this field. The next ones can be accessed with the {@link
+   * Attribute#nextAttribute} field. May be {@literal null}.
+   *
+   * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
+   * firstAttribute is actually the last attribute visited in {@link #visitAttribute}. The {@link
+   * #putFieldInfo} method writes the attributes in the order defined by this list, i.e. in the
+   * reverse order specified by the user.
+   */
+  private Attribute firstAttribute;
 
-    /**
-     * Constructs a new {@link FieldWriter}.
-     * 
-     * @param cw
-     *            the class writer to which this field must be added.
-     * @param access
-     *            the field's access flags (see {@link Opcodes}).
-     * @param name
-     *            the field's name.
-     * @param desc
-     *            the field's descriptor (see {@link Type}).
-     * @param signature
-     *            the field's signature. May be <tt>null</tt>.
-     * @param value
-     *            the field's constant value. May be <tt>null</tt>.
-     */
-    FieldWriter(final ClassWriter cw, final int access, final String name,
-            final String desc, final String signature, final Object value) {
-        super(Opcodes.ASM6);
-        if (cw.firstField == null) {
-            cw.firstField = this;
-        } else {
-            cw.lastField.fv = this;
-        }
-        cw.lastField = this;
-        this.cw = cw;
-        this.access = access;
-        this.name = cw.newUTF8(name);
-        this.desc = cw.newUTF8(desc);
-        if (ClassReader.SIGNATURES && signature != null) {
-            this.signature = cw.newUTF8(signature);
-        }
-        if (value != null) {
-            this.value = cw.newConstItem(value).index;
-        }
+  // -----------------------------------------------------------------------------------------------
+  // Constructor
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Constructs a new {@link FieldWriter}.
+   *
+   * @param symbolTable where the constants used in this FieldWriter must be stored.
+   * @param access the field's access flags (see {@link Opcodes}).
+   * @param name the field's name.
+   * @param descriptor the field's descriptor (see {@link Type}).
+   * @param signature the field's signature. May be {@literal null}.
+   * @param constantValue the field's constant value. May be {@literal null}.
+   */
+  FieldWriter(
+      final SymbolTable symbolTable,
+      final int access,
+      final String name,
+      final String descriptor,
+      final String signature,
+      final Object constantValue) {
+    super(Opcodes.ASM7);
+    this.symbolTable = symbolTable;
+    this.accessFlags = access;
+    this.nameIndex = symbolTable.addConstantUtf8(name);
+    this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);
+    if (signature != null) {
+      this.signatureIndex = symbolTable.addConstantUtf8(signature);
     }
-
-    // ------------------------------------------------------------------------
-    // Implementation of the FieldVisitor abstract class
-    // ------------------------------------------------------------------------
-
-    @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
-            final boolean visible) {
-        if (!ClassReader.ANNOTATIONS) {
-            return null;
-        }
-        ByteVector bv = new ByteVector();
-        // write type, and reserve space for values count
-        bv.putShort(cw.newUTF8(desc)).putShort(0);
-        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv, 2);
-        if (visible) {
-            aw.next = anns;
-            anns = aw;
-        } else {
-            aw.next = ianns;
-            ianns = aw;
-        }
-        return aw;
+    if (constantValue != null) {
+      this.constantValueIndex = symbolTable.addConstant(constantValue).index;
     }
+  }
 
-    @Override
-    public AnnotationVisitor visitTypeAnnotation(final int typeRef,
-            final TypePath typePath, final String desc, final boolean visible) {
-        if (!ClassReader.ANNOTATIONS) {
-            return null;
-        }
-        ByteVector bv = new ByteVector();
-        // write target_type and target_info
-        AnnotationWriter.putTarget(typeRef, typePath, bv);
-        // write type, and reserve space for values count
-        bv.putShort(cw.newUTF8(desc)).putShort(0);
-        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv,
-                bv.length - 2);
-        if (visible) {
-            aw.next = tanns;
-            tanns = aw;
-        } else {
-            aw.next = itanns;
-            itanns = aw;
-        }
-        return aw;
+  // -----------------------------------------------------------------------------------------------
+  // Implementation of the FieldVisitor abstract class
+  // -----------------------------------------------------------------------------------------------
+
+  @Override
+  public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
+    if (visible) {
+      return lastRuntimeVisibleAnnotation =
+          AnnotationWriter.create(symbolTable, descriptor, lastRuntimeVisibleAnnotation);
+    } else {
+      return lastRuntimeInvisibleAnnotation =
+          AnnotationWriter.create(symbolTable, descriptor, lastRuntimeInvisibleAnnotation);
     }
+  }
 
-    @Override
-    public void visitAttribute(final Attribute attr) {
-        attr.next = attrs;
-        attrs = attr;
+  @Override
+  public AnnotationVisitor visitTypeAnnotation(
+      final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
+    if (visible) {
+      return lastRuntimeVisibleTypeAnnotation =
+          AnnotationWriter.create(
+              symbolTable, typeRef, typePath, descriptor, lastRuntimeVisibleTypeAnnotation);
+    } else {
+      return lastRuntimeInvisibleTypeAnnotation =
+          AnnotationWriter.create(
+              symbolTable, typeRef, typePath, descriptor, lastRuntimeInvisibleTypeAnnotation);
     }
+  }
 
-    @Override
-    public void visitEnd() {
+  @Override
+  public void visitAttribute(final Attribute attribute) {
+    // Store the attributes in the <i>reverse</i> order of their visit by this method.
+    attribute.nextAttribute = firstAttribute;
+    firstAttribute = attribute;
+  }
+
+  @Override
+  public void visitEnd() {
+    // Nothing to do.
+  }
+
+  // -----------------------------------------------------------------------------------------------
+  // Utility methods
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Returns the size of the field_info JVMS structure generated by this FieldWriter. Also adds the
+   * names of the attributes of this field in the constant pool.
+   *
+   * @return the size in bytes of the field_info JVMS structure.
+   */
+  int computeFieldInfoSize() {
+    // The access_flags, name_index, descriptor_index and attributes_count fields use 8 bytes.
+    int size = 8;
+    // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
+    if (constantValueIndex != 0) {
+      // ConstantValue attributes always use 8 bytes.
+      symbolTable.addConstantUtf8(Constants.CONSTANT_VALUE);
+      size += 8;
     }
-
-    // ------------------------------------------------------------------------
-    // Utility methods
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns the size of this field.
-     * 
-     * @return the size of this field.
-     */
-    int getSize() {
-        int size = 8;
-        if (value != 0) {
-            cw.newUTF8("ConstantValue");
-            size += 8;
-        }
-        if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
-            if ((cw.version & 0xFFFF) < Opcodes.V1_5
-                    || (access & ClassWriter.ACC_SYNTHETIC_ATTRIBUTE) != 0) {
-                cw.newUTF8("Synthetic");
-                size += 6;
-            }
-        }
-        if ((access & Opcodes.ACC_DEPRECATED) != 0) {
-            cw.newUTF8("Deprecated");
-            size += 6;
-        }
-        if (ClassReader.SIGNATURES && signature != 0) {
-            cw.newUTF8("Signature");
-            size += 8;
-        }
-        if (ClassReader.ANNOTATIONS && anns != null) {
-            cw.newUTF8("RuntimeVisibleAnnotations");
-            size += 8 + anns.getSize();
-        }
-        if (ClassReader.ANNOTATIONS && ianns != null) {
-            cw.newUTF8("RuntimeInvisibleAnnotations");
-            size += 8 + ianns.getSize();
-        }
-        if (ClassReader.ANNOTATIONS && tanns != null) {
-            cw.newUTF8("RuntimeVisibleTypeAnnotations");
-            size += 8 + tanns.getSize();
-        }
-        if (ClassReader.ANNOTATIONS && itanns != null) {
-            cw.newUTF8("RuntimeInvisibleTypeAnnotations");
-            size += 8 + itanns.getSize();
-        }
-        if (attrs != null) {
-            size += attrs.getSize(cw, null, 0, -1, -1);
-        }
-        return size;
+    size += Attribute.computeAttributesSize(symbolTable, accessFlags, signatureIndex);
+    size +=
+        AnnotationWriter.computeAnnotationsSize(
+            lastRuntimeVisibleAnnotation,
+            lastRuntimeInvisibleAnnotation,
+            lastRuntimeVisibleTypeAnnotation,
+            lastRuntimeInvisibleTypeAnnotation);
+    if (firstAttribute != null) {
+      size += firstAttribute.computeAttributesSize(symbolTable);
     }
+    return size;
+  }
 
-    /**
-     * Puts the content of this field into the given byte vector.
-     * 
-     * @param out
-     *            where the content of this field must be put.
-     */
-    void put(final ByteVector out) {
-        final int FACTOR = ClassWriter.TO_ACC_SYNTHETIC;
-        int mask = Opcodes.ACC_DEPRECATED | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
-                | ((access & ClassWriter.ACC_SYNTHETIC_ATTRIBUTE) / FACTOR);
-        out.putShort(access & ~mask).putShort(name).putShort(desc);
-        int attributeCount = 0;
-        if (value != 0) {
-            ++attributeCount;
-        }
-        if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
-            if ((cw.version & 0xFFFF) < Opcodes.V1_5
-                    || (access & ClassWriter.ACC_SYNTHETIC_ATTRIBUTE) != 0) {
-                ++attributeCount;
-            }
-        }
-        if ((access & Opcodes.ACC_DEPRECATED) != 0) {
-            ++attributeCount;
-        }
-        if (ClassReader.SIGNATURES && signature != 0) {
-            ++attributeCount;
-        }
-        if (ClassReader.ANNOTATIONS && anns != null) {
-            ++attributeCount;
-        }
-        if (ClassReader.ANNOTATIONS && ianns != null) {
-            ++attributeCount;
-        }
-        if (ClassReader.ANNOTATIONS && tanns != null) {
-            ++attributeCount;
-        }
-        if (ClassReader.ANNOTATIONS && itanns != null) {
-            ++attributeCount;
-        }
-        if (attrs != null) {
-            attributeCount += attrs.getCount();
-        }
-        out.putShort(attributeCount);
-        if (value != 0) {
-            out.putShort(cw.newUTF8("ConstantValue"));
-            out.putInt(2).putShort(value);
-        }
-        if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
-            if ((cw.version & 0xFFFF) < Opcodes.V1_5
-                    || (access & ClassWriter.ACC_SYNTHETIC_ATTRIBUTE) != 0) {
-                out.putShort(cw.newUTF8("Synthetic")).putInt(0);
-            }
-        }
-        if ((access & Opcodes.ACC_DEPRECATED) != 0) {
-            out.putShort(cw.newUTF8("Deprecated")).putInt(0);
-        }
-        if (ClassReader.SIGNATURES && signature != 0) {
-            out.putShort(cw.newUTF8("Signature"));
-            out.putInt(2).putShort(signature);
-        }
-        if (ClassReader.ANNOTATIONS && anns != null) {
-            out.putShort(cw.newUTF8("RuntimeVisibleAnnotations"));
-            anns.put(out);
-        }
-        if (ClassReader.ANNOTATIONS && ianns != null) {
-            out.putShort(cw.newUTF8("RuntimeInvisibleAnnotations"));
-            ianns.put(out);
-        }
-        if (ClassReader.ANNOTATIONS && tanns != null) {
-            out.putShort(cw.newUTF8("RuntimeVisibleTypeAnnotations"));
-            tanns.put(out);
-        }
-        if (ClassReader.ANNOTATIONS && itanns != null) {
-            out.putShort(cw.newUTF8("RuntimeInvisibleTypeAnnotations"));
-            itanns.put(out);
-        }
-        if (attrs != null) {
-            attrs.put(cw, null, 0, -1, -1, out);
-        }
+  /**
+   * Puts the content of the field_info JVMS structure generated by this FieldWriter into the given
+   * ByteVector.
+   *
+   * @param output where the field_info structure must be put.
+   */
+  void putFieldInfo(final ByteVector output) {
+    boolean useSyntheticAttribute = symbolTable.getMajorVersion() < Opcodes.V1_5;
+    // Put the access_flags, name_index and descriptor_index fields.
+    int mask = useSyntheticAttribute ? Opcodes.ACC_SYNTHETIC : 0;
+    output.putShort(accessFlags & ~mask).putShort(nameIndex).putShort(descriptorIndex);
+    // Compute and put the attributes_count field.
+    // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
+    int attributesCount = 0;
+    if (constantValueIndex != 0) {
+      ++attributesCount;
     }
+    if ((accessFlags & Opcodes.ACC_SYNTHETIC) != 0 && useSyntheticAttribute) {
+      ++attributesCount;
+    }
+    if (signatureIndex != 0) {
+      ++attributesCount;
+    }
+    if ((accessFlags & Opcodes.ACC_DEPRECATED) != 0) {
+      ++attributesCount;
+    }
+    if (lastRuntimeVisibleAnnotation != null) {
+      ++attributesCount;
+    }
+    if (lastRuntimeInvisibleAnnotation != null) {
+      ++attributesCount;
+    }
+    if (lastRuntimeVisibleTypeAnnotation != null) {
+      ++attributesCount;
+    }
+    if (lastRuntimeInvisibleTypeAnnotation != null) {
+      ++attributesCount;
+    }
+    if (firstAttribute != null) {
+      attributesCount += firstAttribute.getAttributeCount();
+    }
+    output.putShort(attributesCount);
+    // Put the field_info attributes.
+    // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
+    if (constantValueIndex != 0) {
+      output
+          .putShort(symbolTable.addConstantUtf8(Constants.CONSTANT_VALUE))
+          .putInt(2)
+          .putShort(constantValueIndex);
+    }
+    Attribute.putAttributes(symbolTable, accessFlags, signatureIndex, output);
+    AnnotationWriter.putAnnotations(
+        symbolTable,
+        lastRuntimeVisibleAnnotation,
+        lastRuntimeInvisibleAnnotation,
+        lastRuntimeVisibleTypeAnnotation,
+        lastRuntimeInvisibleTypeAnnotation,
+        output);
+    if (firstAttribute != null) {
+      firstAttribute.putAttributes(symbolTable, output);
+    }
+  }
+
+  /**
+   * Collects the attributes of this field into the given set of attribute prototypes.
+   *
+   * @param attributePrototypes a set of attribute prototypes.
+   */
+  final void collectAttributePrototypes(final Attribute.Set attributePrototypes) {
+    attributePrototypes.addAttributes(firstAttribute);
+  }
 }

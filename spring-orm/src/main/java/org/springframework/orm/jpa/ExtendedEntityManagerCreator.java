@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -43,6 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Delegate for creating a variety of {@link javax.persistence.EntityManager}
@@ -65,6 +67,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Mark Paluch
  * @since 2.0
  * @see javax.persistence.EntityManagerFactory#createEntityManager()
  * @see javax.persistence.PersistenceContextType#EXTENDED
@@ -72,6 +75,9 @@ import org.springframework.util.CollectionUtils;
  * @see SharedEntityManagerCreator
  */
 public abstract class ExtendedEntityManagerCreator {
+
+	private static final Map<Class<?>, Class<?>[]> cachedEntityManagerInterfaces = new ConcurrentReferenceHashMap<>(4);
+
 
 	/**
 	 * Create an application-managed extended EntityManager proxy.
@@ -157,8 +163,8 @@ public abstract class ExtendedEntityManagerCreator {
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return a container-managed EntityManager that expects container-driven lifecycle
 	 * management but may opt out of automatic transaction synchronization
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 * @since 4.0
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
@@ -222,17 +228,29 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class<?>> ifcs = new LinkedHashSet<>();
+		Class<?>[] interfaces;
+
 		if (emIfc != null) {
-			ifcs.add(emIfc);
+			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(emIfc, key -> {
+				Set<Class<?>> ifcs = new LinkedHashSet<>();
+				ifcs.add(key);
+				ifcs.add(EntityManagerProxy.class);
+				return ClassUtils.toClassArray(ifcs);
+			});
 		}
 		else {
-			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(rawEm.getClass(), cl));
+			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(rawEm.getClass(), key -> {
+				Set<Class<?>> ifcs = new LinkedHashSet<>();
+				ifcs.addAll(ClassUtils
+						.getAllInterfacesForClassAsSet(key, cl));
+				ifcs.add(EntityManagerProxy.class);
+				return ClassUtils.toClassArray(ifcs);
+			});
 		}
-		ifcs.add(EntityManagerProxy.class);
+
 		return (EntityManager) Proxy.newProxyInstance(
 				(cl != null ? cl : ExtendedEntityManagerCreator.class.getClassLoader()),
-				ifcs.toArray(new Class<?>[ifcs.size()]),
+				interfaces,
 				new ExtendedEntityManagerInvocationHandler(
 						rawEm, exceptionTranslator, jta, containerManaged, synchronizedWithTransaction));
 	}
@@ -242,7 +260,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * InvocationHandler for extended EntityManagers as defined in the JPA spec.
 	 */
 	@SuppressWarnings("serial")
-	private static class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
+	private static final class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private static final Log logger = LogFactory.getLog(ExtendedEntityManagerInvocationHandler.class);
 
@@ -491,10 +509,10 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 
 		private RuntimeException convertException(RuntimeException ex) {
-			DataAccessException daex = (this.exceptionTranslator != null) ?
+			DataAccessException dae = (this.exceptionTranslator != null) ?
 					this.exceptionTranslator.translateExceptionIfPossible(ex) :
 					EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
-			return (daex != null ? daex : ex);
+			return (dae != null ? dae : ex);
 		}
 	}
 

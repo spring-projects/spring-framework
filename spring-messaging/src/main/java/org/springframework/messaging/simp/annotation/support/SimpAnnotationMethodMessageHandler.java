@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -50,14 +52,17 @@ import org.springframework.messaging.handler.annotation.support.DestinationVaria
 import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
+import org.springframework.messaging.handler.invocation.ReactiveReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -69,6 +74,7 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringValueResolver;
@@ -87,6 +93,10 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements EmbeddedValueResolverAware, SmartLifecycle {
+
+	private static final boolean reactorPresent = ClassUtils.isPresent(
+			"reactor.core.publisher.Flux", SimpAnnotationMethodMessageHandler.class.getClassLoader());
+
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -111,9 +121,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
-	private final Object lifecycleMonitor = new Object();
-
 	private volatile boolean running = false;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	/**
@@ -231,9 +241,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Set the Validator instance used for validating @Payload arguments
+	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
-	 * @see PayloadArgumentResolver
+	 * @see PayloadMethodArgumentResolver
 	 */
 	public void setValidator(@Nullable Validator validator) {
 		this.validator = validator;
@@ -246,7 +256,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
-	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
+	 * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}
 	 * that send messages from controller return values.
 	 * <p>By default, this property is not set.
 	 */
@@ -262,16 +272,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return this.headerInitializer;
 	}
 
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
 
 	@Override
 	public final void start() {
@@ -299,12 +299,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
 
 
+	@Override
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		ApplicationContext context = getApplicationContext();
 		ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?
@@ -322,7 +321,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
+		resolvers.add(new PayloadMethodArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}
@@ -332,15 +331,18 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
+
 		handlers.add(new ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
+		if (reactorPresent) {
+			handlers.add(new ReactiveReturnValueHandler());
+		}
 
 		// Annotation-based return value types
+
 		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		if (this.headerInitializer != null) {
-			sendToHandler.setHeaderInitializer(this.headerInitializer);
-		}
+		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =
@@ -348,15 +350,27 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(subscriptionHandler);
 
-		// custom return value types
+		// Custom return value types
+
 		handlers.addAll(getCustomReturnValueHandlers());
 
-		// catch-all
+		// Catch-all
+
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
 		return handlers;
+	}
+
+	@Override
+	protected Log getReturnValueHandlerLogger() {
+		return SimpLogging.forLog(HandlerMethodReturnValueHandlerComposite.defaultLogger);
+	}
+
+	@Override
+	protected Log getHandlerMethodLogger() {
+		return SimpLogging.forLog(HandlerMethod.defaultLogger);
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,15 @@ package org.springframework.web.servlet.mvc;
 
 import java.util.Properties;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
+
 
 /**
  * @author Rick Evans
@@ -46,7 +47,7 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
 	@Test
@@ -63,14 +64,14 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 
 		// request.setRequestURI("http://localhost:7070/example/bingo.html");
 		request.setRequestURI("example/bingo.html");
 		interceptor.preHandle(request, response, null);
 
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-store"));
+		assertThat(cacheControlHeaders).contains("no-store");
 	}
 
 	@Test
@@ -92,9 +93,9 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.emptyIterable());
+		assertThat(expiresHeaders).isEmpty();
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 	}
 
 	// SPR-13252, SPR-14053
@@ -107,8 +108,8 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
 	// SPR-13252, SPR-14053
@@ -123,8 +124,8 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
 	@SuppressWarnings("deprecation")
@@ -138,32 +139,33 @@ public class WebContentInterceptorTests {
 		mappings.setProperty("*/*.cache.html", "10"); // was **/*.cache.html
 		interceptor.setCacheMappings(mappings);
 
-		// request.setRequestURI("http://example.org/foo/page.html");
+		// request.setRequestURI("https://example.org/foo/page.html");
 		request.setRequestURI("foo/page.html");
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-cache", "no-store"));
+		assertThat(cacheControlHeaders).containsExactly("no-cache", "no-store");
 		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
+		assertThat(pragmaHeaders).containsExactly("no-cache");
 
-		// request.setRequestURI("http://example.org/page.cache.html");
+		// request.setRequestURI("https://example.org/page.cache.html");
 		request = new MockHttpServletRequest("GET", "foo/page.cache.html");
 		response = new MockHttpServletResponse();
 		interceptor.preHandle(request, response, null);
 
 		expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("max-age=10, must-revalidate"));
+		assertThat(cacheControlHeaders).containsExactly("max-age=10, must-revalidate");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void throwsExceptionWithNullPathMatcher() throws Exception {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
-		interceptor.setPathMatcher(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.setPathMatcher(null));
 	}
 
 }

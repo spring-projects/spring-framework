@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -119,7 +119,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 
 		Class<?> typeArgumentClass = (Class<?>) typeArgument;
-		return typeArgumentClass.isAssignableFrom(ResourceRegion.class);
+		return ResourceRegion.class.isAssignableFrom(typeArgumentClass);
 	}
 
 	@Override
@@ -179,11 +179,23 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
 		OutputStream out = outputMessage.getBody();
 
-		for (ResourceRegion region : resourceRegions) {
-			long start = region.getPosition();
-			long end = start + region.getCount() - 1;
-			InputStream in = region.getResource().getInputStream();
-			try {
+		Resource resource = null;
+		InputStream in = null;
+		long inputStreamPosition = 0;
+
+		try {
+			for (ResourceRegion region : resourceRegions) {
+				long start = region.getPosition() - inputStreamPosition;
+				if (start < 0 || resource != region.getResource()) {
+					if (in != null) {
+						in.close();
+					}
+					resource = region.getResource();
+					in = resource.getInputStream();
+					inputStreamPosition = 0;
+					start = region.getPosition();
+				}
+				long end = start + region.getCount() - 1;
 				// Writing MIME header.
 				println(out);
 				print(out, "--" + boundaryString);
@@ -193,20 +205,25 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 					println(out);
 				}
 				Long resourceLength = region.getResource().contentLength();
-				end = Math.min(end, resourceLength - 1);
-				print(out, "Content-Range: bytes " + start + '-' + end + '/' + resourceLength);
+				end = Math.min(end, resourceLength - inputStreamPosition - 1);
+				print(out, "Content-Range: bytes " +
+						region.getPosition() + '-' + (region.getPosition() + region.getCount() - 1) +
+						'/' + resourceLength);
 				println(out);
 				println(out);
 				// Printing content
 				StreamUtils.copyRange(in, out, start, end);
+				inputStreamPosition += (end + 1);
 			}
-			finally {
-				try {
+		}
+		finally {
+			try {
+				if (in != null) {
 					in.close();
 				}
-				catch (IOException ex) {
-					// ignore
-				}
+			}
+			catch (IOException ex) {
+				// ignore
 			}
 		}
 

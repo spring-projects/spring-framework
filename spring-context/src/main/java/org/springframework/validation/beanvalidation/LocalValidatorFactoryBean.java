@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.validation.Configuration;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
@@ -157,6 +158,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
 	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
 	 * Spring-based {@code ResourceBundleLocator} when constructing your interpolator.
+	 * <p>In order for Hibernate's default validation messages to be resolved still, your
+	 * {@link MessageSource} must be configured for optional resolution (usually the default).
+	 * In particular, the {@code MessageSource} instance specified here should not apply
+	 * {@link org.springframework.context.support.AbstractMessageSource#setUseCodeAsDefaultMessage
+	 * "useCodeAsDefaultMessage"} behavior. Please double-check your setup accordingly.
 	 * @see ResourceBundleMessageInterpolator
 	 */
 	public void setValidationMessageSource(MessageSource messageSource) {
@@ -409,6 +415,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		throw new ValidationException("Cannot unwrap to " + type);
 	}
 
+	@Override
 	public void close() {
 		if (this.validatorFactory != null) {
 			this.validatorFactory.close();

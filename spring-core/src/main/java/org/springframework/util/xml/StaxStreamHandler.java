@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Map;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -26,8 +27,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
-
-import org.springframework.util.Assert;
 
 /**
  * SAX {@link org.xml.sax.ContentHandler} and {@link LexicalHandler}
@@ -42,7 +41,6 @@ class StaxStreamHandler extends AbstractStaxHandler {
 
 
 	public StaxStreamHandler(XMLStreamWriter streamWriter) {
-		Assert.notNull(streamWriter, "XMLStreamWriter must not be null");
 		this.streamWriter = streamWriter;
 	}
 

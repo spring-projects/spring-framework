@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,13 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockBodyContent;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockBodyContent;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ArgumentTag}
@@ -40,7 +40,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 	private MockArgumentSupportTag parent;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		PageContext context = createPageContext();
 		parent = new MockArgumentSupportTag();
@@ -55,16 +55,16 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("value1", parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isEqualTo("value1");
 	}
 
 	@Test
 	public void argumentWithImplicitNullValue() throws JspException {
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertNull(parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isNull();
 	}
 
 	@Test
@@ -73,8 +73,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertNull(parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isNull();
 	}
 
 	@Test
@@ -84,8 +84,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("value2", parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isEqualTo("value2");
 	}
 
 	@Test
@@ -94,8 +94,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 		int action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("value3", parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isEqualTo("value3");
 
 		tag.release();
 
@@ -107,8 +107,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 		action = tag.doEndTag();
 
-		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("value4", parent.getArgument());
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(parent.getArgument()).isEqualTo("value4");
 	}
 
 	@SuppressWarnings("serial")

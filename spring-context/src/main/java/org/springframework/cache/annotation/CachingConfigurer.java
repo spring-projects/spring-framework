@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
  * for detailed instructions.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableCaching
  * @see CachingConfigurerSupport
@@ -69,8 +70,8 @@ public interface CachingConfigurer {
 	 * Return the {@link CacheResolver} bean to use to resolve regular caches for
 	 * annotation-driven cache management. This is an alternative and more powerful
 	 * option of specifying the {@link CacheManager} to use.
-	 * <p>If both a {@link #cacheManager()} and {@link #cacheResolver()} are set, the
-	 * cache manager is ignored.
+	 * <p>If both a {@link #cacheManager()} and {@code #cacheResolver()} are set,
+	 * the cache manager is ignored.
 	 * <p>Implementations must explicitly declare
 	 * {@link org.springframework.context.annotation.Bean @Bean}, e.g.
 	 * <pre class="code">

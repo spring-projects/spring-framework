@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,12 @@
 
 package org.springframework.remoting.jaxws;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServiceFeature;
@@ -48,7 +49,6 @@ import org.springframework.util.Assert;
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint
  * @see SimpleJaxWsServiceExporter
- * @see SimpleHttpServerJaxWsServiceExporter
  */
 public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, InitializingBean, DisposableBean {
 
@@ -137,9 +137,9 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {

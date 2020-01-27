@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,74 +20,62 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link AutowireUtils}.
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Loïc Ledoyen
  */
 public class AutowireUtilsTests {
 
 	@Test
 	public void genericMethodReturnTypes() {
-		Method notParameterized = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterized", new Class[]{});
-		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterized, new Object[]{}, getClass().getClassLoader()));
+		Method notParameterized = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterized");
+		Object actual = AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterized, new Object[0], getClass().getClassLoader());
+		assertThat(actual).isEqualTo(String.class);
 
-		Method notParameterizedWithArguments = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments",
-				new Class[] { Integer.class, Boolean.class });
-		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterizedWithArguments, new Object[] { 99, true }, getClass().getClassLoader()));
+		Method notParameterizedWithArguments = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments", Integer.class, Boolean.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterizedWithArguments, new Object[]{99, true}, getClass().getClassLoader())).isEqualTo(String.class);
 
-		Method createProxy = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createProxy", new Class[] { Object.class });
-		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createProxy, new Object[] { "foo" }, getClass().getClassLoader()));
+		Method createProxy = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createProxy", Object.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createProxy, new Object[]{"foo"}, getClass().getClassLoader())).isEqualTo(String.class);
 
-		Method createNamedProxyWithDifferentTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy",
-				new Class[] { String.class, Object.class });
-		assertEquals(Long.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma", 99L }, getClass().getClassLoader()));
+		Method createNamedProxyWithDifferentTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy", String.class, Object.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[]{"enigma", 99L}, getClass().getClassLoader())).isEqualTo(Long.class);
 
-		Method createNamedProxyWithDuplicateTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy",
-				new Class[] { String.class, Object.class });
-		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDuplicateTypes, new Object[] { "enigma", "foo" }, getClass().getClassLoader()));
+		Method createNamedProxyWithDuplicateTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy", String.class, Object.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDuplicateTypes, new Object[]{"enigma", "foo"}, getClass().getClassLoader())).isEqualTo(String.class);
 
-		Method createMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createMock", new Class[] { Class.class });
-		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[] { Runnable.class }, getClass().getClassLoader()));
-		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[] { Runnable.class.getName() }, getClass().getClassLoader()));
+		Method createMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createMock", Class.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[]{Runnable.class}, getClass().getClassLoader())).isEqualTo(Runnable.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[]{Runnable.class.getName()}, getClass().getClassLoader())).isEqualTo(Runnable.class);
 
-		Method createNamedMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedMock", new Class[] { String.class,
-				Class.class });
-		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedMock, new Object[] { "foo", Runnable.class }, getClass().getClassLoader()));
+		Method createNamedMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedMock", String.class, Class.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedMock, new Object[]{"foo", Runnable.class}, getClass().getClassLoader())).isEqualTo(Runnable.class);
 
-		Method createVMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createVMock",
-				new Class[] { Object.class, Class.class });
-		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createVMock, new Object[] { "foo", Runnable.class }, getClass().getClassLoader()));
+		Method createVMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createVMock", Object.class, Class.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(createVMock, new Object[]{"foo", Runnable.class}, getClass().getClassLoader())).isEqualTo(Runnable.class);
 
 		// Ideally we would expect String.class instead of Object.class, but
 		// resolveReturnTypeForFactoryMethod() does not currently support this form of
 		// look-up.
-		Method extractValueFrom = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractValueFrom",
-				new Class[] { MyInterfaceType.class });
-		assertEquals(Object.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(extractValueFrom, new Object[] { new MySimpleInterfaceType() }, getClass().getClassLoader()));
+		Method extractValueFrom = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractValueFrom", MyInterfaceType.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(extractValueFrom, new Object[]{new MySimpleInterfaceType()}, getClass().getClassLoader())).isEqualTo(Object.class);
 
 		// Ideally we would expect Boolean.class instead of Object.class, but this
 		// information is not available at run-time due to type erasure.
 		Map<Integer, Boolean> map = new HashMap<>();
 		map.put(0, false);
 		map.put(1, true);
-		Method extractMagicValue = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractMagicValue", new Class[] { Map.class });
-		assertEquals(Object.class, AutowireUtils.resolveReturnTypeForFactoryMethod(extractMagicValue, new Object[] { map }, getClass().getClassLoader()));
+		Method extractMagicValue = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractMagicValue", Map.class);
+		assertThat(AutowireUtils.resolveReturnTypeForFactoryMethod(extractMagicValue, new Object[]{map}, getClass().getClassLoader())).isEqualTo(Object.class);
 	}
 
 
@@ -98,31 +86,6 @@ public class AutowireUtilsTests {
 	}
 
 	public static class MyTypeWithMethods<T> {
-
-		public MyInterfaceType<Integer> integer() {
-			return null;
-		}
-
-		public MySimpleInterfaceType string() {
-			return null;
-		}
-
-		public Object object() {
-			return null;
-		}
-
-		@SuppressWarnings("rawtypes")
-		public MyInterfaceType raw() {
-			return null;
-		}
-
-		public String notParameterized() {
-			return null;
-		}
-
-		public String notParameterizedWithArguments(Integer x, Boolean b) {
-			return null;
-		}
 
 		/**
 		 * Simulates a factory method that wraps the supplied object in a proxy of the
@@ -176,6 +139,31 @@ public class AutowireUtilsTests {
 		 * Extract some magic value from the supplied map.
 		 */
 		public static <K, V> V extractMagicValue(Map<K, V> map) {
+			return null;
+		}
+
+		public MyInterfaceType<Integer> integer() {
+			return null;
+		}
+
+		public MySimpleInterfaceType string() {
+			return null;
+		}
+
+		public Object object() {
+			return null;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public MyInterfaceType raw() {
+			return null;
+		}
+
+		public String notParameterized() {
+			return null;
+		}
+
+		public String notParameterizedWithArguments(Integer x, Boolean b) {
 			return null;
 		}
 

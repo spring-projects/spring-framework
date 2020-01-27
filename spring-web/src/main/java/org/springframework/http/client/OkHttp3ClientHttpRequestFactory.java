@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,9 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -36,7 +35,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
- * <a href="http://square.github.io/okhttp/">OkHttp</a> 3.x to create requests.
+ * <a href="https://square.github.io/okhttp/">OkHttp</a> 3.x to create requests.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
@@ -72,9 +71,8 @@ public class OkHttp3ClientHttpRequestFactory
 
 
 	/**
-	 * Sets the underlying read timeout in milliseconds.
+	 * Set the underlying read timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#readTimeout(long, TimeUnit)
 	 */
 	public void setReadTimeout(int readTimeout) {
 		this.client = this.client.newBuilder()
@@ -83,9 +81,8 @@ public class OkHttp3ClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying write timeout in milliseconds.
+	 * Set the underlying write timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#writeTimeout(long, TimeUnit)
 	 */
 	public void setWriteTimeout(int writeTimeout) {
 		this.client = this.client.newBuilder()
@@ -94,9 +91,8 @@ public class OkHttp3ClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying connect timeout in milliseconds.
+	 * Set the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#connectTimeout(long, TimeUnit)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		this.client = this.client.newBuilder()
@@ -120,10 +116,12 @@ public class OkHttp3ClientHttpRequestFactory
 	public void destroy() throws IOException {
 		if (this.defaultClient) {
 			// Clean up the client if we created it in the constructor
-			if (this.client.cache() != null) {
-				this.client.cache().close();
+			Cache cache = this.client.cache();
+			if (cache != null) {
+				cache.close();
 			}
 			this.client.dispatcher().executorService().shutdown();
+			this.client.connectionPool().evictAll();
 		}
 	}
 
@@ -137,12 +135,11 @@ public class OkHttp3ClientHttpRequestFactory
 				RequestBody.create(contentType, content) : null);
 
 		Request.Builder builder = new Request.Builder().url(uri.toURL()).method(method.name(), body);
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
+		headers.forEach((headerName, headerValues) -> {
+			for (String headerValue : headerValues) {
 				builder.addHeader(headerName, headerValue);
 			}
-		}
+		});
 		return builder.build();
 	}
 

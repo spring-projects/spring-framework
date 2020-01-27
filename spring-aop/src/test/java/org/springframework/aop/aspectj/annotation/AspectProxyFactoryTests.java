@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.aop.PerThisAspect;
 
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rob Harrop
@@ -37,10 +38,11 @@ import static org.junit.Assert.*;
  */
 public class AspectProxyFactoryTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
-		proxyFactory.addAspect(TestBean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				proxyFactory.addAspect(TestBean.class));
 	}
 
 	@Test
@@ -50,7 +52,7 @@ public class AspectProxyFactoryTests {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(bean);
 		proxyFactory.addAspect(MultiplyReturnValue.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertEquals("Multiplication did not occur", bean.getAge() * 2, proxy.getAge());
+		assertThat(proxy.getAge()).as("Multiplication did not occur").isEqualTo((bean.getAge() * 2));
 	}
 
 	@Test
@@ -67,16 +69,17 @@ public class AspectProxyFactoryTests {
 		ITestBean proxy1 = pf1.getProxy();
 		ITestBean proxy2 = pf2.getProxy();
 
-		assertEquals(0, proxy1.getAge());
-		assertEquals(1, proxy1.getAge());
-		assertEquals(0, proxy2.getAge());
-		assertEquals(2, proxy1.getAge());
+		assertThat(proxy1.getAge()).isEqualTo(0);
+		assertThat(proxy1.getAge()).isEqualTo(1);
+		assertThat(proxy2.getAge()).isEqualTo(0);
+		assertThat(proxy1.getAge()).isEqualTo(2);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithInstanceWithNonAspect() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
-		pf.addAspect(new TestBean());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pf.addAspect(new TestBean()));
 	}
 
 	@Test
@@ -85,13 +88,12 @@ public class AspectProxyFactoryTests {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 		ITestBean tb = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
-		assertTrue(tb.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(tb.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testWithInstance() throws Exception {
 		MultiplyReturnValue aspect = new MultiplyReturnValue();
 		int multiple = 3;
@@ -104,16 +106,17 @@ public class AspectProxyFactoryTests {
 		proxyFactory.addAspect(aspect);
 
 		ITestBean proxy = proxyFactory.getProxy();
-		assertEquals(target.getAge() * multiple, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo((target.getAge() * multiple));
 
 		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
-		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
+		assertThat(serializedProxy.getAge()).isEqualTo((target.getAge() * multiple));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonSingletonAspectInstance() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
-		pf.addAspect(new PerThisAspect());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pf.addAspect(new PerThisAspect()));
 	}
 
 	@Test  // SPR-13328
@@ -122,7 +125,7 @@ public class AspectProxyFactoryTests {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 	@Test  // SPR-13328
@@ -131,7 +134,7 @@ public class AspectProxyFactoryTests {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnSetter.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 

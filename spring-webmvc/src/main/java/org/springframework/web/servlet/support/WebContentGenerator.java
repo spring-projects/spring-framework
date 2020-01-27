@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,13 +66,13 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	/** HTTP method "GET" */
+	/** HTTP method "GET". */
 	public static final String METHOD_GET = "GET";
 
-	/** HTTP method "HEAD" */
+	/** HTTP method "HEAD". */
 	public static final String METHOD_HEAD = "HEAD";
 
-	/** HTTP method "POST" */
+	/** HTTP method "POST". */
 	public static final String METHOD_POST = "POST";
 
 	private static final String HEADER_PRAGMA = "Pragma";
@@ -81,7 +82,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Set of supported HTTP methods */
+	/** Set of supported HTTP methods. */
 	@Nullable
 	private Set<String> supportedMethods;
 
@@ -174,7 +175,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		if (this.supportedMethods == null) {
 			allowedMethods = new ArrayList<>(HttpMethod.values().length - 1);
 			for (HttpMethod method : HttpMethod.values()) {
-				if (!HttpMethod.TRACE.equals(method)) {
+				if (method != HttpMethod.TRACE) {
 					allowedMethods.add(method.name());
 				}
 			}
@@ -191,13 +192,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Return the "Allow" header value to use in response to an HTTP OPTIONS
-	 * request based on the configured {@link #setSupportedMethods supported
-	 * methods} also automatically adding "OPTIONS" to the list even if not
-	 * present as a supported method. This means sub-classes don't have to
-	 * explicitly list "OPTIONS" as a supported method as long as HTTP OPTIONS
-	 * requests are handled before making a call to
-	 * {@link #checkRequest(HttpServletRequest)}.
+	 * Return the "Allow" header value to use in response to an HTTP OPTIONS request
+	 * based on the configured {@link #setSupportedMethods supported methods} also
+	 * automatically adding "OPTIONS" to the list even if not present as a supported
+	 * method. This means subclasses don't have to explicitly list "OPTIONS" as a
+	 * supported method as long as HTTP OPTIONS requests are handled before making a
+	 * call to {@link #checkRequest(HttpServletRequest)}.
+	 * @since 4.3
 	 */
 	@Nullable
 	protected String getAllowHeader() {
@@ -469,6 +470,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator.
 	 * @see #checkRequest(HttpServletRequest)
 	 * @see #prepareResponse(HttpServletResponse)
 	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
@@ -483,6 +486,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator.
 	 * @see #checkRequest(HttpServletRequest)
 	 * @see #applyCacheSeconds(HttpServletResponse, int)
 	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
@@ -573,7 +578,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Prevent the response from being cached.
 	 * Only called in HTTP 1.0 compatibility mode.
-	 * <p>See {@code http://www.mnot.net/cache_docs}.
+	 * <p>See {@code https://www.mnot.net/cache_docs}.
 	 * @deprecated as of 4.2, in favor of {@link #applyCacheControl}
 	 */
 	@Deprecated

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -28,6 +29,8 @@ import javax.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
@@ -86,6 +89,11 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		// Avoid Validator invocation on FactoryBean.getObjectType/isSingleton
+		if (isFactoryBeanMetadataMethod(invocation.getMethod())) {
+			return invocation.proceed();
+		}
+
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		// Standard Bean Validation 1.1 API
@@ -117,6 +125,27 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		}
 
 		return returnValue;
+	}
+
+	private boolean isFactoryBeanMetadataMethod(Method method) {
+		Class<?> clazz = method.getDeclaringClass();
+
+		// Call from interface-based proxy handle, allowing for an efficient check?
+		if (clazz.isInterface()) {
+			return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
+					!method.getName().equals("getObject"));
+		}
+
+		// Call from CGLIB proxy handle, potentially implementing a FactoryBean method?
+		Class<?> factoryBeanType = null;
+		if (SmartFactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = SmartFactoryBean.class;
+		}
+		else if (FactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = FactoryBean.class;
+		}
+		return (factoryBeanType != null && !method.getName().equals("getObject") &&
+				ClassUtils.hasMethod(factoryBeanType, method));
 	}
 
 	/**

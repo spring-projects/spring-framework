@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,9 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Conventions;
@@ -60,8 +57,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @since 3.1
  */
 public final class ModelFactory {
-
-	private static final Log logger = LogFactory.getLog(ModelFactory.class);
 
 	private final List<ModelMethod> modelMethods = new ArrayList<>();
 
@@ -103,8 +98,8 @@ public final class ModelFactory {
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer container,
-			HandlerMethod handlerMethod) throws Exception {
+	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
+			throws Exception {
 
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
 		container.mergeAttributes(sessionAttributes);
@@ -155,18 +150,11 @@ public final class ModelFactory {
 	private ModelMethod getNextModelMethod(ModelAndViewContainer container) {
 		for (ModelMethod modelMethod : this.modelMethods) {
 			if (modelMethod.checkDependencies(container)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Selected @ModelAttribute method " + modelMethod);
-				}
 				this.modelMethods.remove(modelMethod);
 				return modelMethod;
 			}
 		}
 		ModelMethod modelMethod = this.modelMethods.get(0);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Selected @ModelAttribute method (not present: " +
-					modelMethod.getUnresolvedDependencies(container)+ ") " + modelMethod);
-		}
 		this.modelMethods.remove(modelMethod);
 		return modelMethod;
 	}
@@ -257,7 +245,8 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derive the model attribute name for the given return value based on:
+	 * Derive the model attribute name for the given return value. Results will be
+	 * based on:
 	 * <ol>
 	 * <li>the method {@code ModelAttribute} annotation value
 	 * <li>the declared return type if it is more specific than {@code Object}
@@ -308,16 +297,6 @@ public final class ModelFactory {
 				}
 			}
 			return true;
-		}
-
-		public List<String> getUnresolvedDependencies(ModelAndViewContainer mavContainer) {
-			List<String> result = new ArrayList<>(this.dependencies.size());
-			for (String name : this.dependencies) {
-				if (!mavContainer.containsAttribute(name)) {
-					result.add(name);
-				}
-			}
-			return result;
 		}
 
 		@Override

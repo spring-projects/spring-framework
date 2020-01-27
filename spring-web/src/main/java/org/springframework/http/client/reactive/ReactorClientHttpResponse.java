@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,12 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.netty.NettyInbound;
+import reactor.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -35,57 +38,76 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Brian Clozel
  * @since 5.0
- * @see reactor.ipc.netty.http.client.HttpClient
+ * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final NettyDataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory bufferFactory;
 
 	private final HttpClientResponse response;
 
+	private final NettyInbound inbound;
 
-	public ReactorClientHttpResponse(HttpClientResponse response) {
+	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
+
+
+	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
 		this.response = response;
-		this.dataBufferFactory = new NettyDataBufferFactory(response.channel().alloc());
+		this.inbound = inbound;
+		this.bufferFactory = new NettyDataBufferFactory(alloc);
 	}
 
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return response.receive()
-				.map(buf -> {
-					buf.retain();
-					return dataBufferFactory.wrap(buf);
+		return this.inbound.receive()
+				.doOnSubscribe(s -> {
+					if (this.rejectSubscribers.get()) {
+						throw new IllegalStateException("The client response body can only be consumed once.");
+					}
+				})
+				.doOnCancel(() ->
+					// https://github.com/reactor/reactor-netty/issues/503
+					// FluxReceive rejects multiple subscribers, but not after a cancel().
+					// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
+					// So we need to intercept and reject them in that case.
+					this.rejectSubscribers.set(true)
+				)
+				.map(byteBuf -> {
+					byteBuf.retain();
+					return this.bufferFactory.wrap(byteBuf);
 				});
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders().entries()
-		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.response.responseHeaders().entries().forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.response.status().code());
+		return HttpStatus.valueOf(getRawStatusCode());
+	}
+
+	@Override
+	public int getRawStatusCode() {
+		return this.response.status().code();
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.response.cookies().values().stream().flatMap(Collection::stream)
-				.forEach(cookie -> {
-					ResponseCookie responseCookie = ResponseCookie.from(cookie.name(), cookie.value())
+				.forEach(cookie ->
+					result.add(cookie.name(), ResponseCookie.from(cookie.name(), cookie.value())
 							.domain(cookie.domain())
 							.path(cookie.path())
 							.maxAge(cookie.maxAge())
 							.secure(cookie.isSecure())
 							.httpOnly(cookie.isHttpOnly())
-							.build();
-					result.add(cookie.name(), responseCookie);
-				});
+							.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
@@ -93,7 +115,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
-				"status=" + getStatusCode() + '}';
+				"status=" + getRawStatusCode() + '}';
 	}
 
 }

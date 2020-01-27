@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,11 +41,15 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Phillip Webb
  * @since 2.5.2
  */
-public abstract class GenericTypeResolver {
+public final class GenericTypeResolver {
 
-	/** Cache from Class to TypeVariable Map */
+	/** Cache from Class to TypeVariable Map. */
 	@SuppressWarnings("rawtypes")
 	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache = new ConcurrentReferenceHashMap<>();
+
+
+	private GenericTypeResolver() {
+	}
 
 
 	/**
@@ -53,12 +57,13 @@ public abstract class GenericTypeResolver {
 	 * @param methodParameter the method parameter specification
 	 * @param implementationClass the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
+	 * @deprecated since 5.2 in favor of {@code methodParameter.withContainingClass(implementationClass).getParameterType()}
 	 */
+	@Deprecated
 	public static Class<?> resolveParameterType(MethodParameter methodParameter, Class<?> implementationClass) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		Assert.notNull(implementationClass, "Class must not be null");
 		methodParameter.setContainingClass(implementationClass);
-		ResolvableType.resolveMethodParameter(methodParameter);
 		return methodParameter.getParameterType();
 	}
 
@@ -86,7 +91,7 @@ public abstract class GenericTypeResolver {
 	 */
 	@Nullable
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
-		Assert.notNull(method, "method must not be null");
+		Assert.notNull(method, "Method must not be null");
 		ResolvableType resolvableType = ResolvableType.forMethodReturnType(method).as(genericIfc);
 		if (!resolvableType.hasGenerics() || resolvableType.getType() instanceof WildcardType) {
 			return null;
@@ -225,7 +230,7 @@ public abstract class GenericTypeResolver {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
-		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).toClass();
 	}
 
 	/**

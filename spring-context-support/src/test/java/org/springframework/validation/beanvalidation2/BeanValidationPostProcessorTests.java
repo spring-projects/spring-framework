@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,16 +20,17 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -42,14 +43,9 @@ public class BeanValidationPostProcessorTests {
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
 		ac.registerBeanDefinition("bean", new RootBeanDefinition(NotNullConstrainedBean.class));
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause().getMessage().contains("testBean"));
-			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				ac::refresh)
+			.satisfies(ex -> assertThat(ex.getRootCause().getMessage()).contains("testBean", "invalid"));
 		ac.close();
 	}
 
@@ -85,14 +81,9 @@ public class BeanValidationPostProcessorTests {
 		bd.getPropertyValues().add("testBean", new TestBean());
 		bd.getPropertyValues().add("stringValue", "s");
 		ac.registerBeanDefinition("bean", bd);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause().getMessage().contains("stringValue"));
-			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				ac::refresh)
+			.satisfies(ex -> assertThat(ex.getRootCause().getMessage()).contains("stringValue", "invalid"));
 		ac.close();
 	}
 
@@ -135,7 +126,7 @@ public class BeanValidationPostProcessorTests {
 
 		@PostConstruct
 		public void init() {
-			assertNotNull("Shouldn't be here after constraint checking", this.testBean);
+			assertThat(this.testBean).as("Shouldn't be here after constraint checking").isNotNull();
 		}
 	}
 

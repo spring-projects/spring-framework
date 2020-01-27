@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean id="employee" class="org.springframework.tests.sample.beans.Employee">
+	<bean id="employee" class="org.springframework.beans.testfixture.beans.Employee">
 		<property name="name" value="John Smith" />
 		<property name="age" value="42" />
 		<property name="company" value="Acme Widgets, Inc." />

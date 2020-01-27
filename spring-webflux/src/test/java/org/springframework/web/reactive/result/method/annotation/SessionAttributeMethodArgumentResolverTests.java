@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,22 +19,17 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -42,22 +37,15 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SessionAttributeMethodArgumentResolver}.
- *
  * @author Rossen Stoyanchev
  */
 public class SessionAttributeMethodArgumentResolverTests {
@@ -71,92 +59,86 @@ public class SessionAttributeMethodArgumentResolverTests {
 	private Method handleMethod;
 
 
-	@Before
-	public void setup() throws Exception {
+	@BeforeEach
+	@SuppressWarnings("resource")
+	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
-
 		this.session = mock(WebSession.class);
-		WebSessionManager sessionManager = new MockWebSessionManager(this.session);
-
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(),
-				sessionManager, ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
-
+		this.exchange = MockServerWebExchange.builder(MockServerHttpRequest.get("/")).session(this.session).build();
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 	}
 
 
 	@Test
-	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
-		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
+	public void supportsParameter() {
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0))).isTrue();
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4))).isFalse();
 	}
 
 	@Test
-	public void resolve() throws Exception {
+	public void resolve() {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@Test
-	public void resolveWithName() throws Exception {
+	public void resolveWithName() {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
-		when(this.session.getAttribute("specialFoo")).thenReturn(foo);
+		given(this.session.getAttribute("specialFoo")).willReturn(foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@Test
-	public void resolveNotRequired() throws Exception {
+	public void resolveNotRequired() {
 		MethodParameter param = initMethodParameter(2);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertNull(mono.block());
+		assertThat(mono.block()).isNull();
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void resolveOptional() throws Exception {
+	public void resolveOptional() {
 		MethodParameter param = initMethodParameter(3);
 		Optional<Object> actual = (Optional<Object>) this.resolver
 				.resolveArgument(param, new BindingContext(), this.exchange).block();
 
-		assertNotNull(actual);
-		assertFalse(actual.isPresent());
+		assertThat(actual).isNotNull();
+		assertThat(actual.isPresent()).isFalse();
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
 		BindingContext bindingContext = new BindingContext(initializer);
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		actual = (Optional<Object>) this.resolver.resolveArgument(param, bindingContext, this.exchange).block();
 
-		assertNotNull(actual);
-		assertTrue(actual.isPresent());
-		assertSame(foo, actual.get());
+		assertThat(actual).isNotNull();
+		assertThat(actual.isPresent()).isTrue();
+		assertThat(actual.get()).isSameAs(foo);
 	}
 
 
 	private MethodParameter initMethodParameter(int parameterIndex) {
 		MethodParameter param = new SynthesizingMethodParameter(this.handleMethod, parameterIndex);
 		param.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(param, this.resolver.getClass());
-		return param;
+		return param.withContainingClass(this.resolver.getClass());
 	}
 
 

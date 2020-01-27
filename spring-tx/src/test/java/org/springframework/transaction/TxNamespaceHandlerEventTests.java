@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,18 @@
 
 package org.springframework.transaction;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.beans.CollectingReaderEventListener;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Torsten Juergeleit
@@ -40,7 +40,7 @@ public class TxNamespaceHandlerEventTests {
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);
@@ -50,7 +50,7 @@ public class TxNamespaceHandlerEventTests {
 	@Test
 	public void componentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("txAdvice");
-		assertThat(component, instanceOf(BeanComponentDefinition.class));
+		assertThat(component).isInstanceOf(BeanComponentDefinition.class);
 	}
 
 }

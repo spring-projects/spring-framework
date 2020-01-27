@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -40,105 +40,165 @@ import org.springframework.util.Assert;
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the type of element signaled to the {@link Subscriber}
  */
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogDelegateFactory#getHiddenLog(Class)
+	 * @see AbstractListenerReadPublisher#rsReadLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 * @see WriteResultPublisher#rsWriteResultLogger
+	 */
+	protected static final Log rsWriteLogger = LogDelegateFactory.getHiddenLog(AbstractListenerWriteProcessor.class);
 
-	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
 	@Nullable
-	protected volatile T currentData;
-
-	private volatile boolean subscriberCompleted;
-
-	@Nullable
 	private Subscription subscription;
 
+	@Nullable
+	private volatile T currentData;
 
-	// Subscriber implementation...
+	/* Indicates "onComplete" was received during the (last) write. */
+	private volatile boolean subscriberCompleted;
+
+	/**
+	 * Indicates we're waiting for one last isReady-onWritePossible cycle
+	 * after "onComplete" because some Servlet containers expect this to take
+	 * place prior to calling AsyncContext.complete().
+	 * See https://github.com/eclipse-ee4j/servlet-api/issues/273
+	 */
+	private volatile boolean readyToCompleteAfterLastWrite;
+
+	private final WriteResultPublisher resultPublisher;
+
+	private final String logPrefix;
+
+
+	public AbstractListenerWriteProcessor() {
+		this("");
+	}
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public AbstractListenerWriteProcessor(String logPrefix) {
+		this.logPrefix = logPrefix;
+		this.resultPublisher = new WriteResultPublisher(logPrefix);
+	}
+
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public String getLogPrefix() {
+		return this.logPrefix;
+	}
+
+
+	// Subscriber methods and async I/O notification methods...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onSubscribe: " + subscription);
-		}
 		this.state.get().onSubscribe(this, subscription);
 	}
 
 	@Override
 	public final void onNext(T data) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onNext: " + data);
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Item to write");
 		}
 		this.state.get().onNext(this, data);
 	}
 
+	/**
+	 * Error signal from the upstream, write Publisher. This is also used by
+	 * sub-classes to delegate error notifications from the container.
+	 */
 	@Override
-	public final void onError(Throwable t) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onError: " + t);
+	public final void onError(Throwable ex) {
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Write source error: " + ex);
 		}
-		this.state.get().onError(this, t);
+		this.state.get().onError(this, ex);
 	}
 
+	/**
+	 * Completion signal from the upstream, write Publisher. This is also used
+	 * by sub-classes to delegate completion notifications from the container.
+	 */
 	@Override
 	public final void onComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onComplete");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "No more items to write");
 		}
 		this.state.get().onComplete(this);
 	}
 
-
-	// Publisher implementation...
-
-	@Override
-	public final void subscribe(Subscriber<? super Void> subscriber) {
-		this.resultPublisher.subscribe(subscriber);
-	}
-
-
-	// Listener delegation methods...
-
 	/**
-	 * Listeners can call this to notify when writing is possible.
+	 * Invoked when writing is possible, either in the same thread after a check
+	 * via {@link #isWritePossible()}, or as a callback from the underlying
+	 * container.
 	 */
 	public final void onWritePossible() {
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "onWritePossible");
+		}
 		this.state.get().onWritePossible(this);
 	}
 
 	/**
-	 * Listeners can call this method to cancel further writing.
+	 * Invoked during an error or completion callback from the underlying
+	 * container to cancel the upstream subscription.
 	 */
 	public void cancel() {
+		rsWriteLogger.trace(getLogPrefix() + "Cancellation");
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
 	}
 
+	// Publisher implementation for result notifications...
+
+	@Override
+	public final void subscribe(Subscriber<? super Void> subscriber) {
+		// Technically, cancellation from the result subscriber should be propagated
+		// to the upstream subscription. In practice, HttpHandler server adapters
+		// don't have a reason to cancel the result subscription.
+		this.resultPublisher.subscribe(subscriber);
+	}
+
+
+	// Write API methods to be implemented or template methods to override...
 
 	/**
-	 * Called when a data item is received via {@link Subscriber#onNext(Object)}
+	 * Whether the given data item has any content to write.
+	 * If false the item is not written.
 	 */
-	protected void receiveData(T data) {
-		if (this.currentData != null) {
-			throw new IllegalStateException("Current data not processed yet: " + this.currentData);
+	protected abstract boolean isDataEmpty(T data);
+
+	/**
+	 * Template method invoked after a data item to write is received via
+	 * {@link Subscriber#onNext(Object)}. The default implementation saves the
+	 * data item for writing once that is possible.
+	 */
+	protected void dataReceived(T data) {
+		T prev = this.currentData;
+		if (prev != null) {
+			// This shouldn't happen:
+			//   1. dataReceived can only be called from REQUESTED state
+			//   2. currentData is cleared before requesting
+			discardData(data);
+			cancel();
+			onError(new IllegalStateException("Received new data while current not processed yet."));
 		}
 		this.currentData = data;
 	}
-
-	/**
-	 * Called when the current received data item can be released.
-	 */
-	protected abstract void releaseData();
-
-	/**
-	 * Whether the given data item contains any actual data to be processed.
-	 */
-	protected abstract boolean isDataEmpty(T data);
 
 	/**
 	 * Whether writing is possible.
@@ -146,71 +206,119 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected abstract boolean isWritePossible();
 
 	/**
-	 * Writes the given data to the output.
-	 * @param data the data to write
-	 * @return whether the data was fully written ({@code true})
-	 * and new data can be requested, or otherwise ({@code false})
+	 * Write the given item.
+	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing any
+	 * data buffer associated with the item, once fully written, if pooled
+	 * buffers apply to the underlying container.
+	 * @param data the item to write
+	 * @return whether the current data item was written and another one
+	 * requested ({@code true}), or or otherwise if more writes are required.
 	 */
 	protected abstract boolean write(T data) throws IOException;
 
 	/**
-	 * Suspend writing. Defaults to no-op.
+	 * Invoked after the current data has been written and before requesting
+	 * the next item from the upstream, write Publisher.
+	 * <p>The default implementation is a no-op.
+	 * @deprecated originally introduced for Undertow to stop write notifications
+	 * when no data is available, but deprecated as of as of 5.0.6 since constant
+	 * switching on every requested item causes a significant slowdown.
 	 */
-	protected void suspendWriting() {
+	@Deprecated
+	protected void writingPaused() {
 	}
 
 	/**
-	 * Invoked when writing is complete. Defaults to no-op.
+	 * Invoked after onComplete or onError notification.
+	 * <p>The default implementation is a no-op.
 	 */
 	protected void writingComplete() {
 	}
 
 	/**
-	 * Invoked when an error happens while writing.
-	 * <p>Defaults to no-op. Servlet 3.1 based implementations will receive
-	 * {@code javax.servlet.WriteListener#onError(Throwable)} event.
+	 * Invoked when an I/O error occurs during a write. Sub-classes may choose
+	 * to ignore this if they know the underlying API will provide an error
+	 * notification in a container thread.
+	 * <p>Defaults to no-op.
 	 */
 	protected void writingFailed(Throwable ex) {
 	}
 
+	/**
+	 * Invoked after any error (either from the upstream write Publisher, or
+	 * from I/O operations to the underlying server) and cancellation
+	 * to discard in-flight data that was in
+	 * the process of being written when the error took place.
+	 * @param data the data to be released
+	 * @since 5.0.11
+	 */
+	protected abstract void discardData(T data);
 
+
+	// Private methods for use from State's...
 
 	private boolean changeState(State oldState, State newState) {
-		return this.state.compareAndSet(oldState, newState);
+		boolean result = this.state.compareAndSet(oldState, newState);
+		if (result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + oldState + " -> " + newState);
+		}
+		return result;
+	}
+
+	private void changeStateToReceived(State oldState) {
+		if (changeState(oldState, State.RECEIVED)) {
+			writeIfPossible();
+		}
+	}
+
+	private void changeStateToComplete(State oldState) {
+		if (changeState(oldState, State.COMPLETED)) {
+			discardCurrentData();
+			writingComplete();
+			this.resultPublisher.publishComplete();
+		}
+		else {
+			this.state.get().onComplete(this);
+		}
 	}
 
 	private void writeIfPossible() {
-		if (isWritePossible()) {
+		boolean result = isWritePossible();
+		if (!result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "isWritePossible: false");
+		}
+		if (result) {
 			onWritePossible();
+		}
+	}
+
+	private void discardCurrentData() {
+		T data = this.currentData;
+		this.currentData = null;
+		if (data != null) {
+			discardData(data);
 		}
 	}
 
 
 	/**
-	 * Represents a state for the {@link Subscriber} to be in. The following figure
-	 * indicate the four different states that exist, and the relationships between them.
+	 * Represents a state for the {@link Processor} to be in.
 	 *
-	 * <pre>
-	 *       UNSUBSCRIBED
-	 *        |
-	 *        v
-	 * REQUESTED -------------------> RECEIVED
-	 *         ^                      ^
-	 *         |                      |
-	 *         --------- WRITING <-----
-	 *                      |
-	 *                      v
-	 *                  COMPLETED
+	 * <p><pre>
+	 *        UNSUBSCRIBED
+	 *             |
+	 *             v
+	 *   +--- REQUESTED -------------> RECEIVED ---+
+	 *   |        ^                       ^        |
+	 *   |        |                       |        |
+	 *   |        + ------ WRITING <------+        |
+	 *   |                    |                    |
+	 *   |                    v                    |
+	 *   +--------------> COMPLETED <--------------+
 	 * </pre>
-	 * Refer to the individual states for more information.
 	 */
 	private enum State {
 
-		/**
-		 * The initial unsubscribed state. Will respond to {@code onSubscribe} by
-		 * requesting 1 data from the subscription, and change state to {@link
-		 * #REQUESTED}.
-		 */
 		UNSUBSCRIBED {
 			@Override
 			public <T> void onSubscribe(AbstractListenerWriteProcessor<T> processor, Subscription subscription) {
@@ -223,14 +331,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					super.onSubscribe(processor, subscription);
 				}
 			}
+
+			@Override
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
+				// This can happen on (very early) completion notification from container..
+				processor.changeStateToComplete(this);
+			}
 		},
 
-		/**
-		 * State that gets entered after a data has been
-		 * {@linkplain Subscription#request(long) requested}. Responds to {@code onNext}
-		 * by changing state to {@link #RECEIVED}, and responds to {@code onComplete} by
-		 * changing state to {@link #COMPLETED}.
-		 */
 		REQUESTED {
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
@@ -239,55 +347,44 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					processor.subscription.request(1);
 				}
 				else {
-					processor.receiveData(data);
-					if (processor.changeState(this, RECEIVED)) {
-						processor.writeIfPossible();
-					}
+					processor.dataReceived(data);
+					processor.changeStateToReceived(this);
 				}
 			}
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				if (processor.changeState(this, COMPLETED)) {
-					processor.writingComplete();
-					processor.resultPublisher.publishComplete();
-				}
+				processor.readyToCompleteAfterLastWrite = true;
+				processor.changeStateToReceived(this);
 			}
 		},
 
-		/**
-		 * State that gets entered after a data has been
-		 * {@linkplain Subscriber#onNext(Object) received}. Responds to
-		 * {@code onWritePossible} by writing the current data and changes
-		 * the state to {@link #WRITING}. If it can be written completely,
-		 * changes the state to either {@link #REQUESTED} if the subscription
-		 * has not been completed; or {@link #COMPLETED} if it has. If it cannot
-		 * be written completely the state will be changed to {@code #RECEIVED}.
-		 */
 		RECEIVED {
+			@SuppressWarnings("deprecation")
 			@Override
 			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
-				if (processor.changeState(this, WRITING)) {
+				if (processor.readyToCompleteAfterLastWrite) {
+					processor.changeStateToComplete(RECEIVED);
+				}
+				else if (processor.changeState(this, WRITING)) {
 					T data = processor.currentData;
 					Assert.state(data != null, "No data");
 					try {
-						boolean writeCompleted = processor.write(data);
-						if (writeCompleted) {
-							processor.releaseData();
-							if (!processor.subscriberCompleted) {
-								processor.changeState(WRITING, REQUESTED);
-								processor.suspendWriting();
-								Assert.state(processor.subscription != null, "No subscription");
-								processor.subscription.request(1);
-							}
-							else {
-								processor.changeState(WRITING, COMPLETED);
-								processor.writingComplete();
-								processor.resultPublisher.publishComplete();
+						if (processor.write(data)) {
+							if (processor.changeState(WRITING, REQUESTED)) {
+								processor.currentData = null;
+								if (processor.subscriberCompleted) {
+									processor.readyToCompleteAfterLastWrite = true;
+									processor.changeStateToReceived(REQUESTED);
+								}
+								else {
+									processor.writingPaused();
+									Assert.state(processor.subscription != null, "No subscription");
+									processor.subscription.request(1);
+								}
 							}
 						}
 						else {
-							processor.changeState(WRITING, RECEIVED);
-							processor.writeIfPossible();
+							processor.changeStateToReceived(WRITING);
 						}
 					}
 					catch (IOException ex) {
@@ -295,26 +392,28 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					}
 				}
 			}
+
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 
-		/**
-		 * State that gets entered after a writing of the current data has been
-		 * {@code onWritePossible started}.
-		 */
 		WRITING {
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+				// A competing write might have completed very quickly
+				if (processor.state.get().equals(State.REQUESTED)) {
+					processor.changeStateToComplete(State.REQUESTED);
+				}
 			}
 		},
 
-		/**
-		 * The terminal completed state. Does not respond to any events.
-		 */
 		COMPLETED {
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
@@ -335,13 +434,19 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		}
 
 		public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
-			throw new IllegalStateException(toString());
+			processor.discardData(data);
+			processor.cancel();
+			processor.onError(new IllegalStateException("Illegal onNext without demand"));
 		}
 
 		public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
+				processor.discardCurrentData();
 				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
+			}
+			else {
+				processor.state.get().onError(processor, ex);
 			}
 		}
 

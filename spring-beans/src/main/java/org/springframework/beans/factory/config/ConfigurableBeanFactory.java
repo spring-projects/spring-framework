@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,15 +51,15 @@ import org.springframework.util.StringValueResolver;
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
 
 	/**
-	 * Scope identifier for the standard singleton scope: "singleton".
-	 * Custom scopes can be added via {@code registerScope}.
+	 * Scope identifier for the standard singleton scope: {@value}.
+	 * <p>Custom scopes can be added via {@code registerScope}.
 	 * @see #registerScope
 	 */
 	String SCOPE_SINGLETON = "singleton";
 
 	/**
-	 * Scope identifier for the standard prototype scope: "prototype".
-	 * Custom scopes can be added via {@code registerScope}.
+	 * Scope identifier for the standard prototype scope: {@value}.
+	 * <p>Custom scopes can be added via {@code registerScope}.
 	 * @see #registerScope
 	 */
 	String SCOPE_PROTOTYPE = "prototype";
@@ -89,7 +89,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
 
 	/**
-	 * Return this factory's class loader for loading bean classes.
+	 * Return this factory's class loader for loading bean classes
+	 * (only {@code null} if even the system ClassLoader isn't accessible).
+	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
 	@Nullable
 	ClassLoader getBeanClassLoader();
@@ -192,9 +194,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * bean property values, constructor argument values, etc.
 	 * <p>This will override the default PropertyEditor mechanism and hence make
 	 * any custom editors or custom editor registrars irrelevant.
+	 * @since 2.5
 	 * @see #addPropertyEditorRegistrar
 	 * @see #registerCustomEditor
-	 * @since 2.5
 	 */
 	void setTypeConverter(TypeConverter typeConverter);
 

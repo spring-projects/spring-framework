@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.support;
 
 import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.support.DaoSupport;
@@ -96,7 +97,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 */
 	@Nullable
 	public final JdbcTemplate getJdbcTemplate() {
-	  return this.jdbcTemplate;
+		return this.jdbcTemplate;
 	}
 
 	/**
@@ -144,7 +145,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	/**
 	 * Close the given JDBC Connection, created via this DAO's DataSource,
 	 * if it isn't bound to the thread.
-	 * @param con Connection to close
+	 * @param con the Connection to close
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	protected final void releaseConnection(Connection con) {

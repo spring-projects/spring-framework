@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.util.List;
@@ -24,11 +25,10 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
-
 /**
  * Default implementation of {@link WebSessionManager} delegating to a
  * {@link WebSessionIdResolver} for session id resolution and to a
- * {@link WebSessionStore}
+ * {@link WebSessionStore}.
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
@@ -47,7 +47,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	 * @param sessionIdResolver the resolver to use
 	 */
 	public void setSessionIdResolver(WebSessionIdResolver sessionIdResolver) {
-		Assert.notNull(sessionIdResolver, "WebSessionIdResolver is required.");
+		Assert.notNull(sessionIdResolver, "WebSessionIdResolver is required");
 		this.sessionIdResolver = sessionIdResolver;
 	}
 
@@ -64,7 +64,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	 * @param sessionStore the persistence strategy to use
 	 */
 	public void setSessionStore(WebSessionStore sessionStore) {
-		Assert.notNull(sessionStore, "WebSessionStore is required.");
+		Assert.notNull(sessionStore, "WebSessionStore is required");
 		this.sessionStore = sessionStore;
 	}
 
@@ -90,7 +90,6 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
-
 		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
 
 		if (!session.isStarted() || session.isExpired()) {
@@ -107,4 +106,5 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 		return session.save();
 	}
+
 }

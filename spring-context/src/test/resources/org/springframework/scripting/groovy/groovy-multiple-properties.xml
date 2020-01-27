@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
 
 	<lang:groovy id="bean" script-source="classpath:org/springframework/scripting/groovy/ScriptBean.groovy" autowire="byType">
 		<lang:property name="name" value="Sophie Marceau"/>
@@ -19,6 +19,6 @@
 		<lang:property name="age" value="31"/>
 	</lang:groovy>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

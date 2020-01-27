@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,18 @@
 
 package org.springframework.web.servlet.mvc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -47,8 +45,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("index", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("index");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -57,8 +55,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("index", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("index");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -67,8 +65,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index;a=A;b=B");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("index", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("index");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -79,8 +77,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("mypre_index_mysuf", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("mypre_index_mysuf");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -90,8 +88,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("mypre_index", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("mypre_index");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -101,8 +99,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("index_mysuf", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("index_mysuf");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -111,8 +109,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("docs/cvs/commit", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -122,8 +120,8 @@ public class UrlFilenameViewControllerTests {
 		exposePathInMapping(request, "/docs/**");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("cvs/commit", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("cvs/commit");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -133,8 +131,8 @@ public class UrlFilenameViewControllerTests {
 		exposePathInMapping(request, "/docs/cvs/commit.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("docs/cvs/commit", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -144,29 +142,29 @@ public class UrlFilenameViewControllerTests {
 		request.setContextPath("/myapp");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("docs/cvs/commit", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
 	public void settingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix(null);
-		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getPrefix());
-		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getPrefix());
+		assertThat(ctrl.getPrefix()).as("For setPrefix(..) with null, the empty string must be used instead.").isNotNull();
+		assertThat(ctrl.getPrefix()).as("For setPrefix(..) with null, the empty string must be used instead.").isEqualTo("");
 	}
 
 	@Test
 	public void settingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setSuffix(null);
-		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getSuffix());
-		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getSuffix());
+		assertThat(ctrl.getSuffix()).as("For setPrefix(..) with null, the empty string must be used instead.").isNotNull();
+		assertThat(ctrl.getSuffix()).as("For setPrefix(..) with null, the empty string must be used instead.").isEqualTo("");
 	}
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2789
 	 */
 	@Test
 	public void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
@@ -174,8 +172,8 @@ public class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("products/view", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
+		assertThat(mv.getViewName()).isEqualTo("products/view");
+		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -185,9 +183,9 @@ public class UrlFilenameViewControllerTests {
 		request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("index", mv.getViewName());
-		assertEquals(1, mv.getModel().size());
-		assertEquals("value", mv.getModel().get("name"));
+		assertThat(mv.getViewName()).isEqualTo("index");
+		assertThat(mv.getModel().size()).isEqualTo(1);
+		assertThat(mv.getModel().get("name")).isEqualTo("value");
 	}
 
 	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {

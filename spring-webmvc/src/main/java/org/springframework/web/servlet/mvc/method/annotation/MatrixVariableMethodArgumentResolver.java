@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -122,12 +123,11 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing matrix variable '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		throw new MissingMatrixVariableException(name, parameter);
 	}
 
 
-	private static class MatrixVariableNamedValueInfo extends NamedValueInfo {
+	private static final class MatrixVariableNamedValueInfo extends NamedValueInfo {
 
 		private MatrixVariableNamedValueInfo(MatrixVariable annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

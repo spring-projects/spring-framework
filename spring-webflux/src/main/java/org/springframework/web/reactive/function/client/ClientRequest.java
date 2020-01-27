@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 
@@ -45,6 +44,16 @@ import org.springframework.web.reactive.function.BodyInserter;
  * @since 5.0
  */
 public interface ClientRequest {
+
+	/**
+	 * Name of {@link #attributes() attribute} whose value can be used to
+	 * correlate log messages for this request. Use {@link #logPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #logPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ClientRequest.class.getName() + ".LOG_ID";
+
 
 	/**
 	 * Return the HTTP method.
@@ -77,15 +86,8 @@ public interface ClientRequest {
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
-
 
 	/**
 	 * Return the attributes of this request.
@@ -93,8 +95,17 @@ public interface ClientRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Writes this request to the given {@link ClientHttpRequest}.
-	 *
+	 * Return a log message prefix to use to correlate messages for this request.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} surrounded with "[" and "]".
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String logPrefix();
+
+	/**
+	 * Write this request to the given {@link ClientHttpRequest}.
 	 * @param request the client http request to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
@@ -110,21 +121,28 @@ public interface ClientRequest {
 	 * @return the created builder
 	 */
 	static Builder from(ClientRequest other) {
-		Assert.notNull(other, "'other' must not be null");
-		return new DefaultClientRequestBuilder(other.method(), other.url())
-				.headers(headers -> headers.addAll(other.headers()))
-				.cookies(cookies -> cookies.addAll(other.cookies()))
-				.attributes(attributes -> attributes.putAll(other.attributes()))
-				.body(other.body());
+		return new DefaultClientRequestBuilder(other);
 	}
 
 	/**
 	 * Create a builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url the url (as a URI instance)
+	 * @return the created builder
+	 * @deprecated in favor of {@link #create(HttpMethod, URI)}
+	 */
+	@Deprecated
+	static Builder method(HttpMethod method, URI url) {
+		return new DefaultClientRequestBuilder(method, url);
+	}
+
+	/**
+	 * Create a request builder with the given method and url.
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param url the url (as a URI instance)
 	 * @return the created builder
 	 */
-	static Builder method(HttpMethod method, URI url) {
+	static Builder create(HttpMethod method, URI url) {
 		return new DefaultClientRequestBuilder(method, url);
 	}
 
@@ -214,8 +232,7 @@ public interface ClientRequest {
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built request
 		 */
-		<S, P extends Publisher<S>> Builder body(P publisher,
-				ParameterizedTypeReference<S> typeReference);
+		<S, P extends Publisher<S>> Builder body(P publisher, ParameterizedTypeReference<S> typeReference);
 
 		/**
 		 * Set the attribute with the given name to the given value.
@@ -235,8 +252,7 @@ public interface ClientRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Builds the request entity with no body.
-		 * @return the request entity
+		 * Build the request.
 		 */
 		ClientRequest build();
 	}

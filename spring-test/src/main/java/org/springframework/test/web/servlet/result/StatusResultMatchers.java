@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 /**
  * Factory for assertions on the response status.
@@ -49,15 +49,17 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code with the given Hamcrest {@link Matcher}.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
-	public ResultMatcher is(final Matcher<Integer> matcher) {
+	public ResultMatcher is(Matcher<Integer> matcher) {
 		return result -> assertThat("Response status", result.getResponse().getStatus(), matcher);
 	}
 
 	/**
 	 * Assert the response status code is equal to an integer value.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
-	public ResultMatcher is(final int status) {
+	public ResultMatcher is(int status) {
 		return result -> assertEquals("Response status", status, result.getResponse().getStatus());
 	}
 
@@ -110,14 +112,14 @@ public class StatusResultMatchers {
 	/**
 	 * Assert the Servlet response error message with the given Hamcrest {@link Matcher}.
 	 */
-	public ResultMatcher reason(final Matcher<? super String> matcher) {
+	public ResultMatcher reason(Matcher<? super String> matcher) {
 		return result -> assertThat("Response status reason", result.getResponse().getErrorMessage(), matcher);
 	}
 
 	/**
 	 * Assert the Servlet response error message.
 	 */
-	public ResultMatcher reason(final String reason) {
+	public ResultMatcher reason(String reason) {
 		return result -> assertEquals("Response status reason", reason, result.getResponse().getErrorMessage());
 	}
 
@@ -443,31 +445,31 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	  * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
-	  * @deprecated matching the deprecation of {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE}
-	  */
-	 @Deprecated
-	 public ResultMatcher isInsufficientSpaceOnResource() {
-		 return matcher(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
-	 }
+	 * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
+	 * @deprecated matching the deprecation of {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE}
+	 */
+	@Deprecated
+	public ResultMatcher isInsufficientSpaceOnResource() {
+		return matcher(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
+	}
 
-	 /**
-	  * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
-	  * @deprecated matching the deprecation of {@code HttpStatus.METHOD_FAILURE}
-	  */
-	 @Deprecated
-	 public ResultMatcher isMethodFailure() {
-		 return matcher(HttpStatus.METHOD_FAILURE);
-	 }
+	/**
+	 * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
+	 * @deprecated matching the deprecation of {@code HttpStatus.METHOD_FAILURE}
+	 */
+	@Deprecated
+	public ResultMatcher isMethodFailure() {
+		return matcher(HttpStatus.METHOD_FAILURE);
+	}
 
-	 /**
-	  * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
-	  * @deprecated matching the deprecation of {@code HttpStatus.DESTINATION_LOCKED}
-	  */
-	 @Deprecated
-	 public ResultMatcher isDestinationLocked() {
-		 return matcher(HttpStatus.DESTINATION_LOCKED);
-	 }
+	/**
+	 * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
+	 * @deprecated matching the deprecation of {@code HttpStatus.DESTINATION_LOCKED}
+	 */
+	@Deprecated
+	public ResultMatcher isDestinationLocked() {
+		return matcher(HttpStatus.DESTINATION_LOCKED);
+	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_ENTITY} (422).
@@ -488,6 +490,14 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher isFailedDependency() {
 		return matcher(HttpStatus.FAILED_DEPENDENCY);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.TOO_EARLY} (425).
+	 * @since 5.2
+	 */
+	public ResultMatcher isTooEarly() {
+		return matcher(HttpStatus.valueOf(425));
 	}
 
 	/**
@@ -611,9 +621,9 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Match the expected response status to that of the HttpServletResponse
+	 * Match the expected response status to that of the HttpServletResponse.
 	 */
-	private ResultMatcher matcher(final HttpStatus status) {
+	private ResultMatcher matcher(HttpStatus status) {
 		return result -> assertEquals("Status", status.value(), result.getResponse().getStatus());
 	}
 

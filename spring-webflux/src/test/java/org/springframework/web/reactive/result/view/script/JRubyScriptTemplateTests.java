@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,25 +19,25 @@ package org.springframework.web.reactive.result.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for ERB templates running on JRuby.
  *
  * @author Sebastien Deleuze
  */
-@Ignore("JRuby not compatible with JDK 9 yet")
+@Disabled("JRuby not compatible with JDK 9 yet")
 public class JRubyScriptTemplateTests {
 
 	@Test
@@ -47,8 +47,7 @@ public class JRubyScriptTemplateTests {
 		model.put("body", "This is the body");
 		String url = "org/springframework/web/reactive/result/view/script/jruby/template.erb";
 		MockServerHttpResponse response = renderViewWithModel(url, model);
-		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
-				response.getBodyAsString().block());
+		assertThat(response.getBodyAsString().block()).isEqualTo("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>");
 	}
 
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -42,8 +42,10 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.TestPerson;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -60,80 +62,54 @@ public class EvaluationTests extends AbstractExpressionTests {
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression expression = parser.parseExpression("list[0]");
+		Expression e = parser.parseExpression("list[0]");
 		TestClass testClass = new TestClass();
-		Object o = null;
-		o = expression.getValue(new StandardEvaluationContext(testClass));
-		assertEquals("", o);
+
+		Object o = e.getValue(new StandardEvaluationContext(testClass));
+		assertThat(o).isEqualTo("");
 		o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
-		assertEquals("", o);
-		assertEquals(4, testClass.list.size());
-		try {
-			o = parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass));
-			fail();
-		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			// success!
-		}
+		assertThat(o).isEqualTo("");
+		assertThat(testClass.list.size()).isEqualTo(4);
+
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass)));
+
 		o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
-		assertEquals("", o);
-		assertEquals(4, testClass.getFoo().size());
+		assertThat(o).isEqualTo("");
+		assertThat(testClass.getFoo().size()).isEqualTo(4);
 	}
 
-	@Test(expected = SpelEvaluationException.class)
-	public void testCreateMapsOnAttemptToIndexNull01() throws Exception {
+	@Test
+	public void testCreateMapsOnAttemptToIndexNull01() {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Object o = null;
-		o = parser.parseExpression("map['a']").getValue(ctx);
-		assertNull(o);
-		o = parser.parseExpression("map").getValue(ctx);
-		assertNotNull(o);
 
-		o = parser.parseExpression("map2['a']").getValue(ctx);
+		Object o = parser.parseExpression("map['a']").getValue(ctx);
+		assertThat(o).isNull();
+		o = parser.parseExpression("map").getValue(ctx);
+		assertThat(o).isNotNull();
+
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("map2['a']").getValue(ctx));
 		// map2 should be null, there is no setter
 	}
 
 	// wibble2 should be null (cannot be initialized dynamically), there is no setter
-	@Test(expected = SpelEvaluationException.class)
-	public void testCreateObjectsOnAttemptToReferenceNull() throws Exception {
+	@Test
+	public void testCreateObjectsOnAttemptToReferenceNull() {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Object o = null;
-		o = parser.parseExpression("wibble.bar").getValue(ctx);
-		assertEquals("hello", o);
+
+		Object o = parser.parseExpression("wibble.bar").getValue(ctx);
+		assertThat(o).isEqualTo("hello");
 		o = parser.parseExpression("wibble").getValue(ctx);
-		assertNotNull(o);
+		assertThat(o).isNotNull();
 
-		o = parser.parseExpression("wibble2.bar").getValue(ctx);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("wibble2.bar").getValue(ctx));
 	}
-
-
-	@SuppressWarnings("rawtypes")
-	static class TestClass {
-		public Foo wibble;
-		private Foo wibble2;
-		public Map map;
-		public Map<String, Integer> mapStringToInteger;
-		public List<String> list;
-		public List list2;
-		private Map map2;
-		private List<String> foo;
-
-		public Map getMap2() { return this.map2; }
-		public Foo getWibble2() { return this.wibble2; }
-		public List<String> getFoo() { return this.foo; }
-		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
-	}
-
-	public static class Foo {
-		public Foo() {}
-		public String bar = "hello";
-	}
-
 
 	@Test
 	public void testElvis01() {
@@ -213,7 +189,18 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testRelOperatorsMatches05() {
-		evaluate("27 matches '^.*2.*$'", true, Boolean.class); // conversion int>string
+		evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int>string
+	}
+
+	@Test  // SPR-16731
+	public void testMatchesWithPatternAccessThreshold() {
+		String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
+		String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches \'" + pattern + "\'";
+		Expression expr = parser.parseExpression(expression);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				expr::getValue)
+			.withCauseInstanceOf(IllegalStateException.class)
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FLAWED_PATTERN));
 	}
 
 	// mixing operators
@@ -228,7 +215,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		evaluate("name", "Nikola Tesla", String.class, false);
 		// not writable because (1) name is private (2) there is no setter, only a getter
 		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
-			"org.springframework.expression.spel.testresources.Inventor");
+				"org.springframework.expression.spel.testresources.Inventor");
 	}
 
 	@Test
@@ -239,17 +226,12 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testRogueTrailingDotCausesNPE_SPR6866() {
-		try {
-			new SpelExpressionParser().parseExpression("placeOfBirth.foo.");
-			fail("Should have failed to parse");
-		}
-		catch (ParseException e) {
-			e.printStackTrace();
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
-			assertEquals(SpelMessage.OOD, spe.getMessageCode());
-			assertEquals(16, spe.getPosition());
-		}
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseExpression("placeOfBirth.foo."))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OOD);
+				assertThat(ex.getPosition()).isEqualTo(16);
+			});
 	}
 
 	// nested properties
@@ -265,14 +247,12 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testPropertiesNested03() throws ParseException {
-		try {
-			new SpelExpressionParser().parseRaw("placeOfBirth.23");
-			fail();
-		}
-		catch (SpelParseException spe) {
-			assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
-			assertEquals("23", spe.getInserts()[0]);
-		}
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseRaw("placeOfBirth.23"))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
+				assertThat(ex.getInserts()[0]).isEqualTo("23");
+			});
 	}
 
 	// methods
@@ -298,19 +278,19 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testConstructorInvocation06() throws Exception {
+	public void testConstructorInvocation06() {
 		// repeated evaluation to drive use of cached executor
-		SpelExpression expr = (SpelExpression) parser.parseExpression("new String('wibble')");
-		String newString = expr.getValue(String.class);
-		assertEquals("wibble", newString);
-		newString = expr.getValue(String.class);
-		assertEquals("wibble", newString);
+		SpelExpression e = (SpelExpression) parser.parseExpression("new String('wibble')");
+		String newString = e.getValue(String.class);
+		assertThat(newString).isEqualTo("wibble");
+		newString = e.getValue(String.class);
+		assertThat(newString).isEqualTo("wibble");
 
 		// not writable
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertThat(e.isWritable(new StandardEvaluationContext())).isFalse();
 
 		// ast
-		assertEquals("new String('wibble')", expr.toStringAST());
+		assertThat(e.toStringAST()).isEqualTo("new String('wibble')");
 	}
 
 	// unary expressions
@@ -334,29 +314,34 @@ public class EvaluationTests extends AbstractExpressionTests {
 		evaluate("!false", "true", Boolean.class);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testUnaryNotWithNullValue() {
-		parser.parseExpression("!null").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("!null")::getValue);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testAndWithNullValueOnLeft() {
-		parser.parseExpression("null and true").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("null and true")::getValue);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testAndWithNullValueOnRight() {
-		parser.parseExpression("true and null").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("true and null")::getValue);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testOrWithNullValueOnLeft() {
-		parser.parseExpression("null or false").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("null or false")::getValue);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testOrWithNullValueOnRight() {
-		parser.parseExpression("false or null").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("false or null")::getValue);
 	}
 
 	// assignment
@@ -382,9 +367,9 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testTernaryOperator04() throws Exception {
-		Expression expr = parser.parseExpression("1>2?3:4");
-		assertFalse(expr.isWritable(eContext));
+	public void testTernaryOperator04() {
+		Expression e = parser.parseExpression("1>2?3:4");
+		assertThat(e.isWritable(context)).isFalse();
 	}
 
 	@Test
@@ -395,9 +380,10 @@ public class EvaluationTests extends AbstractExpressionTests {
 		evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testTernaryOperatorWithNullValue() {
-		parser.parseExpression("null ? 0 : 1").getValue();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				parser.parseExpression("null ? 0 : 1")::getValue);
 	}
 
 	@Test
@@ -408,7 +394,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 	@Test
 	public void ctorCallWithRootReferenceThroughParameter() {
 		evaluate("new org.springframework.expression.spel.testresources.PlaceOfBirth(inventions[0].toString()).city",
-			"Telephone repeater", String.class);
+				"Telephone repeater", String.class);
 	}
 
 	@Test
@@ -429,7 +415,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 	@Test
 	public void testIndexerError() {
 		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
-			SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+				SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test
@@ -460,43 +446,43 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testTypeReferencesAndQualifiedIdentifierCaching() throws Exception {
-		SpelExpression expr = (SpelExpression) parser.parseExpression("T(java.lang.String)");
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		assertEquals("T(java.lang.String)", expr.toStringAST());
-		assertEquals(String.class, expr.getValue(Class.class));
+	public void testTypeReferencesAndQualifiedIdentifierCaching() {
+		SpelExpression e = (SpelExpression) parser.parseExpression("T(java.lang.String)");
+		assertThat(e.isWritable(new StandardEvaluationContext())).isFalse();
+		assertThat(e.toStringAST()).isEqualTo("T(java.lang.String)");
+		assertThat(e.getValue(Class.class)).isEqualTo(String.class);
 		// use cached QualifiedIdentifier:
-		assertEquals("T(java.lang.String)", expr.toStringAST());
-		assertEquals(String.class, expr.getValue(Class.class));
+		assertThat(e.toStringAST()).isEqualTo("T(java.lang.String)");
+		assertThat(e.getValue(Class.class)).isEqualTo(String.class);
 	}
 
 	@Test
-	public void operatorVariants() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("#a < #b");
+	public void operatorVariants() {
+		SpelExpression e = (SpelExpression)parser.parseExpression("#a < #b");
 		EvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("a", (short)3);
-		ctx.setVariable("b", (short)6);
-		assertTrue(expr.getValue(ctx, Boolean.class));
-		ctx.setVariable("b", (byte)6);
-		assertTrue(expr.getValue(ctx, Boolean.class));
-		ctx.setVariable("a", (byte)9);
-		ctx.setVariable("b", (byte)6);
-		assertFalse(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (short) 3);
+		ctx.setVariable("b", (short) 6);
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
+		ctx.setVariable("b", (byte) 6);
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
+		ctx.setVariable("a", (byte) 9);
+		ctx.setVariable("b", (byte) 6);
+		assertThat(e.getValue(ctx, Boolean.class)).isFalse();
 		ctx.setVariable("a", 10L);
-		ctx.setVariable("b", (short)30);
-		assertTrue(expr.getValue(ctx, Boolean.class));
-		ctx.setVariable("a", (byte)3);
-		ctx.setVariable("b", (short)30);
-		assertTrue(expr.getValue(ctx, Boolean.class));
-		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", (short) 30);
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
+		ctx.setVariable("a", (byte) 3);
+		ctx.setVariable("b", (short) 30);
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
+		ctx.setVariable("a", (byte) 3);
 		ctx.setVariable("b", 30L);
-		assertTrue(expr.getValue(ctx, Boolean.class));
-		ctx.setVariable("a", (byte)3);
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
+		ctx.setVariable("a", (byte) 3);
 		ctx.setVariable("b", 30f);
-		assertTrue(expr.getValue(ctx, Boolean.class));
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
 		ctx.setVariable("a", new BigInteger("10"));
 		ctx.setVariable("b", new BigInteger("20"));
-		assertTrue(expr.getValue(ctx, Boolean.class));
+		assertThat(e.getValue(ctx, Boolean.class)).isTrue();
 	}
 
 	@Test
@@ -531,45 +517,40 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testAdvancedNumerics() throws Exception {
+	public void testAdvancedNumerics() {
 		int twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Integer.class);
-		assertEquals(24, twentyFour);
+		assertThat(twentyFour).isEqualTo(24);
 		double one = parser.parseExpression("8.0 / 5e0 % 2").getValue(Double.class);
-		assertEquals(1.6d, one, 0);
+		assertThat((float) one).isCloseTo((float) 1.6d, within((float) 0d));
 		int o = parser.parseExpression("8.0 / 5e0 % 2").getValue(Integer.class);
-		assertEquals(1, o);
+		assertThat(o).isEqualTo(1);
 		int sixteen = parser.parseExpression("-2 ^ 4").getValue(Integer.class);
-		assertEquals(16, sixteen);
+		assertThat(sixteen).isEqualTo(16);
 		int minusFortyFive = parser.parseExpression("1+2-3*8^2/2/2").getValue(Integer.class);
-		assertEquals(-45, minusFortyFive);
+		assertThat(minusFortyFive).isEqualTo(-45);
 	}
 
 	@Test
-	public void testComparison() throws Exception {
+	public void testComparison() {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
-		boolean trueValue = parser.parseExpression("T(java.util.Date) == Birthdate.Class").getValue(context,
-			Boolean.class);
-		assertTrue(trueValue);
+		boolean trueValue = parser.parseExpression("T(java.util.Date) == Birthdate.Class").getValue(
+				context, Boolean.class);
+		assertThat(trueValue).isTrue();
 	}
 
 	@Test
-	public void testResolvingList() throws Exception {
+	public void testResolvingList() {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
-		try {
-			assertFalse(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
-			fail("should have failed to find List");
-		}
-		catch (EvaluationException ee) {
-			// success - List not found
-		}
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
 		((StandardTypeLocator) context.getTypeLocator()).registerImport("java.util");
-		assertTrue(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
+		assertThat(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class)).isTrue();
 	}
 
 	@Test
-	public void testResolvingString() throws Exception {
+	public void testResolvingString() {
 		Class<?> stringClass = parser.parseExpression("T(String)").getValue(Class.class);
-		assertEquals(String.class, stringClass);
+		assertThat(stringClass).isEqualTo(String.class);
 	}
 
 	/**
@@ -577,27 +558,27 @@ public class EvaluationTests extends AbstractExpressionTests {
 	 * doesn't currently exist in the collection (address.crossStreets[0] below)
 	 */
 	@Test
-	public void initializingCollectionElementsOnWrite() throws Exception {
+	public void initializingCollectionElementsOnWrite() {
 		TestPerson person = new TestPerson();
 		EvaluationContext context = new StandardEvaluationContext(person);
 		SpelParserConfiguration config = new SpelParserConfiguration(true, true);
 		ExpressionParser parser = new SpelExpressionParser(config);
-		Expression expression = parser.parseExpression("name");
-		expression.setValue(context, "Oleg");
-		assertEquals("Oleg", person.getName());
+		Expression e = parser.parseExpression("name");
+		e.setValue(context, "Oleg");
+		assertThat(person.getName()).isEqualTo("Oleg");
 
-		expression = parser.parseExpression("address.street");
-		expression.setValue(context, "123 High St");
-		assertEquals("123 High St", person.getAddress().getStreet());
+		e = parser.parseExpression("address.street");
+		e.setValue(context, "123 High St");
+		assertThat(person.getAddress().getStreet()).isEqualTo("123 High St");
 
-		expression = parser.parseExpression("address.crossStreets[0]");
-		expression.setValue(context, "Blah");
-		assertEquals("Blah", person.getAddress().getCrossStreets().get(0));
+		e = parser.parseExpression("address.crossStreets[0]");
+		e.setValue(context, "Blah");
+		assertThat(person.getAddress().getCrossStreets().get(0)).isEqualTo("Blah");
 
-		expression = parser.parseExpression("address.crossStreets[3]");
-		expression.setValue(context, "Wibble");
-		assertEquals("Blah", person.getAddress().getCrossStreets().get(0));
-		assertEquals("Wibble", person.getAddress().getCrossStreets().get(3));
+		e = parser.parseExpression("address.crossStreets[3]");
+		e.setValue(context, "Wibble");
+		assertThat(person.getAddress().getCrossStreets().get(0)).isEqualTo("Blah");
+		assertThat(person.getAddress().getCrossStreets().get(3)).isEqualTo("Wibble");
 	}
 
 	/**
@@ -606,23 +587,22 @@ public class EvaluationTests extends AbstractExpressionTests {
 	@Test
 	public void caseInsensitiveNullLiterals() {
 		ExpressionParser parser = new SpelExpressionParser();
-		Expression exp;
 
-		exp = parser.parseExpression("null");
-		assertNull(exp.getValue());
+		Expression e = parser.parseExpression("null");
+		assertThat(e.getValue()).isNull();
 
-		exp = parser.parseExpression("NULL");
-		assertNull(exp.getValue());
+		e = parser.parseExpression("NULL");
+		assertThat(e.getValue()).isNull();
 
-		exp = parser.parseExpression("NuLl");
-		assertNull(exp.getValue());
+		e = parser.parseExpression("NuLl");
+		assertThat(e.getValue()).isNull();
 	}
 
 	/**
 	 * Verifies behavior requested in SPR-9621.
 	 */
 	@Test
-	public void customMethodFilter() throws Exception {
+	public void customMethodFilter() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 
 		// Register a custom MethodResolver...
@@ -635,77 +615,9 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 		// Register a custom MethodFilter...
 		MethodFilter filter = new CustomMethodFilter();
-		try {
-			context.registerMethodFilter(String.class, filter);
-			fail("should have failed");
-		}
-		catch (IllegalStateException ise) {
-			assertEquals(
-					"Method filter cannot be set as the reflective method resolver is not in use",
-					ise.getMessage());
-		}
-	}
-
-	static class CustomMethodResolver implements MethodResolver {
-
-		@Override
-		public MethodExecutor resolve(EvaluationContext context,
-				Object targetObject, String name,
-				List<TypeDescriptor> argumentTypes) throws AccessException {
-			return null;
-		}
-	}
-
-	static class CustomMethodFilter implements MethodFilter {
-
-		@Override
-		public List<Method> filter(List<Method> methods) {
-			return null;
-		}
-
-	}
-
-	// increment/decrement operators - SPR-9751
-
-	static class Spr9751 {
-		public String type = "hello";
-		public BigDecimal bd = new BigDecimal("2");
-		public double ddd = 2.0d;
-		public float fff = 3.0f;
-		public long lll = 66666L;
-		public int iii = 42;
-		public short sss = (short)15;
-		public Spr9751_2 foo = new Spr9751_2();
-
-		public void m() {}
-
-		public int[] intArray = new int[]{1,2,3,4,5};
-		public int index1 = 2;
-
-		public Integer[] integerArray;
-		public int index2 = 2;
-
-		public List<String> listOfStrings;
-		public int index3 = 0;
-
-		public Spr9751() {
-			integerArray = new Integer[5];
-			integerArray[0] = 1;
-			integerArray[1] = 2;
-			integerArray[2] = 3;
-			integerArray[3] = 4;
-			integerArray[4] = 5;
-			listOfStrings = new ArrayList<>();
-			listOfStrings.add("abc");
-		}
-
-		public static boolean isEven(int i) {
-			return (i%2)==0;
-		}
-	}
-
-	static class Spr9751_2 {
-		public int iii = 99;
+		assertThatIllegalStateException().isThrownBy(() ->
+				context.registerMethodFilter(String.class, filter))
+			.withMessage("Method filter cannot be set as the reflective method resolver is not in use");
 	}
 
 	/**
@@ -721,50 +633,46 @@ public class EvaluationTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
 		e.getValue(ctx);
-		assertEquals(2,instance.listOfStrings.size());
-		assertEquals("def",instance.listOfStrings.get(1));
+		assertThat(instance.listOfStrings.size()).isEqualTo(2);
+		assertThat(instance.listOfStrings.get(1)).isEqualTo("def");
 
 		// Check reference beyond end of collection
 		ctx = new StandardEvaluationContext(instance);
 		parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		e =  parser.parseExpression("listOfStrings[0]");
-		String value = e.getValue(ctx,String.class);
-		assertEquals("abc",value);
+		String value = e.getValue(ctx, String.class);
+		assertThat(value).isEqualTo("abc");
 		e =  parser.parseExpression("listOfStrings[1]");
-		value = e.getValue(ctx,String.class);
-		assertEquals("def",value);
+		value = e.getValue(ctx, String.class);
+		assertThat(value).isEqualTo("def");
 		e =  parser.parseExpression("listOfStrings[2]");
-		value = e.getValue(ctx,String.class);
-		assertEquals("",value);
+		value = e.getValue(ctx, String.class);
+		assertThat(value).isEqualTo("");
 
 		// Now turn off growing and reference off the end
-		ctx = new StandardEvaluationContext(instance);
+		StandardEvaluationContext failCtx = new StandardEvaluationContext(instance);
 		parser = new SpelExpressionParser(new SpelParserConfiguration(false, false));
-		e =  parser.parseExpression("listOfStrings[3]");
-		try {
-			e.getValue(ctx,String.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,see.getMessageCode());
-		}
+		Expression failExp = parser.parseExpression("listOfStrings[3]");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				failExp.getValue(failCtx, String.class))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS));
 	}
 
 	@Test
-	public void limitCollectionGrowing() throws Exception {
+	public void limitCollectionGrowing() {
 		TestClass instance = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
 		SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
-		Expression expression = parser.parseExpression("foo[2]");
-		expression.setValue(ctx, "2");
-		assertThat(instance.getFoo().size(), equalTo(3));
-		expression = parser.parseExpression("foo[3]");
+		Expression e = parser.parseExpression("foo[2]");
+		e.setValue(ctx, "2");
+		assertThat(instance.getFoo().size()).isEqualTo(3);
+		e = parser.parseExpression("foo[3]");
 		try {
-			expression.setValue(ctx, "3");
+			e.setValue(ctx, "3");
 		}
 		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.UNABLE_TO_GROW_COLLECTION, see.getMessageCode());
-			assertThat(instance.getFoo().size(), equalTo(3));
+			assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW_COLLECTION);
+			assertThat(instance.getFoo().size()).isEqualTo(3);
 		}
 	}
 
@@ -775,14 +683,10 @@ public class EvaluationTests extends AbstractExpressionTests {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e =  parser.parseExpression("#this++");
-		assertEquals(42,i.intValue());
-		try {
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
+		assertThat(i.intValue()).isEqualTo(42);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e.getValue(ctx, Integer.class))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 	}
 
 	@Test
@@ -790,52 +694,52 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 		// BigDecimal
 		e = parser.parseExpression("bd++");
-		assertTrue(new BigDecimal("2").equals(helper.bd));
-		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
-		assertTrue(new BigDecimal("2").equals(return_bd));
-		assertTrue(new BigDecimal("3").equals(helper.bd));
+		assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+		BigDecimal return_bd = e.getValue(ctx, BigDecimal.class);
+		assertThat(new BigDecimal("2").equals(return_bd)).isTrue();
+		assertThat(new BigDecimal("3").equals(helper.bd)).isTrue();
 
 		// double
 		e = parser.parseExpression("ddd++");
-		assertEquals(2.0d,helper.ddd,0d);
-		double return_ddd = e.getValue(ctx,Double.TYPE);
-		assertEquals(2.0d,return_ddd,0d);
-		assertEquals(3.0d,helper.ddd,0d);
+		assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		double return_ddd = e.getValue(ctx, Double.TYPE);
+		assertThat((float) return_ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		assertThat((float) helper.ddd).isCloseTo((float) 3.0d, within((float) 0d));
 
 		// float
 		e = parser.parseExpression("fff++");
-		assertEquals(3.0f,helper.fff,0d);
-		float return_fff = e.getValue(ctx,Float.TYPE);
-		assertEquals(3.0f,return_fff,0d);
-		assertEquals(4.0f,helper.fff,0d);
+		assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
+		float return_fff = e.getValue(ctx, Float.TYPE);
+		assertThat(return_fff).isCloseTo(3.0f, within((float) 0d));
+		assertThat(helper.fff).isCloseTo(4.0f, within((float) 0d));
 
 		// long
 		e = parser.parseExpression("lll++");
-		assertEquals(66666L,helper.lll);
-		long return_lll = e.getValue(ctx,Long.TYPE);
-		assertEquals(66666L,return_lll);
-		assertEquals(66667L,helper.lll);
+		assertThat(helper.lll).isEqualTo(66666L);
+		long return_lll = e.getValue(ctx, Long.TYPE);
+		assertThat(return_lll).isEqualTo(66666L);
+		assertThat(helper.lll).isEqualTo(66667L);
 
 		// int
 		e = parser.parseExpression("iii++");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(43,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(43,return_iii);
-		assertEquals(44,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		int return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(43);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(43);
+		assertThat(helper.iii).isEqualTo(44);
 
 		// short
 		e = parser.parseExpression("sss++");
-		assertEquals(15,helper.sss);
-		short return_sss = e.getValue(ctx,Short.TYPE);
-		assertEquals(15,return_sss);
-		assertEquals(16,helper.sss);
+		assertThat(helper.sss).isEqualTo((short) 15);
+		short return_sss = e.getValue(ctx, Short.TYPE);
+		assertThat(return_sss).isEqualTo((short) 15);
+		assertThat(helper.sss).isEqualTo((short) 16);
 	}
 
 	@Test
@@ -843,53 +747,53 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 
 		// BigDecimal
 		e = parser.parseExpression("++bd");
-		assertTrue(new BigDecimal("2").equals(helper.bd));
-		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
-		assertTrue(new BigDecimal("3").equals(return_bd));
-		assertTrue(new BigDecimal("3").equals(helper.bd));
+		assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+		BigDecimal return_bd = e.getValue(ctx, BigDecimal.class);
+		assertThat(new BigDecimal("3").equals(return_bd)).isTrue();
+		assertThat(new BigDecimal("3").equals(helper.bd)).isTrue();
 
 		// double
 		e = parser.parseExpression("++ddd");
-		assertEquals(2.0d,helper.ddd,0d);
-		double return_ddd = e.getValue(ctx,Double.TYPE);
-		assertEquals(3.0d,return_ddd,0d);
-		assertEquals(3.0d,helper.ddd,0d);
+		assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		double return_ddd = e.getValue(ctx, Double.TYPE);
+		assertThat((float) return_ddd).isCloseTo((float) 3.0d, within((float) 0d));
+		assertThat((float) helper.ddd).isCloseTo((float) 3.0d, within((float) 0d));
 
 		// float
 		e = parser.parseExpression("++fff");
-		assertEquals(3.0f,helper.fff,0d);
-		float return_fff = e.getValue(ctx,Float.TYPE);
-		assertEquals(4.0f,return_fff,0d);
-		assertEquals(4.0f,helper.fff,0d);
+		assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
+		float return_fff = e.getValue(ctx, Float.TYPE);
+		assertThat(return_fff).isCloseTo(4.0f, within((float) 0d));
+		assertThat(helper.fff).isCloseTo(4.0f, within((float) 0d));
 
 		// long
 		e = parser.parseExpression("++lll");
-		assertEquals(66666L,helper.lll);
-		long return_lll = e.getValue(ctx,Long.TYPE);
-		assertEquals(66667L,return_lll);
-		assertEquals(66667L,helper.lll);
+		assertThat(helper.lll).isEqualTo(66666L);
+		long return_lll = e.getValue(ctx, Long.TYPE);
+		assertThat(return_lll).isEqualTo(66667L);
+		assertThat(helper.lll).isEqualTo(66667L);
 
 		// int
 		e = parser.parseExpression("++iii");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(43,return_iii);
-		assertEquals(43,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(44,return_iii);
-		assertEquals(44,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		int return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(43);
+		assertThat(helper.iii).isEqualTo(43);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(44);
+		assertThat(helper.iii).isEqualTo(44);
 
 		// short
 		e = parser.parseExpression("++sss");
-		assertEquals(15,helper.sss);
-		int return_sss = (Integer)e.getValue(ctx);
-		assertEquals(16,return_sss);
-		assertEquals(16,helper.sss);
+		assertThat(helper.sss).isEqualTo((short) 15);
+		int return_sss = (Integer) e.getValue(ctx);
+		assertThat(return_sss).isEqualTo((short) 16);
+		assertThat(helper.sss).isEqualTo((short) 16);
 	}
 
 	@Test
@@ -897,64 +801,43 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
 
-		e = parser.parseExpression("m()++");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_INCREMENTABLE,see.getMessageCode());
-		}
+		Expression e1 = parser.parseExpression("m()++");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e1.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_INCREMENTABLE));
 
-		e = parser.parseExpression("++m()");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_INCREMENTABLE,see.getMessageCode());
-		}
+		Expression e2 = parser.parseExpression("++m()");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e2.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_INCREMENTABLE));
 	}
-
 
 	@Test
 	public void increment04() {
 		Integer i = 42;
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		try {
-			Expression e =  parser.parseExpression("++1");
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
-		try {
-			Expression e =  parser.parseExpression("1++");
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
+		Expression e1 =  parser.parseExpression("++1");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e1.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
+		Expression e2 =  parser.parseExpression("1++");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e2.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 	}
+
 	@Test
 	public void decrement01root() {
 		Integer i = 42;
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e =  parser.parseExpression("#this--");
-		assertEquals(42,i.intValue());
-		try {
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
+		assertThat(i.intValue()).isEqualTo(42);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e.getValue(ctx, Integer.class))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 	}
 
 	@Test
@@ -962,52 +845,52 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 		// BigDecimal
 		e = parser.parseExpression("bd--");
-		assertTrue(new BigDecimal("2").equals(helper.bd));
+		assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
 		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
-		assertTrue(new BigDecimal("2").equals(return_bd));
-		assertTrue(new BigDecimal("1").equals(helper.bd));
+		assertThat(new BigDecimal("2").equals(return_bd)).isTrue();
+		assertThat(new BigDecimal("1").equals(helper.bd)).isTrue();
 
 		// double
 		e = parser.parseExpression("ddd--");
-		assertEquals(2.0d,helper.ddd,0d);
-		double return_ddd = e.getValue(ctx,Double.TYPE);
-		assertEquals(2.0d,return_ddd,0d);
-		assertEquals(1.0d,helper.ddd,0d);
+		assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		double return_ddd = e.getValue(ctx, Double.TYPE);
+		assertThat((float) return_ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		assertThat((float) helper.ddd).isCloseTo((float) 1.0d, within((float) 0d));
 
 		// float
 		e = parser.parseExpression("fff--");
-		assertEquals(3.0f,helper.fff,0d);
-		float return_fff = e.getValue(ctx,Float.TYPE);
-		assertEquals(3.0f,return_fff,0d);
-		assertEquals(2.0f,helper.fff,0d);
+		assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
+		float return_fff = e.getValue(ctx, Float.TYPE);
+		assertThat(return_fff).isCloseTo(3.0f, within((float) 0d));
+		assertThat(helper.fff).isCloseTo(2.0f, within((float) 0d));
 
 		// long
 		e = parser.parseExpression("lll--");
-		assertEquals(66666L,helper.lll);
-		long return_lll = e.getValue(ctx,Long.TYPE);
-		assertEquals(66666L,return_lll);
-		assertEquals(66665L,helper.lll);
+		assertThat(helper.lll).isEqualTo(66666L);
+		long return_lll = e.getValue(ctx, Long.TYPE);
+		assertThat(return_lll).isEqualTo(66666L);
+		assertThat(helper.lll).isEqualTo(66665L);
 
 		// int
 		e = parser.parseExpression("iii--");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(41,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(41,return_iii);
-		assertEquals(40,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		int return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(41);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(41);
+		assertThat(helper.iii).isEqualTo(40);
 
 		// short
 		e = parser.parseExpression("sss--");
-		assertEquals(15,helper.sss);
-		short return_sss = e.getValue(ctx,Short.TYPE);
-		assertEquals(15,return_sss);
-		assertEquals(14,helper.sss);
+		assertThat(helper.sss).isEqualTo((short) 15);
+		short return_sss = e.getValue(ctx, Short.TYPE);
+		assertThat(return_sss).isEqualTo((short) 15);
+		assertThat(helper.sss).isEqualTo((short) 14);
 	}
 
 	@Test
@@ -1015,52 +898,52 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 		// BigDecimal
 		e = parser.parseExpression("--bd");
-		assertTrue(new BigDecimal("2").equals(helper.bd));
+		assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
 		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
-		assertTrue(new BigDecimal("1").equals(return_bd));
-		assertTrue(new BigDecimal("1").equals(helper.bd));
+		assertThat(new BigDecimal("1").equals(return_bd)).isTrue();
+		assertThat(new BigDecimal("1").equals(helper.bd)).isTrue();
 
 		// double
 		e = parser.parseExpression("--ddd");
-		assertEquals(2.0d,helper.ddd,0d);
-		double return_ddd = e.getValue(ctx,Double.TYPE);
-		assertEquals(1.0d,return_ddd,0d);
-		assertEquals(1.0d,helper.ddd,0d);
+		assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
+		double return_ddd = e.getValue(ctx, Double.TYPE);
+		assertThat((float) return_ddd).isCloseTo((float) 1.0d, within((float) 0d));
+		assertThat((float) helper.ddd).isCloseTo((float) 1.0d, within((float) 0d));
 
 		// float
 		e = parser.parseExpression("--fff");
-		assertEquals(3.0f,helper.fff,0d);
-		float return_fff = e.getValue(ctx,Float.TYPE);
-		assertEquals(2.0f,return_fff,0d);
-		assertEquals(2.0f,helper.fff,0d);
+		assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
+		float return_fff = e.getValue(ctx, Float.TYPE);
+		assertThat(return_fff).isCloseTo(2.0f, within((float) 0d));
+		assertThat(helper.fff).isCloseTo(2.0f, within((float) 0d));
 
 		// long
 		e = parser.parseExpression("--lll");
-		assertEquals(66666L,helper.lll);
-		long return_lll = e.getValue(ctx,Long.TYPE);
-		assertEquals(66665L,return_lll);
-		assertEquals(66665L,helper.lll);
+		assertThat(helper.lll).isEqualTo(66666L);
+		long return_lll = e.getValue(ctx, Long.TYPE);
+		assertThat(return_lll).isEqualTo(66665L);
+		assertThat(helper.lll).isEqualTo(66665L);
 
 		// int
 		e = parser.parseExpression("--iii");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(41,return_iii);
-		assertEquals(41,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(40,return_iii);
-		assertEquals(40,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		int return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(41);
+		assertThat(helper.iii).isEqualTo(41);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(40);
+		assertThat(helper.iii).isEqualTo(40);
 
 		// short
 		e = parser.parseExpression("--sss");
-		assertEquals(15,helper.sss);
+		assertThat(helper.sss).isEqualTo((short) 15);
 		int return_sss = (Integer)e.getValue(ctx);
-		assertEquals(14,return_sss);
-		assertEquals(14,helper.sss);
+		assertThat(return_sss).isEqualTo(14);
+		assertThat(helper.sss).isEqualTo((short) 14);
 	}
 
 	@Test
@@ -1068,25 +951,16 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
 
-		e = parser.parseExpression("m()--");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_DECREMENTABLE,see.getMessageCode());
-		}
+		Expression e1 = parser.parseExpression("m()--");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e1.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_DECREMENTABLE));
 
-		e = parser.parseExpression("--m()");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_DECREMENTABLE,see.getMessageCode());
-		}
+		Expression e2 = parser.parseExpression("--m()");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e2.getValue(ctx, Double.TYPE))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_DECREMENTABLE));
 	}
 
 
@@ -1095,22 +969,15 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Integer i = 42;
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		try {
-			Expression e =  parser.parseExpression("--1");
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
-		try {
-			Expression e =  parser.parseExpression("1--");
-			e.getValue(ctx,Integer.class);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
+		Expression e1 = parser.parseExpression("--1");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e1.getValue(ctx, Integer.class))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
+
+		Expression e2 = parser.parseExpression("1--");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e2.getValue(ctx, Integer.class))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 	}
 
 	@Test
@@ -1118,26 +985,26 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 		// index1 is 2 at the start - the 'intArray[#root.index1++]' should not be evaluated twice!
 		// intArray[2] is 3
 		e = parser.parseExpression("intArray[#root.index1++]++");
-		e.getValue(ctx,Integer.class);
-		assertEquals(3,helper.index1);
-		assertEquals(4,helper.intArray[2]);
+		e.getValue(ctx, Integer.class);
+		assertThat(helper.index1).isEqualTo(3);
+		assertThat(helper.intArray[2]).isEqualTo(4);
 
 		// index1 is 3 intArray[3] is 4
 		e =  parser.parseExpression("intArray[#root.index1++]--");
-		assertEquals(4,e.getValue(ctx,Integer.class).intValue());
-		assertEquals(4,helper.index1);
-		assertEquals(3,helper.intArray[3]);
+		assertThat(e.getValue(ctx, Integer.class).intValue()).isEqualTo(4);
+		assertThat(helper.index1).isEqualTo(4);
+		assertThat(helper.intArray[3]).isEqualTo(3);
 
 		// index1 is 4, intArray[3] is 3
 		e =  parser.parseExpression("intArray[--#root.index1]++");
-		assertEquals(3,e.getValue(ctx,Integer.class).intValue());
-		assertEquals(3,helper.index1);
-		assertEquals(4,helper.intArray[3]);
+		assertThat(e.getValue(ctx, Integer.class).intValue()).isEqualTo(3);
+		assertThat(helper.index1).isEqualTo(3);
+		assertThat(helper.intArray[3]).isEqualTo(4);
 	}
 
 
@@ -1147,7 +1014,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Spr9751 helper = new Spr9751();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
+		Expression e;
 
 		// BooleanLiteral
 		expectFailNotAssignable(parser, ctx, "true++");
@@ -1296,49 +1163,49 @@ public class EvaluationTests extends AbstractExpressionTests {
 		// Assign
 		// iii=42
 		e = parser.parseExpression("iii=iii++");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,helper.iii);
-		assertEquals(42,return_iii);
+		assertThat(helper.iii).isEqualTo(42);
+		int return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(helper.iii).isEqualTo(42);
+		assertThat(return_iii).isEqualTo(42);
 
 		// Identifier
 		e = parser.parseExpression("iii++");
-		assertEquals(42,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(43,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(43);
 
 		e = parser.parseExpression("--iii");
-		assertEquals(43,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(42,helper.iii);
+		assertThat(helper.iii).isEqualTo(43);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(42);
 
 		e = parser.parseExpression("iii=99");
-		assertEquals(42,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_iii);
-		assertEquals(99,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		return_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_iii).isEqualTo(99);
+		assertThat(helper.iii).isEqualTo(99);
 
 		// CompoundExpression
 		// foo.iii == 99
 		e = parser.parseExpression("foo.iii++");
-		assertEquals(99,helper.foo.iii);
-		int return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_foo_iii);
-		assertEquals(100,helper.foo.iii);
+		assertThat(helper.foo.iii).isEqualTo(99);
+		int return_foo_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_foo_iii).isEqualTo(99);
+		assertThat(helper.foo.iii).isEqualTo(100);
 
 		e = parser.parseExpression("--foo.iii");
-		assertEquals(100,helper.foo.iii);
-		return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_foo_iii);
-		assertEquals(99,helper.foo.iii);
+		assertThat(helper.foo.iii).isEqualTo(100);
+		return_foo_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_foo_iii).isEqualTo(99);
+		assertThat(helper.foo.iii).isEqualTo(99);
 
 		e = parser.parseExpression("foo.iii=999");
-		assertEquals(99,helper.foo.iii);
-		return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(999,return_foo_iii);
-		assertEquals(999,helper.foo.iii);
+		assertThat(helper.foo.iii).isEqualTo(99);
+		return_foo_iii = e.getValue(ctx, Integer.TYPE);
+		assertThat(return_foo_iii).isEqualTo(999);
+		assertThat(helper.foo.iii).isEqualTo(999);
 
 		// ConstructorReference
 		expectFailNotAssignable(parser, ctx, "(new String('abc'))++");
@@ -1381,32 +1248,32 @@ public class EvaluationTests extends AbstractExpressionTests {
 		expectFailNotIncrementable(parser, ctx, "#wibble++");
 		expectFailNotDecrementable(parser, ctx, "--#wibble");
 		e = parser.parseExpression("#wibble=#wibble+#wibble");
-		String s = e.getValue(ctx,String.class);
-		assertEquals("hello worldhello world",s);
-		assertEquals("hello worldhello world",ctx.lookupVariable("wibble"));
+		String s = e.getValue(ctx, String.class);
+		assertThat(s).isEqualTo("hello worldhello world");
+		assertThat(ctx.lookupVariable("wibble")).isEqualTo("hello worldhello world");
 
 		ctx.setVariable("wobble", 3);
 		e = parser.parseExpression("#wobble++");
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
-		int r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(3,r);
-		assertEquals(4,((Integer)ctx.lookupVariable("wobble")).intValue());
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
+		int r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(3);
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(4);
 
 		e = parser.parseExpression("--#wobble");
-		assertEquals(4,((Integer)ctx.lookupVariable("wobble")).intValue());
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(3,r);
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(4);
+		r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(3);
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
 
 		e = parser.parseExpression("#wobble=34");
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(34,r);
-		assertEquals(34,((Integer)ctx.lookupVariable("wobble")).intValue());
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
+		r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(34);
+		assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(34);
 
 		// Projection
-		expectFailNotIncrementable(parser, ctx, "({1,2,3}.![#isEven(#this)])++"); // projection would be {false,true,false}
-		expectFailNotDecrementable(parser, ctx, "--({1,2,3}.![#isEven(#this)])"); // projection would be {false,true,false}
+		expectFailNotIncrementable(parser, ctx, "({1,2,3}.![#isEven(#this)])++");  // projection would be {false,true,false}
+		expectFailNotDecrementable(parser, ctx, "--({1,2,3}.![#isEven(#this)])");  // projection would be {false,true,false}
 		expectFailNotAssignable(parser, ctx, "({1,2,3}.![#isEven(#this)])=({1,2,3}.![#isEven(#this)])");
 
 		// InlineList
@@ -1428,66 +1295,150 @@ public class EvaluationTests extends AbstractExpressionTests {
 		// PropertyOrFieldReference
 		helper.iii = 42;
 		e = parser.parseExpression("iii++");
-		assertEquals(42,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,r);
-		assertEquals(43,helper.iii);
+		assertThat(helper.iii).isEqualTo(42);
+		r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(43);
 
 		e = parser.parseExpression("--iii");
-		assertEquals(43,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,r);
-		assertEquals(42,helper.iii);
+		assertThat(helper.iii).isEqualTo(43);
+		r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(42);
+		assertThat(helper.iii).isEqualTo(42);
 
 		e = parser.parseExpression("iii=100");
-		assertEquals(42,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(100,r);
-		assertEquals(100,helper.iii);
-	}
-
-
-	private void expectFail(ExpressionParser parser, EvaluationContext eContext, String expressionString, SpelMessage messageCode) {
-		try {
-			Expression e = parser.parseExpression(expressionString);
-			 SpelUtilities.printAbstractSyntaxTree(System.out, e);
-			e.getValue(eContext);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			see.printStackTrace();
-			assertEquals(messageCode,see.getMessageCode());
-		}
+		assertThat(helper.iii).isEqualTo(42);
+		r = e.getValue(ctx, Integer.TYPE);
+		assertThat(r).isEqualTo(100);
+		assertThat(helper.iii).isEqualTo(100);
 	}
 
 	private void expectFailNotAssignable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.NOT_ASSIGNABLE);
+		expectFail(parser, eContext, expressionString, SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	private void expectFailSetValueNotSupported(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.SETVALUE_NOT_SUPPORTED);
+		expectFail(parser, eContext, expressionString, SpelMessage.SETVALUE_NOT_SUPPORTED);
 	}
 
 	private void expectFailNotIncrementable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.OPERAND_NOT_INCREMENTABLE);
+		expectFail(parser, eContext, expressionString, SpelMessage.OPERAND_NOT_INCREMENTABLE);
 	}
 
 	private void expectFailNotDecrementable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.OPERAND_NOT_DECREMENTABLE);
+		expectFail(parser, eContext, expressionString, SpelMessage.OPERAND_NOT_DECREMENTABLE);
+	}
+
+	private void expectFail(ExpressionParser parser, EvaluationContext eContext, String expressionString, SpelMessage messageCode) {
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() -> {
+			Expression e = parser.parseExpression(expressionString);
+			SpelUtilities.printAbstractSyntaxTree(System.out, e);
+			e.getValue(eContext);
+		}).satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(messageCode));
+	}
+
+	static class CustomMethodResolver implements MethodResolver {
+
+		@Override
+		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+				List<TypeDescriptor> argumentTypes) throws AccessException {
+			return null;
+		}
+	}
+
+
+	static class CustomMethodFilter implements MethodFilter {
+
+		@Override
+		public List<Method> filter(List<Method> methods) {
+			return null;
+		}
+
+	}
+
+
+	@SuppressWarnings("rawtypes")
+	static class TestClass {
+
+		public Foo wibble;
+		private Foo wibble2;
+		public Map map;
+		public Map<String, Integer> mapStringToInteger;
+		public List<String> list;
+		public List list2;
+		private Map map2;
+		private List<String> foo;
+
+		public Map getMap2() { return this.map2; }
+		public Foo getWibble2() { return this.wibble2; }
+		public List<String> getFoo() { return this.foo; }
+		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
+	}
+
+
+	public static class Foo {
+
+		public String bar = "hello";
+
+		public Foo() {}
+	}
+
+
+	// increment/decrement operators - SPR-9751
+	static class Spr9751 {
+
+		public String type = "hello";
+		public BigDecimal bd = new BigDecimal("2");
+		public double ddd = 2.0d;
+		public float fff = 3.0f;
+		public long lll = 66666L;
+		public int iii = 42;
+		public short sss = (short)15;
+		public Spr9751_2 foo = new Spr9751_2();
+
+		public int[] intArray = new int[]{1,2,3,4,5};
+		public int index1 = 2;
+
+		public Integer[] integerArray;
+		public int index2 = 2;
+
+		public List<String> listOfStrings;
+		public int index3 = 0;
+
+		public Spr9751() {
+			integerArray = new Integer[5];
+			integerArray[0] = 1;
+			integerArray[1] = 2;
+			integerArray[2] = 3;
+			integerArray[3] = 4;
+			integerArray[4] = 5;
+			listOfStrings = new ArrayList<>();
+			listOfStrings.add("abc");
+		}
+
+		public void m() {}
+
+		public static boolean isEven(int i) {
+			return (i%2)==0;
+		}
+	}
+
+
+	static class Spr9751_2 {
+
+		public int iii = 99;
 	}
 
 
 	static class MyBeanResolver implements BeanResolver {
 
 		@Override
-		public Object resolve(EvaluationContext context, String beanName)
-				throws AccessException {
+		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
 			if (beanName.equals("foo") || beanName.equals("bar")) {
 				return new Spr9751_2();
 			}
-			throw new AccessException("not heard of "+beanName);
+			throw new AccessException("not heard of " + beanName);
 		}
-
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,13 +30,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents a reactive server-side HTTP request
+ * Represents a reactive server-side HTTP request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+
+	/**
+	 * Return an id that represents the underlying connection, if available,
+	 * or the request for the purpose of correlating log messages.
+	 * @since 5.1
+	 * @see org.springframework.web.server.ServerWebExchange#getLogPrefix()
+	 */
+	String getId();
 
 	/**
 	 * Returns a structured representation of the request path including the
@@ -59,8 +68,29 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return the remote address where this request is connected to, if available.
 	 */
 	@Nullable
-	InetSocketAddress getRemoteAddress();
+	default InetSocketAddress getRemoteAddress() {
+		return null;
+	}
 
+	/**
+	 * Return the local address the request was accepted on, if available.
+	 * 5.2.3
+	 */
+	@Nullable
+	default InetSocketAddress getLocalAddress() {
+		return null;
+	}
+
+	/**
+	 * Return the SSL session information if the request has been transmitted
+	 * over a secure protocol including SSL certificates, if available.
+	 * @return the session information, or {@code null} if none available
+	 * @since 5.0.2
+	 */
+	@Nullable
+	default SslInfo getSslInfo() {
+		return null;
+	}
 
 	/**
 	 * Return a builder to mutate properties of this request by wrapping it
@@ -83,36 +113,67 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder method(HttpMethod httpMethod);
 
 		/**
-		 * Set the URI to return.
+		 * Set the URI to use with the following conditions:
+		 * <ul>
+		 * <li>If {@link #path(String) path} is also set, it overrides the path
+		 * of the URI provided here.
+		 * <li>If {@link #contextPath(String) contextPath} is also set, or
+		 * already present, it must match the start of the path of the URI
+		 * provided here.
+		 * </ul>
 		 */
 		Builder uri(URI uri);
 
 		/**
-		 * Set the path to use instead of the {@code "rawPath"} of
-		 * {@link ServerHttpRequest#getURI()}.
+		 * Set the path to use instead of the {@code "rawPath"} of the URI of
+		 * the request with the following conditions:
+		 * <ul>
+		 * <li>If {@link #uri(URI) uri} is also set, the path given here
+		 * overrides the path of the given URI.
+		 * <li>If {@link #contextPath(String) contextPath} is also set, or
+		 * already present, it must match the start of the path given here.
+		 * <li>The given value must begin with a slash.
+		 * </ul>
 		 */
 		Builder path(String path);
 
 		/**
 		 * Set the contextPath to use.
+		 * <p>The given value must be a valid {@link RequestPath#contextPath()
+		 * contextPath} and it must match the start of the path of the URI of
+		 * the request. That means changing the contextPath, implies also
+		 * changing the path via {@link #path(String)}.
 		 */
 		Builder contextPath(String contextPath);
 
 		/**
-		 * Set or override the specified header.
+		 * Set or override the specified header values under the given name.
+		 * <p>If you need to add header values, remove headers, etc., use
+		 * {@link #headers(Consumer)} for greater control.
+		 * @param headerName the header name
+		 * @param headerValues the header values
+		 * @since 5.1.9
+		 * @see #headers(Consumer)
 		 */
-		Builder header(String key, String value);
+		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate this request's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
-		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
-		 * @return this builder
+		 * Manipulate request headers. The provided {@code HttpHeaders} contains
+		 * current request headers, so that the {@code Consumer} can
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
+		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * use any other {@link HttpHeaders} methods.
+		 * @see #header(String, String...)
 		 */
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set the SSL session information. This may be useful in environments
+		 * where TLS termination is done at the router, but SSL information is
+		 * made available in some other way such as through a header.
+		 * @since 5.0.7
+		 */
+		Builder sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.

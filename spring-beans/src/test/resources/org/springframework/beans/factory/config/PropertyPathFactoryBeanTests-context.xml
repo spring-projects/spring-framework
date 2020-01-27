@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="tb" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="tb" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="age"><value>10</value></property>
 		<property name="spouse">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="age"><value>11</value></property>
 			</bean>
 		</property>
   </bean>
 
-	<bean id="otb" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="otb" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="age"><value>98</value></property>
 		<property name="spouse">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="age"><value>99</value></property>
 			</bean>
 		</property>
@@ -23,7 +23,7 @@
 
 	<bean id="propertyPath1" class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
 		<property name="targetObject">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="age"><value>12</value></property>
 			</bean>
 		</property>
@@ -46,10 +46,10 @@
 	<bean id="propertyPath3" class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
 		<property name="targetBeanName"><value>tb</value></property>
 		<property name="propertyPath"><value>spouse</value></property>
-		<property name="resultType"><value>org.springframework.tests.sample.beans.TestBean</value></property>
+		<property name="resultType"><value>org.springframework.beans.testfixture.beans.TestBean</value></property>
 	</bean>
 
-	<bean id="tbWithInner" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="tbWithInner" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="age" value="10"/>
 		<property name="spouse">
 			<bean name="otb.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
@@ -59,11 +59,11 @@
 		</property>
 	</bean>
 
-	<bean id="tbWithNullReference" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="tbWithNullReference" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="spouse" ref="tb.spouse.spouse"/>
 	</bean>
 
-	<bean id="tbWithInnerNull" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="tbWithInnerNull" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="spouse">
 			<bean name="tb.spouse.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</property>

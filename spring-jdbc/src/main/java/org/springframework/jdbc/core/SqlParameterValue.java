@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import org.springframework.lang.Nullable;
 
 /**
- * Object to represent a SQL parameter value, including parameter metadata
+ * Object to represent an SQL parameter value, including parameter meta-data
  * such as the SQL type and the scale for numeric values.
  *
  * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of
@@ -44,7 +44,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param value the value object
 	 */
 	public SqlParameterValue(int sqlType, @Nullable Object value) {
@@ -54,7 +54,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 * @param value the value object
 	 */
@@ -65,7 +65,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
 	 * @param value the value object

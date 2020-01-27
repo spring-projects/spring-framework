@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -153,7 +153,7 @@ public abstract class StatementCreatorUtils {
 	 * @param ps the prepared statement or callable statement
 	 * @param paramIndex index of the parameter we are setting
 	 * @param sqlType the SQL type of the parameter
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -171,7 +171,7 @@ public abstract class StatementCreatorUtils {
 	 * @param sqlType the SQL type of the parameter
 	 * @param typeName the type name of the parameter
 	 * (optional, only used for SQL NULL and SqlTypeValue)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -191,7 +191,7 @@ public abstract class StatementCreatorUtils {
 	 * (optional, only used for SQL NULL and SqlTypeValue)
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -240,7 +240,7 @@ public abstract class StatementCreatorUtils {
 	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
 
-		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			if (!shouldIgnoreGetParameterType) {
@@ -295,9 +295,11 @@ public abstract class StatementCreatorUtils {
 		else if (inValue instanceof SqlValue) {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
-		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
-				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR) {
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
 			ps.setString(paramIndex, inValue.toString());
+		}
+		else if (sqlType == Types.NVARCHAR || sqlType == Types.LONGNVARCHAR) {
+			ps.setNString(paramIndex, inValue.toString());
 		}
 		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
 			String strVal = inValue.toString();
@@ -312,8 +314,15 @@ public abstract class StatementCreatorUtils {
 				}
 				return;
 			}
-			// Fallback: regular setString binding
-			ps.setString(paramIndex, strVal);
+			else {
+				// Fallback: setString or setNString binding
+				if (sqlType == Types.NCLOB) {
+					ps.setNString(paramIndex, strVal);
+				}
+				else {
+					ps.setString(paramIndex, strVal);
+				}
+			}
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 			if (inValue instanceof BigDecimal) {

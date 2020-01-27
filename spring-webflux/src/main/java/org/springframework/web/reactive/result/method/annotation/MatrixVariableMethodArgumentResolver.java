@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
@@ -48,9 +49,8 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-
-	protected MatrixVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
-			ReactiveAdapterRegistry registry) {
+	public MatrixVariableMethodArgumentResolver(
+			@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 
 		super(factory, registry);
 	}
@@ -59,7 +59,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return checkAnnotatedParamNoReactiveWrapper(parameter, MatrixVariable.class,
-				(annot, type) -> !Map.class.isAssignableFrom(type) || StringUtils.hasText(annot.name()));
+				(ann, type) -> !Map.class.isAssignableFrom(type) || StringUtils.hasText(ann.name()));
 	}
 
 
@@ -73,10 +73,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 	@Nullable
 	@Override
 	protected Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange) {
-
 		Map<String, MultiValueMap<String, String>> pathParameters =
 				exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
-
 		if (CollectionUtils.isEmpty(pathParameters)) {
 			return null;
 		}
@@ -100,7 +98,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 						String paramType = param.getNestedParameterType().getName();
 						throw new ServerErrorException(
 								"Found more than one match for URI path parameter '" + name +
-								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.");
+								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.",
+								param, null);
 					}
 					paramValues.addAll(params.get(name));
 					found = true;
@@ -121,12 +120,13 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServerWebInputException {
-		throw new ServerWebInputException("Missing matrix variable '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		String paramInfo = parameter.getNestedParameterType().getSimpleName();
+		throw new ServerWebInputException("Missing matrix variable '" + name + "' " +
+				"for method parameter of type " + paramInfo, parameter);
 	}
 
 
-	private static class MatrixVariableNamedValueInfo extends NamedValueInfo {
+	private static final class MatrixVariableNamedValueInfo extends NamedValueInfo {
 
 		private MatrixVariableNamedValueInfo(MatrixVariable annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

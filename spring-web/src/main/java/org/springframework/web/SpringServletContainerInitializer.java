@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
+
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * the JAR Services API {@link ServiceLoader#load(Class)} method detecting the
  * {@code spring-web} module's {@code META-INF/services/javax.servlet.ServletContainerInitializer}
  * service provider configuration file. See the
- * <a href="http://download.oracle.com/javase/6/docs/technotes/guides/jar/jar.html#Service%20Provider">
+ * <a href="https://download.oracle.com/javase/6/docs/technotes/guides/jar/jar.html#Service%20Provider">
  * JAR Services API documentation</a> as well as section <em>8.2.4</em> of the Servlet 3.0
  * Final Draft specification for complete details.
  *
@@ -58,12 +59,11 @@ import org.springframework.util.ReflectionUtils;
  * {@code web.xml} as follows:
  *
  * <pre class="code">
- * {@code
- * <absolute-ordering>
- *   <name>some_web_fragment</name>
- *   <name>spring_web</name>
- * </absolute-ordering>
- * }</pre>
+ * &lt;absolute-ordering&gt;
+ *   &lt;name>some_web_fragment&lt;/name&gt;
+ *   &lt;name>spring_web&lt;/name&gt;
+ * &lt;/absolute-ordering&gt;
+ * </pre>
  *
  * <h2>Relationship to Spring's {@code WebApplicationInitializer}</h2>
  * Spring's {@code WebApplicationInitializer} SPI consists of just one method:

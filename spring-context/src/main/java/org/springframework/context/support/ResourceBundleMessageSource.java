@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,13 +26,13 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
@@ -58,6 +58,17 @@ import org.springframework.util.ClassUtils;
  * Note that the JDK's standard ResourceBundle treats dots as package separators:
  * This means that "test.theme" is effectively equivalent to "test/theme".
  *
+ * <p>On the classpath, bundle resources will be read with the locally configured
+ * {@link #setDefaultEncoding encoding}: by default, ISO-8859-1; consider switching
+ * this to UTF-8, or to {@code null} for the platform default encoding. On the JDK 9+
+ * module path where locally provided {@code ResourceBundle.Control} handles are not
+ * supported, this MessageSource always falls back to {@link ResourceBundle#getBundle}
+ * retrieval with the platform default encoding: UTF-8 with a ISO-8859-1 fallback on
+ * JDK 9+ (configurable through the "java.util.PropertyResourceBundle.encoding" system
+ * property). Note that {@link #loadBundle(Reader)}/{@link #loadBundle(InputStream)}
+ * won't be called in this case either, effectively ignoring overrides in subclasses.
+ * Consider implementing a JDK 9 {@code java.util.spi.ResourceBundleProvider} instead.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setBasenames
@@ -80,7 +91,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new HashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
+			new ConcurrentHashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -90,7 +102,16 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new HashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
+			new ConcurrentHashMap<>();
+
+	@Nullable
+	private volatile MessageSourceControl control = new MessageSourceControl();
+
+
+	public ResourceBundleMessageSource() {
+		setDefaultEncoding("ISO-8859-1");
+	}
 
 
 	/**
@@ -178,31 +199,32 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 		else {
 			// Cache forever: prefer locale cache over repeated getBundle calls.
-			synchronized (this.cachedResourceBundles) {
-				Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
-				if (localeMap != null) {
-					ResourceBundle bundle = localeMap.get(locale);
-					if (bundle != null) {
-						return bundle;
-					}
-				}
-				try {
-					ResourceBundle bundle = doGetBundle(basename, locale);
-					if (localeMap == null) {
-						localeMap = new HashMap<>();
-						this.cachedResourceBundles.put(basename, localeMap);
-					}
-					localeMap.put(locale, bundle);
+			Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
+			if (localeMap != null) {
+				ResourceBundle bundle = localeMap.get(locale);
+				if (bundle != null) {
 					return bundle;
 				}
-				catch (MissingResourceException ex) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+			}
+			try {
+				ResourceBundle bundle = doGetBundle(basename, locale);
+				if (localeMap == null) {
+					localeMap = new ConcurrentHashMap<>();
+					Map<Locale, ResourceBundle> existing = this.cachedResourceBundles.putIfAbsent(basename, localeMap);
+					if (existing != null) {
+						localeMap = existing;
 					}
-					// Assume bundle not found
-					// -> do NOT throw the exception to allow for checking parent message source.
-					return null;
 				}
+				localeMap.put(locale, bundle);
+				return bundle;
+			}
+			catch (MissingResourceException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+				}
+				// Assume bundle not found
+				// -> do NOT throw the exception to allow for checking parent message source.
+				return null;
 			}
 		}
 	}
@@ -219,20 +241,69 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
 		ClassLoader classLoader = getBundleClassLoader();
 		Assert.state(classLoader != null, "No bundle ClassLoader set");
-		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
+
+		MessageSourceControl control = this.control;
+		if (control != null) {
+			try {
+				return ResourceBundle.getBundle(basename, locale, classLoader, control);
+			}
+			catch (UnsupportedOperationException ex) {
+				// Probably in a Jigsaw environment on JDK 9+
+				this.control = null;
+				String encoding = getDefaultEncoding();
+				if (encoding != null && logger.isInfoEnabled()) {
+					logger.info("ResourceBundleMessageSource is configured to read resources with encoding '" +
+							encoding + "' but ResourceBundle.Control not supported in current system environment: " +
+							ex.getMessage() + " - falling back to plain ResourceBundle.getBundle retrieval with the " +
+							"platform default encoding. Consider setting the 'defaultEncoding' property to 'null' " +
+							"for participating in the platform default and therefore avoiding this log message.");
+				}
+			}
+		}
+
+		// Fallback: plain getBundle lookup without Control handle
+		return ResourceBundle.getBundle(basename, locale, classLoader);
 	}
 
 	/**
 	 * Load a property-based resource bundle from the given reader.
+	 * <p>This will be called in case of a {@link #setDefaultEncoding "defaultEncoding"},
+	 * including {@link ResourceBundleMessageSource}'s default ISO-8859-1 encoding.
+	 * Note that this method can only be called with a {@code ResourceBundle.Control}:
+	 * When running on the JDK 9+ module path where such control handles are not
+	 * supported, any overrides in custom subclasses will effectively get ignored.
 	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
 	 * @param reader the reader for the target resource
 	 * @return the fully loaded bundle
 	 * @throws IOException in case of I/O failure
 	 * @since 4.2
+	 * @see #loadBundle(InputStream)
 	 * @see PropertyResourceBundle#PropertyResourceBundle(Reader)
 	 */
 	protected ResourceBundle loadBundle(Reader reader) throws IOException {
 		return new PropertyResourceBundle(reader);
+	}
+
+	/**
+	 * Load a property-based resource bundle from the given input stream,
+	 * picking up the default properties encoding on JDK 9+.
+	 * <p>This will only be called with {@link #setDefaultEncoding "defaultEncoding"}
+	 * set to {@code null}, explicitly enforcing the platform default encoding
+	 * (which is UTF-8 with a ISO-8859-1 fallback on JDK 9+ but configurable
+	 * through the "java.util.PropertyResourceBundle.encoding" system property).
+	 * Note that this method can only be called with a {@code ResourceBundle.Control}:
+	 * When running on the JDK 9+ module path where such control handles are not
+	 * supported, any overrides in custom subclasses will effectively get ignored.
+	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
+	 * @param inputStream the input stream for the target resource
+	 * @return the fully loaded bundle
+	 * @throws IOException in case of I/O failure
+	 * @since 5.1
+	 * @see #loadBundle(Reader)
+	 * @see PropertyResourceBundle#PropertyResourceBundle(InputStream)
+	 */
+	protected ResourceBundle loadBundle(InputStream inputStream) throws IOException {
+		return new PropertyResourceBundle(inputStream);
 	}
 
 	/**
@@ -249,36 +320,41 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
-		synchronized (this.cachedBundleMessageFormats) {
-			Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
-			Map<Locale, MessageFormat> localeMap = null;
-			if (codeMap != null) {
-				localeMap = codeMap.get(code);
-				if (localeMap != null) {
-					MessageFormat result = localeMap.get(locale);
-					if (result != null) {
-						return result;
-					}
+		Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
+		Map<Locale, MessageFormat> localeMap = null;
+		if (codeMap != null) {
+			localeMap = codeMap.get(code);
+			if (localeMap != null) {
+				MessageFormat result = localeMap.get(locale);
+				if (result != null) {
+					return result;
 				}
 			}
-
-			String msg = getStringOrNull(bundle, code);
-			if (msg != null) {
-				if (codeMap == null) {
-					codeMap = new HashMap<>();
-					this.cachedBundleMessageFormats.put(bundle, codeMap);
-				}
-				if (localeMap == null) {
-					localeMap = new HashMap<>();
-					codeMap.put(code, localeMap);
-				}
-				MessageFormat result = createMessageFormat(msg, locale);
-				localeMap.put(locale, result);
-				return result;
-			}
-
-			return null;
 		}
+
+		String msg = getStringOrNull(bundle, code);
+		if (msg != null) {
+			if (codeMap == null) {
+				codeMap = new ConcurrentHashMap<>();
+				Map<String, Map<Locale, MessageFormat>> existing =
+						this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
+				if (existing != null) {
+					codeMap = existing;
+				}
+			}
+			if (localeMap == null) {
+				localeMap = new ConcurrentHashMap<>();
+				Map<Locale, MessageFormat> existing = codeMap.putIfAbsent(code, localeMap);
+				if (existing != null) {
+					localeMap = existing;
+				}
+			}
+			MessageFormat result = createMessageFormat(msg, locale);
+			localeMap.put(locale, result);
+			return result;
+		}
+
+		return null;
 	}
 
 	/**
@@ -301,7 +377,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 			try {
 				return bundle.getString(key);
 			}
-			catch (MissingResourceException ex){
+			catch (MissingResourceException ex) {
 				// Assume key not found for some other reason
 				// -> do NOT throw the exception to allow for checking parent message source.
 			}
@@ -319,9 +395,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 
 	/**
-	 * Custom implementation of Java 6's {@code ResourceBundle.Control},
-	 * adding support for custom file encodings, deactivating the fallback to the
-	 * system locale and activating ResourceBundle's native cache, if desired.
+	 * Custom implementation of {@code ResourceBundle.Control}, adding support
+	 * for custom file encodings, deactivating the fallback to the system locale
+	 * and activating ResourceBundle's native cache, if desired.
 	 */
 	private class MessageSourceControl extends ResourceBundle.Control {
 
@@ -336,9 +412,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final String resourceName = toResourceName(bundleName, "properties");
 				final ClassLoader classLoader = loader;
 				final boolean reloadFlag = reload;
-				InputStream stream;
+				InputStream inputStream;
 				try {
-					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+					inputStream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
 						InputStream is = null;
 						if (reloadFlag) {
 							URL url = classLoader.getResource(resourceName);
@@ -359,16 +435,17 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
 				}
-				if (stream != null) {
+				if (inputStream != null) {
 					String encoding = getDefaultEncoding();
-					if (encoding == null) {
-						encoding = "ISO-8859-1";
+					if (encoding != null) {
+						try (InputStreamReader bundleReader = new InputStreamReader(inputStream, encoding)) {
+							return loadBundle(bundleReader);
+						}
 					}
-					try {
-						return loadBundle(new InputStreamReader(stream, encoding));
-					}
-					finally {
-						stream.close();
+					else {
+						try (InputStream bundleStream = inputStream) {
+							return loadBundle(bundleStream);
+						}
 					}
 				}
 				else {
@@ -384,7 +461,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		@Override
 		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
+			Locale defaultLocale = getDefaultLocale();
+			return (defaultLocale != null && !defaultLocale.equals(locale) ? defaultLocale : null);
 		}
 
 		@Override
@@ -394,7 +472,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 
 		@Override
-		public boolean needsReload(String baseName, Locale locale, String format, ClassLoader loader, ResourceBundle bundle, long loadTime) {
+		public boolean needsReload(
+				String baseName, Locale locale, String format, ClassLoader loader, ResourceBundle bundle, long loadTime) {
+
 			if (super.needsReload(baseName, locale, format, loader, bundle, loadTime)) {
 				cachedBundleMessageFormats.remove(bundle);
 				return true;

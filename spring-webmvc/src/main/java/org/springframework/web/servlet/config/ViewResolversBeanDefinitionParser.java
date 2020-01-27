@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,9 +63,13 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  */
 public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code ViewResolverComposite}.
+	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
@@ -174,7 +178,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		MutablePropertyValues values = beanDef.getPropertyValues();
 
-		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
+		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, "default-views");
 		if (!elements.isEmpty()) {
 			ManagedList<Object> list = new ManagedList<>();
 			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {

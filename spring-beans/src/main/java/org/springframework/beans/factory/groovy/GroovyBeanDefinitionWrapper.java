@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,6 @@ import groovy.lang.GroovyObjectSupport;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -162,6 +161,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 
+	@Override
 	public Object getProperty(String property) {
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);
@@ -172,6 +172,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return super.getProperty(property);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		if (PARENT.equals(property)) {
 			setParent(newValue);
@@ -180,22 +181,22 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			AbstractBeanDefinition bd = getBeanDefinition();
 			if (AUTOWIRE.equals(property)) {
 				if ("byName".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 				}
 				else if ("byType".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 				}
 				else if ("constructor".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 				}
 				else if (Boolean.TRUE.equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 				}
 			}
 			// constructorArgs
 			else if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List) {
 				ConstructorArgumentValues cav = new ConstructorArgumentValues();
-				List args = (List) newValue;
+				List<?> args = (List<?>) newValue;
 				for (Object arg : args) {
 					cav.addGenericArgumentValue(arg);
 				}
@@ -209,8 +210,9 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			}
 			// factoryMethod
 			else if (FACTORY_METHOD.equals(property)) {
-				if (newValue != null)
+				if (newValue != null) {
 					bd.setFactoryMethodName(newValue.toString());
+				}
 			}
 			// initMethod
 			else if (INIT_METHOD.equals(property)) {

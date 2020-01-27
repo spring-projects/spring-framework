@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,6 +57,7 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -73,16 +74,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
-
 	private final WebSocketClient webSocketClient;
 
 	private int inboundMessageSizeLimit = 64 * 1024;
 
 	private boolean autoStartup = true;
 
-	private boolean running = false;
+	private int phase = DEFAULT_PHASE;
 
-	private int phase = Integer.MAX_VALUE;
+	private volatile boolean running = false;
 
 
 	/**
@@ -196,12 +196,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	}
 
 	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
-	}
-
-	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
@@ -213,8 +207,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * when connected on the STOMP level after the CONNECTED frame is received.
 	 * @param url the url to connect to
 	 * @param handler the session handler
-	 * @param uriVars URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVars the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, StompSessionHandler handler, Object... uriVars) {
 		return connect(url, null, handler, uriVars);
@@ -227,8 +221,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake
 	 * @param handler the session handler
-	 * @param uriVariables URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
@@ -245,8 +239,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handshakeHeaders headers for the WebSocket handshake
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 * @param handler the session handler
-	 * @param uriVariables URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
@@ -264,7 +258,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handshakeHeaders the headers for the WebSocket handshake
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 * @param sessionHandler the STOMP session handler
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
@@ -272,7 +266,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		Assert.notNull(url, "'url' must not be null");
 		ConnectionHandlingStompSession session = createSession(connectHeaders, sessionHandler);
 		WebSocketTcpConnectionHandlerAdapter adapter = new WebSocketTcpConnectionHandlerAdapter(session);
-		getWebSocketClient().doHandshake(adapter, handshakeHeaders, url).addCallback(adapter);
+		getWebSocketClient()
+				.doHandshake(new LoggingWebSocketHandlerDecorator(adapter), handshakeHeaders, url)
+				.addCallback(adapter);
 		return session.getSessionFuture();
 	}
 
@@ -397,7 +393,10 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		}
 
 		private void updateLastWriteTime() {
-			this.lastWriteTime = (this.lastWriteTime != -1 ? System.currentTimeMillis() : -1);
+			long lastWriteTime = this.lastWriteTime;
+			if (lastWriteTime != -1) {
+				this.lastWriteTime = System.currentTimeMillis();
+			}
 		}
 
 		@Override
@@ -405,7 +404,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-				if (System.currentTimeMillis() - lastReadTime > duration) {
+				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
 						runnable.run();
 					}
@@ -422,17 +421,14 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public void onWriteInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(new Runnable() {
-				@Override
-				public void run() {
-					if (System.currentTimeMillis() - lastWriteTime > duration) {
-						try {
-							runnable.run();
-						}
-						catch (Throwable ex) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("WriteInactivityTask failure", ex);
-							}
+			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
+					try {
+						runnable.run();
+					}
+					catch (Throwable ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("WriteInactivityTask failure", ex);
 						}
 					}
 				}

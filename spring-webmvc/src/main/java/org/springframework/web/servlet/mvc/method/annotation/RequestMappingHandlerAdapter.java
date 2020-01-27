@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,8 +37,8 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -47,7 +48,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -98,13 +98,12 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * An {@link AbstractHandlerMethodAdapter} that supports {@link HandlerMethod}s
- * with their method argument and return type signature, as defined via
- * {@code @RequestMapping}.
+ * Extension of {@link AbstractHandlerMethodAdapter} that supports
+ * {@link RequestMapping @RequestMapping} annotated {@link HandlerMethod HandlerMethods}.
  *
  * <p>Support for custom argument and return value types can be added via
- * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
- * Or alternatively, to re-configure all argument and return value types,
+ * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers},
+ * or alternatively, to re-configure all argument and return value types,
  * use {@link #setArgumentResolvers} and {@link #setReturnValueHandlers}.
  *
  * @author Rossen Stoyanchev
@@ -115,6 +114,20 @@ import org.springframework.web.util.WebUtils;
  */
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
+
+	/**
+	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
+	 */
+	public static final MethodFilter INIT_BINDER_METHODS = method ->
+			AnnotatedElementUtils.hasAnnotation(method, InitBinder.class);
+
+	/**
+	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
+	 */
+	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
+					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
+
 
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -152,7 +165,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[0];
 
-	private ReactiveAdapterRegistry reactiveRegistry = new ReactiveAdapterRegistry();
+	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
@@ -180,13 +193,15 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	public RequestMappingHandlerAdapter() {
-		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
-
 		this.messageConverters = new ArrayList<>(4);
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
-		this.messageConverters.add(stringHttpMessageConverter);
-		this.messageConverters.add(new SourceHttpMessageConverter<>());
+		this.messageConverters.add(new StringHttpMessageConverter());
+		try {
+			this.messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
+		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
@@ -294,7 +309,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Provide custom {@link ModelAndViewResolver}s.
+	 * Provide custom {@link ModelAndViewResolver ModelAndViewResolvers}.
 	 * <p><strong>Note:</strong> This method is available for backwards
 	 * compatibility only. However, it is recommended to re-write a
 	 * {@code ModelAndViewResolver} as {@link HandlerMethodReturnValueHandler}.
@@ -312,7 +327,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Return the configured {@link ModelAndViewResolver}s, or {@code null}.
+	 * Return the configured {@link ModelAndViewResolver ModelAndViewResolvers}, or {@code null}.
 	 */
 	@Nullable
 	public List<ModelAndViewResolver> getModelAndViewResolvers() {
@@ -399,7 +414,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * processing thread has exited and ends when the request is dispatched again
 	 * for further processing of the concurrently produced result.
 	 * <p>If this value is not set, the default timeout of the underlying
-	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	 * implementation is used.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
@@ -411,8 +426,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @param interceptors the interceptors to register
 	 */
 	public void setCallableInterceptors(List<CallableProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors, "CallableProcessingInterceptor List must not be null");
-		this.callableInterceptors = interceptors.toArray(new CallableProcessingInterceptor[interceptors.size()]);
+		this.callableInterceptors = interceptors.toArray(new CallableProcessingInterceptor[0]);
 	}
 
 	/**
@@ -420,18 +434,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @param interceptors the interceptors to register
 	 */
 	public void setDeferredResultInterceptors(List<DeferredResultProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors, "DeferredResultProcessingInterceptor List must not be null");
-		this.deferredResultInterceptors = interceptors.toArray(new DeferredResultProcessingInterceptor[interceptors.size()]);
+		this.deferredResultInterceptors = interceptors.toArray(new DeferredResultProcessingInterceptor[0]);
 	}
 
 	/**
 	 * Configure the registry for reactive library types to be supported as
 	 * return values from controller methods.
-	 * @since 5.0
+	 * @since 5.0.5
 	 */
-	public void setReactiveRegistry(ReactiveAdapterRegistry reactiveRegistry) {
-		Assert.notNull(reactiveRegistry, "ReactiveAdapterRegistry is required");
-		this.reactiveRegistry = reactiveRegistry;
+	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry reactiveAdapterRegistry) {
+		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 	}
 
 	/**
@@ -439,7 +451,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @since 5.0
 	 */
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
-		return this.reactiveRegistry;
+		return this.reactiveAdapterRegistry;
 	}
 
 	/**
@@ -564,12 +576,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (getApplicationContext() == null) {
 			return;
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
-		}
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(adviceBeans);
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
@@ -581,34 +589,42 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
 				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + adviceBean);
-				}
 			}
 			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + adviceBean);
-				}
 			}
-			if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
+			if (RequestBodyAdvice.class.isAssignableFrom(beanType) || ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 				requestResponseBodyAdviceBeans.add(adviceBean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected RequestBodyAdvice bean in " + adviceBean);
-				}
-			}
-			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
-				requestResponseBodyAdviceBeans.add(adviceBean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected ResponseBodyAdvice bean in " + adviceBean);
-				}
 			}
 		}
 
 		if (!requestResponseBodyAdviceBeans.isEmpty()) {
 			this.requestResponseBodyAdvice.addAll(0, requestResponseBodyAdviceBeans);
 		}
+
+		if (logger.isDebugEnabled()) {
+			int modelSize = this.modelAttributeAdviceCache.size();
+			int binderSize = this.initBinderAdviceCache.size();
+			int reqCount = getBodyAdviceCount(RequestBodyAdvice.class);
+			int resCount = getBodyAdviceCount(ResponseBodyAdvice.class);
+			if (modelSize == 0 && binderSize == 0 && reqCount == 0 && resCount == 0) {
+				logger.debug("ControllerAdvice beans: none");
+			}
+			else {
+				logger.debug("ControllerAdvice beans: " + modelSize + " @ModelAttribute, " + binderSize +
+						" @InitBinder, " + reqCount + " RequestBodyAdvice, " + resCount + " ResponseBodyAdvice");
+			}
+		}
+	}
+
+	// Count all advice, including explicit registrations..
+
+	private int getBodyAdviceCount(Class<?> adviceType) {
+		List<Object> advice = this.requestResponseBodyAdvice;
+		return RequestBodyAdvice.class.isAssignableFrom(adviceType) ?
+				RequestResponseBodyAdviceChain.getAdviceByType(advice, RequestBodyAdvice.class).size() :
+				RequestResponseBodyAdviceChain.getAdviceByType(advice, ResponseBodyAdvice.class).size();
 	}
 
 	/**
@@ -703,7 +719,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters(),
-				this.reactiveRegistry, this.taskExecutor, this.contentNegotiationManager));
+				this.reactiveAdapterRegistry, this.taskExecutor, this.contentNegotiationManager));
 		handlers.add(new StreamingResponseBodyReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(),
 				this.contentNegotiationManager, this.requestResponseBodyAdvice));
@@ -811,7 +827,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			synchronized (this.sessionAttributesHandlerCache) {
 				sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
 				if (sessionAttrHandler == null) {
-					sessionAttrHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
+					sessionAttrHandler = new SessionAttributesHandler(handlerType, this.sessionAttributeStore);
 					this.sessionAttributesHandlerCache.put(handlerType, sessionAttrHandler);
 				}
 			}
@@ -862,9 +878,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				Object result = asyncManager.getConcurrentResult();
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found concurrent result value [" + result + "]");
-				}
+				LogFormatUtils.traceDebug(logger, traceOn -> {
+					String formatted = LogFormatUtils.formatValue(result, !traceOn);
+					return "Resume with async result [" + formatted + "]";
+				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
@@ -900,9 +917,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
 		// Global methods first
-		this.modelAttributeAdviceCache.forEach((clazz, methodSet) -> {
-			if (clazz.isApplicableToBeanType(handlerType)) {
-				Object bean = clazz.resolveBean();
+		this.modelAttributeAdviceCache.forEach((controllerAdviceBean, methodSet) -> {
+			if (controllerAdviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = controllerAdviceBean.resolveBean();
 				for (Method method : methodSet) {
 					attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
 				}
@@ -934,9 +951,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
 		// Global methods first
-		this.initBinderAdviceCache.forEach((clazz, methodSet) -> {
-			if (clazz.isApplicableToBeanType(handlerType)) {
-				Object bean = clazz.resolveBean();
+		this.initBinderAdviceCache.forEach((controllerAdviceBean, methodSet) -> {
+			if (controllerAdviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = controllerAdviceBean.resolveBean();
 				for (Method method : methodSet) {
 					initBinderMethods.add(createInitBinderMethod(bean, method));
 				}
@@ -995,19 +1012,5 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		return mav;
 	}
-
-
-	/**
-	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
-	 */
-	public static final MethodFilter INIT_BINDER_METHODS = method ->
-			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
-
-	/**
-	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
-	 */
-	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
-			((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-			(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
 
 }

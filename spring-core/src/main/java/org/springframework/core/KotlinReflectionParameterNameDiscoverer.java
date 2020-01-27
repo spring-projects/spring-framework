@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		if (!KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+		if (ctor.getDeclaringClass().isEnum() || !KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 			return null;
 		}
 
@@ -75,11 +75,15 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	private String[] getParameterNames(List<KParameter> parameters) {
 		List<KParameter> filteredParameters = parameters
 				.stream()
-				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
+				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
 				.collect(Collectors.toList());
 		String[] parameterNames = new String[filteredParameters.size()];
 		for (int i = 0; i < filteredParameters.size(); i++) {
-			String name = filteredParameters.get(i).getName();
+			KParameter parameter = filteredParameters.get(i);
+			// extension receivers are not explicitly named, but require a name for Java interoperability
+			// $receiver is not a valid Kotlin identifier, but valid in Java, so it can be used here
+			String name = KParameter.Kind.EXTENSION_RECEIVER.equals(parameter.getKind())  ? "$receiver" : parameter.getName();
 			if (name == null) {
 				return null;
 			}

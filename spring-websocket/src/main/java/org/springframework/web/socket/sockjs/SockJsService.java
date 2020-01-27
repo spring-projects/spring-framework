@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,7 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  * <p>In a Servlet 3+ container, {@link org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler}
  * can be used to invoke this service. The processing servlet, as well as all filters involved,
  * must have asynchronous support enabled through the ServletContext API or by adding an
- * {@code <async-support>true</async-support>} element to servlet and filter declarations
+ * <code>&lt;async-support&gt;true&lt;/async-support&gt;</code> element to servlet and filter declarations
  * in web.xml.
  *
  * @author Rossen Stoyanchev
@@ -40,7 +40,7 @@ public interface SockJsService {
 	/**
 	 * Process a SockJS HTTP request.
 	 * <p>See the "Base URL", "Static URLs", and "Session URLs" sections of the <a
-	 * href="http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html">SockJS
+	 * href="https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html">SockJS
 	 * protocol</a> for details on the types of URLs expected.
 	 * @param request the current request
 	 * @param response the current response

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -97,19 +95,18 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	 * @param headers the headers to add
 	 */
 	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
+		headers.forEach((headerName, headerValues) -> {
 			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
-				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				String headerValue = StringUtils.collectionToDelimitedString(headerValues, "; ");
 				httpRequest.addHeader(headerName, headerValue);
 			}
 			else if (!HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) &&
 					!HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName)) {
-				for (String headerValue : entry.getValue()) {
+				for (String headerValue : headerValues) {
 					httpRequest.addHeader(headerName, headerValue);
 				}
 			}
-		}
+		});
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,20 +23,16 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 
 import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -45,10 +41,15 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Juergen Hoeller
@@ -56,10 +57,6 @@ import static org.mockito.BDDMockito.*;
  * @since 14.03.2004
  */
 public class FreeMarkerViewTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void noFreeMarkerConfig() throws Exception {
@@ -71,18 +68,18 @@ public class FreeMarkerViewTests {
 
 		fv.setUrl("anythingButNull");
 
-		exception.expect(ApplicationContextException.class);
-		exception.expectMessage(containsString("FreeMarkerConfig"));
-		fv.setApplicationContext(wac);
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				fv.setApplicationContext(wac))
+			.withMessageContaining("FreeMarkerConfig");
 	}
 
 	@Test
 	public void noTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString("url"));
-		fv.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				fv.afterPropertiesSet())
+			.withMessageContaining("url");
 	}
 
 	@Test
@@ -113,7 +110,7 @@ public class FreeMarkerViewTests {
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
-		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(AbstractView.DEFAULT_CONTENT_TYPE);
 	}
 
 	@Test
@@ -145,7 +142,7 @@ public class FreeMarkerViewTests {
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
-		assertEquals("myContentType", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("myContentType");
 	}
 
 	@Test
@@ -165,19 +162,19 @@ public class FreeMarkerViewTests {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("test", Locale.CANADA);
-		assertEquals("Correct view class", FreeMarkerView.class, view.getClass());
-		assertEquals("Correct URL", "prefix_test_suffix", ((FreeMarkerView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(FreeMarkerView.class);
+		assertThat(((FreeMarkerView) view).getUrl()).as("Correct URL").isEqualTo("prefix_test_suffix");
 
 		view = vr.resolveViewName("non-existing", Locale.CANADA);
-		assertNull(view);
+		assertThat(view).isNull();
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
-		assertEquals("Correct view class", RedirectView.class, view.getClass());
-		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(RedirectView.class);
+		assertThat(((RedirectView) view).getUrl()).as("Correct URL").isEqualTo("myUrl");
 
 		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
-		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(InternalResourceView.class);
+		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("myUrl");
 	}
 
 
@@ -193,10 +190,11 @@ public class FreeMarkerViewTests {
 				return new Template(name, new StringReader("test"), this) {
 					@Override
 					public void process(Object model, Writer writer) throws TemplateException, IOException {
-						assertEquals(Locale.US, locale);
-						assertTrue(model instanceof AllHttpScopesHashModel);
+						assertThat(locale).isEqualTo(Locale.US);
+						boolean condition = model instanceof AllHttpScopesHashModel;
+						assertThat(condition).isTrue();
 						AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
-						assertEquals("myvalue", fmModel.get("myattr").toString());
+						assertThat(fmModel.get("myattr").toString()).isEqualTo("myvalue");
 					}
 				};
 			}

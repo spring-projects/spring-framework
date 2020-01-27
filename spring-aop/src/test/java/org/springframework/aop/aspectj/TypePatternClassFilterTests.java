@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,19 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.tests.sample.beans.CountingTestBean;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.subpkg.DeepBean;
+import org.springframework.beans.testfixture.beans.CountingTestBean;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
@@ -34,58 +36,94 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Rick Evans
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class TypePatternClassFilterTests {
+class TypePatternClassFilterTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testInvalidPattern() {
-		// should throw - pattern must be recognized as invalid
-		new TypePatternClassFilter("-");
+	@Test
+	void nullPattern() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TypePatternClassFilter(null));
 	}
 
 	@Test
-	public void testValidPatternMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
-		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
-		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
-		assertTrue("Must match: in package", tpcf.matches(IOther.class));
-		assertFalse("Must be excluded: in wrong package", tpcf.matches(DeepBean.class));
-		assertFalse("Must be excluded: in wrong package", tpcf.matches(BeanFactory.class));
-		assertFalse("Must be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
+	void invalidPattern() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TypePatternClassFilter("-"));
 	}
 
 	@Test
-	public void testSubclassMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.tests.sample.beans.ITestBean+");
-		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
-		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
-		assertTrue("Must match: in package", tpcf.matches(CountingTestBean.class));
-		assertFalse("Must be excluded: not subclass", tpcf.matches(IOther.class));
-		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
+	void invocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
+		assertThatIllegalStateException().isThrownBy(() -> new TypePatternClassFilter().matches(String.class));
 	}
 
 	@Test
-	public void testAndOrNotReplacement() {
+	void validPatternMatching() {
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+
+		assertThat(tpcf.matches(TestBean.class)).as("Must match: in package").isTrue();
+		assertThat(tpcf.matches(ITestBean.class)).as("Must match: in package").isTrue();
+		assertThat(tpcf.matches(IOther.class)).as("Must match: in package").isTrue();
+
+		assertThat(tpcf.matches(DeepBean.class)).as("Must be excluded: in wrong package").isFalse();
+		assertThat(tpcf.matches(BeanFactory.class)).as("Must be excluded: in wrong package").isFalse();
+		assertThat(tpcf.matches(DefaultListableBeanFactory.class)).as("Must be excluded: in wrong package").isFalse();
+	}
+
+	@Test
+	void subclassMatching() {
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.ITestBean+");
+
+		assertThat(tpcf.matches(TestBean.class)).as("Must match: in package").isTrue();
+		assertThat(tpcf.matches(ITestBean.class)).as("Must match: in package").isTrue();
+		assertThat(tpcf.matches(CountingTestBean.class)).as("Must match: in package").isTrue();
+
+		assertThat(tpcf.matches(IOther.class)).as("Must be excluded: not subclass").isFalse();
+		assertThat(tpcf.matches(DefaultListableBeanFactory.class)).as("Must be excluded: not subclass").isFalse();
+	}
+
+	@Test
+	void andOrNotReplacement() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("java.lang.Object or java.lang.String");
-		assertFalse("matches Number",tpcf.matches(Number.class));
-		assertTrue("matches Object",tpcf.matches(Object.class));
-		assertTrue("matchesString",tpcf.matches(String.class));
+		assertThat(tpcf.matches(Number.class)).as("matches Number").isFalse();
+		assertThat(tpcf.matches(Object.class)).as("matches Object").isTrue();
+		assertThat(tpcf.matches(String.class)).as("matchesString").isTrue();
+
 		tpcf = new TypePatternClassFilter("java.lang.Number+ and java.lang.Float");
-		assertTrue("matches Float",tpcf.matches(Float.class));
-		assertFalse("matches Double",tpcf.matches(Double.class));
+		assertThat(tpcf.matches(Float.class)).as("matches Float").isTrue();
+		assertThat(tpcf.matches(Double.class)).as("matches Double").isFalse();
+
 		tpcf = new TypePatternClassFilter("java.lang.Number+ and not java.lang.Float");
-		assertFalse("matches Float",tpcf.matches(Float.class));
-		assertTrue("matches Double",tpcf.matches(Double.class));
+		assertThat(tpcf.matches(Float.class)).as("matches Float").isFalse();
+		assertThat(tpcf.matches(Double.class)).as("matches Double").isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetTypePatternWithNullArgument() throws Exception {
-		new TypePatternClassFilter(null);
+	@Test
+	void testEquals() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
+
+		assertThat(filter1).isEqualTo(filter2);
+		assertThat(filter1).isNotEqualTo(filter3);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
-		new TypePatternClassFilter().matches(String.class);
+	@Test
+	void testHashCode() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
+
+		assertThat(filter1.hashCode()).isEqualTo(filter2.hashCode());
+		assertThat(filter1.hashCode()).isNotEqualTo(filter3.hashCode());
+	}
+
+	@Test
+	void testToString() {
+		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
+
+		assertThat(filter1.toString())
+			.isEqualTo("org.springframework.aop.aspectj.TypePatternClassFilter: org.springframework.beans.testfixture.beans.*");
+		assertThat(filter1.toString()).isEqualTo(filter2.toString());
 	}
 
 }

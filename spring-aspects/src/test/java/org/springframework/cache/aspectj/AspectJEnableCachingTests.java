@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,15 +17,11 @@
 package org.springframework.cache.aspectj;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.config.AbstractCacheAnnotationTests;
 import org.springframework.cache.config.AnnotatedClassCacheableService;
 import org.springframework.cache.config.CacheableService;
 import org.springframework.cache.config.DefaultCacheableService;
-import org.springframework.cache.config.SomeCustomKeyGenerator;
-import org.springframework.cache.config.SomeKeyGenerator;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
@@ -34,6 +30,9 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.SomeCustomKeyGenerator;
+import org.springframework.context.testfixture.cache.SomeKeyGenerator;
 
 /**
  * @author Stephane Nicoll

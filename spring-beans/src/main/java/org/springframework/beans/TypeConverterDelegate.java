@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -81,42 +80,6 @@ class TypeConverterDelegate {
 		this.targetObject = targetObject;
 	}
 
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be {@code null})
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object newValue, @Nullable Class<T> requiredType,
-			@Nullable MethodParameter methodParam) throws IllegalArgumentException {
-
-		return convertIfNecessary(null, null, newValue, requiredType,
-				(methodParam != null ? new TypeDescriptor(methodParam) : TypeDescriptor.valueOf(requiredType)));
-	}
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param field the reflective field that is the target of the conversion
-	 * (may be {@code null})
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object newValue, @Nullable Class<T> requiredType, @Nullable Field field)
-			throws IllegalArgumentException {
-
-		return convertIfNecessary(null, null, newValue, requiredType,
-				(field != null ? new TypeDescriptor(field) : TypeDescriptor.valueOf(requiredType)));
-	}
 
 	/**
 	 * Convert the value to the required type for the specified property.
@@ -247,7 +210,7 @@ class TypeConverterDelegate {
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
-					if (requiredType.isEnum() && "".equals(trimmedValue)) {
+					if (requiredType.isEnum() && trimmedValue.isEmpty()) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
@@ -317,7 +280,7 @@ class TypeConverterDelegate {
 
 		if (Enum.class == requiredType && this.targetObject != null) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
-			int index = trimmedValue.lastIndexOf(".");
+			int index = trimmedValue.lastIndexOf('.');
 			if (index > - 1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);
@@ -346,6 +309,7 @@ class TypeConverterDelegate {
 			// to be checked, hence we don't return it right away.
 			try {
 				Field enumField = requiredType.getField(trimmedValue);
+				ReflectionUtils.makeAccessible(enumField);
 				convertedValue = enumField.get(null);
 			}
 			catch (Throwable ex) {
@@ -558,8 +522,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		int i = 0;
-		for (; it.hasNext(); i++) {
+		for (int i = 0; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,

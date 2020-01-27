@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -31,37 +31,18 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.AbstractExpressionTests;
 import org.springframework.expression.spel.SpelUtilities;
-import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Tests for any helper code.
+ * Tests for reflection helper code.
  *
  * @author Andy Clement
  */
 public class ReflectionHelperTests extends AbstractExpressionTests {
-
-	@Test
-	public void testFormatHelperForClassName() {
-		assertEquals("java.lang.String",FormatHelper.formatClassNameForMessage(String.class));
-		assertEquals("java.lang.String[]",FormatHelper.formatClassNameForMessage(new String[1].getClass()));
-		assertEquals("java.lang.String[][]",FormatHelper.formatClassNameForMessage(new String[1][1].getClass()));
-		assertEquals("int[]",FormatHelper.formatClassNameForMessage(new int[1].getClass()));
-		assertEquals("int[][]",FormatHelper.formatClassNameForMessage(new int[1][2].getClass()));
-		assertEquals("null",FormatHelper.formatClassNameForMessage(null));
-	}
-
-	/*
-	@Test
-	public void testFormatHelperForMethod() {
-		assertEquals("foo(java.lang.String)",FormatHelper.formatMethodForMessage("foo", String.class));
-		assertEquals("goo(java.lang.String,int[])",FormatHelper.formatMethodForMessage("goo", String.class, new int[1].getClass()));
-		assertEquals("boo()",FormatHelper.formatMethodForMessage("boo"));
-	}
-	*/
 
 	@Test
 	public void testUtilities() throws ParseException {
@@ -90,8 +71,8 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 //		  CompoundExpression  value:2
 //		    IntLiteral  value:2
 //		===> Expression '3+4+5+6+7-2' - AST end
-		assertTrue(s.contains("===> Expression '3+4+5+6+7-2' - AST start"));
-		assertTrue(s.contains(" OpPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2"));
+		assertThat(s.contains("===> Expression '3+4+5+6+7-2' - AST start")).isTrue();
+		assertThat(s.contains(" OpPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")).isTrue();
 	}
 
 	@Test
@@ -99,17 +80,17 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		TypedValue tv1 = new TypedValue("hello");
 		TypedValue tv2 = new TypedValue("hello");
 		TypedValue tv3 = new TypedValue("bye");
-		assertEquals(String.class, tv1.getTypeDescriptor().getType());
-		assertEquals("TypedValue: 'hello' of [java.lang.String]", tv1.toString());
-		assertEquals(tv1, tv2);
-		assertEquals(tv2, tv1);
-		assertNotEquals(tv1, tv3);
-		assertNotEquals(tv2, tv3);
-		assertNotEquals(tv3, tv1);
-		assertNotEquals(tv3, tv2);
-		assertEquals(tv1.hashCode(), tv2.hashCode());
-		assertNotEquals(tv1.hashCode(), tv3.hashCode());
-		assertNotEquals(tv2.hashCode(), tv3.hashCode());
+		assertThat(tv1.getTypeDescriptor().getType()).isEqualTo(String.class);
+		assertThat(tv1.toString()).isEqualTo("TypedValue: 'hello' of [java.lang.String]");
+		assertThat(tv2).isEqualTo(tv1);
+		assertThat(tv1).isEqualTo(tv2);
+		assertThat(tv3).isNotEqualTo(tv1);
+		assertThat(tv3).isNotEqualTo(tv2);
+		assertThat(tv1).isNotEqualTo(tv3);
+		assertThat(tv2).isNotEqualTo(tv3);
+		assertThat(tv2.hashCode()).isEqualTo(tv1.hashCode());
+		assertThat(tv3.hashCode()).isNotEqualTo((long) tv1.hashCode());
+		assertThat(tv3.hashCode()).isNotEqualTo((long) tv2.hashCode());
 	}
 
 	@Test
@@ -117,10 +98,10 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(String) with (String) is exact match
-		checkMatch(new Class[] {String.class}, new Class[] {String.class}, tc, ReflectionHelper.ArgumentsMatchKind.EXACT);
+		checkMatch(new Class<?>[] {String.class}, new Class<?>[] {String.class}, tc, ReflectionHelper.ArgumentsMatchKind.EXACT);
 
 		// Calling foo(String,Integer) with (String,Integer) is exact match
-		checkMatch(new Class[] {String.class, Integer.class}, new Class[] {String.class, Integer.class}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch(new Class<?>[] {String.class, Integer.class}, new Class<?>[] {String.class, Integer.class}, tc, ArgumentsMatchKind.EXACT);
 	}
 
 	@Test
@@ -128,13 +109,13 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(List) with (ArrayList) is close match (no conversion required)
-		checkMatch(new Class[] {ArrayList.class}, new Class[] {List.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {ArrayList.class}, new Class<?>[] {List.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Sub,String) on call to foo(Super,String) is close match
-		checkMatch(new Class[] {Sub.class, String.class}, new Class[] {Super.class, String.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Sub.class, String.class}, new Class<?>[] {Super.class, String.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (String,Sub) on call to foo(String,Super) is close match
-		checkMatch(new Class[] {String.class, Sub.class}, new Class[] {String.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {String.class, Sub.class}, new Class<?>[] {String.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
 	}
 
 	@Test
@@ -142,16 +123,16 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(String,int) with (String,Integer) requires boxing conversion of argument one
-		checkMatch(new Class[] {String.class, Integer.TYPE}, new Class[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {String.class, Integer.TYPE}, new Class<?>[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,String) on call to foo(Integer,String) requires boxing conversion of argument zero
-		checkMatch(new Class[] {Integer.TYPE, String.class}, new Class[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Integer.TYPE, String.class}, new Class<?>[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub) on call to foo(Integer,Super) requires boxing conversion of argument zero
-		checkMatch(new Class[] {Integer.TYPE, Sub.class}, new Class[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Integer.TYPE, Sub.class}, new Class<?>[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub,boolean) on call to foo(Integer,Super,Boolean) requires boxing conversion of arguments zero and two
-		// TODO checkMatch(new Class[] {Integer.TYPE, Sub.class, Boolean.TYPE}, new Class[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
+		// TODO checkMatch(new Class<?>[] {Integer.TYPE, Sub.class, Boolean.TYPE}, new Class<?>[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
 	}
 
 	@Test
@@ -159,59 +140,57 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 
 		// Passing (Super,String) on call to foo(Sub,String) is not a match
-		checkMatch(new Class[] {Super.class,String.class}, new Class[] {Sub.class,String.class},typeConverter,null);
+		checkMatch(new Class<?>[] {Super.class,String.class}, new Class<?>[] {Sub.class,String.class}, typeConverter, null);
 	}
 
 	@Test
 	public void testReflectionHelperCompareArguments_Varargs_ExactMatching() {
 		StandardTypeConverter tc = new StandardTypeConverter();
-		Class<?> stringArrayClass = new String[0].getClass();
-		Class<?> integerArrayClass = new Integer[0].getClass();
 
 		// Passing (String[]) on call to (String[]) is exact match
-		checkMatch2(new Class[] {stringArrayClass}, new Class[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {String[].class}, new Class<?>[] {String[].class}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Integer, String[]) on call to (Integer, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, stringArrayClass}, new Class[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {Integer.class, String[].class}, new Class<?>[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (String, Integer, String[]) on call to (String, String, String[]) is exact match
-		checkMatch2(new Class[] {String.class, Integer.class, stringArrayClass}, new Class[] {String.class,Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {String.class, Integer.class, String[].class}, new Class<?>[] {String.class,Integer.class, String[].class}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Sub, String[]) on call to (Super, String[]) is exact match
-		checkMatch2(new Class[] {Sub.class, stringArrayClass}, new Class[] {Super.class,stringArrayClass}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch2(new Class<?>[] {Sub.class, String[].class}, new Class<?>[] {Super.class,String[].class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Integer, String[]) on call to (String, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, stringArrayClass}, new Class[] {String.class, stringArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, String[].class}, new Class<?>[] {String.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (Integer, Sub, String[]) on call to (String, Super, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, Sub.class, String[].class}, new Class[] {String.class,Super .class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Sub.class, String[].class}, new Class<?>[] {String.class,Super .class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (String) on call to (String[]) is exact match
-		checkMatch2(new Class[] {String.class}, new Class[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {String.class}, new Class<?>[] {String[].class}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Integer,String) on call to (Integer,String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, String.class}, new Class[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {Integer.class, String.class}, new Class<?>[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (String) on call to (Integer[]) is conversion match (String to Integer)
-		checkMatch2(new Class[] {String.class}, new Class[] {integerArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {String.class}, new Class<?>[] {Integer[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (Sub) on call to (Super[]) is close match
-		checkMatch2(new Class[] {Sub.class}, new Class[] {new Super[0].getClass()}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch2(new Class<?>[] {Sub.class}, new Class<?>[] {Super[].class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Super) on call to (Sub[]) is not a match
-		checkMatch2(new Class[] {Super.class}, new Class[] {new Sub[0].getClass()}, tc, null);
+		checkMatch2(new Class<?>[] {Super.class}, new Class<?>[] {Sub[].class}, tc, null);
 
-		checkMatch2(new Class[] {Unconvertable.class, String.class}, new Class[] {Sub.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, String.class}, new Class[] {String.class, String.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Unconvertable.class, String.class}, new Class[] {Sub.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, String.class}, new Class[] {String.class, String.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, Sub.class}, new Class[] {String.class, String.class, Super[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, Sub.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, Integer.class}, new Class[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, Integer.class}, new Class<?>[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 		// what happens on (Integer,String) passed to (Integer[]) ?
 	}
 
@@ -234,12 +213,12 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		// varargs with nothing needing conversion
 		args = new Object[] {3, "abc", "abc"};
 		ReflectionHelper.convertArguments(tc, args, twoArg, 1);
-		checkArguments(args, "3","abc","abc");
+		checkArguments(args, "3", "abc", "abc");
 
 		// varargs with conversion required
 		args = new Object[] {3, false ,3.0d};
 		ReflectionHelper.convertArguments(tc, args, twoArg, 1);
-		checkArguments(args, "3","false","3.0");
+		checkArguments(args, "3", "false", "3.0");
 	}
 
 	@Test
@@ -251,181 +230,229 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		// Simple conversion: int to string
 		Object[] args = new Object[] {3};
 		ReflectionHelper.convertAllArguments(tc, args, oneArg);
-		checkArguments(args,"3");
+		checkArguments(args, "3");
 
 		// varargs conversion
 		args = new Object[] {3, false, 3.0f};
 		ReflectionHelper.convertAllArguments(tc, args, twoArg);
-		checkArguments(args,"3","false","3.0");
+		checkArguments(args, "3", "false", "3.0");
 
 		// varargs conversion but no varargs
 		args = new Object[] {3};
 		ReflectionHelper.convertAllArguments(tc, args, twoArg);
-		checkArguments(args,"3");
+		checkArguments(args, "3");
 
 		// null value
 		args = new Object[] {3, null, 3.0f};
 		ReflectionHelper.convertAllArguments(tc, args, twoArg);
-		checkArguments(args,"3",null,"3.0");
+		checkArguments(args, "3", null, "3.0");
 	}
 
 	@Test
 	public void testSetupArguments() {
-		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[] {new String[0].getClass()},"a","b","c");
+		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
+				new Class<?>[] {String[].class}, "a", "b", "c");
 
-		assertEquals(1, newArray.length);
+		assertThat(newArray.length).isEqualTo(1);
 		Object firstParam = newArray[0];
-		assertEquals(String.class,firstParam.getClass().getComponentType());
-		Object[] firstParamArray = (Object[])firstParam;
-		assertEquals(3,firstParamArray.length);
-		assertEquals("a",firstParamArray[0]);
-		assertEquals("b",firstParamArray[1]);
-		assertEquals("c",firstParamArray[2]);
+		assertThat(firstParam.getClass().getComponentType()).isEqualTo(String.class);
+		Object[] firstParamArray = (Object[]) firstParam;
+		assertThat(firstParamArray.length).isEqualTo(3);
+		assertThat(firstParamArray[0]).isEqualTo("a");
+		assertThat(firstParamArray[1]).isEqualTo("b");
+		assertThat(firstParamArray[2]).isEqualTo("c");
 	}
 
 	@Test
-	public void testReflectivePropertyResolver() throws Exception {
-		ReflectivePropertyAccessor rpr = new ReflectivePropertyAccessor();
+	public void testReflectivePropertyAccessor() throws Exception {
+		ReflectivePropertyAccessor rpa = new ReflectivePropertyAccessor();
 		Tester t = new Tester();
 		t.setProperty("hello");
 		EvaluationContext ctx = new StandardEvaluationContext(t);
-		assertTrue(rpr.canRead(ctx, t, "property"));
-		assertEquals("hello",rpr.read(ctx, t, "property").getValue());
-		assertEquals("hello",rpr.read(ctx, t, "property").getValue()); // cached accessor used
+		assertThat(rpa.canRead(ctx, t, "property")).isTrue();
+		assertThat(rpa.read(ctx, t, "property").getValue()).isEqualTo("hello");
+		// cached accessor used
+		assertThat(rpa.read(ctx, t, "property").getValue()).isEqualTo("hello");
 
-		assertTrue(rpr.canRead(ctx, t, "field"));
-		assertEquals(3,rpr.read(ctx, t, "field").getValue());
-		assertEquals(3,rpr.read(ctx, t, "field").getValue()); // cached accessor used
+		assertThat(rpa.canRead(ctx, t, "field")).isTrue();
+		assertThat(rpa.read(ctx, t, "field").getValue()).isEqualTo(3);
+		// cached accessor used
+		assertThat(rpa.read(ctx, t, "field").getValue()).isEqualTo(3);
 
-		assertTrue(rpr.canWrite(ctx, t, "property"));
-		rpr.write(ctx, t, "property","goodbye");
-		rpr.write(ctx, t, "property","goodbye"); // cached accessor used
+		assertThat(rpa.canWrite(ctx, t, "property")).isTrue();
+		rpa.write(ctx, t, "property", "goodbye");
+		rpa.write(ctx, t, "property", "goodbye"); // cached accessor used
 
-		assertTrue(rpr.canWrite(ctx, t, "field"));
-		rpr.write(ctx, t, "field",12);
-		rpr.write(ctx, t, "field",12);
+		assertThat(rpa.canWrite(ctx, t, "field")).isTrue();
+		rpa.write(ctx, t, "field", 12);
+		rpa.write(ctx, t, "field", 12);
 
 		// Attempted write as first activity on this field and property to drive testing
 		// of populating type descriptor cache
-		rpr.write(ctx,t,"field2",3);
-		rpr.write(ctx, t, "property2","doodoo");
-		assertEquals(3,rpr.read(ctx,t,"field2").getValue());
+		rpa.write(ctx, t, "field2", 3);
+		rpa.write(ctx, t, "property2", "doodoo");
+		assertThat(rpa.read(ctx, t, "field2").getValue()).isEqualTo(3);
 
 		// Attempted read as first activity on this field and property (no canRead before them)
-		assertEquals(0,rpr.read(ctx,t,"field3").getValue());
-		assertEquals("doodoo",rpr.read(ctx,t,"property3").getValue());
+		assertThat(rpa.read(ctx, t, "field3").getValue()).isEqualTo(0);
+		assertThat(rpa.read(ctx, t, "property3").getValue()).isEqualTo("doodoo");
 
 		// Access through is method
-//		assertEquals(0,rpr.read(ctx,t,"field3").getValue());
-		assertEquals(false,rpr.read(ctx,t,"property4").getValue());
-		assertTrue(rpr.canRead(ctx,t,"property4"));
+		assertThat(rpa .read(ctx, t, "field3").getValue()).isEqualTo(0);
+		assertThat(rpa.read(ctx, t, "property4").getValue()).isEqualTo(false);
+		assertThat(rpa.canRead(ctx, t, "property4")).isTrue();
 
 		// repro SPR-9123, ReflectivePropertyAccessor JavaBean property names compliance tests
-		assertEquals("iD",rpr.read(ctx,t,"iD").getValue());
-		assertTrue(rpr.canRead(ctx,t,"iD"));
-		assertEquals("id",rpr.read(ctx,t,"id").getValue());
-		assertTrue(rpr.canRead(ctx,t,"id"));
-		assertEquals("ID",rpr.read(ctx,t,"ID").getValue());
-		assertTrue(rpr.canRead(ctx,t,"ID"));
+		assertThat(rpa.read(ctx, t, "iD").getValue()).isEqualTo("iD");
+		assertThat(rpa.canRead(ctx, t, "iD")).isTrue();
+		assertThat(rpa.read(ctx, t, "id").getValue()).isEqualTo("id");
+		assertThat(rpa.canRead(ctx, t, "id")).isTrue();
+		assertThat(rpa.read(ctx, t, "ID").getValue()).isEqualTo("ID");
+		assertThat(rpa.canRead(ctx, t, "ID")).isTrue();
 		// note: "Id" is not a valid JavaBean name, nevertheless it is treated as "id"
-		assertEquals("id",rpr.read(ctx,t,"Id").getValue());
-		assertTrue(rpr.canRead(ctx,t,"Id"));
+		assertThat(rpa.read(ctx, t, "Id").getValue()).isEqualTo("id");
+		assertThat(rpa.canRead(ctx, t, "Id")).isTrue();
 
 		// repro SPR-10994
-		assertEquals("xyZ",rpr.read(ctx,t,"xyZ").getValue());
-		assertTrue(rpr.canRead(ctx,t,"xyZ"));
-		assertEquals("xY",rpr.read(ctx,t,"xY").getValue());
-		assertTrue(rpr.canRead(ctx,t,"xY"));
+		assertThat(rpa.read(ctx, t, "xyZ").getValue()).isEqualTo("xyZ");
+		assertThat(rpa.canRead(ctx, t, "xyZ")).isTrue();
+		assertThat(rpa.read(ctx, t, "xY").getValue()).isEqualTo("xY");
+		assertThat(rpa.canRead(ctx, t, "xY")).isTrue();
 
 		// SPR-10122, ReflectivePropertyAccessor JavaBean property names compliance tests - setters
-		rpr.write(ctx, t, "pEBS","Test String");
-		assertEquals("Test String",rpr.read(ctx,t,"pEBS").getValue());
+		rpa.write(ctx, t, "pEBS", "Test String");
+		assertThat(rpa.read(ctx, t, "pEBS").getValue()).isEqualTo("Test String");
 	}
 
 	@Test
-	public void testOptimalReflectivePropertyResolver() throws Exception {
-		ReflectivePropertyAccessor rpr = new ReflectivePropertyAccessor();
-		Tester t = new Tester();
-		t.setProperty("hello");
-		EvaluationContext ctx = new StandardEvaluationContext(t);
-//		assertTrue(rpr.canRead(ctx, t, "property"));
-//		assertEquals("hello",rpr.read(ctx, t, "property").getValue());
-//		assertEquals("hello",rpr.read(ctx, t, "property").getValue()); // cached accessor used
+	public void testOptimalReflectivePropertyAccessor() throws Exception {
+		ReflectivePropertyAccessor reflective = new ReflectivePropertyAccessor();
+		Tester tester = new Tester();
+		tester.setProperty("hello");
+		EvaluationContext ctx = new StandardEvaluationContext(tester);
+		assertThat(reflective.canRead(ctx, tester, "property")).isTrue();
+		assertThat(reflective.read(ctx, tester, "property").getValue()).isEqualTo("hello");
+		// cached accessor used
+		assertThat(reflective.read(ctx, tester, "property").getValue()).isEqualTo("hello");
 
-		PropertyAccessor optA = rpr.createOptimalAccessor(ctx, t, "property");
-		assertTrue(optA.canRead(ctx, t, "property"));
-		assertFalse(optA.canRead(ctx, t, "property2"));
-		try {
-			optA.canWrite(ctx, t, "property");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.canWrite(ctx, t, "property2");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		assertEquals("hello",optA.read(ctx, t, "property").getValue());
-		assertEquals("hello",optA.read(ctx, t, "property").getValue()); // cached accessor used
+		PropertyAccessor property = reflective.createOptimalAccessor(ctx, tester, "property");
+		assertThat(property.canRead(ctx, tester, "property")).isTrue();
+		assertThat(property.canRead(ctx, tester, "property2")).isFalse();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.canWrite(ctx, tester, "property"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.canWrite(ctx, tester, "property2"));
+		assertThat(property.read(ctx, tester, "property").getValue()).isEqualTo("hello");
+		// cached accessor used
+		assertThat(property.read(ctx, tester, "property").getValue()).isEqualTo("hello");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(property::getSpecificTargetClasses);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.write(ctx, tester, "property", null));
 
-		try {
-			optA.getSpecificTargetClasses();
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.write(ctx,t,"property",null);
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-
-		optA = rpr.createOptimalAccessor(ctx, t, "field");
-		assertTrue(optA.canRead(ctx, t, "field"));
-		assertFalse(optA.canRead(ctx, t, "field2"));
-		try {
-			optA.canWrite(ctx, t, "field");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.canWrite(ctx, t, "field2");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		assertEquals(3,optA.read(ctx, t, "field").getValue());
-		assertEquals(3,optA.read(ctx, t, "field").getValue()); // cached accessor used
-
-		try {
-			optA.getSpecificTargetClasses();
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.write(ctx,t,"field",null);
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
+		PropertyAccessor field = reflective.createOptimalAccessor(ctx, tester, "field");
+		assertThat(field.canRead(ctx, tester, "field")).isTrue();
+		assertThat(field.canRead(ctx, tester, "field2")).isFalse();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.canWrite(ctx, tester, "field"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.canWrite(ctx, tester, "field2"));
+		assertThat(field.read(ctx, tester, "field").getValue()).isEqualTo(3);
+		// cached accessor used
+		assertThat(field.read(ctx, tester, "field").getValue()).isEqualTo(3);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(field::getSpecificTargetClasses);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.write(ctx, tester, "field", null));
 	}
 
 
-	// test classes
+	/**
+	 * Used to validate the match returned from a compareArguments call.
+	 */
+	private void checkMatch(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
+		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArguments(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
+		if (expectedMatchKind == null) {
+			assertThat(matchInfo).as("Did not expect them to match in any way").isNull();
+		}
+		else {
+			assertThat(matchInfo).as("Should not be a null match").isNotNull();
+		}
+
+		if (expectedMatchKind == ArgumentsMatchKind.EXACT) {
+			assertThat(matchInfo.isExactMatch()).isTrue();
+		}
+		else if (expectedMatchKind == ArgumentsMatchKind.CLOSE) {
+			assertThat(matchInfo.isCloseMatch()).isTrue();
+		}
+		else if (expectedMatchKind == ArgumentsMatchKind.REQUIRES_CONVERSION) {
+			assertThat(matchInfo.isMatchRequiringConversion()).as("expected to be a match requiring conversion, but was " + matchInfo).isTrue();
+		}
+	}
+
+	/**
+	 * Used to validate the match returned from a compareArguments call.
+	 */
+	private void checkMatch2(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
+		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArgumentsVarargs(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
+		if (expectedMatchKind == null) {
+			assertThat(matchInfo).as("Did not expect them to match in any way: " + matchInfo).isNull();
+		}
+		else {
+			assertThat(matchInfo).as("Should not be a null match").isNotNull();
+		}
+
+		if (expectedMatchKind == ArgumentsMatchKind.EXACT) {
+			assertThat(matchInfo.isExactMatch()).isTrue();
+		}
+		else if (expectedMatchKind == ArgumentsMatchKind.CLOSE) {
+			assertThat(matchInfo.isCloseMatch()).isTrue();
+		}
+		else if (expectedMatchKind == ArgumentsMatchKind.REQUIRES_CONVERSION) {
+			assertThat(matchInfo.isMatchRequiringConversion()).as("expected to be a match requiring conversion, but was " + matchInfo).isTrue();
+		}
+	}
+
+	private void checkArguments(Object[] args, Object... expected) {
+		assertThat(args.length).isEqualTo(expected.length);
+		for (int i = 0; i < expected.length; i++) {
+			checkArgument(expected[i],args[i]);
+		}
+	}
+
+	private void checkArgument(Object expected, Object actual) {
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	private List<TypeDescriptor> getTypeDescriptors(Class<?>... types) {
+		List<TypeDescriptor> typeDescriptors = new ArrayList<>(types.length);
+		for (Class<?> type : types) {
+			typeDescriptors.add(TypeDescriptor.valueOf(type));
+		}
+		return typeDescriptors;
+	}
+
+
+	public interface TestInterface {
+
+		void oneArg(String arg1);
+
+		void twoArg(String arg1, String... arg2);
+	}
+
+
+	static class Super {
+	}
+
+
+	static class Sub extends Super {
+	}
+
+
+	static class Unconvertable {
+	}
+
+
 	static class Tester {
+
 		String property;
 		public int field = 3;
 		public int field2;
@@ -441,6 +468,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		String xyZ = "xyZ";
 
 		public String getProperty() { return property; }
+
 		public void setProperty(String value) { property = value; }
 
 		public void setProperty2(String value) { property2 = value; }
@@ -459,96 +487,9 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 
 		public String getXyZ() { return xyZ; }
 
-		public String getpEBS() {
-			return pEBS;
-		}
+		public String getpEBS() { return pEBS; }
 
-		public void setpEBS(String pEBS) {
-			this.pEBS = pEBS;
-		}
-	}
-
-	static class Super {
-	}
-
-	static class Sub extends Super {
-	}
-
-	static class Unconvertable {}
-
-	// ---
-
-	/**
-	 * Used to validate the match returned from a compareArguments call.
-	 */
-	private void checkMatch(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
-		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArguments(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
-		if (expectedMatchKind == null) {
-			assertNull("Did not expect them to match in any way", matchInfo);
-		}
-		else {
-			assertNotNull("Should not be a null match", matchInfo);
-		}
-
-		if (expectedMatchKind == ArgumentsMatchKind.EXACT) {
-			assertTrue(matchInfo.isExactMatch());
-		}
-		else if (expectedMatchKind == ArgumentsMatchKind.CLOSE) {
-			assertTrue(matchInfo.isCloseMatch());
-		}
-		else if (expectedMatchKind == ArgumentsMatchKind.REQUIRES_CONVERSION) {
-			assertTrue("expected to be a match requiring conversion, but was " + matchInfo, matchInfo.isMatchRequiringConversion());
-		}
-	}
-
-	/**
-	 * Used to validate the match returned from a compareArguments call.
-	 */
-	private void checkMatch2(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
-		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArgumentsVarargs(getTypeDescriptors(expectedTypes), getTypeDescriptors(inputTypes), typeConverter);
-		if (expectedMatchKind == null) {
-			assertNull("Did not expect them to match in any way: " + matchInfo, matchInfo);
-		}
-		else {
-			assertNotNull("Should not be a null match", matchInfo);
-		}
-
-		if (expectedMatchKind == ArgumentsMatchKind.EXACT) {
-			assertTrue(matchInfo.isExactMatch());
-		}
-		else if (expectedMatchKind == ArgumentsMatchKind.CLOSE) {
-			assertTrue(matchInfo.isCloseMatch());
-		}
-		else if (expectedMatchKind == ArgumentsMatchKind.REQUIRES_CONVERSION) {
-			assertTrue("expected to be a match requiring conversion, but was " + matchInfo, matchInfo.isMatchRequiringConversion());
-		}
-	}
-
-	private void checkArguments(Object[] args, Object... expected) {
-		assertEquals(expected.length,args.length);
-		for (int i = 0; i < expected.length; i++) {
-			checkArgument(expected[i],args[i]);
-		}
-	}
-
-	private void checkArgument(Object expected, Object actual) {
-		assertEquals(expected,actual);
-	}
-
-	private List<TypeDescriptor> getTypeDescriptors(Class<?>... types) {
-		List<TypeDescriptor> typeDescriptors = new ArrayList<>(types.length);
-		for (Class<?> type : types) {
-			typeDescriptors.add(TypeDescriptor.valueOf(type));
-		}
-		return typeDescriptors;
-	}
-
-
-	public interface TestInterface {
-
-		void oneArg(String arg1);
-
-		void twoArg(String arg1, String... arg2);
+		public void setpEBS(String pEBS) { this.pEBS = pEBS; }
 	}
 
 }

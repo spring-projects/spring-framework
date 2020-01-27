@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 03.11.2003
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle, Closeable {
@@ -54,8 +55,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
-	 * @see org.springframework.core.convert.ConversionService
 	 * @since 3.0
+	 * @see org.springframework.core.convert.ConversionService
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
@@ -85,6 +86,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see java.lang.System#getenv()
 	 */
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
+
+	/**
+	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
+	 * shutdown hook} thread: {@value}.
+	 * @since 5.2
+	 * @see #registerShutdownHook()
+	 */
+	String SHUTDOWN_HOOK_THREAD_NAME = "SpringContextShutdownHook";
 
 
 	/**
@@ -164,6 +173,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * on JVM shutdown unless it has already been closed at that time.
 	 * <p>This method can be called multiple times. Only one shutdown hook
 	 * (at max) will be registered for each context instance.
+	 * <p>As of Spring Framework 5.2, the {@linkplain Thread#getName() name} of
+	 * the shutdown hook thread should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
 	 */
@@ -197,7 +208,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the BeanFactory setup process before beans get touched.
 	 * <p>Generally, this internal factory will only be accessible while the context
-	 * is active, that is, inbetween {@link #refresh()} and {@link #close()}.
+	 * is active, that is, in-between {@link #refresh()} and {@link #close()}.
 	 * The {@link #isActive()} flag can be used to check whether the context
 	 * is in an appropriate state.
 	 * @return the underlying bean factory

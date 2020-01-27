@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,13 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
-import org.springframework.tests.sample.beans.CustomEnum;
-import org.springframework.tests.sample.beans.GenericBean;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.beans.testfixture.beans.CustomEnum;
+import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.web.servlet.support.BindStatus;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -69,9 +70,9 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("VALUE_1");
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getWriter().toString();
 
@@ -82,11 +83,11 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 	}
 
 	private void assertOptionTagOpened(String output) {
-		assertTrue(output.startsWith("<option"));
+		assertThat(output.startsWith("<option")).isTrue();
 	}
 
 	private void assertOptionTagClosed(String output) {
-		assertTrue(output.endsWith("</option>"));
+		assertThat(output.endsWith("</option>")).isTrue();
 	}
 
 }

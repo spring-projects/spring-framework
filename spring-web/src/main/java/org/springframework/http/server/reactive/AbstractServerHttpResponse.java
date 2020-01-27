@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,17 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -43,7 +44,9 @@ import org.springframework.util.MultiValueMap;
  * Base class for {@link ServerHttpResponse} implementations.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
@@ -56,8 +59,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
 
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
-	private final Log logger = LogFactory.getLog(getClass());
 
 	private final DataBufferFactory dataBufferFactory;
 
@@ -74,9 +77,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
+		this(dataBufferFactory, new HttpHeaders());
+	}
+
+	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory, HttpHeaders headers) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.dataBufferFactory = dataBufferFactory;
-		this.headers = new HttpHeaders();
+		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
@@ -87,16 +95,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		if (this.state.get() == State.COMMITTED) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
-						" because the HTTP response has already been committed");
-			}
 			return false;
 		}
 		else {
-			this.statusCode = (statusCode != null ? statusCode.value() : null);
+			this.statusCode = (status != null ? status.value() : null);
 			return true;
 		}
 	}
@@ -112,7 +116,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @param statusCode the HTTP status as an integer value
 	 * @since 5.0.1
 	 */
-	public void setStatusCodeValue(Integer statusCode) {
+	public void setStatusCodeValue(@Nullable Integer statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -170,20 +174,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)));
+		// For Mono we can avoid ChannelSendOperator and Reactor Netty is more optimized for Mono.
+		// We must resolve value first however, for a chance to handle potential error.
+		if (body instanceof Mono) {
+			return ((Mono<? extends DataBuffer>) body)
+					.flatMap(buffer -> doCommit(() ->
+							writeWithInternal(Mono.fromCallable(() -> buffer)
+									.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))))
+					.doOnError(t -> getHeaders().clearContentHeaders());
+		}
+		else {
+			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
+					.doOnError(t -> getHeaders().clearContentHeaders());
+		}
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)));
+		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeAndFlushWithInternal(inner)))
+				.doOnError(t -> getHeaders().clearContentHeaders());
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(null);
+		return !isCommitted() ? doCommit(null) : Mono.empty();
 	}
 
 	/**
@@ -202,28 +218,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Skipping doCommit (response already committed).");
-			}
 			return Mono.empty();
 		}
 
-		this.commitActions.add(() -> {
+		Flux<Void> allActions = Flux.empty();
+
+		if (!this.commitActions.isEmpty()) {
+			allActions = Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
+					.doOnError(ex -> {
+						if (this.state.compareAndSet(State.COMMITTING, State.NEW)) {
+							getHeaders().clearContentHeaders();
+						}
+					});
+		}
+
+		allActions = allActions.concatWith(Mono.fromRunnable(() -> {
 			applyStatusCode();
 			applyHeaders();
 			applyCookies();
 			this.state.set(State.COMMITTED);
-			return Mono.empty();
-		});
+		}));
 
 		if (writeAction != null) {
-			this.commitActions.add(writeAction);
+			allActions = allActions.concatWith(writeAction.get());
 		}
 
-		List<? extends Mono<Void>> actions = this.commitActions.stream()
-				.map(Supplier::get).collect(Collectors.toList());
-
-		return Flux.concat(actions).next();
+		return allActions.then();
 	}
 
 
@@ -246,8 +266,13 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Apply header changes from {@link #getHeaders()} to the underlying response.
-	 * This method is called once only.
+	 * Invoked when the response is getting committed allowing sub-classes to
+	 * make apply header values to the underlying response.
+	 * <p>Note that most sub-classes use an {@link HttpHeaders} instance that
+	 * wraps an adapter to the native response headers such that changes are
+	 * propagated to the underlying response on the go. That means this callback
+	 * is typically not used other than for specialized updates such as setting
+	 * the contentType or characterEncoding fields in a Servlet response.
 	 */
 	protected abstract void applyHeaders();
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,14 +30,12 @@ import org.springframework.util.ObjectUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-class PropertyDescriptorUtils {
+abstract class PropertyDescriptorUtils {
 
 	/**
 	 * See {@link java.beans.FeatureDescriptor}.
 	 */
-	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target)
-			throws IntrospectionException {
-
+	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target) {
 		target.setExpert(source.isExpert());
 		target.setHidden(source.isHidden());
 		target.setPreferred(source.isPreferred());
@@ -68,8 +66,7 @@ class PropertyDescriptorUtils {
 		Class<?> propertyType = null;
 
 		if (readMethod != null) {
-			Class<?>[] params = readMethod.getParameterTypes();
-			if (params.length != 0) {
+			if (readMethod.getParameterCount() != 0) {
 				throw new IntrospectionException("Bad read method arg count: " + readMethod);
 			}
 			propertyType = readMethod.getReturnType();
@@ -79,7 +76,7 @@ class PropertyDescriptorUtils {
 		}
 
 		if (writeMethod != null) {
-			Class<?> params[] = writeMethod.getParameterTypes();
+			Class<?>[] params = writeMethod.getParameterTypes();
 			if (params.length != 1) {
 				throw new IntrospectionException("Bad write method arg count: " + writeMethod);
 			}
@@ -114,7 +111,7 @@ class PropertyDescriptorUtils {
 		Class<?> indexedPropertyType = null;
 
 		if (indexedReadMethod != null) {
-			Class<?> params[] = indexedReadMethod.getParameterTypes();
+			Class<?>[] params = indexedReadMethod.getParameterTypes();
 			if (params.length != 1) {
 				throw new IntrospectionException("Bad indexed read method arg count: " + indexedReadMethod);
 			}
@@ -128,7 +125,7 @@ class PropertyDescriptorUtils {
 		}
 
 		if (indexedWriteMethod != null) {
-			Class<?> params[] = indexedWriteMethod.getParameterTypes();
+			Class<?>[] params = indexedWriteMethod.getParameterTypes();
 			if (params.length != 2) {
 				throw new IntrospectionException("Bad indexed write method arg count: " + indexedWriteMethod);
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,20 +41,24 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple {@link PropertyAccessor} that uses reflection to access properties
- * for reading and writing.
+ * A powerful {@link PropertyAccessor} that uses reflection to access properties
+ * for reading and possibly also for writing.
  *
- * <p>A property can be accessed through a public getter method (when being read)
+ * <p>A property can be referenced through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 3.0
+ * @see StandardEvaluationContext
+ * @see SimpleEvaluationContext
+ * @see DataBindingPropertyAccessor
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
 
@@ -63,12 +67,14 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private static final Set<Class<?>> BOOLEAN_TYPES;
 
 	static {
-		Set<Class<?>> booleanTypes = new HashSet<>();
+		Set<Class<?>> booleanTypes = new HashSet<>(4);
 		booleanTypes.add(Boolean.class);
 		booleanTypes.add(Boolean.TYPE);
 		BOOLEAN_TYPES = Collections.unmodifiableSet(booleanTypes);
 	}
 
+
+	private final boolean allowWrite;
 
 	private final Map<PropertyCacheKey, InvokerPair> readerCache = new ConcurrentHashMap<>(64);
 
@@ -76,8 +82,29 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<>(64);
 
+	private final Map<Class<?>, Method[]> sortedMethodsCache = new ConcurrentHashMap<>(64);
+
 	@Nullable
-	private InvokerPair lastReadInvokerPair;
+	private volatile InvokerPair lastReadInvokerPair;
+
+
+	/**
+	 * Create a new property accessor for reading as well writing.
+	 * @see #ReflectivePropertyAccessor(boolean)
+	 */
+	public ReflectivePropertyAccessor() {
+		this.allowWrite = true;
+	}
+
+	/**
+	 * Create a new property accessor for reading and possibly writing.
+	 * @param allowWrite whether to also allow for write operations
+	 * @since 4.3.15
+	 * @see #canWrite
+	 */
+	public ReflectivePropertyAccessor(boolean allowWrite) {
+		this.allowWrite = allowWrite;
+	}
 
 
 	/**
@@ -94,20 +121,24 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (target == null) {
 			return false;
 		}
+
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 		if (type.isArray() && name.equals("length")) {
 			return true;
 		}
+
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		if (this.readerCache.containsKey(cacheKey)) {
 			return true;
 		}
+
 		Method method = findGetterForProperty(name, type, target);
 		if (method != null) {
 			// Treat it like a property...
 			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+			method = ClassUtils.getInterfaceMethodIfPossible(method);
 			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -121,13 +152,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return true;
 			}
 		}
-		return false;
-	}
 
-	@Nullable
-	public Member getLastReadInvokerPair() {
-		InvokerPair lastReadInvoker = this.lastReadInvokerPair;
-		return (lastReadInvoker != null ? lastReadInvoker.member : null);
+		return false;
 	}
 
 	@Override
@@ -144,20 +170,20 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invoker = this.readerCache.get(cacheKey);
-		lastReadInvokerPair = invoker;
+		this.lastReadInvokerPair = invoker;
 
 		if (invoker == null || invoker.member instanceof Method) {
 			Method method = (Method) (invoker != null ? invoker.member : null);
 			if (method == null) {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
-					// TODO remove the duplication here between canRead and read
 					// Treat it like a property...
 					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
 					invoker = new InvokerPair(method, typeDescriptor);
-					lastReadInvokerPair = invoker;
+					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -179,7 +205,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				field = findField(name, type, target);
 				if (field != null) {
 					invoker = new InvokerPair(field, new TypeDescriptor(field));
-					lastReadInvokerPair = invoker;
+					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -200,19 +226,22 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	@Override
 	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		if (target == null) {
+		if (!this.allowWrite || target == null) {
 			return false;
 		}
+
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		if (this.writerCache.containsKey(cacheKey)) {
 			return true;
 		}
+
 		Method method = findSetterForProperty(name, type, target);
 		if (method != null) {
 			// Treat it like a property
 			Property property = new Property(type, null, method);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+			method = ClassUtils.getInterfaceMethodIfPossible(method);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -225,12 +254,18 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
 	@Override
 	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
 			throws AccessException {
+
+		if (!this.allowWrite) {
+			throw new AccessException("PropertyAccessor for property '" + name +
+					"' on target [" + target + "] does not allow write operations");
+		}
 
 		Assert.state(target != null, "Target must not be null");
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
@@ -246,6 +281,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				throw new AccessException("Type conversion failure", evaluationException);
 			}
 		}
+
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		Member cachedMember = this.writerCache.get(cacheKey);
 
@@ -254,6 +290,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findSetterForProperty(name, type, target);
 				if (method != null) {
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
 					cachedMember = method;
 					this.writerCache.put(cacheKey, cachedMember);
 				}
@@ -294,6 +331,18 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		throw new AccessException("Neither setter method nor field found for property '" + name + "'");
 	}
 
+	/**
+	 * Get the last read invoker pair.
+	 * @deprecated as of 4.3.15 since it is not used within the framework anymore
+	 */
+	@Deprecated
+	@Nullable
+	public Member getLastReadInvokerPair() {
+		InvokerPair lastReadInvoker = this.lastReadInvokerPair;
+		return (lastReadInvoker != null ? lastReadInvoker.member : null);
+	}
+
+
 	@Nullable
 	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
@@ -304,17 +353,14 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		TypeDescriptor typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 		if (typeDescriptor == null) {
-			// attempt to populate the cache entry
+			// Attempt to populate the cache entry
 			try {
-				if (canRead(context, target, name)) {
-					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
-				}
-				else if (canWrite(context, target, name)) {
+				if (canRead(context, target, name) || canWrite(context, target, name)) {
 					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 				}
 			}
 			catch (AccessException ex) {
-				// continue with null type descriptor
+				// Continue with null type descriptor
 			}
 		}
 		return typeDescriptor;
@@ -338,25 +384,16 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return method;
 	}
 
-	@Nullable
-	private Field findField(String name, Class<?> clazz, Object target) {
-		Field field = findField(name, clazz, target instanceof Class);
-		if (field == null && target instanceof Class) {
-			field = findField(name, target.getClass(), false);
-		}
-		return field;
-	}
-
 	/**
 	 * Find a getter method for the specified property.
 	 */
 	@Nullable
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
+				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-					 "is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 		}
 		return method;
 	}
@@ -374,10 +411,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 
-		Method[] methods = getSortedClassMethods(clazz);
+		Method[] methods = getSortedMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
-				if (method.getName().equals(prefix + methodSuffix) &&
+				if (isCandidateForProperty(method, clazz) && method.getName().equals(prefix + methodSuffix) &&
 						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
@@ -386,16 +423,30 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 		return null;
-
 	}
 
 	/**
-	 * Returns class methods ordered with non bridge methods appearing higher.
+	 * Return class methods ordered with non-bridge methods appearing higher.
 	 */
-	private Method[] getSortedClassMethods(Class<?> clazz) {
-		Method[] methods = clazz.getMethods();
-		Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1));
-		return methods;
+	private Method[] getSortedMethods(Class<?> clazz) {
+		return this.sortedMethodsCache.computeIfAbsent(clazz, key -> {
+			Method[] methods = key.getMethods();
+			Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
+			return methods;
+		});
+	}
+
+	/**
+	 * Determine whether the given {@code Method} is a candidate for property access
+	 * on an instance of the given target class.
+	 * <p>The default implementation considers any method as a candidate, even for
+	 * non-user-declared properties on the {@link Object} base class.
+	 * @param method the Method to evaluate
+	 * @param targetClass the concrete target class that is being introspected
+	 * @since 4.3.15
+	 */
+	protected boolean isCandidateForProperty(Method method, Class<?> targetClass) {
+		return true;
 	}
 
 	/**
@@ -407,9 +458,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	protected String[] getPropertyMethodSuffixes(String propertyName) {
 		String suffix = getPropertyMethodSuffix(propertyName);
 		if (suffix.length() > 0 && Character.isUpperCase(suffix.charAt(0))) {
-			return new String[] { suffix };
+			return new String[] {suffix};
 		}
-		return new String[] { suffix, StringUtils.capitalize(suffix) };
+		return new String[] {suffix, StringUtils.capitalize(suffix)};
 	}
 
 	/**
@@ -421,6 +472,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return propertyName;
 		}
 		return StringUtils.capitalize(propertyName);
+	}
+
+	@Nullable
+	private Field findField(String name, Class<?> clazz, Object target) {
+		Field field = findField(name, clazz, target instanceof Class);
+		if (field == null && target instanceof Class) {
+			field = findField(name, target.getClass(), false);
+		}
+		return field;
 	}
 
 	/**
@@ -452,31 +512,37 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Attempt to create an optimized property accessor tailored for a property of a particular name on
-	 * a particular class. The general ReflectivePropertyAccessor will always work but is not optimal
-	 * due to the need to lookup which reflective member (method/field) to use each time read() is called.
-	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
-	 * something more optimal.
+	 * Attempt to create an optimized property accessor tailored for a property of a
+	 * particular name on a particular class. The general ReflectivePropertyAccessor
+	 * will always work but is not optimal due to the need to lookup which reflective
+	 * member (method/field) to use each time read() is called. This method will just
+	 * return the ReflectivePropertyAccessor instance if it is unable to build a more
+	 * optimal accessor.
+	 * <p>Note: An optimal accessor is currently only usable for read attempts.
+	 * Do not call this method if you need a read-write accessor.
+	 * @see OptimalPropertyAccessor
 	 */
-	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, @Nullable Object target, String name) {
-		// Don't be clever for arrays or null target
+	public PropertyAccessor createOptimalAccessor(EvaluationContext context, @Nullable Object target, String name) {
+		// Don't be clever for arrays or a null target...
 		if (target == null) {
 			return this;
 		}
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
-		if (type.isArray()) {
+		Class<?> clazz = (target instanceof Class ? (Class<?>) target : target.getClass());
+		if (clazz.isArray()) {
 			return this;
 		}
 
-		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(clazz, name, target instanceof Class);
 		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
 
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
 			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
 			if (method == null) {
-				method = findGetterForProperty(name, type, target);
+				method = findGetterForProperty(name, clazz, target);
 				if (method != null) {
-					invocationTarget = new InvokerPair(method, new TypeDescriptor(new MethodParameter(method, -1)));
+					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
+					invocationTarget = new InvokerPair(method, typeDescriptor);
 					ReflectionUtils.makeAccessible(method);
 					this.readerCache.put(cacheKey, invocationTarget);
 				}
@@ -489,7 +555,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invocationTarget == null || invocationTarget.member instanceof Field) {
 			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
 			if (field == null) {
-				field = findField(name, type, target instanceof Class);
+				field = findField(name, clazz, target instanceof Class);
 				if (field != null) {
 					invocationTarget = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);
@@ -537,7 +603,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
@@ -581,6 +647,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	public static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
 
+		/**
+		 * The member being accessed.
+		 */
 		public final Member member;
 
 		private final TypeDescriptor typeDescriptor;

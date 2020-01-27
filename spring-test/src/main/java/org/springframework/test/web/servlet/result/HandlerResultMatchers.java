@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,11 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the selected handler or handler method.
@@ -60,10 +63,10 @@ public class HandlerResultMatchers {
 	/**
 	 * Assert the type of the handler that processed the request.
 	 */
-	public ResultMatcher handlerType(final Class<?> type) {
+	public ResultMatcher handlerType(Class<?> type) {
 		return result -> {
 			Object handler = result.getHandler();
-			assertTrue("No handler", handler != null);
+			assertNotNull("No handler", handler);
 			if (handler != null) {
 				Class<?> actual = handler.getClass();
 				if (HandlerMethod.class.isInstance(handler)) {
@@ -84,7 +87,7 @@ public class HandlerResultMatchers {
 	 * public class SimpleController {
 	 *
 	 *     &#064;RequestMapping("/")
-	 *     public ResponseEntity<Void> handle() {
+	 *     public ResponseEntity&lt;Void&gt; handle() {
 	 *         return ResponseEntity.ok().build();
 	 *     }
 	 * }
@@ -98,7 +101,7 @@ public class HandlerResultMatchers {
 	 * @param obj either the value returned from a "mock" controller invocation
 	 * or the "mock" controller itself after an invocation
 	 */
-	public ResultMatcher methodCall(final Object obj) {
+	public ResultMatcher methodCall(Object obj) {
 		return result -> {
 			if (!(obj instanceof MethodInvocationInfo)) {
 				fail(String.format("The supplied object [%s] is not an instance of %s. " +
@@ -116,7 +119,7 @@ public class HandlerResultMatchers {
 	 * Assert the name of the controller method used to process the request
 	 * using the given Hamcrest {@link Matcher}.
 	 */
-	public ResultMatcher methodName(final Matcher<? super String> matcher) {
+	public ResultMatcher methodName(Matcher<? super String> matcher) {
 		return result -> {
 			HandlerMethod handlerMethod = getHandlerMethod(result);
 			assertThat("Handler method", handlerMethod.getMethod().getName(), matcher);
@@ -126,7 +129,7 @@ public class HandlerResultMatchers {
 	/**
 	 * Assert the name of the controller method used to process the request.
 	 */
-	public ResultMatcher methodName(final String name) {
+	public ResultMatcher methodName(String name) {
 		return result -> {
 			HandlerMethod handlerMethod = getHandlerMethod(result);
 			assertEquals("Handler method", name, handlerMethod.getMethod().getName());
@@ -136,7 +139,7 @@ public class HandlerResultMatchers {
 	/**
 	 * Assert the controller method used to process the request.
 	 */
-	public ResultMatcher method(final Method method) {
+	public ResultMatcher method(Method method) {
 		return result -> {
 			HandlerMethod handlerMethod = getHandlerMethod(result);
 			assertEquals("Handler method", method, handlerMethod.getMethod());
@@ -146,10 +149,7 @@ public class HandlerResultMatchers {
 
 	private static HandlerMethod getHandlerMethod(MvcResult result) {
 		Object handler = result.getHandler();
-		assertTrue("No handler", handler != null);
-		if (!(handler instanceof HandlerMethod)) {
-			fail("Not a HandlerMethod: " + handler);
-		}
+		assertTrue("Not a HandlerMethod: " + handler, handler instanceof HandlerMethod);
 		return (HandlerMethod) handler;
 	}
 

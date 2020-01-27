@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,10 @@ import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.spi.CachingProvider;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 /**
  * @author Stephane Nicoll
@@ -41,7 +41,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 	private JCacheCache cacheNoNull;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.cacheManager = getCachingProvider().getCacheManager();
 		this.cacheManager.createCache(CACHE_NAME, new MutableConfiguration<>());
@@ -57,7 +57,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 		return Caching.getCachingProvider("org.ehcache.jcache.JCacheCachingProvider");
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		if (this.cacheManager != null) {
 			this.cacheManager.close();

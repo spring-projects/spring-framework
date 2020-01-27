@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -159,17 +160,19 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 				super.setSubscriptionId(value);
 			}
 		}
-		else if (StompCommand.CONNECT.equals(command)) {
+		else if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
 			protectPasscode();
 		}
 	}
 
 	void updateStompHeadersFromSimpMessageHeaders() {
-		if (getDestination() != null) {
-			setNativeHeader(STOMP_DESTINATION_HEADER, getDestination());
+		String destination = getDestination();
+		if (destination != null) {
+			setNativeHeader(STOMP_DESTINATION_HEADER, destination);
 		}
-		if (getContentType() != null) {
-			setNativeHeader(STOMP_CONTENT_TYPE_HEADER, getContentType().toString());
+		MimeType contentType = getContentType();
+		if (contentType != null) {
+			setNativeHeader(STOMP_CONTENT_TYPE_HEADER, contentType.toString());
 		}
 		trySetStompHeaderForSubscriptionId();
 	}
@@ -188,21 +191,25 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
-		if (getMessageType() != SimpMessageType.MESSAGE) {
-			throw new IllegalStateException("Unexpected message type " + getMessageType());
+		SimpMessageType messageType = getMessageType();
+		if (messageType != SimpMessageType.MESSAGE) {
+			throw new IllegalStateException("Unexpected message type " + messageType);
 		}
-		if (getCommand() == null) {
-			setHeader(COMMAND_HEADER, StompCommand.SEND);
+		StompCommand command = getCommand();
+		if (command == null) {
+			command = StompCommand.SEND;
+			setHeader(COMMAND_HEADER, command);
 		}
-		else if (!getCommand().equals(StompCommand.SEND)) {
-			throw new IllegalStateException("Unexpected STOMP command " + getCommand());
+		else if (!command.equals(StompCommand.SEND)) {
+			throw new IllegalStateException("Unexpected STOMP command " + command);
 		}
-		return getCommand();
+		return command;
 	}
 
 	public void updateStompCommandAsServerMessage() {
-		if (getMessageType() != SimpMessageType.MESSAGE) {
-			throw new IllegalStateException("Unexpected message type " + getMessageType());
+		SimpMessageType messageType = getMessageType();
+		if (messageType != SimpMessageType.MESSAGE) {
+			throw new IllegalStateException("Unexpected message type " + messageType);
 		}
 		StompCommand command = getCommand();
 		if ((command == null) || StompCommand.SEND.equals(command)) {
@@ -236,7 +243,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		if (rawValues == null) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
@@ -278,7 +285,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	private void trySetStompHeaderForSubscriptionId() {
 		String subscriptionId = getSubscriptionId();
 		if (subscriptionId != null) {
-			if (getCommand() != null && StompCommand.MESSAGE.equals(getCommand())) {
+			StompCommand command = getCommand();
+			if (command != null && StompCommand.MESSAGE.equals(command)) {
 				setNativeHeader(STOMP_SUBSCRIPTION_HEADER, subscriptionId);
 			}
 			else {
@@ -403,23 +411,30 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	@Override
 	public String getShortLogMessage(Object payload) {
-		if (StompCommand.SUBSCRIBE.equals(getCommand())) {
+		StompCommand command = getCommand();
+		if (StompCommand.SUBSCRIBE.equals(command)) {
 			return "SUBSCRIBE " + getDestination() + " id=" + getSubscriptionId() + appendSession();
 		}
-		else if (StompCommand.UNSUBSCRIBE.equals(getCommand())) {
+		else if (StompCommand.UNSUBSCRIBE.equals(command)) {
 			return "UNSUBSCRIBE id=" + getSubscriptionId() + appendSession();
 		}
-		else if (StompCommand.SEND.equals(getCommand())) {
+		else if (StompCommand.SEND.equals(command)) {
 			return "SEND " + getDestination() + appendSession() + appendPayload(payload);
 		}
-		else if (StompCommand.CONNECT.equals(getCommand())) {
-			return "CONNECT" + (getUser() != null ? " user=" + getUser().getName() : "") + appendSession();
+		else if (StompCommand.CONNECT.equals(command)) {
+			Principal user = getUser();
+			return "CONNECT" + (user != null ? " user=" + user.getName() : "") + appendSession();
 		}
-		else if (StompCommand.CONNECTED.equals(getCommand())) {
+		else if (StompCommand.STOMP.equals(command)) {
+			Principal user = getUser();
+			return "STOMP" + (user != null ? " user=" + user.getName() : "") + appendSession();
+		}
+		else if (StompCommand.CONNECTED.equals(command)) {
 			return "CONNECTED heart-beat=" + Arrays.toString(getHeartbeat()) + appendSession();
 		}
-		else if (StompCommand.DISCONNECT.equals(getCommand())) {
-			return "DISCONNECT" + (getReceipt() != null ? " receipt=" + getReceipt() : "") + appendSession();
+		else if (StompCommand.DISCONNECT.equals(command)) {
+			String receipt = getReceipt();
+			return "DISCONNECT" + (receipt != null ? " receipt=" + receipt : "") + appendSession();
 		}
 		else {
 			return getDetailedLogMessage(payload);
@@ -462,11 +477,12 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 					"Expected byte array payload but got: " + ClassUtils.getQualifiedName(payload.getClass()));
 		}
 		byte[] bytes = (byte[]) payload;
-		String contentType = (getContentType() != null ? " " + getContentType().toString() : "");
-		if (bytes.length == 0 || getContentType() == null || !isReadableContentType()) {
+		MimeType mimeType = getContentType();
+		String contentType = (mimeType != null ? " " + mimeType.toString() : "");
+		if (bytes.length == 0 || mimeType == null || !isReadableContentType()) {
 			return contentType;
 		}
-		Charset charset = getContentType().getCharset();
+		Charset charset = mimeType.getCharset();
 		charset = (charset != null ? charset : StandardCharsets.UTF_8);
 		return (bytes.length < 80) ?
 				contentType + " payload=" + new String(bytes, charset) :

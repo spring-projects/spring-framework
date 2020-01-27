@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.metadata;
 
 import java.util.Arrays;
 import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -35,9 +36,9 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class CallMetaDataProviderFactory {
+public final class CallMetaDataProviderFactory {
 
-	/** List of supported database products for procedure calls */
+	/** List of supported database products for procedure calls. */
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
 			"DB2",
@@ -48,7 +49,7 @@ public class CallMetaDataProviderFactory {
 			"Sybase"
 		);
 
-	/** List of supported database products for function calls */
+	/** List of supported database products for function calls. */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
 			"Microsoft SQL Server",
@@ -59,66 +60,72 @@ public class CallMetaDataProviderFactory {
 	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
 
 
+	private CallMetaDataProviderFactory() {
+	}
+
+
 	/**
-	 * Create a CallMetaDataProvider based on the database metadata
-	 * @param dataSource used to retrieve metadata
-	 * @param context the class that holds configuration and metadata
+	 * Create a {@link CallMetaDataProvider} based on the database meta-data.
+	 * @param dataSource the JDBC DataSource to use for retrieving meta-data
+	 * @param context the class that holds configuration and meta-data
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
-	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
+	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
-			CallMetaDataProvider result = (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
+			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 				boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 				if (context.isFunction()) {
 					if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for function calls " +
+						if (logger.isInfoEnabled()) {
+							logger.info(databaseProductName + " is not one of the databases fully supported for function calls " +
 									"-- supported are: " + supportedDatabaseProductsForFunctions);
 						}
 						if (accessProcedureColumnMetaData) {
-							logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+							logger.info("Metadata processing disabled - you must specify all parameters explicitly");
 							accessProcedureColumnMetaData = false;
 						}
 					}
 				}
 				else {
 					if (!supportedDatabaseProductsForProcedures.contains(databaseProductName)) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for procedure calls " +
+						if (logger.isInfoEnabled()) {
+							logger.info(databaseProductName + " is not one of the databases fully supported for procedure calls " +
 									"-- supported are: " + supportedDatabaseProductsForProcedures);
 						}
 						if (accessProcedureColumnMetaData) {
-							logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+							logger.info("Metadata processing disabled - you must specify all parameters explicitly");
 							accessProcedureColumnMetaData = false;
 						}
 					}
 				}
+
 				CallMetaDataProvider provider;
 				if ("Oracle".equals(databaseProductName)) {
 					provider = new OracleCallMetaDataProvider(databaseMetaData);
 				}
-				else if ("DB2".equals(databaseProductName)) {
-					provider = new Db2CallMetaDataProvider((databaseMetaData));
+				else if ("PostgreSQL".equals(databaseProductName)) {
+					provider = new PostgresCallMetaDataProvider((databaseMetaData));
 				}
 				else if ("Apache Derby".equals(databaseProductName)) {
 					provider = new DerbyCallMetaDataProvider((databaseMetaData));
 				}
-				else if ("PostgreSQL".equals(databaseProductName)) {
-					provider = new PostgresCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Sybase".equals(databaseProductName)) {
-					provider = new SybaseCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Microsoft SQL Server".equals(databaseProductName)) {
-					provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+				else if ("DB2".equals(databaseProductName)) {
+					provider = new Db2CallMetaDataProvider((databaseMetaData));
 				}
 				else if ("HDB".equals(databaseProductName)) {
 					provider = new HanaCallMetaDataProvider((databaseMetaData));
 				}
+				else if ("Microsoft SQL Server".equals(databaseProductName)) {
+					provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+				}
+				else if ("Sybase".equals(databaseProductName)) {
+					provider = new SybaseCallMetaDataProvider((databaseMetaData));
+				}
 				else {
 					provider = new GenericCallMetaDataProvider(databaseMetaData);
 				}
+
 				if (logger.isDebugEnabled()) {
 					logger.debug("Using " + provider.getClass().getName());
 				}
@@ -129,10 +136,9 @@ public class CallMetaDataProviderFactory {
 				}
 				return provider;
 			});
-			return result;
 		}
 		catch (MetaDataAccessException ex) {
-			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);
+			throw new DataAccessResourceFailureException("Error retrieving database meta-data", ex);
 		}
 	}
 

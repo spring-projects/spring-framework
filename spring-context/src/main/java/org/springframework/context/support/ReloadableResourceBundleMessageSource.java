@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,7 +85,8 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements ResourceLoaderAware {
+public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
+		implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -101,23 +102,20 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	/** Cache to hold filename lists per Locale */
-	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames =
-			new ConcurrentHashMap<>();
+	// Cache to hold filename lists per Locale
+	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
-	/** Cache to hold already loaded properties per filename */
-	private final ConcurrentMap<String, PropertiesHolder> cachedProperties =
-			new ConcurrentHashMap<>();
+	// Cache to hold already loaded properties per filename
+	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
-	/** Cache to hold merged loaded properties per locale */
-	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties =
-			new ConcurrentHashMap<>();
+	// Cache to hold already loaded properties per filename
+	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
 
 	/**
 	 * Set per-file charsets to use for parsing properties files.
 	 * <p>Only applies to classic properties files, not to XML files.
-	 * @param fileEncodings Properties with filenames as keys and charset
+	 * @param fileEncodings a Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
 	 * with optional locale-specific components: e.g. "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
@@ -239,6 +237,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		if (mergedHolder != null) {
 			return mergedHolder;
 		}
+
 		Properties mergedProps = newProperties();
 		long latestTimestamp = -1;
 		String[] basenames = StringUtils.toStringArray(getBasenameSet());
@@ -255,6 +254,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				}
 			}
 		}
+
 		mergedHolder = new PropertiesHolder(mergedProps, latestTimestamp);
 		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
 		if (existing != null) {
@@ -281,10 +281,15 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				return filenames;
 			}
 		}
+
+		// Filenames for given Locale
 		List<String> filenames = new ArrayList<>(7);
 		filenames.addAll(calculateFilenamesForLocale(basename, locale));
-		if (isFallbackToSystemLocale() && !locale.equals(Locale.getDefault())) {
-			List<String> fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
+
+		// Filenames for default Locale, if any
+		Locale defaultLocale = getDefaultLocale();
+		if (defaultLocale != null && !defaultLocale.equals(locale)) {
+			List<String> fallbackFilenames = calculateFilenamesForLocale(basename, defaultLocale);
 			for (String fallbackFilename : fallbackFilenames) {
 				if (!filenames.contains(fallbackFilename)) {
 					// Entry for fallback locale that isn't already in filenames list.
@@ -292,7 +297,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				}
 			}
 		}
+
+		// Filename for default bundle file
 		filenames.add(basename);
+
 		if (localeMap == null) {
 			localeMap = new ConcurrentHashMap<>();
 			Map<Locale, List<String>> existing = this.cachedFilenames.putIfAbsent(basename, localeMap);
@@ -463,9 +471,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @throws IOException if properties loading failed
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
-		InputStream is = resource.getInputStream();
 		Properties props = newProperties();
-		try {
+		try (InputStream is = resource.getInputStream()) {
 			String resourceFilename = resource.getFilename();
 			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
@@ -495,9 +502,6 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				}
 			}
 			return props;
-		}
-		finally {
-			is.close();
 		}
 	}
 
@@ -560,7 +564,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		private final ReentrantLock refreshLock = new ReentrantLock();
 
-		/** Cache to hold already generated MessageFormats per message code */
+		/** Cache to hold already generated MessageFormats per message code. */
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
 				new ConcurrentHashMap<>();
 

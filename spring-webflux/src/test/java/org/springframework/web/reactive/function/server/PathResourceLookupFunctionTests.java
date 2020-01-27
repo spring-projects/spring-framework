@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,9 @@ package org.springframework.web.reactive.function.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -91,6 +92,36 @@ public class PathResourceLookupFunctionTests {
 				.build();
 		Mono<Resource> result = function.apply(request);
 		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void composeResourceLookupFunction() throws Exception {
+		ClassPathResource defaultResource = new ClassPathResource("response.txt", getClass());
+
+		Function<ServerRequest, Mono<Resource>> lookupFunction =
+				new PathResourceLookupFunction("/resources/**",
+						new ClassPathResource("org/springframework/web/reactive/function/server/"));
+
+		Function<ServerRequest, Mono<Resource>> customLookupFunction =
+				lookupFunction.andThen(resourceMono -> resourceMono
+								.switchIfEmpty(Mono.just(defaultResource)));
+
+		MockServerRequest request = MockServerRequest.builder()
+				.uri(new URI("http://localhost/resources/foo"))
+				.build();
+
+		Mono<Resource> result = customLookupFunction.apply(request);
+		StepVerifier.create(result)
+				.expectNextMatches(resource -> {
+					try {
+						return defaultResource.getFile().equals(resource.getFile());
+					}
+					catch (IOException ex) {
+						return false;
+					}
+				})
 				.expectComplete()
 				.verify();
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,10 @@ import java.util.Map;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @deprecated as of 5.0 in favor of {@link DefaultUriBuilderFactory}
+ * @deprecated as of 5.0 in favor of {@link DefaultUriBuilderFactory}.
+ * <p><strong>Note:</strong> {@link DefaultUriBuilderFactory} has a different
+ * default for the {@link #setParsePath(boolean) parsePath} property (from
+ * false to true).
  */
 @Deprecated
 public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {

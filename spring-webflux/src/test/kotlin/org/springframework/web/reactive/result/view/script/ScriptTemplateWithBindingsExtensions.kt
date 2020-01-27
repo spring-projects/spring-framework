@@ -13,4 +13,4 @@ fun ScriptTemplateWithBindings.i18n(code: String) =
 
 var ScriptTemplateWithBindings.foo: String
 	get() = bindings["foo"] as String
-	set(value) { throw UnsupportedOperationException() }
+	set(@Suppress("UNUSED_PARAMETER") value) { throw UnsupportedOperationException() }

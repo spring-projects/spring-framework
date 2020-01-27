@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,22 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation4.DependencyBean;
 import org.springframework.context.annotation4.FactoryMethodComponent;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
@@ -54,37 +54,38 @@ public class ClassPathFactoryBeanDefinitionScannerTests {
 		context.refresh();
 
 		FactoryMethodComponent fmc = context.getBean("factoryMethodComponent", FactoryMethodComponent.class);
-		assertFalse(fmc.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
+		assertThat(fmc.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)).isFalse();
 
 		TestBean tb = (TestBean) context.getBean("publicInstance"); //2
-		assertEquals("publicInstance", tb.getName());
+		assertThat(tb.getName()).isEqualTo("publicInstance");
 		TestBean tb2 = (TestBean) context.getBean("publicInstance"); //2
-		assertEquals("publicInstance", tb2.getName());
-		assertSame(tb2, tb);
+		assertThat(tb2.getName()).isEqualTo("publicInstance");
+		assertThat(tb).isSameAs(tb2);
 
 		tb = (TestBean) context.getBean("protectedInstance"); //3
-		assertEquals("protectedInstance", tb.getName());
-		assertSame(tb, context.getBean("protectedInstance"));
-		assertEquals("0", tb.getCountry());
+		assertThat(tb.getName()).isEqualTo("protectedInstance");
+		assertThat(context.getBean("protectedInstance")).isSameAs(tb);
+		assertThat(tb.getCountry()).isEqualTo("0");
 		tb2 = context.getBean("protectedInstance", TestBean.class); //3
-		assertEquals("protectedInstance", tb2.getName());
-		assertSame(tb2, tb);
+		assertThat(tb2.getName()).isEqualTo("protectedInstance");
+		assertThat(tb).isSameAs(tb2);
 
 		tb = context.getBean("privateInstance", TestBean.class); //4
-		assertEquals("privateInstance", tb.getName());
-		assertEquals(1, tb.getAge());
+		assertThat(tb.getName()).isEqualTo("privateInstance");
+		assertThat(tb.getAge()).isEqualTo(1);
 		tb2 = context.getBean("privateInstance", TestBean.class); //4
-		assertEquals(2, tb2.getAge());
-		assertNotSame(tb2, tb);
+		assertThat(tb2.getAge()).isEqualTo(2);
+		assertThat(tb).isNotSameAs(tb2);
 
 		Object bean = context.getBean("requestScopedInstance"); //5
-		assertTrue(AopUtils.isCglibProxy(bean));
-		assertTrue(bean instanceof ScopedObject);
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		boolean condition = bean instanceof ScopedObject;
+		assertThat(condition).isTrue();
 
 		QualifiedClientBean clientBean = context.getBean("clientBean", QualifiedClientBean.class);
-		assertSame(context.getBean("publicInstance"), clientBean.testBean);
-		assertSame(context.getBean("dependencyBean"), clientBean.dependencyBean);
-		assertSame(context, clientBean.applicationContext);
+		assertThat(clientBean.testBean).isSameAs(context.getBean("publicInstance"));
+		assertThat(clientBean.dependencyBean).isSameAs(context.getBean("dependencyBean"));
+		assertThat(clientBean.applicationContext).isSameAs(context);
 	}
 
 
