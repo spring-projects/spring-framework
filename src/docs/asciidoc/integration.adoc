@@ -6943,7 +6943,7 @@ This is the recommended approach over the
 quite different in signatures as the code base grows. While the default strategy might
 work for some methods, it rarely works for all methods.
 
-The following examples ise various SpEL declarations (if you are not familiar with SpEL,
+The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read <<core.adoc#expressions, Spring Expression Language>>):
 
 [source,java,indent=0]
