@@ -444,7 +444,7 @@ public class CorsConfiguration {
 		}
 
 		if (this.allowedOrigins.contains(ALL)) {
-			if (this.allowCredentials != Boolean.TRUE) {
+			if (!this.allowCredentials.equals(Boolean.TRUE)) {
 				return ALL;
 			}
 			else {
