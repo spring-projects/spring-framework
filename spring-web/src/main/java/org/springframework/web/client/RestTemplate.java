@@ -853,8 +853,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
 						.filter(converter -> canReadResponse(this.responseType, converter))
 						.flatMap(this::getSupportedMediaTypes)
-						.distinct()
 						.sorted(MediaType.SPECIFICITY_COMPARATOR)
+						.distinct()
 						.collect(Collectors.toList());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Accept=" + allSupportedMediaTypes);
