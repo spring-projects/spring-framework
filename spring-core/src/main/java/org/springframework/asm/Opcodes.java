@@ -48,6 +48,14 @@ public interface Opcodes {
   int ASM6 = 6 << 16 | 0 << 8;
   int ASM7 = 7 << 16 | 0 << 8;
 
+  /**
+   * <i>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
+   * will break existing code using it. Only code compiled with --enable-preview can use this.</i>
+   *
+   * @deprecated This API is experimental.
+   */
+  @Deprecated int ASM8_EXPERIMENTAL = 1 << 24 | 8 << 16 | 0 << 8;
+
   /*
    * Internal flags used to redirect calls to deprecated methods. For instance, if a visitOldStuff
    * method in API_OLD is deprecated and replaced with visitNewStuff in API_NEW, then the
@@ -270,6 +278,7 @@ public interface Opcodes {
   int V12 = 0 << 16 | 56;
   int V13 = 0 << 16 | 57;
   int V14 = 0 << 16 | 58;
+  int V15 = 0 << 16 | 59;
 
   /**
    * Version flag indicating that the class is using 'preview' features.
@@ -306,7 +315,7 @@ public interface Opcodes {
   int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter, module *
   int ACC_ANNOTATION = 0x2000; // class
   int ACC_ENUM = 0x4000; // class(?) field inner
-  int ACC_MANDATED = 0x8000; // parameter, module, module *
+  int ACC_MANDATED = 0x8000; // field, method, parameter, module, module *
   int ACC_MODULE = 0x8000; // class
 
   // ASM specific access flags.
