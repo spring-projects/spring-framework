@@ -293,10 +293,10 @@ public final class ContentDisposition {
 				String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
 						part.substring(eqIndex + 2, part.length() - 1) :
 						part.substring(eqIndex + 1));
-				if (attribute.equals("name") ) {
+				if ("name".equals(attribute) ) {
 					name = value;
 				}
-				else if (attribute.equals("filename*") ) {
+				else if ("filename*".equals(attribute) ) {
 					int idx1 = value.indexOf('\'');
 					int idx2 = value.indexOf('\'', idx1 + 1);
 					if (idx1 != -1 && idx2 != -1) {
@@ -310,13 +310,13 @@ public final class ContentDisposition {
 						filename = decodeFilename(value, StandardCharsets.US_ASCII);
 					}
 				}
-				else if (attribute.equals("filename") && (filename == null)) {
+				else if ("filename".equals(attribute) && (filename == null)) {
 					filename = value;
 				}
-				else if (attribute.equals("size") ) {
+				else if ("size".equals(attribute) ) {
 					size = Long.parseLong(value);
 				}
-				else if (attribute.equals("creation-date")) {
+				else if ("creation-date".equals(attribute)) {
 					try {
 						creationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
 					}
@@ -324,7 +324,7 @@ public final class ContentDisposition {
 						// ignore
 					}
 				}
-				else if (attribute.equals("modification-date")) {
+				else if ("modification-date".equals(attribute)) {
 					try {
 						modificationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
 					}
@@ -332,7 +332,7 @@ public final class ContentDisposition {
 						// ignore
 					}
 				}
-				else if (attribute.equals("read-date")) {
+				else if ("read-date".equals(attribute)) {
 					try {
 						readDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
 					}
