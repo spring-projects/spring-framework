@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,11 +170,12 @@ public final class GenericTypeResolver {
 					ParameterizedType parameterizedType = (ParameterizedType) genericType;
 					Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
+					ResolvableType contextType = ResolvableType.forClass(contextClass);
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
 						if (typeArgument instanceof TypeVariable) {
 							ResolvableType resolvedTypeArgument = resolveVariable(
-									(TypeVariable<?>) typeArgument, ResolvableType.forClass(contextClass));
+									(TypeVariable<?>) typeArgument, contextType);
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument.resolve();
 							}
