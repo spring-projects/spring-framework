@@ -608,8 +608,8 @@ final class LogAdapter {
 				else {
 					rec = new LocationResolvingLogRecord(level, String.valueOf(message));
 					rec.setLoggerName(this.name);
-					rec.setResourceBundleName(logger.getResourceBundleName());
-					rec.setResourceBundle(logger.getResourceBundle());
+					rec.setResourceBundleName(this.logger.getResourceBundleName());
+					rec.setResourceBundle(this.logger.getResourceBundle());
 					rec.setThrown(exception);
 				}
 				logger.log(rec);
