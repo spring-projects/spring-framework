@@ -46,7 +46,8 @@ public final class CallMetaDataProviderFactory {
 			"Microsoft SQL Server",
 			"Oracle",
 			"PostgreSQL",
-			"Sybase"
+			"Sybase",
+			"Informix Dynamic Server"
 		);
 
 	/** List of supported database products for function calls. */
