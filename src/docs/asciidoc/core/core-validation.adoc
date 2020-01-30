@@ -1971,6 +1971,7 @@ requires the Spring Validation API, as the following example shows:
 ==== Configuring Custom Constraints
 
 Each bean validation constraint consists of two parts:
+
 * A `@Constraint` annotation that declares the constraint and its configurable properties.
 * An implementation of the `javax.validation.ConstraintValidator` interface that implements
 the constraint's behavior.
