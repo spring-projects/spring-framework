@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -551,7 +551,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder host(@Nullable String host) {
 		this.host = host;
-		resetSchemeSpecificPart();
+		if (host != null) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
@@ -559,14 +561,18 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public UriComponentsBuilder port(int port) {
 		Assert.isTrue(port >= -1, "Port must be >= -1");
 		this.port = String.valueOf(port);
-		resetSchemeSpecificPart();
+		if (port > -1) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
 	@Override
 	public UriComponentsBuilder port(@Nullable String port) {
 		this.port = port;
-		resetSchemeSpecificPart();
+		if (port != null) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
@@ -604,11 +610,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				String value = matcher.group(3);
 				queryParam(name, (value != null ? value : (StringUtils.hasLength(eq) ? "" : null)));
 			}
+			resetSchemeSpecificPart();
 		}
 		else {
 			this.queryParams.clear();
 		}
-		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -617,8 +623,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.queryParams.clear();
 		if (query != null) {
 			query(query);
+			resetSchemeSpecificPart();
 		}
-		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -651,6 +657,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public UriComponentsBuilder queryParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
 			this.queryParams.addAll(params);
+			resetSchemeSpecificPart();
 		}
 		return this;
 	}
