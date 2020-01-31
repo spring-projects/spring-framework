@@ -423,7 +423,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		MutablePropertyValues pvs = new MutablePropertyValues();
 
 		String prefixWithSep = prefix + SEPARATOR;
-		int beginIndex = prefix.length() + SEPARATOR.length();
+		int beginIndex = prefixWithSep.length();
 
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
