@@ -67,6 +67,7 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 	@Test  // SPR-13637
+	@SuppressWarnings("deprecation")
 	public void suffixPatternMatch() throws Exception {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
 		builder.setUseSuffixPatternMatch(false);
