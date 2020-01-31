@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ class SimpleCommandLinePropertySourceTests {
 	@Test
 	void withDefaultName() {
 		PropertySource<?> ps = new SimpleCommandLinePropertySource();
-		assertThat(ps.getName())
-				.isEqualTo(CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME);
+		assertThat(ps.getName()).isEqualTo(CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME);
 	}
 
 	@Test
@@ -52,8 +51,7 @@ class SimpleCommandLinePropertySourceTests {
 
 	@Test
 	void withOptionArgsOnly() {
-		CommandLinePropertySource<?> ps =
-			new SimpleCommandLinePropertySource("--o1=v1", "--o2");
+		CommandLinePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "--o2");
 		assertThat(ps.containsProperty("o1")).isTrue();
 		assertThat(ps.containsProperty("o2")).isTrue();
 		assertThat(ps.containsProperty("o3")).isFalse();
@@ -77,8 +75,7 @@ class SimpleCommandLinePropertySourceTests {
 
 	@Test
 	void withDefaultNonOptionArgsNameAndNonOptionArgsPresent() {
-		CommandLinePropertySource<?> ps =
-			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
+		CommandLinePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 
 		assertThat(ps.containsProperty("nonOptionArgs")).isTrue();
 		assertThat(ps.containsProperty("o1")).isTrue();
@@ -90,8 +87,7 @@ class SimpleCommandLinePropertySourceTests {
 
 	@Test
 	void withCustomNonOptionArgsNameAndNoNonOptionArgsPresent() {
-		CommandLinePropertySource<?> ps =
-			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
+		CommandLinePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 		ps.setNonOptionArgsPropertyName("NOA");
 
 		assertThat(ps.containsProperty("nonOptionArgs")).isFalse();
@@ -104,8 +100,7 @@ class SimpleCommandLinePropertySourceTests {
 
 	@Test
 	void covertNonOptionArgsToStringArrayAndList() {
-		CommandLinePropertySource<?> ps =
-			new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
+		CommandLinePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "noa1", "--o2", "noa2");
 		StandardEnvironment env = new StandardEnvironment();
 		env.getPropertySources().addFirst(ps);
 

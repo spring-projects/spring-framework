@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class SimpleCommandLineArgsParser {
 				String optionValue = null;
 				if (optionText.contains("=")) {
 					optionName = optionText.substring(0, optionText.indexOf('='));
-					optionValue = optionText.substring(optionText.indexOf('=')+1, optionText.length());
+					optionValue = optionText.substring(optionText.indexOf('=') + 1, optionText.length());
 				}
 				else {
 					optionName = optionText;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class JOptCommandLinePropertySourceTests {
 		OptionSet options = parser.parse("--foo=bar");
 
 		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
-		assertThat((String)ps.getProperty("foo")).isEqualTo("bar");
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -50,7 +50,7 @@ class JOptCommandLinePropertySourceTests {
 
 		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
 		assertThat(ps.containsProperty("foo")).isTrue();
-		assertThat((String)ps.getProperty("foo")).isEqualTo("");
+		assertThat(ps.getProperty("foo")).isEqualTo("");
 	}
 
 	@Test
@@ -63,7 +63,7 @@ class JOptCommandLinePropertySourceTests {
 		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
 		assertThat(ps.containsProperty("o1")).isTrue();
 		assertThat(ps.containsProperty("o2")).isFalse();
-		assertThat((String)ps.getProperty("o1")).isEqualTo("");
+		assertThat(ps.getProperty("o1")).isEqualTo("");
 		assertThat(ps.getProperty("o2")).isNull();
 	}
 
@@ -138,8 +138,7 @@ class JOptCommandLinePropertySourceTests {
 		assertThat(ps.containsProperty("o1")).isTrue();
 		assertThat(ps.containsProperty("o2")).isTrue();
 
-		String nonOptionArgs = (String)ps.getProperty("nonOptionArgs");
-		assertThat(nonOptionArgs).isEqualTo("noa1,noa2");
+		assertThat(ps.getProperty("nonOptionArgs")).isEqualTo("noa1,noa2");
 	}
 
 	@Test
@@ -169,7 +168,8 @@ class JOptCommandLinePropertySourceTests {
 		assertThat(ps.getProperty("o1")).isEqualTo("VAL_1");
 	}
 
-	public static enum OptionEnum {
+	public enum OptionEnum {
 		VAL_1;
 	}
+
 }
