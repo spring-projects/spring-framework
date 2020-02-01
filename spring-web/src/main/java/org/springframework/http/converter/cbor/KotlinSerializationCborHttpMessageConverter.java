@@ -1,6 +1,5 @@
 package org.springframework.http.converter.cbor;
 
-import kotlinx.serialization.JvmResolvingKt;
 import kotlinx.serialization.cbor.Cbor;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -8,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.KotlinSerializationResolver;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -22,13 +22,20 @@ import java.io.IOException;
  */
 public class KotlinSerializationCborHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
+	private final KotlinSerializationResolver resolver = new KotlinSerializationResolver();
+
 	public KotlinSerializationCborHttpMessageConverter() {
 		super(MediaType.APPLICATION_CBOR);
 	}
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		return true;
+		try {
+			this.resolver.resolve(clazz);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -38,7 +45,7 @@ public class KotlinSerializationCborHttpMessageConverter extends AbstractHttpMes
 	) throws IOException, HttpMessageNotReadableException {
 		try {
 			byte[] payload = StreamUtils.copyToByteArray(inputMessage.getBody());
-			return Cbor.Companion.load(JvmResolvingKt.serializerByTypeToken(clazz), payload);
+			return Cbor.Companion.load(this.resolver.resolve(clazz), payload);
 		} catch (Exception ex) {
 			throw new HttpMessageNotReadableException("Could not read CBOR: " + ex.getMessage(), ex, inputMessage);
 		}
@@ -50,7 +57,7 @@ public class KotlinSerializationCborHttpMessageConverter extends AbstractHttpMes
 			HttpOutputMessage outputMessage
 	) throws IOException, HttpMessageNotWritableException {
 		try {
-			outputMessage.getBody().write(Cbor.Companion.dump(JvmResolvingKt.serializerByTypeToken(o.getClass()), o));
+			outputMessage.getBody().write(Cbor.Companion.dump(this.resolver.resolve(o.getClass()), o));
 			outputMessage.getBody().flush();
 		} catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write CBOR: " + ex.getMessage(), ex);

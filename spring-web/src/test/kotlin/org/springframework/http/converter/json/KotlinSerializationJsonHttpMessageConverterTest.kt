@@ -39,12 +39,18 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	internal fun canReadJson() {
 		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canRead(String::class.java, MediaType.APPLICATION_JSON)).isTrue()
+
+		// By default, kotlin.serialization cannot read generics.
+		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
 	fun canWriteJson() {
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canWrite(String::class.java, MediaType.APPLICATION_JSON)).isTrue()
+
+		// By default, kotlin.serialization cannot write generics.
+		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test

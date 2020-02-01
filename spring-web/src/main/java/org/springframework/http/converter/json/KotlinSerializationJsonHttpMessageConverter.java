@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.json;
 
-import kotlinx.serialization.JvmResolvingKt;
 import kotlinx.serialization.json.Json;
 import kotlinx.serialization.json.JsonConfiguration;
 import kotlinx.serialization.json.JsonDecodingException;
@@ -29,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.KotlinSerializationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
@@ -49,6 +49,8 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	private final KotlinSerializationResolver resolver = new KotlinSerializationResolver();
+
 	private final Json json;
 
 	/**
@@ -68,7 +70,12 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 
 	@Override
 	protected boolean supports(@NotNull Class<?> clazz) {
-		return true;
+		try {
+			this.resolver.resolve(clazz);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	@NotNull
@@ -81,7 +88,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 		String jsonText = StreamUtils.copyToString(inputMessage.getBody(), getCharsetToUse(contentType));
 
 		try {
-			return this.json.parse(JvmResolvingKt.serializerByTypeToken(clazz), jsonText);
+			return this.json.parse(this.resolver.resolve(clazz), jsonText);
 		} catch (JsonDecodingException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex, inputMessage);
 		}
@@ -93,7 +100,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 			@NotNull HttpOutputMessage outputMessage
 	) throws IOException, HttpMessageNotWritableException {
 		try {
-			String json = this.json.stringify(JvmResolvingKt.serializerByTypeToken(o.getClass()), o);
+			String json = this.json.stringify(this.resolver.resolve(o.getClass()), o);
 			MediaType contentType = outputMessage.getHeaders().getContentType();
 			outputMessage.getBody().write(json.getBytes(getCharsetToUse(contentType)));
 			outputMessage.getBody().flush();

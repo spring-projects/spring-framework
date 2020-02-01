@@ -39,12 +39,18 @@ class KotlinSerializationCborHttpMessageConverterTest {
 	internal fun canReadCbor() {
 		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(String::class.java, MediaType.APPLICATION_CBOR)).isTrue()
+
+		// By default, kotlin.serialization cannot read generics.
+		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_CBOR)).isFalse()
 	}
 
 	@Test
 	fun canWriteCbor() {
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(String::class.java, MediaType.APPLICATION_CBOR)).isTrue()
+
+		// By default, kotlin.serialization cannot write generics.
+		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_CBOR)).isFalse()
 	}
 
 	@Test
