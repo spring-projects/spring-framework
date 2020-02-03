@@ -798,6 +798,20 @@ class ObjectUtilsTests {
 	}
 
 	@Test
+	void containsElement() {
+		Object[] array = {"foo", "bar", 42, new String[] {"baz", "quux"}};
+
+		assertThat(ObjectUtils.containsElement(null, "foo")).isFalse();
+		assertThat(ObjectUtils.containsElement(array, null)).isFalse();
+		assertThat(ObjectUtils.containsElement(array, "bogus")).isFalse();
+
+		assertThat(ObjectUtils.containsElement(array, "foo")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, "bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, 42)).isTrue();
+		assertThat(ObjectUtils.containsElement(array, new String[] {"baz", "quux"})).isTrue();
+	}
+
+	@Test
 	void caseInsensitiveValueOf() {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "foo")).isEqualTo(Tropes.FOO);
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR")).isEqualTo(Tropes.BAR);
@@ -805,20 +819,6 @@ class ObjectUtilsTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
 			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
-	}
-
-	@Test
-	void containsElement() {
-		String keyObject = "key";
-		String[] array = {"foo", "bar", "Bar", keyObject};
-
-		String fakeObject = "fake";
-
-		assertThat(ObjectUtils.containsElement(null, keyObject)).isFalse();
-
-		assertThat(ObjectUtils.containsElement(array, keyObject)).isTrue();
-
-		assertThat(ObjectUtils.containsElement(array, fakeObject)).isFalse();
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {
