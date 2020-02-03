@@ -303,16 +303,16 @@ public class MessageBrokerBeanDefinitionParserTests {
 		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);
 		String actual = stats.toString();
 		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
-				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
-				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)], " +
+				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)], " +
 				"stompBrokerRelay\\[0 sessions, relayhost:1234 \\(not available\\), " +
-				"processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)], " +
 				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
-				"completed tasks = \\d\\], " +
+				"completed tasks = \\d], " +
 				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
-				"completed tasks = \\d\\], " +
+				"completed tasks = \\d], " +
 				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
-				"completed tasks = \\d\\]";
+				"completed tasks = \\d]";
 
 		assertThat(actual.matches(expected)).as("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual).isTrue();
 	}

@@ -147,7 +147,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The {@code Pattern} used to match placeholders.
 	 */
-	private static final Pattern PATTERN = Pattern.compile("\\$\\[\\p{Alpha}+\\]");
+	private static final Pattern PATTERN = Pattern.compile("\\$\\[\\p{Alpha}+]");
 
 	/**
 	 * The {@code Set} of allowed placeholders.

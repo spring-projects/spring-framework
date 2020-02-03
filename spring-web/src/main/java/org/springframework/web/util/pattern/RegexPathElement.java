@@ -35,7 +35,7 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
  */
 class RegexPathElement extends PathElement {
 
-	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 

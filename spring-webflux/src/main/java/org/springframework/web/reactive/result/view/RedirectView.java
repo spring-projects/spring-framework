@@ -53,7 +53,7 @@ import org.springframework.web.util.UriUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)}");
 
 
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
