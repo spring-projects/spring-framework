@@ -97,7 +97,7 @@ configure(allprojects) { project ->
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.1"
-			dependency "com.github.librepdf:openpdf:1.3.12"
+			dependency "com.github.librepdf:openpdf:1.3.13"
 			dependency "com.rometools:rome:1.12.2"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.0"
@@ -125,7 +125,7 @@ configure(allprojects) { project ->
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
 			dependency "org.hibernate:hibernate-core:5.4.10.Final"
-			dependency "org.hibernate:hibernate-validator:6.1.1.Final"
+			dependency "org.hibernate:hibernate-validator:6.1.2.Final"
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
 
