@@ -48,7 +48,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 	/**
 	 * Pattern for validating callback parameter values.
 	 */
-	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
+	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_.]*");
 
 
 	@Override
