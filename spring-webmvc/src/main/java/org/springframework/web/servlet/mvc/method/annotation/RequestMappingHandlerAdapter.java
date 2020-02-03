@@ -821,14 +821,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * (never {@code null}).
 	 */
 	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
-		Class<?> handlerType = handlerMethod.getBeanType();
-		SessionAttributesHandler sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
-		if (sessionAttrHandler == null) {
-			synchronized (this.sessionAttributesHandlerCache) {
-				sessionAttrHandler = this.sessionAttributesHandlerCache.computeIfAbsent(handlerType, type -> new SessionAttributesHandler(type, this.sessionAttributeStore));
-			}
-		}
-		return sessionAttrHandler;
+		return this.sessionAttributesHandlerCache.computeIfAbsent(
+				handlerMethod.getBeanType(),
+				type -> new SessionAttributesHandler(type, this.sessionAttributeStore));
 	}
 
 	/**
