@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link SimpleCommandLinePropertySource}.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 class SimpleCommandLinePropertySourceTests {
@@ -60,6 +61,14 @@ class SimpleCommandLinePropertySourceTests {
 		assertThat(ps.getProperty("o3")).isNull();
 	}
 
+	@Test // gh-24464
+	void withOptionalArg_andArgIsEmpty() {
+		EnumerablePropertySource<?> ps = new SimpleCommandLinePropertySource("--foo=");
+
+		assertThat(ps.containsProperty("foo")).isTrue();
+		assertThat(ps.getProperty("foo")).isEqualTo("");
+	}
+
 	@Test
 	void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		EnumerablePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "--o2");
@@ -70,7 +79,7 @@ class SimpleCommandLinePropertySourceTests {
 
 		assertThat(ps.containsProperty("nonOptionArgs")).isFalse();
 		assertThat(ps.getProperty("nonOptionArgs")).isNull();
-		assertThat(ps.getPropertyNames().length).isEqualTo(2);
+		assertThat(ps.getPropertyNames()).hasSize(2);
 	}
 
 	@Test

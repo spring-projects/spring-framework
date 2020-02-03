@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-class SimpleCommandLineParserTests {
+/**
+ * Unit tests for {@link SimpleCommandLineArgsParser}.
+ *
+ * @author Chris Beams
+ * @author Sam Brannen
+ */
+class SimpleCommandLineArgsParserTests {
+
+	private final SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
+
 
 	@Test
 	void withNoOptions() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		assertThat(parser.parse().getOptionValues("foo")).isNull();
 	}
 
 	@Test
 	void withSingleOptionAndNoValue() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1");
 		assertThat(args.containsOption("o1")).isTrue();
 		assertThat(args.getOptionValues("o1")).isEqualTo(Collections.EMPTY_LIST);
@@ -43,63 +50,52 @@ class SimpleCommandLineParserTests {
 
 	@Test
 	void withSingleOptionAndValue() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1");
 		assertThat(args.containsOption("o1")).isTrue();
-		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
+		assertThat(args.getOptionValues("o1")).containsExactly("v1");
 	}
 
 	@Test
 	void withMixOfOptionsHavingValueAndOptionsHavingNoValue() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "--o2");
 		assertThat(args.containsOption("o1")).isTrue();
 		assertThat(args.containsOption("o2")).isTrue();
 		assertThat(args.containsOption("o3")).isFalse();
-		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
+		assertThat(args.getOptionValues("o1")).containsExactly("v1");
 		assertThat(args.getOptionValues("o2")).isEqualTo(Collections.EMPTY_LIST);
 		assertThat(args.getOptionValues("o3")).isNull();
 	}
 
 	@Test
 	void withEmptyOptionText() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				parser.parse("--"));
+		assertThatIllegalArgumentException().isThrownBy(() -> parser.parse("--"));
 	}
 
 	@Test
 	void withEmptyOptionName() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				parser.parse("--=v1"));
+		assertThatIllegalArgumentException().isThrownBy(() -> parser.parse("--=v1"));
 	}
 
 	@Test
 	void withEmptyOptionValue() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				parser.parse("--o1="));
+		CommandLineArgs args = parser.parse("--o1=");
+		assertThat(args.containsOption("o1")).isTrue();
+		assertThat(args.getOptionValues("o1")).containsExactly("");
 	}
 
 	@Test
 	void withEmptyOptionNameAndEmptyOptionValue() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				parser.parse("--="));
+		assertThatIllegalArgumentException().isThrownBy(() -> parser.parse("--="));
 	}
 
 	@Test
 	void withNonOptionArguments() {
-		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "noa1", "--o2=v2", "noa2");
-		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
-		assertThat(args.getOptionValues("o2").get(0)).isEqualTo("v2");
+		assertThat(args.getOptionValues("o1")).containsExactly("v1");
+		assertThat(args.getOptionValues("o2")).containsExactly("v2");
 
 		List<String> nonOptions = args.getNonOptionArgs();
-		assertThat(nonOptions.get(0)).isEqualTo("noa1");
-		assertThat(nonOptions.get(1)).isEqualTo("noa2");
-		assertThat(nonOptions.size()).isEqualTo(2);
+		assertThat(nonOptions).containsExactly("noa1", "noa2");
 	}
 
 	@Test

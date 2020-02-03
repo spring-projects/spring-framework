@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link JOptCommandLinePropertySource}.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 class JOptCommandLinePropertySourceTests {
@@ -47,6 +48,17 @@ class JOptCommandLinePropertySourceTests {
 		OptionParser parser = new OptionParser();
 		parser.accepts("foo").withOptionalArg();
 		OptionSet options = parser.parse("--foo");
+
+		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
+		assertThat(ps.containsProperty("foo")).isTrue();
+		assertThat(ps.getProperty("foo")).isEqualTo("");
+	}
+
+	@Test // gh-24464
+	void withOptionalArg_andArgIsEmpty() {
+		OptionParser parser = new OptionParser();
+		parser.accepts("foo").withOptionalArg();
+		OptionSet options = parser.parse("--foo=");
 
 		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
 		assertThat(ps.containsProperty("foo")).isTrue();
@@ -74,7 +86,7 @@ class JOptCommandLinePropertySourceTests {
 		OptionSet options = parser.parse("--foo=bar,baz,biz");
 
 		CommandLinePropertySource<?> ps = new JOptCommandLinePropertySource(options);
-		assertThat(ps.getOptionValues("foo")).isEqualTo(Arrays.asList("bar","baz","biz"));
+		assertThat(ps.getOptionValues("foo")).containsExactly("bar", "baz", "biz");
 		assertThat(ps.getProperty("foo")).isEqualTo("bar,baz,biz");
 	}
 
@@ -85,7 +97,7 @@ class JOptCommandLinePropertySourceTests {
 		OptionSet options = parser.parse("--foo=bar", "--foo=baz", "--foo=biz");
 
 		CommandLinePropertySource<?> ps = new JOptCommandLinePropertySource(options);
-		assertThat(ps.getOptionValues("foo")).isEqualTo(Arrays.asList("bar","baz","biz"));
+		assertThat(ps.getOptionValues("foo")).containsExactly("bar", "baz", "biz");
 		assertThat(ps.getProperty("foo")).isEqualTo("bar,baz,biz");
 	}
 
@@ -123,7 +135,7 @@ class JOptCommandLinePropertySourceTests {
 
 		assertThat(ps.containsProperty("nonOptionArgs")).isFalse();
 		assertThat(ps.getProperty("nonOptionArgs")).isNull();
-		assertThat(ps.getPropertyNames().length).isEqualTo(2);
+		assertThat(ps.getPropertyNames()).hasSize(2);
 	}
 
 	@Test
