@@ -224,16 +224,15 @@ public abstract class FileCopyUtils {
 	}
 
 	/**
-	 * Close the {@link Closeable} as a null-safety.
-	 *
-	 * @param closeable to close, may be null.
+	 * Attempt to close the supplied {@link Closeable}, silently swallowing any
+	 * exceptions.
+	 * @param closeable the {@code Closeable} to close
 	 */
-	private static void close(@Nullable Closeable closeable) {
-		if (closeable == null) return;
+	private static void close(Closeable closeable) {
 		try {
 			closeable.close();
-		} catch (IOException e) {
-			// do nothing
+		} catch (IOException ex) {
+			// ignore
 		}
 	}
 
