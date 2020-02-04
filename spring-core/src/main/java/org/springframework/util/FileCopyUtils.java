@@ -231,7 +231,8 @@ public abstract class FileCopyUtils {
 	private static void close(Closeable closeable) {
 		try {
 			closeable.close();
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			// ignore
 		}
 	}
