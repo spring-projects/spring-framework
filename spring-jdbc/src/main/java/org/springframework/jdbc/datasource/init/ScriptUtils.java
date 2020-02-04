@@ -325,12 +325,8 @@ public abstract class ScriptUtils {
 	private static String readScript(EncodedResource resource, @Nullable String[] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
-		LineNumberReader lnr = new LineNumberReader(resource.getReader());
-		try {
+		try (LineNumberReader lnr = new LineNumberReader(resource.getReader())) {
 			return readScript(lnr, commentPrefixes, separator, blockCommentEndDelimiter);
-		}
-		finally {
-			lnr.close();
 		}
 	}
 
