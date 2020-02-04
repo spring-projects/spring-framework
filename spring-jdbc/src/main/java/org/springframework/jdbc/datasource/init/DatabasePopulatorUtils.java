@@ -52,7 +52,7 @@ public abstract class DatabasePopulatorUtils {
 				DataSourceUtils.releaseConnection(connection, dataSource);
 			}
 		}
-		catch (ScriptException ex){
+		catch (ScriptException ex) {
 			throw ex;
 		}
 		catch (Throwable ex) {
