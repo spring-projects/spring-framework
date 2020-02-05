@@ -369,7 +369,7 @@ public class ImportSelectorTests {
 
 		@Override
 		@Nullable
-		public Predicate<String> getCandidateFilter() {
+		public Predicate<String> getExclusionFilter() {
 			return className -> className.endsWith("ImportedSelector1");
 		}
 	}

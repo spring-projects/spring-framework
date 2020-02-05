@@ -68,16 +68,17 @@ public interface ImportSelector {
 	String[] selectImports(AnnotationMetadata importingClassMetadata);
 
 	/**
-	 * Return a predicate for filtering candidate classes, to be transitively
-	 * applied to all candidate classes found through this selector's imports.
-	 * <p>If this predicate returns {@code true} for a given class name,
-	 * said class will not be considered as a configuration class,
-	 * bypassing class loading as well as metadata introspection.
-	 * @return the filter predicate, or {@code null} if none
+	 * Return a predicate for excluding classes from the import candidates, to be
+	 * transitively applied to all classes found through this selector's imports.
+	 * <p>If this predicate returns {@code true} for a given fully-qualified
+	 * class name, said class will not be considered as an imported configuration
+	 * class, bypassing class file loading as well as metadata introspection.
+	 * @return the filter predicate for fully-qualified candidate class names
+	 * of transitively imported configuration classes, or {@code null} if none
 	 * @since 5.2.4
 	 */
 	@Nullable
-	default Predicate<String> getCandidateFilter() {
+	default Predicate<String> getExclusionFilter() {
 		return null;
 	}
 
