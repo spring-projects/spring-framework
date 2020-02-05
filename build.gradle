@@ -60,7 +60,8 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '2.5.9') {
+			// If customJavaHome has been set, we assume we need Groovy 3.0 for testing purposes.
+			dependencySet(group: 'org.codehaus.groovy', version: System.getProperty("customJavaHome") ?  '3.0.0-rc-3' : '2.5.9') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'
@@ -305,6 +306,7 @@ configure([rootProject] + javaProjects) { project ->
 	apply plugin: "java-test-fixtures"
 	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.compile'
+	apply from: "${rootDir}/gradle/custom-java-home.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
 
 	pluginManager.withPlugin("kotlin") {
