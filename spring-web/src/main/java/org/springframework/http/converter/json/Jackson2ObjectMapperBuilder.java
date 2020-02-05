@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -45,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -257,6 +259,23 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder annotationIntrospector(AnnotationIntrospector annotationIntrospector) {
 		this.annotationIntrospector = annotationIntrospector;
+		return this;
+	}
+
+	/**
+	 * Alternative to {@link #annotationIntrospector(AnnotationIntrospector)}
+	 * that allows combining with rather than replacing the currently set
+	 * introspector, e.g. via
+	 * {@link AnnotationIntrospectorPair#pair(AnnotationIntrospector, AnnotationIntrospector)}.
+	 * @param pairingFunction a function to apply to the currently set
+	 * introspector (possibly {@code null}); the result of the function becomes
+	 * the new introspector.
+	 * @since 5.2.4
+	 */
+	public Jackson2ObjectMapperBuilder annotationIntrospector(
+			Function<AnnotationIntrospector, AnnotationIntrospector> pairingFunction) {
+
+		this.annotationIntrospector = pairingFunction.apply(this.annotationIntrospector);
 		return this;
 	}
 
