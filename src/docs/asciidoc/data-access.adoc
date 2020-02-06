@@ -2730,15 +2730,15 @@ The following query finds and populates a single domain object:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	RowMapper<Actor> actorRowMapper = (resultRest, rowNum) -> {
-		Actor actor = new Actor();
-		actor.setFirstName(resultRest.getString("first_name"));
-		actor.setLastName(resultRest.getString("last_name"));
-		return actor;
-	};
 	Actor actor = this.jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
-			actorRowMapper, 1212L);
+			(resultSet, rowNum) -> {
+				Actor newActor = new Actor();
+				newActor.setFirstName(resultSet.getString("first_name"));
+				newActor.setLastName(resultSet.getString("last_name"));
+				return newActor;
+			},
+			1212L);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2755,15 +2755,14 @@ The following query finds and populates a number of domain objects:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	RowMapper<Actor> actorRowMapper = (resultRest, rowNum) -> {
-		Actor actor = new Actor();
-		actor.setFirstName(resultRest.getString("first_name"));
-		actor.setLastName(resultRest.getString("last_name"));
-		return actor;
-	};
 	List<Actor> actors = this.jdbcTemplate.query(
 			"select first_name, last_name from t_actor",
-			actorRowMapper);
+			(resultSet, rowNum) -> {
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
+			});
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2775,25 +2774,24 @@ The following query finds and populates a number of domain objects:
 
 If the last two snippets of code actually existed in the same application, it would make
 sense to remove the duplication present in the two `RowMapper` lambda expressions and
-extract them out into a single expression or class (typically a `static` nested class) that
-could then be referenced by DAO methods as needed. For example, it may be better to write the
-preceding code snippet as follows:
+extract them out into a single field that could then be referenced by DAO methods as needed.
+For example, it may be better to write the preceding code snippet as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+
+	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultSet.getString("first_name"));
+		actor.setLastName(resultSet.getString("last_name"));
+		return actor;
+	};
+
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", getActorMapper());
+		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
 	}
 
-	private RowMapper<Actor> getActorMapper() {
-		return (resultRest, rowNum) -> {
-			Actor actor = new Actor();
-			actor.setFirstName(resultRest.getString("first_name"));
-			actor.setLastName(resultRest.getString("last_name"));
-			return actor;
-		};
-	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -3558,12 +3556,11 @@ on Oracle but may not work on other platforms:
 	final String name = "Rob";
 
 	KeyHolder keyHolder = new GeneratedKeyHolder();
-	PreparedStatementCreator statementCreator = connection -> {
+	jdbcTemplate.update(connection -> {
 		PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] { "id" });
 		ps.setString(1, name);
 		return ps;
-	};
-	jdbcTemplate.update(statementCreator, keyHolder);
+	}, keyHolder);
 
 	// keyHolder.getKey() now contains the generated key
 ----
