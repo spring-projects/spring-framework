@@ -153,6 +153,9 @@ public class InjectionMetadata {
 	 * @return {@code true} indicating a refresh, {@code false} otherwise
 	 */
 	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
+		if (metadata == EMPTY) {
+			return false;
+		}
 		return (metadata == null || metadata.targetClass != clazz);
 	}
 
