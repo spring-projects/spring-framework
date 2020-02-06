@@ -16,12 +16,15 @@
 //     Do not set this system property if Java 8 should be used.
 //
 // Examples:
-// 	
+//
 // ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
 //
 // ./gradlew --no-build-cache -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
 //
 // ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home -DcustomJavaSourceVersion=14 test
+//
+//
+// Credits: inspired by work from Marc Philipp and Stephane Nicoll
 //
 // -----------------------------------------------------------------------------
 
