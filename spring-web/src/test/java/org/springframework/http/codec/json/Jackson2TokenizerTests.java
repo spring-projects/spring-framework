@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -39,6 +44,8 @@ import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Arjen Poutsma
@@ -259,6 +266,34 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				.verify();
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void useBigDecimalForFloats(boolean useBigDecimalForFloats) {
+		this.objectMapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, useBigDecimalForFloats);
+
+		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, -1);
+
+		StepVerifier.create(tokens)
+				.assertNext(tokenBuffer -> {
+					try {
+						JsonParser parser = tokenBuffer.asParser();
+						JsonToken token = parser.nextToken();
+						assertThat(token).isEqualTo(JsonToken.VALUE_NUMBER_FLOAT);
+						JsonParser.NumberType numberType = parser.getNumberType();
+						if (useBigDecimalForFloats) {
+							assertThat(numberType).isEqualTo(JsonParser.NumberType.BIG_DECIMAL);
+						}
+						else {
+							assertThat(numberType).isEqualTo(JsonParser.NumberType.DOUBLE);
+						}
+					}
+					catch (IOException ex) {
+						fail(ex);
+					}
+				})
+				.verifyComplete();
+	}
 
 	private Flux<String> decode(List<String> source, boolean tokenize, int maxInMemorySize) {
 
