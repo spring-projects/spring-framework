@@ -89,14 +89,14 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 		java.setTargetCompatibility(DEFAULT_COMPILER_VERSION);
 
 		project.getTasks().withType(JavaCompile.class)
-				.matching(javaCompile -> javaCompile.getName().equals(JavaPlugin.COMPILE_JAVA_TASK_NAME))
+				.matching(compileTask -> compileTask.getName().equals(JavaPlugin.COMPILE_JAVA_TASK_NAME))
 				.forEach(compileTask -> {
 					compileTask.getOptions().setCompilerArgs(COMPILER_ARGS);
 					compileTask.getOptions().setEncoding("UTF-8");
 				});
 		project.getTasks().withType(JavaCompile.class)
-				.matching(javaCompile -> javaCompile.getName().equals(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
-						|| javaCompile.getName().equals("compileTestFixturesJava"))
+				.matching(compileTask -> compileTask.getName().equals(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
+						|| compileTask.getName().equals("compileTestFixturesJava"))
 				.forEach(compileTask -> {
 					compileTask.getOptions().setCompilerArgs(TEST_COMPILER_ARGS);
 					compileTask.getOptions().setEncoding("UTF-8");
