@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -42,13 +43,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.util.MimeType;
 
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.http.codec.json.Jackson2JsonDecoder.*;
-import static org.springframework.http.codec.json.JacksonViewBean.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.codec.json.Jackson2JsonDecoder.JSON_VIEW_HINT;
+import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
+import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 
 /**
  * Unit tests for {@link Jackson2JsonDecoder}.
@@ -195,6 +204,16 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 
 		testDecode(input, TestObject.class, step -> step
 				.consumeNextWith(o -> assertEquals(1, o.getTest()))
+				.verifyComplete()
+		);
+	}
+
+	@Test
+	public void bigDecimalFlux() {
+		Flux<DataBuffer> input = stringBuffer("[ 1E+2 ]").flux();
+
+		testDecode(input, BigDecimal.class, step -> step
+				.expectNext(new BigDecimal("1E+2"))
 				.verifyComplete()
 		);
 	}

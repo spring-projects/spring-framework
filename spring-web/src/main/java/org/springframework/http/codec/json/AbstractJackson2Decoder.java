@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -113,8 +115,13 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), true, getMaxInMemorySize());
+		boolean forceUseOfBigDecimal = getObjectMapper().isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+		if (elementType != null && BigDecimal.class.equals(elementType.getType())) {
+			forceUseOfBigDecimal = true;
+		}
+
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, getObjectMapper(),
+				true, forceUseOfBigDecimal, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -122,8 +129,12 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), false, getMaxInMemorySize());
+		boolean forceUseOfBigDecimal = getObjectMapper().isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+		if (elementType != null && BigDecimal.class.equals(elementType.getType())) {
+			forceUseOfBigDecimal = true;
+		}
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, getObjectMapper(),
+				false, forceUseOfBigDecimal, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
 
