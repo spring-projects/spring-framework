@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.json.JSONException;
@@ -249,7 +248,8 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	public void errorInStream() {
 		DataBuffer buffer = stringBuffer("{\"id\":1,\"name\":");
 		Flux<DataBuffer> source = Flux.just(buffer).concatWith(Flux.error(new RuntimeException()));
-		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, true, -1);
+		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, true,
+				false, -1);
 
 		StepVerifier.create(result)
 				.expectError(RuntimeException.class)
@@ -259,7 +259,8 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	@Test  // SPR-16521
 	public void jsonEOFExceptionIsWrappedAsDecodingError() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, -1);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false,
+				false, -1);
 
 		StepVerifier.create(tokens)
 				.expectError(DecodingException.class)
@@ -269,10 +270,8 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
 	public void useBigDecimalForFloats(boolean useBigDecimalForFloats) {
-		this.objectMapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, useBigDecimalForFloats);
-
 		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, -1);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, useBigDecimalForFloats, -1);
 
 		StepVerifier.create(tokens)
 				.assertNext(tokenBuffer -> {
@@ -299,7 +298,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
 				Flux.fromIterable(source).map(this::stringBuffer),
-				this.jsonFactory, this.objectMapper, tokenize, maxInMemorySize);
+				this.jsonFactory, this.objectMapper, tokenize, false, maxInMemorySize);
 
 		return tokens
 				.map(tokenBuffer -> {
