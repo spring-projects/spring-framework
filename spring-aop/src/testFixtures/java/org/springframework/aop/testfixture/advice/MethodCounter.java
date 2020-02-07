@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.HashMap;
  *
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Sam Brannen
  */
 @SuppressWarnings("serial")
 public class MethodCounter implements Serializable {
@@ -39,15 +40,12 @@ public class MethodCounter implements Serializable {
 	}
 
 	protected void count(String methodName) {
-		Integer i = map.get(methodName);
-		i = (i != null) ? new Integer(i.intValue() + 1) : new Integer(1);
-		map.put(methodName, i);
+		map.merge(methodName, 1, (n, m) -> n + 1);
 		++allCount;
 	}
 
 	public int getCalls(String methodName) {
-		Integer i = map.get(methodName);
-		return (i != null ? i.intValue() : 0);
+		return map.getOrDefault(methodName, 0);
 	}
 
 	public int getCalls() {
