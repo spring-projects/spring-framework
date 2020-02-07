@@ -419,7 +419,7 @@ class ClassUtilsTests {
 	void getRawClass(){
 		Field[] fields = ParameterizedClass.class.getDeclaredFields();
 		for(Field f : fields){
-			assertThat(ClassUtils.getRawClass(f.getGenericType())).isEqualTo(f.getType());
+			assertThat(ClassUtils.getRawClassForType(f.getGenericType())).isEqualTo(f.getType());
 		}
 	}
 

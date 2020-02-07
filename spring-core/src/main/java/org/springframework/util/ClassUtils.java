@@ -1403,7 +1403,7 @@ public abstract class ClassUtils {
 	 * @return the class, or {@code null} if the type neither instanceof {@link Class} nor {@link ParameterizedType}
 	 */
 	@Nullable
-	public static Class<?> getRawClass(Type type){
+	public static Class<?> getRawClassForType(Type type){
 		if (type instanceof Class) {
 			return (Class<?>) type;
 		}

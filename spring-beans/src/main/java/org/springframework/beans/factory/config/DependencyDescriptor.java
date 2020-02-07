@@ -393,7 +393,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 						type = args[args.length - 1];
 					}
 				}
-				Class<?> clazz = ClassUtils.getRawClass(type);
+				Class<?> clazz = ClassUtils.getRawClassForType(type);
 
 				return clazz != null ? clazz : Object.class;
 			}

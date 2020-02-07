@@ -560,7 +560,7 @@ public class MethodParameter {
 				// TODO: Object.class if unresolvable
 			}
 
-			Class<?> clazz = ClassUtils.getRawClass(type);
+			Class<?> clazz = ClassUtils.getRawClassForType(type);
 
 			return clazz != null ? clazz : Object.class;
 		}
