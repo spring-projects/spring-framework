@@ -51,7 +51,9 @@ if (customJavaHome) {
 		}
 		options.fork = true
 		options.forkOptions.executable = javacExecutable
-		options.compilerArgs -= "-Werror"
+		// Ignore warnings about missing classpath elements -- for example, those picked up
+		// via Class-Path entries in MANIFEST.MF files in artifacts like xalan-2.7.2.jar.
+		options.compilerArgs -= "-Xlint:path"
 		if (customJavaSourceVersion) {
 			options.compilerArgs += [ "--release", customJavaSourceVersion]
 			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
