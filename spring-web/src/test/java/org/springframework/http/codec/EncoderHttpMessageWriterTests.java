@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ class EncoderHttpMessageWriterTests {
 	void setContentLengthForMonoBody() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DataBuffer buffer = factory.wrap("body".getBytes(StandardCharsets.UTF_8));
-		configureEncoder(buffer, MimeTypeUtils.TEXT_PLAIN);
+		configureEncoder(Flux.just(buffer), MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 

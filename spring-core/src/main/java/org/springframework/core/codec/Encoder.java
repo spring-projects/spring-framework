@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,9 +68,9 @@ public interface Encoder<T> {
 			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
-	 * Encode an Object of type T to a data buffer. This is useful for scenarios
-	 * that produce a stream of discrete messages (or events) and the
-	 * content for each is encoded individually.
+	 * Encode an Object of type T to a data buffer. This is useful for scenarios,
+	 * that distinct messages (or events) are encoded and handled individually,
+	 * in fully aggregated form.
 	 * <p>By default this method raises {@link UnsupportedOperationException}
 	 * and it is expected that some encoders cannot produce a single buffer or
 	 * cannot do so synchronously (e.g. encoding a {@code Resource}).
