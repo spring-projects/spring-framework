@@ -22,6 +22,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -413,6 +415,14 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.determineCommonAncestor(String.class, List.class)).isNull();
 	}
 
+	@Test
+	void getRawClass(){
+		Field[] fields = ParameterizedClass.class.getDeclaredFields();
+		for(Field f : fields){
+			assertThat(ClassUtils.getRawClass(f.getGenericType())).isEqualTo(f.getType());
+		}
+	}
+
 	@ParameterizedTest
 	@WrapperTypes
 	void isPrimitiveWrapper(Class<?> type) {
@@ -487,6 +497,14 @@ class ClassUtilsTests {
 		void print(String header, String[] messages, String footer) {
 			/* no-op */
 		}
+	}
+
+	private static class ParameterizedClass{
+		List<String> list1;
+		List list2;
+		Map<String,Long> map1;
+		Map map2;
+		Map.Entry<Long,Short> map3;
 	}
 
 }

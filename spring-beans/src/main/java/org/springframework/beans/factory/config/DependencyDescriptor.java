@@ -39,6 +39,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -392,16 +393,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 						type = args[args.length - 1];
 					}
 				}
-				if (type instanceof Class) {
-					return (Class<?>) type;
-				}
-				else if (type instanceof ParameterizedType) {
-					Type arg = ((ParameterizedType) type).getRawType();
-					if (arg instanceof Class) {
-						return (Class<?>) arg;
-					}
-				}
-				return Object.class;
+				Class<?> clazz = ClassUtils.getRawClass(type);
+
+				return clazz != null ? clazz : Object.class;
 			}
 			else {
 				return this.field.getType();

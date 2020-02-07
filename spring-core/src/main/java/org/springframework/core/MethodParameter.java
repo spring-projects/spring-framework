@@ -559,16 +559,10 @@ public class MethodParameter {
 				}
 				// TODO: Object.class if unresolvable
 			}
-			if (type instanceof Class) {
-				return (Class<?>) type;
-			}
-			else if (type instanceof ParameterizedType) {
-				Type arg = ((ParameterizedType) type).getRawType();
-				if (arg instanceof Class) {
-					return (Class<?>) arg;
-				}
-			}
-			return Object.class;
+
+			Class<?> clazz = ClassUtils.getRawClass(type);
+
+			return clazz != null ? clazz : Object.class;
 		}
 		else {
 			return getParameterType();

@@ -24,7 +24,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -1395,4 +1397,23 @@ public abstract class ClassUtils {
 		return candidates;
 	}
 
+	/**
+	 * Return the raw class of the type.
+	 * @param type the class from
+	 * @return the class, or {@code null} if the type neither instanceof {@link Class} nor {@link ParameterizedType}
+	 */
+	@Nullable
+	public static Class<?> getRawClass(Type type){
+		if (type instanceof Class) {
+			return (Class<?>) type;
+		}
+		else if (type instanceof ParameterizedType) {
+			Type arg = ((ParameterizedType) type).getRawType();
+			if (arg instanceof Class) {
+				return (Class<?>) arg;
+			}
+		}
+
+		return null;
+	}
 }
