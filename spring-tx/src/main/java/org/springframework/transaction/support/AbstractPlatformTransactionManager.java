@@ -390,7 +390,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Open new transaction with transaction definition.
+	 * Open a new transaction with transaction definition.
 	 */
 	@NonNull
 	private TransactionStatus openNewTransaction(TransactionDefinition def, Object transaction,
