@@ -501,6 +501,7 @@ class ClassUtilsTests {
 
 	@SuppressWarnings("unused")
 	private static class ParameterizedClass{
+
 		List<String> list1;
 		List list2;
 		Map<String,Long> map1;
