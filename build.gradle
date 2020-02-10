@@ -61,7 +61,7 @@ configure(allprojects) { project ->
 				entry 'aspectjweaver'
 			}
 			// If customJavaHome has been set, we assume we need Groovy 3.0 for testing purposes.
-			dependencySet(group: 'org.codehaus.groovy', version: System.getProperty("customJavaHome") ?  '3.0.0-rc-3' : '2.5.9') {
+			dependencySet(group: 'org.codehaus.groovy', version: System.getProperty("customJavaHome") ?  '3.0.0' : '2.5.9') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'
@@ -125,7 +125,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.10.Final"
+			dependency "org.hibernate:hibernate-core:5.4.11.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.2.Final"
 			dependency "org.webjars:webjars-locator-core:0.43"
 			dependency "org.webjars:underscorejs:1.8.3"
