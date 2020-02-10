@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -59,7 +60,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	private boolean waitForTasksToCompleteOnShutdown = false;
 
-	private int awaitTerminationSeconds = 0;
+	private Duration awaitTerminationDuration = Duration.ZERO;
 
 	@Nullable
 	private String beanName;
@@ -145,7 +146,16 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
-		this.awaitTerminationSeconds = awaitTerminationSeconds;
+		this.awaitTerminationDuration = Duration.ofSeconds(awaitTerminationSeconds);
+	}
+
+	/**
+	 *
+	 * @param awaitTerminationDuration time to await to shutdown internal executor
+	 * @since 5.2.4
+	 */
+	public void setAwaitTerminationDuration(Duration awaitTerminationDuration) {
+		this.awaitTerminationDuration = awaitTerminationDuration;
 	}
 
 	@Override
@@ -236,12 +246,13 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Wait for the executor to terminate, according to the value of the
-	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
+	 * {@link #setAwaitTerminationDuration "awaitTerminationDuration"} property.
 	 */
 	private void awaitTerminationIfNecessary(ExecutorService executor) {
-		if (this.awaitTerminationSeconds > 0) {
+		boolean awaitTermination = !this.awaitTerminationDuration.isNegative() && !this.awaitTerminationDuration.isZero();
+		if (awaitTermination) {
 			try {
-				if (!executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+				if (!executor.awaitTermination(this.awaitTerminationDuration.toMillis(), TimeUnit.MILLISECONDS)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Timed out while waiting for executor" +
 								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");
