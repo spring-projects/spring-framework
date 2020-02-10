@@ -241,6 +241,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
 		}
+		catch (JsonMappingException ex) {
+			throw new HttpMessageConversionException("Content mapping error: " + ex.getOriginalMessage(), ex);
+		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
 		}
