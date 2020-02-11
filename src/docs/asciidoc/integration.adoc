@@ -973,10 +973,10 @@ method API.
 * <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
 that supports both synchronous and asynchronous as well as streaming scenarios.
 
-NOTE: As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
-`RestTemplate` with efficient support for both synchronous and asynchronous as well as streaming
-scenarios. The `RestTemplate` will be deprecated in a future version and will not have
-major new features added going forward.
+NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
+changes and bugs to be accepted going forward. Please, consider using the
+<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
+supports sync, async, and streaming scenarios.
 
 
 [[rest-resttemplate]]
