@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	private boolean waitForTasksToCompleteOnShutdown = false;
 
-	private int awaitTerminationSeconds = 0;
+	private long awaitTerminationMillis = 0;
 
 	@Nullable
 	private String beanName;
@@ -145,8 +145,19 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
-		this.awaitTerminationSeconds = awaitTerminationSeconds;
+		this.awaitTerminationMillis = awaitTerminationSeconds * 1000;
 	}
+
+	/**
+	 * Variant of {@link #setAwaitTerminationSeconds} with millisecond precision.
+	 * @since 5.2.4
+	 * @see java.util.concurrent.ExecutorService#shutdown()
+	 * @see java.util.concurrent.ExecutorService#awaitTermination
+	 */
+	public void setAwaitTerminationMillis(long awaitTerminationMillis) {
+		this.awaitTerminationMillis = awaitTerminationMillis;
+	}
+
 
 	@Override
 	public void setBeanName(String name) {
@@ -239,9 +250,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
 	 */
 	private void awaitTerminationIfNecessary(ExecutorService executor) {
-		if (this.awaitTerminationSeconds > 0) {
+		if (this.awaitTerminationMillis > 0) {
 			try {
-				if (!executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+				if (!executor.awaitTermination(this.awaitTerminationMillis, TimeUnit.MILLISECONDS)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Timed out while waiting for executor" +
 								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");
