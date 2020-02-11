@@ -75,7 +75,14 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
 
-		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
+		// see https://github.com/reactor/reactor-core/issues/2041
+
+		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+		testDecodeCancel(input, TYPE, null, null);
+		testDecodeEmpty(TYPE, null, null);
+
+		// testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
 
 	@Test

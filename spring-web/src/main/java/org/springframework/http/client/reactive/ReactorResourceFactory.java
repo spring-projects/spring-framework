@@ -46,6 +46,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Nullable
 	private Consumer<HttpResources> globalResourcesConsumer;
 
+	@SuppressWarnings("deprecation")
 	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.fixed("webflux", 500);
 
 	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");

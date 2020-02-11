@@ -95,6 +95,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
