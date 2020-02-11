@@ -547,13 +547,10 @@ public abstract class DataBufferUtils {
 			return (Mono<DataBuffer>) buffers;
 		}
 
-		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
-
 		return Flux.from(buffers)
 				.collect(() -> new LimitedDataBufferList(maxByteCount), LimitedDataBufferList::add)
 				.filter(list -> !list.isEmpty())
 				.map(list -> list.get(0).factory().join(list))
-				.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 

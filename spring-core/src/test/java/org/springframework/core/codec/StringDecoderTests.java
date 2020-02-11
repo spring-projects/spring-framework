@@ -78,11 +78,11 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
 		// see https://github.com/reactor/reactor-core/issues/2041
 
-		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
-		testDecodeCancel(input, TYPE, null, null);
-		testDecodeEmpty(TYPE, null, null);
+//		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+//		testDecodeCancel(input, TYPE, null, null);
+//		testDecodeEmpty(TYPE, null, null);
 
-		// testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
 
 	@Test

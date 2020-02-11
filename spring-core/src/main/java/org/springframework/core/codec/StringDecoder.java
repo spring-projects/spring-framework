@@ -32,6 +32,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DataBufferWrapper;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -96,22 +97,13 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		Flux<DataBuffer> inputFlux = Flux.defer(() -> {
 			DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delimiterBytes);
 
-			Flux<DataBuffer> buffers = Flux.from(input)
-					.concatMapIterable(buffer -> endFrameAfterDelimiter(buffer, matcher));
+			@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+			LimitChecker limiter = new LimitChecker(getMaxInMemorySize());
 
-			Flux<List<DataBuffer>> delimitedBuffers;
-			if (getMaxInMemorySize() != -1) {
-				delimitedBuffers = buffers
-						.windowUntil(buffer -> buffer instanceof EndFrameBuffer)
-						.concatMap(window -> window.collect(
-								() -> new LimitedDataBufferList(getMaxInMemorySize()),
-								LimitedDataBufferList::add));
-			}
-			else {
-				delimitedBuffers = buffers.bufferUntil(buffer -> buffer instanceof EndFrameBuffer);
-			}
-
-			return delimitedBuffers
+			return Flux.from(input)
+					.concatMapIterable(buffer -> endFrameAfterDelimiter(buffer, matcher))
+					.doOnNext(limiter)
+					.bufferUntil(buffer -> buffer instanceof EndFrameBuffer)
 					.map(list -> joinAndStrip(list, this.stripDelimiter))
 					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
@@ -205,7 +197,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		DataBuffer lastBuffer = dataBuffers.get(lastIdx);
 		if (lastBuffer instanceof EndFrameBuffer) {
 			matchingDelimiter = ((EndFrameBuffer) lastBuffer).delimiter();
-			dataBuffers = dataBuffers.subList(0, lastIdx);
+			dataBuffers.remove(lastIdx);
 		}
 
 		DataBuffer result = dataBuffers.get(0).factory().join(dataBuffers);
@@ -296,31 +288,28 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 
-	private class ConcatMapIterableDiscardWorkaroundCache implements Consumer<DataBuffer>, Runnable {
+	private static class LimitChecker implements Consumer<DataBuffer> {
 
-		private final List<DataBuffer> buffers = new ArrayList<>();
+		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+		private final LimitedDataBufferList list;
 
 
-		public List<DataBuffer> addAll(List<DataBuffer> buffersToAdd) {
-			this.buffers.addAll(buffersToAdd);
-			return buffersToAdd;
+		LimitChecker(int maxInMemorySize) {
+			this.list = new LimitedDataBufferList(maxInMemorySize);
 		}
 
 		@Override
-		public void accept(DataBuffer dataBuffer) {
-			this.buffers.remove(dataBuffer);
-		}
-
-		@Override
-		public void run() {
-			this.buffers.forEach(buffer -> {
-				try {
-					DataBufferUtils.release(buffer);
-				}
-				catch (Throwable ex) {
-					// Keep going..
-				}
-			});
+		public void accept(DataBuffer buffer) {
+			if (buffer instanceof EndFrameBuffer) {
+				this.list.clear();
+			}
+			try {
+				this.list.add(buffer);
+			}
+			catch (DataBufferLimitException ex) {
+				DataBufferUtils.release(buffer);
+				throw ex;
+			}
 		}
 	}
 
