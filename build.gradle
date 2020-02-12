@@ -3,6 +3,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.3.61' apply false
 	id 'org.jetbrains.dokka' version '0.9.18' apply false
 	id 'org.asciidoctor.jvm.convert' version '2.4.0'
+	id 'io.spring.gradle-enterprise-conventions' version '0.0.2'
 	id 'io.spring.nohttp' version '0.0.4.RELEASE'
 	id 'de.undercouch.download' version '4.0.0'
 	id 'com.gradle.build-scan' version '3.1.1'
@@ -12,16 +13,6 @@ plugins {
 }
 
 apply from: "$rootDir/gradle/build-scan-user-data.gradle"
-buildScan {
-	captureTaskInputFiles = true
-	obfuscation {
-		ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
-	}
-	publishAlways()
-	publishIfAuthenticated()
-	server = 'https://ge.spring.io'
-}
-
 ext {
 	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
 	javaProjects = subprojects - project(":framework-bom")
