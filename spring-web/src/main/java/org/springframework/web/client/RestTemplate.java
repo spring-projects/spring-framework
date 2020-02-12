@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ import org.springframework.web.util.UriTemplateHandler;
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
-	private static boolean romePresent =
+	private static final boolean romePresent =
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
 					RestTemplate.class.getClassLoader());
 
