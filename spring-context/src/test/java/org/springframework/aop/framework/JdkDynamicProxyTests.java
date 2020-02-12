@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testVarargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new VarargTestBean());
 		VarargTestInterface proxy = (VarargTestInterface) proxyFactory.getProxy();
@@ -213,6 +214,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 	public interface VarargTestInterface {
 
+		@SuppressWarnings("unchecked")
 		<V extends MyInterface> boolean doWithVarargs(V... args);
 	}
 
