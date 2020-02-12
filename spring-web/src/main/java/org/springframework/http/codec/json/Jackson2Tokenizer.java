@@ -36,7 +36,6 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link Function} to transform a JSON stream of arbitrary size, byte array
@@ -66,7 +65,6 @@ final class Jackson2Tokenizer {
 
 	private int byteCount;
 
-	@Nullable // yet initialized by calling createToken() in the constructor
 	private TokenBuffer tokenBuffer;
 
 
@@ -84,7 +82,7 @@ final class Jackson2Tokenizer {
 		this.forceUseOfBigDecimal = forceUseOfBigDecimal;
 		this.inputFeeder = (ByteArrayFeeder) this.parser.getNonBlockingInputFeeder();
 		this.maxInMemorySize = maxInMemorySize;
-		createToken();
+		this.tokenBuffer = createToken();
 	}
 
 
@@ -174,9 +172,8 @@ final class Jackson2Tokenizer {
 
 		if ((token.isStructEnd() || token.isScalarValue()) && this.objectDepth == 0 && this.arrayDepth == 0) {
 			result.add(this.tokenBuffer);
-			createToken();
+			this.tokenBuffer = createToken();
 		}
-
 	}
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
@@ -187,13 +184,14 @@ final class Jackson2Tokenizer {
 		if (this.objectDepth == 0 && (this.arrayDepth == 0 || this.arrayDepth == 1) &&
 				(token == JsonToken.END_OBJECT || token.isScalarValue())) {
 			result.add(this.tokenBuffer);
-			createToken();
+			this.tokenBuffer = createToken();
 		}
 	}
 
-	private void createToken() {
-		this.tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
-		this.tokenBuffer.forceUseOfBigDecimal(this.forceUseOfBigDecimal);
+	private TokenBuffer createToken() {
+		TokenBuffer tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
+		tokenBuffer.forceUseOfBigDecimal(this.forceUseOfBigDecimal);
+		return tokenBuffer;
 	}
 
 	private boolean isTopLevelArrayToken(JsonToken token) {

@@ -170,8 +170,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder",
-					ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
 		}
 
 		byte[] bytes = byteBuilder.toByteArray();
@@ -197,8 +196,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder",
-					ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
 		}
 
 		byte[] bytes = byteArrayBuilder.toByteArray();
@@ -233,6 +231,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private ObjectWriter createObjectWriter(ResolvableType valueType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
+
 		JavaType javaType = getJavaType(valueType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
@@ -280,7 +279,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	}
 
 
-	// HttpMessageEncoder...
+	// HttpMessageEncoder
 
 	@Override
 	public List<MimeType> getEncodableMimeTypes() {
@@ -299,7 +298,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		return (actualType != null ? getHints(actualType) : Hints.none());
 	}
 
-	// Jackson2CodecSupport ...
+
+	// Jackson2CodecSupport
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
