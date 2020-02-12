@@ -278,11 +278,9 @@ perform actions on that bean, such as setting and retrieving properties.
 [[beans-beans-conventions]]
 === Setting and Getting Basic and Nested Properties
 
-Setting and getting properties is done by using the `setPropertyValue`,
-`setPropertyValues`, `getPropertyValue`, and `getPropertyValues` methods which come
-with a couple of overloaded variants. Springs javadoc describes them in more detail.
-The JavaBeans specification has conventions for indicating properties of an
-object. The following table shows some examples of these conventions:
+Setting and getting properties is done through the `setPropertyValue` and
+`getPropertyValue` overloaded method variants of `BeanWrapper`. See their Javadoc for
+details. The below table shows some examples of these conventions:
 
 [[beans-beans-conventions-properties-tbl]]
 .Examples of properties
