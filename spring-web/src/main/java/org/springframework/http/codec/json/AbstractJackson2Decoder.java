@@ -25,9 +25,11 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -188,9 +190,17 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private CodecException processException(IOException ex) {
-		if (ex instanceof InvalidDefinitionException) {
+		if (ex instanceof MismatchedInputException) {  // specific kind of JsonMappingException
+			String originalMessage = ((MismatchedInputException) ex).getOriginalMessage();
+			return new DecodingException("Invalid JSON input: " + originalMessage, ex);
+		}
+		if (ex instanceof InvalidDefinitionException) {  // another kind of JsonMappingException
 			JavaType type = ((InvalidDefinitionException) ex).getType();
 			return new CodecException("Type definition error: " + type, ex);
+		}
+		if (ex instanceof JsonMappingException) {  // typically ValueInstantiationException
+			String originalMessage = ((JsonMappingException) ex).getOriginalMessage();
+			return new CodecException("JSON conversion problem: " + originalMessage, ex);
 		}
 		if (ex instanceof JsonProcessingException) {
 			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();
@@ -200,7 +210,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 
-	// HttpMessageDecoder...
+	// HttpMessageDecoder
 
 	@Override
 	public Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
@@ -214,7 +224,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return getMimeTypes();
 	}
 
-	// Jackson2CodecSupport ...
+	// Jackson2CodecSupport
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {

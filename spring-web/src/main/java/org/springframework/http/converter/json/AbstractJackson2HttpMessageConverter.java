@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
@@ -238,8 +239,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (InvalidDefinitionException ex) {
+		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
+			throw new HttpMessageNotReadableException("Invalid JSON input: " + ex.getOriginalMessage(), ex, inputMessage);
+		}
+		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
+		}
+		catch (JsonMappingException ex) {  // typically ValueInstantiationException
+			throw new HttpMessageConversionException("JSON conversion problem: " + ex.getOriginalMessage(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
@@ -289,8 +296,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			writeSuffix(generator, object);
 			generator.flush();
 		}
-		catch (InvalidDefinitionException ex) {
+		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
+			throw new HttpMessageNotWritableException("Invalid JSON input: " + ex.getOriginalMessage(), ex);
+		}
+		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
+		}
+		catch (JsonMappingException ex) {  // typically ValueInstantiationException
+			throw new HttpMessageConversionException("JSON mapping problem: " + ex.getPathReference(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
