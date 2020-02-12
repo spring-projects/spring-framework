@@ -4,6 +4,8 @@ tagCiOrLocal()
 addCiMetadata()
 addGitMetadata()
 addTestTaskMetadata()
+addCustomJavaHomeMetadata()
+addCustomJavaSourceVersionMetadata()
 
 void tagOs() {
 	buildScan.tag System.getProperty('os.name')
@@ -57,6 +59,20 @@ void addTestTaskMetadata() {
 				buildScan.value "Test#maxParallelForks[${test.path}]", test.maxParallelForks.toString()
 			}
 		}
+	}
+}
+
+void addCustomJavaHomeMetadata() {
+	def customJavaHome = System.getProperty("customJavaHome")
+	if (customJavaHome) {
+		buildScan.value "Custom JAVA_HOME", customJavaHome
+	}
+}
+
+void addCustomJavaSourceVersionMetadata() {
+	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+	if (customJavaSourceVersion) {
+		buildScan.value "Custom Java Source Version", customJavaSourceVersion
 	}
 }
 

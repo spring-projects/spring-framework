@@ -311,9 +311,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * assuming a "force" parameter), else logging an error.
 	 */
 	private void invokeCustomDestroyMethod(final Method destroyMethod) {
-		Class<?>[] paramTypes = destroyMethod.getParameterTypes();
-		final Object[] args = new Object[paramTypes.length];
-		if (paramTypes.length == 1) {
+		int paramCount = destroyMethod.getParameterCount();
+		final Object[] args = new Object[paramCount];
+		if (paramCount == 1) {
 			args[0] = Boolean.TRUE;
 		}
 		if (logger.isTraceEnabled()) {

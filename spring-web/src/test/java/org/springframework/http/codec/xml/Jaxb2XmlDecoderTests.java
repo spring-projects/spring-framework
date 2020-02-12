@@ -29,16 +29,16 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.xml.jaxb.XmlRootElement;
 import org.springframework.http.codec.xml.jaxb.XmlRootElementWithName;
 import org.springframework.http.codec.xml.jaxb.XmlRootElementWithNameAndNamespace;
 import org.springframework.http.codec.xml.jaxb.XmlType;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

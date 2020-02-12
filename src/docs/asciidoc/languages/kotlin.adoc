@@ -748,12 +748,12 @@ as the following example shows:
 
 === Injecting Configuration Properties
 
-In Java, you can inject configuration properties by using annotations (such as `@Value("${property}")`).
+In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`)].
 However, in Kotlin, `$` is a reserved character that is used for
 https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
 
 Therefore, if you wish to use the `@Value` annotation in Kotlin, you need to escape the `$`
-character by writing `@Value("\${property}")`.
+character by writing pass:q[`@Value("\${property}")`].
 
 NOTE: If you use Spring Boot, you should probably use
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]

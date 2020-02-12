@@ -60,8 +60,8 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()
-				&& TransactionSynchronizationManager.isActualTransactionActive()) {
+		if (TransactionSynchronizationManager.isSynchronizationActive() &&
+				TransactionSynchronizationManager.isActualTransactionActive()) {
 			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
 			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
 		}

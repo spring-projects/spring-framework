@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests with {@code @CrossOrigin} and {@code @RequestMapping}
@@ -87,6 +89,28 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isNull();
 		assertThat(entity.getBody()).isEqualTo("no");
+	}
+
+	@ParameterizedHttpServerTest
+	void optionsRequestWithAccessControlRequestMethod(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+		this.headers.clear();
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/no", this.headers, String.class);
+		assertThat(entity.getBody()).isNull();
+	}
+
+	@ParameterizedHttpServerTest
+	void preflightRequestWithoutAnnotation(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		try {
+			performOptions("/no", this.headers, Void.class);
+			fail("Preflight request without CORS configuration should fail");
+		}
+		catch (HttpClientErrorException ex) {
+			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		}
 	}
 
 	@ParameterizedHttpServerTest

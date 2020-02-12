@@ -40,6 +40,7 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
@@ -129,16 +130,12 @@ public class ServerCodecConfigurerTests {
 	public void maxInMemorySize() {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
+
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(13);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-
-		ResourceHttpMessageReader resourceReader = (ResourceHttpMessageReader) nextReader(readers);
-		ResourceDecoder decoder = (ResourceDecoder) resourceReader.getDecoder();
-		assertThat(decoder.getMaxInMemorySize()).isEqualTo(size);
-
+		assertThat(((ResourceDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
 		assertThat(((FormHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
@@ -154,9 +151,89 @@ public class ServerCodecConfigurerTests {
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}
 
+	@Test
+	public void maxInMemorySizeWithCustomCodecs() {
+
+		int size = 99;
+		this.configurer.defaultCodecs().maxInMemorySize(size);
+		this.configurer.registerDefaults(false);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new ByteArrayDecoder());
+		customCodecs.registerWithDefaultConfig(new ByteArrayDecoder());
+		customCodecs.register(new Jackson2JsonDecoder());
+		customCodecs.registerWithDefaultConfig(new Jackson2JsonDecoder());
+
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+	}
+
+	@Test
+	public void enableRequestLoggingDetails() {
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(findCodec(readers, FormHttpMessageReader.class).isEnableLoggingRequestDetails()).isTrue();
+
+		MultipartHttpMessageReader multipartReader = findCodec(readers, MultipartHttpMessageReader.class);
+		assertThat(multipartReader.isEnableLoggingRequestDetails()).isTrue();
+
+		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		assertThat(reader.isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
+	public void enableRequestLoggingDetailsWithCustomCodecs() {
+
+		this.configurer.registerDefaults(false);
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new FormHttpMessageReader());
+		customCodecs.registerWithDefaultConfig(new FormHttpMessageReader());
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((FormHttpMessageReader) readers.get(0)).isEnableLoggingRequestDetails()).isFalse();
+		assertThat(((FormHttpMessageReader) readers.get(1)).isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
+	public void cloneConfigurer() {
+		ServerCodecConfigurer clone = this.configurer.clone();
+
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		clone.defaultCodecs().multipartReader(reader);
+		clone.defaultCodecs().serverSentEventEncoder(encoder);
+
+		// Clone has the customizations
+
+		HttpMessageReader<?> actualReader =
+				findCodec(clone.getReaders(), MultipartHttpMessageReader.class);
+
+		ServerSentEventHttpMessageWriter actualWriter =
+				findCodec(clone.getWriters(), ServerSentEventHttpMessageWriter.class);
+
+		assertThat(actualReader).isSameAs(reader);
+		assertThat(actualWriter.getEncoder()).isSameAs(encoder);
+
+		// Original does not have the customizations
+
+		actualReader = findCodec(this.configurer.getReaders(), MultipartHttpMessageReader.class);
+		actualWriter = findCodec(this.configurer.getWriters(), ServerSentEventHttpMessageWriter.class);
+
+		assertThat(actualReader).isNotSameAs(reader);
+		assertThat(actualWriter.getEncoder()).isNotSameAs(encoder);
+	}
+
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = nextReader(readers);
-		assertThat(reader.getClass()).isEqualTo(DecoderHttpMessageReader.class);
+		assertThat(reader).isInstanceOf(DecoderHttpMessageReader.class);
 		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
@@ -168,6 +245,11 @@ public class ServerCodecConfigurerTests {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertThat(writer.getClass()).isEqualTo(EncoderHttpMessageWriter.class);
 		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T findCodec(List<?> codecs, Class<T> type) {
+		return (T) codecs.stream().filter(type::isInstance).findFirst().get();
 	}
 
 	@SuppressWarnings("unchecked")

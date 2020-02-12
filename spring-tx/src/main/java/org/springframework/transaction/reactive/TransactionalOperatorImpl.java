@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  * @see #execute
  * @see ReactiveTransactionManager
  */
-@SuppressWarnings("serial")
 final class TransactionalOperatorImpl implements TransactionalOperator {
 
 	private static final Log logger = LogFactory.getLog(TransactionalOperatorImpl.class);

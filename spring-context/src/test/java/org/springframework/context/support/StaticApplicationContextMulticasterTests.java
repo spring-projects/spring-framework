@@ -24,18 +24,18 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ACATester;
-import org.springframework.context.AbstractApplicationContextTests;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.ACATester;
+import org.springframework.context.testfixture.beans.BeanThatListens;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

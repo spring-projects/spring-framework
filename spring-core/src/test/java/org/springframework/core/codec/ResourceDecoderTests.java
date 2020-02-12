@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
@@ -81,10 +82,7 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 	@Override
 	@Test
 	public void decodeToMono() {
-		Flux<DataBuffer> input = Flux.concat(
-				dataBuffer(this.fooBytes),
-				dataBuffer(this.barBytes));
-
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 		testDecodeToMonoAll(input, ResolvableType.forClass(Resource.class),
 				step -> step
 						.consumeNextWith(value -> {
@@ -102,6 +100,24 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 						.verify(),
 				null,
 				Collections.singletonMap(ResourceDecoder.FILENAME_HINT, "testFile"));
+	}
+
+	@Test
+	public void decodeInputStreamResource() {
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
+		testDecodeAll(input, InputStreamResource.class, step -> step
+				.consumeNextWith(resource -> {
+					try {
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+						assertThat(new String(bytes)).isEqualTo("foobar");
+						assertThat(resource.contentLength()).isEqualTo(fooBytes.length + barBytes.length);
+					}
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
+					}
+				})
+				.expectComplete()
+				.verify());
 	}
 
 }

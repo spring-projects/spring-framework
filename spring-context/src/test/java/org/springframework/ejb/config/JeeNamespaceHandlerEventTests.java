@@ -23,8 +23,8 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.beans.CollectingReaderEventListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

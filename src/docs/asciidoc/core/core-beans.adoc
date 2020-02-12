@@ -543,7 +543,7 @@ enforced by the container, though no longer by XML parsers.
 You are not required to supply a `name` or an `id` for a bean. If you do not supply a
 `name` or `id` explicitly, the container generates a unique name for that bean. However,
 if you want to refer to that bean by name, through the use of the `ref` element or a
-<<beans-servicelocator,Service Locator>> style lookup, you must provide a name.
+Service Locator style lookup, you must provide a name.
 Motivations for not supplying a name are related to using <<beans-inner-beans,inner
 beans>> and <<beans-factory-autowire,autowiring collaborators>>.
 
@@ -1565,7 +1565,7 @@ is a dependency of the bean whose property is to be set, and it is initialized o
 as needed before the property is set. (If the collaborator is a singleton bean, it may
 already be initialized by the container.) All references are ultimately a reference to
 another object. Scoping and validation depend on whether you specify the ID or name of the
-other object through the `bean`, `local,` or `parent` attributes.
+other object through the `bean` or `parent` attribute.
 
 Specifying the target bean through the `bean` attribute of the `<ref/>` tag is the most
 general form and allows creation of a reference to any bean in the same container or
@@ -4482,7 +4482,7 @@ with placeholder values is defined:
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
 properties of the DataSource. The values to replace are specified as placeholders of the
-form `${property-name}`, which follows the Ant and log4j and JSP EL style.
+form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -5400,7 +5400,6 @@ The following example shows corresponding bean definitions.
 is qualified with the same value.
 <2> The bean with the `action` qualifier value is wired with the constructor argument that
 is qualified with the same value.
-====
 
 For a fallback match, the bean name is considered a default qualifier value. Thus, you
 can define the bean with an `id` of `main` instead of the nested qualifier element, leading
@@ -5428,6 +5427,7 @@ If there is no other resolution indicator (such as a qualifier or a primary mark
 for a non-unique dependency situation, Spring matches the injection point name
 (that is, the field name or parameter name) against the target bean names and choose the
 same-named candidate, if any.
+====
 
 That said, if you intend to express annotation-driven injection by name, do not
 primarily use `@Autowired`, even if it is capable of selecting by bean name among
@@ -5451,16 +5451,28 @@ back to the bean that is currently injected). Note that self injection is a fall
 Regular dependencies on other components always have precedence. In that sense, self
 references do not participate in regular candidate selection and are therefore in
 particular never primary. On the contrary, they always end up as lowest precedence.
-In practice, you should use self references as a last resort only (for example, for calling other methods
-on the same instance through the bean's transactional proxy). Consider factoring out
-the effected methods to a separate delegate bean in such a scenario. Alternatively, you
-can use `@Resource`, which may obtain a proxy back to the current bean by its unique name.
+In practice, you should use self references as a last resort only (for example, for
+calling other methods on the same instance through the bean's transactional proxy).
+Consider factoring out the effected methods to a separate delegate bean in such a scenario.
+Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
+by its unique name.
+
+[NOTE]
+====
+Trying to inject the results from `@Bean` methods on the same configuration class is
+effectively a self-reference scenario as well. Either lazily resolve such references
+in the method signature where it is actually needed (as opposed to an autowired field
+in the configuration class) or declare the affected `@Bean` methods as `static`,
+decoupling them from the containing configuration class instance and its lifecycle.
+Otherwise, such beans are only considered in the fallback phase, with matching beans
+on other configuration classes selected as primary candidates instead (if available).
+====
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
 narrowing through qualifier annotations at the parameter level. In contrast, `@Resource`
 is supported only for fields and bean property setter methods with a single argument.
-As a consequence, you should stick with qualifiers if your injection target is a constructor or a
-multi-argument method.
+As a consequence, you should stick with qualifiers if your injection target is a
+constructor or a multi-argument method.
 
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
@@ -6849,12 +6861,12 @@ constraints applying.
 ====
 You may declare `@Bean` methods as `static`, allowing for them to be called without
 creating their containing configuration class as an instance. This makes particular
-sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor` or
-`BeanPostProcessor`), since such beans get initialized early in the container
+sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor`
+or `BeanPostProcessor`), since such beans get initialized early in the container
 lifecycle and should avoid triggering other parts of the configuration at that point.
 
-Calls to static `@Bean` methods never get intercepted by the container,
-not even within `@Configuration` classes (as described earlier in this section), due to technical
+Calls to static `@Bean` methods never get intercepted by the container, not even within
+`@Configuration` classes (as described earlier in this section), due to technical
 limitations: CGLIB subclassing can override only non-static methods. As a consequence,
 a direct call to another `@Bean` method has standard Java semantics, resulting
 in an independent instance being returned straight from the factory method itself.
@@ -6929,12 +6941,19 @@ classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 	}
 ----
 
-NOTE: If you do not want to rely on the default bean-naming strategy, you can provide a
-custom bean-naming strategy. First, implement the
+If you do not want to rely on the default bean-naming strategy, you can provide a custom
+bean-naming strategy. First, implement the
 {api-spring-framework}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the fully
 qualified class name when configuring the scanner, as the following example annotation
-and bean definition show:
+and bean definition show.
+
+TIP: If you run into naming conflicts due to multiple autodetected components having the
+same non-qualified class name (i.e., classes with identical names but residing in
+different packages), you may need to configure a `BeanNameGenerator` that defaults to the
+fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+`FullyQualifiedAnnotationBeanNameGenerator` located in package
+`org.springframework.context.annotation` can be used for such purposes.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -9524,7 +9543,7 @@ now looks like the following listing:
 The problem is how to switch between using these two variations based on the
 current environment. Over time, Spring users have devised a number of ways to
 get this done, usually relying on a combination of system environment variables
-and XML `<import/>` statements containing `${placeholder}` tokens that resolve
+and XML `<import/>` statements containing pass:q[`${placeholder}`] tokens that resolve
 to the correct configuration file path depending on the value of an environment
 variable. Bean definition profiles is a core container feature that provides a
 solution to this problem.
@@ -11055,7 +11074,7 @@ file extension).
 .Add a
 `META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
-`META-INF/applicationContext.xml).
+`META-INF/applicationContext.xml`).
 . Drop the resulting RAR file into your
 application server's deployment directory.
 

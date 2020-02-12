@@ -357,7 +357,7 @@ public abstract class AbstractAdaptableMessageListener
 			throws JMSException {
 
 		if (result instanceof JmsResponse) {
-			JmsResponse<?> jmsResponse = (JmsResponse) result;
+			JmsResponse<?> jmsResponse = (JmsResponse<?>) result;
 			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
 			if (destination != null) {
 				return destination;
@@ -538,6 +538,7 @@ public abstract class AbstractAdaptableMessageListener
 			 * this case, its payload is returned.
 			 * @return the payload of the message
 			 */
+			@SuppressWarnings("rawtypes")
 			private Object unwrapPayload() throws JMSException {
 				Object payload = extractPayload(this.message);
 				if (payload instanceof org.springframework.messaging.Message) {

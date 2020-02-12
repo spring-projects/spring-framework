@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static java.util.Collections.emptyList;
@@ -109,6 +109,19 @@ public class RequestPredicatesTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/path");
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
 		RequestPredicate predicate = RequestPredicates.path("/p*");
+		assertThat(predicate.test(request)).isTrue();
+
+		servletRequest = new MockHttpServletRequest("GET", "/foo");
+		request = new DefaultServerRequest(servletRequest, emptyList());
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	public void servletPath() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/foo/bar");
+		servletRequest.setServletPath("/foo");
+		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
+		RequestPredicate predicate = RequestPredicates.path("/bar");
 		assertThat(predicate.test(request)).isTrue();
 
 		servletRequest = new MockHttpServletRequest("GET", "/foo");

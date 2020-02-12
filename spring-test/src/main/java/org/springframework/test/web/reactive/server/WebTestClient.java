@@ -37,6 +37,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -84,6 +85,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * perform integration tests on an embedded WebFlux server.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -442,11 +444,34 @@ public interface WebTestClient {
 		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
+		 * Configure the codecs for the {@code WebClient} in the
+		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
+		 * {@code ExchangeStrategies}.
+		 * @param configurer the configurer to apply
+		 * @since 5.1.13
+		 */
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+
+		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * <p>For most cases, prefer using {@link #codecs(Consumer)} which allows
+		 * customizing the codecs in the {@code ExchangeStrategies} rather than
+		 * replace them. That ensures multiple parties can contribute to codecs
+		 * configuration.
+		 * <p>By default this is set to {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
+
+		/**
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
+		 * @deprecated as of 5.1.13 in favor of {@link #codecs(Consumer)}
+		 */
+		@Deprecated
+		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
 
 		/**
 		 * Max amount of time to wait for responses.
@@ -928,7 +953,7 @@ public interface WebTestClient {
 		 * @since 5.1
 		 * @see #xpath(String, Map, Object...)
 		 */
-		default XpathAssertions xpath(String expression, Object... args){
+		default XpathAssertions xpath(String expression, Object... args) {
 			return xpath(expression, null, args);
 		}
 
@@ -942,7 +967,7 @@ public interface WebTestClient {
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */
-		XpathAssertions xpath(String expression, @Nullable  Map<String, String> namespaces, Object... args);
+		XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args);
 
 		/**
 		 * Assert the response body content with the given {@link Consumer}.

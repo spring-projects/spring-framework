@@ -23,17 +23,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.SideEffectBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.SideEffectBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

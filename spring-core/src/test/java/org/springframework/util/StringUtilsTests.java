@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -743,6 +743,23 @@ class StringUtilsTests {
 		assertThat(StringUtils.parseLocale("invalidvalue")).isEqualTo(new Locale("invalidvalue"));
 		assertThat(StringUtils.parseLocale("invalidvalue_foo")).isEqualTo(new Locale("invalidvalue", "foo"));
 		assertThat(StringUtils.parseLocale("")).isNull();
+	}
+
+	@Test
+	void split() {
+		assertThat(StringUtils.split("Hello, world", ",")).containsExactly("Hello", " world");
+		assertThat(StringUtils.split(",Hello world", ",")).containsExactly("", "Hello world");
+		assertThat(StringUtils.split("Hello world,", ",")).containsExactly("Hello world", "");
+		assertThat(StringUtils.split("Hello, world,", ",")).containsExactly("Hello", " world,");
+	}
+
+	@Test
+	void splitWithEmptyStringOrNull() {
+		assertThat(StringUtils.split("Hello, world", "")).isNull();
+		assertThat(StringUtils.split("", ",")).isNull();
+		assertThat(StringUtils.split(null, ",")).isNull();
+		assertThat(StringUtils.split("Hello, world", null)).isNull();
+		assertThat(StringUtils.split(null, null)).isNull();
 	}
 
 }

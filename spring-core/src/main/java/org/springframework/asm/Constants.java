@@ -27,6 +27,11 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 package org.springframework.asm;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.regex.Pattern;
+
 /**
  * Defines additional JVM opcodes, access flags and constants which are not part of the ASM public
  * API.
@@ -56,7 +61,8 @@ final class Constants implements Opcodes {
   static final String RUNTIME_VISIBLE_ANNOTATIONS = "RuntimeVisibleAnnotations";
   static final String RUNTIME_INVISIBLE_ANNOTATIONS = "RuntimeInvisibleAnnotations";
   static final String RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS = "RuntimeVisibleParameterAnnotations";
-  static final String RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS = "RuntimeInvisibleParameterAnnotations";
+  static final String RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS =
+      "RuntimeInvisibleParameterAnnotations";
   static final String RUNTIME_VISIBLE_TYPE_ANNOTATIONS = "RuntimeVisibleTypeAnnotations";
   static final String RUNTIME_INVISIBLE_TYPE_ANNOTATIONS = "RuntimeInvisibleTypeAnnotations";
   static final String ANNOTATION_DEFAULT = "AnnotationDefault";
@@ -67,6 +73,8 @@ final class Constants implements Opcodes {
   static final String MODULE_MAIN_CLASS = "ModuleMainClass";
   static final String NEST_HOST = "NestHost";
   static final String NEST_MEMBERS = "NestMembers";
+  static final String PERMITTED_SUBTYPES = "PermittedSubtypes";
+  static final String RECORD = "Record";
 
   // ASM specific access flags.
   // WARNING: the 16 least significant bits must NOT be used, to avoid conflicts with standard
@@ -173,4 +181,41 @@ final class Constants implements Opcodes {
   static final int ASM_GOTO_W = 220;
 
   private Constants() {}
+
+  static void checkAsm8Experimental(final Object caller) {
+    Class<?> callerClass = caller.getClass();
+    String internalName = callerClass.getName().replace('.', '/');
+    if (!isWhitelisted(internalName)) {
+      checkIsPreview(callerClass.getClassLoader().getResourceAsStream(internalName + ".class"));
+    }
+  }
+
+  static boolean isWhitelisted(final String internalName) {
+    if (!internalName.startsWith("org/objectweb/asm/")) {
+      return false;
+    }
+    String member = "(Annotation|Class|Field|Method|Module|RecordComponent|Signature)";
+    return internalName.contains("Test$")
+        || Pattern.matches(
+            "org/objectweb/asm/util/Trace" + member + "Visitor(\\$.*)?", internalName)
+        || Pattern.matches(
+            "org/objectweb/asm/util/Check" + member + "Adapter(\\$.*)?", internalName);
+  }
+
+  static void checkIsPreview(final InputStream classInputStream) {
+    if (classInputStream == null) {
+      throw new IllegalStateException("Bytecode not available, can't check class version");
+    }
+    int minorVersion;
+    try (DataInputStream callerClassStream = new DataInputStream(classInputStream); ) {
+      callerClassStream.readInt();
+      minorVersion = callerClassStream.readUnsignedShort();
+    } catch (IOException ioe) {
+      throw new IllegalStateException("I/O error, can't check class version", ioe);
+    }
+    if (minorVersion != 0xFFFF) {
+      throw new IllegalStateException(
+          "ASM8_EXPERIMENTAL can only be used by classes compiled with --enable-preview");
+    }
+  }
 }

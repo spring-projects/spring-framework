@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.function.Consumer;
@@ -109,8 +110,8 @@ class DefaultRSocketStrategiesTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void applyMetadataExtractors() {
-		Consumer<MetadataExtractorRegistry> consumer = (Consumer<MetadataExtractorRegistry>) mock(Consumer.class);
-		RSocketStrategies strategies = RSocketStrategies.builder().metadataExtractorRegistry(consumer).build();
+		Consumer<MetadataExtractorRegistry> consumer = mock(Consumer.class);
+		RSocketStrategies.builder().metadataExtractorRegistry(consumer).build();
 		verify(consumer, times(1)).accept(any());
 	}
 

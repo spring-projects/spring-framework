@@ -1094,13 +1094,13 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags:
 | No
 |
 | Comma-delimited list of `Exception` instances that trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 
 | `no-rollback-for`
 | No
 |
 | Comma-delimited list of `Exception` instances that do not trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 |===
 
 
@@ -1314,7 +1314,7 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<aop-proxying>> for a discussion of the
+interface-based proxies are created. (See <<core.adoc#aop-proxying>> for a discussion of the
 different proxy types.)
 
 NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
@@ -3613,20 +3613,20 @@ part of the JDBC specification and is a generalized connection factory. It lets 
 container or a framework hide connection pooling and transaction management issues
 from the application code. As a developer, you need not know details about how to
 connect to the database. That is the responsibility of the administrator who sets up
-the datasource. You most likely fill both roles as you develop and test code, but you do
-not necessarily have to know how the production data source is configured.
+the datasource. You most likely fill both roles as you develop and test code, but you
+do not necessarily have to know how the production data source is configured.
 
-When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can configure your
-own with a connection pool implementation provided by a third party. Popular
-implementations are Apache Jakarta Commons DBCP and C3P0. Implementations in the Spring
-distribution are meant only for testing purposes and do not provide pooling.
+When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can
+configure your own with a connection pool implementation provided by a third party.
+Traditional choices are Apache Commons DBCP and C3P0 with bean-style `DataSource` classes;
+for a modern JDBC connection pool, consider HikariCP with its builder-style API instead.
 
-This section uses Spring's `DriverManagerDataSource` implementation, and several
-additional implementations are covered later.
+NOTE: You should use the `DriverManagerDataSource` and `SimpleDriverDataSource` classes
+(as included in the Spring distribution) only for testing purposes! Those variants do not
+provide pooling and perform poorly when multiple requests for a connection are made.
 
-NOTE: You should use the `DriverManagerDataSource` class only for testing purposes,
-since it does not provide pooling and performs poorly when multiple requests for a
-connection are made.
+The following section uses Spring's `DriverManagerDataSource` implementation.
+Several other `DataSource` variants are covered later.
 
 To configure a `DriverManagerDataSource`:
 
@@ -3848,9 +3848,10 @@ based on entries in a list, and the entire list is used as the batch:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					new BatchPreparedStatementSetter() {
 						public void setValues(PreparedStatement ps, int i) throws SQLException {
-							ps.setString(1, actors.get(i).getFirstName());
-							ps.setString(2, actors.get(i).getLastName());
-							ps.setLong(3, actors.get(i).getId().longValue());
+							Actor actor = actors.get(i);
+							ps.setString(1, actor.getFirstName());
+							ps.setString(2, actor.getLastName());
+							ps.setLong(3, actor.getId().longValue());
 						}
 						public int getBatchSize() {
 							return actors.size();
@@ -4123,11 +4124,9 @@ example uses only one configuration method (we show examples of multiple methods
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource).withTableName("t_actor");
 		}
 
@@ -4147,7 +4146,6 @@ example uses only one configuration method (we show examples of multiple methods
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource).withTableName("t_actor")
 
 		fun add(actor: Actor) {
@@ -4182,11 +4180,9 @@ listing shows how it works:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4208,7 +4204,6 @@ listing shows how it works:
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor").usingGeneratedKeyColumns("id")
 
@@ -4244,11 +4239,9 @@ You can limit the columns for an insert by specifying a list of column names wit
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingColumns("first_name", "last_name")
@@ -4271,7 +4264,6 @@ You can limit the columns for an insert by specifying a list of column names wit
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingColumns("first_name", "last_name")
@@ -4308,11 +4300,9 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4332,7 +4322,6 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingGeneratedKeyColumns("id")
@@ -4355,11 +4344,9 @@ convenient `addValue` method that can be chained. The following example shows ho
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -4381,7 +4368,6 @@ convenient `addValue` method that can be chained. The following example shows ho
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val insertActor = SimpleJdbcInsert(dataSource)
 				.withTableName("t_actor")
 				.usingGeneratedKeyColumns("id")
@@ -4444,11 +4430,9 @@ of the stored procedure):
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcCall procReadActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.procReadActor = new SimpleJdbcCall(dataSource)
 					.withProcedureName("read_actor");
 		}
@@ -4473,7 +4457,6 @@ of the stored procedure):
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
-		private val jdbcTemplate = JdbcTemplate(dataSource)
 		private val procReadActor = SimpleJdbcCall(dataSource)
 				.withProcedureName("read_actor")
 

@@ -362,6 +362,20 @@ class MockHttpServletResponseTests {
 		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
 	}
 
+	/**
+	 * @since 5.1.12
+	 */
+	@Test
+	void setCookieHeaderWithZeroExpiresAttribute() {
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=0";
+		response.setHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		assertNumCookies(1);
+		String header = response.getHeader(HttpHeaders.SET_COOKIE);
+		assertThat(header).isNotEqualTo(cookieValue);
+		// We don't assert the actual Expires value since it is based on the current time.
+		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
+	}
+
 	@Test
 	void addCookieHeader() {
 		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
@@ -384,6 +398,20 @@ class MockHttpServletResponseTests {
 				"HttpOnly; SameSite=Lax";
 		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
 		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
+	}
+
+	/**
+	 * @since 5.1.12
+	 */
+	@Test
+	void addCookieHeaderWithZeroExpiresAttribute() {
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=0";
+		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		assertNumCookies(1);
+		String header = response.getHeader(HttpHeaders.SET_COOKIE);
+		assertThat(header).isNotEqualTo(cookieValue);
+		// We don't assert the actual Expires value since it is based on the current time.
+		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
 	}
 
 	@Test

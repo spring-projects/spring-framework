@@ -38,6 +38,10 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
+import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
+import org.springframework.aop.testfixture.advice.MyThrowsHandler;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -45,20 +49,16 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SideEffectBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.TestListener;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.advice.CountingBeforeAdvice;
-import org.springframework.tests.aop.advice.MyThrowsHandler;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SideEffectBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -93,7 +93,7 @@ public class ProxyFactoryBeanTests {
 	@BeforeEach
 	public void setUp() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
-		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestListener.class));
+		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestApplicationListener.class));
 		this.factory = new DefaultListableBeanFactory(parent);
 		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.factory).loadBeanDefinitions(
 				new ClassPathResource(CONTEXT, getClass()));

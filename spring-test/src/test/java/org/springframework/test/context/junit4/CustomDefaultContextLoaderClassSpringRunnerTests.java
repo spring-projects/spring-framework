@@ -20,12 +20,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.support.GenericPropertiesContextLoader;
-import org.springframework.tests.sample.beans.Pet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

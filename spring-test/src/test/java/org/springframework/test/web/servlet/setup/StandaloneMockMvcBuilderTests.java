@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.json.SpringHandlerInstantiator;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
@@ -67,6 +67,7 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 	@Test  // SPR-13637
+	@SuppressWarnings("deprecation")
 	public void suffixPatternMatch() throws Exception {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
 		builder.setUseSuffixPatternMatch(false);

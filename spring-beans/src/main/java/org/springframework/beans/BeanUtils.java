@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,11 @@ import org.springframework.util.StringUtils;
  * Static convenience methods for JavaBeans: for instantiating beans,
  * checking bean property types, copying bean properties, etc.
  *
- * <p>Mainly for use within the framework, but to some degree also
- * useful for application classes.
+ * <p>Mainly for internal use within the framework, but to some degree also
+ * useful for application classes. Consider
+ * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
+ * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
+ * or similar third-party frameworks for more comprehensive bean utilities.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -523,7 +526,8 @@ public abstract class BeanUtils {
 				return null;
 			}
 		}
-		String editorName = targetType.getName() + "Editor";
+		String targetTypeName = targetType.getName();
+		String editorName = targetTypeName + "Editor";
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
@@ -539,7 +543,7 @@ public abstract class BeanUtils {
 		catch (ClassNotFoundException ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No property editor [" + editorName + "] found for type " +
-						targetType.getName() + " according to 'Editor' suffix convention");
+						targetTypeName + " according to 'Editor' suffix convention");
 			}
 			unknownEditorTypes.add(targetType);
 			return null;

@@ -18,13 +18,13 @@ package org.springframework.web.bind;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.util.StopWatch;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller

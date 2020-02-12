@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -106,8 +108,14 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		ObjectMapper mapper = getObjectMapper();
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), mapper.getFactory(), mapper, true, getMaxInMemorySize());
+
+		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+		if (elementType != null && BigDecimal.class.equals(elementType.getType())) {
+			forceUseOfBigDecimal = true;
+		}
+
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), mapper.getFactory(), mapper,
+				true, forceUseOfBigDecimal, getMaxInMemorySize());
 
 		ObjectReader reader = getObjectReader(elementType, hints);
 
@@ -130,7 +138,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
 	}
 
 	@Override
@@ -153,13 +161,21 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		MethodParameter param = getParameter(elementType);
-		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
+		Class<?> contextClass = getContextClass(elementType);
+		if (contextClass == null && hints != null) {
+			contextClass = getContextClass((ResolvableType) hints.get(ACTUAL_TYPE_HINT));
+		}
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		return jsonView != null ?
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
 				getObjectMapper().readerFor(javaType);
+	}
+
+	@Nullable
+	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
+		MethodParameter param = (elementType != null ? getParameter(elementType)  : null);
+		return (param != null ? param.getContainingClass() : null);
 	}
 
 	private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {

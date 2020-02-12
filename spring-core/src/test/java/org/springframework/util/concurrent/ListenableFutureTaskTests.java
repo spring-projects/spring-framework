@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Arjen Poutsma
@@ -98,7 +98,7 @@ class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(successCallback).onSuccess(s);
-		verifyZeroInteractions(failureCallback);
+		verifyNoInteractions(failureCallback);
 
 		assertThat(task.get()).isSameAs(s);
 		assertThat(task.completable().get()).isSameAs(s);
@@ -119,7 +119,7 @@ class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(failureCallback).onFailure(ex);
-		verifyZeroInteractions(successCallback);
+		verifyNoInteractions(successCallback);
 
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
 				task::get)

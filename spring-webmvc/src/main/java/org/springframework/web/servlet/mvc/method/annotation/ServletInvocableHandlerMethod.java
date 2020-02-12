@@ -166,7 +166,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	private void disableContentCachingIfNecessary(ServletWebRequest webRequest) {
-		if (!isRequestNotModified(webRequest)) {
+		if (isRequestNotModified(webRequest)) {
 			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 			Assert.notNull(response, "Expected HttpServletResponse");
 			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {

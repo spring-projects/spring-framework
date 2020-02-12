@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Base class for {@link EmbeddedDatabaseConfigurer} implementations
@@ -53,14 +55,7 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 			logger.info("Could not shut down embedded database", ex);
 		}
 		finally {
-			if (con != null) {
-				try {
-					con.close();
-				}
-				catch (Throwable ex) {
-					logger.debug("Could not close JDBC Connection on shutdown", ex);
-				}
-			}
+			JdbcUtils.closeConnection(con);
 		}
 	}
 

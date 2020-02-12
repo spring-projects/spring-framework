@@ -88,7 +88,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	private long maxDiskUsagePerPart = -1;
 
-	private long maxParts = -1;
+	private int maxParts = -1;
 
 
 	/**
@@ -138,7 +138,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	 * Specify the maximum number of parts allowed in a given multipart request.
 	 * @since 5.1.11
 	 */
-	public void setMaxParts(long maxParts) {
+	public void setMaxParts(int maxParts) {
 		this.maxParts = maxParts;
 	}
 
@@ -146,7 +146,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	 * Return the {@link #setMaxParts configured} limit on the number of parts.
 	 * @since 5.1.11
 	 */
-	public long getMaxParts() {
+	public int getMaxParts() {
 		return this.maxParts;
 	}
 
@@ -245,19 +245,16 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		@Override
 		protected void hookOnError(Throwable ex) {
-			try {
-				if (this.parser != null) {
-					this.parser.close();
-				}
+			if (this.listener != null) {
+				int index = this.storageFactory.getCurrentPartIndex();
+				this.listener.onError("Failure while parsing part[" + index + "]", ex);
 			}
-			catch (IOException ex2) {
-				// ignore
-			}
-			finally {
-				if (this.listener != null) {
-					int index = this.storageFactory.getCurrentPartIndex();
-					this.listener.onError("Failure while parsing part[" + index + "]", ex);
-				}
+		}
+
+		@Override
+		protected void hookOnComplete() {
+			if (this.listener != null) {
+				this.listener.onAllPartsFinished();
 			}
 		}
 
@@ -269,9 +266,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 				}
 			}
 			catch (IOException ex) {
-				if (this.listener != null) {
-					this.listener.onError("Error while closing parser", ex);
-				}
+				// ignore
 			}
 		}
 

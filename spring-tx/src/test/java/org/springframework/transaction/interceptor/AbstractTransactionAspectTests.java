@@ -21,9 +21,9 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.MockCallbackPreferringTransactionManager;
 import org.springframework.transaction.NoTransactionException;
@@ -42,7 +42,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Mock object based tests for transaction aspects. A true unit test in that it
@@ -90,7 +90,7 @@ public abstract class AbstractTransactionAspectTests {
 		checkTransactionStatus(false);
 
 		// expect no calls
-		verifyZeroInteractions(ptm);
+		verifyNoInteractions(ptm);
 	}
 
 	/**

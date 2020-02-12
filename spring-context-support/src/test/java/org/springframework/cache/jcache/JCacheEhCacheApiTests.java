@@ -25,7 +25,7 @@ import javax.cache.spi.CachingProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 /**
  * @author Stephane Nicoll

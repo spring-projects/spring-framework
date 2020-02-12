@@ -7,9 +7,9 @@
 
 	<aop:aspectj-autoproxy/>
 
-	<bean id="testBean1" class="org.springframework.tests.sample.beans.TestBean"/>
-	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean"/>
-	<bean id="testBean3" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean1" class="org.springframework.beans.testfixture.beans.TestBean"/>
+	<bean id="testBean2" class="org.springframework.beans.testfixture.beans.TestBean"/>
+	<bean id="testBean3" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="counterAspect" class="org.springframework.aop.aspectj.CounterAspect"/>
 </beans>

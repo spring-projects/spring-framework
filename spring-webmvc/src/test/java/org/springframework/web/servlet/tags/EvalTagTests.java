@@ -32,9 +32,9 @@ import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

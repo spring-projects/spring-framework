@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -505,6 +506,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public RequestMappingInfo build() {
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
 
@@ -600,14 +602,22 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Set whether to apply suffix pattern matching in PatternsRequestCondition.
 		 * <p>By default this is set to 'true'.
 		 * @see #setRegisteredSuffixPatternMatch(boolean)
+		 * @deprecated as of 5.2.4. See class-level note in
+		 * {@link RequestMappingHandlerMapping} on the deprecation of path
+		 * extension config options.
 		 */
+		@Deprecated
 		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
 			this.suffixPatternMatch = suffixPatternMatch;
 		}
 
 		/**
 		 * Return whether to apply suffix pattern matching in PatternsRequestCondition.
+		 * @deprecated as of 5.2.4. See class-level note in
+		 * {@link RequestMappingHandlerMapping} on the deprecation of path
+		 * extension config options.
 		 */
+		@Deprecated
 		public boolean useSuffixPatternMatch() {
 			return this.suffixPatternMatch;
 		}
@@ -618,7 +628,12 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@code suffixPatternMatch=true} and requires that a
 		 * {@link #setContentNegotiationManager} is also configured in order to
 		 * obtain the registered file extensions.
+		 * @deprecated as of 5.2.4. See class-level note in
+		 * {@link RequestMappingHandlerMapping} on the deprecation of path
+		 * extension config options; note also that in 5.3 the default for this
+		 * property switches from {@code false} to {@code true}.
 		 */
+		@Deprecated
 		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
 			this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
 			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
@@ -627,7 +642,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Return whether suffix pattern matching should be restricted to registered
 		 * file extensions only.
+		 * @deprecated as of 5.2.4. See class-level note in
+		 * {@link RequestMappingHandlerMapping} on the deprecation of path
+		 * extension config options.
 		 */
+		@Deprecated
 		public boolean useRegisteredSuffixPatternMatch() {
 			return this.registeredSuffixPatternMatch;
 		}
@@ -636,8 +655,12 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Return the file extensions to use for suffix pattern matching. If
 		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
 		 * from the configured {@code contentNegotiationManager}.
+		 * @deprecated as of 5.2.4. See class-level note in
+		 * {@link RequestMappingHandlerMapping} on the deprecation of path
+		 * extension config options.
 		 */
 		@Nullable
+		@Deprecated
 		public List<String> getFileExtensions() {
 			if (useRegisteredSuffixPatternMatch() && this.contentNegotiationManager != null) {
 				return this.contentNegotiationManager.getAllFileExtensions();

@@ -365,7 +365,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static boolean implementsInterface(Method method, Set<Class<?>> ifcs) {
 		for (Class<?> ifc : ifcs) {
-			if (ClassUtils.hasMethod(ifc, method.getName(), method.getParameterTypes())) {
+			if (ClassUtils.hasMethod(ifc, method)) {
 				return true;
 			}
 		}

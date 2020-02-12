@@ -23,11 +23,15 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.Part
+import org.springframework.util.CollectionUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Mono
+import java.net.InetSocketAddress
 import java.security.Principal
+import java.util.*
 
 /**
  * Mock object based tests for [ServerRequest] Kotlin extensions.
@@ -37,6 +41,8 @@ import java.security.Principal
 class ServerRequestExtensionsTests {
 
 	val request = mockk<ServerRequest>(relaxed = true)
+
+	val headers = mockk<ServerRequest.Headers>(relaxed = true)
 
 	@Test
 	fun `bodyToMono with reified type parameters`() {
@@ -108,6 +114,90 @@ class ServerRequestExtensionsTests {
 		}
 	}
 
+	@Test
+	fun `remoteAddressOrNull with value`() {
+		val remoteAddress = InetSocketAddress(1234)
+		every { request.remoteAddress() } returns Optional.of(remoteAddress)
+		assertThat(remoteAddress).isEqualTo(request.remoteAddressOrNull())
+		verify { request.remoteAddress() }
+	}
+
+	@Test
+	fun `remoteAddressOrNull with null`() {
+		every { request.remoteAddress() } returns Optional.empty()
+		assertThat(request.remoteAddressOrNull()).isNull()
+		verify { request.remoteAddress() }
+	}
+
+	@Test
+	fun `attributeOrNull with value`() {
+		every { request.attributes() } returns mapOf("foo" to "bar")
+		assertThat(request.attributeOrNull("foo")).isEqualTo("bar")
+		verify { request.attributes() }
+	}
+
+	@Test
+	fun `attributeOrNull with null`() {
+		every { request.attributes() } returns mapOf("foo" to "bar")
+		assertThat(request.attributeOrNull("baz")).isNull()
+		verify { request.attributes() }
+	}
+
+	@Test
+	fun `queryParamOrNull with value`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar")))
+		assertThat(request.queryParamOrNull("foo")).isEqualTo("bar")
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamOrNull with values`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar", "bar")))
+		assertThat(request.queryParamOrNull("foo")).isEqualTo("bar")
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamOrNull with null value`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf(null)))
+		assertThat(request.queryParamOrNull("foo")).isEqualTo("")
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamOrNull with null`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar")))
+		assertThat(request.queryParamOrNull("baz")).isNull()
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `contentLengthOrNull with value`() {
+		every { headers.contentLength() } returns OptionalLong.of(123)
+		assertThat(headers.contentLengthOrNull()).isEqualTo(123)
+		verify { headers.contentLength() }
+	}
+
+	@Test
+	fun `contentLengthOrNull with null`() {
+		every { headers.contentLength() } returns OptionalLong.empty()
+		assertThat(headers.contentLengthOrNull()).isNull()
+		verify { headers.contentLength() }
+	}
+
+	@Test
+	fun `contentTypeOrNull with value`() {
+		every { headers.contentType() } returns Optional.of(MediaType.APPLICATION_JSON)
+		assertThat(headers.contentTypeOrNull()).isEqualTo(MediaType.APPLICATION_JSON)
+		verify { headers.contentType() }
+	}
+
+	@Test
+	fun `contentTypeOrNull with null`() {
+		every { headers.contentType() } returns Optional.empty()
+		assertThat(headers.contentTypeOrNull()).isNull()
+		verify { headers.contentType() }
+	}
 
 	class Foo
 }

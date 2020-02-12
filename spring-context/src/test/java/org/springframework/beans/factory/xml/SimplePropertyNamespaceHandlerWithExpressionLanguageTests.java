@@ -18,9 +18,9 @@ package org.springframework.beans.factory.xml;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

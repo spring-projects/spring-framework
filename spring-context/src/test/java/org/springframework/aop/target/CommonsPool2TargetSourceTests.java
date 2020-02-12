@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.SideEffectBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

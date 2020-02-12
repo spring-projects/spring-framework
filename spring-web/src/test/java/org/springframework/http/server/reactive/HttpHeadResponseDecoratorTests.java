@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

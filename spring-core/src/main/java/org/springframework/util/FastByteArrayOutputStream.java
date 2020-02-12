@@ -206,9 +206,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	 */
 	public byte[] toByteArray() {
 		byte[] bytesUnsafe = toByteArrayUnsafe();
-		byte[] ret = new byte[bytesUnsafe.length];
-		System.arraycopy(bytesUnsafe, 0, ret, 0, bytesUnsafe.length);
-		return ret;
+		return bytesUnsafe.clone();
 	}
 
 	/**

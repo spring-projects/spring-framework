@@ -21,6 +21,9 @@ import java.util.Map;
 
 import io.rsocket.frame.FrameType;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -171,6 +174,69 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
+	public void rejectConnectMappingMethodsThatCanReply() {
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setHandlers(Collections.singletonList(new InvalidConnectMappingController()));
+		assertThatThrownBy(handler::afterPropertiesSet)
+				.hasMessage("Invalid @ConnectMapping method. " +
+						"Return type must be void or a void async type: " +
+						"public java.lang.String org.springframework.messaging.rsocket.annotation.support." +
+						"RSocketMessageHandlerTests$InvalidConnectMappingController.connectString()");
+
+		handler = new RSocketMessageHandler();
+		handler.setHandlers(Collections.singletonList(new AnotherInvalidConnectMappingController()));
+		assertThatThrownBy(handler::afterPropertiesSet)
+				.hasMessage("Invalid @ConnectMapping method. " +
+						"Return type must be void or a void async type: " +
+						"public reactor.core.publisher.Mono<java.lang.String> " +
+						"org.springframework.messaging.rsocket.annotation.support." +
+						"RSocketMessageHandlerTests$AnotherInvalidConnectMappingController.connectString()");
+	}
+
+	@Test
+	public void ignoreFireAndForgetToHandlerThatCanReply() {
+
+		InteractionMismatchController controller = new InteractionMismatchController();
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setHandlers(Collections.singletonList(controller));
+		handler.afterPropertiesSet();
+
+		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		headers.setLeaveMutable(true);
+		RouteMatcher.Route route = handler.getRouteMatcher().parseRoute("mono-string");
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, route);
+		headers.setHeader(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER, FrameType.REQUEST_FNF);
+		Message<?> message = MessageBuilder.createMessage(Mono.empty(), headers.getMessageHeaders());
+
+		// Simply dropped and logged (error cannot propagate to client)
+		StepVerifier.create(handler.handleMessage(message)).expectComplete().verify();
+		assertThat(controller.invokeCount).isEqualTo(0);
+	}
+
+	@Test
+	public void rejectRequestResponseToStreamingHandler() {
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setHandlers(Collections.singletonList(new InteractionMismatchController()));
+		handler.afterPropertiesSet();
+
+		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		headers.setLeaveMutable(true);
+		RouteMatcher.Route route = handler.getRouteMatcher().parseRoute("flux-string");
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, route);
+		headers.setHeader(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER, FrameType.REQUEST_RESPONSE);
+		Message<?> message = MessageBuilder.createMessage(Mono.empty(), headers.getMessageHeaders());
+
+		StepVerifier.create(handler.handleMessage(message))
+				.expectErrorMessage(
+						"Destination 'flux-string' does not support REQUEST_RESPONSE. " +
+								"Supported interaction(s): [REQUEST_STREAM]")
+				.verify();
+	}
+
+	@Test
 	public void handleNoMatch() {
 
 		testHandleNoMatch(FrameType.SETUP);
@@ -219,6 +285,40 @@ public class RSocketMessageHandlerTests {
 
 		@ConnectMapping
 		public void handleAll() {
+		}
+	}
+
+
+	private static class InvalidConnectMappingController {
+
+		@ConnectMapping
+		public String connectString() {
+			return "";
+		}
+	}
+
+	private static class AnotherInvalidConnectMappingController {
+
+		@ConnectMapping
+		public Mono<String> connectString() {
+			return Mono.empty();
+		}
+	}
+
+	private static class InteractionMismatchController {
+
+		private int invokeCount;
+
+		@MessageMapping("mono-string")
+		public Mono<String> messageMonoString() {
+			this.invokeCount++;
+			return Mono.empty();
+		}
+
+		@MessageMapping("flux-string")
+		public Flux<String> messageFluxString() {
+			this.invokeCount++;
+			return Flux.empty();
 		}
 	}
 

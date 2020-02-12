@@ -26,12 +26,12 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ACATester;
-import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.ACATester;
+import org.springframework.context.testfixture.beans.BeanThatListens;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +59,6 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	@Test
 	@Override
 	public void count() {
-		// These are only checked for current Ctx (not parent ctx)
 		assertCount(15);
 	}
 
@@ -183,9 +182,9 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		Map<String, String> m = new HashMap<>();
 		m.put("name", "Roderick");
-		parent.registerPrototype("rod", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("rod", org.springframework.beans.testfixture.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
-		parent.registerPrototype("father", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("father", org.springframework.beans.testfixture.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
 		parent.addApplicationListener(parentListener);

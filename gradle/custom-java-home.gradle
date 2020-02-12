@@ -1,0 +1,92 @@
+// -----------------------------------------------------------------------------
+//
+// This script adds support for the following two JVM system properties
+// that control the build for alternative JDKs (i.e., a JDK other than
+// the one used to launch the Gradle process).
+//
+// - customJavaHome: absolute path to the alternate JDK installation to
+//     use to compile Java code and execute tests. Setting this system
+//     property causes Groovy 3.0 RC3 to be used instead of 2.5.x. This
+//     system property is also used in spring-oxm.gradle to determine
+//     whether JiBX is supported.
+//
+// - customJavaSourceVersion: Java version supplied to the `--release`
+//     command line flag to control the Java source and target
+//     compatibility version. Supported versions include 9 or higher.
+//     Do not set this system property if Java 8 should be used.
+//
+// Examples:
+//
+// ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
+//
+// ./gradlew --no-build-cache -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
+//
+// ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home -DcustomJavaSourceVersion=14 test
+//
+//
+// Credits: inspired by work from Marc Philipp and Stephane Nicoll
+//
+// -----------------------------------------------------------------------------
+
+import org.gradle.internal.os.OperatingSystem
+// import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
+
+def customJavaHome = System.getProperty("customJavaHome")
+
+if (customJavaHome) {
+	def javacExecutable = customJavaHome + "/bin/javac"
+	def javaExecutable = customJavaHome + "/bin/java"
+	if (OperatingSystem.current().isWindows()) {
+		javacExecutable += ".exe"
+		javaExecutable += ".exe"
+	}
+
+	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+
+	tasks.withType(JavaCompile) {
+		logger.info("Java compiler for " + it.name + " task in " + project.name + ": " + javacExecutable)
+		doFirst {
+			// Avoid compiler warnings for non-existing path entries
+			classpath = classpath.filter { it.exists() }
+		}
+		options.fork = true
+		options.forkOptions.executable = javacExecutable
+		// Ignore warnings about missing classpath elements -- for example, those picked up
+		// via Class-Path entries in MANIFEST.MF files in artifacts like xalan-2.7.2.jar.
+		options.compilerArgs -= "-Xlint:path"
+		if (customJavaSourceVersion) {
+			options.compilerArgs += [ "--release", customJavaSourceVersion]
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+		inputs.property("customJavaHome", customJavaHome)
+	}
+
+	tasks.withType(GroovyCompile) {
+		logger.info("Java compiler for " + it.name + " task in " + project.name + ": " + javacExecutable)
+		options.fork = true
+		options.forkOptions.executable = javacExecutable
+		if (customJavaSourceVersion) {
+			options.compilerArgs += [ "--release", customJavaSourceVersion]
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+		inputs.property("customJavaHome", customJavaHome)
+	}
+
+	/*
+	tasks.withType(KotlinJvmCompile) {
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHome)
+		kotlinOptions.jdkHome = customJavaHome
+		inputs.property("customJavaHome", customJavaHome)
+	}
+	*/
+
+	tasks.withType(Test) {
+		logger.info("Java executable for " + it.name + " task in " + project.name + ": " + javaExecutable)
+		executable = javaExecutable
+		inputs.property("customJavaHome", customJavaHome)
+		if (customJavaSourceVersion) {
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+	}
+
+}

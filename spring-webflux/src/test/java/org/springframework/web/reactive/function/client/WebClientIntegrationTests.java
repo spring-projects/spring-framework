@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -57,7 +58,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.Pojo;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -1078,6 +1079,52 @@ class WebClientIntegrationTests {
 		StepVerifier.create(responseMono)
 				.expectErrorMessage("URI is not absolute: " + uri)
 				.verify(Duration.ofSeconds(5));
+	}
+
+	@ParameterizedWebClientTest
+	void nullJsonResponseShouldBeReadAsEmpty(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setResponseCode(200)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.setBody("null"));
+
+		Mono<Map> result = this.webClient.get()
+				.uri("/null")
+				.retrieve()
+				.bodyToMono(Map.class);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedWebClientTest
+	void mapBodyInOnStatus(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setResponseCode(500)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.setBody("{\"fooValue\":\"bar\"}")
+		);
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.retrieve()
+				.onStatus(HttpStatus::isError, response ->
+						response.bodyToMono(Foo.class)
+								.flatMap(foo -> Mono.error(new MyException(foo.getFooValue())))
+				)
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeErrorWith(throwable -> {
+					assertThat(throwable).isInstanceOf(MyException.class);
+					MyException error = (MyException) throwable;
+					assertThat(error.getMessage()).isEqualTo("bar");
+				})
+				.verify();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				}
 				else {
 					position = extractLink(position, content, result);
-
 				}
 			}
 		}
@@ -166,7 +165,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		/**
-		 * Invoked after a keyword match, after whitespaces removed, and when
+		 * Invoked after a keyword match, after whitespace has been removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
 		protected abstract int extractLink(int index, String content, SortedSet<ContentChunkInfo> linksToAdd);
@@ -182,8 +181,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		protected int extractLink(int index, String content, SortedSet<ContentChunkInfo> linksToAdd) {
-			if (content.substring(index, index + 4).equals("url(")) {
-				// Ignore, UrlLinkParser will take care
+			if (content.startsWith("url(", index)) {
+				// Ignore: UrlFunctionLinkParser will handle it.
 			}
 			else if (logger.isTraceEnabled()) {
 				logger.trace("Unexpected syntax for @import link at index " + index);

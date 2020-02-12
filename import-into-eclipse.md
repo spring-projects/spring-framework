@@ -3,12 +3,12 @@
 This document will guide you through the process of importing the Spring Framework
 projects into Eclipse or the Spring Tool Suite (_STS_). It is recommended that you
 have a recent version of Eclipse. As a bare minimum you will need Eclipse with full Java
-8 support, the Kotlin plugin, and the Groovy plugin.
+8 support, Eclipse Buildship, the Kotlin plugin, and the Groovy plugin.
 
 The following instructions have been tested against [STS](https://spring.io/tools) 4.3.2
 ([download](https://github.com/spring-projects/sts4/wiki/Previous-Versions#spring-tools-432-changelog))
-with [Eclipse Buildship](https://projects.eclipse.org/projects/tools.buildship). The
-instructions should work with the latest Eclipse distribution as long as you install
+(based on Eclipse 4.12) with [Eclipse Buildship](https://projects.eclipse.org/projects/tools.buildship).
+The instructions should work with the latest Eclipse distribution as long as you install
 [Buildship](https://marketplace.eclipse.org/content/buildship-gradle-integration). Note
 that STS 4 comes with Buildship preinstalled.
 
@@ -23,7 +23,7 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 1. Switch to Groovy 2.5 (Preferences -> Groovy -> Compiler -> Switch to 2.5...) in Eclipse.
 1. Change the _Forbidden reference (access rule)_ in Eclipse from Error to Warning
 (Preferences -> Java -> Compiler -> Errors/Warnings -> Deprecated and restricted API -> Forbidden reference (access rule)).
-1. Optionally install the [AspectJ Development Tools](https://www.eclipse.org/ajdt/downloads/) (_AJDT_) if you need to work with the `spring-aspects` project.
+1. Optionally install the [AspectJ Development Tools](https://marketplace.eclipse.org/content/aspectj-development-tools) (_AJDT_) if you need to work with the `spring-aspects` project. The AspectJ Development Tools available in the Eclipse Marketplace have been tested with these instructions using STS 4.5 (Eclipse 4.14).
 1. Optionally install the [TestNG plugin](https://testng.org/doc/eclipse.html) in Eclipse if you need to execute TestNG tests in the `spring-test` module.
 1. Build `spring-oxm` from the command line with `./gradlew :spring-oxm:check`.
 1. To apply project specific settings, run `./gradlew eclipseBuildship` from the command line.

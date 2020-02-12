@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -725,8 +725,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
+		String prefix = factoryPrefix ? FACTORY_BEAN_PREFIX : "";
 		for (String retrievedAlias : retrievedAliases) {
-			String alias = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + retrievedAlias;
+			String alias = prefix + retrievedAlias;
 			if (!alias.equals(name)) {
 				aliases.add(alias);
 			}
@@ -1317,7 +1318,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			if (mbd == null || mbd.stale) {
 				previous = mbd;
-				mbd = null;
 				if (bd.getParentName() == null) {
 					// Use copy of given root bean definition.
 					if (bd instanceof RootBeanDefinition) {
@@ -1358,7 +1358,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Set default singleton scope, if not configured before.
 				if (!StringUtils.hasLength(mbd.getScope())) {
-					mbd.setScope(RootBeanDefinition.SCOPE_SINGLETON);
+					mbd.setScope(SCOPE_SINGLETON);
 				}
 
 				// A bean contained in a non-singleton bean cannot be a singleton itself.

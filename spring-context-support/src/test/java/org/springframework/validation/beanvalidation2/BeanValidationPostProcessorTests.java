@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
 
 import static org.assertj.core.api.Assertions.assertThat;

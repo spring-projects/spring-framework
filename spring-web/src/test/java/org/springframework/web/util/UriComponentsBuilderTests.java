@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -767,6 +767,21 @@ public class UriComponentsBuilderTests {
 
 		// TODO [SPR-13537] Change equalTo(null) to equalTo("").
 		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isNull();
+	}
+
+	@Test // gh-24444
+	public void opaqueUriDoesNotResetOnNullInput() throws URISyntaxException {
+		URI uri = new URI("urn:ietf:wg:oauth:2.0:oob");
+		UriComponents result = UriComponentsBuilder.fromUri(uri)
+				.host(null)
+				.port(-1)
+				.port(null)
+				.queryParams(null)
+				.replaceQuery(null)
+				.query(null)
+				.build();
+
+		assertThat(result.toUri()).isEqualTo(uri);
 	}
 
 	@Test

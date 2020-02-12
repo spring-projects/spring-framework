@@ -21,9 +21,9 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

@@ -33,15 +33,15 @@ import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.advice.CountingBeforeAdvice;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.TimeStamped;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -368,30 +368,6 @@ public class ProxyFactoryTests {
 			return invocation.getMethod().invoke(target, invocation.getArguments());
 		});
 		assertThat(proxy.getName()).isEqualTo("tb");
-	}
-
-
-	@SuppressWarnings("serial")
-	private static class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
-			implements TimeStamped {
-
-		private long ts;
-
-		public TimestampIntroductionInterceptor() {
-		}
-
-		public TimestampIntroductionInterceptor(long ts) {
-			this.ts = ts;
-		}
-
-		public void setTime(long ts) {
-			this.ts = ts;
-		}
-
-		@Override
-		public long getTimeStamp() {
-			return ts;
-		}
 	}
 
 

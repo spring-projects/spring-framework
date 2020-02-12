@@ -18,15 +18,15 @@ package org.springframework.expression.spel;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 ///CLOVER:OFF
 

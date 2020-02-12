@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Hyunjin Choi
  */
 class ObjectUtilsTests {
 
@@ -794,6 +795,20 @@ class ObjectUtilsTests {
 
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO", true)).isTrue();
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "foo", true)).isFalse();
+	}
+
+	@Test
+	void containsElement() {
+		Object[] array = {"foo", "bar", 42, new String[] {"baz", "quux"}};
+
+		assertThat(ObjectUtils.containsElement(null, "foo")).isFalse();
+		assertThat(ObjectUtils.containsElement(array, null)).isFalse();
+		assertThat(ObjectUtils.containsElement(array, "bogus")).isFalse();
+
+		assertThat(ObjectUtils.containsElement(array, "foo")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, "bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, 42)).isTrue();
+		assertThat(ObjectUtils.containsElement(array, new String[] {"baz", "quux"})).isTrue();
 	}
 
 	@Test

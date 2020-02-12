@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
@@ -46,6 +45,7 @@ import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentR
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.method.ResolvableMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,8 +68,8 @@ public class ControllerMethodResolverTests {
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
 		ServerCodecConfigurer codecs = ServerCodecConfigurer.create();
-		codecs.customCodecs().decoder(new ByteArrayDecoder());
-		codecs.customCodecs().decoder(new ByteBufferDecoder());
+		codecs.customCodecs().register(new ByteArrayDecoder());
+		codecs.customCodecs().register(new ByteBufferDecoder());
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.registerBean(TestControllerAdvice.class);

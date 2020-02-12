@@ -50,11 +50,11 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -590,7 +590,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
-	@Aspect("pertypewithin(org.springframework.tests.sample.beans.IOther+)")
+	@Aspect("pertypewithin(org.springframework.beans.testfixture.beans.IOther+)")
 	public static class PerTypeWithinAspect {
 
 		public int count;
@@ -931,7 +931,7 @@ abstract class AbstractMakeModifiable {
 @Aspect
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
-	@DeclareParents(value = "org.springframework.tests.sample.beans.ITestBean+",
+	@DeclareParents(value = "org.springframework.beans.testfixture.beans.ITestBean+",
 			defaultImpl=ModifiableImpl.class)
 	public static MutableModifiable mixin;
 

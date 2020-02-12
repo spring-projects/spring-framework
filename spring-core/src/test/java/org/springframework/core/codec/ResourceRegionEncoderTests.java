@@ -29,11 +29,11 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 

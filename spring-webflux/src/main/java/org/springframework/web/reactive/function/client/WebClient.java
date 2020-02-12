@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -66,6 +67,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public interface WebClient {
@@ -264,7 +266,7 @@ public interface WebClient {
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
 		/**
-		 * Add the given filter to the filter chain.
+		 * Add the given filter to the end of the filter chain.
 		 * @param filter the filter to be added to the chain
 		 */
 		Builder filter(ExchangeFilterFunction filter);
@@ -290,17 +292,41 @@ public interface WebClient {
 		Builder clientConnector(ClientHttpConnector connector);
 
 		/**
+		 * Configure the codecs for the {@code WebClient} in the
+		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
+		 * {@code ExchangeStrategies}.
+		 * @param configurer the configurer to apply
+		 * @since 5.1.13
+		 */
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+
+		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default this is obtained from {@link ExchangeStrategies#withDefaults()}.
+		 * <p>For most cases, prefer using {@link #codecs(Consumer)} which allows
+		 * customizing the codecs in the {@code ExchangeStrategies} rather than
+		 * replace them. That ensures multiple parties can contribute to codecs
+		 * configuration.
+		 * <p>By default this is set to {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
+		 * @deprecated as of 5.1.13 in favor of {@link #codecs(Consumer)}
+		 */
+		@Deprecated
+		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
+
+		/**
 		 * Provide an {@link ExchangeFunction} pre-configured with
 		 * {@link ClientHttpConnector} and {@link ExchangeStrategies}.
 		 * <p>This is an alternative to, and effectively overrides
-		 * {@link #clientConnector}, and {@link #exchangeStrategies}.
+		 * {@link #clientConnector}, and
+		 * {@link #exchangeStrategies(ExchangeStrategies)}.
 		 * @param exchangeFunction the exchange function to use
 		 */
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
@@ -483,9 +509,15 @@ public interface WebClient {
 		 *     .exchange()
 		 *     .flatMapMany(response -&gt; response.bodyToFlux(Person.class));
 		 * </pre>
-		 * <p><strong>NOTE:</strong> You must always use one of the body or
-		 * entity methods of the response to ensure resources are released.
-		 * See {@link ClientResponse} for more details.
+		 * <p><strong>NOTE:</strong> Unlike {@link #retrieve()}, when using
+		 * {@code exchange()}, it is the responsibility of the application to
+		 * consume any response content regardless of the scenario (success,
+		 * error, unexpected data, etc). Not doing so can cause a memory leak.
+		 * See {@link ClientResponse} for a list of all the available options
+		 * for consuming the body. Generally prefer using {@link #retrieve()}
+		 * unless you have a good reason to use {@code exchange()} which does
+		 * allow to check the response status and headers before deciding how or
+		 * if to consume the response.
 		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */

@@ -60,7 +60,7 @@ fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).bui
  * @author Yevhenii Melnyk
  * @since 5.0
  */
-class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
+class RouterFunctionDsl internal constructor (private val init: RouterFunctionDsl.() -> Unit) {
 
 	@PublishedApi
 	internal val builder = RouterFunctions.route()

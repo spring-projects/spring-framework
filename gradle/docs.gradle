@@ -1,3 +1,20 @@
+configurations {
+	asciidoctorExt
+}
+
+dependencies {
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.0.RELEASE")
+}
+
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+		mavenContent {
+			group "io.spring.asciidoctor"
+		}
+	}
+}
+
 /**
  * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
  */
@@ -93,11 +110,22 @@ task extractDocResources(type: Copy, dependsOn: downloadResources) {
 	into "$buildDir/docs/spring-docs-resources/"
 }
 
+asciidoctorj {
+	modules {
+		pdf {
+			version '1.5.0-beta.8'
+		}
+	}
+	fatalWarnings ".*"
+}
+
 /**
  * Produce the Spring Framework Reference documentation
  * from "src/docs/asciidoc" into  "build/asciidoc/html5"
  */
 asciidoctor {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
 	sources {
 		include '*.adoc'
 	}
@@ -106,13 +134,11 @@ asciidoctor {
 		from(sourceDir) {
 			include 'images/*', 'css/**', 'js/**'
 		}
-		from "$buildDir/docs/spring-docs-resources/"
+		from extractDocResources
 	}
 	logDocuments = true
-	backends = ["html5"]
-	// only ouput PDF documentation for non-SNAPSHOT builds
-	if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
-		backends += "pdf"
+	outputOptions {
+		backends = ["html5", "pdf"]
 	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
@@ -131,8 +157,6 @@ asciidoctor {
 			'spring-version': project.version
 	])
 }
-
-asciidoctor.dependsOn extractDocResources
 
 /**
  * Zip all docs (API and reference) into a single archive
@@ -175,14 +199,14 @@ task schemaZip(type: Zip) {
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {
-			it.path.endsWith("META-INF/spring.schemas")
+			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
 		}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
 			assert shortName != key
 			File xsdFile = module.sourceSets.main.resources.find {
-				it.path.endsWith(schemas.get(key))
+				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
 			}
 			assert xsdFile != null
 			into (shortName) {

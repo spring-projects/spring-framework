@@ -43,11 +43,11 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.tests.sample.beans.BooleanTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.NumberTestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.BooleanTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.NumberTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -593,9 +593,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.tests.sample.beans.TestBean[]");
+		classEditor.setAsText("org.springframework.beans.testfixture.beans.TestBean[]");
 		assertThat(classEditor.getValue()).isEqualTo(TestBean[].class);
-		assertThat(classEditor.getAsText()).isEqualTo("org.springframework.tests.sample.beans.TestBean[]");
+		assertThat(classEditor.getAsText()).isEqualTo("org.springframework.beans.testfixture.beans.TestBean[]");
 	}
 
 	/*

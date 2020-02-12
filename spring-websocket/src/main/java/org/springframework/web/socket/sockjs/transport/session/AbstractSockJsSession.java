@@ -324,7 +324,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		try {
 			writeFrameInternal(frame);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			logWriteFrameFailure(ex);
 			try {
 				// Force disconnect (so we won't try to send close frame)
@@ -388,7 +388,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 					undelivered.remove(0);
 				}
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				throw new SockJsMessageDeliveryException(this.id, undelivered, ex);
 			}
 		}

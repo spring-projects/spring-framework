@@ -1133,9 +1133,9 @@ All of the textual operators are case-insensitive.
 
 SpEL supports the following logical operators:
 
-* `and`
-* `or`
-* `not`
+* `and` (`&&`)
+* `or` (`||`)
+* `not` (`!`)
 
 The following example shows how to use the logical operators
 
@@ -1382,8 +1382,20 @@ example shows how to use the `new` operator to invoke constructors:
 === Variables
 
 You can reference variables in the expression by using the `#variableName` syntax. Variables
-are set by using the `setVariable` method on `EvaluationContext` implementations. The
-following example shows how to use variables:
+are set by using the `setVariable` method on `EvaluationContext` implementations.
+
+[NOTE]
+====
+Valid variable names must be composed of one or more of the following supported
+characters.
+
+* letters: `A` to `Z` and `a` to `z`
+* digits: `0` to `9`
+* underscore: `_`
+* dollar sign: `$`
+====
+
+The following example shows how to use variables.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

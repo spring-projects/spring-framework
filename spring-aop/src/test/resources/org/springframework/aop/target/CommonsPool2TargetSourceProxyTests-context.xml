@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="testBeanTarget" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+	<bean id="testBeanTarget" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype"/>
 
 	<bean id="targetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName" value="testBeanTarget"/>

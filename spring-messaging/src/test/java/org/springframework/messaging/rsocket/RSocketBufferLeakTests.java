@@ -36,6 +36,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -59,21 +61,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RSocketBufferLeakTests {
+@TestInstance(Lifecycle.PER_CLASS)
+class RSocketBufferLeakTests {
 
-	private static AnnotationConfigApplicationContext context;
+	private final PayloadInterceptor payloadInterceptor = new PayloadInterceptor();
 
-	private static final PayloadInterceptor payloadInterceptor = new PayloadInterceptor();
+	private AnnotationConfigApplicationContext context;
 
-	private static CloseableChannel server;
+	private CloseableChannel server;
 
-	private static RSocketRequester requester;
+	private RSocketRequester requester;
 
 
 	@BeforeAll
-	@SuppressWarnings("ConstantConditions")
-	public static void setupOnce() {
-
+	void setupOnce() {
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
 		SocketAcceptor responder = messageHandler.responder();
@@ -94,20 +95,21 @@ public class RSocketBufferLeakTests {
 	}
 
 	@AfterAll
-	public static void tearDownOnce() {
+	void tearDownOnce() {
 		requester.rsocket().dispose();
 		server.dispose();
+		context.close();
 	}
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		getLeakAwareNettyDataBufferFactory().reset();
 		payloadInterceptor.reset();
 	}
 
 	@AfterEach
-	public void tearDown() throws InterruptedException {
+	void tearDown() throws InterruptedException {
 		getLeakAwareNettyDataBufferFactory().checkForLeaks(Duration.ofSeconds(5));
 		payloadInterceptor.checkForLeaks();
 	}
@@ -118,7 +120,7 @@ public class RSocketBufferLeakTests {
 
 
 	@Test
-	public void assemblyTimeErrorForHandleAndReply() {
+	void assemblyTimeErrorForHandleAndReply() {
 		Mono<String> result = requester.route("A.B").data("foo").retrieveMono(String.class);
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Ambiguous handler methods mapped for destination 'A.B':";
@@ -127,7 +129,7 @@ public class RSocketBufferLeakTests {
 	}
 
 	@Test
-	public void subscriptionTimeErrorForHandleAndReply() {
+	void subscriptionTimeErrorForHandleAndReply() {
 		Mono<String> result = requester.route("not-decodable").data("foo").retrieveMono(String.class);
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Cannot decode to [org.springframework.core.io.Resource]";
@@ -136,21 +138,15 @@ public class RSocketBufferLeakTests {
 	}
 
 	@Test
-	public void errorSignalWithExceptionHandler() {
-		Mono<String> result = requester.route("error-signal").data("foo").retrieveMono(String.class);
+	void errorSignalWithExceptionHandler() {
+		Flux<String> result = requester.route("error-signal").data("foo").retrieveFlux(String.class);
 		StepVerifier.create(result).expectNext("Handled 'bad input'").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
-	public void ignoreInput() {
-		Flux<String> result = requester.route("ignore-input").data("a").retrieveFlux(String.class);
+	void ignoreInput() {
+		Mono<String> result = requester.route("ignore-input").data("a").retrieveMono(String.class);
 		StepVerifier.create(result).expectNext("bar").thenCancel().verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void retrieveMonoFromFluxResponderMethod() {
-		Mono<String> result = requester.route("request-stream").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("foo-1").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 
@@ -173,25 +169,20 @@ public class RSocketBufferLeakTests {
 		}
 
 		@MessageMapping("error-signal")
-		public Flux<String> errorSignal(String payload) {
+		Flux<String> errorSignal(String payload) {
 			return Flux.error(new IllegalArgumentException("bad input"))
 					.delayElements(Duration.ofMillis(10))
 					.cast(String.class);
 		}
 
 		@MessageExceptionHandler
-		public String handleIllegalArgument(IllegalArgumentException ex) {
+		String handleIllegalArgument(IllegalArgumentException ex) {
 			return "Handled '" + ex.getMessage() + "'";
 		}
 
 		@MessageMapping("ignore-input")
 		Mono<String> ignoreInput() {
 			return Mono.delay(Duration.ofMillis(10)).map(l -> "bar");
-		}
-
-		@MessageMapping("request-stream")
-		Flux<String> stream(String payload) {
-			return Flux.range(1,100).delayElements(Duration.ofMillis(10)).map(idx -> payload + "-" + idx);
 		}
 	}
 
@@ -200,19 +191,19 @@ public class RSocketBufferLeakTests {
 	static class ServerConfig {
 
 		@Bean
-		public ServerController controller() {
+		ServerController controller() {
 			return new ServerController();
 		}
 
 		@Bean
-		public RSocketMessageHandler messageHandler() {
+		RSocketMessageHandler messageHandler() {
 			RSocketMessageHandler handler = new RSocketMessageHandler();
 			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}
 
 		@Bean
-		public RSocketStrategies rsocketStrategies() {
+		RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.builder()
 					.dataBufferFactory(new LeakAwareNettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
 					.build();
@@ -260,7 +251,7 @@ public class RSocketBufferLeakTests {
 			}
 		}
 
-		public void reset() {
+		void reset() {
 			this.rsockets.forEach(PayloadSavingDecorator::reset);
 		}
 

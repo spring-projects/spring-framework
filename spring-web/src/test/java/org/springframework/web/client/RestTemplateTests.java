@@ -25,8 +25,13 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,6 +48,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.StreamUtils;
@@ -486,6 +492,49 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
+	@Test // gh-23740
+	public void headerAcceptAllOnPut() throws Exception {
+		MockWebServer server = new MockWebServer();
+		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+		server.start();
+		try {
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.put(server.url("/internal/server/error").uri(), null);
+			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+		}
+		finally {
+			server.shutdown();
+		}
+	}
+
+	@Test // gh-23740
+	public void keepGivenAcceptHeaderOnPut() throws Exception {
+		MockWebServer server = new MockWebServer();
+		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+		server.start();
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+			HttpEntity<String> entity = new HttpEntity<>(null, headers);
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.exchange(server.url("/internal/server/error").uri(), PUT, entity, Void.class);
+
+			RecordedRequest request = server.takeRequest();
+
+			final List<List<String>> accepts = request.getHeaders().toMultimap().entrySet().stream()
+					.filter(entry -> entry.getKey().equalsIgnoreCase("accept"))
+					.map(Entry::getValue)
+					.collect(Collectors.toList());
+
+			assertThat(accepts).hasSize(1);
+			assertThat(accepts.get(0)).hasSize(1);
+			assertThat(accepts.get(0).get(0)).isEqualTo("application/json");
+		}
+		finally {
+			server.shutdown();
+		}
+	}
+
 	@Test
 	public void patchForObject() throws Exception {
 		mockTextPlainHttpMessageConverter();
@@ -530,6 +579,21 @@ public class RestTemplateTests {
 		template.delete("https://example.com");
 
 		verify(response).close();
+	}
+
+	@Test // gh-23740
+	public void headerAcceptAllOnDelete() throws Exception {
+		MockWebServer server = new MockWebServer();
+		server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+		server.start();
+		try {
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.delete(server.url("/internal/server/error").uri());
+			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+		}
+		finally {
+			server.shutdown();
+		}
 	}
 
 	@Test

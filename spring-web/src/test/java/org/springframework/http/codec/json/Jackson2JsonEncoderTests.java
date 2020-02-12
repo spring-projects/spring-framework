@@ -32,16 +32,16 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractEncoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;

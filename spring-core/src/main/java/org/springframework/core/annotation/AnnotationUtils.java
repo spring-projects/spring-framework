@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -374,6 +374,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = (containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables());
+
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS, repeatableContainers)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
@@ -455,6 +456,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables();
+
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.DIRECT, repeatableContainers)
 				.stream(annotationType)
 				.map(MergedAnnotation::withNonMergedAttributes)
@@ -484,11 +486,13 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotatedElement.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
@@ -515,11 +519,13 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(method)) {
 			return method.getDeclaredAnnotation(annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
@@ -553,11 +559,23 @@ public abstract class AnnotationUtils {
 		if (annotationType == null) {
 			return null;
 		}
+
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
-			return clazz.getDeclaredAnnotation(annotationType);
+			A annotation = clazz.getDeclaredAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
+			}
+			// For backwards compatibility, perform a superclass search with plain annotations
+			// even if not marked as @Inherited: e.g. a findAnnotation search for @Deprecated
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass == null || superclass == Object.class) {
+				return null;
+			}
+			return findAnnotation(superclass, annotationType);
 		}
+
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
 				.get(annotationType).withNonMergedAttributes()
@@ -1058,7 +1076,7 @@ public abstract class AnnotationUtils {
 	 * <p>Otherwise, this method does nothing.
 	 * @param ex the throwable to inspect
 	 */
-	private static void rethrowAnnotationConfigurationException(Throwable ex) {
+	static void rethrowAnnotationConfigurationException(Throwable ex) {
 		if (ex instanceof AnnotationConfigurationException) {
 			throw (AnnotationConfigurationException) ex;
 		}
@@ -1069,16 +1087,17 @@ public abstract class AnnotationUtils {
 	 * <p>If the supplied exception is an {@link AnnotationConfigurationException},
 	 * it will simply be thrown, allowing it to propagate to the caller, and
 	 * nothing will be logged.
-	 * <p>Otherwise, this method logs an introspection failure (in particular
-	 * {@code TypeNotPresentExceptions}) before moving on, assuming nested
-	 * Class values were not resolvable within annotation attributes and
+	 * <p>Otherwise, this method logs an introspection failure (in particular for
+	 * a {@link TypeNotPresentException}) before moving on, assuming nested
+	 * {@code Class} values were not resolvable within annotation attributes and
 	 * thereby effectively pretending there were no annotations on the specified
 	 * element.
 	 * @param element the element that we tried to introspect annotations on
 	 * @param ex the exception that we encountered
 	 * @see #rethrowAnnotationConfigurationException
+	 * @see IntrospectionFailureLogger
 	 */
-	private static void handleIntrospectionFailure(@Nullable AnnotatedElement element, Throwable ex) {
+	static void handleIntrospectionFailure(@Nullable AnnotatedElement element, Throwable ex) {
 		rethrowAnnotationConfigurationException(ex);
 		IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
 		boolean meta = false;

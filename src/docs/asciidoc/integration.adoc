@@ -920,10 +920,10 @@ method API.
 * <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
 that supports both synchronous and asynchronous as well as streaming scenarios.
 
-NOTE: As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
-`RestTemplate` with efficient support for both synchronous and asynchronous as well as streaming
-scenarios. The `RestTemplate` will be deprecated in a future version and will not have
-major new features added going forward.
+NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
+changes and bugs to be accepted going forward. Please, consider using the
+<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
+supports sync, async, and streaming scenarios.
 
 
 [[rest-resttemplate]]
@@ -1113,7 +1113,7 @@ converters to use explicitly.
 
 [[rest-message-conversion]]
 ===== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
 
 The `spring-web` module contains the `HttpMessageConverter` contract for reading and
 writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
@@ -6943,7 +6943,7 @@ This is the recommended approach over the
 quite different in signatures as the code base grows. While the default strategy might
 work for some methods, it rarely works for all methods.
 
-The following examples ise various SpEL declarations (if you are not familiar with SpEL,
+The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read <<core.adoc#expressions, Spring Expression Language>>):
 
 [source,java,indent=0]

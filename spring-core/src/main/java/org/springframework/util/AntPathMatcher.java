@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?}");
 
 	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
 
@@ -614,14 +614,15 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of
 	 * explicitness.
-	 * <p>This{@code Comparator} will {@linkplain java.util.List#sort(Comparator) sort}
-	 * a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns:
+	 * <p>This {@code Comparator} will {@linkplain java.util.List#sort(Comparator) sort}
+	 * a list so that more specific patterns (without URI templates or wild cards) come before
+	 * generic patterns. So given a list with the following patterns, the returned comparator
+	 * will sort this list so that the order will be as indicated.
 	 * <ol>
 	 * <li>{@code /hotels/new}</li>
-	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li>
+	 * <li>{@code /hotels/{hotel}}</li>
+	 * <li>{@code /hotels/*}</li>
 	 * </ol>
-	 * the returned comparator will sort this list so that the order will be as indicated.
 	 * <p>The full path given as parameter is used to test for exact matches. So when the given path
 	 * is {@code /hotels/2}, the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
 	 * @param path the full path to use for comparison
@@ -640,7 +641,7 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
 		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 

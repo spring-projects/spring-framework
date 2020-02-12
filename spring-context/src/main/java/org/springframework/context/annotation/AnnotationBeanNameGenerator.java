@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.beans.factory.support.BeanNameGenerator}
- * implementation for bean classes annotated with the
- * {@link org.springframework.stereotype.Component @Component} annotation
- * or with another annotation that is itself annotated with
- * {@link org.springframework.stereotype.Component @Component} as a
+ * {@link BeanNameGenerator} implementation for bean classes annotated with the
+ * {@link org.springframework.stereotype.Component @Component} annotation or
+ * with another annotation that is itself annotated with {@code @Component} as a
  * meta-annotation. For example, Spring's stereotype annotations (such as
  * {@link org.springframework.stereotype.Repository @Repository}) are
- * themselves annotated with
- * {@link org.springframework.stereotype.Component @Component}.
+ * themselves annotated with {@code @Component}.
  *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
  * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
@@ -60,6 +57,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
  * @see javax.inject.Named#value()
+ * @see FullyQualifiedAnnotationBeanNameGenerator
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 

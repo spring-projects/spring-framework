@@ -17,10 +17,13 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
@@ -29,12 +32,11 @@ import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.tests.TestGroup.CI;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Unit tests for various {@link Resource} implementations.
@@ -124,6 +126,14 @@ class ResourceTests {
 	@Test
 	void fileSystemResource() throws IOException {
 		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
+		doTestResource(resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(file));
+	}
+
+	@Test
+	void fileSystemResourceWithFile() throws IOException {
+		File file = new File(getClass().getResource("Resource.class").getFile());
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
 		assertThat(resource).isEqualTo(new FileSystemResource(file));
@@ -220,10 +230,26 @@ class ResourceTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(CI)
-	void testNonFileResourceExists() throws Exception {
-		Resource resource = new UrlResource("https://spring.io/");
+	void nonFileResourceExists() throws Exception {
+		URL url = new URL("https://spring.io/");
+
+		// Abort if spring.io is not reachable.
+		assumeTrue(urlIsReachable(url));
+
+		Resource resource = new UrlResource(url);
 		assertThat(resource.exists()).isTrue();
+	}
+
+	private boolean urlIsReachable(URL url) {
+		try {
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("HEAD");
+			connection.setReadTimeout(5_000);
+			return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
+		}
+		catch (Exception ex) {
+			return false;
+		}
 	}
 
 	@Test

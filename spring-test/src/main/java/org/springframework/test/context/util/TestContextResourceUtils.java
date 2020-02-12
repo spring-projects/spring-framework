@@ -47,7 +47,7 @@ public abstract class TestContextResourceUtils {
 
 	private static final String SLASH = "/";
 
-	private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{[^\\}]+\\}.*");
+	private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{[^}]+}.*");
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,15 +100,21 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	@Override
 	public HttpStatus getStatusCode() {
-		HttpStatus httpStatus = super.getStatusCode();
-		return (httpStatus != null ? httpStatus : HttpStatus.resolve(this.response.getStatus()));
+		HttpStatus status = super.getStatusCode();
+		return (status != null ? status : HttpStatus.resolve(this.response.getStatus()));
+	}
+
+	@Override
+	public Integer getRawStatusCode() {
+		Integer status = super.getRawStatusCode();
+		return (status != null ? status : this.response.getStatus());
 	}
 
 	@Override
 	protected void applyStatusCode() {
-		Integer statusCode = getStatusCodeValue();
-		if (statusCode != null) {
-			this.response.setStatus(statusCode);
+		Integer status = super.getRawStatusCode();
+		if (status != null) {
+			this.response.setStatus(status);
 		}
 	}
 

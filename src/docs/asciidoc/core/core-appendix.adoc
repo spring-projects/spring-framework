@@ -666,7 +666,7 @@ integrate such parsers into the Spring IoC container.
 To facilitate authoring configuration files that use a schema-aware XML editor,
 Spring's extensible XML configuration mechanism is based on XML Schema. If you are not
 familiar with Spring's current XML configuration extensions that come with the standard
-Spring distribution, you should first read the appendix entitled <<xsd-config>>.
+Spring distribution, you should first read the appendix entitled <<appendix.adoc#xsd-configuration>>.
 
 To create new XML configuration extensions:
 

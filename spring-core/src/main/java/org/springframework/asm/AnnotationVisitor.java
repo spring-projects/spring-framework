@@ -67,9 +67,17 @@ public abstract class AnnotationVisitor {
    * @param annotationVisitor the annotation visitor to which this visitor must delegate method
    *     calls. May be {@literal null}.
    */
+  @SuppressWarnings("deprecation")
   public AnnotationVisitor(final int api, final AnnotationVisitor annotationVisitor) {
-    if (api != Opcodes.ASM7 && api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4) {
+    if (api != Opcodes.ASM7
+        && api != Opcodes.ASM6
+        && api != Opcodes.ASM5
+        && api != Opcodes.ASM4
+        && api != Opcodes.ASM8_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
+    }
+    if (api == Opcodes.ASM8_EXPERIMENTAL) {
+      Constants.checkAsm8Experimental(this);
     }
     this.api = api;
     this.av = annotationVisitor;

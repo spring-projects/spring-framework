@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -179,30 +178,25 @@ final class AnnotationTypeMapping {
 		}
 		if (isAliasPair(target) && checkAliasPair) {
 			AliasFor targetAliasFor = target.getAnnotation(AliasFor.class);
-			if (targetAliasFor == null) {
-				throw new AnnotationConfigurationException(String.format(
-						"%s must be declared as an @AliasFor '%s'.",
-						StringUtils.capitalize(AttributeMethods.describe(target)),
-						attribute.getName()));
-			}
-			Method mirror = resolveAliasTarget(target, targetAliasFor, false);
-			if (!mirror.equals(attribute)) {
-				throw new AnnotationConfigurationException(String.format(
-						"%s must be declared as an @AliasFor '%s', not '%s'.",
-						StringUtils.capitalize(AttributeMethods.describe(target)),
-						attribute.getName(), mirror.getName()));
+			if (targetAliasFor != null) {
+				Method mirror = resolveAliasTarget(target, targetAliasFor, false);
+				if (!mirror.equals(attribute)) {
+					throw new AnnotationConfigurationException(String.format(
+							"%s must be declared as an @AliasFor %s, not %s.",
+							StringUtils.capitalize(AttributeMethods.describe(target)),
+							AttributeMethods.describe(attribute), AttributeMethods.describe(mirror)));
+				}
 			}
 		}
 		return target;
 	}
 
 	private boolean isAliasPair(Method target) {
-		return target.getDeclaringClass().equals(this.annotationType);
+		return (this.annotationType == target.getDeclaringClass());
 	}
 
 	private boolean isCompatibleReturnType(Class<?> attributeType, Class<?> targetType) {
-		return Objects.equals(attributeType, targetType) ||
-				Objects.equals(attributeType, targetType.getComponentType());
+		return (attributeType == targetType || attributeType == targetType.getComponentType());
 	}
 
 	private void processAliases() {
@@ -481,7 +475,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the mirror sets for this type mapping.
-	 * @return the mirrorSets the attribute mirror sets.
+	 * @return the attribute mirror sets
 	 */
 	MirrorSets getMirrorSets() {
 		return this.mirrorSets;
@@ -652,10 +646,12 @@ final class AnnotationTypeMapping {
 					boolean isDefaultValue = (value == null ||
 							isEquivalentToDefaultValue(attribute, value, valueExtractor));
 					if (isDefaultValue || ObjectUtils.nullSafeEquals(lastValue, value)) {
+						if (result == -1) {
+							result = this.indexes[i];
+						}
 						continue;
 					}
-					if (lastValue != null &&
-							!ObjectUtils.nullSafeEquals(lastValue, value)) {
+					if (lastValue != null && !ObjectUtils.nullSafeEquals(lastValue, value)) {
 						String on = (source != null) ? " declared on " + source : "";
 						throw new AnnotationConfigurationException(String.format(
 								"Different @AliasFor mirror values for annotation [%s]%s; attribute '%s' " +

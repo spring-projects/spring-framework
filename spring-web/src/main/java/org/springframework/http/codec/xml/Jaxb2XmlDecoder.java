@@ -52,6 +52,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -92,7 +93,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 
 	public Jaxb2XmlDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
 	}
 
 	/**
@@ -221,7 +222,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 	}
 
-	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws CodecException, JAXBException {
 		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
 		return this.unmarshallerProcessor.apply(unmarshaller);
 	}

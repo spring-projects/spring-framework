@@ -18,10 +18,10 @@ package org.springframework.web.servlet.mvc.method.annotation
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.mock.web.test.MockHttpServletRequest
-import org.springframework.mock.web.test.MockHttpServletResponse
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse
 
 /**
  * @author Sebastien Deleuze

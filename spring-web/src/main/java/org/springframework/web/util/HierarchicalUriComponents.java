@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,12 +335,19 @@ final class HierarchicalUriComponents extends UriComponents {
 		Assert.notNull(type, "Type must not be null");
 
 		byte[] bytes = source.getBytes(charset);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
-		boolean changed = false;
+		boolean original = true;
 		for (byte b : bytes) {
-			if (b < 0) {
-				b += 256;
+			if (!type.isAllowed(b)) {
+				original = false;
+				break;
 			}
+		}
+		if (original) {
+			return source;
+		}
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+		for (byte b : bytes) {
 			if (type.isAllowed(b)) {
 				bos.write(b);
 			}
@@ -350,10 +357,9 @@ final class HierarchicalUriComponents extends UriComponents {
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 				bos.write(hex1);
 				bos.write(hex2);
-				changed = true;
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), charset) : source);
+		return new String(bos.toByteArray(), charset);
 	}
 
 	private Type getHostType() {
@@ -416,12 +422,10 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
-
 		Assert.state(!this.encodeState.equals(EncodeState.FULLY_ENCODED),
 				"URI components already encoded, and could not possibly contain '{' or '}'.");
 
-		// Array-based vars rely on the below order..
-
+		// Array-based vars rely on the order below...
 		String schemeTo = expandUriComponent(getScheme(), uriVariables, this.variableEncoder);
 		String userInfoTo = expandUriComponent(this.userInfo, uriVariables, this.variableEncoder);
 		String hostTo = expandUriComponent(this.host, uriVariables, this.variableEncoder);
@@ -578,7 +582,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Enumeration used to identify the allowed characters per URI component.
 	 * <p>Contains methods to indicate whether a given character is valid in a specific URI component.
-	 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a>
 	 */
 	enum Type {
 

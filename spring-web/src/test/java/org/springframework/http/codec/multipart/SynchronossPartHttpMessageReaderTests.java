@@ -18,6 +18,7 @@ package org.springframework.http.codec.multipart;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
@@ -33,19 +34,20 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -140,6 +142,24 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 		ZeroDemandSubscriber subscriber = new ZeroDemandSubscriber();
 		parts.subscribe(subscriber);
 		subscriber.cancel();
+	}
+
+	@Test
+	void gh23768() throws IOException {
+		ReadableByteChannel channel = new ClassPathResource("invalid.multipart", getClass()).readableChannel();
+		Flux<DataBuffer> body = DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 1024);
+
+		MediaType contentType = new MediaType("multipart", "form-data",
+				singletonMap("boundary", "NbjrKgjbsaMLdnMxMfDpD6myWomYc0qNX0w"));
+		ServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType)
+				.body(body);
+
+		Mono<MultiValueMap<String, Part>> parts = this.reader.readMono(PARTS_ELEMENT_TYPE, request, emptyMap());
+
+		StepVerifier.create(parts)
+				.assertNext(result -> assertThat(result).isEmpty())
+				.verifyComplete();
 	}
 
 	@Test

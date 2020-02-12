@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.gradle.api.tasks.compile.JavaCompile;
  * with a dedicated property on the CLI: {@code "./gradlew test -PjavaSourceVersion=11"}.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 public class CompilerConventionsPlugin implements Plugin<Project> {
 
@@ -40,13 +41,13 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 	 * The project property that can be used to switch the Java source
 	 * compatibility version for building source and test classes.
 	 */
-	public static String JAVA_SOURCE_VERSION_PROPERTY = "javaSourceVersion";
+	public static final String JAVA_SOURCE_VERSION_PROPERTY = "javaSourceVersion";
 
-	public static JavaVersion DEFAULT_COMPILER_VERSION = JavaVersion.VERSION_1_8;
+	public static final JavaVersion DEFAULT_COMPILER_VERSION = JavaVersion.VERSION_1_8;
 
-	private static List<String> COMPILER_ARGS;
+	private static final List<String> COMPILER_ARGS;
 
-	private static List<String> TEST_COMPILER_ARGS;
+	private static final List<String> TEST_COMPILER_ARGS;
 
 	static {
 		List<String> commonCompilerArgs = Arrays.asList(
@@ -72,7 +73,8 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 	}
 
 	/**
-	 * Applies the common Java compiler options for sources and test sources.
+	 * Applies the common Java compiler options for main sources, test fixture sources, and
+	 * test sources.
 	 * @param project the current project
 	 */
 	private void applyJavaCompileConventions(Project project) {
@@ -87,16 +89,18 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 		java.setTargetCompatibility(DEFAULT_COMPILER_VERSION);
 
 		project.getTasks().withType(JavaCompile.class)
-				.matching(javaCompile -> javaCompile.getName().equals(JavaPlugin.COMPILE_JAVA_TASK_NAME))
+				.matching(compileTask -> compileTask.getName().equals(JavaPlugin.COMPILE_JAVA_TASK_NAME))
 				.forEach(compileTask -> {
 					compileTask.getOptions().setCompilerArgs(COMPILER_ARGS);
 					compileTask.getOptions().setEncoding("UTF-8");
 				});
 		project.getTasks().withType(JavaCompile.class)
-				.matching(javaCompile -> javaCompile.getName().equals(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME))
+				.matching(compileTask -> compileTask.getName().equals(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
+						|| compileTask.getName().equals("compileTestFixturesJava"))
 				.forEach(compileTask -> {
 					compileTask.getOptions().setCompilerArgs(TEST_COMPILER_ARGS);
 					compileTask.getOptions().setEncoding("UTF-8");
 				});
 	}
+
 }

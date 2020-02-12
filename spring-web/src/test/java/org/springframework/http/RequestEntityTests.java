@@ -27,7 +27,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +58,7 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriVariablesExpansion() throws URISyntaxException {
-		URI uri = new UriTemplate("https://example.com/{foo}").expand("bar");
+		URI uri = UriComponentsBuilder.fromUriString("https://example.com/{foo}").buildAndExpand("bar").toUri();
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "https://www.{host}.com/{path}";
@@ -66,7 +66,7 @@ public class RequestEntityTests {
 		String path = "foo/bar";
 		URI expected = new URI("https://www.example.com/foo/bar");
 
-		uri = new UriTemplate(url).expand(host, path);
+		uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(host, path).toUri();
 		RequestEntity<?> entity = RequestEntity.get(uri).build();
 		assertThat(entity.getUrl()).isEqualTo(expected);
 
@@ -74,7 +74,7 @@ public class RequestEntityTests {
 		uriVariables.put("host", host);
 		uriVariables.put("path", path);
 
-		uri = new UriTemplate(url).expand(uriVariables);
+		uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).toUri();
 		entity = RequestEntity.get(uri).build();
 		assertThat(entity.getUrl()).isEqualTo(expected);
 	}

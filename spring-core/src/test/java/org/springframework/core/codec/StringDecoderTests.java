@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -73,6 +74,13 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		String o = "ø";
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
+
+		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
+		// see https://github.com/reactor/reactor-core/issues/2041
+
+//		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+//		testDecodeCancel(input, TYPE, null, null);
+//		testDecodeEmpty(TYPE, null, null);
 
 		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
@@ -129,17 +137,30 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	}
 
 	@Test
-	void decodeNewLineWithLimit() {
+	void maxInMemoryLimit() {
 		Flux<DataBuffer> input = Flux.just(
-				stringBuffer("abc\n"),
-				stringBuffer("defg\n"),
-				stringBuffer("hijkl\n")
-		);
-		this.decoder.setMaxInMemorySize(5);
+				stringBuffer("abc\n"), stringBuffer("defg\n"), stringBuffer("hijkl\n"));
 
+		this.decoder.setMaxInMemorySize(5);
 		testDecode(input, String.class, step ->
-				step.expectNext("abc", "defg")
-						.verifyError(DataBufferLimitException.class));
+				step.expectNext("abc", "defg").verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24312
+	void maxInMemoryLimitReleaseUnprocessedLinesFromCurrentBuffer() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("TOO MUCH DATA\nanother line\n\nand another\n"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step -> step.verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24339
+	void maxInMemoryLimitReleaseUnprocessedLinesWhenUnlimited() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("Line 1\nLine 2\nLine 3\n"));
+
+		this.decoder.setMaxInMemorySize(-1);
+		testDecodeCancel(input, ResolvableType.forClass(String.class), null, Collections.emptyMap());
 	}
 
 	@Test

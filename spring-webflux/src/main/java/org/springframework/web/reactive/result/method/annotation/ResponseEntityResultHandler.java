@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.AbstractServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
@@ -141,14 +139,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			}
 
 			if (httpEntity instanceof ResponseEntity) {
-				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
-				ServerHttpResponse response = exchange.getResponse();
-				if (response instanceof AbstractServerHttpResponse) {
-					((AbstractServerHttpResponse) response).setStatusCodeValue(responseEntity.getStatusCodeValue());
-				}
-				else {
-					response.setStatusCode(responseEntity.getStatusCode());
-				}
+				exchange.getResponse().setRawStatusCode(
+						((ResponseEntity<?>) httpEntity).getStatusCodeValue());
 			}
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();

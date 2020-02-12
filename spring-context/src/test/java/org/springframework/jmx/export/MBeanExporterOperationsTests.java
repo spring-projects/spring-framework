@@ -37,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
+class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 
 	@Test
-	public void testRegisterManagedResourceWithUserSuppliedObjectName() throws Exception {
+	void testRegisterManagedResourceWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 
 		JmxTestBean bean = new JmxTestBean();
@@ -55,7 +55,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void testRegisterExistingMBeanWithUserSuppliedObjectName() throws Exception {
+	void testRegisterExistingMBeanWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 		ModelMBeanInfo info = new ModelMBeanInfoSupport("myClass", "myDescription", null, null, null, null);
 		RequiredModelMBean bean = new RequiredModelMBean(info);
@@ -69,7 +69,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void testRegisterManagedResourceWithGeneratedObjectName() throws Exception {
+	void testRegisterManagedResourceWithGeneratedObjectName() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -95,7 +95,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void testRegisterManagedResourceWithGeneratedObjectNameWithoutUniqueness() throws Exception {
+	void testRegisterManagedResourceWithGeneratedObjectNameWithoutUniqueness() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
 		MBeanExporter exporter = new MBeanExporter();

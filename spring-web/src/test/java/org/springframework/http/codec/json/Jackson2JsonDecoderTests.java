@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -34,15 +35,15 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -201,6 +202,16 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 
 		testDecode(input, TestObject.class, step -> step
 				.consumeNextWith(o -> assertThat(o.getTest()).isEqualTo(1))
+				.verifyComplete()
+		);
+	}
+
+	@Test
+	public void bigDecimalFlux() {
+		Flux<DataBuffer> input = stringBuffer("[ 1E+2 ]").flux();
+
+		testDecode(input, BigDecimal.class, step -> step
+				.expectNext(new BigDecimal("1E+2"))
 				.verifyComplete()
 		);
 	}

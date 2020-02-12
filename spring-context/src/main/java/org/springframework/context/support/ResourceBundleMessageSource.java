@@ -461,7 +461,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		@Override
 		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
+			Locale defaultLocale = getDefaultLocale();
+			return (defaultLocale != null && !defaultLocale.equals(locale) ? defaultLocale : null);
 		}
 
 		@Override

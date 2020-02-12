@@ -63,7 +63,7 @@ fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
+class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunctionDsl.() -> Unit)) {
 
 	@PublishedApi
 	internal val builder = RouterFunctions.route()

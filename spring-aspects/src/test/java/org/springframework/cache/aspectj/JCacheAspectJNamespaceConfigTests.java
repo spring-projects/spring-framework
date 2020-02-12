@@ -16,9 +16,9 @@
 
 package org.springframework.cache.aspectj;
 
-import org.springframework.cache.jcache.config.AbstractJCacheAnnotationTests;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnotationTests;
 
 /**
  * @author Stephane Nicoll

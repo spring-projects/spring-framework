@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,9 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		if (status != null) {
 			if (response.setStatusCode(status)) {
 				if (ex instanceof ResponseStatusException) {
-					((ResponseStatusException) ex).getHeaders()
-							.forEach((name, value) -> response.getHeaders().add(name, value));
+					((ResponseStatusException) ex).getResponseHeaders()
+							.forEach((name, values) ->
+									values.forEach(value -> response.getHeaders().add(name, value)));
 				}
 				result = true;
 			}
