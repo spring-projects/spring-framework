@@ -112,7 +112,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		ObjectMapper mapper = getObjectMapper();
 
 		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-		if (elementType != null && BigDecimal.class.equals(elementType.getType())) {
+		if (BigDecimal.class.equals(elementType.getType())) {
 			forceUseOfBigDecimal = true;
 		}
 
@@ -223,6 +223,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public List<MimeType> getDecodableMimeTypes() {
 		return getMimeTypes();
 	}
+
 
 	// Jackson2CodecSupport
 

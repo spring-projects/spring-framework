@@ -240,6 +240,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private ObjectWriter createObjectWriter(ResolvableType valueType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
+
 		JavaType javaType = getJavaType(valueType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
