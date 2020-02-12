@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		return buffer;
 	}
-	
+
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,
 			ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
@@ -196,7 +196,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	}
 
 
-	// HttpMessageEncoder...
+	// HttpMessageEncoder
 
 	@Override
 	public List<MimeType> getEncodableMimeTypes() {
@@ -215,11 +215,12 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		return (actualType != null ? getHints(actualType) : Collections.emptyMap());
 	}
 
-	// Jackson2CodecSupport ...
+
+	// Jackson2CodecSupport
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
 		return parameter.getMethodAnnotation(annotType);
 	}
-	
+
 }
