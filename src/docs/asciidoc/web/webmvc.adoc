@@ -4251,7 +4251,7 @@ FormatterRegistrar implementations.
 By default, if <<core.adoc#validation-beanvalidation-overview, Bean Validation>> is present
 on the classpath (for example, Hibernate Validator), the `LocalValidatorFactoryBean` is
 registered as a global <<core.adoc#validator, Validator>> for use with `@Valid` and
-`Validated` on controller method arguments.
+`@Validated` on `@Controller` method arguments.
 
 In Java configuration, you can customize the global `Validator` instance, as the
 following example shows:
