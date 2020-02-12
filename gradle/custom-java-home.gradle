@@ -34,53 +34,42 @@ import org.gradle.internal.os.OperatingSystem
 def customJavaHome = System.getProperty("customJavaHome")
 
 if (customJavaHome) {
-	def javacExecutable = customJavaHome + "/bin/javac"
-	def javaExecutable = customJavaHome + "/bin/java"
-	if (OperatingSystem.current().isWindows()) {
-		javacExecutable += ".exe"
-		javaExecutable += ".exe"
-	}
-
+	def customJavaHomeDir = new File(customJavaHome)
 	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
 
 	tasks.withType(JavaCompile) {
-		logger.info("Java compiler for " + it.name + " task in " + project.name + ": " + javacExecutable)
-		doFirst {
-			// Avoid compiler warnings for non-existing path entries
-			classpath = classpath.filter { it.exists() }
-		}
-		options.fork = true
-		options.forkOptions.executable = javacExecutable
-		// Ignore warnings about missing classpath elements -- for example, those picked up
-		// via Class-Path entries in MANIFEST.MF files in artifacts like xalan-2.7.2.jar.
-		options.compilerArgs -= "-Xlint:path"
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHomeDir)
+		options.forkOptions.javaHome = customJavaHomeDir
+		inputs.property("customJavaHome", customJavaHome)
 		if (customJavaSourceVersion) {
 			options.compilerArgs += [ "--release", customJavaSourceVersion]
 			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
 		}
-		inputs.property("customJavaHome", customJavaHome)
 	}
 
 	tasks.withType(GroovyCompile) {
-		logger.info("Java compiler for " + it.name + " task in " + project.name + ": " + javacExecutable)
-		options.fork = true
-		options.forkOptions.executable = javacExecutable
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHomeDir)
+		options.forkOptions.executable = customJavaHomeDir
+		inputs.property("customJavaHome", customJavaHome)
 		if (customJavaSourceVersion) {
 			options.compilerArgs += [ "--release", customJavaSourceVersion]
 			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
 		}
-		inputs.property("customJavaHome", customJavaHome)
 	}
 
 	/*
 	tasks.withType(KotlinJvmCompile) {
 		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHome)
-		kotlinOptions.jdkHome = customJavaHome
+		kotlinOptions.jdkHome = customJavaHomeDir
 		inputs.property("customJavaHome", customJavaHome)
 	}
 	*/
 
 	tasks.withType(Test) {
+		def javaExecutable = customJavaHome + "/bin/java"
+		if (OperatingSystem.current().isWindows()) {
+			javaExecutable += ".exe"
+		}
 		logger.info("Java executable for " + it.name + " task in " + project.name + ": " + javaExecutable)
 		executable = javaExecutable
 		inputs.property("customJavaHome", customJavaHome)
