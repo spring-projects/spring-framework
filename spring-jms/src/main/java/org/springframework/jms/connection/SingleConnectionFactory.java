@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -505,7 +505,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
 		}
 		catch (Throwable ex) {
-			logger.debug("Could not close shared JMS Connection", ex);
+			logger.warn("Could not close shared JMS Connection", ex);
 		}
 	}
 
