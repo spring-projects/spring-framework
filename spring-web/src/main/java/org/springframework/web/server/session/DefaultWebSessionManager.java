@@ -18,10 +18,13 @@ package org.springframework.web.server.session;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
@@ -35,6 +38,8 @@ import org.springframework.web.server.WebSession;
  * @since 5.0
  */
 public class DefaultWebSessionManager implements WebSessionManager {
+
+	private static final Log logger = LogFactory.getLog(DefaultWebSessionManager.class);
 
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -79,7 +84,12 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.defer(() -> retrieveSession(exchange)
-				.switchIfEmpty(this.sessionStore.createWebSession())
+				.switchIfEmpty(Mono.defer(() -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Did not find an existing WebSession, creating a new one.");
+					}
+					return this.sessionStore.createWebSession();
+				}))
 				.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 
@@ -95,6 +105,9 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		if (!session.isStarted() || session.isExpired()) {
 			if (!ids.isEmpty()) {
 				// Expired on retrieve or while processing request, or invalidated..
+				if (logger.isDebugEnabled()) {
+					logger.debug("Expiring existing sessionIds while saving session.");
+				}
 				this.sessionIdResolver.expireSession(exchange);
 			}
 			return Mono.empty();
