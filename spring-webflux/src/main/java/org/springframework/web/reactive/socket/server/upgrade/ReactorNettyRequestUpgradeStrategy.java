@@ -103,15 +103,15 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		HttpServerResponse reactorResponse = getNativeResponse(response);
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
-
-		return reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength, this.handlePing,
-				(in, out) -> {
-					ReactorNettyWebSocketSession session =
-							new ReactorNettyWebSocketSession(
-									in, out, handshakeInfo, bufferFactory, this.maxFramePayloadLength);
-					URI uri = exchange.getRequest().getURI();
-					return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
-				});
+		return response.setComplete()
+				.then(Mono.defer(() -> reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength, this.handlePing,
+						(in, out) -> {
+							ReactorNettyWebSocketSession session =
+									new ReactorNettyWebSocketSession(
+											in, out, handshakeInfo, bufferFactory, this.maxFramePayloadLength);
+							URI uri = exchange.getRequest().getURI();
+							return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
+						})));
 	}
 
 	private static HttpServerResponse getNativeResponse(ServerHttpResponse response) {
