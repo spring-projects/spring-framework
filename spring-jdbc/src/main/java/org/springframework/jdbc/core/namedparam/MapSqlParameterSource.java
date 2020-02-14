@@ -160,9 +160,13 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	@Nullable
 	public Object getValue(String paramName) {
 		if (!hasValue(paramName)) {
-			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
+			return null;
 		}
-		return this.values.get(paramName);
+		Object paramValue=this.values.get(paramName);
+		if(paramValue!=null&&paramValue instanceof String&&paramValue.toString().length()==0) {
+			paramValue=null;
+		}
+		return paramValue;
 	}
 
 	@Override
