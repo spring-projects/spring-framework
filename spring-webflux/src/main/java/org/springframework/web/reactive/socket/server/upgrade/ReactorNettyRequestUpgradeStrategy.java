@@ -103,8 +103,13 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		HttpServerResponse reactorResponse = getNativeResponse(response);
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
+
+		// Trigger WebFlux preCommit actions and upgrade
 		return response.setComplete()
-				.then(Mono.defer(() -> reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength, this.handlePing,
+				.then(Mono.defer(() -> reactorResponse.sendWebsocket(
+						subProtocol,
+						this.maxFramePayloadLength,
+						this.handlePing,
 						(in, out) -> {
 							ReactorNettyWebSocketSession session =
 									new ReactorNettyWebSocketSession(

@@ -64,6 +64,8 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+
+		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
 				.then(Mono.fromCallable(() -> {
 					DefaultCallback callback = new DefaultCallback(handshakeInfo, handler, bufferFactory);
