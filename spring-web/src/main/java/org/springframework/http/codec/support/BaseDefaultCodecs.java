@@ -50,6 +50,7 @@ import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartsHttpMessageWriter;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
@@ -400,6 +401,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
+		writers.add(new PartsHttpMessageWriter());
 		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		if (protobufPresent) {
 			writers.add(new ProtobufHttpMessageWriter(this.protobufEncoder != null ?

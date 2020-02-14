@@ -62,6 +62,10 @@ import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.codec.multipart.PartsHttpMessageWriter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
@@ -70,6 +74,8 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -96,6 +102,7 @@ public class BodyInsertersTests {
 		messageWriters.add(new FormHttpMessageWriter());
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		messageWriters.add(new MultipartHttpMessageWriter(messageWriters));
+		messageWriters.add(new PartsHttpMessageWriter());
 
 		this.context = new BodyInserter.Context() {
 			@Override
@@ -415,6 +422,62 @@ public class BodyInsertersTests {
 							"Content-Length: 6\r\n" +
 							"\r\n" +
 							"value2");
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofPartsFlux() {
+		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
+		Flux<DataBuffer> bufferPublisher2 = Flux.just(
+				bufferFactory.wrap("Db".getBytes(StandardCharsets.UTF_8)),
+				bufferFactory.wrap("Ee".getBytes(StandardCharsets.UTF_8))
+		);
+
+		Part mockPart = mock(Part.class);
+		given(mockPart.content()).willReturn(bufferPublisher2);
+		given(mockPart.name()).willReturn("part");
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		given(mockPart.headers()).willReturn(headers);
+
+		Flux<DataBuffer> bufferPublisher1 = Flux.just(
+				bufferFactory.wrap("Aa".getBytes(StandardCharsets.UTF_8)),
+				bufferFactory.wrap("Bb".getBytes(StandardCharsets.UTF_8)),
+				bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
+		);
+		FilePart mockFilePart = mock(FilePart.class);
+		given(mockFilePart.content()).willReturn(bufferPublisher1);
+		given(mockFilePart.filename()).willReturn("file.txt");
+		given(mockFilePart.name()).willReturn("filePart");
+		HttpHeaders fileHeaders = new HttpHeaders();
+		fileHeaders.setContentType(MediaType.IMAGE_JPEG);
+		given(mockFilePart.headers()).willReturn(fileHeaders);
+
+		BodyInserter<Flux<Part>, ReactiveHttpOutputMessage> inserter
+				= BodyInserters.fromPublisher(Flux.just(mockPart, mockFilePart), Part.class);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.com"));
+		request.getHeaders().setContentType(MediaType.MULTIPART_FORM_DATA);
+		Mono<Void> result = inserter.insert(request, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(DataBufferUtils.join(request.getBody()))
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
+					String content = new String(resultBytes, StandardCharsets.UTF_8);
+					assertThat(content).contains("Content-Type: text/plain\r\n" +
+							"Content-Disposition: form-data; name=\"part\"\r\n" +
+							"\r\n" +
+							"DbEe");
+					assertThat(content).contains("Content-Type: image/jpeg\r\n" +
+							"Content-Disposition: form-data; name=\"filePart\"; filename=\"file.txt\"\r\n" +
+							"\r\n" +
+							"AaBbCc");
 				})
 				.expectComplete()
 				.verify();

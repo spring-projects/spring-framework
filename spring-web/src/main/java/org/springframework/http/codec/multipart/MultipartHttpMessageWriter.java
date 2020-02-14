@@ -330,7 +330,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	}
 
 
-	private Mono<DataBuffer> generateBoundaryLine(byte[] boundary, DataBufferFactory bufferFactory) {
+	static Mono<DataBuffer> generateBoundaryLine(byte[] boundary, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(boundary.length + 4);
 			buffer.write((byte)'-');
@@ -342,7 +342,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		});
 	}
 
-	private Mono<DataBuffer> generateNewLine(DataBufferFactory bufferFactory) {
+	static Mono<DataBuffer> generateNewLine(DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(2);
 			buffer.write((byte)'\r');
@@ -351,7 +351,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		});
 	}
 
-	private Mono<DataBuffer> generateLastLine(byte[] boundary, DataBufferFactory bufferFactory) {
+	static Mono<DataBuffer> generateLastLine(byte[] boundary, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(boundary.length + 6);
 			buffer.write((byte)'-');
@@ -365,8 +365,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		});
 	}
 
-
-	private static class MultipartHttpOutputMessage implements ReactiveHttpOutputMessage {
+	static class MultipartHttpOutputMessage implements ReactiveHttpOutputMessage {
 
 		private final DataBufferFactory bufferFactory;
 
