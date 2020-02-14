@@ -429,9 +429,17 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		if (getCacheLimit() <= 0) {
 			return NamedParameterUtils.parseSqlStatement(sql);
 		}
-		synchronized (this.parsedSqlCache) {
-			return this.parsedSqlCache.computeIfAbsent(sql, NamedParameterUtils::parseSqlStatement);
+		ParsedSql parsedSql = this.parsedSqlCache.get(sql);
+		if (parsedSql == null) {
+			synchronized (this.parsedSqlCache) {
+				parsedSql = this.parsedSqlCache.get(sql);
+				if(parsedSql==null) {
+					parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+					this.parsedSqlCache.put(sql, parsedSql);
+				}
+			}
 		}
+		return parsedSql;
 	}
 
 	/**
