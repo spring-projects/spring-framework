@@ -21,8 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 
@@ -385,23 +383,15 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	public Class<?> getDependencyType() {
 		if (this.field != null) {
 			if (this.nestingLevel > 1) {
-				Type type = this.field.getGenericType();
+				ResolvableType type = ResolvableType.forField(this.field);
 				for (int i = 2; i <= this.nestingLevel; i++) {
-					if (type instanceof ParameterizedType) {
-						Type[] args = ((ParameterizedType) type).getActualTypeArguments();
-						type = args[args.length - 1];
+					ResolvableType[] types = type.getGenerics();
+					if(types.length > 0){
+						type = types[types.length - 1];
 					}
 				}
-				if (type instanceof Class) {
-					return (Class<?>) type;
-				}
-				else if (type instanceof ParameterizedType) {
-					Type arg = ((ParameterizedType) type).getRawType();
-					if (arg instanceof Class) {
-						return (Class<?>) arg;
-					}
-				}
-				return Object.class;
+				Class<?> clazz = type.getRawClass();
+				return clazz != null ? clazz :Object.class;
 			}
 			else {
 				return this.field.getType();
