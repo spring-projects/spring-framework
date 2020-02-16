@@ -10421,7 +10421,7 @@ resolved is specified manually:
 [literal,subs="verbatim,quotes"]
 ----
 # in exceptions_en_GB.properties
-argument.required=Ebagum lad, the {0} argument is required, I say, required.
+argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 ----
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
