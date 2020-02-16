@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,7 @@ import java.io.IOException;
 public abstract class RepeatableReadInputStreamAndContentCacheFilter extends OncePerRequestFilter {
 
 
-	/**
-	 * Forwards the request to the next filter in the chain and delegates down to the subclasses
-	 * to perform the actual request logging both before and after the request is processed.
-	 */
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {

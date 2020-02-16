@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,12 @@
 
 package org.springframework.web.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -34,17 +39,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
+ * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content from
  * the {@linkplain #getInputStream() input stream} and {@linkplain #getReader() reader},
- * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
+ * and make {@linkplain #getInputStream() input stream} and {@linkplain #getReader() reader}
+ * can be repeatable read, and allows this content to be retrieved via a
+ * {@link #getContentAsByteArray() byte array},
  *
- * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
- * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
+ * <p>Used e.g. by {@link org.springframework.web.filter.RepeatableReadInputStreamAndContentCacheFilter}.
  *
- * @author Juergen Hoeller
- * @author Brian Clozel
- * @since 4.1.3
- * @see ContentCachingResponseWrapper
+ * @author Zhilong Li
  */
 public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends HttpServletRequestWrapper {
 
@@ -58,7 +61,8 @@ public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends Http
 
 
 	/**
-	 * Create a new ContentCachingRequestWrapper for the given servlet request.
+	 * Create a new RepeatableReadInputStreamAndContentCacheRequestWrapper for the given servlet request.
+	 *
 	 * @param request the original servlet request
 	 */
 	public RepeatableReadInputStreamAndContentCacheRequestWrapper(HttpServletRequest request) {
@@ -67,7 +71,7 @@ public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends Http
 	}
 
 	@Override
-	public ServletInputStream getInputStream() throws IOException {
+	public ServletInputStream getInputStream() {
 		cacheContentAndInitParams();
 		return new ByteServletInputStream(contentBytes);
 	}
@@ -85,20 +89,19 @@ public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends Http
 	}
 
 	private void cacheContentAndInitParams() {
-		// 初始化过了
 		if (contentBytes != null)
 			return;
 
-		// 1.先初始化内容
-		try {
-			contentBytes = IOUtils.toByteArray(request.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (isFormPost()) {
+			writeRequestParametersToCachedContent();
+		} else {
+			try {
+				contentBytes = IOUtils.toByteArray(request.getInputStream());
+			} catch (IOException e) {
+				throw new IllegalStateException("Failed to read request inputStream to cached content", e);
+			}
 
-		// 2.初始化参数
-//		if (contentBytes.length != 0 && isFormPost())
-//			writeRequestParametersToCachedContent();
+		}
 	}
 
 	@Override
@@ -125,42 +128,42 @@ public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends Http
 		return super.getParameterValues(name);
 	}
 
-
 	private boolean isFormPost() {
 		String contentType = getContentType();
 		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
 				HttpMethod.POST.matches(getMethod()));
 	}
 
-//	private void writeRequestParametersToCachedContent() {
-//		try {
-//			if (this.cachedContent.size() == 0) {
-//				String requestEncoding = getCharacterEncoding();
-//				Map<String, String[]> form = super.getParameterMap();
-//				for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
-//					String name = nameIterator.next();
-//					List<String> values = Arrays.asList(form.get(name));
-//					for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext(); ) {
-//						String value = valueIterator.next();
-//						this.cachedContent.write(URLEncoder.encode(name, requestEncoding).getBytes());
-//						if (value != null) {
-//							this.cachedContent.write('=');
-//							this.cachedContent.write(URLEncoder.encode(value, requestEncoding).getBytes());
-//							if (valueIterator.hasNext()) {
-//								this.cachedContent.write('&');
-//							}
-//						}
-//					}
-//					if (nameIterator.hasNext()) {
-//						this.cachedContent.write('&');
-//					}
-//				}
-//			}
-//		}
-//		catch (IOException ex) {
-//			throw new IllegalStateException("Failed to write request parameters to cached content", ex);
-//		}
-//	}
+	private void writeRequestParametersToCachedContent() {
+		try {
+			if (this.contentBytes == null) {
+				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				String requestEncoding = getCharacterEncoding();
+				Map<String, String[]> form = super.getParameterMap();
+				for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
+					String name = nameIterator.next();
+					List<String> values = Arrays.asList(form.get(name));
+					for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext(); ) {
+						String value = valueIterator.next();
+						byteArrayOutputStream.write(URLEncoder.encode(name, requestEncoding).getBytes());
+						if (value != null) {
+							byteArrayOutputStream.write('=');
+							byteArrayOutputStream.write(URLEncoder.encode(value, requestEncoding).getBytes());
+							if (valueIterator.hasNext()) {
+								byteArrayOutputStream.write('&');
+							}
+						}
+					}
+					if (nameIterator.hasNext()) {
+						byteArrayOutputStream.write('&');
+					}
+				}
+				contentBytes = byteArrayOutputStream.toByteArray();
+			}
+		} catch (IOException ex) {
+			throw new IllegalStateException("Failed to write request parameters to cached content", ex);
+		}
+	}
 
 	/**
 	 * Return the cached request content as a byte array.
@@ -168,7 +171,6 @@ public class RepeatableReadInputStreamAndContentCacheRequestWrapper extends Http
 	public byte[] getContentAsByteArray() {
 		return this.contentBytes;
 	}
-
 
 
 	private class ByteServletInputStream extends ServletInputStream {
