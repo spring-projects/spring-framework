@@ -85,8 +85,7 @@ public class ConcurrentMapCacheTests
 		assertThat(serializeCache.isStoreByValue()).isTrue();
 
 		Object key = createRandomKey();
-		List<String> content = new ArrayList<>();
-		content.addAll(Arrays.asList("one", "two", "three"));
+		List<String> content = new ArrayList<>(Arrays.asList("one", "two", "three"));
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
