@@ -11,7 +11,6 @@ sourceSets.test.java.srcDirs = files()
 aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
 dependencies {
-	aspect(project(":spring-orm"))
 	compile("org.aspectj:aspectjweaver")
 	compileOnly("org.aspectj:aspectjrt")
 	optional(project(":spring-aop"))  // for @Async support
