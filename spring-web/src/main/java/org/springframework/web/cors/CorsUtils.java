@@ -44,7 +44,10 @@ public abstract class CorsUtils {
 			return false;
 		}
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		String scheme = request.getScheme();
+		String scheme = request.getHeader("x-forwarded-proto");
+		if (scheme == null) {
+			scheme = request.getScheme();
+		}
 		String host = request.getServerName();
 		int port = request.getServerPort();
 		return !(ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
