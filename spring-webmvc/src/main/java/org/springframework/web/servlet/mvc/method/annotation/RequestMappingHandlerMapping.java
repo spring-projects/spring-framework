@@ -49,7 +49,6 @@ import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
@@ -470,16 +469,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 		else {
 			return value;
-		}
-	}
-
-	@Override
-	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		try {
-			return super.getHandlerInternal(request);
-		}
-		finally {
-			ProducesRequestCondition.clearMediaTypesAttribute(request);
 		}
 	}
 
