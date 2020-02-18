@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Calculate the MD5 digest of the given stream.
+	 * Calculate the MD5 digest of the given stream. This method does
+	 * <strong>not</strong> close the input stream.
 	 * @param inputStream the InputStream to calculate the digest over
 	 * @return the digest
 	 * @since 4.2
@@ -71,6 +72,7 @@ public abstract class DigestUtils {
 
 	/**
 	 * Return a hexadecimal string representation of the MD5 digest of the given stream.
+	 * This method does <strong>not</strong> close the input stream.
 	 * @param inputStream the InputStream to calculate the digest over
 	 * @return a hexadecimal digest string
 	 * @since 4.2
@@ -92,7 +94,8 @@ public abstract class DigestUtils {
 
 	/**
 	 * Append a hexadecimal string representation of the MD5 digest of the given
-	 * inputStream to the given {@link StringBuilder}.
+	 * inputStream to the given {@link StringBuilder}. This method does
+	 * <strong>not</strong> close the input stream.
 	 * @param inputStream the inputStream to calculate the digest over
 	 * @param builder the string builder to append the digest to
 	 * @return the given string builder
