@@ -51,8 +51,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Calculate the MD5 digest of the given stream. This method does
-	 * <strong>not</strong> close the input stream.
+	 * Calculate the MD5 digest of the given stream.
+	 * <p>This method does <strong>not</strong> close the input stream.
 	 * @param inputStream the InputStream to calculate the digest over
 	 * @return the digest
 	 * @since 4.2
@@ -72,7 +72,7 @@ public abstract class DigestUtils {
 
 	/**
 	 * Return a hexadecimal string representation of the MD5 digest of the given stream.
-	 * This method does <strong>not</strong> close the input stream.
+	 * <p>This method does <strong>not</strong> close the input stream.
 	 * @param inputStream the InputStream to calculate the digest over
 	 * @return a hexadecimal digest string
 	 * @since 4.2
@@ -94,8 +94,8 @@ public abstract class DigestUtils {
 
 	/**
 	 * Append a hexadecimal string representation of the MD5 digest of the given
-	 * inputStream to the given {@link StringBuilder}. This method does
-	 * <strong>not</strong> close the input stream.
+	 * inputStream to the given {@link StringBuilder}.
+	 * <p>This method does <strong>not</strong> close the input stream.
 	 * @param inputStream the inputStream to calculate the digest over
 	 * @param builder the string builder to append the digest to
 	 * @return the given string builder
@@ -108,7 +108,7 @@ public abstract class DigestUtils {
 
 	/**
 	 * Create a new {@link MessageDigest} with the given algorithm.
-	 * Necessary because {@code MessageDigest} is not thread-safe.
+	 * <p>Necessary because {@code MessageDigest} is not thread-safe.
 	 */
 	private static MessageDigest getDigest(String algorithm) {
 		try {
