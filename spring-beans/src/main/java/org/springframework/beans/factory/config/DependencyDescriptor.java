@@ -371,7 +371,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Determine the name of the wrapped parameter/field.
-	 * @return the declared name (never {@code null})
+	 * @return the declared name (may be {@code null})
 	 */
 	@Nullable
 	public String getDependencyName() {
