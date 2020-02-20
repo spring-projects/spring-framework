@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoderTestCase;
 import org.springframework.core.codec.CodecException;
@@ -218,9 +220,42 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 		);
 	}
 
+	@Test
+	public void decodeNonUtf8Encoding() {
+		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
+
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
+				step -> step.assertNext(o -> {
+					Map<String, String> map = (Map<String, String>) o;
+					assertEquals("bar", map.get("foo"));
+				})
+				.verifyComplete(),
+				MediaType.parseMediaType("application/json; charset=utf-16"),
+				null);
+	}
+
+	@Test
+	public void decodeMonoNonUtf8Encoding() {
+		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
+
+		testDecodeToMono(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {
+				}),
+				step -> step.assertNext(o -> {
+					Map<String, String> map = (Map<String, String>) o;
+					assertEquals("bar", map.get("foo"));
+				})
+				.verifyComplete(),
+				MediaType.parseMediaType("application/json; charset=utf-16"),
+				null);
+	}
+
 	private Mono<DataBuffer> stringBuffer(String value) {
+		return stringBuffer(value, StandardCharsets.UTF_8);
+	}
+
+	private Mono<DataBuffer> stringBuffer(String value, Charset charset) {
 		return Mono.defer(() -> {
-			byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+			byte[] bytes = value.getBytes(charset);
 			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 			buffer.write(bytes);
 			return Mono.just(buffer);

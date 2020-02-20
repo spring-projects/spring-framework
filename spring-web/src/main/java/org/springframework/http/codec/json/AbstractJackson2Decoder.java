@@ -120,9 +120,27 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			forceUseOfBigDecimal = true;
 		}
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, getObjectMapper(),
+		Flux<DataBuffer> processed = processInput(input, elementType, mimeType, hints);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, this.jsonFactory, getObjectMapper(),
 				true, forceUseOfBigDecimal, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints);
+	}
+
+	/**
+	 * Process the input publisher into a flux. Default implementation returns
+	 * {@link Flux#from(Publisher)}, but subclasses can choose to to customize
+	 * this behaviour.
+	 * @param input the {@code DataBuffer} input stream to process
+	 * @param elementType the expected type of elements in the output stream
+	 * @param mimeType the MIME type associated with the input stream (optional)
+	 * @param hints additional information about how to do encode
+	 * @return the processed flux
+	 * @since 5.1.14
+	 */
+	protected Flux<DataBuffer> processInput(Publisher<DataBuffer> input, ResolvableType elementType,
+				@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return Flux.from(input);
 	}
 
 	@Override
@@ -134,7 +152,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			forceUseOfBigDecimal = true;
 		}
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, getObjectMapper(),
+		Flux<DataBuffer> processed = processInput(input, elementType, mimeType, hints);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, this.jsonFactory, getObjectMapper(),
 				false, forceUseOfBigDecimal, getMaxInMemorySize());
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
