@@ -4268,11 +4268,6 @@ the classpath.
 == HTTP/2
 [.small]#<<web.adoc#mvc-http2, Web MVC>>#
 
-Servlet 4 containers are required to support HTTP/2, and Spring Framework 5 is compatible
-with Servlet API 4. From a programming model perspective, there is nothing specific that
-applications need to do. However, there are considerations related to server configuration.
-For more details, see the
+HTTP/2 is supported with Reactor Netty, Tomcat, Jetty, and Undertow. However, there are
+considerations related to server configuration. For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
-
-Currently, Spring WebFlux does not support HTTP/2 with Netty. There is also no support for
-pushing resources programmatically to the client.
