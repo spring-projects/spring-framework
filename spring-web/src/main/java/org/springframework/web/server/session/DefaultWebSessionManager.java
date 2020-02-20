@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
@@ -40,6 +39,7 @@ import org.springframework.web.server.WebSession;
 public class DefaultWebSessionManager implements WebSessionManager {
 
 	private static final Log logger = LogFactory.getLog(DefaultWebSessionManager.class);
+
 
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -84,13 +84,16 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.defer(() -> retrieveSession(exchange)
-				.switchIfEmpty(Mono.defer(() -> {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Did not find an existing WebSession, creating a new one.");
-					}
-					return this.sessionStore.createWebSession();
-				}))
+				.switchIfEmpty(createWebSession())
 				.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
+	}
+
+	private Mono<WebSession> createWebSession() {
+		Mono<WebSession> session = this.sessionStore.createWebSession();
+		if (logger.isDebugEnabled()) {
+			session = session.doOnNext(s -> logger.debug("Created new WebSession."));
+		}
+		return session;
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
@@ -106,7 +109,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 			if (!ids.isEmpty()) {
 				// Expired on retrieve or while processing request, or invalidated..
 				if (logger.isDebugEnabled()) {
-					logger.debug("Expiring existing sessionIds while saving session.");
+					logger.debug("WebSession expired or has been invalidated");
 				}
 				this.sessionIdResolver.expireSession(exchange);
 			}
