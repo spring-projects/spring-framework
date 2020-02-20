@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Constants;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -371,7 +370,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
 			}
 			try {
-				return openNewTransaction(def, transaction, debugEnabled, suspendedResources);
+				return startTransaction(def, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error ex) {
 				resume(null, suspendedResources);
@@ -390,16 +389,16 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Open a new transaction with transaction definition.
+	 * Start a new transaction.
 	 */
-	@NonNull
-	private TransactionStatus openNewTransaction(TransactionDefinition def, Object transaction,
+	private TransactionStatus startTransaction(TransactionDefinition definition, Object transaction,
 			boolean debugEnabled, @Nullable SuspendedResourcesHolder suspendedResources) {
+
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 		DefaultTransactionStatus status = newTransactionStatus(
-				def, transaction, true, newSynchronization, debugEnabled, suspendedResources);
-		doBegin(transaction, def);
-		prepareSynchronization(status, def);
+				definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
+		doBegin(transaction, definition);
+		prepareSynchronization(status, definition);
 		return status;
 	}
 
@@ -432,7 +431,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			SuspendedResourcesHolder suspendedResources = suspend(transaction);
 			try {
-				return openNewTransaction(definition, transaction, debugEnabled, suspendedResources);
+				return startTransaction(definition, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error beginEx) {
 				resumeAfterBeginException(transaction, suspendedResources, beginEx);
@@ -462,7 +461,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Nested transaction through nested begin and commit/rollback calls.
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
-				return openNewTransaction(definition, transaction, debugEnabled, null);
+				return startTransaction(definition, transaction, debugEnabled, null);
 			}
 		}
 
