@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationsScannerTests {
 
 	@Test
-	void directStrategyOnClassWhenNotAnnoatedScansNone() {
+	void directStrategyOnClassWhenNotAnnotatedScansNone() {
 		Class<?> source = WithNoAnnotations.class;
 		assertThat(scan(source, SearchStrategy.DIRECT)).isEmpty();
 	}
