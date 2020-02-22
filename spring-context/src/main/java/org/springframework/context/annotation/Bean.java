@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,14 +240,6 @@ public @interface Bean {
 	String[] name() default {};
 
 	/**
-	 * Are dependencies to be injected via convention-based autowiring by name or type?
-	 * <p>Note that this autowire mode is just about externally driven autowiring based
-	 * on bean property setter methods by convention, analogous to XML bean definitions.
-	 * <p>The default mode does allow for annotation-driven autowiring. "no" refers to
-	 * externally driven autowiring only, not affecting any autowiring demands that the
-	 * bean class itself expresses through annotations.
-	 * @see Autowire#BY_NAME
-	 * @see Autowire#BY_TYPE
 	 * @deprecated as of 5.1, since {@code @Bean} factory method argument resolution and
 	 * {@code @Autowired} processing supersede name/type-based bean property injection
 	 */
