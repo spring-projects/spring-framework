@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationsScannerTests {
 
 	@Test
-	void directStrategyOnClassWhenNotAnnoatedScansNone() {
+	void directStrategyOnClassWhenNotAnnotatedScansNone() {
 		Class<?> source = WithNoAnnotations.class;
 		assertThat(scan(source, SearchStrategy.DIRECT)).isEmpty();
 	}
@@ -423,7 +423,7 @@ class AnnotationsScannerTests {
 	@Test
 	void typeHierarchyStrategyOnMethodWithIgnorablesScansAnnotations()
 			throws Exception {
-		Method source = methodFrom(Ignoreable.class);
+		Method source = methodFrom(Ignorable.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly(
 				"0:TestAnnotation1");
 	}
@@ -752,7 +752,7 @@ class AnnotationsScannerTests {
 	}
 
 	@SuppressWarnings("serial")
-	static class Ignoreable implements IgnoreableOverrideInterface1, IgnoreableOverrideInterface2, Serializable {
+	static class Ignorable implements IgnorableOverrideInterface1, IgnorableOverrideInterface2, Serializable {
 
 		@Override
 		@TestAnnotation1
@@ -760,13 +760,13 @@ class AnnotationsScannerTests {
 		}
 	}
 
-	interface IgnoreableOverrideInterface1 {
+	interface IgnorableOverrideInterface1 {
 
 		@Nullable
 		void method();
 	}
 
-	interface IgnoreableOverrideInterface2 {
+	interface IgnorableOverrideInterface2 {
 
 		@Nullable
 		void method();
