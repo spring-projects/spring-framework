@@ -338,8 +338,8 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getWithInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation1() {
-		// SPR-13554: convention mapping mixed with AlaisFor annotations
-		// xmlConfigFiles can be used because it has an AlaisFor annotation
+		// SPR-13554: convention mapping mixed with AliasFor annotations
+		// xmlConfigFiles can be used because it has an AliasFor annotation
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass1.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
@@ -351,8 +351,8 @@ class MergedAnnotationsTests {
 
 	@Test
 	void withInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
-		// SPR-13554: convention mapping mixed with AlaisFor annotations
-		// locations doesn't apply because it has no AlaisFor annotation
+		// SPR-13554: convention mapping mixed with AliasFor annotations
+		// locations doesn't apply because it has no AliasFor annotation
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass2.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
