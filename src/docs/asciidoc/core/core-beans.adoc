@@ -2863,7 +2863,7 @@ shows the filter part of a web application:
 
 `DispatcherServlet`, `RequestContextListener`, and `RequestContextFilter` all do exactly
 the same thing, namely bind the HTTP request object to the `Thread` that is servicing
-that request. This makes beans that are request- and session-scoped available further
+that request. This makes beans that are request-scoped and session-scoped available further
 down the call chain.
 
 
