@@ -496,7 +496,7 @@ Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error
 
 [CAUTION]
 ====
-Unlike `retrieve()`, when using `exchange(), it is the responsibility of the application
+Unlike `retrieve()`, when using `exchange()`, it is the responsibility of the application
 to consume any response content regardless of the scenario (success, error, unexpected
 data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
 all the available options for consuming the body. Generally prefer using `retrieve()`
