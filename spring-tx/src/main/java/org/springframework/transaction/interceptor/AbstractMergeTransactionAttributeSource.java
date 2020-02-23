@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 1.1
  */
-public abstract class AbstractFallbackTransactionAttributeSource implements TransactionAttributeSource {
+public abstract class AbstractMergeTransactionAttributeSource implements TransactionAttributeSource {
 
 	/**
 	 * Canonical value held in cache to indicate no transaction attribute was

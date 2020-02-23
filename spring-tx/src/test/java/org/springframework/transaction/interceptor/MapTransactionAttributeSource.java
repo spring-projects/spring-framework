@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Inherits fallback behavior from AbstractFallbackTransactionAttributeSource.
+ * Inherits behavior from {@link AbstractMergeTransactionAttributeSource}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class MapTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
+public class MapTransactionAttributeSource extends AbstractMergeTransactionAttributeSource {
 
 	private final Map<Object, TransactionAttribute> attributeMap = new HashMap<>();
 
