@@ -73,6 +73,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Mike Smithson
  * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -80,7 +81,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useSuffixPatternMatch = true;
 
-	private boolean useRegisteredSuffixPatternMatch = false;
+	private boolean useRegisteredSuffixPatternMatch = true;
 
 	private boolean useTrailingSlashMatch = true;
 

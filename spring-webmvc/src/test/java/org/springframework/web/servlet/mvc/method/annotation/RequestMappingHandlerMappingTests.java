@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -59,6 +58,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Mike Smithson
  */
 public class RequestMappingHandlerMappingTests {
 
@@ -73,7 +73,7 @@ public class RequestMappingHandlerMappingTests {
 	@Test
 	public void useRegisteredSuffixPatternMatch() {
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
-		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isFalse();
+		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isTrue();
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
@@ -85,7 +85,7 @@ public class RequestMappingHandlerMappingTests {
 
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
 		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Arrays.asList("json"));
+		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
 	}
 
 	@Test
@@ -159,6 +159,7 @@ public class RequestMappingHandlerMappingTests {
 	@Test // gh-23907
 	public void pathPrefixPreservesPathMatchingSettings() throws NoSuchMethodException {
 		this.handlerMapping.setUseSuffixPatternMatch(false);
+		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);
 		this.handlerMapping.setPathPrefixes(Collections.singletonMap("/api", HandlerTypePredicate.forAnyHandlerType()));
 		this.handlerMapping.afterPropertiesSet();
 
@@ -175,7 +176,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
+	public void resolveRequestMappingViaComposedAnnotation() {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
 		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString())
@@ -185,7 +186,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	public void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
+	public void getMappingOverridesConsumesFromTypeLevelAnnotation() {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -206,31 +207,31 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void getMapping() throws Exception {
+	public void getMapping() {
 		assertComposedAnnotationMapping(RequestMethod.GET);
 	}
 
 	@Test
-	public void postMapping() throws Exception {
+	public void postMapping() {
 		assertComposedAnnotationMapping(RequestMethod.POST);
 	}
 
 	@Test
-	public void putMapping() throws Exception {
+	public void putMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PUT);
 	}
 
 	@Test
-	public void deleteMapping() throws Exception {
+	public void deleteMapping() {
 		assertComposedAnnotationMapping(RequestMethod.DELETE);
 	}
 
 	@Test
-	public void patchMapping() throws Exception {
+	public void patchMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
-	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
+	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
 
@@ -238,7 +239,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	private RequestMappingInfo assertComposedAnnotationMapping(String methodName, String path,
-			RequestMethod requestMethod) throws Exception {
+			RequestMethod requestMethod) {
 
 		Class<?> clazz = ComposedAnnotationController.class;
 		Method method = ClassUtils.getMethod(clazz, methodName, (Class<?>[]) null);
