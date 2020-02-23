@@ -385,7 +385,7 @@ public class AnnotationTransactionInterceptorTests {
 		@Transactional
 		public void doSomething() {
 			assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
-			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isTrue();
 		}
 
 		public void doSomethingElse() {
