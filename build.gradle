@@ -64,6 +64,8 @@ configure(allprojects) { project ->
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
 			dependency "io.reactivex.rxjava2:rxjava:2.2.17"
 
+			dependency "io.projectreactor.tools:blockhound:1.0.2.RELEASE"
+
 			dependency "com.caucho:hessian:4.0.62"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
 			dependency("com.fasterxml.woodstox:woodstox-core:6.0.3") {
