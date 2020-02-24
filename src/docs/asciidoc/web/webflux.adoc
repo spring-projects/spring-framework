@@ -3691,11 +3691,10 @@ class WebConfig : WebFluxConfigurer {
 === Conversion, formatting
 [.small]#<<web.adoc#mvc-config-conversion, Web MVC>>#
 
-By default, formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
-formatting library is also installed if Joda-Time is present on the classpath.
+By default, formatters for various number and date types are installed, along with support
+for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
 
-The following example shows how to register custom formatters and converters:
+To register custom formatters and converters in Java config, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3720,6 +3719,41 @@ The following example shows how to register custom formatters and converters:
 
 		override fun addFormatters(registry: FormatterRegistry) {
 			// ...
+		}
+	}
+----
+
+By default Spring WebFlux considers the request Locale when parsing and formatting date
+values. This works for forms where dates are represented as Strings with "input" form
+fields. For "date" and "time" form fields, however, browsers use a fixed format defined
+in the HTML spec. For such cases date and time formatting can be customized as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setUseIsoFormat(true);
+			registrar.registerFormatters(registry);
+      	}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			val registrar = DateTimeFormatterRegistrar()
+			registrar.setUseIsoFormat(true)
+			registrar.registerFormatters(registry)
 		}
 	}
 ----
