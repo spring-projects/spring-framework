@@ -26,9 +26,9 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Representation of a WebSocket message.
- * <p>See static factory methods in {@link WebSocketSession} for creating messages
- * with the {@link org.springframework.core.io.buffer.DataBufferFactory
- * DataBufferFactory} for the session.
+ *
+ * <p>See static factory methods in {@link WebSocketSession} for creating messages with
+ * the {@link org.springframework.core.io.buffer.DataBufferFactory} for the session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -139,6 +139,7 @@ public class WebSocketMessage {
 	public String toString() {
 		return "WebSocket " + this.type.name() + " message (" + this.payload.readableByteCount() + " bytes)";
 	}
+
 
 	/**
 	 * WebSocket message types.
