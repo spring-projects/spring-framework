@@ -8876,8 +8876,9 @@ parameter-based injection, as in the preceding example.
 
 Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
-instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` do not
-work on the configuration class itself, since it is being created as a bean instance too early.
+instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` may not
+work on the configuration class itself, since it is possible to create it as a bean instance earlier than
+{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
 ====
 
 The following example shows how one bean can be autowired to another bean:
