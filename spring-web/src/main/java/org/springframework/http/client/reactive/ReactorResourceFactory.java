@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -61,6 +62,10 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 
 	private boolean manageLoopResources = false;
 
+	private Duration shutdownQuietPeriod = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_QUIET_PERIOD);
+
+	private Duration shutdownTimeout = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_TIMEOUT);
+
 
 	/**
 	 * Whether to use global Reactor Netty resources via {@link HttpResources}.
@@ -81,6 +86,29 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 */
 	public boolean isUseGlobalResources() {
 		return this.useGlobalResources;
+	}
+
+	/**
+	 * Configure the amount of time we'll wait before shutting down resources. If a task is
+	 * submitted during the {@code quietPeriod}, it is guaranteed to be accepted and the
+	 * {@code quietPeriod} will start over.
+	 * @since 5.2.4
+	 * @see #setShutdownTimeout(Duration)
+	 */
+	public void setShutdownQuietPeriod(Duration shutdownQuietPeriod) {
+		Assert.notNull(shutdownQuietPeriod, "shutdownQuietPeriod should not be null");
+		this.shutdownQuietPeriod = shutdownQuietPeriod;
+	}
+
+	/**
+	 * Configure the maximum amount of time to wait until the disposal of the underlying
+	 * resources regardless if a task was submitted during the {@code shutdownQuietPeriod}.
+	 * @since 5.2.4
+	 * @see #setShutdownTimeout(Duration)
+	 */
+	public void setShutdownTimeout(Duration shutdownTimeout) {
+		Assert.notNull(shutdownTimeout, "shutdownQuietPeriod should not be null");
+		this.shutdownTimeout = shutdownTimeout;
 	}
 
 	/**
@@ -182,7 +210,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Override
 	public void destroy() {
 		if (this.useGlobalResources) {
-			HttpResources.disposeLoopsAndConnectionsLater().block();
+			HttpResources.disposeLoopsAndConnectionsLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 		}
 		else {
 			try {
@@ -198,7 +226,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 			try {
 				LoopResources resources = this.loopResources;
 				if (resources != null && this.manageLoopResources) {
-					resources.disposeLater().block();
+					resources.disposeLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 				}
 			}
 			catch (Throwable ex) {
