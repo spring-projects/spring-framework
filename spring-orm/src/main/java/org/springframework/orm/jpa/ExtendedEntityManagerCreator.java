@@ -240,8 +240,7 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 		else {
 			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(rawEm.getClass(), key -> {
-				Set<Class<?>> ifcs = new LinkedHashSet<>();
-				ifcs.addAll(ClassUtils
+				Set<Class<?>> ifcs = new LinkedHashSet<>(ClassUtils
 						.getAllInterfacesForClassAsSet(key, cl));
 				ifcs.add(EntityManagerProxy.class);
 				return ClassUtils.toClassArray(ifcs);
