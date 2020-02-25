@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	 */
 	static void addHeaders(HttpURLConnection connection, HttpHeaders headers) {
 		String method = connection.getRequestMethod();
-		if (method.equals("PUT") || method.equals("DELETE")) {
+		if (HttpMethod.PUT.matches(method) || HttpMethod.DELETE.matches(method)) {
 			if (!StringUtils.hasText(headers.getFirst(HttpHeaders.ACCEPT))) {
 				// Avoid "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2"
 				// from HttpUrlConnection which prevents JSON error response details.

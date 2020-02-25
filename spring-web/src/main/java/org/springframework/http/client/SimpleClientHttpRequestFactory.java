@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,15 +208,15 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 		connection.setDoInput(true);
 
-		if ("GET".equals(httpMethod)) {
+		if (HttpMethod.GET.matches(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
 		}
 		else {
 			connection.setInstanceFollowRedirects(false);
 		}
 
-		if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
-				"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
+		if (HttpMethod.POST.matches(httpMethod) || HttpMethod.PUT.matches(httpMethod) ||
+				HttpMethod.PATCH.matches(httpMethod) || HttpMethod.DELETE.matches(httpMethod)) {
 			connection.setDoOutput(true);
 		}
 		else {

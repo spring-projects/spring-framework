@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
@@ -54,7 +55,7 @@ public class HessianServiceExporter extends HessianExporter implements HttpReque
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (!"POST".equals(request.getMethod())) {
+		if (!HttpMethod.POST.matches(request.getMethod())) {
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
 					new String[] {"POST"}, "HessianServiceExporter only supports POST requests");
 		}
