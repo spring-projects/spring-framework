@@ -25,8 +25,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jdbc.support.JdbcUtils;
-
 /**
  * Base class for {@link EmbeddedDatabaseConfigurer} implementations
  * providing common shutdown behavior through a "SHUTDOWN" statement.
@@ -55,7 +53,17 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 			logger.info("Could not shut down embedded database", ex);
 		}
 		finally {
-			JdbcUtils.closeConnection(con);
+			if (con != null) {
+				try {
+					con.close();
+				}
+				catch (SQLException ex) {
+					logger.debug("Could not close JDBC Connection on shutdown", ex);
+				}
+				catch (Throwable ex) {
+					logger.debug("Unexpected exception on closing JDBC Connection", ex);
+				}
+			}
 		}
 	}
 
