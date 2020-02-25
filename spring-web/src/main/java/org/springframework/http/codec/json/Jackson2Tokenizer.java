@@ -229,8 +229,8 @@ final class Jackson2Tokenizer {
 	 * @param objectMapper the current mapper instance
 	 * @param tokenizeArrays if {@code true} and the "top level" JSON object is
 	 * an array, each element is returned individually immediately after it is received
-	 * @param forceUseOfBigDecimal if {@code true}, any floating point values encountered in source will use
-	 * {@link java.math.BigDecimal}
+	 * @param forceUseOfBigDecimal if {@code true}, any floating point values encountered
+	 * in source will use {@link java.math.BigDecimal}
 	 * @param maxInMemorySize maximum memory size
 	 * @return the resulting token buffers
 	 */
@@ -244,8 +244,8 @@ final class Jackson2Tokenizer {
 				context = ((DefaultDeserializationContext) context).createInstance(
 						objectMapper.getDeserializationConfig(), parser, objectMapper.getInjectableValues());
 			}
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, context, tokenizeArrays, forceUseOfBigDecimal,
-					maxInMemorySize);
+			Jackson2Tokenizer tokenizer =
+					new Jackson2Tokenizer(parser, context, tokenizeArrays, forceUseOfBigDecimal, maxInMemorySize);
 			return dataBuffers.flatMap(tokenizer::tokenize, Flux::error, tokenizer::endOfInput);
 		}
 		catch (IOException ex) {
