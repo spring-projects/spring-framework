@@ -1693,18 +1693,18 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring 
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a Global Date and Time Format
 
-By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings by using the `DateFormat.SHORT` style. If you prefer, you can
-change this by defining your own global format.
+By default, date and time fields not annotated with `@DateTimeFormat` are converted from
+strings by using the `DateFormat.SHORT` style. If you prefer, you can change this by
+defining your own global format.
 
-To do so, you need to ensure that Spring does not register default formatters. Instead,
-you should register all formatters manually. Use the
-`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` or
-`org.springframework.format.datetime.DateFormatterRegistrar` class, depending on whether
-you use the Joda-Time library.
+To do that, ensure that Spring does not register default formatters. Instead, register
+formatters manually with the help of:
 
-For example, the following Java configuration registers a global `yyyyMMdd`
-format (this example does not depend on the Joda-Time library):
+* `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
+* `org.springframework.format.datetime.DateFormatterRegistrar`, or
+`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` for Joda-Time.
+
+For example, the following Java configuration registers a global `yyyyMMdd` format:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1720,6 +1720,11 @@ format (this example does not depend on the Joda-Time library):
 
 			// Ensure @NumberFormat is still supported
 			conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+
+			// Register JSR-310 date conversion with a specific global format
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			registrar.registerFormatters(conversionService);
 
 			// Register date conversion with a specific global format
 			DateFormatterRegistrar registrar = new DateFormatterRegistrar();
@@ -1740,8 +1745,15 @@ format (this example does not depend on the Joda-Time library):
 		fun conversionService(): FormattingConversionService {
 			// Use the DefaultFormattingConversionService but do not register defaults
 			return DefaultFormattingConversionService(false).apply {
+
 				// Ensure @NumberFormat is still supported
 				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
+
+				// Register JSR-310 date conversion with a specific global format
+				val registrar = DateTimeFormatterRegistrar()
+				registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				registrar.registerFormatters(this)
+
 				// Register date conversion with a specific global format
 				val registrar = DateFormatterRegistrar()
 				registrar.setFormatter(DateFormatter("yyyyMMdd"))
@@ -1786,18 +1798,10 @@ Time):
 	</beans>
 ----
 
-NOTE: Joda-Time provides separate distinct types to represent `date`, `time`, and `date-time`
-values. The `dateFormatter`, `timeFormatter`, and `dateTimeFormatter` properties of the
-`JodaTimeFormatterRegistrar` should be used to configure the different formats for each
-type. The `DateTimeFormatterFactoryBean` provides a convenient way to create formatters.
-
-NOTE: If you use Spring MVC, remember to explicitly configure the conversion service that
-is used. For Java-based `@Configuration`, this means extending the
-`WebMvcConfigurationSupport` class and overriding the `mvcConversionService()` method.
-For XML, you should use the `conversion-service` attribute of the
-`mvc:annotation-driven` element.
-See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> for details.
-
+Note there are extra considerations when configuring date and time formats in web
+applications. Please see
+<<web.adoc#mvc-config-conversion, WebMVC Conversion and Formatting>> or
+<<web-reactive.adoc#webflux-config-conversion, WebFlux Conversion and Formatting>>.
 
 
 
