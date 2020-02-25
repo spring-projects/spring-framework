@@ -102,12 +102,13 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
 		if (statusCode == null) {
+			byte[] body = getResponseBody(response);
 			String message = getErrorMessage(
 					response.getRawStatusCode(), response.getStatusText(),
-					getResponseBody(response), getCharset(response));
+					body, getCharset(response));
 			throw new UnknownHttpStatusCodeException(message,
 					response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), getResponseBody(response), getCharset(response));
+					response.getHeaders(), body, getCharset(response));
 		}
 		handleError(response, statusCode);
 	}

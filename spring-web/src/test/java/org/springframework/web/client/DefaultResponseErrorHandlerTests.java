@@ -32,6 +32,7 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -160,15 +161,29 @@ public class DefaultResponseErrorHandlerTests {
 
 	@Test
 	public void handleErrorForCustomClientError() throws Exception {
+		int statusCode = 499;
+		String statusText = "Custom status code";
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getRawStatusCode()).willReturn(499);
-		given(response.getStatusText()).willReturn("Custom status code");
-		given(response.getHeaders()).willReturn(headers);
+		String responseBody = "Hello World";
+		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
 
-		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
-				handler.handleError(response));
+		given(response.getRawStatusCode()).willReturn(statusCode);
+		given(response.getStatusText()).willReturn(statusText);
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(body);
+
+		Throwable throwable = catchThrowable(() -> handler.handleError(response));
+
+		// validate exception
+		assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
+		UnknownHttpStatusCodeException actualUnknownHttpStatusCodeException = (UnknownHttpStatusCodeException) throwable;
+		assertThat(actualUnknownHttpStatusCodeException.getRawStatusCode()).isEqualTo(statusCode);
+		assertThat(actualUnknownHttpStatusCodeException.getStatusText()).isEqualTo(statusText);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseHeaders()).isEqualTo(headers);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseBodyAsString()).isEqualTo(responseBody);
 	}
 
 	@Test  // SPR-17461
@@ -185,15 +200,29 @@ public class DefaultResponseErrorHandlerTests {
 
 	@Test
 	public void handleErrorForCustomServerError() throws Exception {
+		int statusCode = 599;
+		String statusText = "Custom status code";
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getRawStatusCode()).willReturn(599);
-		given(response.getStatusText()).willReturn("Custom status code");
-		given(response.getHeaders()).willReturn(headers);
+		String responseBody = "Hello World";
+		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
 
-		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
-				handler.handleError(response));
+		given(response.getRawStatusCode()).willReturn(statusCode);
+		given(response.getStatusText()).willReturn(statusText);
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(body);
+
+		Throwable throwable = catchThrowable(() -> handler.handleError(response));
+
+		// validate exception
+		assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
+		UnknownHttpStatusCodeException actualUnknownHttpStatusCodeException = (UnknownHttpStatusCodeException) throwable;
+		assertThat(actualUnknownHttpStatusCodeException.getRawStatusCode()).isEqualTo(statusCode);
+		assertThat(actualUnknownHttpStatusCodeException.getStatusText()).isEqualTo(statusText);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseHeaders()).isEqualTo(headers);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseBodyAsString()).isEqualTo(responseBody);
 	}
 
 	@Test  // SPR-16604
@@ -211,7 +240,6 @@ public class DefaultResponseErrorHandlerTests {
 		assertThat(body.isClosed()).isFalse();
 		assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)).isEqualTo("Hello World");
 	}
-
 
 	private static class TestByteArrayInputStream extends ByteArrayInputStream {
 
