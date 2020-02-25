@@ -16,9 +16,11 @@
 
 package org.springframework.context.annotation;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -455,6 +459,8 @@ class ConfigurationClassParser {
 		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
 				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiateClass(factoryClass));
 
+		locations = getWildcardLocations(locations);
+
 		for (String location : locations) {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
@@ -473,6 +479,32 @@ class ConfigurationClassParser {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Parse locations and expand those with wildcard
+	 */
+	private String[] getWildcardLocations(String[] locations) throws IOException {
+		List<String> filesNames = new ArrayList<>();
+		Pattern allFiles = Pattern.compile("(.*[/:])\\*(\\.[a-zA-Z0-9]*)$");
+		for(String location : locations){
+			Matcher matcher = allFiles.matcher(location);
+			if(matcher.matches()){
+				String folderName = matcher.group(1);
+				String extension = matcher.group(2);
+				File folder = this.resourceLoader.getResource(folderName).getFile();
+				File[] files = folder.listFiles();
+				for (File file : files){
+					if(file.getName().endsWith(extension)){
+						filesNames.add("file:"+file.getPath());
+					}
+				}
+			} else {
+				filesNames.add(location);
+			}
+		}
+
+		return filesNames.toArray(new String[filesNames.size()]);
 	}
 
 	private void addPropertySource(PropertySource<?> propertySource) {
