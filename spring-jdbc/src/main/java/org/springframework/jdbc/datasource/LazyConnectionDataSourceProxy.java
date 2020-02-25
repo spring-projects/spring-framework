@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,28 +285,28 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
+			if ("equals".equals(method.getName())) {
 				// We must avoid fetching a target Connection for "equals".
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0]);
 			}
-			else if (method.getName().equals("hashCode")) {
+			else if ("hashCode".equals(method.getName())) {
 				// We must avoid fetching a target Connection for "hashCode",
 				// and we must return the same hash code even when the target
 				// Connection has been fetched: use hashCode of Connection proxy.
 				return System.identityHashCode(proxy);
 			}
-			else if (method.getName().equals("unwrap")) {
+			else if ("unwrap".equals(method.getName())) {
 				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
-			else if (method.getName().equals("isWrapperFor")) {
+			else if ("isWrapperFor".equals(method.getName())) {
 				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}
-			else if (method.getName().equals("getTargetConnection")) {
+			else if ("getTargetConnection".equals(method.getName())) {
 				// Handle getTargetConnection method: return underlying connection.
 				return getTargetConnection(method);
 			}
@@ -316,59 +316,59 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// resolve transaction demarcation methods without fetching
 				// a physical JDBC Connection until absolutely necessary.
 
-				if (method.getName().equals("toString")) {
+				if ("toString".equals(method.getName())) {
 					return "Lazy Connection proxy for target DataSource [" + getTargetDataSource() + "]";
 				}
-				else if (method.getName().equals("getAutoCommit")) {
+				else if ("getAutoCommit".equals(method.getName())) {
 					if (this.autoCommit != null) {
 						return this.autoCommit;
 					}
 					// Else fetch actual Connection and check there,
 					// because we didn't have a default specified.
 				}
-				else if (method.getName().equals("setAutoCommit")) {
+				else if ("setAutoCommit".equals(method.getName())) {
 					this.autoCommit = (Boolean) args[0];
 					return null;
 				}
-				else if (method.getName().equals("getTransactionIsolation")) {
+				else if ("getTransactionIsolation".equals(method.getName())) {
 					if (this.transactionIsolation != null) {
 						return this.transactionIsolation;
 					}
 					// Else fetch actual Connection and check there,
 					// because we didn't have a default specified.
 				}
-				else if (method.getName().equals("setTransactionIsolation")) {
+				else if ("setTransactionIsolation".equals(method.getName())) {
 					this.transactionIsolation = (Integer) args[0];
 					return null;
 				}
-				else if (method.getName().equals("isReadOnly")) {
+				else if ("isReadOnly".equals(method.getName())) {
 					return this.readOnly;
 				}
-				else if (method.getName().equals("setReadOnly")) {
+				else if ("setReadOnly".equals(method.getName())) {
 					this.readOnly = (Boolean) args[0];
 					return null;
 				}
-				else if (method.getName().equals("getHoldability")) {
+				else if ("getHoldability".equals(method.getName())) {
 					return this.holdability;
 				}
-				else if (method.getName().equals("setHoldability")) {
+				else if ("setHoldability".equals(method.getName())) {
 					this.holdability = (Integer) args[0];
 					return null;
 				}
-				else if (method.getName().equals("commit") || method.getName().equals("rollback")) {
+				else if ("commit".equals(method.getName()) || "rollback".equals(method.getName())) {
 					// Ignore: no statements created yet.
 					return null;
 				}
-				else if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
+				else if ("getWarnings".equals(method.getName()) || "clearWarnings".equals(method.getName())) {
 					// Ignore: no warnings to expose yet.
 					return null;
 				}
-				else if (method.getName().equals("close")) {
+				else if ("close".equals(method.getName())) {
 					// Ignore: no target connection yet.
 					this.closed = true;
 					return null;
 				}
-				else if (method.getName().equals("isClosed")) {
+				else if ("isClosed".equals(method.getName())) {
 					return this.closed;
 				}
 				else if (this.closed) {

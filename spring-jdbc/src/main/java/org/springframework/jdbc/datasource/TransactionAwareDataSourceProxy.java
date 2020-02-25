@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,15 +175,15 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
+			if ("equals".equals(method.getName())) {
 				// Only considered as equal when proxies are identical.
 				return (proxy == args[0]);
 			}
-			else if (method.getName().equals("hashCode")) {
+			else if ("hashCode".equals(method.getName())) {
 				// Use hashCode of Connection proxy.
 				return System.identityHashCode(proxy);
 			}
-			else if (method.getName().equals("toString")) {
+			else if ("toString".equals(method.getName())) {
 				// Allow for differentiating between the proxy and the raw Connection.
 				StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
 				if (this.target != null) {
@@ -194,28 +194,28 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				}
 				return sb.toString();
 			}
-			else if (method.getName().equals("unwrap")) {
+			else if ("unwrap".equals(method.getName())) {
 				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
-			else if (method.getName().equals("isWrapperFor")) {
+			else if ("isWrapperFor".equals(method.getName())) {
 				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}
-			else if (method.getName().equals("close")) {
+			else if ("close".equals(method.getName())) {
 				// Handle close method: only close if not within a transaction.
 				DataSourceUtils.doReleaseConnection(this.target, this.targetDataSource);
 				this.closed = true;
 				return null;
 			}
-			else if (method.getName().equals("isClosed")) {
+			else if ("isClosed".equals(method.getName())) {
 				return this.closed;
 			}
 
 			if (this.target == null) {
-				if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
+				if ("getWarnings".equals(method.getName()) || "clearWarnings".equals(method.getName())) {
 					// Avoid creation of target Connection on pre-close cleanup (e.g. Hibernate Session)
 					return null;
 				}
@@ -231,7 +231,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				actualTarget = DataSourceUtils.doGetConnection(this.targetDataSource);
 			}
 
-			if (method.getName().equals("getTargetConnection")) {
+			if ("getTargetConnection".equals(method.getName())) {
 				// Handle getTargetConnection method: return underlying Connection.
 				return actualTarget;
 			}
