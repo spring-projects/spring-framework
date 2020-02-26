@@ -607,7 +607,7 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertTotalEventsCount(0);
 	}
 	@Test
-	public void ContextWithGenericEvent() throws NoSuchMethodException {
+	public void publishEventWithGeneric() throws NoSuchMethodException {
 		MyAnnotationConfigApplicationContext ctx = new MyAnnotationConfigApplicationContext();
 		context = ctx;
 		ctx.register(MyEventWithGenericListener.class);
