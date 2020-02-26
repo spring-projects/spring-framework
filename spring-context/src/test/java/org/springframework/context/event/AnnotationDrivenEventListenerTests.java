@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ResolvableType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -605,6 +606,17 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertNoEventReceived(listener);
 		this.eventCollector.assertTotalEventsCount(0);
 	}
+	@Test
+	public void ContextWithGenericEvent() throws NoSuchMethodException {
+		MyAnnotationConfigApplicationContext ctx = new MyAnnotationConfigApplicationContext();
+		context = ctx;
+		ctx.register(MyEventWithGenericListener.class);
+		ctx.refresh();
+		ResolvableType resolvableType = ResolvableType.forMethodParameter(MyEventWithGenericListener.class.getMethod("onMyEventWithGeneric",MyEventWithGeneric.class),0);
+		ctx.publishEvent(new MyEventWithGeneric<String>(),resolvableType);
+		assertThat(MyEventWithGenericListener.count).isEqualTo(1);
+	}
+
 
 	@Test
 	public void orderedListeners() {
@@ -1115,6 +1127,31 @@ public class AnnotationDrivenEventListenerTests {
 				throw new AssertionError();
 			}
 		}
+	}
+
+	public static class MyAnnotationConfigApplicationContext extends AnnotationConfigApplicationContext{
+
+		@Override
+		public void publishEvent(Object event, ResolvableType eventType) {
+			super.publishEvent(event, eventType);
+		}
+	}
+
+	public static class MyEventWithGeneric<T> {
+
+	}
+
+	@Component
+	public static class MyEventWithGenericListener{
+
+		public static int count ;
+
+		@EventListener
+		public void onMyEventWithGeneric(MyEventWithGeneric<String> event){
+			count ++;
+		}
+
+
 	}
 
 }
