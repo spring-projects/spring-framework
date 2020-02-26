@@ -856,14 +856,14 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-featu
 As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive, dedicated section>>,
 JUnit 5 allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
-{api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowire = true)`]
+{api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
 to enable autowiring for all parameters.
 
 ====
 [source,kotlin,indent=0]
 ----
 @SpringJUnitConfig(TestConfig::class)
-@TestConstructor(autowire = true)
+@TestConstructor(autowireMode = AutowireMode.ALL)
 class OrderServiceIntegrationTests(val orderService: OrderService,
                                    val customerService: CustomerService) {
 
