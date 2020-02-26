@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -27,6 +28,7 @@ import org.springframework.util.Assert;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Qimiao Chen
  * @since 4.2
  * @param <T> the payload type of the event
  * @see ApplicationEventPublisher#publishEvent(Object)
@@ -37,6 +39,8 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 
 	private final T payload;
 
+	@Nullable
+	private ResolvableType payloadType;
 
 	/**
 	 * Create a new PayloadApplicationEvent.
@@ -44,15 +48,29 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 	 * @param payload the payload object (never {@code null})
 	 */
 	public PayloadApplicationEvent(Object source, T payload) {
+		this(source, payload, null);
+	}
+
+	/**
+	 * Create a new PayloadApplicationEvent.
+	 * @param source the object on which the event initially occurred (never {@code null})
+	 * @param payload the payload object (never {@code null})
+	 * @param payloadType the type object of payload object (can be {@code null})
+	 */
+	public PayloadApplicationEvent(Object source, T payload, @Nullable ResolvableType payloadType) {
 		super(source);
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
+		this.payloadType = payloadType;
 	}
 
 
 	@Override
 	public ResolvableType getResolvableType() {
-		return ResolvableType.forClassWithGenerics(getClass(), ResolvableType.forInstance(getPayload()));
+		if (this.payloadType == null) {
+			this.payloadType = ResolvableType.forInstance(getPayload());
+		}
+		return ResolvableType.forClassWithGenerics(getClass(), this.payloadType);
 	}
 
 	/**
