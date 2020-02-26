@@ -36,7 +36,6 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.ResolvableType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -62,6 +61,7 @@ import org.springframework.context.event.test.GenericEventPojo;
 import org.springframework.context.event.test.Identifiable;
 import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
