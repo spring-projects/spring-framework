@@ -96,8 +96,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("favouriteColour","blue");
-		List<Integer> primes = new ArrayList<>();
-		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
+		List<Integer> primes = Arrays.asList(2, 3, 5, 7, 11, 13, 17);
 		ctx.setVariable("primes",primes);
 
 		Expression expr = parser.parseRaw("#favouriteColour");

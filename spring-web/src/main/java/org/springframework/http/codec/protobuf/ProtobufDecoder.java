@@ -227,8 +227,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}
 
-					chunkBytesToRead = this.messageBytesToRead >= input.readableByteCount() ?
-							input.readableByteCount() : this.messageBytesToRead;
+					chunkBytesToRead = Math.min(this.messageBytesToRead, input.readableByteCount());
 					remainingBytesToRead = input.readableByteCount() - chunkBytesToRead;
 
 					byte[] bytesToWrite = new byte[chunkBytesToRead];
