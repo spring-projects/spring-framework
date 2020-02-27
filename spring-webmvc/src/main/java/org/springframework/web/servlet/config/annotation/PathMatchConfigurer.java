@@ -44,10 +44,10 @@ import org.springframework.web.util.UrlPathHelper;
 public class PathMatchConfigurer {
 
 	@Nullable
-	private Boolean suffixPatternMatch;
+	private Boolean suffixPatternMatch = Boolean.TRUE;
 
 	@Nullable
-	private Boolean registeredSuffixPatternMatch;
+	private Boolean registeredSuffixPatternMatch = Boolean.TRUE;
 
 	@Nullable
 	private Boolean trailingSlashMatch;
@@ -83,7 +83,7 @@ public class PathMatchConfigurer {
 	 * {@link WebMvcConfigurer#configureContentNegotiation configure content
 	 * negotiation}. This is generally recommended to reduce ambiguity and to
 	 * avoid issues such as when a "." appears in the path for other reasons.
-	 * <p>By default this is set to "false".
+	 * <p>By default this is set to "true".
 	 * @see WebMvcConfigurer#configureContentNegotiation
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
@@ -159,7 +159,8 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Whether to use registered suffixes for pattern matching.
+	 * Whether to use registered suffixes for pattern matching. By default, this
+	 * is set to 'true'
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
 	 * config options.

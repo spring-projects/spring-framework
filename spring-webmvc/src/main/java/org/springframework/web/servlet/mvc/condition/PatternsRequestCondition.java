@@ -87,7 +87,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param urlPathHelper for determining the lookup path of a request
 	 * @param pathMatcher for path matching with patterns
-	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
+	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*"), defaults to "true"
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
@@ -105,7 +105,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
 	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
-	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
+	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*"), defaults to "true"
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param fileExtensions a list of file extensions to consider for path matching
 	 * @deprecated as of 5.2.4. See class-level note in

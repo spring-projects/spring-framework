@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			if (elem instanceof CaptureTheRestPathElement || elem instanceof WildcardTheRestPathElement) {
 				this.catchAll = true;
 			}
-			if (elem instanceof SeparatorPathElement && elem.next != null &&
-					elem.next instanceof WildcardPathElement && elem.next.next == null) {
+			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
 				this.endsWithSeparatorWildcard = true;
 			}
 			elem = elem.next;
@@ -325,7 +324,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			}
 		}
 
-		PathContainer resultPath = null;
+		PathContainer resultPath;
 		if (multipleAdjacentSeparators) {
 			// Need to rebuild the path without the duplicate adjacent separators
 			StringBuilder buf = new StringBuilder();

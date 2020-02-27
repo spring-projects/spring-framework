@@ -114,7 +114,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * explicitly registered with the {@link ContentNegotiationManager}. This
 	 * is generally recommended to reduce ambiguity and to avoid issues such as
 	 * when a "." appears in the path for other reasons.
-	 * <p>By default this is set to "false".
+	 * <p>By default this is set to "true".
 	 * @deprecated as of 5.2.4. See class level comment about deprecation of
 	 * path extension config options note also that in 5.3 the default for this
 	 * property will switch from {@code false} to {@code true}.
