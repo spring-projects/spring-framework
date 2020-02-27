@@ -134,7 +134,7 @@ The following example shows how to configure a `RestTemplate`:
 .Kotlin
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode
-	
+
 	val baseUrl = "https://example.org"
 	val factory = DefaultUriBuilderFactory(baseUrl)
 	factory.encodingMode = EncodingMode.TEMPLATE_AND_VALUES
@@ -320,11 +320,11 @@ expanded.
 * `VALUES_ONLY`: Does not encode the URI template and, instead, applies strict encoding
 to URI variables through `UriUtils#encodeUriUriVariables` prior to expanding them into the
 template.
-* `URI_COMPONENTS`: Uses `UriComponents#encode()`, corresponding to the second option in the earlier list, to
+* `URI_COMPONENT`: Uses `UriComponents#encode()`, corresponding to the second option in the earlier list, to
 encode URI component value _after_ URI variables are expanded.
 * `NONE`: No encoding is applied.
 
-The `RestTemplate` is set to `EncodingMode.URI_COMPONENTS` for historic
+The `RestTemplate` is set to `EncodingMode.URI_COMPONENT` for historic
 reasons and for backwards compatibility. The `WebClient` relies on the default value
-in `DefaultUriBuilderFactory`, which was changed from `EncodingMode.URI_COMPONENTS` in
+in `DefaultUriBuilderFactory`, which was changed from `EncodingMode.URI_COMPONENT` in
 5.0.x to `EncodingMode.TEMPLATE_AND_VALUES` in 5.1.

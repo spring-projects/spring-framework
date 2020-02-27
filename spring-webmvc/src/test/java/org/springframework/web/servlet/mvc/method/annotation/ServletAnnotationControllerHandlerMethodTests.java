@@ -320,8 +320,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertThat(response.getStatus()).as("Invalid response status").isEqualTo(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		String allowHeader = response.getHeader("Allow");
 		assertThat(allowHeader).as("No Allow header").isNotNull();
-		Set<String> allowedMethods = new HashSet<>();
-		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
+		Set<String> allowedMethods = new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
 		assertThat(allowedMethods.size()).as("Invalid amount of supported methods").isEqualTo(6);
 		assertThat(allowedMethods.contains("PUT")).as("PUT not allowed").isTrue();
 		assertThat(allowedMethods.contains("DELETE")).as("DELETE not allowed").isTrue();

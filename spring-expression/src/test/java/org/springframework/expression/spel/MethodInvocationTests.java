@@ -221,8 +221,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		ctx.addMethodResolver(dummy);
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 
-		List<MethodResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getMethodResolvers());
+		List<MethodResolver> copy = new ArrayList<>(ctx.getMethodResolvers());
 		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
 		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);

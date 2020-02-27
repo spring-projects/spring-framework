@@ -1273,7 +1273,7 @@ The following example shows how to use around advice:
 			// start stopwatch
 			val retVal = pjp.proceed()
 			// stop stopwatch
-			return pjp.proceed()
+			return retVal
 		}
 
 	}

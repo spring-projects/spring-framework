@@ -205,8 +205,7 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
-			handlers.addAll(getCustomReturnValueHandlers());
+			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(getCustomReturnValueHandlers());
 			return handlers;
 		}
 

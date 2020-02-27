@@ -135,8 +135,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(spa);
 		assertThat(ctx.getPropertyAccessors().size()).isEqualTo(2);
 
-		List<PropertyAccessor> copy = new ArrayList<>();
-		copy.addAll(ctx.getPropertyAccessors());
+		List<PropertyAccessor> copy = new ArrayList<>(ctx.getPropertyAccessors());
 		assertThat(ctx.removePropertyAccessor(spa)).isTrue();
 		assertThat(ctx.removePropertyAccessor(spa)).isFalse();
 		assertThat(ctx.getPropertyAccessors().size()).isEqualTo(1);
