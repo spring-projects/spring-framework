@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="aca" class="org.springframework.context.ACATester"/>
+	<bean id="aca" class="org.springframework.context.testfixture.beans.ACATester"/>
 
-	<bean id="aca-prototype" class="org.springframework.context.ACATester" scope="prototype"/>
+	<bean id="aca-prototype" class="org.springframework.context.testfixture.beans.ACATester" scope="prototype"/>
 
-	<bean id="testListener" class="org.springframework.context.TestListener"/>
+	<bean id="testListener" class="org.springframework.context.testfixture.beans.TestApplicationListener"/>
 
 	<bean id="roderick" parent="rod">
 		<property name="name"><value>Roderick</value></property>
 		<property name="age"><value>31</value></property>
 	</bean>
 
-	<bean id="kathy" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+	<bean id="kathy" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype"/>
 
-	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="kerry" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
-	<bean id="typeMismatch" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="typeMismatch" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref bean="rod"/></property>
@@ -31,20 +31,20 @@
 	<!-- Factory beans are automatically treated
 		differently -->
 	<bean id="singletonFactory"
-		class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		class="org.springframework.beans.testfixture.beans.factory.DummyFactory">
 	</bean>
 
 	<bean id="prototypeFactory"
-		class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		class="org.springframework.beans.testfixture.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 
-	<bean id="listenerVeto" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="listenerVeto" class="org.springframework.beans.testfixture.beans.TestBean">
 		<!--	<listener property="age" beanRef="agistListener" /> -->
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>
 	</bean>
 
-	<bean id="validEmpty" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="validEmpty" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

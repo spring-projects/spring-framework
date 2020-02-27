@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,11 @@ package org.springframework.cache.config;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
@@ -33,11 +32,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
+import org.springframework.context.testfixture.cache.beans.CacheableService;
+import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class CustomInterceptorTests {
@@ -46,44 +48,37 @@ public class CustomInterceptorTests {
 
 	protected CacheableService<?> cs;
 
-	@Before
+	@BeforeEach
 	public void setup() {
-		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
-		cs = ctx.getBean("service", CacheableService.class);
+		this.ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
+		this.cs = ctx.getBean("service", CacheableService.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
-		ctx.close();
+		this.ctx.close();
 	}
 
 	@Test
 	public void onlyOneInterceptorIsAvailable() {
-		Map<String, CacheInterceptor> interceptors = ctx.getBeansOfType(CacheInterceptor.class);
-		assertEquals("Only one interceptor should be defined", 1, interceptors.size());
+		Map<String, CacheInterceptor> interceptors = this.ctx.getBeansOfType(CacheInterceptor.class);
+		assertThat(interceptors.size()).as("Only one interceptor should be defined").isEqualTo(1);
 		CacheInterceptor interceptor = interceptors.values().iterator().next();
-		assertEquals("Custom interceptor not defined", TestCacheInterceptor.class, interceptor.getClass());
+		assertThat(interceptor.getClass()).as("Custom interceptor not defined").isEqualTo(TestCacheInterceptor.class);
 	}
 
 	@Test
 	public void customInterceptorAppliesWithRuntimeException() {
-		Object o = cs.throwUnchecked(0L);
-		assertEquals(55L, o); // See TestCacheInterceptor
+		Object o = this.cs.throwUnchecked(0L);
+		// See TestCacheInterceptor
+		assertThat(o).isEqualTo(55L);
 	}
 
 	@Test
 	public void customInterceptorAppliesWithCheckedException() {
-		try {
-			cs.throwChecked(0L);
-			fail("Should have failed");
-		}
-		catch (RuntimeException e) {
-			assertNotNull("missing original exception", e.getCause());
-			assertEquals(IOException.class, e.getCause().getClass());
-		}
-		catch (Exception e) {
-			fail("Wrong exception type " + e);
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				this.cs.throwChecked(0L))
+			.withCauseExactlyInstanceOf(IOException.class);
 	}
 
 

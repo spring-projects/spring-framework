@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,8 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -34,9 +35,11 @@ import org.springframework.core.GenericCollectionTypeResolver;
  */
 public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
+	@Nullable
 	private List<?> sourceList;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends List> targetListClass;
 
 
@@ -54,7 +57,7 @@ public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 	 * @see java.util.ArrayList
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setTargetListClass(Class<? extends List> targetListClass) {
+	public void setTargetListClass(@Nullable Class<? extends List> targetListClass) {
 		if (targetListClass == null) {
 			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}
@@ -82,11 +85,11 @@ public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 			result = BeanUtils.instantiateClass(this.targetListClass);
 		}
 		else {
-			result = new ArrayList<Object>(this.sourceList.size());
+			result = new ArrayList<>(this.sourceList.size());
 		}
 		Class<?> valueType = null;
 		if (this.targetListClass != null) {
-			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
+			valueType = ResolvableType.forClass(this.targetListClass).asCollection().resolveGeneric();
 		}
 		if (valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -37,6 +38,7 @@ import org.springframework.core.io.ProtocolResolver;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 03.11.2003
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle, Closeable {
@@ -53,6 +55,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
+	 * @since 3.0
 	 * @see org.springframework.core.convert.ConversionService
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
@@ -61,12 +64,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
 	 * the context will use a temporary ClassLoader for type matching, in order
 	 * to allow the LoadTimeWeaver to process all actual bean classes.
+	 * @since 2.5
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 	/**
 	 * Name of the {@link Environment} bean in the factory.
+	 * @since 3.1
 	 */
 	String ENVIRONMENT_BEAN_NAME = "environment";
 
@@ -82,9 +87,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
 
+	/**
+	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
+	 * shutdown hook} thread: {@value}.
+	 * @since 5.2
+	 * @see #registerShutdownHook()
+	 */
+	String SHUTDOWN_HOOK_THREAD_NAME = "SpringContextShutdownHook";
+
 
 	/**
 	 * Set the unique id of this application context.
+	 * @since 3.0
 	 */
 	void setId(String id);
 
@@ -96,19 +110,22 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
-	void setParent(ApplicationContext parent);
-
-	/**
-	 * Return the Environment for this application context in configurable form.
-	 */
-	@Override
-	ConfigurableEnvironment getEnvironment();
+	void setParent(@Nullable ApplicationContext parent);
 
 	/**
 	 * Set the {@code Environment} for this application context.
 	 * @param environment the new environment
+	 * @since 3.1
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
+
+	/**
+	 * Return the {@code Environment} for this application context in configurable
+	 * form, allowing for further customization.
+	 * @since 3.1
+	 */
+	@Override
+	ConfigurableEnvironment getEnvironment();
 
 	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
@@ -156,6 +173,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * on JVM shutdown unless it has already been closed at that time.
 	 * <p>This method can be called multiple times. Only one shutdown hook
 	 * (at max) will be registered for each context instance.
+	 * <p>As of Spring Framework 5.2, the {@linkplain Thread#getName() name} of
+	 * the shutdown hook thread should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
 	 */
@@ -189,7 +208,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the BeanFactory setup process before beans get touched.
 	 * <p>Generally, this internal factory will only be accessible while the context
-	 * is active, that is, inbetween {@link #refresh()} and {@link #close()}.
+	 * is active, that is, in-between {@link #refresh()} and {@link #close()}.
 	 * The {@link #isActive()} flag can be used to check whether the context
 	 * is in an appropriate state.
 	 * @return the underlying bean factory

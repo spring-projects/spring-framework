@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.springframework.format.Formatter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Formatter} implementation for a JSR-310 {@link java.time.Instant},
@@ -32,23 +31,23 @@ import org.springframework.lang.UsesJava8;
  * (which is commonly used for HTTP date header values), as of Spring 4.3.
  *
  * @author Juergen Hoeller
+ * @author Andrei Nevedomskii
  * @since 4.0
  * @see java.time.Instant#parse
  * @see java.time.format.DateTimeFormatter#ISO_INSTANT
  * @see java.time.format.DateTimeFormatter#RFC_1123_DATE_TIME
  */
-@UsesJava8
 public class InstantFormatter implements Formatter<Instant> {
 
 	@Override
 	public Instant parse(String text, Locale locale) throws ParseException {
-		if (text.length() > 0 && Character.isDigit(text.charAt(0))) {
-			// assuming UTC instant a la "2007-12-03T10:15:30.00Z"
-			return Instant.parse(text);
-		}
-		else {
+		if (text.length() > 0 && Character.isAlphabetic(text.charAt(0))) {
 			// assuming RFC-1123 value a la "Tue, 3 Jun 2008 11:05:30 GMT"
 			return Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
+		}
+		else {
+			// assuming UTC instant a la "2007-12-03T10:15:30.00Z"
+			return Instant.parse(text);
 		}
 	}
 

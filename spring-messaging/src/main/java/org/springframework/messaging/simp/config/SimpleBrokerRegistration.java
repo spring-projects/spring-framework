@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -29,9 +30,14 @@ import org.springframework.scheduling.TaskScheduler;
  */
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
+	@Nullable
 	private long[] heartbeat;
+
+	@Nullable
+	private String selectorHeaderName = "selector";
 
 
 	public SimpleBrokerRegistration(SubscribableChannel inChannel, MessageChannel outChannel, String[] prefixes) {
@@ -65,6 +71,24 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
+	/**
+	 * Configure the name of a header that a subscription message can have for
+	 * the purpose of filtering messages matched to the subscription. The header
+	 * value is expected to be a Spring EL boolean expression to be applied to
+	 * the headers of messages matched to the subscription.
+	 * <p>For example:
+	 * <pre>
+	 * headers.foo == 'bar'
+	 * </pre>
+	 * <p>By default this is set to "selector". You can set it to a different
+	 * name, or to {@code null} to turn off support for a selector header.
+	 * @param selectorHeaderName the name to use for a selector header
+	 * @since 4.3.17
+	 */
+	public void setSelectorHeaderName(@Nullable String selectorHeaderName) {
+		this.selectorHeaderName = selectorHeaderName;
+	}
+
 
 	@Override
 	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
@@ -76,6 +100,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 		if (this.heartbeat != null) {
 			handler.setHeartbeatValue(this.heartbeat);
 		}
+		handler.setSelectorHeaderName(this.selectorHeaderName);
 		return handler;
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,10 +28,10 @@ import org.springframework.format.Formatter;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation using
- * a {@link DateFormatter}.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using a {@link DateFormatter}.
  *
  * @author Phillip Webb
  * @since 3.2
@@ -40,11 +40,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
-
 	private static final Set<Class<?>> FIELD_TYPES;
 
 	static {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(4);
+		Set<Class<?>> fieldTypes = new HashSet<>(4);
 		fieldTypes.add(Date.class);
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);
@@ -69,9 +68,15 @@ public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueReso
 
 	protected Formatter<Date> getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateFormatter formatter = new DateFormatter();
-		formatter.setStylePattern(resolveEmbeddedValue(annotation.style()));
+		String style = resolveEmbeddedValue(annotation.style());
+		if (StringUtils.hasLength(style)) {
+			formatter.setStylePattern(style);
+		}
 		formatter.setIso(annotation.iso());
-		formatter.setPattern(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			formatter.setPattern(pattern);
+		}
 		return formatter;
 	}
 

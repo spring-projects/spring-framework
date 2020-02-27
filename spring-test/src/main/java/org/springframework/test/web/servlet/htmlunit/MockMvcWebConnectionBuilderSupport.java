@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -40,12 +41,13 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rob Winch
  * @author Sam Brannen
  * @since 4.2
+ * @param <T> a self reference to the builder type
  */
 public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebConnectionBuilderSupport<T>> {
 
 	private final MockMvc mockMvc;
 
-	private final List<WebRequestMatcher> requestMatchers = new ArrayList<WebRequestMatcher>();
+	private final List<WebRequestMatcher> requestMatchers = new ArrayList<>();
 
 	private String contextPath = "";
 
@@ -117,9 +119,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 */
 	@SuppressWarnings("unchecked")
 	public T useMockMvc(WebRequestMatcher... matchers) {
-		for (WebRequestMatcher matcher : matchers) {
-			this.requestMatchers.add(matcher);
-		}
+		Collections.addAll(this.requestMatchers, matchers);
 		return (T) this;
 	}
 
@@ -140,33 +140,14 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
 	 * instance if one of the specified {@link WebRequestMatcher} instances
 	 * matches.
-	 * @param defaultConnection the default WebConnection to use if none of
-	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
-	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
-	 * instance if one of the specified {@code WebRequestMatcher} matches
-	 * @see #alwaysUseMockMvc()
-	 * @see #useMockMvc(WebRequestMatcher...)
-	 * @see #useMockMvcForHosts(String...)
-	 * @deprecated Use {@link #createConnection(WebClient)} instead
-	 */
-	@Deprecated
-	protected final WebConnection createConnection(WebConnection defaultConnection) {
-		Assert.notNull(defaultConnection, "Default WebConnection must not be null");
-		return createConnection(new WebClient(), defaultConnection);
-	}
-
-	/**
-	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
-	 * instance if one of the specified {@link WebRequestMatcher} instances
-	 * matches.
 	 * @param webClient the WebClient to use if none of the specified
 	 * {@code WebRequestMatcher} instances matches (never {@code null})
 	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
 	 * instance if one of the specified {@code WebRequestMatcher} matches
+	 * @since 4.3
 	 * @see #alwaysUseMockMvc()
 	 * @see #useMockMvc(WebRequestMatcher...)
 	 * @see #useMockMvcForHosts(String...)
-	 * @since 4.3
 	 */
 	protected final WebConnection createConnection(WebClient webClient) {
 		Assert.notNull(webClient, "WebClient must not be null");
@@ -178,7 +159,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 		if (this.alwaysUseMockMvc) {
 			return connection;
 		}
-		List<DelegateWebConnection> delegates = new ArrayList<DelegateWebConnection>(this.requestMatchers.size());
+		List<DelegateWebConnection> delegates = new ArrayList<>(this.requestMatchers.size());
 		for (WebRequestMatcher matcher : this.requestMatchers) {
 			delegates.add(new DelegateWebConnection(matcher, connection));
 		}

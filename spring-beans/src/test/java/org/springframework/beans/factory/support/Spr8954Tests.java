@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,15 @@ package org.springframework.beans.factory.support;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
@@ -44,7 +44,7 @@ public class Spr8954Tests {
 
 	private DefaultListableBeanFactory bf;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
@@ -53,32 +53,32 @@ public class Spr8954Tests {
 
 	@Test
 	public void repro() {
-		assertThat(bf.getBean("foo"), instanceOf(Foo.class));
-		assertThat(bf.getBean("&foo"), instanceOf(FooFactoryBean.class));
-		assertThat(bf.isTypeMatch("&foo", FactoryBean.class), is(true));
+		assertThat(bf.getBean("foo")).isInstanceOf(Foo.class);
+		assertThat(bf.getBean("&foo")).isInstanceOf(FooFactoryBean.class);
+		assertThat(bf.isTypeMatch("&foo", FactoryBean.class)).isTrue();
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(fbBeans.size(), is(1));
-		assertThat(fbBeans.keySet(), hasItem("&foo"));
+		assertThat(fbBeans).hasSize(1);
+		assertThat(fbBeans.keySet()).contains("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans.size(), is(1));
-		assertThat(aiBeans.keySet(), hasItem("&foo"));
+		assertThat(aiBeans).hasSize(1);
+		assertThat(aiBeans.keySet()).contains("&foo");
 	}
 
 	@Test
 	public void findsBeansByTypeIfNotInstantiated() {
-		assertThat(bf.isTypeMatch("&foo", FactoryBean.class), is(true));
+		assertThat(bf.isTypeMatch("&foo", FactoryBean.class)).isTrue();
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(1, equalTo(fbBeans.size()));
-		assertThat("&foo", equalTo(fbBeans.keySet().iterator().next()));
+		assertThat(1).isEqualTo(fbBeans.size());
+		assertThat("&foo").isEqualTo(fbBeans.keySet().iterator().next());
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans.size(), is(1));
-		assertThat(aiBeans.keySet(), hasItem("&foo"));
+		assertThat(aiBeans).hasSize(1);
+		assertThat(aiBeans.keySet()).contains("&foo");
 	}
 
 	/**
@@ -87,11 +87,11 @@ public class Spr8954Tests {
 	@Test
 	public void findsFactoryBeanNameByTypeWithoutInstantiation() {
 		String[] names = bf.getBeanNamesForType(AnInterface.class, false, false);
-		assertThat(Arrays.asList(names), hasItem("&foo"));
+		assertThat(Arrays.asList(names)).contains("&foo");
 
 		Map<String, AnInterface> beans = bf.getBeansOfType(AnInterface.class, false, false);
-		assertThat(beans.size(), is(1));
-		assertThat(beans.keySet(), hasItem("&foo"));
+		assertThat(beans).hasSize(1);
+		assertThat(beans.keySet()).contains("&foo");
 	}
 
 

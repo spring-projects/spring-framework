@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,20 +20,19 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.AbstractEnvironment;
-import org.springframework.core.env.StandardEnvironmentTests;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
@@ -47,14 +46,14 @@ public class EnvironmentSecurityManagerIntegrationTests {
 	private Map<String, String> env;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		originalSecurityManager = System.getSecurityManager();
-		env = StandardEnvironmentTests.getModifiableSystemEnvironment();
+		env = EnvironmentTestUtils.getModifiableSystemEnvironment();
 		env.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "p1");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		env.remove(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME);
 		System.setSecurityManager(originalSecurityManager);
@@ -78,7 +77,7 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(bf);
 		reader.register(C1.class);
-		assertThat(bf.containsBean("c1"), is(true));
+		assertThat(bf.containsBean("c1")).isTrue();
 	}
 
 	@Test
@@ -108,7 +107,7 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(bf);
 		reader.register(C1.class);
-		assertThat(bf.containsBean("c1"), is(false));
+		assertThat(bf.containsBean("c1")).isFalse();
 	}
 
 

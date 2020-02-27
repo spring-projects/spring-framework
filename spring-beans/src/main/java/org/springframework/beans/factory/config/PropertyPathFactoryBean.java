@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -85,16 +87,22 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 	private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
 
+	@Nullable
 	private BeanWrapper targetBeanWrapper;
 
+	@Nullable
 	private String targetBeanName;
 
+	@Nullable
 	private String propertyPath;
 
+	@Nullable
 	private Class<?> resultType;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -168,7 +176,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 			}
 
 			// No other properties specified: check bean name.
-			int dotIndex = this.beanName.indexOf('.');
+			int dotIndex = (this.beanName != null ? this.beanName.indexOf('.') : -1);
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException(
 						"Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
@@ -193,6 +201,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {
@@ -205,9 +214,12 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 		}
 		else {
 			// Fetch prototype target bean...
+			Assert.state(this.beanFactory != null, "No BeanFactory available");
+			Assert.state(this.targetBeanName != null, "No target bean name specified");
 			Object bean = this.beanFactory.getBean(this.targetBeanName);
 			target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		}
+		Assert.state(this.propertyPath != null, "No property path specified");
 		return target.getPropertyValue(this.propertyPath);
 	}
 

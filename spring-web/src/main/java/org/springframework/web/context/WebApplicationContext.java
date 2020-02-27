@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.context;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to provide configuration for a web application. This is read-only while
@@ -66,12 +67,6 @@ public interface WebApplicationContext extends ApplicationContext {
 	String SCOPE_SESSION = "session";
 
 	/**
-	 * Scope identifier for global session scope: "globalSession".
-	 * Supported in addition to the standard scopes "singleton" and "prototype".
-	 */
-	String SCOPE_GLOBAL_SESSION = "globalSession";
-
-	/**
 	 * Scope identifier for the global web application scope: "application".
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
 	 */
@@ -84,8 +79,8 @@ public interface WebApplicationContext extends ApplicationContext {
 	String SERVLET_CONTEXT_BEAN_NAME = "servletContext";
 
 	/**
-	 * Name of the ServletContext/PortletContext init-params environment bean in the factory.
-	 * <p>Note: Possibly merged with ServletConfig/PortletConfig parameters.
+	 * Name of the ServletContext init-params environment bean in the factory.
+	 * <p>Note: Possibly merged with ServletConfig parameters.
 	 * ServletConfig parameters override ServletContext parameters of the same name.
 	 * @see javax.servlet.ServletContext#getInitParameterNames()
 	 * @see javax.servlet.ServletContext#getInitParameter(String)
@@ -95,7 +90,7 @@ public interface WebApplicationContext extends ApplicationContext {
 	String CONTEXT_PARAMETERS_BEAN_NAME = "contextParameters";
 
 	/**
-	 * Name of the ServletContext/PortletContext attributes environment bean in the factory.
+	 * Name of the ServletContext attributes environment bean in the factory.
 	 * @see javax.servlet.ServletContext#getAttributeNames()
 	 * @see javax.servlet.ServletContext#getAttribute(String)
 	 */
@@ -104,8 +99,8 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Servlet API ServletContext for this application.
-	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
+	@Nullable
 	ServletContext getServletContext();
 
 }

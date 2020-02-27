@@ -1,0 +1,37 @@
+description = "Spring Aspects"
+
+apply plugin: "io.freefair.aspectj"
+
+sourceSets.main.aspectj.srcDir "src/main/java"
+sourceSets.main.java.srcDirs = files()
+
+sourceSets.test.aspectj.srcDir "src/test/java"
+sourceSets.test.java.srcDirs = files()
+
+aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
+
+dependencies {
+	compile("org.aspectj:aspectjweaver")
+	compileOnly("org.aspectj:aspectjrt")
+	optional(project(":spring-aop"))  // for @Async support
+	optional(project(":spring-beans"))  // for @Configurable support
+	optional(project(":spring-context"))  // for @Enable* support
+	optional(project(":spring-context-support"))  // for JavaMail and JSR-107 support
+	optional(project(":spring-orm"))  // for JPA exception translation support
+	optional(project(":spring-tx"))  // for JPA, @Transactional support
+	optional("javax.cache:cache-api")  // for JCache aspect
+	optional("javax.transaction:javax.transaction-api")  // for @javax.transaction.Transactional support
+	testCompile(project(":spring-core"))  // for CodeStyleAspect
+	testCompile(project(":spring-test"))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-context-support")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
+	testCompile("javax.mail:javax.mail-api")
+	testCompileOnly("org.aspectj:aspectjrt")
+}
+
+eclipse.project {
+	natures += "org.eclipse.ajdt.ui.ajnature"
+	buildCommands = [new org.gradle.plugins.ide.eclipse.model.BuildCommand("org.eclipse.ajdt.core.ajbuilder")]
+}

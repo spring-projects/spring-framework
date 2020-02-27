@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
@@ -46,9 +47,9 @@ public class ResourceChainRegistration {
 			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
 
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceResolver> resolvers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>(4);
+	private final List<ResourceTransformer> transformers = new ArrayList<>(4);
 
 	private boolean hasVersionResolver;
 
@@ -60,10 +61,10 @@ public class ResourceChainRegistration {
 
 
 	public ResourceChainRegistration(boolean cacheResources) {
-		this(cacheResources, cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null);
+		this(cacheResources, (cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null));
 	}
 
-	public ResourceChainRegistration(boolean cacheResources, Cache cache) {
+	public ResourceChainRegistration(boolean cacheResources, @Nullable Cache cache) {
 		Assert.isTrue(!cacheResources || cache != null, "'cache' is required when cacheResources=true");
 		if (cacheResources) {
 			this.resolvers.add(new CachingResourceResolver(cache));
@@ -108,7 +109,7 @@ public class ResourceChainRegistration {
 
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
-			List<ResourceResolver> result = new ArrayList<ResourceResolver>(this.resolvers);
+			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
 			if (isWebJarsAssetLocatorPresent && !this.hasWebjarsResolver) {
 				result.add(new WebJarsResourceResolver());
 			}
@@ -120,7 +121,7 @@ public class ResourceChainRegistration {
 
 	protected List<ResourceTransformer> getResourceTransformers() {
 		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
-			List<ResourceTransformer> result = new ArrayList<ResourceTransformer>(this.transformers);
+			List<ResourceTransformer> result = new ArrayList<>(this.transformers);
 			boolean hasTransformers = !this.transformers.isEmpty();
 			boolean hasCaching = hasTransformers && this.transformers.get(0) instanceof CachingResourceTransformer;
 			result.add(hasCaching ? 1 : 0, new CssLinkResourceTransformer());

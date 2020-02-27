@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 import java.net.URL;
 
 import org.springframework.core.io.VfsUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Artificial class used for accessing the {@link VfsUtils} methods
@@ -32,12 +33,14 @@ import org.springframework.core.io.VfsUtils;
  */
 abstract class VfsPatternUtils extends VfsUtils {
 
-	static Object getVisitorAttribute() {
-		return doGetVisitorAttribute();
+	@Nullable
+	static Object getVisitorAttributes() {
+		return doGetVisitorAttributes();
 	}
 
 	static String getPath(Object resource) {
-		return doGetPath(resource);
+		String path = doGetPath(resource);
+		return (path != null ? path : "");
 	}
 
 	static Object findRoot(URL url) throws IOException {

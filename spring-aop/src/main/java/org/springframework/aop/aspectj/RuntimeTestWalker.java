@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ import org.aspectj.weaver.reflect.ReflectionVar;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -50,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * migrate to {@code ShadowMatch.getVariablesInvolvedInRuntimeTest()}
  * or some similar operation.
  *
- * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>Bug 151593</a>
+ * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593">Bug 151593</a>
  *
  * @author Adrian Colyer
  * @author Ramnivas Laddad
@@ -78,6 +79,7 @@ class RuntimeTestWalker {
 	}
 
 
+	@Nullable
 	private final Test runtimeTest;
 
 
@@ -173,7 +175,7 @@ class RuntimeTestWalker {
 	}
 
 
-	private static abstract class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
+	private abstract static class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
 
 		private final Class<?> matchClass;
 

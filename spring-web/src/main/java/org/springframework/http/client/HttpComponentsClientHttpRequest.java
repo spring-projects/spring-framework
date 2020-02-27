@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -35,12 +33,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * Apache HttpComponents HttpClient to execute requests.
+ * {@link ClientHttpRequest} implementation based on
+ * Apache HttpComponents HttpClient.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
- *
- * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
@@ -57,16 +53,16 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	private final HttpContext httpContext;
 
 
-	HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
-		this.httpClient = httpClient;
-		this.httpRequest = httpRequest;
-		this.httpContext = httpContext;
+	HttpComponentsClientHttpRequest(HttpClient client, HttpUriRequest request, HttpContext context) {
+		this.httpClient = client;
+		this.httpRequest = request;
+		this.httpContext = context;
 	}
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+	public String getMethodValue() {
+		return this.httpRequest.getMethod();
 	}
 
 	@Override
@@ -99,19 +95,18 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	 * @param headers the headers to add
 	 */
 	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
+		headers.forEach((headerName, headerValues) -> {
 			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
-				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				String headerValue = StringUtils.collectionToDelimitedString(headerValues, "; ");
 				httpRequest.addHeader(headerName, headerValue);
 			}
 			else if (!HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) &&
 					!HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName)) {
-				for (String headerValue : entry.getValue()) {
+				for (String headerValue : headerValues) {
 					httpRequest.addHeader(headerName, headerValue);
 				}
 			}
-		}
+		});
 	}
 
 }

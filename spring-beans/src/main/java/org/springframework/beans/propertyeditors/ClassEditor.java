@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  */
 public class ClassEditor extends PropertyEditorSupport {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 
@@ -52,7 +54,7 @@ public class ClassEditor extends PropertyEditorSupport {
 	 * @param classLoader the ClassLoader to use
 	 * (or {@code null} for the thread context ClassLoader)
 	 */
-	public ClassEditor(ClassLoader classLoader) {
+	public ClassEditor(@Nullable ClassLoader classLoader) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 

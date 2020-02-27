@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -51,13 +52,12 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Map<String, Object> mapOfColValues = createColumnMap(columnCount);
+		Map<String, Object> mapOfColumnValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
-			String key = getColumnKey(JdbcUtils.lookupColumnName(rsmd, i));
-			Object obj = getColumnValue(rs, i);
-			mapOfColValues.put(key, obj);
+			String column = JdbcUtils.lookupColumnName(rsmd, i);
+			mapOfColumnValues.putIfAbsent(getColumnKey(column), getColumnValue(rs, i));
 		}
-		return mapOfColValues;
+		return mapOfColumnValues;
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @see org.springframework.util.LinkedCaseInsensitiveMap
 	 */
 	protected Map<String, Object> createColumnMap(int columnCount) {
-		return new LinkedCaseInsensitiveMap<Object>(columnCount);
+		return new LinkedCaseInsensitiveMap<>(columnCount);
 	}
 
 	/**
@@ -92,6 +92,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @return the Object returned
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
+	@Nullable
 	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index);
 	}

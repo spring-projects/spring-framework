@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -65,10 +66,11 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		this.multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
 		this.partName = partName;
 
-		this.headers = this.multipartRequest.getMultipartHeaders(this.partName);
-		if (this.headers == null) {
+		HttpHeaders headers = this.multipartRequest.getMultipartHeaders(this.partName);
+		if (headers == null) {
 			throw new MissingServletRequestPartException(partName);
 		}
+		this.headers = headers;
 	}
 
 
@@ -76,7 +78,6 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
-
 
 	@Override
 	public InputStream getBody() throws IOException {
@@ -95,21 +96,21 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 			}
 			else {
 				String paramValue = this.multipartRequest.getParameter(this.partName);
-				return new ByteArrayInputStream(paramValue.getBytes(determineEncoding()));
+				return new ByteArrayInputStream(paramValue.getBytes(determineCharset()));
 			}
 		}
 	}
 
-	private String determineEncoding() {
+	private Charset determineCharset() {
 		MediaType contentType = getHeaders().getContentType();
 		if (contentType != null) {
 			Charset charset = contentType.getCharset();
 			if (charset != null) {
-				return charset.name();
+				return charset;
 			}
 		}
 		String encoding = this.multipartRequest.getCharacterEncoding();
-		return (encoding != null ? encoding : FORM_CHARSET);
+		return (encoding != null ? Charset.forName(encoding) : FORM_CHARSET);
 	}
 
 }

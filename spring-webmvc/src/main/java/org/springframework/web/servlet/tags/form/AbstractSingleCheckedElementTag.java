@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,13 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
- * Abstract base class to provide common methods for implementing
- * databinding-aware JSP tags for rendering a <i>single</i>
- * HTML '{@code input}' element with a '{@code type}'
- * of '{@code checkbox}' or '{@code radio}'.
+ * Abstract base class to provide common methods for implementing databinding-aware
+ * JSP tags for rendering a <i>single</i> HTML '{@code input}' element with a
+ * '{@code type}' of '{@code checkbox}' or '{@code radio}'.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -33,11 +35,13 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * The value of the '{@code value}' attribute.
 	 */
+	@Nullable
 	private Object value;
 
 	/**
 	 * The value of the '{@code label}' attribute.
 	 */
+	@Nullable
 	private Object label;
 
 
@@ -52,6 +56,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code value}' attribute.
 	 */
+	@Nullable
 	protected Object getValue() {
 		return this.value;
 	}
@@ -67,6 +72,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code label}' attribute.
 	 */
+	@Nullable
 	protected Object getLabel() {
 		return this.label;
 	}
@@ -89,6 +95,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 
 		Object resolvedLabel = evaluate("label", getLabel());
 		if (resolvedLabel != null) {
+			Assert.state(id != null, "Label id is required");
 			tagWriter.startTag("label");
 			tagWriter.writeAttribute("for", id);
 			tagWriter.appendValue(convertToDisplayString(resolvedLabel));

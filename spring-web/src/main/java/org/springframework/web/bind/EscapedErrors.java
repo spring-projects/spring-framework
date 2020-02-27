@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.springframework.web.bind;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -47,9 +49,7 @@ public class EscapedErrors implements Errors {
 	 * Create a new EscapedErrors instance for the given source instance.
 	 */
 	public EscapedErrors(Errors source) {
-		if (source == null) {
-			throw new IllegalArgumentException("Cannot wrap a null instance");
-		}
+		Assert.notNull(source, "Errors source must not be null");
 		this.source = source;
 	}
 
@@ -95,22 +95,24 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.source.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		this.source.rejectValue(field, errorCode);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		this.source.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
+			@Nullable String defaultMessage) {
+
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
@@ -151,6 +153,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return escapeObjectError(this.source.getGlobalError());
 	}
@@ -171,6 +174,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.source.getFieldError();
 	}
@@ -191,25 +195,33 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return escapeObjectError(this.source.getFieldError(field));
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
 		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.source.getFieldType(field);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends ObjectError> T escapeObjectError(T source) {
+	@Nullable
+	private <T extends ObjectError> T escapeObjectError(@Nullable T source) {
 		if (source == null) {
 			return null;
+		}
+		String defaultMessage = source.getDefaultMessage();
+		if (defaultMessage != null) {
+			defaultMessage = HtmlUtils.htmlEscape(defaultMessage);
 		}
 		if (source instanceof FieldError) {
 			FieldError fieldError = (FieldError) source;
@@ -218,19 +230,17 @@ public class EscapedErrors implements Errors {
 				value = HtmlUtils.htmlEscape((String) value);
 			}
 			return (T) new FieldError(
-					fieldError.getObjectName(), fieldError.getField(), value,
-					fieldError.isBindingFailure(), fieldError.getCodes(),
-					fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+					fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
+					fieldError.getCodes(), fieldError.getArguments(), defaultMessage);
 		}
 		else {
 			return (T) new ObjectError(
-					source.getObjectName(), source.getCodes(), source.getArguments(),
-					HtmlUtils.htmlEscape(source.getDefaultMessage()));
+					source.getObjectName(), source.getCodes(), source.getArguments(), defaultMessage);
 		}
 	}
 
 	private <T extends ObjectError> List<T> escapeObjectErrors(List<T> source) {
-		List<T> escaped = new ArrayList<T>(source.size());
+		List<T> escaped = new ArrayList<>(source.size());
 		for (T objectError : source) {
 			escaped.add(escapeObjectError(objectError));
 		}

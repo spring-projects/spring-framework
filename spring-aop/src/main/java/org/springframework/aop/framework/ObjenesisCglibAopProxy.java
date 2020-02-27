@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,10 +25,11 @@ import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.objenesis.SpringObjenesis;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Objenesis-based extension of {@link CglibAopProxy} to create proxy instances
- * without invoking the constructor of the class.
+ * without invoking the constructor of the class. Used by default as of Spring 4.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
@@ -50,7 +53,6 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
 		Class<?> proxyClass = enhancer.createClass();
 		Object proxyInstance = null;
@@ -68,9 +70,12 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 		if (proxyInstance == null) {
 			// Regular instantiation via default constructor...
 			try {
+				Constructor<?> ctor = (this.constructorArgs != null ?
+						proxyClass.getDeclaredConstructor(this.constructorArgTypes) :
+						proxyClass.getDeclaredConstructor());
+				ReflectionUtils.makeAccessible(ctor);
 				proxyInstance = (this.constructorArgs != null ?
-						proxyClass.getConstructor(this.constructorArgTypes).newInstance(this.constructorArgs) :
-						proxyClass.newInstance());
+						ctor.newInstance(this.constructorArgs) : ctor.newInstance());
 			}
 			catch (Throwable ex) {
 				throw new AopConfigException("Unable to instantiate proxy using Objenesis, " +

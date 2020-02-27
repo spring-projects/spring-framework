@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.remoting.support;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -63,9 +64,8 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * The interface must be suitable for the particular service and remoting strategy.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -89,7 +89,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * @see RemoteInvocationTraceInterceptor
 	 */
 	public void setRegisterTraceInterceptor(boolean registerTraceInterceptor) {
-		this.registerTraceInterceptor = Boolean.valueOf(registerTraceInterceptor);
+		this.registerTraceInterceptor = registerTraceInterceptor;
 	}
 
 	/**
@@ -110,9 +110,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * @see #setService
 	 */
 	protected void checkService() throws IllegalArgumentException {
-		if (getService() == null) {
-			throw new IllegalArgumentException("Property 'service' is required");
-		}
+		Assert.notNull(getService(), "Property 'service' is required");
 	}
 
 	/**
@@ -123,10 +121,9 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 */
 	protected void checkServiceInterface() throws IllegalArgumentException {
 		Class<?> serviceInterface = getServiceInterface();
+		Assert.notNull(serviceInterface, "Property 'serviceInterface' is required");
+
 		Object service = getService();
-		if (serviceInterface == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
 		if (service instanceof String) {
 			throw new IllegalArgumentException("Service [" + service + "] is a String " +
 					"rather than an actual service reference: Have you accidentally specified " +
@@ -153,20 +150,23 @@ public abstract class RemoteExporter extends RemotingSupport {
 	protected Object getProxyForService() {
 		checkService();
 		checkServiceInterface();
+
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.addInterface(getServiceInterface());
-		if (this.registerTraceInterceptor != null ?
-				this.registerTraceInterceptor.booleanValue() : this.interceptors == null) {
+
+		if (this.registerTraceInterceptor != null ? this.registerTraceInterceptor : this.interceptors == null) {
 			proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
 		}
 		if (this.interceptors != null) {
 			AdvisorAdapterRegistry adapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
-			for (int i = 0; i < this.interceptors.length; i++) {
-				proxyFactory.addAdvisor(adapterRegistry.wrap(this.interceptors[i]));
+			for (Object interceptor : this.interceptors) {
+				proxyFactory.addAdvisor(adapterRegistry.wrap(interceptor));
 			}
 		}
+
 		proxyFactory.setTarget(getService());
 		proxyFactory.setOpaque(true);
+
 		return proxyFactory.getProxy(getBeanClassLoader());
 	}
 

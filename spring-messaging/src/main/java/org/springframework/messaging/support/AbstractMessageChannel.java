@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -39,17 +40,34 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractMessageChannel implements MessageChannel, InterceptableChannel, BeanNameAware {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final List<ChannelInterceptor> interceptors = new ArrayList<ChannelInterceptor>(5);
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private String beanName;
+
+	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
 
 
 	public AbstractMessageChannel() {
 		this.beanName = getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
 	}
 
+
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
+	}
 
 	/**
 	 * A message channel uses the bean name primarily for logging purposes.
@@ -107,29 +125,30 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 	@Override
 	public final boolean send(Message<?> message, long timeout) {
 		Assert.notNull(message, "Message must not be null");
+		Message<?> messageToUse = message;
 		ChannelInterceptorChain chain = new ChannelInterceptorChain();
 		boolean sent = false;
 		try {
-			message = chain.applyPreSend(message, this);
-			if (message == null) {
+			messageToUse = chain.applyPreSend(messageToUse, this);
+			if (messageToUse == null) {
 				return false;
 			}
-			sent = sendInternal(message, timeout);
-			chain.applyPostSend(message, this, sent);
-			chain.triggerAfterSendCompletion(message, this, sent, null);
+			sent = sendInternal(messageToUse, timeout);
+			chain.applyPostSend(messageToUse, this, sent);
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, null);
 			return sent;
 		}
 		catch (Exception ex) {
-			chain.triggerAfterSendCompletion(message, this, sent, ex);
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, ex);
 			if (ex instanceof MessagingException) {
 				throw (MessagingException) ex;
 			}
-			throw new MessageDeliveryException(message,"Failed to send message to " + this, ex);
+			throw new MessageDeliveryException(messageToUse,"Failed to send message to " + this, ex);
 		}
 		catch (Throwable err) {
 			MessageDeliveryException ex2 =
-					new MessageDeliveryException(message, "Failed to send message to " + this, err);
-			chain.triggerAfterSendCompletion(message, this, sent, ex2);
+					new MessageDeliveryException(messageToUse, "Failed to send message to " + this, err);
+			chain.triggerAfterSendCompletion(messageToUse, this, sent, ex2);
 			throw ex2;
 		}
 	}
@@ -152,6 +171,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 		private int receiveInterceptorIndex = -1;
 
+		@Nullable
 		public Message<?> applyPreSend(Message<?> message, MessageChannel channel) {
 			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
@@ -176,7 +196,9 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			}
 		}
 
-		public void triggerAfterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+		public void triggerAfterSendCompletion(Message<?> message, MessageChannel channel,
+				boolean sent, @Nullable Exception ex) {
+
 			for (int i = this.sendInterceptorIndex; i >= 0; i--) {
 				ChannelInterceptor interceptor = interceptors.get(i);
 				try {
@@ -199,17 +221,21 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			return true;
 		}
 
+		@Nullable
 		public Message<?> applyPostReceive(Message<?> message, MessageChannel channel) {
+			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
-				message = interceptor.postReceive(message, channel);
-				if (message == null) {
+				messageToUse = interceptor.postReceive(messageToUse, channel);
+				if (messageToUse == null) {
 					return null;
 				}
 			}
-			return message;
+			return messageToUse;
 		}
 
-		public void triggerAfterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
+		public void triggerAfterReceiveCompletion(
+				@Nullable Message<?> message, MessageChannel channel, @Nullable Exception ex) {
+
 			for (int i = this.receiveInterceptorIndex; i >= 0; i--) {
 				ChannelInterceptor interceptor = interceptors.get(i);
 				try {

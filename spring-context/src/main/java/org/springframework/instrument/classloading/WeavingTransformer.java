@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,10 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 /**
  * ClassFileTransformer-based weaver, allowing for a list of transformers to be
  * applied on a class byte array. Normally used inside class loaders.
@@ -36,19 +40,17 @@ import java.util.List;
  */
 public class WeavingTransformer {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
-	private final List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>();
+	private final List<ClassFileTransformer> transformers = new ArrayList<>();
 
 
 	/**
 	 * Create a new WeavingTransformer for the given class loader.
 	 * @param classLoader the ClassLoader to build a transformer for
 	 */
-	public WeavingTransformer(ClassLoader classLoader) {
-		if (classLoader == null) {
-			throw new IllegalArgumentException("ClassLoader must not be null");
-		}
+	public WeavingTransformer(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -58,9 +60,7 @@ public class WeavingTransformer {
 	 * @param transformer the class file transformer to register
 	 */
 	public void addTransformer(ClassFileTransformer transformer) {
-		if (transformer == null) {
-			throw new IllegalArgumentException("Transformer must not be null");
-		}
+		Assert.notNull(transformer, "Transformer must not be null");
 		this.transformers.add(transformer);
 	}
 
@@ -74,7 +74,7 @@ public class WeavingTransformer {
 	 * @return (possibly transformed) class byte definition
 	 */
 	public byte[] transformIfNecessary(String className, byte[] bytes) {
-		String internalName = className.replace(".", "/");
+		String internalName = StringUtils.replace(className, ".", "/");
 		return transformIfNecessary(className, internalName, bytes, null);
 	}
 
@@ -88,7 +88,7 @@ public class WeavingTransformer {
 	 * @param pd protection domain to be used (can be null)
 	 * @return (possibly transformed) class byte definition
 	 */
-	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, ProtectionDomain pd) {
+	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, @Nullable ProtectionDomain pd) {
 		byte[] result = bytes;
 		for (ClassFileTransformer cft : this.transformers) {
 			try {

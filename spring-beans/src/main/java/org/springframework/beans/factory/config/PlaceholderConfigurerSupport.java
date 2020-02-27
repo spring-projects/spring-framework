@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -35,10 +36,10 @@ import org.springframework.util.StringValueResolver;
  * Example XML bean definition:
  *
  * <pre class="code">
- * <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/>
- *   <property name="driverClassName" value="${driver}"/>
- *   <property name="url" value="jdbc:${dbname}"/>
- * </bean>
+ * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/&gt;
+ *   &lt;property name="driverClassName" value="${driver}"/&gt;
+ *   &lt;property name="url" value="jdbc:${dbname}"/&gt;
+ * &lt;/bean&gt;
  * </pre>
  *
  * Example properties file:
@@ -88,33 +89,37 @@ import org.springframework.util.StringValueResolver;
 public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfigurer
 		implements BeanNameAware, BeanFactoryAware {
 
-	/** Default placeholder prefix: {@value} */
+	/** Default placeholder prefix: {@value}. */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
-	/** Default placeholder suffix: {@value} */
+	/** Default placeholder suffix: {@value}. */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
-	/** Default value separator: {@value} */
+	/** Default value separator: {@value}. */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX} */
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX} */
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX}. */
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
-	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR} */
+	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
+	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
 	protected boolean trimValues = false;
 
+	@Nullable
 	protected String nullValue;
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -140,7 +145,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * special character should be processed as a value separator.
 	 * The default is {@value #DEFAULT_VALUE_SEPARATOR}.
 	 */
-	public void setValueSeparator(String valueSeparator) {
+	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 

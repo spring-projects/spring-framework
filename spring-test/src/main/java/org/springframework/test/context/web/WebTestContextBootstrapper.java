@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 	 */
 	@Override
 	protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
-		if (AnnotatedElementUtils.findMergedAnnotation(testClass, WebAppConfiguration.class) != null) {
+		if (AnnotatedElementUtils.hasAnnotation(testClass, WebAppConfiguration.class)) {
 			return WebDelegatingSmartContextLoader.class;
 		}
 		else {

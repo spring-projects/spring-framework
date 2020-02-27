@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
@@ -30,6 +31,7 @@ import javax.websocket.server.ServerEndpointConfig;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
@@ -54,8 +56,10 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 public class ServerEndpointExporter extends WebApplicationObjectSupport
 		implements InitializingBean, SmartInitializingSingleton {
 
+	@Nullable
 	private List<Class<?>> annotatedEndpointClasses;
 
+	@Nullable
 	private ServerContainer serverContainer;
 
 
@@ -73,13 +77,14 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	 * Set the JSR-356 {@link ServerContainer} to use for endpoint registration.
 	 * If not set, the container is going to be retrieved via the {@code ServletContext}.
 	 */
-	public void setServerContainer(ServerContainer serverContainer) {
+	public void setServerContainer(@Nullable ServerContainer serverContainer) {
 		this.serverContainer = serverContainer;
 	}
 
 	/**
 	 * Return the JSR-356 {@link ServerContainer} to use for endpoint registration.
 	 */
+	@Nullable
 	protected ServerContainer getServerContainer() {
 		return this.serverContainer;
 	}
@@ -112,7 +117,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	 * Actually register the endpoints. Called by {@link #afterSingletonsInstantiated()}.
 	 */
 	protected void registerEndpoints() {
-		Set<Class<?>> endpointClasses = new LinkedHashSet<Class<?>>();
+		Set<Class<?>> endpointClasses = new LinkedHashSet<>();
 		if (this.annotatedEndpointClasses != null) {
 			endpointClasses.addAll(this.annotatedEndpointClasses);
 		}
@@ -138,11 +143,17 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	}
 
 	private void registerEndpoint(Class<?> endpointClass) {
+		ServerContainer serverContainer = getServerContainer();
+		Assert.state(serverContainer != null,
+				"No ServerContainer set. Most likely the server's own WebSocket ServletContainerInitializer " +
+				"has not run yet. Was the Spring ApplicationContext refreshed through a " +
+				"org.springframework.web.context.ContextLoaderListener, " +
+				"i.e. after the ServletContext has been fully initialized?");
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Registering @ServerEndpoint class: " + endpointClass);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering @ServerEndpoint class: " + endpointClass);
 			}
-			getServerContainer().addEndpoint(endpointClass);
+			serverContainer.addEndpoint(endpointClass);
 		}
 		catch (DeploymentException ex) {
 			throw new IllegalStateException("Failed to register @ServerEndpoint class: " + endpointClass, ex);
@@ -150,11 +161,13 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	}
 
 	private void registerEndpoint(ServerEndpointConfig endpointConfig) {
+		ServerContainer serverContainer = getServerContainer();
+		Assert.state(serverContainer != null, "No ServerContainer set");
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Registering ServerEndpointConfig: " + endpointConfig);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering ServerEndpointConfig: " + endpointConfig);
 			}
-			getServerContainer().addEndpoint(endpointConfig);
+			serverContainer.addEndpoint(endpointConfig);
 		}
 		catch (DeploymentException ex) {
 			throw new IllegalStateException("Failed to register ServerEndpointConfig: " + endpointConfig, ex);

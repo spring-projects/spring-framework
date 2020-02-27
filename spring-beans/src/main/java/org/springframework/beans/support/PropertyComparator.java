@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.beans.support;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 19.05.2003
+ * @param <T> the type of objects that may be compared by this comparator
  * @see org.springframework.beans.BeanWrapper
  */
 public class PropertyComparator<T> implements Comparator<T> {
@@ -94,8 +95,8 @@ public class PropertyComparator<T> implements Comparator<T> {
 			}
 		}
 		catch (RuntimeException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
 			}
 			return 0;
 		}
@@ -108,6 +109,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 	 * @param obj the object to get the property value for
 	 * @return the property value
 	 */
+	@Nullable
 	private Object getPropertyValue(Object obj) {
 		// If a nested property cannot be read, simply return null
 		// (similar to JSTL EL). If the property doesn't exist in the
@@ -117,7 +119,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 			return this.beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
 		}
 		catch (BeansException ex) {
-			logger.info("PropertyComparator could not access property - treating as null for sorting", ex);
+			logger.debug("PropertyComparator could not access property - treating as null for sorting", ex);
 			return null;
 		}
 	}
@@ -133,7 +135,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 	 */
 	public static void sort(List<?> source, SortDefinition sortDefinition) throws BeansException {
 		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			Collections.sort(source, new PropertyComparator<Object>(sortDefinition));
+			source.sort(new PropertyComparator<>(sortDefinition));
 		}
 	}
 
@@ -147,7 +149,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
 		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			Arrays.sort(source, new PropertyComparator<Object>(sortDefinition));
+			Arrays.sort(source, new PropertyComparator<>(sortDefinition));
 		}
 	}
 

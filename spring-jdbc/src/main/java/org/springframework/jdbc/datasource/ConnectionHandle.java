@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,15 +20,14 @@ import java.sql.Connection;
 
 /**
  * Simple interface to be implemented by handles for a JDBC Connection.
- * Used by JpaDialect and JdoDialect, for example.
+ * Used by JpaDialect, for example.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see SimpleConnectionHandle
  * @see ConnectionHolder
- * @see org.springframework.orm.jdo.JpaDialect#getJdbcConnection
- * @see org.springframework.orm.jdo.JdoDialect#getJdbcConnection
  */
+@FunctionalInterface
 public interface ConnectionHandle {
 
 	/**
@@ -38,8 +37,11 @@ public interface ConnectionHandle {
 
 	/**
 	 * Release the JDBC Connection that this handle refers to.
+	 * <p>The default implementation is empty, assuming that the lifecycle
+	 * of the connection is managed externally.
 	 * @param con the JDBC Connection to release
 	 */
-	void releaseConnection(Connection con);
+	default void releaseConnection(Connection con) {
+	}
 
 }

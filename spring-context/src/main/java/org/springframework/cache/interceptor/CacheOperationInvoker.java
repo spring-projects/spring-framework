@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,12 +27,12 @@ package org.springframework.cache.interceptor;
  * @author Stephane Nicoll
  * @since 4.1
  */
+@FunctionalInterface
 public interface CacheOperationInvoker {
 
 	/**
-	 * Invoke the cache operation defined by this instance. Wraps any
-	 * exception that is thrown during the invocation in a
-	 * {@link ThrowableWrapper}.
+	 * Invoke the cache operation defined by this instance. Wraps any exception
+	 * that is thrown during the invocation in a {@link ThrowableWrapper}.
 	 * @return the result of the operation
 	 * @throws ThrowableWrapper if an error occurred while invoking the operation
 	 */

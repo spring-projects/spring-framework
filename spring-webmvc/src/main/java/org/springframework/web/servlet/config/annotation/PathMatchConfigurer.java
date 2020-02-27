@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,13 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -32,20 +38,28 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Brian Clozel
  * @since 4.0.3
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * @see RequestMappingHandlerMapping
  * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
  */
 public class PathMatchConfigurer {
 
+	@Nullable
 	private Boolean suffixPatternMatch;
 
-	private Boolean trailingSlashMatch;
-
+	@Nullable
 	private Boolean registeredSuffixPatternMatch;
 
+	@Nullable
+	private Boolean trailingSlashMatch;
+
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	@Nullable
 	private PathMatcher pathMatcher;
+
+	@Nullable
+	private Map<String, Predicate<Class<?>>> pathPrefixes;
 
 
 	/**
@@ -53,19 +67,13 @@ public class PathMatchConfigurer {
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>By default this is set to {@code true}.
 	 * @see #registeredSuffixPatternMatch
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
 	 */
+	@Deprecated
 	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
 		this.suffixPatternMatch = suffixPatternMatch;
-		return this;
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
-	 */
-	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
-		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
 
@@ -77,11 +85,23 @@ public class PathMatchConfigurer {
 	 * avoid issues such as when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "false".
 	 * @see WebMvcConfigurer#configureContentNegotiation
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
 	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(
-			Boolean registeredSuffixPatternMatch) {
-
+	@Deprecated
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
+		return this;
+	}
+
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 * If enabled a method mapped to "/users" also matches to "/users/".
+	 * <p>The default value is {@code true}.
+	 */
+	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
+		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
 
@@ -106,24 +126,67 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+	/**
+	 * Configure a path prefix to apply to matching controller methods.
+	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
+	 * method whose controller type is matched by the corresponding
+	 * {@code Predicate}. The prefix for the first matching predicate is used.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
+	 * @param prefix the prefix to apply
+	 * @param predicate a predicate for matching controller types
+	 * @since 5.1
+	 */
+	public PathMatchConfigurer addPathPrefix(String prefix, Predicate<Class<?>> predicate) {
+		if (this.pathPrefixes == null) {
+			this.pathPrefixes = new LinkedHashMap<>();
+		}
+		this.pathPrefixes.put(prefix, predicate);
+		return this;
+	}
+
+
+	/**
+	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
+	 */
+	@Nullable
+	@Deprecated
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
-	public Boolean isUseTrailingSlashMatch() {
-		return this.trailingSlashMatch;
-	}
-
+	/**
+	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
+	 */
+	@Nullable
+	@Deprecated
 	public Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
+	@Nullable
+	public Boolean isUseTrailingSlashMatch() {
+		return this.trailingSlashMatch;
+	}
+
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+	@Nullable
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
+	@Nullable
+	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
+		return this.pathPrefixes;
+	}
 }

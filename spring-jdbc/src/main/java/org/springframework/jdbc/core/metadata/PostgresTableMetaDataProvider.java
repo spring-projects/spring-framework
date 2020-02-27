@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,18 +33,10 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 		super(databaseMetaData);
 	}
 
+
 	@Override
 	public boolean isGetGeneratedKeysSimulated() {
-		if (getDatabaseVersion().compareTo("8.2.0") >= 0) {
-			return true;
-		}
-		else {
-			if (logger.isWarnEnabled()) {
-				logger.warn("PostgreSQL does not support getGeneratedKeys or INSERT ... RETURNING in version " +
-						getDatabaseVersion());
-			}
-			return false;
-		}
+		return true;
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket
@@ -43,10 +44,11 @@ public interface WebSocketSession extends Closeable {
 	/**
 	 * Return the URI used to open the WebSocket connection.
 	 */
+	@Nullable
 	URI getUri();
 
 	/**
-	 * Return the headers used in the handshake request.
+	 * Return the headers used in the handshake request (never {@code null}).
 	 */
 	HttpHeaders getHandshakeHeaders();
 
@@ -57,31 +59,36 @@ public interface WebSocketSession extends Closeable {
 	 * HandshakeInterceptor}. On the client side the map can be populated via
 	 * {@link org.springframework.web.socket.client.WebSocketClient
 	 * WebSocketClient} handshake methods.
-	 * @return a Map with the session attributes, never {@code null}.
+	 * @return a Map with the session attributes (never {@code null})
 	 */
 	Map<String, Object> getAttributes();
 
 	/**
-	 * Return a {@link java.security.Principal} instance containing the name of the
-	 * authenticated user.
+	 * Return a {@link java.security.Principal} instance containing the name
+	 * of the authenticated user.
 	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
+	@Nullable
 	Principal getPrincipal();
 
 	/**
 	 * Return the address on which the request was received.
 	 */
+	@Nullable
 	InetSocketAddress getLocalAddress();
 
 	/**
 	 * Return the address of the remote client.
 	 */
+	@Nullable
 	InetSocketAddress getRemoteAddress();
 
 	/**
-	 * Return the negotiated sub-protocol or {@code null} if none was specified or
-	 * negotiated successfully.
+	 * Return the negotiated sub-protocol.
+	 * @return the protocol identifier, or {@code null} if no protocol
+	 * was specified or negotiated successfully
 	 */
+	@Nullable
 	String getAcceptedProtocol();
 
 	/**
@@ -105,13 +112,21 @@ public interface WebSocketSession extends Closeable {
 	int getBinaryMessageSizeLimit();
 
 	/**
-	 * Return the negotiated extensions or {@code null} if none was specified or
-	 * negotiated successfully.
+	 * Determine the negotiated extensions.
+	 * @return the list of extensions, or an empty list if no extension
+	 * was specified or negotiated successfully
 	 */
 	List<WebSocketExtension> getExtensions();
 
 	/**
 	 * Send a WebSocket message: either {@link TextMessage} or {@link BinaryMessage}.
+	 *
+	 * <p><strong>Note:</strong> The underlying standard WebSocket session (JSR-356) does
+	 * not allow concurrent sending. Therefore sending must be synchronized. To ensure
+	 * that, one option is to wrap the {@code WebSocketSession} with the
+	 * {@link org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
+	 * ConcurrentWebSocketSessionDecorator}.
+	 * @see org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
 	 */
 	void sendMessage(WebSocketMessage<?> message) throws IOException;
 

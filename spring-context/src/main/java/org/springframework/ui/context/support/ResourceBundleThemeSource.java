@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
@@ -46,22 +47,26 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ThemeSource parentThemeSource;
 
 	private String basenamePrefix = "";
 
+	@Nullable
 	private String defaultEncoding;
 
+	@Nullable
 	private Boolean fallbackToSystemLocale;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
-	/** Map from theme name to Theme instance */
-	private final Map<String, Theme> themeCache = new ConcurrentHashMap<String, Theme>();
+	/** Map from theme name to Theme instance. */
+	private final Map<String, Theme> themeCache = new ConcurrentHashMap<>();
 
 
 	@Override
-	public void setParentThemeSource(ThemeSource parent) {
+	public void setParentThemeSource(@Nullable ThemeSource parent) {
 		this.parentThemeSource = parent;
 
 		// Update existing Theme objects.
@@ -74,6 +79,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	}
 
 	@Override
+	@Nullable
 	public ThemeSource getParentThemeSource() {
 		return this.parentThemeSource;
 	}
@@ -88,7 +94,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
-	public void setBasenamePrefix(String basenamePrefix) {
+	public void setBasenamePrefix(@Nullable String basenamePrefix) {
 		this.basenamePrefix = (basenamePrefix != null ? basenamePrefix : "");
 	}
 
@@ -99,7 +105,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @since 4.2
 	 * @see ResourceBundleMessageSource#setDefaultEncoding
 	 */
-	public void setDefaultEncoding(String defaultEncoding) {
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -115,7 +121,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
@@ -130,10 +136,8 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @see #createMessageSource
 	 */
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
-		if (themeName == null) {
-			return null;
-		}
 		Theme theme = this.themeCache.get(themeName);
 		if (theme == null) {
 			synchronized (this.themeCache) {

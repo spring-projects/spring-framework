@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,13 +26,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.net.URL} locators.
- * <p>Supports resolution as a {@code URL} and also as a {@code File} in
+ * Supports resolution as a {@code URL} and also as a {@code File} in
  * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
@@ -44,6 +45,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Original URI, if available; used for URI and File access.
 	 */
+	@Nullable
 	private final URI uri;
 
 	/**
@@ -61,6 +63,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * Create a new {@code UrlResource} based on the given URI object.
 	 * @param uri a URI
 	 * @throws MalformedURLException if the given URL path is not valid
+	 * @since 2.5
 	 */
 	public UrlResource(URI uri) throws MalformedURLException {
 		Assert.notNull(uri, "URI must not be null");
@@ -120,7 +123,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException  {
+	public UrlResource(String protocol, String location, @Nullable String fragment) throws MalformedURLException  {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();
@@ -133,24 +136,26 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 	}
 
+
 	/**
 	 * Determine a cleaned URL for the given original URL.
 	 * @param originalUrl the original URL
 	 * @param originalPath the original URL path
-	 * @return the cleaned URL
+	 * @return the cleaned URL (possibly the original URL as-is)
 	 * @see org.springframework.util.StringUtils#cleanPath
 	 */
 	private URL getCleanedUrl(URL originalUrl, String originalPath) {
-		try {
-			return new URL(StringUtils.cleanPath(originalPath));
+		String cleanedPath = StringUtils.cleanPath(originalPath);
+		if (!cleanedPath.equals(originalPath)) {
+			try {
+				return new URL(cleanedPath);
+			}
+			catch (MalformedURLException ex) {
+				// Cleaned URL path cannot be converted to URL -> take original URL.
+			}
 		}
-		catch (MalformedURLException ex) {
-			// Cleaned URL path cannot be converted to URL
-			// -> take original URL.
-			return originalUrl;
-		}
+		return originalUrl;
 	}
-
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
@@ -180,7 +185,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * This implementation returns the underlying URL reference.
 	 */
 	@Override
-	public URL getURL() throws IOException {
+	public URL getURL() {
 		return this.url;
 	}
 
@@ -195,6 +200,16 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 		else {
 			return super.getURI();
+		}
+	}
+
+	@Override
+	public boolean isFile() {
+		if (this.uri != null) {
+			return super.isFile(this.uri);
+		}
+		else {
+			return super.isFile();
 		}
 	}
 
@@ -214,26 +229,40 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation creates a {@code UrlResource}, applying the given path
-	 * relative to the path of the underlying URL of this resource descriptor.
-	 * @see java.net.URL#URL(java.net.URL, String)
+	 * This implementation creates a {@code UrlResource}, delegating to
+	 * {@link #createRelativeURL(String)} for adapting the relative path.
+	 * @see #createRelativeURL(String)
 	 */
 	@Override
 	public Resource createRelative(String relativePath) throws MalformedURLException {
+		return new UrlResource(createRelativeURL(relativePath));
+	}
+
+	/**
+	 * This delegate creates a {@code java.net.URL}, applying the given path
+	 * relative to the path of the underlying URL of this resource descriptor.
+	 * A leading slash will get dropped; a "#" symbol will get encoded.
+	 * @since 5.2
+	 * @see #createRelative(String)
+	 * @see java.net.URL#URL(java.net.URL, String)
+	 */
+	protected URL createRelativeURL(String relativePath) throws MalformedURLException {
 		if (relativePath.startsWith("/")) {
 			relativePath = relativePath.substring(1);
 		}
-		return new UrlResource(new URL(this.url, relativePath));
+		// # can appear in filenames, java.net.URL should not treat it as a fragment
+		relativePath = StringUtils.replace(relativePath, "#", "%23");
+		// Use the URL constructor for applying the relative path as a URL spec
+		return new URL(this.url, relativePath);
 	}
 
 	/**
 	 * This implementation returns the name of the file that this URL refers to.
-	 * @see java.net.URL#getFile()
-	 * @see java.io.File#getName()
+	 * @see java.net.URL#getPath()
 	 */
 	@Override
 	public String getFilename() {
-		return new File(this.url.getFile()).getName();
+		return StringUtils.getFilename(this.cleanedUrl.getPath());
 	}
 
 	/**
@@ -249,9 +278,9 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying URL references.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof UrlResource &&
+				this.cleanedUrl.equals(((UrlResource) other).cleanedUrl)));
 	}
 
 	/**

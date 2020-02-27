@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,15 @@ package org.springframework.jms.config;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
@@ -35,13 +36,14 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Stephane Nicoll
@@ -57,7 +59,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	private JmsEndpointSampleInterface listener = sample;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		initializeFactory(factory);
 	}
@@ -65,10 +67,21 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 	@Test
 	public void messageConverterUsedIfSet() throws JMSException {
-		containerFactory.setMessageConverter(new UpperCaseMessageConverter());
+		this.containerFactory.setMessageConverter(new UpperCaseMessageConverter());
+		testMessageConverterIsUsed();
+	}
 
+	@Test
+	public void messagingMessageConverterCanBeUsed() throws JMSException {
+		MessagingMessageConverter converter = new MessagingMessageConverter();
+		converter.setPayloadConverter(new UpperCaseMessageConverter());
+		this.containerFactory.setMessageConverter(converter);
+		testMessageConverterIsUsed();
+	}
+
+	private void testMessageConverterIsUsed() throws JMSException {
 		MethodJmsListenerEndpoint endpoint = createDefaultMethodJmsEndpoint(
-				listener.getClass(), "handleIt", String.class, String.class);
+				this.listener.getClass(), "handleIt", String.class, String.class);
 		Message message = new StubTextMessage("foo-bar");
 		message.setStringProperty("my-header", "my-value");
 
@@ -123,7 +136,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 	private void assertListenerMethodInvocation(String methodName) {
-		assertTrue("Method " + methodName + " should have been invoked", sample.invocations.get(methodName));
+		assertThat((boolean) sample.invocations.get(methodName)).as("Method " + methodName + " should have been invoked").isTrue();
 	}
 
 	private MethodJmsListenerEndpoint createMethodJmsEndpoint(DefaultMessageHandlerMethodFactory factory, Method method) {
@@ -152,12 +165,13 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 	static class JmsEndpointSampleBean implements JmsEndpointSampleInterface {
 
-		private final Map<String, Boolean> invocations = new HashMap<String, Boolean>();
+		private final Map<String, Boolean> invocations = new HashMap<>();
 
+		@Override
 		public void handleIt(@Payload String msg, @Header("my-header") String myHeader) {
 			invocations.put("handleIt", true);
-			assertEquals("Unexpected payload message", "FOO-BAR", msg);
-			assertEquals("Unexpected header value", "my-value", myHeader);
+			assertThat(msg).as("Unexpected payload message").isEqualTo("FOO-BAR");
+			assertThat(myHeader).as("Unexpected header value").isEqualTo("my-value");
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,30 +19,28 @@ package org.springframework.remoting.rmi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.omg.CORBA.OBJECT_NOT_EXIST;
-import org.omg.CORBA.SystemException;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
-import org.springframework.remoting.RemoteAccessException;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.Assert;
 
 /**
- * {@link org.aopalliance.intercept.MethodInterceptor} for accessing RMI services from JNDI.
- * Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing RMI services
+ * from JNDI. Typically used for RMI-IIOP but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
  * this accessor also performs narrowing through PortableRemoteObject.
  *
@@ -74,7 +72,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
- * @see javax.rmi.PortableRemoteObject#narrow
  */
 public class JndiRmiClientInterceptor extends JndiObjectLocator implements MethodInterceptor, InitializingBean {
 
@@ -102,9 +99,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * but can also be optional if the lookup returns a typed stub.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -227,17 +223,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 */
 	protected Object lookupStub() throws RemoteLookupFailureException {
 		try {
-			Object stub = lookup();
-			if (getServiceInterface() != null && !(stub instanceof RmiInvocationHandler)) {
-				try {
-					stub = PortableRemoteObject.narrow(stub, getServiceInterface());
-				}
-				catch (ClassCastException ex) {
-					throw new RemoteLookupFailureException(
-							"Could not narrow RMI stub to service interface [" + getServiceInterface().getName() + "]", ex);
-				}
-			}
-			return stub;
+			return lookup();
 		}
 		catch (NamingException ex) {
 			throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
@@ -306,14 +292,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 				throw ex;
 			}
 		}
-		catch (SystemException ex) {
-			if (isConnectFailure(ex)) {
-				return handleRemoteConnectFailure(invocation, ex);
-			}
-			else {
-				throw ex;
-			}
-		}
 		finally {
 			getJndiTemplate().releaseContext(ctx);
 		}
@@ -331,17 +309,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	}
 
 	/**
-	 * Determine whether the given CORBA exception indicates a connect failure.
-	 * <p>The default implementation checks for CORBA's
-	 * {@link org.omg.CORBA.OBJECT_NOT_EXIST} exception.
-	 * @param ex the RMI exception to check
-	 * @return whether the exception should be treated as connect failure
-	 */
-	protected boolean isConnectFailure(SystemException ex) {
-		return (ex instanceof OBJECT_NOT_EXIST);
-	}
-
-	/**
 	 * Refresh the stub and retry the remote invocation if necessary.
 	 * <p>If not configured to refresh on connect failure, this method
 	 * simply rethrows the original exception.
@@ -355,8 +322,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not connect to RMI service [" + getJndiName() + "] - retrying", ex);
 			}
-			else if (logger.isWarnEnabled()) {
-				logger.warn("Could not connect to RMI service [" + getJndiName() + "] - retrying");
+			else if (logger.isInfoEnabled()) {
+				logger.info("Could not connect to RMI service [" + getJndiName() + "] - retrying");
 			}
 			return refreshAndRetry(invocation);
 		}
@@ -373,6 +340,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @throws Throwable in case of invocation failure
 	 * @see #invoke
 	 */
+	@Nullable
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Object freshStub;
 		synchronized (this.stubMonitor) {
@@ -393,6 +361,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation, Object stub) throws Throwable {
 		if (stub instanceof RmiInvocationHandler) {
 			// RMI invoker
@@ -401,9 +370,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 			}
 			catch (RemoteException ex) {
 				throw convertRmiAccessException(ex, invocation.getMethod());
-			}
-			catch (SystemException ex) {
-				throw convertCorbaAccessException(ex, invocation.getMethod());
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -422,9 +388,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 				Throwable targetEx = ex.getTargetException();
 				if (targetEx instanceof RemoteException) {
 					throw convertRmiAccessException((RemoteException) targetEx, invocation.getMethod());
-				}
-				else if (targetEx instanceof SystemException) {
-					throw convertCorbaAccessException((SystemException) targetEx, invocation.getMethod());
 				}
 				else {
 					throw targetEx;
@@ -481,29 +444,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 */
 	private Exception convertRmiAccessException(RemoteException ex, Method method) {
 		return RmiClientInterceptorUtils.convertRmiAccessException(method, ex, isConnectFailure(ex), getJndiName());
-	}
-
-	/**
-	 * Convert the given CORBA SystemException that happened during remote access
-	 * to Spring's RemoteAccessException if the method signature does not declare
-	 * RemoteException. Else, return the SystemException wrapped in a RemoteException.
-	 * @param method the invoked method
-	 * @param ex the RemoteException that happened
-	 * @return the exception to be thrown to the caller
-	 */
-	private Exception convertCorbaAccessException(SystemException ex, Method method) {
-		if (ReflectionUtils.declaresException(method, RemoteException.class)) {
-			// A traditional RMI service: wrap CORBA exceptions in standard RemoteExceptions.
-			return new RemoteException("Failed to access CORBA service [" + getJndiName() + "]", ex);
-		}
-		else {
-			if (isConnectFailure(ex)) {
-				return new RemoteConnectFailureException("Could not connect to CORBA service [" + getJndiName() + "]", ex);
-			}
-			else {
-				return new RemoteAccessException("Could not access CORBA service [" + getJndiName() + "]", ex);
-			}
-		}
 	}
 
 }

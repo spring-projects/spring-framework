@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.socket.messaging;
 import java.security.Principal;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -34,27 +35,25 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 
 	private final Message<byte[]> message;
 
+	@Nullable
 	private final Principal user;
 
 
 	/**
 	 * Create a new AbstractSubProtocolEvent.
 	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message
+	 * @param message the incoming message (never {@code null})
 	 */
 	protected AbstractSubProtocolEvent(Object source, Message<byte[]> message) {
-		super(source);
-		Assert.notNull(message, "Message must not be null");
-		this.message = message;
-		this.user = null;
+		this(source, message, null);
 	}
 
 	/**
 	 * Create a new AbstractSubProtocolEvent.
 	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message
+	 * @param message the incoming message (never {@code null})
 	 */
-	protected AbstractSubProtocolEvent(Object source, Message<byte[]> message, Principal user) {
+	protected AbstractSubProtocolEvent(Object source, Message<byte[]> message, @Nullable Principal user) {
 		super(source);
 		Assert.notNull(message, "Message must not be null");
 		this.message = message;
@@ -80,6 +79,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	/**
 	 * Return the user for the session associated with the event.
 	 */
+	@Nullable
 	public Principal getUser() {
 		return this.user;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.jmx.export.metadata;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Metadata indicating that instances of an annotated class
@@ -29,31 +31,37 @@ package org.springframework.jmx.export.metadata;
  */
 public class ManagedResource extends AbstractJmxAttribute {
 
+	@Nullable
 	private String objectName;
 
 	private boolean log = false;
 
+	@Nullable
 	private String logFile;
 
+	@Nullable
 	private String persistPolicy;
 
 	private int persistPeriod = -1;
 
+	@Nullable
 	private String persistName;
 
+	@Nullable
 	private String persistLocation;
 
 
 	/**
 	 * Set the JMX ObjectName of this managed resource.
 	 */
-	public void setObjectName(String objectName) {
+	public void setObjectName(@Nullable String objectName) {
 		this.objectName = objectName;
 	}
 
 	/**
 	 * Return the JMX ObjectName of this managed resource.
 	 */
+	@Nullable
 	public String getObjectName() {
 		return this.objectName;
 	}
@@ -66,18 +74,20 @@ public class ManagedResource extends AbstractJmxAttribute {
 		return this.log;
 	}
 
-	public void setLogFile(String logFile) {
+	public void setLogFile(@Nullable String logFile) {
 		this.logFile = logFile;
 	}
 
+	@Nullable
 	public String getLogFile() {
 		return this.logFile;
 	}
 
-	public void setPersistPolicy(String persistPolicy) {
+	public void setPersistPolicy(@Nullable String persistPolicy) {
 		this.persistPolicy = persistPolicy;
 	}
 
+	@Nullable
 	public String getPersistPolicy() {
 		return this.persistPolicy;
 	}
@@ -90,18 +100,20 @@ public class ManagedResource extends AbstractJmxAttribute {
 		return this.persistPeriod;
 	}
 
-	public void setPersistName(String persistName) {
+	public void setPersistName(@Nullable String persistName) {
 		this.persistName = persistName;
 	}
 
+	@Nullable
 	public String getPersistName() {
 		return this.persistName;
 	}
 
-	public void setPersistLocation(String persistLocation) {
+	public void setPersistLocation(@Nullable String persistLocation) {
 		this.persistLocation = persistLocation;
 	}
 
+	@Nullable
 	public String getPersistLocation() {
 		return this.persistLocation;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Convenient implementation of the
@@ -57,7 +59,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	/**
 	 * Hold weak references to keys as we don't want to interfere with garbage collection..
 	 */
-	private final Map<Object, Object> delegateMap = new WeakHashMap<Object, Object>();
+	private final Map<Object, Object> delegateMap = new WeakHashMap<>();
 
 	private Class<?> defaultImplType;
 
@@ -84,6 +86,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
 			Object delegate = getIntroductionDelegateFor(mi.getThis());
@@ -131,7 +134,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 
 	private Object createNewDelegate() {
 		try {
-			return this.defaultImplType.newInstance();
+			return ReflectionUtils.accessibleConstructor(this.defaultImplType).newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalArgumentException("Cannot create default implementation for '" +

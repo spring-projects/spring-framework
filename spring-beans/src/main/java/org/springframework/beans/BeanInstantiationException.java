@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.springframework.beans;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown when instantiation of a bean failed.
  * Carries the offending bean class.
@@ -29,11 +31,13 @@ import java.lang.reflect.Method;
 @SuppressWarnings("serial")
 public class BeanInstantiationException extends FatalBeanException {
 
-	private Class<?> beanClass;
+	private final Class<?> beanClass;
 
-	private Constructor<?> constructor;
+	@Nullable
+	private final Constructor<?> constructor;
 
-	private Method constructingMethod;
+	@Nullable
+	private final Method constructingMethod;
 
 
 	/**
@@ -51,9 +55,11 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public BeanInstantiationException(Class<?> beanClass, String msg, Throwable cause) {
+	public BeanInstantiationException(Class<?> beanClass, String msg, @Nullable Throwable cause) {
 		super("Failed to instantiate [" + beanClass.getName() + "]: " + msg, cause);
 		this.beanClass = beanClass;
+		this.constructor = null;
+		this.constructingMethod = null;
 	}
 
 	/**
@@ -63,10 +69,11 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param cause the root cause
 	 * @since 4.3
 	 */
-	public BeanInstantiationException(Constructor<?> constructor, String msg, Throwable cause) {
+	public BeanInstantiationException(Constructor<?> constructor, String msg, @Nullable Throwable cause) {
 		super("Failed to instantiate [" + constructor.getDeclaringClass().getName() + "]: " + msg, cause);
 		this.beanClass = constructor.getDeclaringClass();
 		this.constructor = constructor;
+		this.constructingMethod = null;
 	}
 
 	/**
@@ -77,9 +84,10 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param cause the root cause
 	 * @since 4.3
 	 */
-	public BeanInstantiationException(Method constructingMethod, String msg, Throwable cause) {
+	public BeanInstantiationException(Method constructingMethod, String msg, @Nullable Throwable cause) {
 		super("Failed to instantiate [" + constructingMethod.getReturnType().getName() + "]: " + msg, cause);
 		this.beanClass = constructingMethod.getReturnType();
+		this.constructor = null;
 		this.constructingMethod = constructingMethod;
 	}
 
@@ -98,6 +106,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * factory method or in case of default instantiation
 	 * @since 4.3
 	 */
+	@Nullable
 	public Constructor<?> getConstructor() {
 		return this.constructor;
 	}
@@ -108,6 +117,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * or {@code null} in case of constructor-based instantiation
 	 * @since 4.3
 	 */
+	@Nullable
 	public Method getConstructingMethod() {
 		return this.constructingMethod;
 	}

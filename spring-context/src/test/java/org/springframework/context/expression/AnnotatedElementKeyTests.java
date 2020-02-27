@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,59 +18,61 @@ package org.springframework.context.expression;
 
 import java.lang.reflect.Method;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
-public class AnnotatedElementKeyTests {
+class AnnotatedElementKeyTests {
 
-	@Rule
-	public final TestName name = new TestName();
+	private Method method;
+
+	@BeforeEach
+	void setUpMethod(TestInfo testInfo) {
+		this.method = ReflectionUtils.findMethod(getClass(), testInfo.getTestMethod().get().getName());
+	}
 
 	@Test
-	public void sameInstanceEquals() {
-		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		AnnotatedElementKey instance = new AnnotatedElementKey(m, getClass());
+	void sameInstanceEquals() {
+		AnnotatedElementKey instance = new AnnotatedElementKey(this.method, getClass());
+
 		assertKeyEquals(instance, instance);
 	}
 
 	@Test
-	public void equals() {
-		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		AnnotatedElementKey first = new AnnotatedElementKey(m, getClass());
-		AnnotatedElementKey second = new AnnotatedElementKey(m, getClass());
+	void equals() {
+		AnnotatedElementKey first = new AnnotatedElementKey(this.method, getClass());
+		AnnotatedElementKey second = new AnnotatedElementKey(this.method, getClass());
 
 		assertKeyEquals(first, second);
 	}
 
 	@Test
-	public void equalsNoTarget() {
-		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		AnnotatedElementKey first = new AnnotatedElementKey(m, null);
-		AnnotatedElementKey second = new AnnotatedElementKey(m, null);
+	void equalsNoTarget() {
+		AnnotatedElementKey first = new AnnotatedElementKey(this.method, null);
+		AnnotatedElementKey second = new AnnotatedElementKey(this.method, null);
 
 		assertKeyEquals(first, second);
 	}
 
 	@Test
-	public void noTargetClassNotEquals() {
-		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		AnnotatedElementKey first = new AnnotatedElementKey(m, getClass());
-		AnnotatedElementKey second = new AnnotatedElementKey(m, null);
+	void noTargetClassNotEquals() {
+		AnnotatedElementKey first = new AnnotatedElementKey(this.method, getClass());
+		AnnotatedElementKey second = new AnnotatedElementKey(this.method, null);
 
-		assertFalse(first.equals(second));
+		assertThat(first.equals(second)).isFalse();
 	}
 
-	protected void assertKeyEquals(AnnotatedElementKey first, AnnotatedElementKey second) {
-		assertEquals(first, second);
-		assertEquals(first.hashCode(), second.hashCode());
+	private void assertKeyEquals(AnnotatedElementKey first, AnnotatedElementKey second) {
+		assertThat(second).isEqualTo(first);
+		assertThat(second.hashCode()).isEqualTo(first.hashCode());
 	}
 
 }

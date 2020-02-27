@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.context.transaction;
 
 import org.springframework.core.NamedInheritableThreadLocal;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link InheritableThreadLocal}-based holder for the current {@link TransactionContext}.
@@ -24,26 +25,30 @@ import org.springframework.core.NamedInheritableThreadLocal;
  * @author Sam Brannen
  * @since 4.1
  */
-class TransactionContextHolder {
+final class TransactionContextHolder {
 
-	private static final ThreadLocal<TransactionContext> currentTransactionContext = new NamedInheritableThreadLocal<TransactionContext>(
-		"Test Transaction Context");
+	private static final ThreadLocal<TransactionContext> currentTransactionContext =
+			new NamedInheritableThreadLocal<>("Test Transaction Context");
 
 
-	static TransactionContext getCurrentTransactionContext() {
-		return currentTransactionContext.get();
+	private TransactionContextHolder() {
 	}
+
 
 	static void setCurrentTransactionContext(TransactionContext transactionContext) {
 		currentTransactionContext.set(transactionContext);
 	}
 
+	@Nullable
+	static TransactionContext getCurrentTransactionContext() {
+		return currentTransactionContext.get();
+	}
+
+	@Nullable
 	static TransactionContext removeCurrentTransactionContext() {
-		synchronized (currentTransactionContext) {
-			TransactionContext transactionContext = currentTransactionContext.get();
-			currentTransactionContext.remove();
-			return transactionContext;
-		}
+		TransactionContext transactionContext = currentTransactionContext.get();
+		currentTransactionContext.remove();
+		return transactionContext;
 	}
 
 }

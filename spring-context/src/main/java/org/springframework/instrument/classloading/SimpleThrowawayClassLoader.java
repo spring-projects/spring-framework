@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
 package org.springframework.instrument.classloading;
 
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.UsesJava7;
+import org.springframework.lang.Nullable;
 
 /**
  * ClassLoader that can be used to load classes without bringing them
@@ -27,13 +27,10 @@ import org.springframework.lang.UsesJava7;
  * @author Rod Johnson
  * @since 2.0
  */
-@UsesJava7
 public class SimpleThrowawayClassLoader extends OverridingClassLoader {
 
 	static {
-		if (parallelCapableClassLoaderAvailable) {
-			ClassLoader.registerAsParallelCapable();
-		}
+		ClassLoader.registerAsParallelCapable();
 	}
 
 
@@ -41,7 +38,7 @@ public class SimpleThrowawayClassLoader extends OverridingClassLoader {
 	 * Create a new SimpleThrowawayClassLoader for the given ClassLoader.
 	 * @param parent the ClassLoader to build a throwaway ClassLoader for
 	 */
-	public SimpleThrowawayClassLoader(ClassLoader parent) {
+	public SimpleThrowawayClassLoader(@Nullable ClassLoader parent) {
 		super(parent);
 	}
 

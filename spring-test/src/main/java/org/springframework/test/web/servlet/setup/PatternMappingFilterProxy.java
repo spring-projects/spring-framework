@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.setup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -49,13 +50,13 @@ final class PatternMappingFilterProxy implements Filter {
 	private final Filter delegate;
 
 	/** Patterns that require an exact match, e.g. "/test" */
-	private final List<String> exactMatches = new ArrayList<String>();
+	private final List<String> exactMatches = new ArrayList<>();
 
 	/** Patterns that require the URL to have a specific prefix, e.g. "/test/*" */
-	private final List<String> startsWithMatches = new ArrayList<String>();
+	private final List<String> startsWithMatches = new ArrayList<>();
 
 	/** Patterns that require the request URL to have a specific suffix, e.g. "*.html" */
-	private final List<String> endsWithMatches = new ArrayList<String>();
+	private final List<String> endsWithMatches = new ArrayList<>();
 
 
 	/**
@@ -82,7 +83,7 @@ final class PatternMappingFilterProxy implements Filter {
 			this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
 		}
 		else {
-			if ("".equals(urlPattern)) {
+			if (urlPattern.isEmpty()) {
 				urlPattern = "/";
 			}
 			this.exactMatches.add(urlPattern);

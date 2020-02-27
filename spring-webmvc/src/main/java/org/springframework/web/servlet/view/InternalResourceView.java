@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,14 @@
 package org.springframework.web.servlet.view;
 
 import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -155,7 +158,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		if (useInclude(request, response)) {
 			response.setContentType(getContentType());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Including [" + getUrl() + "]");
 			}
 			rd.include(request, response);
 		}
@@ -163,7 +166,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		else {
 			// Note: The forwarded resource is supposed to determine the content type itself.
 			if (logger.isDebugEnabled()) {
-				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Forwarding to [" + getUrl() + "]");
 			}
 			rd.forward(request, response);
 		}
@@ -199,6 +202,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			throws Exception {
 
 		String path = getUrl();
+		Assert.state(path != null, "'url' not set");
+
 		if (this.preventDispatchLoop) {
 			String uri = request.getRequestURI();
 			if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
@@ -219,6 +224,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @param path the target URL (as returned from {@link #prepareForRendering})
 	 * @return a corresponding RequestDispatcher
 	 */
+	@Nullable
 	protected RequestDispatcher getRequestDispatcher(HttpServletRequest request, String path) {
 		return request.getRequestDispatcher(path);
 	}

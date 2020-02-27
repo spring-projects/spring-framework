@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -45,10 +46,12 @@ import org.springframework.util.ClassUtils;
  */
 public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
+	@Nullable
 	private Map<String, Object> scopes;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
@@ -70,7 +73,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	 */
 	public void addScope(String scopeName, Scope scope) {
 		if (this.scopes == null) {
-			this.scopes = new LinkedHashMap<String, Object>(1);
+			this.scopes = new LinkedHashMap<>(1);
 		}
 		this.scopes.put(scopeName, scope);
 	}
@@ -86,7 +89,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
@@ -94,20 +97,18 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.scopes != null) {
-			for (Map.Entry<String, Object> entry : this.scopes.entrySet()) {
-				String scopeKey = entry.getKey();
-				Object value = entry.getValue();
+			this.scopes.forEach((scopeKey, value) -> {
 				if (value instanceof Scope) {
 					beanFactory.registerScope(scopeKey, (Scope) value);
 				}
 				else if (value instanceof Class) {
 					Class<?> scopeClass = (Class<?>) value;
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else if (value instanceof String) {
 					Class<?> scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else {
@@ -115,7 +116,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 							scopeKey + "] is not an instance of required type [" + Scope.class.getName() +
 							"] or a corresponding Class or String value indicating a Scope implementation");
 				}
-			}
+			});
 		}
 	}
 

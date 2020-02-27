@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using the
@@ -49,7 +50,7 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> fieldTypes = new HashSet<>(8);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
 		fieldTypes.add(LocalDateTime.class);
@@ -68,6 +69,24 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	@Override
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
+
+		// Efficient ISO_LOCAL_* variants for printing since they are twice as fast...
+		if (formatter == DateTimeFormatter.ISO_DATE) {
+			if (isLocal(fieldType)) {
+				formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+			}
+		}
+		else if (formatter == DateTimeFormatter.ISO_TIME) {
+			if (isLocal(fieldType)) {
+				formatter = DateTimeFormatter.ISO_LOCAL_TIME;
+			}
+		}
+		else if (formatter == DateTimeFormatter.ISO_DATE_TIME) {
+			if (isLocal(fieldType)) {
+				formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+			}
+		}
+
 		return new TemporalAccessorPrinter(formatter);
 	}
 
@@ -81,15 +100,25 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	/**
 	 * Factory method used to create a {@link DateTimeFormatter}.
 	 * @param annotation the format annotation for the field
-	 * @param fieldType the type of field
+	 * @param fieldType the declared type of the field
 	 * @return a {@link DateTimeFormatter} instance
 	 */
 	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
-		factory.setStylePattern(resolveEmbeddedValue(annotation.style()));
+		String style = resolveEmbeddedValue(annotation.style());
+		if (StringUtils.hasLength(style)) {
+			factory.setStylePattern(style);
+		}
 		factory.setIso(annotation.iso());
-		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			factory.setPattern(pattern);
+		}
 		return factory.createDateTimeFormatter();
+	}
+
+	private boolean isLocal(Class<?> fieldType) {
+		return fieldType.getSimpleName().startsWith("Local");
 	}
 
 }

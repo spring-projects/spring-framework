@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
@@ -82,8 +83,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 				this.httpClient.start();
 			}
 		}
-		catch (Exception e) {
-			throw new SockJsException("Failed to start " + this, e);
+		catch (Exception ex) {
+			throw new SockJsException("Failed to start JettyXhrTransport", ex);
 		}
 	}
 
@@ -94,8 +95,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 				this.httpClient.stop();
 			}
 		}
-		catch (Exception e) {
-			throw new SockJsException("Failed to stop " + this, e);
+		catch (Exception ex) {
+			throw new SockJsException("Failed to stop JettyXhrTransport", ex);
 		}
 	}
 
@@ -134,7 +135,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
 	}
 
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, String body) {
+	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method,
+			HttpHeaders headers, @Nullable String body) {
+
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {
@@ -150,16 +153,17 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		HttpStatus status = HttpStatus.valueOf(response.getStatus());
 		HttpHeaders responseHeaders = toHttpHeaders(response.getHeaders());
 		return (response.getContent() != null ?
-			new ResponseEntity<String>(response.getContentAsString(), responseHeaders, status) :
-			new ResponseEntity<String>(responseHeaders, status));
+				new ResponseEntity<>(response.getContentAsString(), responseHeaders, status) :
+				new ResponseEntity<>(responseHeaders, status));
 	}
 
+
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
-		for (String name : headers.keySet()) {
-			for (String value : headers.get(name)) {
-				request.header(name, value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				request.header(key, value);
 			}
-		}
+		});
 	}
 
 	private static HttpHeaders toHttpHeaders(HttpFields httpFields) {
@@ -194,7 +198,6 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-
 		public SockJsResponseListener(URI url, HttpHeaders headers,	XhrClientSockJsSession sockJsSession,
 				SettableListenableFuture<WebSocketSession> connectFuture) {
 
@@ -203,7 +206,6 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			this.connectFuture = connectFuture;
 			this.sockJsSession = sockJsSession;
 		}
-
 
 		@Override
 		public void onBegin(Response response) {
@@ -269,7 +271,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		@Override
 		public void onFailure(Response response, Throwable failure) {
-			if (connectFuture.setException(failure)) {
+			if (this.connectFuture.setException(failure)) {
 				return;
 			}
 			if (this.sockJsSession.isDisconnected()) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,18 +17,13 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletConfig;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,9 +34,13 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletConfig;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for view resolution with {@code @EnableWebMvc}.
@@ -51,56 +50,43 @@ import static org.junit.Assert.*;
  */
 public class ViewResolutionIntegrationTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
-
 	@Test
 	public void freemarker() throws Exception {
 		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
-	}
-
-	@Test
-	public void velocity() throws Exception {
-		MockHttpServletResponse response = runTest(VelocityWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
 	public void tiles() throws Exception {
 		MockHttpServletResponse response = runTest(TilesWebConfig.class);
-		assertEquals("/WEB-INF/index.jsp", response.getForwardedUrl());
+		assertThat(response.getForwardedUrl()).isEqualTo("/WEB-INF/index.jsp");
 	}
 
 	@Test
 	public void groovyMarkup() throws Exception {
 		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
 	public void freemarkerInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a FreeMarker view resolver ");
-		runTest(InvalidFreeMarkerWebConfig.class);
-	}
-
-	@Test
-	public void velocityInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Velocity view resolver ");
-		runTest(InvalidVelocityWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidFreeMarkerWebConfig.class))
+			.withMessageContaining("In addition to a FreeMarker view resolver ");
 	}
 
 	@Test
 	public void tilesInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Tiles view resolver ");
-		runTest(InvalidTilesWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidTilesWebConfig.class))
+			.withMessageContaining("In addition to a Tiles view resolver ");
 	}
 
 	@Test
 	public void groovyMarkupInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Groovy markup view resolver ");
-		runTest(InvalidGroovyMarkupWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidGroovyMarkupWebConfig.class))
+			.withMessageContaining("In addition to a Groovy markup view resolver ");
 	}
 
 	// SPR-12013
@@ -108,7 +94,7 @@ public class ViewResolutionIntegrationTests {
 	@Test
 	public void existingViewResolver() throws Exception {
 		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 
@@ -141,7 +127,7 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@EnableWebMvc
-	static abstract class AbstractWebConfig extends WebMvcConfigurerAdapter {
+	static abstract class AbstractWebConfig implements WebMvcConfigurer {
 
 		@Bean
 		public SampleController sampleController() {
@@ -161,22 +147,6 @@ public class ViewResolutionIntegrationTests {
 		public FreeMarkerConfigurer freeMarkerConfigurer() {
 			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 			configurer.setTemplateLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-
-	@Configuration
-	static class VelocityWebConfig extends AbstractWebConfig {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.velocity();
-		}
-
-		@Bean
-		public VelocityConfigurer velocityConfigurer() {
-			VelocityConfigurer configurer = new VelocityConfigurer();
-			configurer.setResourceLoaderPath("/WEB-INF/");
 			return configurer;
 		}
 	}
@@ -219,15 +189,6 @@ public class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-		}
-	}
-
-	@Configuration
-	static class InvalidVelocityWebConfig extends WebMvcConfigurationSupport {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.velocity();
 		}
 	}
 

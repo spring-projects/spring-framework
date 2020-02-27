@@ -1,0 +1,72 @@
+[[spring-web-reactive]]
+= Web on Reactive Stack
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:toc: left
+:toclevels: 4
+:tabsize: 4
+:docinfo1:
+
+This part of the documentation covers support for reactive-stack web applications built
+on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
+servers, such as Netty, Undertow, and Servlet 3.1+ containers. Individual chapters cover
+the <<webflux.adoc#webflux, Spring WebFlux>> framework,
+the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,
+and <<webflux-reactive-libraries, reactive libraries>>. For Servlet-stack web applications,
+see <<web.adoc#spring-web, Web on Servlet Stack>>.
+
+include::web/webflux.adoc[leveloffset=+1]
+
+include::web/webflux-webclient.adoc[leveloffset=+1]
+
+include::web/webflux-websocket.adoc[leveloffset=+1]
+
+
+
+[[webflux-test]]
+== Testing
+[.small]#<<web.adoc#testing, Same in Spring MVC>>#
+
+The `spring-test` module provides mock implementations of `ServerHttpRequest`,
+`ServerHttpResponse`, and `ServerWebExchange`.
+See <<testing.adoc#mock-objects-web-reactive, Spring Web Reactive>> for a
+discussion of mock objects.
+
+<<testing.adoc#webtestclient, `WebTestClient`>> builds on these mock request and
+response objects to provide support for testing WebFlux applications without an HTTP
+server. You can use the `WebTestClient` for end-to-end integration tests, too.
+
+
+
+include::rsocket.adoc[leveloffset=+1]
+
+
+
+[[webflux-reactive-libraries]]
+== Reactive Libraries
+
+`spring-webflux` depends on `reactor-core` and uses it internally to compose asynchronous
+logic and to provide Reactive Streams support. Generally, WebFlux APIs return `Flux` or
+`Mono` (since those are used internally) and leniently accept any Reactive Streams
+`Publisher` implementation as input. The use of `Flux` versus `Mono` is important, because
+it helps to express cardinality -- for example, whether a single or multiple asynchronous
+values are expected, and that can be essential for making decisions (for example, when
+encoding or decoding HTTP messages).
+
+For annotated controllers, WebFlux transparently adapts to the reactive library chosen by
+the application. This is done with the help of the
+{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
+provides pluggable support for reactive library and other asynchronous types. The registry
+has built-in support for RxJava and `CompletableFuture`, but you can register others, too.
+
+For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general rules
+for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
+`Publisher` as input. When a `Publisher`, whether custom or from another reactive library,
+is provided, it can be treated only as a stream with unknown semantics (0..N). If, however,
+the semantics are known, you can wrap it with `Flux` or `Mono.from(Publisher)` instead
+of passing the raw `Publisher`.
+
+For example, given a `Publisher` that is not a `Mono`, the Jackson JSON message writer
+expects multiple values. If the media type implies an infinite stream (for example,
+`application/json+stream`), values are written and flushed individually. Otherwise,
+values are buffered into a list and rendered as a JSON array.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -59,7 +59,7 @@
 	  </property>
 	</bean>
 
-	<bean id="timestampIntroduction" class="org.springframework.tests.aop.advice.TimestampIntroductionAdvisor"/>
+	<bean id="timestampIntroduction" class="org.springframework.aop.testfixture.advice.TimestampIntroductionAdvisor"/>
 
 	<!--
 		Stateful mixin. Note that singleton property is false.
@@ -67,17 +67,17 @@
 	<bean id="lockableAdvisor" class="test.mixin.LockMixinAdvisor"
 			scope="prototype"/>
 
-	<bean id="countingBeforeAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="countingBeforeAdvice" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionNopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="introductionNopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>introductionUsingJdk</value></property>
 	</bean>
 
-	<bean id="second-introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="second-introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>second-introductionUsingJdk</value></property>
 	</bean>
 
@@ -88,29 +88,29 @@
 			lazy-init="true">
 	</bean>
 
-	<bean id="jdk1" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="jdk1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>jdk1</value></property>
 	</bean>
 
-	<bean id="frozen" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="frozen" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
 
 	<alias name="frozen" alias="frozenBean"/>
 
-	<bean id="cglib1" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="cglib1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>cglib1</value></property>
 	</bean>
 
-	<bean id="onlyJdk" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="onlyJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>onlyJdk</value></property>
 	</bean>
 
-	<bean id="doubleJdk" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="doubleJdk" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>doubleJdk</value></property>
 	</bean>
 
-	<bean id="noproxy" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="noproxy" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>noproxy</value></property>
 	</bean>
 

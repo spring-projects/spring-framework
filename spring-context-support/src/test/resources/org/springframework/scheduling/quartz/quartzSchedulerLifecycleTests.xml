@@ -2,11 +2,17 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd">
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="lazyInitSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true"/>
+	<bean id="otherSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="autoStartup" value="false"/>
+	</bean>
 
-	<bean id="lazyInitSchedulerWithCustomShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true">
+	<bean id="lazyInitSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		  lazy-init="true" depends-on="otherSchedulerWithDefaultShutdownOrder"/>
+
+	<bean id="lazyInitSchedulerWithCustomShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		  lazy-init="true">
 		<property name="phase" value="99"/>
 	</bean>
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,8 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.util.StringUtils;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a {@code BeanFactory} is asked for a bean instance for which it
@@ -26,6 +27,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @see BeanFactory#getBean(String)
  * @see BeanFactory#getBean(Class)
  * @see NoUniqueBeanDefinitionException
@@ -33,11 +35,11 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class NoSuchBeanDefinitionException extends BeansException {
 
-	/** Name of the missing bean */
-	private String beanName;
+	@Nullable
+	private final String beanName;
 
-	/** Required type of the missing bean */
-	private Class<?> beanType;
+	@Nullable
+	private final ResolvableType resolvableType;
 
 
 	/**
@@ -45,8 +47,9 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param name the name of the missing bean
 	 */
 	public NoSuchBeanDefinitionException(String name) {
-		super("No bean named '" + name + "' is defined");
+		super("No bean named '" + name + "' available");
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -55,8 +58,9 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(String name, String message) {
-		super("No bean named '" + name + "' is defined: " + message);
+		super("No bean named '" + name + "' available: " + message);
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -64,8 +68,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param type required type of the missing bean
 	 */
 	public NoSuchBeanDefinitionException(Class<?> type) {
-		super("No qualifying bean of type [" + type.getName() + "] is defined");
-		this.beanType = type;
+		this(ResolvableType.forClass(type));
 	}
 
 	/**
@@ -74,36 +77,58 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class<?> type, String message) {
-		super("No qualifying bean of type [" + type.getName() + "] is defined: " + message);
-		this.beanType = type;
+		this(ResolvableType.forClass(type), message);
 	}
 
 	/**
 	 * Create a new {@code NoSuchBeanDefinitionException}.
-	 * @param type required type of the missing bean
-	 * @param dependencyDescription a description of the originating dependency
-	 * @param message detailed message describing the problem
+	 * @param type full type declaration of the missing bean
+	 * @since 4.3.4
 	 */
-	public NoSuchBeanDefinitionException(Class<?> type, String dependencyDescription, String message) {
-		super("No qualifying bean of type [" + type.getName() + "] found for dependency" +
-				(StringUtils.hasLength(dependencyDescription) ? " [" + dependencyDescription + "]" : "") +
-				": " + message);
-		this.beanType = type;
+	public NoSuchBeanDefinitionException(ResolvableType type) {
+		super("No qualifying bean of type '" + type + "' available");
+		this.beanName = null;
+		this.resolvableType = type;
+	}
+
+	/**
+	 * Create a new {@code NoSuchBeanDefinitionException}.
+	 * @param type full type declaration of the missing bean
+	 * @param message detailed message describing the problem
+	 * @since 4.3.4
+	 */
+	public NoSuchBeanDefinitionException(ResolvableType type, String message) {
+		super("No qualifying bean of type '" + type + "' available: " + message);
+		this.beanName = null;
+		this.resolvableType = type;
 	}
 
 
 	/**
 	 * Return the name of the missing bean, if it was a lookup <em>by name</em> that failed.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
 
 	/**
-	 * Return the required type of the missing bean, if it was a lookup <em>by type</em> that failed.
+	 * Return the required type of the missing bean, if it was a lookup <em>by type</em>
+	 * that failed.
 	 */
+	@Nullable
 	public Class<?> getBeanType() {
-		return this.beanType;
+		return (this.resolvableType != null ? this.resolvableType.resolve() : null);
+	}
+
+	/**
+	 * Return the required {@link ResolvableType} of the missing bean, if it was a lookup
+	 * <em>by type</em> that failed.
+	 * @since 4.3.4
+	 */
+	@Nullable
+	public ResolvableType getResolvableType() {
+		return this.resolvableType;
 	}
 
 	/**

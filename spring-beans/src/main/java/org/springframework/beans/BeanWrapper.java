@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,15 +62,12 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	int getAutoGrowCollectionLimit();
 
 	/**
-	 * Return the bean instance wrapped by this object, if any.
-	 * @return the bean instance, or {@code null} if none set
+	 * Return the bean instance wrapped by this object.
 	 */
 	Object getWrappedInstance();
 
 	/**
-	 * Return the type of the wrapped JavaBean object.
-	 * @return the type of the wrapped bean instance,
-	 * or {@code null} if no wrapped object has been set
+	 * Return the type of the wrapped bean instance.
 	 */
 	Class<?> getWrappedClass();
 
