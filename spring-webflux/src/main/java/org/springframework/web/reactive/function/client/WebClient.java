@@ -201,7 +201,7 @@ public interface WebClient {
 		 * </pre>
 		 * <p><strong>Note:</strong> this method is mutually exclusive with
 		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
-		 * baseUrl value provided here will be ignored.
+		 * defaultUriVariables value provided here will be ignored.
 		 * @see DefaultUriBuilderFactory#setDefaultUriVariables(Map)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
