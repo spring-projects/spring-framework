@@ -11,8 +11,8 @@ EL, to name a few -- the Spring Expression Language was created to provide the S
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements
-for code completion support within the Eclipse-based Spring Tool Suite. That said,
-SpEL is based on a technology-agnostic API that lets other expression language
+for code completion support within the https://spring.io/tools[Spring Tools for Eclipse].
+That said, SpEL is based on a technology-agnostic API that lets other expression language
 implementations be integrated, should the need arise.
 
 While SpEL serves as the foundation for expression evaluation within the Spring

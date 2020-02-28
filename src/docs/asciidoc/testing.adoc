@@ -6468,7 +6468,7 @@ The fluent API in the example from the <<spring-mvc-test-server, preceding secti
 requires a few static imports, such as `MockMvcRequestBuilders.{asterisk}`,
 `MockMvcResultMatchers.{asterisk}`, and `MockMvcBuilders.{asterisk}`. An easy way to find
 these classes is to search for types that match `MockMvc*`. If you use Eclipse or the
-Eclipse-based Spring Tool Suite, be sure to add them as "`favorite static members`" in
+https://spring.io/tools[Spring Tools for Eclipse], be sure to add them as "`favorite static members`" in
 the Eclipse preferences under Java -> Editor -> Content Assist -> Favorites. Doing so
 lets you use content assist after typing the first character of the static method name.
 Other IDEs (such as IntelliJ) may not require any additional configuration. Check the
