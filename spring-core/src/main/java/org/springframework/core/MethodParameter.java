@@ -185,6 +185,7 @@ public class MethodParameter {
 		this.parameterAnnotations = original.parameterAnnotations;
 		this.parameterNameDiscoverer = original.parameterNameDiscoverer;
 		this.parameterName = original.parameterName;
+		this.nestedMethodParameter = original.nestedMethodParameter;
 	}
 
 

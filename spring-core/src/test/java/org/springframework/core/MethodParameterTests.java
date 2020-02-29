@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,6 +235,16 @@ class MethodParameterTests {
 		assertThat(m1.getTypeIndexForCurrentLevel()).isNull();
 		assertThat(m2.getTypeIndexForCurrentLevel()).isEqualTo(2);
 		assertThat(m3.getTypeIndexForCurrentLevel()).isEqualTo(3);
+	}
+
+	@Test
+	void cloneShouldKeepNestedMethodParameter() throws Exception {
+		Method method = ArrayList.class.getMethod("get", int.class);
+		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
+		MethodParameter m2 = m1.nested();
+		MethodParameter m3 = m1.clone();
+		MethodParameter m4 = m3.nested();
+		assertThat(m2).isSameAs(m4);
 	}
 
 	public int method(String p1, long p2) {
