@@ -74,8 +74,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application typically suffices (see <<context-create>>). If you use the
-https://spring.io/tools/sts[Spring Tool Suite] (an Eclipse-powered development
-environment), you can easily create this boilerplate configuration with a few mouse clicks or
+https://spring.io/tools[Spring Tools 4] (the next generation of Spring tooling for your favorite coding environment), you can easily create this boilerplate configuration with a few mouse clicks or
 keystrokes.
 
 The following diagram shows a high-level view of how Spring works. Your application classes
