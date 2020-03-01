@@ -161,8 +161,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 
 	/**
 	 * Configure the amount of time we'll wait before shutting down resources.
-	 * If a task is submitted during the {@code quietPeriod}, it is guaranteed
-	 * to be accepted and the {@code quietPeriod} will start over.
+	 * If a task is submitted during the {@code shutdownQuietPeriod}, it is guaranteed
+	 * to be accepted and the {@code shutdownQuietPeriod} will start over.
 	 * <p>By default, this is set to
 	 * {@link LoopResources#DEFAULT_SHUTDOWN_QUIET_PERIOD} which is 2 seconds but
 	 * can also be overridden with the system property
@@ -189,7 +189,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * @see #setShutdownQuietPeriod(Duration)
 	 */
 	public void setShutdownTimeout(Duration shutdownTimeout) {
-		Assert.notNull(shutdownTimeout, "shutdownQuietPeriod should not be null");
+		Assert.notNull(shutdownTimeout, "shutdownTimeout should not be null");
 		this.shutdownTimeout = shutdownTimeout;
 	}
 
