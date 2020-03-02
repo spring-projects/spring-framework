@@ -215,25 +215,14 @@ public abstract class StringUtils {
 	 * Trim leading and trailing whitespace from the given {@code String}.
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
-	 * @see java.lang.Character#isWhitespace
+	 * @see java.lang.String#trim()
 	 */
 	public static String trimWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
 		}
 
-		int beginIndex = 0;
-		int endIndex = str.length() - 1;
-
-		while (beginIndex <= endIndex && Character.isWhitespace(str.charAt(beginIndex))) {
-			beginIndex++;
-		}
-
-		while (endIndex > beginIndex && Character.isWhitespace(str.charAt(endIndex))) {
-			endIndex--;
-		}
-
-		return str.substring(beginIndex, endIndex + 1);
+		return str.trim();
 	}
 
 	/**
