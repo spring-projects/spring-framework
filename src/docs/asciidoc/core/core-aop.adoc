@@ -529,7 +529,7 @@ application and particular sets of operations from within several aspects. We re
 defining a "`SystemArchitecture`" aspect that captures common pointcut expressions for
 this purpose. Such an aspect typically resembles the following example:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	package com.xyz.someapp;
@@ -591,7 +591,7 @@ this purpose. Such an aspect typically resembles the following example:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	package com.xyz.someapp
@@ -950,7 +950,7 @@ You can declare before advice in an aspect by using the `@Before` annotation:
 If we use an in-place pointcut expression, we could rewrite the preceding example as the
 following example:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
@@ -966,7 +966,7 @@ following example:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
@@ -3681,7 +3681,7 @@ use @AspectJ with <<beans-java, Java configuration>>. Specifically, you can use 
 The following example shows the profiling aspect, which is not fancy.
 It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	package foo;
@@ -3712,7 +3712,7 @@ It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 		public void methodsToBeProfiled(){}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	package foo
