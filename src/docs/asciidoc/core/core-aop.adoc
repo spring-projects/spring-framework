@@ -481,7 +481,7 @@ pointcut expressions by name. The following example shows three pointcut express
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Pointcut("execution(public * *(..))")
+	@Pointcut("execution(public * \*(..))")
 	private void anyPublicOperation() {} // <1>
 
 	@Pointcut("within(com.xyz.someapp.trading..*)")
@@ -499,7 +499,7 @@ trading module.
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Pointcut("execution(public * *(..))")
+	@Pointcut("execution(public * \*(..))")
 	private fun anyPublicOperation() {} // <1>
 
 	@Pointcut("within(com.xyz.someapp.trading..*)")
