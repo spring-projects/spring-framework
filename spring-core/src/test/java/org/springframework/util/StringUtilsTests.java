@@ -56,6 +56,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.containsWhitespace("a")).isFalse();
 		assertThat(StringUtils.containsWhitespace("abc")).isFalse();
 		assertThat(StringUtils.containsWhitespace(" ")).isTrue();
+		assertThat(StringUtils.containsWhitespace("\t")).isTrue();
+		assertThat(StringUtils.containsWhitespace("\n")).isTrue();
 		assertThat(StringUtils.containsWhitespace(" a")).isTrue();
 		assertThat(StringUtils.containsWhitespace("abc ")).isTrue();
 		assertThat(StringUtils.containsWhitespace("a b")).isTrue();
@@ -68,6 +70,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace(" a ")).isEqualTo("a");
@@ -77,9 +81,12 @@ class StringUtilsTests {
 
 	@Test
 	void trimAllWhitespace() {
+		assertThat(StringUtils.trimAllWhitespace(null)).isEqualTo(null);
 		assertThat(StringUtils.trimAllWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimAllWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimAllWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace(" a ")).isEqualTo("a");
@@ -93,6 +100,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimLeadingWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimLeadingWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimLeadingWhitespace("a ")).isEqualTo("a ");
 		assertThat(StringUtils.trimLeadingWhitespace(" a ")).isEqualTo("a ");
@@ -106,6 +115,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimTrailingWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimTrailingWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a")).isEqualTo(" a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a ")).isEqualTo(" a");
