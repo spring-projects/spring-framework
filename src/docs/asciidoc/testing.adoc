@@ -1726,8 +1726,8 @@ a configuration class:
 <1> Specify the configuration class.
 
 
-The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify a
-the location of a configuration file:
+The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify the
+location of a configuration file:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
