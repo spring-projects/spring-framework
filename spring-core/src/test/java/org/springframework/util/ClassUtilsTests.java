@@ -413,6 +413,35 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.determineCommonAncestor(String.class, List.class)).isNull();
 	}
 
+	@Test
+	void getMostSpecificMethod() throws NoSuchMethodException {
+		Method defaultPrintMethod = ClassUtils.getMethod(MethodsInterface.class, "defaultPrint");
+		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, MethodsInterfaceImplementation.class)).isEqualTo(defaultPrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, SubMethodsInterfaceImplementation.class)).isEqualTo(defaultPrintMethod);
+
+		Method printMethod = ClassUtils.getMethod(MethodsInterface.class, "print", String.class);
+		assertThat(ClassUtils.getMostSpecificMethod(printMethod, MethodsInterfaceImplementation.class)).isNotEqualTo(printMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(printMethod, MethodsInterfaceImplementation.class))
+				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
+		assertThat(ClassUtils.getMostSpecificMethod(printMethod, SubMethodsInterfaceImplementation.class))
+				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
+
+		Method protectedPrintMethod = MethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint");
+		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, MethodsInterfaceImplementation.class)).isEqualTo(protectedPrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, SubMethodsInterfaceImplementation.class))
+				.isEqualTo(SubMethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint"));
+
+
+		Method packageAccessiblePrint = MethodsInterfaceImplementation.class.getDeclaredMethod("packageAccessiblePrint");
+		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrint, MethodsInterfaceImplementation.class)).isEqualTo(packageAccessiblePrint);
+		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrint, SubMethodsInterfaceImplementation.class))
+				.isEqualTo(ClassUtils.getMethod(SubMethodsInterfaceImplementation.class, "packageAccessiblePrint"));
+
+
+
+
+	}
+
 	@ParameterizedTest
 	@WrapperTypes
 	void isPrimitiveWrapper(Class<?> type) {
@@ -487,6 +516,46 @@ class ClassUtilsTests {
 		void print(String header, String[] messages, String footer) {
 			/* no-op */
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private interface MethodsInterface{
+
+		default void defaultPrint(){
+
+		}
+		void print(String messages);
+	}
+
+	@SuppressWarnings("unused")
+	private class MethodsInterfaceImplementation implements MethodsInterface{
+
+		@Override
+		public void print(String message) {
+
+		}
+
+		protected void protectedPrint(){
+
+		}
+
+		void packageAccessiblePrint(){
+
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private class SubMethodsInterfaceImplementation extends MethodsInterfaceImplementation{
+
+		@Override
+		protected void protectedPrint(){
+
+		}
+
+		public void packageAccessiblePrint(){
+
+		}
+
 	}
 
 }
