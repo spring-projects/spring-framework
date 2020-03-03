@@ -432,9 +432,10 @@ class ClassUtilsTests {
 				.isEqualTo(SubMethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint"));
 
 
-		Method packageAccessiblePrint = MethodsInterfaceImplementation.class.getDeclaredMethod("packageAccessiblePrint");
-		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrint, MethodsInterfaceImplementation.class)).isEqualTo(packageAccessiblePrint);
-		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrint, SubMethodsInterfaceImplementation.class))
+		Method packageAccessiblePrintMethod = MethodsInterfaceImplementation.class.getDeclaredMethod("packageAccessiblePrint");
+		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrintMethod, MethodsInterfaceImplementation.class))
+				.isEqualTo(packageAccessiblePrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrintMethod, SubMethodsInterfaceImplementation.class))
 				.isEqualTo(ClassUtils.getMethod(SubMethodsInterfaceImplementation.class, "packageAccessiblePrint"));
 
 
