@@ -211,7 +211,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.send(SseEmitter.event().
 				comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo((":a test\n" +
 						"event:update\n" +
 						"id:1\n" +
@@ -238,7 +238,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		processor.onNext("baz");
 		processor.onComplete();
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 
@@ -272,7 +272,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getHeader("foo")).isEqualTo("bar");
 	}
 
