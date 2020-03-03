@@ -437,7 +437,6 @@ class ClassUtilsTests {
 				.isEqualTo(packageAccessiblePrintMethod);
 		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrintMethod, SubMethodsInterfaceImplementation.class))
 				.isEqualTo(ClassUtils.getMethod(SubMethodsInterfaceImplementation.class, "packageAccessiblePrint"));
-		
 	}
 
 	@ParameterizedTest
