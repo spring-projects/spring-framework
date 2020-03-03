@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Andrey Golikov
  */
 class DefaultListableBeanFactoryTests {
 
@@ -1360,6 +1361,57 @@ class DefaultListableBeanFactoryTests {
 		Object spouse = lbf.getBean("spouse");
 		assertThat(bean.getSpouse1() == spouse).isTrue();
 		assertThat(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse).isTrue();
+	}
+
+	@Test
+	void partialAutowireWithTwoMatchesForConstructorDependency() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("dependency1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("dependency2", bd2);
+		RootBeanDefinition bd3 = new RootBeanDefinition(PrototypeWithSingletonDependency.class);
+		bd3.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		lbf.registerBeanDefinition("test", bd3);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				lbf.getBean(PrototypeWithSingletonDependency.class, 42))
+				.withMessageContaining("dependency1")
+				.withMessageContaining("dependency2");
+	}
+
+	@Test
+	void partialAutowireWithUnresolvableRuntimeConstructorDependency() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("dependency", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(PrototypeWithSingletonDependency.class);
+		bd2.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		lbf.registerBeanDefinition("test", bd2);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				lbf.getBean(PrototypeWithSingletonDependency.class));
+	}
+
+	@Test
+	void partialAutowireWithUnresolvableSingletonConstructorDependency() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(PrototypeWithSingletonDependency.class);
+		bd1.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		lbf.registerBeanDefinition("test", bd1);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				lbf.getBean(PrototypeWithSingletonDependency.class, 42));
+	}
+
+	@Test
+	void partialAutowireConstructor() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		TestBean bean = new TestBean();
+		bd1.setInstanceSupplier(() -> bean);
+		lbf.registerBeanDefinition("dependency", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(PrototypeWithSingletonDependency.class);
+		bd2.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		lbf.registerBeanDefinition("test", bd2);
+		PrototypeWithSingletonDependency test = lbf.getBean(PrototypeWithSingletonDependency.class, 42);
+		assertThat(test.getSingletonDependency())
+				.isEqualTo(bean);
+		assertThat(test.getRuntimeDependency())
+				.isEqualTo(42);
 	}
 
 	@Test
@@ -3360,6 +3412,25 @@ class DefaultListableBeanFactoryTests {
 
 		public NonPublicEnum getNonPublicEnum() {
 			return nonPublicEnum;
+		}
+	}
+
+	public static class PrototypeWithSingletonDependency {
+
+		private final TestBean singletonDependency;
+		private final int runtimeDependency;
+
+		public PrototypeWithSingletonDependency(TestBean singletonParameter, int runtimeParameter) {
+			this.singletonDependency = singletonParameter;
+			this.runtimeDependency = runtimeParameter;
+		}
+
+		public TestBean getSingletonDependency() {
+			return singletonDependency;
+		}
+
+		public int getRuntimeDependency() {
+			return runtimeDependency;
 		}
 	}
 
