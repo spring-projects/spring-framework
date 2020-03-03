@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,8 +132,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	}
 
 	private static List<MediaType> initMediaTypes(@Nullable HttpMessageWriter<?> formWriter) {
-		List<MediaType> result = new ArrayList<>();
-		result.add(MediaType.MULTIPART_FORM_DATA);
+		List<MediaType> result = new ArrayList<>(MultipartHttpMessageReader.MIME_TYPES);
 		if (formWriter != null) {
 			result.addAll(formWriter.getWritableMediaTypes());
 		}
@@ -197,7 +196,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		return Mono.from(inputStream)
 				.flatMap(map -> {
 					if (this.formWriter == null || isMultipart(map, mediaType)) {
-						return writeMultipart(map, outputMessage, hints);
+						return writeMultipart(map, outputMessage, mediaType, hints);
 					}
 					else {
 						@SuppressWarnings("unchecked")
@@ -209,7 +208,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
+			return contentType.getType().equalsIgnoreCase("multipart");
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -221,16 +220,22 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		return false;
 	}
 
-	private Mono<Void> writeMultipart(
-			MultiValueMap<String, ?> map, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+	private Mono<Void> writeMultipart(MultiValueMap<String, ?> map,
+			ReactiveHttpOutputMessage outputMessage, @Nullable MediaType mediaType, Map<String, Object> hints) {
 
 		byte[] boundary = generateMultipartBoundary();
 
-		Map<String, String> params = new HashMap<>(2);
+		Map<String, String> params = new HashMap<>();
+		if (mediaType != null) {
+			params.putAll(mediaType.getParameters());
+		}
 		params.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 		params.put("charset", getCharset().name());
 
-		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
+		mediaType = (mediaType != null ? mediaType : MediaType.MULTIPART_FORM_DATA);
+		mediaType = new MediaType(mediaType, params);
+
+		outputMessage.getHeaders().setContentType(mediaType);
 
 		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Encoding " +
 				(isEnableLoggingRequestDetails() ?

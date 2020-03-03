@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,11 +68,13 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 	private static final ResolvableType PARTS_ELEMENT_TYPE =
 			forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 
+
 	@Test
 	void canRead() {
-		assertThat(this.reader.canRead(
-				PARTS_ELEMENT_TYPE,
-				MediaType.MULTIPART_FORM_DATA)).isTrue();
+		assertThat(this.reader.canRead(PARTS_ELEMENT_TYPE, MediaType.MULTIPART_FORM_DATA)).isTrue();
+		assertThat(this.reader.canRead(PARTS_ELEMENT_TYPE, MediaType.MULTIPART_MIXED)).isTrue();
+		assertThat(this.reader.canRead(PARTS_ELEMENT_TYPE, MediaType.MULTIPART_RELATED)).isTrue();
+		assertThat(this.reader.canRead(PARTS_ELEMENT_TYPE, null)).isTrue();
 
 		assertThat(this.reader.canRead(
 				forClassWithGenerics(MultiValueMap.class, String.class, Object.class),

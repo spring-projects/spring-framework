@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.codec.multipart;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +56,9 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
 			MultiValueMap.class, String.class, Part.class);
 
+	static final List<MediaType> MIME_TYPES = Collections.unmodifiableList(Arrays.asList(
+			MediaType.MULTIPART_FORM_DATA, MediaType.MULTIPART_MIXED, MediaType.MULTIPART_RELATED));
+
 
 	private final HttpMessageReader<Part> partReader;
 
@@ -75,13 +79,22 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return MULTIPART_VALUE_TYPE.isAssignableFrom(elementType) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		if (MULTIPART_VALUE_TYPE.isAssignableFrom(elementType)) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : MIME_TYPES) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
