@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -330,43 +331,57 @@ class CglibAopProxy implements AopProxy, Serializable {
 				aopInterceptor,  // for normal advice
 				targetInterceptor,  // invoke target without considering advice, if optimized
 				new SerializableNoOp(),  // no override for methods mapped to this
-				targetDispatcher, this.advisedDispatcher,
+				targetDispatcher,
+				this.advisedDispatcher,
 				new EqualsInterceptor(this.advised),
 				new HashCodeInterceptor(this.advised)
 		};
-
-		Callback[] callbacks;
 
 		// If the target is a static one and the advice chain is frozen,
 		// then we can make some optimizations by sending the AOP calls
 		// direct to the target using the fixed chain for that method.
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
-			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = CollectionUtils.newHashMap(methods.length);
+			int methodsCount = methods.length;
+			ArrayList<Callback> fixedCallbacks = new ArrayList<>(methodsCount);
+			this.fixedInterceptorMap = CollectionUtils.newHashMap(methodsCount);
 
-			// TODO: small memory optimization here (can skip creation for methods with no advice)
-			for (int x = 0; x < methods.length; x++) {
+			int advicedMethodCount = methodsCount;
+			for (int x = 0; x < methodsCount; x++) {
 				Method method = methods[x];
+				//do not create advices for non-overridden methods of java.lang.Object
+				if (notOverriddenOfObject(method)) {
+					advicedMethodCount--;
+					continue;
+				}
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, rootClass);
-				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
-						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
-				this.fixedInterceptorMap.put(method, x);
+				fixedCallbacks.add(new FixedChainStaticTargetInterceptor(
+						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass()));
+				this.fixedInterceptorMap.put(method, x - (methodsCount - advicedMethodCount) );
 			}
 
 			// Now copy both the callbacks from mainCallbacks
 			// and fixedCallbacks into the callbacks array.
-			callbacks = new Callback[mainCallbacks.length + fixedCallbacks.length];
+			Callback[] callbacks = new Callback[mainCallbacks.length + advicedMethodCount];
 			System.arraycopy(mainCallbacks, 0, callbacks, 0, mainCallbacks.length);
-			System.arraycopy(fixedCallbacks, 0, callbacks, mainCallbacks.length, fixedCallbacks.length);
+			System.arraycopy(fixedCallbacks.toArray(), 0, callbacks, mainCallbacks.length, advicedMethodCount);
 			this.fixedInterceptorOffset = mainCallbacks.length;
+			return callbacks;
 		}
-		else {
-			callbacks = mainCallbacks;
-		}
-		return callbacks;
+
+		return mainCallbacks;
 	}
 
+	/**
+	 * Returns true if param is inherited from {@link Object} and not overridden in declaring class.
+	 * We use this to detect {@link Object#notify()}, {@link Object#notifyAll()}, {@link Object#getClass()} etc.
+	 * to skip creation of useless advices for them.
+	 * @param method to be checked
+	 * @return true in case {@code method} belongs to {@link Object}
+	 */
+	private static boolean notOverriddenOfObject(Method method) {
+		return method.getDeclaringClass() == Object.class;
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
