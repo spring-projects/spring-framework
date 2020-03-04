@@ -129,9 +129,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		for (Object elem : arr) {
-			collection.add((E) elem);
-		}
+		Collections.addAll(collection, (E[])arr);
 	}
 
 	/**
