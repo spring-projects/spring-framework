@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
@@ -143,21 +144,29 @@ public class ServletInvocableHandlerMethodTests {
 				.isTrue();
 	}
 
-	@Test // gh-23775
+	@Test
 	public void invokeAndHandle_VoidNotModifiedWithEtag() throws Exception {
-		String etag = "\"deadb33f8badf00d\"";
-		this.request.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
-		this.webRequest.checkNotModified(etag);
 
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+		String eTagValue = "\"deadb33f8badf00d\"";
 
-		assertThat(this.mavContainer.isRequestHandled())
-				.as("Null return value + 'not modified' request should result in 'request handled'")
-				.isTrue();
+		FilterChain chain = (req, res) -> {
+			request.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			webRequest.checkNotModified(eTagValue);
 
-		assertThat(this.request.getAttribute(ShallowEtagHeaderFilter.class.getName() + ".STREAMING"))
-				.isEqualTo(true);
+			try {
+				ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
+				handlerMethod.invokeAndHandle(webRequest, mavContainer);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.request, this.response, chain);
+
+		assertThat(response.getStatus()).isEqualTo(304);
+		assertThat(response.getHeader(HttpHeaders.ETAG)).isEqualTo(eTagValue);
+		assertThat(response.getContentAsString()).isEmpty();
 	}
 
 	@Test  // SPR-9159
@@ -169,6 +178,31 @@ public class ServletInvocableHandlerMethodTests {
 		assertThat(this.response.getErrorMessage()).isEqualTo("400 Bad Request");
 		assertThat(this.mavContainer.isRequestHandled())
 				.as("When a status reason w/ used, the request is handled").isTrue();
+	}
+
+	@Test // gh-23775, gh-24635
+	public void invokeAndHandle_ETagFilterHasNoImpactWhenETagPresent() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+
+		FilterChain chain = (req, res) -> {
+			request.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			webRequest.checkNotModified(eTagValue);
+
+			try {
+				ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
+				handlerMethod.invokeAndHandle(webRequest, mavContainer);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.request, this.response, chain);
+
+		assertThat(this.response.getStatus()).isEqualTo(304);
+		assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(eTagValue);
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test

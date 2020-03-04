@@ -47,7 +47,6 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -205,7 +204,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
 						&& isResourceNotModified(inputMessage, outputMessage)) {
 					outputMessage.flush();
-					ShallowEtagHeaderFilter.disableContentCaching(inputMessage.getServletRequest());
 					return;
 				}
 			}
