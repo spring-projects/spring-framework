@@ -146,6 +146,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @return the result value, if any
 	 * @throws Throwable the exception, if any
 	 */
+	/** 重新构造结果，如果原来有异常的话，就抛出异常，否则返回原始结果 */
 	@Nullable
 	public Object recreate() throws Throwable {
 		if (this.exception != null) {

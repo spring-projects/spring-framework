@@ -24,6 +24,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for classes that export a remote service.
+ * 能够暴露一个接口给第三方调用的通用基类（能够接收客户端的远程调用）
  * Provides "service" and "serviceInterface" bean properties.
  *
  * <p>Note that the service interface being used will show some signs of

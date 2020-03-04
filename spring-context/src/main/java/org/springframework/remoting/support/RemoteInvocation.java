@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Encapsulates a remote invocation, providing core method invocation properties
  * in a serializable fashion. Used for RMI and HTTP-based serialization invokers.
- *
+ * 封装了一个远程调用对象。用于RMI和基于http的序列化调用程序。
  * <p>This is an SPI class, typically not used directly by applications.
  * Can be subclassed for additional invocation parameters.
  *

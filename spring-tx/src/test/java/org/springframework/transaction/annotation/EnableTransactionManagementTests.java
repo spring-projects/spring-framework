@@ -53,6 +53,7 @@ import static org.junit.Assert.*;
 public class EnableTransactionManagementTests {
 
 	@Test
+	// zenglw 20190424
 	public void transactionProxyIsCreated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, TxManagerConfig.class);
@@ -64,6 +65,7 @@ public class EnableTransactionManagementTests {
 	}
 
 	@Test
+	// TODO zenglw
 	public void transactionProxyIsCreatedWithEnableOnSuperclass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				InheritedEnableTxConfig.class, TxManagerConfig.class);

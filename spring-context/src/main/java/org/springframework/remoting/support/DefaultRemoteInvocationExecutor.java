@@ -36,6 +36,7 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
 		Assert.notNull(invocation, "RemoteInvocation must not be null");
 		Assert.notNull(targetObject, "Target object must not be null");
+		// 委派给 invocation
 		return invocation.invoke(targetObject);
 	}
 

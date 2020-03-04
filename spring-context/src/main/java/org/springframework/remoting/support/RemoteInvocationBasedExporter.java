@@ -22,6 +22,8 @@ import java.lang.reflect.InvocationTargetException;
  * Abstract base class for remote service exporters that are based
  * on deserialization of {@link RemoteInvocation} objects.
  *
+ * 接收一个 {@link RemoteInvocation} 远程调用
+ *
  * <p>Provides a "remoteInvocationExecutor" property, with a
  * {@link DefaultRemoteInvocationExecutor} as default strategy.
  *
@@ -68,6 +70,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	 * @throws InvocationTargetException if the method invocation resulted in an exception
 	 * @see RemoteInvocationExecutor#invoke
 	 */
+	/** 在 targetObject 对象上应用 invocation */
 	protected Object invoke(RemoteInvocation invocation, Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
@@ -75,6 +78,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 			logger.trace("Executing " + invocation);
 		}
 		try {
+			// 委派给 RemoteInvocationExecutor
 			return getRemoteInvocationExecutor().invoke(invocation, targetObject);
 		}
 		catch (NoSuchMethodException ex) {
@@ -112,6 +116,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	protected RemoteInvocationResult invokeAndCreateResult(RemoteInvocation invocation, Object targetObject) {
 		try {
 			Object value = invoke(invocation, targetObject);
+			// 返回远程调用结果
 			return new RemoteInvocationResult(value);
 		}
 		catch (Throwable ex) {

@@ -75,6 +75,7 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 					ClassUtils.getQualifiedMethodName(method));
 		}
 		try {
+			// 调用远程服务
 			Object retVal = invocation.proceed();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Finished processing of " + this.exporterNameClause + "remote call: " +

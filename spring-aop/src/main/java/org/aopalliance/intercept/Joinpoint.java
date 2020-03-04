@@ -37,6 +37,7 @@ import java.lang.reflect.AccessibleObject;
  * @author Rod Johnson
  * @see Interceptor
  */
+/** 连接点，真实过程的调用会被封装成Joinpoint */
 public interface Joinpoint {
 
 	/**

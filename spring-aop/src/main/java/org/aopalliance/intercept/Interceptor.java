@@ -64,6 +64,7 @@ import org.aopalliance.aop.Advice;
  * @author Rod Johnson
  * @see Joinpoint
  */
+/** 通用的拦截器，before invoke after */
 public interface Interceptor extends Advice {
 
 }

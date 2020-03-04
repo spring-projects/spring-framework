@@ -18,7 +18,7 @@ package org.aopalliance.intercept;
 
 /**
  * Intercepts the construction of a new object.
- *
+ * 对构造器进行增强的拦截器，环绕增强
  * <p>The user should implement the {@link
  * #construct(ConstructorInvocation)} method to modify the original
  * behavior. E.g. the following class implements a singleton
