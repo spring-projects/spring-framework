@@ -96,6 +96,21 @@ public class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
+	public void unknownErrorCodeBothExceptionShouldContainBodyAndMessageShouldReturnBody() throws Exception {
+		String body = "Spring rocks";
+
+		given(response.getRawStatusCode()).willReturn(432);
+		given(response.getStatusText()).willReturn("Unknown status code");
+		given(response.getHeaders()).willReturn(new HttpHeaders());
+		given(response.getBody()).willReturn(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+
+		assertThatExceptionOfType(UnknownHttpStatusCodeException.class)
+				.isThrownBy(() -> handler.handleError(response))
+				.satisfies(ex -> assertThat(ex.getMessage()).isEqualTo("432 Unknown status code: [" + body + "]"))
+				.satisfies(ex -> assertThat(ex.getResponseBodyAsString()).isEqualTo(body));
+	}
+
+	@Test
 	public void handleErrorIOException() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
