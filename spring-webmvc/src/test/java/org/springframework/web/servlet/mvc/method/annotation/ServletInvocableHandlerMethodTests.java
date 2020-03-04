@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
@@ -90,8 +91,10 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatus");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + @ResponseStatus should result in 'request handled'").isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(this.mavContainer.isRequestHandled())
+				.as("Null return value + @ResponseStatus should result in 'request handled'")
+				.isTrue();
 	}
 
 	@Test
@@ -99,8 +102,10 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "composedResponseStatus");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + @ComposedResponseStatus should result in 'request handled'").isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(this.mavContainer.isRequestHandled())
+				.as("Null return value + @ComposedResponseStatus should result in 'request handled'")
+				.isTrue();
 	}
 
 	@Test
@@ -120,7 +125,9 @@ public class ServletInvocableHandlerMethodTests {
 				getHandlerMethod(new Handler(), "httpServletResponse", HttpServletResponse.class);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertThat(this.mavContainer.isRequestHandled()).as("Null return value + HttpServletResponse arg should result in 'request handled'").isTrue();
+		assertThat(this.mavContainer.isRequestHandled())
+				.as("Null return value + HttpServletResponse arg should result in 'request handled'")
+				.isTrue();
 	}
 
 	@Test
@@ -137,21 +144,29 @@ public class ServletInvocableHandlerMethodTests {
 				.isTrue();
 	}
 
-	@Test // gh-23775
+	@Test
 	public void invokeAndHandle_VoidNotModifiedWithEtag() throws Exception {
-		String etag = "\"deadb33f8badf00d\"";
-		this.request.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
-		this.webRequest.checkNotModified(etag);
 
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+		String eTagValue = "\"deadb33f8badf00d\"";
 
-		assertThat(this.mavContainer.isRequestHandled())
-				.as("Null return value + 'not modified' request should result in 'request handled'")
-				.isTrue();
+		FilterChain chain = (req, res) -> {
+			request.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			webRequest.checkNotModified(eTagValue);
 
-		assertThat(this.request.getAttribute(ShallowEtagHeaderFilter.class.getName() + ".STREAMING"))
-				.isEqualTo(true);
+			try {
+				ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
+				handlerMethod.invokeAndHandle(webRequest, mavContainer);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.request, this.response, chain);
+
+		assertThat(response.getStatus()).isEqualTo(304);
+		assertThat(response.getHeader(HttpHeaders.ETAG)).isEqualTo(eTagValue);
+		assertThat(response.getContentAsString()).isEmpty();
 	}
 
 	@Test  // SPR-9159
@@ -159,9 +174,35 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatusWithReason");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertThat(this.mavContainer.isRequestHandled()).as("When a status reason w/ used, the request is handled").isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 		assertThat(this.response.getErrorMessage()).isEqualTo("400 Bad Request");
+		assertThat(this.mavContainer.isRequestHandled())
+				.as("When a status reason w/ used, the request is handled").isTrue();
+	}
+
+	@Test // gh-23775, gh-24635
+	public void invokeAndHandle_ETagFilterHasNoImpactWhenETagPresent() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+
+		FilterChain chain = (req, res) -> {
+			request.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			webRequest.checkNotModified(eTagValue);
+
+			try {
+				ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "notModified");
+				handlerMethod.invokeAndHandle(webRequest, mavContainer);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.request, this.response, chain);
+
+		assertThat(this.response.getStatus()).isEqualTo(304);
+		assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(eTagValue);
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -180,15 +221,15 @@ public class ServletInvocableHandlerMethodTests {
 		this.returnValueHandlers.addHandler(new ViewNameMethodReturnValueHandler());
 
 		// Invoke without a request parameter (String return value)
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "dynamicReturnValue", String.class);
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+		ServletInvocableHandlerMethod hm = getHandlerMethod(new Handler(), "dynamicReturnValue", String.class);
+		hm.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.mavContainer.getView()).isNotNull();
 		assertThat(this.mavContainer.getView().getClass()).isEqualTo(RedirectView.class);
 
 		// Invoke with a request parameter (RedirectView return value)
 		this.request.setParameter("param", "value");
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+		hm.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.mavContainer.getViewName()).isEqualTo("view");
 	}

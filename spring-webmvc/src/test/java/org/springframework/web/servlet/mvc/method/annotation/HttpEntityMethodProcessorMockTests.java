@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+import javax.servlet.FilterChain;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -53,6 +55,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -427,6 +430,28 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, -1);
+	}
+
+	@Test
+	public void handleEtagWithHttp304AndEtagFilterHasNoImpact() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+
+		FilterChain chain = (req, res) -> {
+			servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(eTagValue).body("body");
+			initStringMessageConversion(TEXT_PLAIN);
+			try {
+				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.servletRequest, this.servletResponse, chain);
+
+		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, eTagValue, -1);
 	}
 
 	@Test  // SPR-14559
