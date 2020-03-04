@@ -31,6 +31,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
@@ -117,11 +119,12 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		HttpServletResponse rawResponse = (HttpServletResponse) wrapper.getResponse();
 
 		if (isEligibleForEtag(request, wrapper, wrapper.getStatus(), wrapper.getContentInputStream())) {
-			String responseETag = generateETagHeaderValue(wrapper.getContentInputStream(), this.writeWeakETag);
-			rawResponse.setHeader(HttpHeaders.ETAG, responseETag);
-			String requestETag = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-			if (requestETag != null && ("*".equals(requestETag) || compareETagHeaderValue(requestETag, responseETag))) {
-				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+			String eTag = wrapper.getHeader(HttpHeaders.ETAG);
+			if (!StringUtils.hasText(eTag)) {
+				eTag = generateETagHeaderValue(wrapper.getContentInputStream(), this.writeWeakETag);
+				rawResponse.setHeader(HttpHeaders.ETAG, eTag);
+			}
+			if (new ServletWebRequest(request, rawResponse).checkNotModified(eTag)) {
 				return;
 			}
 		}
@@ -224,14 +227,18 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public ServletOutputStream getOutputStream() throws IOException {
-			return (isContentCachingDisabled(this.request) ?
+			return (isContentCachingDisabled(this.request) || hasETag() ?
 					getResponse().getOutputStream() : super.getOutputStream());
 		}
 
 		@Override
 		public PrintWriter getWriter() throws IOException {
-			return (isContentCachingDisabled(this.request) ?
+			return (isContentCachingDisabled(this.request) || hasETag()?
 					getResponse().getWriter() : super.getWriter());
+		}
+
+		private boolean hasETag() {
+			return StringUtils.hasText(getHeader(HttpHeaders.ETAG));
 		}
 	}
 
