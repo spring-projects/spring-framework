@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,13 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
@@ -69,6 +73,9 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DefaultEntityResponseBuilder.class.getClassLoader());
+
+	private static final Type RESOURCE_REGION_LIST_TYPE =
+				new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
 
 
 	private final T entity;
@@ -245,6 +252,11 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			this.entityType = entityType;
 		}
 
+		private static <T> boolean isResource(T entity) {
+			return !(entity instanceof InputStreamResource) &&
+					(entity instanceof Resource);
+		}
+
 		@Override
 		public T entity() {
 			return this.entity;
@@ -267,13 +279,33 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
 			MediaType contentType = getContentType(response);
 			Class<?> entityClass = entity.getClass();
+			Type entityType = this.entityType;
+
+			if (entityClass != InputStreamResource.class && Resource.class.isAssignableFrom(entityClass)) {
+				serverResponse.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+				String rangeHeader = request.getHeader(HttpHeaders.RANGE);
+				if (rangeHeader != null) {
+					Resource resource = (Resource) entity;
+					try {
+						List<HttpRange> httpRanges = HttpRange.parseRanges(rangeHeader);
+						serverResponse.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
+						entity = HttpRange.toResourceRegions(httpRanges, resource);
+						entityClass = entity.getClass();
+						entityType = RESOURCE_REGION_LIST_TYPE;
+					}
+					catch (IllegalArgumentException ex) {
+						serverResponse.getHeaders().set(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
+						serverResponse.getServletResponse().setStatus(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value());
+					}
+				}
+			}
 
 			for (HttpMessageConverter<?> messageConverter : context.messageConverters()) {
 				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
 					GenericHttpMessageConverter<Object> genericMessageConverter =
 							(GenericHttpMessageConverter<Object>) messageConverter;
-					if (genericMessageConverter.canWrite(this.entityType, entityClass, contentType)) {
-						genericMessageConverter.write(entity, this.entityType, contentType, serverResponse);
+					if (genericMessageConverter.canWrite(entityType, entityClass, contentType)) {
+						genericMessageConverter.write(entity, entityType, contentType, serverResponse);
 						return;
 					}
 				}
