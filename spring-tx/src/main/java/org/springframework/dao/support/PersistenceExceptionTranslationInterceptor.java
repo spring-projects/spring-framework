@@ -16,6 +16,9 @@
 
 package org.springframework.dao.support;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -27,6 +30,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -167,8 +172,21 @@ public class PersistenceExceptionTranslationInterceptor
 		// Find all translators, being careful not to activate FactoryBeans.
 		Map<String, PersistenceExceptionTranslator> pets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				beanFactory, PersistenceExceptionTranslator.class, false, false);
+
+		List<PersistenceExceptionTranslator> translators = new ArrayList<>(pets.values());
+		if (translators.size() > 1) {
+			Comparator<Object> comparatorToUse = null;
+			if (beanFactory instanceof DefaultListableBeanFactory) {
+				comparatorToUse = ((DefaultListableBeanFactory) beanFactory).getDependencyComparator();
+			}
+			if (comparatorToUse == null) {
+				comparatorToUse = OrderComparator.INSTANCE;
+			}
+			translators.sort(comparatorToUse);
+		}
+
 		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
-		for (PersistenceExceptionTranslator pet : pets.values()) {
+		for (PersistenceExceptionTranslator pet : translators) {
 			cpet.addDelegate(pet);
 		}
 		return cpet;
