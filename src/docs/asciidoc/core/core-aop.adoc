@@ -2069,7 +2069,7 @@ collects the `this` object as the join point context and passes it to the advice
 		<aop:aspect id="myAspect" ref="aBean">
 
 			<aop:pointcut id="businessService"
-				expression="execution(* com.xyz.myapp.service.*.*(..)) &amp;&amp; this(service)"/>
+				expression="execution(* com.xyz.myapp.service.*.*(..)) && this(service)"/>
 
 			<aop:before pointcut-ref="businessService" method="monitor"/>
 
