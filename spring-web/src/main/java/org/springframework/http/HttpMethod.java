@@ -16,9 +16,8 @@
 
 package org.springframework.http;
 
-import java.util.HashMap;
 import java.util.Map;
-
+import com.google.common.collect.Maps;
 import org.springframework.lang.Nullable;
 
 /**
@@ -35,7 +34,7 @@ public enum HttpMethod {
 	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
 
-	private static final Map<String, HttpMethod> mappings = new HashMap<>(16);
+	private static final Map<String, HttpMethod> mappings = Maps.newHashMapWithExpectedSize(16);
 
 	static {
 		for (HttpMethod httpMethod : values()) {
