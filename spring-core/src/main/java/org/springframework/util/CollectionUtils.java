@@ -89,7 +89,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		collection.addAll(Arrays.asList((E[])arr));
+		Collections.addAll(collection, (E[])arr);
 	}
 
 	/**
