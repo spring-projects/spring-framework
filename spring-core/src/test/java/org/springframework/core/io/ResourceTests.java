@@ -456,4 +456,25 @@ class ResourceTests {
 
 	}
 
+	@Test
+	void getContentAsString_givenValidFile_ShouldReturnFileContent() throws IOException {
+		String expectedString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				+ "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n"
+				+ "<properties version=\"1.0\">\n"
+				+ "\t<entry key=\"foo\">bar</entry>\n"
+				+ "</properties>";
+
+		String fileDirString =
+				new ClassPathResource("org/springframework/core/io/example.xml").getContentAsString();
+		assertThat(fileDirString).isNotBlank();
+		assertThat(fileDirString).isEqualTo(expectedString);
+	}
+
+	@Test
+	void getContentAsString_givenAnInvalidFile_ShouldThrowFileNotFoundException(){
+		assertThatExceptionOfType(FileNotFoundException.class)
+				.isThrownBy(new ClassPathResource("nonExistantFile")::getContentAsString);
+
+	}
+
 }

@@ -26,7 +26,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.jar.JarEntry;
 
@@ -320,6 +323,39 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	protected void customizeConnection(HttpURLConnection con) throws IOException {
 	}
 
+	/**
+	 * This implementation returns the contents of a file as a string using the
+	 * system default Charset. Provided the resource exists and the context has
+	 * access to it, the contents will be returned as a single string with line
+	 * feed characters retained.
+	 * @return the contents of the requested file as a {@code String}.
+	 * @throws FileNotFoundException in the event the file path is invalid.
+	 * @throws IOException if the file can not be read or cannot be serialzied.
+	 */
+	@Override
+	public String getContentAsString() throws IOException {
+
+		if( !exists() ) {
+			throw new FileNotFoundException(getDescription() + " cannot be found.");
+		}
+		if ( !isReadable() ) {
+			throw new IOException(getDescription() + " cannot be opened for reading.");
+		}
+		return new String(Files.readAllBytes(Paths.get(getFile().getAbsolutePath())), Charset.defaultCharset());
+	}
+
+	@Override
+	public String getContentAsString(Charset charset) throws IOException {
+
+		if( !exists() ) {
+			throw new FileNotFoundException(getDescription() + " cannot be found.");
+		}
+		if ( !isReadable() ) {
+			throw new IOException(getDescription() + " cannot be opened for reading.");
+		}
+		return new String(Files.readAllBytes(Paths.get(getFile().getAbsolutePath())), charset);
+
+	}
 
 	/**
 	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.

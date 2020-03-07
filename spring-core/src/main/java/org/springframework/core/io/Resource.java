@@ -17,12 +17,14 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 
 import org.springframework.lang.Nullable;
 
@@ -175,5 +177,42 @@ public interface Resource extends InputStreamSource {
 	 * @see Object#toString()
 	 */
 	String getDescription();
+
+	/**
+	 * Return a {@link ReadableByteChannel}.
+	 * <p>It is expected that each call creates a <i>fresh</i> channel.
+	 * <p>The default implementation returns {@link Channels#newChannel(InputStream)}
+	 * with the result of {@link #getInputStream()}.
+	 * @return the byte channel for the underlying resource (must not be {@code null})
+	 * @throws java.io.FileNotFoundException if the underlying resource doesn't exist
+	 * @throws IOException if the content channel could not be opened
+	 * @since 5.0
+	 * @see #getInputStream()
+	 */
+
+	/**
+	 * Returns the contents of a file as a string using the system default Charset.
+	 * <p>The default implementation returns a {@link Object#toString()} representation of the resource.
+	 * @return the contents of the requested file as a {@code String}.
+	 * @throws FileNotFoundException in the event the file path is invalid.
+	 * @throws IOException if the file can not be read or cannot be accessed.
+	 * @since 5.2.5
+	 */
+	default String getContentAsString() throws IOException{
+		return toString();
+	}
+
+	/**
+	 * Returns the contents of a file as a string using the specified Charset.
+	 * <p>The default implementation returns a {@link Object#toString()} representation of the resource.
+	 * @param charset the {@code Charset} to use to deserialize the content. Defaults to system default.
+	 * @return the contents of the requested file as a {@code String}.
+	 * @throws FileNotFoundException in the event the file path is invalid.
+	 * @throws IOException if the file can not be read or cannot be accessed.
+	 * @since 5.2.5
+	 */
+	default String getContentAsString(Charset charset) throws IOException{
+		return toString();
+	}
 
 }
