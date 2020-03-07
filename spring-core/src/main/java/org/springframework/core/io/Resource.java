@@ -204,13 +204,13 @@ public interface Resource extends InputStreamSource {
 	/**
 	 * Returns the contents of a file as a string using the specified Charset.
 	 * <p>The default implementation returns a {@link Object#toString()} representation of the resource.
-	 * @param encoding the {@code Charset} to use to deserialize the content. Defaults to system default.
+	 * @param charset the {@code Charset} to use to deserialize the content. Defaults to system default.
 	 * @return the contents of the requested file as a {@code String}.
 	 * @throws FileNotFoundException in the event the file path is invalid.
 	 * @throws IOException if the file can not be read or cannot be accessed.
 	 * @since 5.2.5
 	 */
-	default String getContentAsString(Charset encoding) throws IOException{
+	default String getContentAsString(Charset charset) throws IOException{
 		return toString();
 	}
 

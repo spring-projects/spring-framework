@@ -323,7 +323,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	@Override
-	public String getContentAsString(Charset encoding) throws IOException {
+	public String getContentAsString(Charset charset) throws IOException {
 
 		if( !exists() ) {
 			throw new FileNotFoundException(getDescription() + " cannot be found.");
@@ -331,7 +331,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		if ( !isReadable() ) {
 			throw new IOException(getDescription() + " cannot be opened for reading.");
 		}
-		return new String(Files.readAllBytes(Paths.get(getFile().getAbsolutePath())), encoding);
+		return new String(Files.readAllBytes(Paths.get(getFile().getAbsolutePath())), charset);
 
 	}
 
