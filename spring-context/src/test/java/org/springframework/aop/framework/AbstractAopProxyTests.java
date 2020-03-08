@@ -31,9 +31,9 @@ import java.util.Map;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.mixin.LockMixin;
 import test.mixin.LockMixinAdvisor;
 import test.mixin.Lockable;
@@ -57,23 +57,23 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.aop.testfixture.advice.CountingAfterReturningAdvice;
+import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
+import org.springframework.aop.testfixture.advice.MethodCounter;
+import org.springframework.aop.testfixture.advice.MyThrowsHandler;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
+import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
-import org.springframework.tests.aop.advice.CountingBeforeAdvice;
-import org.springframework.tests.aop.advice.MethodCounter;
-import org.springframework.tests.aop.advice.MyThrowsHandler;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,12 +97,12 @@ public abstract class AbstractAopProxyTests {
 	 * The target must be set. Verification will be automatic in tearDown
 	 * to ensure that it was used appropriately by code.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 		mockTargetSource.reset();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		mockTargetSource.verify();
 	}
@@ -163,8 +163,8 @@ public abstract class AbstractAopProxyTests {
 	 * CGLIB this will be slow or will run out of memory.
 	 */
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testManyProxies() {
-		Assume.group(TestGroup.PERFORMANCE);
 		int howMany = 10000;
 		StopWatch sw = new StopWatch();
 		sw.start("Create " + howMany + " proxies");
@@ -765,7 +765,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see test.util.TimeStamped#getTimeStamp()
+			 * @see org.springframework.core.testfixture.util.TimeStamped#getTimeStamp()
 			 */
 			@Override
 			public long getTimeStamp() {

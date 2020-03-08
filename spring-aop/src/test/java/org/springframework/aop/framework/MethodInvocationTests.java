@@ -17,14 +17,13 @@
 package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,44 +32,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 14.03.2003
  */
-public class MethodInvocationTests {
+class MethodInvocationTests {
 
 	@Test
-	public void testValidInvocation() throws Throwable {
-		Method m = Object.class.getMethod("hashCode");
+	void testValidInvocation() throws Throwable {
+		Method method = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
-		final Object returnValue = new Object();
-		List<Object> is = new LinkedList<>();
-		is.add(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return returnValue;
-			}
-		});
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, //?
-		m, null, null, is // list
-	);
+		Object returnValue = new Object();
+		List<Object> interceptors = Collections.singletonList((MethodInterceptor) invocation -> returnValue);
+		ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, method, null, null, interceptors);
 		Object rv = invocation.proceed();
-		assertThat(rv == returnValue).as("correct response").isTrue();
+		assertThat(rv).as("correct response").isSameAs(returnValue);
 	}
 
 	/**
 	 * toString on target can cause failure.
 	 */
 	@Test
-	public void testToStringDoesntHitTarget() throws Throwable {
+	void testToStringDoesntHitTarget() throws Throwable {
 		Object target = new TestBean() {
 			@Override
 			public String toString() {
 				throw new UnsupportedOperationException("toString");
 			}
 		};
-		List<Object> is = new LinkedList<>();
+		List<Object> interceptors = Collections.emptyList();
 
 		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
-		ReflectiveMethodInvocation invocation =
-			new ReflectiveMethodInvocation(proxy, target, m, null, null, is);
+		ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, m, null, null, interceptors);
 
 		// If it hits target, the test will fail with the UnsupportedOpException
 		// in the inner class above.

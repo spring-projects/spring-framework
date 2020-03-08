@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
@@ -62,6 +63,8 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
 
+	private int maxInMemorySize = 256 * 1024;
+
 
 	/**
 	 * Set the default character set to use for reading form data when the
@@ -78,6 +81,26 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	 */
 	public Charset getDefaultCharset() {
 		return this.defaultCharset;
+	}
+
+	/**
+	 * Set the max number of bytes for input form data. As form data is buffered
+	 * before it is parsed, this helps to limit the amount of buffering. Once
+	 * the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -105,7 +128,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 		MediaType contentType = message.getHeaders().getContentType();
 		Charset charset = getMediaTypeCharset(contentType);
 
-		return DataBufferUtils.join(message.getBody())
+		return DataBufferUtils.join(message.getBody(), this.maxInMemorySize)
 				.map(buffer -> {
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
 					String body = charBuffer.toString();

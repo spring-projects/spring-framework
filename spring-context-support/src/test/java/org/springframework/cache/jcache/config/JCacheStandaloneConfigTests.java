@@ -18,6 +18,7 @@ package org.springframework.cache.jcache.config;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnotationTests;
 
 /**
  * @author Stephane Nicoll

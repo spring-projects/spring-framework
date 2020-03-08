@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,7 @@ import org.springframework.util.StringUtils;
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
-
-	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
-
+	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	/**
 	 * Create a new SseEmitter instance.
@@ -70,7 +67,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(UTF8_TEXT_EVENTSTREAM);
+			headers.setContentType(MediaType.TEXT_EVENT_STREAM);
 		}
 	}
 
@@ -82,10 +79,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * SseEmitter emitter = new SseEmitter();
 	 * emitter.send(event().data(myObject));
 	 * </pre>
-	 *
 	 * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
 	 * for important notes on exception handling.
-	 *
 	 * @param object the object to write
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
@@ -103,10 +98,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * SseEmitter emitter = new SseEmitter();
 	 * emitter.send(event().data(myObject, MediaType.APPLICATION_JSON));
 	 * </pre>
-	 *
 	 * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
 	 * for important notes on exception handling.
-	 *
 	 * @param object the object to write
 	 * @param mediaType a MediaType hint for selecting an HttpMessageConverter
 	 * @throws IOException raised when an I/O error occurs

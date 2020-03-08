@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -43,14 +44,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 
@@ -69,7 +70,7 @@ public class SpringValidatorAdapterTests {
 	private final StaticMessageSource messageSource = new StaticMessageSource();
 
 
-	@Before
+	@BeforeEach
 	public void setupSpringValidatorAdapter() {
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} must be between {2} and {1}");
 		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
@@ -322,12 +323,14 @@ public class SpringValidatorAdapterTests {
 
 		private String message;
 
+		@Override
 		public void initialize(Same constraintAnnotation) {
 			field = constraintAnnotation.field();
 			comparingField = constraintAnnotation.comparingField();
 			message = constraintAnnotation.message();
 		}
 
+		@Override
 		public boolean isValid(Object value, ConstraintValidatorContext context) {
 			BeanWrapper beanWrapper = new BeanWrapperImpl(value);
 			Object fieldValue = beanWrapper.getPropertyValue(field);

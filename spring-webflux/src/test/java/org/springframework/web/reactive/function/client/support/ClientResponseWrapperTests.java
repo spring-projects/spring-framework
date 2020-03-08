@@ -18,8 +18,8 @@ package org.springframework.web.reactive.function.client.support;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -47,7 +47,7 @@ public class ClientResponseWrapperTests {
 
 	private ClientResponseWrapper wrapper;
 
-	@Before
+	@BeforeEach
 	public void createWrapper() {
 		this.mockResponse = mock(ClientResponse.class);
 		this.wrapper = new ClientResponseWrapper(mockResponse);

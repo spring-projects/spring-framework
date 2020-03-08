@@ -16,8 +16,8 @@
 
 package org.springframework.transaction;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
@@ -283,7 +283,7 @@ public class TransactionSupportTests {
 	}
 
 
-	@After
+	@AfterEach
 	public void clear() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

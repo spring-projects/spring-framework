@@ -3,7 +3,10 @@ description = "Spring AOP"
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
-	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-	optional("org.apache.commons:commons-pool2:2.6.0")
-	optional("com.jamonapi:jamon:2.81")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.apache.commons:commons-pool2")
+	optional("com.jamonapi:jamon")
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
+	testFixturesImplementation(testFixtures(project(":spring-core")))
 }

@@ -31,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.lang.Nullable;
@@ -40,8 +39,10 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.ReactiveMessageHandler;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.PayloadUtils;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
@@ -60,11 +61,6 @@ import org.springframework.util.RouteMatcher;
  */
 class MessagingRSocket extends AbstractRSocket {
 
-	static final MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
-
-	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
-
-
 	private final MimeType dataMimeType;
 
 	private final MimeType metadataMimeType;
@@ -77,20 +73,20 @@ class MessagingRSocket extends AbstractRSocket {
 
 	private final RSocketRequester requester;
 
-	private final DataBufferFactory bufferFactory;
+	private final RSocketStrategies strategies;
 
 
 	MessagingRSocket(MimeType dataMimeType, MimeType metadataMimeType, MetadataExtractor metadataExtractor,
-			RSocketRequester requester, ReactiveMessageHandler messageHandler,
-			RouteMatcher routeMatcher, DataBufferFactory bufferFactory) {
+			RSocketRequester requester, ReactiveMessageHandler messageHandler, RouteMatcher routeMatcher,
+			RSocketStrategies strategies) {
 
 		Assert.notNull(dataMimeType, "'dataMimeType' is required");
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
-		Assert.notNull(metadataExtractor, "'metadataExtractor' is required");
-		Assert.notNull(requester, "'requester' is required");
-		Assert.notNull(messageHandler, "'messageHandler' is required");
-		Assert.notNull(routeMatcher, "'routeMatcher' is required");
-		Assert.notNull(bufferFactory, "'bufferFactory' is required");
+		Assert.notNull(metadataExtractor, "MetadataExtractor is required");
+		Assert.notNull(requester, "RSocketRequester is required");
+		Assert.notNull(messageHandler, "ReactiveMessageHandler is required");
+		Assert.notNull(routeMatcher, "RouteMatcher is required");
+		Assert.notNull(strategies, "RSocketStrategies is required");
 
 		this.dataMimeType = dataMimeType;
 		this.metadataMimeType = metadataMimeType;
@@ -98,7 +94,7 @@ class MessagingRSocket extends AbstractRSocket {
 		this.requester = requester;
 		this.messageHandler = messageHandler;
 		this.routeMatcher = routeMatcher;
-		this.bufferFactory = bufferFactory;
+		this.strategies = strategies;
 	}
 
 
@@ -187,7 +183,7 @@ class MessagingRSocket extends AbstractRSocket {
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {
-		return PayloadUtils.retainDataAndReleasePayload(payload, this.bufferFactory);
+		return PayloadUtils.retainDataAndReleasePayload(payload, this.strategies.dataBufferFactory());
 	}
 
 	private MessageHeaders createHeaders(Payload payload, FrameType frameType,
@@ -197,6 +193,7 @@ class MessagingRSocket extends AbstractRSocket {
 		headers.setLeaveMutable(true);
 
 		Map<String, Object> metadataValues = this.metadataExtractor.extract(payload, this.metadataMimeType);
+
 		metadataValues.putIfAbsent(MetadataExtractor.ROUTE_KEY, "");
 		for (Map.Entry<String, Object> entry : metadataValues.entrySet()) {
 			if (entry.getKey().equals(MetadataExtractor.ROUTE_KEY)) {
@@ -214,7 +211,8 @@ class MessagingRSocket extends AbstractRSocket {
 		if (replyMono != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
 		}
-		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.bufferFactory);
+		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER,
+				this.strategies.dataBufferFactory());
 
 		return headers.getMessageHeaders();
 	}

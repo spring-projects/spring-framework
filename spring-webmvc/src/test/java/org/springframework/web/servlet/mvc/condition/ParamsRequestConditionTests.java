@@ -18,10 +18,10 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition.ParamExpression;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

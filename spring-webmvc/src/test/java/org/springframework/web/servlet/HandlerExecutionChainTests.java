@@ -16,18 +16,18 @@
 
 package org.springframework.web.servlet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * A test fixture with HandlerExecutionChain and mock handler interceptors.
@@ -51,7 +51,7 @@ public class HandlerExecutionChainTests {
 	private AsyncHandlerInterceptor interceptor3;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.response= new MockHttpServletResponse() ;
@@ -120,7 +120,7 @@ public class HandlerExecutionChainTests {
 	@Test
 	public void exceptionBeforePreHandle() throws Exception {
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
-		verifyZeroInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
+		verifyNoInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
 	}
 
 	@Test

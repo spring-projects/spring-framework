@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -30,23 +31,22 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.testfixture.SimpleMapScope;
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -336,7 +336,6 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	@Test
-	@Ignore
 	public void testPersistenceUnitsFromJndi() {
 		EntityManager mockEm = mock(EntityManager.class);
 		given(mockEmf.createEntityManager()).willReturn(mockEm);

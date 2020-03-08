@@ -22,7 +22,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.CacheControl;

@@ -19,7 +19,7 @@ package org.springframework.core.io.support;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class SpringFactoriesLoaderTests {
+class SpringFactoriesLoaderTests {
 
 	@Test
-	public void loadFactoriesInCorrectOrder() {
+	void loadFactoriesInCorrectOrder() {
 		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, null);
 		assertThat(factories.size()).isEqualTo(2);
 		boolean condition1 = factories.get(0) instanceof MyDummyFactory1;
@@ -44,7 +44,7 @@ public class SpringFactoriesLoaderTests {
 	}
 
 	@Test
-	public void loadPackagePrivateFactory() {
+	void loadPackagePrivateFactory() {
 		List<DummyPackagePrivateFactory> factories =
 				SpringFactoriesLoader.loadFactories(DummyPackagePrivateFactory.class, null);
 		assertThat(factories.size()).isEqualTo(1);
@@ -52,7 +52,7 @@ public class SpringFactoriesLoaderTests {
 	}
 
 	@Test
-	public void attemptToLoadFactoryOfIncompatibleType() {
+	void attemptToLoadFactoryOfIncompatibleType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				SpringFactoriesLoader.loadFactories(String.class, null))
 			.withMessageContaining("Unable to instantiate factory class "

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.springframework.test.web.reactive.server
 
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.server.router
@@ -40,37 +39,36 @@ class WebTestClientExtensionsTests {
 
 
 	@Test
-	fun `RequestBodySpec#bodyWithType with Publisher and reified type parameters`() {
+	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<Foo>>()
-		requestBodySpec.bodyWithType(body)
+		requestBodySpec.body(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
-	fun `RequestBodySpec#bodyWithType with Flow and reified type parameters`() {
+	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<Foo>>()
-		requestBodySpec.bodyWithType(body)
+		requestBodySpec.body(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
-	fun `RequestBodySpec#bodyWithType with CompletableFuture and reified type parameters`() {
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
 		val body = mockk<CompletableFuture<Foo>>()
-		requestBodySpec.bodyWithType<Foo>(body)
+		requestBodySpec.body<Foo>(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	fun `ResponseSpec#expectBody with reified type parameters`() {
 		responseSpec.expectBody<Foo>()
-		verify { responseSpec.expectBody(Foo::class.java) }
+		verify { responseSpec.expectBody(object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	fun `KotlinBodySpec#isEqualTo`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
 				.get().uri("/").exchange().expectBody<String>().isEqualTo("foo")
 	}
@@ -78,17 +76,17 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `KotlinBodySpec#consumeWith`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().consumeWith { assertEquals("foo", it.responseBody) }
+				.get().uri("/").exchange().expectBody<String>().consumeWith { assertThat(it.responseBody).isEqualTo("foo") }
 	}
 
 	@Test
 	fun `KotlinBodySpec#returnResult`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertEquals("foo", responseBody) }
+				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertThat(responseBody).isEqualTo("foo") }
 	}
 
 	@Test

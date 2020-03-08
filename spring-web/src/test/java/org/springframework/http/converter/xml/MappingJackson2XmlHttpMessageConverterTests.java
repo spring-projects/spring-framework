@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;

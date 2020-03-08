@@ -18,11 +18,11 @@ package org.springframework.web.context.support;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -21,18 +21,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -54,7 +54,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	private MethodParameter paramMonoMap;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new PathVariableMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 

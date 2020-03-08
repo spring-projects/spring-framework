@@ -18,18 +18,18 @@ package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +50,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	private NativeWebRequest webRequest;
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -68,7 +68,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}

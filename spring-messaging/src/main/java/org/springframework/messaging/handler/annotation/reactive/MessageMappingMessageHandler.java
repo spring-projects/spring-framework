@@ -88,6 +88,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Nullable
 	private Validator validator;
 
+	@Nullable
 	private RouteMatcher routeMatcher;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
@@ -97,9 +98,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	public MessageMappingMessageHandler() {
-		AntPathMatcher pathMatcher = new AntPathMatcher();
-		pathMatcher.setPathSeparator(".");
-		this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
 		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
 	}
 
@@ -108,6 +106,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * Configure the decoders to use for incoming payloads.
 	 */
 	public void setDecoders(List<? extends Decoder<?>> decoders) {
+		this.decoders.clear();
 		this.decoders.addAll(decoders);
 	}
 
@@ -143,16 +142,29 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * efficiency consider using the {@code PathPatternRouteMatcher} from
 	 * {@code spring-web} instead.
 	 */
-	public void setRouteMatcher(RouteMatcher routeMatcher) {
-		Assert.notNull(routeMatcher, "RouteMatcher must not be null");
+	public void setRouteMatcher(@Nullable RouteMatcher routeMatcher) {
 		this.routeMatcher = routeMatcher;
 	}
 
 	/**
 	 * Return the {@code RouteMatcher} used to map messages to handlers.
+	 * May be {@code null} before the component is initialized.
 	 */
+	@Nullable
 	public RouteMatcher getRouteMatcher() {
 		return this.routeMatcher;
+	}
+
+	/**
+	 * Obtain the {@code RouteMatcher} for actual use.
+	 * @return the RouteMatcher (never {@code null})
+	 * @throws IllegalStateException in case of no RouteMatcher set
+	 * @since 5.0
+	 */
+	protected RouteMatcher obtainRouteMatcher() {
+		RouteMatcher routeMatcher = getRouteMatcher();
+		Assert.state(routeMatcher != null, "No RouteMatcher set");
+		return routeMatcher;
 	}
 
 	/**
@@ -177,6 +189,19 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		this.valueResolver = resolver;
 	}
 
+
+	@Override
+	public void afterPropertiesSet() {
+
+		// Initialize RouteMatcher before parent initializes handler mappings
+		if (this.routeMatcher == null) {
+			AntPathMatcher pathMatcher = new AntPathMatcher();
+			pathMatcher.setPathSeparator(".");
+			this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
+		}
+
+		super.afterPropertiesSet();
+	}
 
 	@Override
 	protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
@@ -231,13 +256,13 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 */
 	@Nullable
 	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
-		MessageMapping annot = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
-		if (annot == null || annot.value().length == 0) {
+		MessageMapping ann = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
+		if (ann == null || ann.value().length == 0) {
 			return null;
 		}
-		String[] patterns = processDestinations(annot.value());
+		String[] patterns = processDestinations(ann.value());
 		return new CompositeMessageCondition(
-				new DestinationPatternsMessageCondition(patterns, this.routeMatcher));
+				new DestinationPatternsMessageCondition(patterns, obtainRouteMatcher()));
 	}
 
 	/**
@@ -258,7 +283,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	protected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping) {
 		Set<String> result = new LinkedHashSet<>();
 		for (String pattern : mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns()) {
-			if (!this.routeMatcher.isPattern(pattern)) {
+			if (!obtainRouteMatcher().isPattern(pattern)) {
 				result.add(pattern);
 			}
 		}
@@ -295,7 +320,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 			String pattern = patterns.iterator().next();
 			RouteMatcher.Route destination = getDestination(message);
 			Assert.state(destination != null, "Missing destination header");
-			Map<String, String> vars = getRouteMatcher().matchAndExtract(pattern, destination);
+			Map<String, String> vars = obtainRouteMatcher().matchAndExtract(pattern, destination);
 			if (!CollectionUtils.isEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");

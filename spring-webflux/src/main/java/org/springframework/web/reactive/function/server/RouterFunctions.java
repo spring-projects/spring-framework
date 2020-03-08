@@ -444,7 +444,6 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all requests that match the
 		 * given predicate.
-		 *
 		 * @param predicate the request predicate to match
 		 * @param handlerFunction the handler function to handle all requests that match the predicate
 		 * @return this builder

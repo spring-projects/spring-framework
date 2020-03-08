@@ -17,11 +17,11 @@
 package org.springframework.cache.caffeine;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.cache.Cache;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +37,7 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 
 	private CaffeineCache cacheNoNull;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		nativeCache = Caffeine.newBuilder().build();
 		cache = new CaffeineCache(CACHE_NAME, nativeCache);

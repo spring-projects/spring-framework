@@ -221,6 +221,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	/**
 	 * Handle incoming WebSocket messages from clients.
 	 */
+	@Override
 	public void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
@@ -651,6 +652,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
+
 	@Override
 	public String toString() {
 		return "StompSubProtocolHandler" + getSupportedProtocols();
@@ -688,7 +690,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		private final AtomicInteger disconnect = new AtomicInteger();
 
-
 		public void incrementConnectCount() {
 			this.connect.incrementAndGet();
 		}
@@ -716,6 +717,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return this.disconnect.get();
 		}
 
+		@Override
 		public String toString() {
 			return "processed CONNECT(" + this.connect.get() + ")-CONNECTED(" +
 					this.connected.get() + ")-DISCONNECT(" + this.disconnect.get() + ")";

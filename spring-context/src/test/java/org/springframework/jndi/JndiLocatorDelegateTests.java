@@ -17,9 +17,10 @@
 package org.springframework.jndi;
 
 import java.lang.reflect.Field;
+
 import javax.naming.spi.NamingManager;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -4,12 +4,12 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="topLevel"/>
 	</bean>
 
 	<beans>
-		<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+		<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 			<property name="name" value="nested"/>
 		</bean>
 	</beans>

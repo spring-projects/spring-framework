@@ -18,11 +18,12 @@ package org.springframework.jdbc.config;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -42,12 +43,12 @@ public class InitializeDatabaseIntegrationTests {
 	private ClassPathXmlApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void init() {
 		enabled = System.setProperty("ENABLED", "true");
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		if (enabled != null) {
 			System.setProperty("ENABLED", enabled);

@@ -19,9 +19,10 @@ package org.springframework.web.method;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+
 import javax.annotation.Priority;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;

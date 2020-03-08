@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_JSON}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -120,7 +120,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -170,7 +170,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -182,7 +182,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
 	 * @since 5.0
-	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
+	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
 	 * now comply with the specification</a> and interpret correctly UTF-8 special
@@ -302,6 +302,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
 
 	/**
+	 * Public constant media type for {@code multipart/related}.
+	 * @since 5.2.5
+	 */
+	public static final MediaType MULTIPART_RELATED;
+
+	/**
+	 * A String equivalent of {@link MediaType#MULTIPART_RELATED}.
+	 * @since 5.2.5
+	 */
+	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
+
+	/**
 	 * Public constant media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
@@ -370,7 +382,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
-		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem", StandardCharsets.UTF_8);
+		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
 		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
@@ -381,6 +393,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = new MediaType("image", "png");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
 		MULTIPART_MIXED = new MediaType("multipart", "mixed");
+		MULTIPART_RELATED = new MediaType("multipart", "related");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");

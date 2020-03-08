@@ -18,8 +18,8 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
@@ -42,7 +42,7 @@ public class ProceedTests {
 	private ProceedTestingAspect secondTestAspect;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());

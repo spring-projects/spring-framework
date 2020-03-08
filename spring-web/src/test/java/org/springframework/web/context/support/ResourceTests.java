@@ -18,10 +18,10 @@ package org.springframework.web.context.support;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

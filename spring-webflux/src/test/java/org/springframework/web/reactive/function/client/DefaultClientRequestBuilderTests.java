@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,8 +33,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -24,15 +24,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -85,7 +88,7 @@ public class AnnotationDrivenEventListenerTests {
 	private CountDownLatch countDownLatch;  // 1 call by default
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
@@ -613,12 +616,19 @@ public class AnnotationDrivenEventListenerTests {
 		assertThat(listener.order).contains("first", "second", "third");
 	}
 
-	@Test @Ignore  // SPR-15122
+	@Test @Disabled  // SPR-15122
 	public void listenersReceiveEarlyEvents() {
 		load(EventOnPostConstruct.class, OrderedTestListener.class);
 		OrderedTestListener listener = this.context.getBean(OrderedTestListener.class);
 
 		assertThat(listener.order).contains("first", "second", "third");
+	}
+
+	@Test
+	public void missingListenerBeanIgnored() {
+		load(MissingEventListener.class);
+		context.getBean(UseMissingEventListener.class);
+		context.getBean(ApplicationEventMulticaster.class).multicastEvent(new TestEvent(this));
 	}
 
 
@@ -842,6 +852,7 @@ public class AnnotationDrivenEventListenerTests {
 
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(event.content);
 			this.eventCollector.addEvent(this, event);
@@ -868,6 +879,7 @@ public class AnnotationDrivenEventListenerTests {
 
 		@EventListener
 		@Async
+		@Override
 		public void handleAsync(AnotherTestEvent event) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(event.content);
 			this.eventCollector.addEvent(this, event);
@@ -982,18 +994,20 @@ public class AnnotationDrivenEventListenerTests {
 			super.handle(event);
 		}
 
-		@Override
 		@EventListener(condition = "#payload.startsWith('OK')")
+		@Override
 		public void handleString(String payload) {
 			super.handleString(payload);
 		}
 
 		@ConditionalEvent("#root.event.timestamp > #p0")
+		@Override
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
 
 		@ConditionalEvent("@conditionEvaluator.valid(#p0)")
+		@Override
 		public void handleRatio(Double ratio) {
 			collectEvent(ratio);
 		}
@@ -1068,6 +1082,38 @@ public class AnnotationDrivenEventListenerTests {
 		@Override
 		public String getConversationId() {
 			return null;
+		}
+	}
+
+
+	@Configuration
+	@Import(UseMissingEventListener.class)
+	public static class MissingEventListener {
+
+		@Bean
+		public MyEventListener missing() {
+			return null;
+		}
+	}
+
+
+	@Component
+	public static class MyEventListener {
+
+		@EventListener
+		public void hear(TestEvent e) {
+			throw new AssertionError();
+		}
+	}
+
+
+	public static class UseMissingEventListener {
+
+		@Inject
+		public UseMissingEventListener(Optional<MyEventListener> notHere) {
+			if (notHere.isPresent()) {
+				throw new AssertionError();
+			}
 		}
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @author Phillip Webb
  */
-public class ComparableComparatorTests {
+class ComparableComparatorTests {
 
 	@Test
-	public void testComparableComparator() {
+	void comparableComparator() {
 		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
@@ -42,7 +42,7 @@ public class ComparableComparatorTests {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void shouldNeedComparable() {
+	void shouldNeedComparable() {
 		Comparator c = new ComparableComparator();
 		Object o1 = new Object();
 		Object o2 = new Object();

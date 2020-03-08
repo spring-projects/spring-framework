@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
@@ -31,56 +32,59 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with
  * one or more {@link ContentNegotiationStrategy} instances.
  *
- * <p>As of 5.0 you can set the exact strategies to use via
- * {@link #strategies(List)}.
- *
- * <p>As an alternative you can also rely on the set of defaults described below
- * which can be turned on or off or customized through the methods of this
- * builder:
+ * <p>This factory offers properties that in turn result in configuring the
+ * underlying strategies. The table below shows the property names, their
+ * default settings, as well as the strategies that they help to configure:
  *
  * <table>
  * <tr>
- * <th>Configurer Property</th>
+ * <th>Property Setter</th>
+ * <th>Default Value</th>
  * <th>Underlying Strategy</th>
- * <th>Default Setting</th>
+ * <th>Enabled Or Not</th>
  * </tr>
  * <tr>
  * <td>{@link #favorPathExtension}</td>
- * <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
- * <td>On</td>
+ * <td>true</td>
+ * <td>{@link org.springframework.web.accept.PathExtensionContentNegotiationStrategy
+ * PathExtensionContentNegotiationStrategy}</td>
+ * <td>Enabled</td>
  * </tr>
  * <tr>
  * <td>{@link #favorParameter}</td>
- * <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ * <td>false</td>
+ * <td>{@link ParameterContentNegotiationStrategy}</td>
  * <td>Off</td>
  * </tr>
  * <tr>
  * <td>{@link #ignoreAcceptHeader}</td>
- * <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
- * <td>On</td>
+ * <td>false</td>
+ * <td>{@link HeaderContentNegotiationStrategy}</td>
+ * <td>Enabled</td>
  * </tr>
  * <tr>
  * <td>{@link #defaultContentType}</td>
- * <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
- * <td>Not set</td>
+ * <td>null</td>
+ * <td>{@link FixedContentNegotiationStrategy}</td>
+ * <td>Off</td>
  * </tr>
  * <tr>
  * <td>{@link #defaultContentTypeStrategy}</td>
+ * <td>null</td>
  * <td>{@link ContentNegotiationStrategy}</td>
- * <td>Not set</td>
+ * <td>Off</td>
  * </tr>
  * </table>
  *
- * <p>The order in which strategies are configured is fixed. You can only turn
- * them on or off.
+ * <p>As of 5.0 you can set the exact strategies to use via
+ * {@link #strategies(List)}.
  *
- * <strong>Note:</strong> if you must use URL-based content type resolution,
+ * <p><strong>Note:</strong> if you must use URL-based content type resolution,
  * the use of a query parameter is simpler and preferable to the use of a path
  * extension since the latter can cause issues with URI variables, path
  * parameters, and URI decoding. Consider setting {@link #favorPathExtension}
@@ -125,7 +129,11 @@ public class ContentNegotiationConfigurer {
 	 * <p>By default this is set to {@code true} in which case a request
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer favorPathExtension(boolean favorPathExtension) {
 		this.factory.setFavorPathExtension(favorPathExtension);
 		return this;
@@ -179,7 +187,11 @@ public class ContentNegotiationConfigurer {
 	 * to any media type. Setting this to {@code false} will result in an
 	 * {@code HttpMediaTypeNotAcceptableException} if there is no match.
 	 * <p>By default this is set to {@code true}.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
 		this.factory.setIgnoreUnknownPathExtensions(ignore);
 		return this;

@@ -19,7 +19,7 @@ package org.springframework.scripting.bsh;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.ScriptEvaluator;

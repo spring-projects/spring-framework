@@ -20,16 +20,16 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

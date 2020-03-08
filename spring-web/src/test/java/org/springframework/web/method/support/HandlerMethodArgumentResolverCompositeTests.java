@@ -18,8 +18,8 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 
@@ -40,8 +40,8 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	private MethodParameter paramStr;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setup() throws Exception {
 		this.resolverComposite = new HandlerMethodArgumentResolverComposite();
 
 		Method method = getClass().getDeclaredMethod("handle", Integer.class, String.class);
@@ -51,7 +51,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Test
-	public void supportsParameter() {
+	public void supportsParameter() throws Exception {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
 		assertThat(this.resolverComposite.supportsParameter(paramInt)).isTrue();

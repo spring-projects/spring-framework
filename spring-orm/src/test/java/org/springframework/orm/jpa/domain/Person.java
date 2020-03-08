@@ -27,8 +27,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Simple JavaBean domain object representing an person.

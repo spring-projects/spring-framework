@@ -18,14 +18,14 @@ package org.springframework.aop.interceptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

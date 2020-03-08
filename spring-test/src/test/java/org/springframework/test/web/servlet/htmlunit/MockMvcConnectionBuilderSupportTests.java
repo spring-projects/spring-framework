@@ -18,20 +18,21 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -52,7 +53,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @WebAppConfiguration
 @SuppressWarnings("rawtypes")
@@ -66,7 +67,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	private WebApplicationContext wac;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(this.client.getWebConnection()).willReturn(mock(WebConnection.class));
 		this.builder = new MockMvcWebConnectionBuilderSupport(this.wac) {};

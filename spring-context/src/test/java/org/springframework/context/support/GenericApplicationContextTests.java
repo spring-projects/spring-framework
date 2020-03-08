@@ -16,9 +16,10 @@
 
 package org.springframework.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -64,7 +65,7 @@ public class GenericApplicationContextTests {
 	public void withScopedSupplier() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("testBean",
-				new RootBeanDefinition(String.class, RootBeanDefinition.SCOPE_PROTOTYPE, ac::toString));
+				new RootBeanDefinition(String.class, BeanDefinition.SCOPE_PROTOTYPE, ac::toString));
 		ac.refresh();
 
 		assertThat(ac.getBean("testBean")).isNotSameAs(ac.getBean("testBean"));

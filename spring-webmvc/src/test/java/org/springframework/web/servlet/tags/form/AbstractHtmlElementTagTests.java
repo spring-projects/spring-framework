@@ -20,13 +20,12 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,6 +37,8 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -55,7 +56,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	private MockPageContext pageContext;
 
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		// set up a writer for the tag content to be written to
 		this.writer = new StringWriter();

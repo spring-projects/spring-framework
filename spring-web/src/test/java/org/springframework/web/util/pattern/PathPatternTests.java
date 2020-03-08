@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
@@ -710,9 +710,10 @@ public class PathPatternTests {
 	@Test
 	public void extractPathWithinPatternCustomSeparator() {
 		PathPatternParser ppp = new PathPatternParser();
-		ppp.setSeparator('.');
+		ppp.setPathOptions(PathContainer.Options.create('.', true));
 		PathPattern pp = ppp.parse("test.**");
-		PathContainer pathContainer = PathContainer.parsePath("test.projects..spring-framework", ".");
+		PathContainer pathContainer = PathContainer.parsePath(
+				"test.projects..spring-framework", PathContainer.Options.create('.', true));
 		PathContainer result = pp.extractPathWithinPattern(pathContainer);
 		assertThat(result.value()).isEqualTo("projects.spring-framework");
 		assertThat(result.elements()).hasSize(3);

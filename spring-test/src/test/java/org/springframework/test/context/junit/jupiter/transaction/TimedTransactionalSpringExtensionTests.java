@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.junit.jupiter.transaction;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class TimedTransactionalSpringExtensionTests {
 		Events events = EngineTestKit.engine("junit-jupiter")
 				.selectors(selectClass(TestCase.class))
 				.execute()
-				.tests()
+				.testEvents()
 				.assertStatistics(stats -> stats.started(4).succeeded(2).failed(2));
 
 		events.failed().assertThatEvents().haveExactly(2,

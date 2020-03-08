@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -33,7 +33,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -52,6 +51,7 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -69,8 +69,12 @@ public class CrossOriginTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
+	private final String optionsHandler = "org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping$HttpOptionsHandler#handle()";
 
-	@Before
+	private final String corsPreflightHandler = "org.springframework.web.servlet.handler.AbstractHandlerMapping$PreFlightHandler";
+
+
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -94,6 +98,25 @@ public class CrossOriginTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/no");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		assertThat(getCorsConfiguration(chain, false)).isNull();
+	}
+
+	@Test
+	public void noAnnotationWithAccessControlRequestMethod() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/no");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		assertThat(chain.getHandler().toString()).isEqualTo(optionsHandler);
+	}
+
+	@Test
+	public void noAnnotationWithPreflightRequest() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/no");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com/");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		assertThat(chain.getHandler().getClass().getName()).isEqualTo(corsPreflightHandler);
 	}
 
 	@Test  // SPR-12931

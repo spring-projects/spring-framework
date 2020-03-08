@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import kotlinx.coroutines.Deferred;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
@@ -40,13 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unchecked")
-public class ReactiveAdapterRegistryTests {
+class ReactiveAdapterRegistryTests {
 
 	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	@Test
-	public void defaultAdapterRegistrations() {
+	void defaultAdapterRegistrations() {
 
 		// Reactor
 		assertThat(getAdapter(Mono.class)).isNotNull();
@@ -75,7 +75,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void getAdapterForReactiveSubType() {
+	void getAdapterForReactiveSubType() {
 
 		ReactiveAdapter adapter1 = getAdapter(Flux.class);
 		ReactiveAdapter adapter2 = getAdapter(FluxProcessor.class);
@@ -94,7 +94,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToFlux() {
+	void publisherToFlux() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Publisher<Integer> source = Flowable.fromIterable(sequence);
 		Object target = getAdapter(Flux.class).fromPublisher(source);
@@ -106,7 +106,7 @@ public class ReactiveAdapterRegistryTests {
 	// TODO: publisherToMono/CompletableFuture vs Single (ISE on multiple elements)?
 
 	@Test
-	public void publisherToMono() {
+	void publisherToMono() {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(Mono.class).fromPublisher(source);
 		boolean condition = target instanceof Mono;
@@ -115,7 +115,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToCompletableFuture() throws Exception {
+	void publisherToCompletableFuture() throws Exception {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(CompletableFuture.class).fromPublisher(source);
 		boolean condition = target instanceof CompletableFuture;
@@ -124,7 +124,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToRxObservable() {
+	void publisherToRxObservable() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Publisher<Integer> source = Flowable.fromIterable(sequence);
 		Object target = getAdapter(rx.Observable.class).fromPublisher(source);
@@ -134,7 +134,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToRxSingle() {
+	void publisherToRxSingle() {
 		Publisher<Integer> source = Flowable.fromArray(1);
 		Object target = getAdapter(rx.Single.class).fromPublisher(source);
 		boolean condition = target instanceof Single;
@@ -143,7 +143,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToRxCompletable() {
+	void publisherToRxCompletable() {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(rx.Completable.class).fromPublisher(source);
 		boolean condition = target instanceof Completable;
@@ -152,7 +152,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToReactivexFlowable() {
+	void publisherToReactivexFlowable() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Publisher<Integer> source = Flux.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Flowable.class).fromPublisher(source);
@@ -162,7 +162,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToReactivexObservable() {
+	void publisherToReactivexObservable() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Publisher<Integer> source = Flowable.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Observable.class).fromPublisher(source);
@@ -172,7 +172,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToReactivexSingle() {
+	void publisherToReactivexSingle() {
 		Publisher<Integer> source = Flowable.fromArray(1);
 		Object target = getAdapter(io.reactivex.Single.class).fromPublisher(source);
 		boolean condition = target instanceof io.reactivex.Single;
@@ -181,7 +181,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void publisherToReactivexCompletable() {
+	void publisherToReactivexCompletable() {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(io.reactivex.Completable.class).fromPublisher(source);
 		boolean condition = target instanceof io.reactivex.Completable;
@@ -190,7 +190,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void rxObservableToPublisher() {
+	void rxObservableToPublisher() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Object source = rx.Observable.from(sequence);
 		Object target = getAdapter(rx.Observable.class).toPublisher(source);
@@ -200,7 +200,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void rxSingleToPublisher() {
+	void rxSingleToPublisher() {
 		Object source = rx.Single.just(1);
 		Object target = getAdapter(rx.Single.class).toPublisher(source);
 		boolean condition = target instanceof Mono;
@@ -209,7 +209,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void rxCompletableToPublisher() {
+	void rxCompletableToPublisher() {
 		Object source = rx.Completable.complete();
 		Object target = getAdapter(rx.Completable.class).toPublisher(source);
 		boolean condition = target instanceof Mono;
@@ -218,7 +218,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void reactivexFlowableToPublisher() {
+	void reactivexFlowableToPublisher() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Object source = io.reactivex.Flowable.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Flowable.class).toPublisher(source);
@@ -228,7 +228,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void reactivexObservableToPublisher() {
+	void reactivexObservableToPublisher() {
 		List<Integer> sequence = Arrays.asList(1, 2, 3);
 		Object source = io.reactivex.Observable.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Observable.class).toPublisher(source);
@@ -238,7 +238,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void reactivexSingleToPublisher() {
+	void reactivexSingleToPublisher() {
 		Object source = io.reactivex.Single.just(1);
 		Object target = getAdapter(io.reactivex.Single.class).toPublisher(source);
 		boolean condition = target instanceof Mono;
@@ -247,7 +247,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void reactivexCompletableToPublisher() {
+	void reactivexCompletableToPublisher() {
 		Object source = io.reactivex.Completable.complete();
 		Object target = getAdapter(io.reactivex.Completable.class).toPublisher(source);
 		boolean condition = target instanceof Mono;
@@ -256,7 +256,7 @@ public class ReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	public void CompletableFutureToPublisher() {
+	void completableFutureToPublisher() {
 		CompletableFuture<Integer> future = new CompletableFuture<>();
 		future.complete(1);
 		Object target = getAdapter(CompletableFuture.class).toPublisher(future);

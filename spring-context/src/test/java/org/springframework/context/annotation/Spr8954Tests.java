@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.FactoryBean;

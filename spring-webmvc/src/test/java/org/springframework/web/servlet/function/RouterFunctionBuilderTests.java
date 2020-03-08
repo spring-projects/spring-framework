@@ -19,13 +19,13 @@ package org.springframework.web.servlet.function;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;

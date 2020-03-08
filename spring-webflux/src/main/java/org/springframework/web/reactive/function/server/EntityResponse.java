@@ -69,7 +69,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T body) {
-		return new DefaultEntityResponseBuilder<>(body, BodyInserters.fromObject(body));
+		return new DefaultEntityResponseBuilder<>(body, BodyInserters.fromValue(body));
 	}
 
 	/**
@@ -91,9 +91,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * @return the created builder
 	 * @since 5.2
 	 */
-	static <T> Builder<T> fromProducer(T producer,
-			ParameterizedTypeReference<?> typeReference) {
-
+	static <T> Builder<T> fromProducer(T producer, ParameterizedTypeReference<?> typeReference) {
 		return new DefaultEntityResponseBuilder<>(producer,
 				BodyInserters.fromProducer(producer, typeReference));
 	}

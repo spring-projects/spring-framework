@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
@@ -309,7 +310,11 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>The default value is {@code true}.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
 	 */
+	@Deprecated
 	public StandaloneMockMvcBuilder setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		return this;
@@ -441,6 +446,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup. */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
+		@SuppressWarnings("deprecation")
 		public RequestMappingHandlerMapping getHandlerMapping(
 				FormattingConversionService mvcConversionService,
 				ResourceUrlProvider mvcResourceUrlProvider) {
@@ -546,7 +552,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		private final PlaceholderResolver resolver;
 
-		public StaticStringValueResolver(final Map<String, String> values) {
+		public StaticStringValueResolver(Map<String, String> values) {
 			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
 			this.resolver = values::get;
 		}

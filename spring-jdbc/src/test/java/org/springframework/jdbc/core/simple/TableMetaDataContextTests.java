@@ -23,10 +23,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.metadata.TableMetaDataContext;
@@ -54,7 +55,7 @@ public class TableMetaDataContextTests  {
 	private TableMetaDataContext context = new TableMetaDataContext();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);

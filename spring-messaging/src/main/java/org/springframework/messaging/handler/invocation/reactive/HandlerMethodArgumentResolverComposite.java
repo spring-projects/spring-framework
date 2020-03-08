@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
+public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -125,7 +125,7 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 	 * the given method parameter.
 	 */
 	@Nullable
-	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
+	public HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {

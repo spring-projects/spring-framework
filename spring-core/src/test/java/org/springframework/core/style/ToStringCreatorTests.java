@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ObjectUtils;
 
@@ -33,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Keith Donald
  */
-public class ToStringCreatorTests {
+class ToStringCreatorTests {
 
 	private SomeObject s1, s2, s3;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		s1 = new SomeObject() {
 			@Override
 			public String toString() {
@@ -61,7 +61,7 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void defaultStyleMap() {
+	void defaultStyleMap() {
 		final Map<String, String> map = getMap();
 		Object stringy = new Object() {
 			@Override
@@ -82,7 +82,7 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void defaultStyleArray() {
+	void defaultStyleArray() {
 		SomeObject[] array = new SomeObject[] {s1, s2, s3};
 		String str = new ToStringCreator(array).toString();
 		assertThat(str).isEqualTo(("[@" + ObjectUtils.getIdentityHexString(array) +
@@ -90,14 +90,14 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void primitiveArrays() {
+	void primitiveArrays() {
 		int[] integers = new int[] {0, 1, 2, 3, 4};
 		String str = new ToStringCreator(integers).toString();
 		assertThat(str).isEqualTo(("[@" + ObjectUtils.getIdentityHexString(integers) + " array<Integer>[0, 1, 2, 3, 4]]"));
 	}
 
 	@Test
-	public void appendList() {
+	void appendList() {
 		List<SomeObject> list = new ArrayList<>();
 		list.add(s1);
 		list.add(s2);
@@ -107,7 +107,7 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void appendSet() {
+	void appendSet() {
 		Set<SomeObject> set = new LinkedHashSet<>();
 		set.add(s1);
 		set.add(s2);
@@ -117,15 +117,15 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void appendClass() {
+	void appendClass() {
 		String str = new ToStringCreator(this).append("myClass", this.getClass()).toString();
 		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
 				" myClass = ToStringCreatorTests]"));
 	}
 
 	@Test
-	public void appendMethod() throws Exception {
-		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("appendMethod")).toString();
+	void appendMethod() throws Exception {
+		String str = new ToStringCreator(this).append("myMethod", this.getClass().getDeclaredMethod("appendMethod")).toString();
 		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
 				" myMethod = appendMethod@ToStringCreatorTests]"));
 	}

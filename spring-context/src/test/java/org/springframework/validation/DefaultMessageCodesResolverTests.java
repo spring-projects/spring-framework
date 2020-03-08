@@ -16,15 +16,12 @@
 
 package org.springframework.validation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.DefaultMessageCodesResolver.Format;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-
-
 
 /**
  * Tests for {@link DefaultMessageCodesResolver}.
@@ -50,7 +47,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes).containsExactly(
 				"errorCode.objectName.field",
 				"errorCode.field",
-				"errorCode.org.springframework.tests.sample.beans.TestBean",
+				"errorCode.org.springframework.beans.testfixture.beans.TestBean",
 				"errorCode");
 	}
 
@@ -66,7 +63,7 @@ public class DefaultMessageCodesResolverTests {
 				"errorCode.a.b[3].c.d",
 				"errorCode.a.b.c.d",
 				"errorCode.d",
-				"errorCode.org.springframework.tests.sample.beans.TestBean",
+				"errorCode.org.springframework.beans.testfixture.beans.TestBean",
 				"errorCode");
 	}
 
@@ -87,7 +84,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes).containsExactly(
 				"prefix.errorCode.objectName.field",
 				"prefix.errorCode.field",
-				"prefix.errorCode.org.springframework.tests.sample.beans.TestBean",
+				"prefix.errorCode.org.springframework.beans.testfixture.beans.TestBean",
 				"prefix.errorCode");
 	}
 
@@ -99,7 +96,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes).containsExactly(
 				"errorCode.objectName.field",
 				"errorCode.field",
-				"errorCode.org.springframework.tests.sample.beans.TestBean",
+				"errorCode.org.springframework.beans.testfixture.beans.TestBean",
 				"errorCode");
 	}
 
@@ -110,7 +107,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes).containsExactly(
 				"errorCode.objectName.field[",
 				"errorCode.field[",
-				"errorCode.org.springframework.tests.sample.beans.TestBean",
+				"errorCode.org.springframework.beans.testfixture.beans.TestBean",
 				"errorCode");
 	}
 
@@ -141,7 +138,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes).containsExactly(
 				"objectName.field.errorCode",
 				"field.errorCode",
-				"org.springframework.tests.sample.beans.TestBean.errorCode",
+				"org.springframework.beans.testfixture.beans.TestBean.errorCode",
 				"errorCode");
 	}
 

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ElementKind;
 import javax.validation.Path;
@@ -117,7 +118,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void validateValue(
 			Class<?> targetType, String fieldName, @Nullable Object value, Errors errors, Object... validationHints) {

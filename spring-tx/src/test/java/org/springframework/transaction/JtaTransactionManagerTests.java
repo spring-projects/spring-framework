@@ -26,11 +26,10 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.tests.transaction.MockJtaTransaction;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -1190,7 +1189,7 @@ public class JtaTransactionManagerTests {
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
-	@After
+	@AfterEach
 	public void tearDown() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

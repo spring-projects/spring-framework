@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,7 +36,6 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.TestBeanAwareMessenger;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

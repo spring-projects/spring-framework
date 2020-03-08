@@ -18,7 +18,7 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;

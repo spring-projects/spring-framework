@@ -20,15 +20,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.servlet.resource.GzipSupport.GzippedFiles;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
+@ExtendWith(GzipSupport.class)
 public class CachingResourceResolverTests {
 
 	private Cache cache;
@@ -47,7 +50,7 @@ public class CachingResourceResolverTests {
 	private List<Resource> locations;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.cache = new ConcurrentMapCache("resourceCache");
@@ -108,10 +111,10 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceAcceptEncodingInCacheKey() throws IOException {
+	public void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) throws IOException {
 
 		String file = "bar.css";
-		EncodedResourceResolverTests.createGzippedFile(file);
+		gzippedFiles.create(file);
 
 		// 1. Resolve plain resource
 

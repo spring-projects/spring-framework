@@ -20,10 +20,8 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -33,8 +31,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -49,6 +45,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,11 +58,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class HandlerMethodAnnotationDetectionTests {
+class HandlerMethodAnnotationDetectionTests {
 
-	@Parameters(name = "controller [{0}], auto-proxy [{1}]")
-	public static Object[][] handlerTypes() {
+	static Object[][] handlerTypes() {
 		return new Object[][] {
 				{ SimpleController.class, true }, // CGLIB proxy
 				{ SimpleController.class, false },
@@ -92,14 +88,14 @@ public class HandlerMethodAnnotationDetectionTests {
 		};
 	}
 
-	private RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+	private RequestMappingHandlerMapping handlerMapping;
 
-	private RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
+	private RequestMappingHandlerAdapter handlerAdapter;
 
-	private ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver();
+	private ExceptionHandlerExceptionResolver exceptionResolver;
 
 
-	public HandlerMethodAnnotationDetectionTests(Class<?> controllerType, boolean useAutoProxy) {
+	private void setUp(Class<?> controllerType, boolean useAutoProxy) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.registerBeanDefinition("controller", new RootBeanDefinition(controllerType));
 		context.registerBeanDefinition("handlerMapping", new RootBeanDefinition(RequestMappingHandlerMapping.class));
@@ -120,8 +116,11 @@ public class HandlerMethodAnnotationDetectionTests {
 	}
 
 
-	@Test
-	public void testRequestMappingMethod() throws Exception {
+	@ParameterizedTest(name = "[{index}] controller [{0}], auto-proxy [{1}]")
+	@MethodSource("handlerTypes")
+	void testRequestMappingMethod(Class<?> controllerType, boolean useAutoProxy) throws Exception {
+		setUp(controllerType, useAutoProxy);
+
 		String datePattern = "MM:dd:yyyy";
 		SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
 		String dateA = "11:01:2011";

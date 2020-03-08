@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
  */
-public class SimpleAliasRegistryTests {
+class SimpleAliasRegistryTests {
 
 	@Test
-	public void testAliasChaining() {
+	void aliasChaining() {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("test", "testAlias");
 		registry.registerAlias("testAlias", "testAlias2");
@@ -35,13 +35,13 @@ public class SimpleAliasRegistryTests {
 		assertThat(registry.hasAlias("test", "testAlias")).isTrue();
 		assertThat(registry.hasAlias("test", "testAlias2")).isTrue();
 		assertThat(registry.hasAlias("test", "testAlias3")).isTrue();
-		assertThat(registry.canonicalName("testAlias")).isSameAs("test");
-		assertThat(registry.canonicalName("testAlias2")).isSameAs("test");
-		assertThat(registry.canonicalName("testAlias3")).isSameAs("test");
+		assertThat(registry.canonicalName("testAlias")).isEqualTo("test");
+		assertThat(registry.canonicalName("testAlias2")).isEqualTo("test");
+		assertThat(registry.canonicalName("testAlias3")).isEqualTo("test");
 	}
 
 	@Test  // SPR-17191
-	public void testAliasChainingWithMultipleAliases() {
+	void aliasChainingWithMultipleAliases() {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("name", "alias_a");
 		registry.registerAlias("name", "alias_b");

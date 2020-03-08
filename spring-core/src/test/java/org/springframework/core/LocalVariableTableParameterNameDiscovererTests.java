@@ -22,8 +22,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 
@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Adrian Colyer
  */
-public class LocalVariableTableParameterNameDiscovererTests {
+class LocalVariableTableParameterNameDiscovererTests {
 
 	private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
 
 	@Test
-	public void methodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+	void methodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Method getName = TestObject.class.getMethod("getName");
 		String[] names = discoverer.getParameterNames(getName);
 		assertThat(names).as("should find method info").isNotNull();
@@ -46,7 +46,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void methodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
+	void methodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
 		Method setName = TestObject.class.getMethod("setName", String.class);
 		String[] names = discoverer.getParameterNames(setName);
 		assertThat(names).as("should find method info").isNotNull();
@@ -55,7 +55,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void consParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+	void consParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Constructor<TestObject> noArgsCons = TestObject.class.getConstructor();
 		String[] names = discoverer.getParameterNames(noArgsCons);
 		assertThat(names).as("should find cons info").isNotNull();
@@ -63,7 +63,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void consParameterNameDiscoveryArgs() throws NoSuchMethodException {
+	void consParameterNameDiscoveryArgs() throws NoSuchMethodException {
 		Constructor<TestObject> twoArgCons = TestObject.class.getConstructor(String.class, int.class);
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertThat(names).as("should find cons info").isNotNull();
@@ -73,7 +73,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void staticMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+	void staticMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Method m = getClass().getMethod("staticMethodNoLocalVars");
 		String[] names = discoverer.getParameterNames(m);
 		assertThat(names).as("should find method info").isNotNull();
@@ -81,7 +81,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void overloadedStaticMethod() throws Exception {
+	void overloadedStaticMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("staticMethod", Long.TYPE, Long.TYPE);
@@ -101,7 +101,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void overloadedStaticMethodInInnerClass() throws Exception {
+	void overloadedStaticMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("staticMethod", Long.TYPE);
@@ -119,7 +119,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void overloadedMethod() throws Exception {
+	void overloadedMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("instanceMethod", Double.TYPE, Double.TYPE);
@@ -139,7 +139,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void overloadedMethodInInnerClass() throws Exception {
+	void overloadedMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("instanceMethod", String.class);
@@ -157,7 +157,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void generifiedClass() throws Exception {
+	void generifiedClass() throws Exception {
 		Class<?> clazz = GenerifiedClass.class;
 
 		Constructor<?> ctor = clazz.getDeclaredConstructor(Object.class);
@@ -203,9 +203,9 @@ public class LocalVariableTableParameterNameDiscovererTests {
 		assertThat(names.length).isEqualTo(0);
 	}
 
-	@Ignore("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")
+	@Disabled("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")
 	@Test
-	public void classesWithoutDebugSymbols() throws Exception {
+	void classesWithoutDebugSymbols() throws Exception {
 		// JDK classes don't have debug information (usually)
 		Class<Component> clazz = Component.class;
 		String methodName = "list";

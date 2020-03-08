@@ -19,25 +19,28 @@ package org.springframework.context.annotation;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.awaitility.Awaitility;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -45,14 +48,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class AnnotationProcessorPerformanceTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void commonAssumptions() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 	}
 
@@ -61,7 +64,7 @@ public class AnnotationProcessorPerformanceTests {
 		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 
@@ -73,7 +76,7 @@ public class AnnotationProcessorPerformanceTests {
 		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
@@ -86,7 +89,7 @@ public class AnnotationProcessorPerformanceTests {
 		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 
@@ -98,7 +101,7 @@ public class AnnotationProcessorPerformanceTests {
 		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));

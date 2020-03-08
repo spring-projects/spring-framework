@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,10 @@ import org.springframework.web.util.UriTemplateHandler;
  * addition to the generalized {@code exchange} and {@code execute} methods that
  * support of less frequent cases.
  *
- * <p><strong>NOTE:</strong> As of 5.0, the non-blocking, reactive
- * {@code org.springframework.web.reactive.client.WebClient} offers a
- * modern alternative to the {@code RestTemplate} with efficient support for
- * both sync and async, as well as streaming scenarios. The {@code RestTemplate}
- * will be deprecated in a future version and will not have major new features
- * added going forward. See the WebClient section of the Spring Framework reference
- * documentation for more details and example code.
+ * <p><strong>NOTE:</strong> As of 5.0 this class is in maintenance mode, with
+ * only minor requests for changes and bugs to be accepted going forward. Please,
+ * consider using the {@code org.springframework.web.reactive.client.WebClient}
+ * which has a more modern API and supports sync, async, and streaming scenarios.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
@@ -93,7 +90,7 @@ import org.springframework.web.util.UriTemplateHandler;
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
-	private static boolean romePresent;
+	private static final boolean romePresent;
 
 	private static final boolean jaxb2Present;
 

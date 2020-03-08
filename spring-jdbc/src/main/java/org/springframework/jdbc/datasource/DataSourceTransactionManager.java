@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -271,6 +272,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
+			txObject.setReadOnly(definition.isReadOnly());
 
 			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
 			// so we don't want to do it unnecessarily (for example if we've explicitly
@@ -373,7 +375,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (txObject.isMustRestoreAutoCommit()) {
 				con.setAutoCommit(true);
 			}
-			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
+			DataSourceUtils.resetConnectionAfterTransaction(
+					con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
 		}
 		catch (Throwable ex) {
 			logger.debug("Could not reset JDBC Connection after transaction", ex);
@@ -408,12 +411,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			throws SQLException {
 
 		if (isEnforceReadOnly() && definition.isReadOnly()) {
-			Statement stmt = con.createStatement();
-			try {
+			try (Statement stmt = con.createStatement()) {
 				stmt.executeUpdate("SET TRANSACTION READ ONLY");
-			}
-			finally {
-				stmt.close();
 			}
 		}
 	}

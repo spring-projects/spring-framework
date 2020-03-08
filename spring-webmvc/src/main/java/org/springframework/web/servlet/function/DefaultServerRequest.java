@@ -34,12 +34,11 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -53,8 +52,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
@@ -108,6 +109,16 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public UriBuilder uriBuilder() {
 		return ServletUriComponentsBuilder.fromRequest(servletRequest());
+	}
+
+	@Override
+	public String path() {
+		String path = (String) servletRequest().getAttribute(HandlerMapping.LOOKUP_PATH);
+		if (path == null) {
+			UrlPathHelper helper = new UrlPathHelper();
+			path = helper.getLookupPathForRequest(servletRequest());
+		}
+		return path;
 	}
 
 	@Override
@@ -309,7 +320,6 @@ class DefaultServerRequest implements ServerRequest {
 			this.servletRequest = servletRequest;
 		}
 
-		@NotNull
 		@Override
 		public Set<Entry<String, List<String>>> entrySet() {
 			return this.servletRequest.getParameterMap().entrySet().stream()
@@ -375,7 +385,6 @@ class DefaultServerRequest implements ServerRequest {
 			attributeNames.forEach(this.servletRequest::removeAttribute);
 		}
 
-		@NotNull
 		@Override
 		public Set<Entry<String, Object>> entrySet() {
 			return Collections.list(this.servletRequest.getAttributeNames()).stream()

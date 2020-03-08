@@ -19,7 +19,7 @@ package org.springframework.web.socket.config.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;

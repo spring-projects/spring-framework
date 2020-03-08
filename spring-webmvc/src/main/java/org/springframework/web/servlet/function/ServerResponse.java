@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -57,8 +58,19 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the (potentially non-standard) status code of this response.
+	 * @return the status as an integer
+	 * @see #statusCode()
+	 * @see HttpStatus#valueOf(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.

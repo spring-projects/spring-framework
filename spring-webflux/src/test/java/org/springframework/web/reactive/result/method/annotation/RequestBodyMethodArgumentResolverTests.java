@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Maybe;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -37,17 +37,17 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestBody;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestBody;
 
 /**
  * Unit tests for {@link RequestBodyMethodArgumentResolver}. When adding a test also
@@ -63,7 +63,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));

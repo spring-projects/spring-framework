@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class MockClientHttpResponse implements ClientHttpResponse {
 
-	private final HttpStatus status;
+	private final int status;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -60,26 +60,30 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	public MockClientHttpResponse(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus is required");
+		this.status = status.value();
+	}
+
+	public MockClientHttpResponse(int status) {
+		Assert.isTrue(status > 99 && status < 1000, "Status must be between 100 and 999");
 		this.status = status;
 	}
 
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return this.status;
+		return HttpStatus.valueOf(this.status);
 	}
 
 	@Override
 	public int getRawStatusCode() {
-		return this.status.value();
+		return this.status;
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		String headerName = HttpHeaders.SET_COOKIE;
-		if (!getCookies().isEmpty() && this.headers.get(headerName) == null) {
+		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
 			getCookies().values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> getHeaders().add(headerName, cookie.toString()));
+					.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
 		}
 		return this.headers;
 	}
@@ -144,4 +148,10 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 		return (charset != null ? charset : StandardCharsets.UTF_8);
 	}
 
+
+	@Override
+	public String toString() {
+		HttpStatus code = HttpStatus.resolve(this.status);
+		return (code != null ? code.name() + "(" + this.status + ")" : "Status (" + this.status + ")") + this.headers;
+	}
 }

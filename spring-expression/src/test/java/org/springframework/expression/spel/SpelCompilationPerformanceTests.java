@@ -16,8 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelCompiler;
@@ -28,13 +28,13 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * Checks the speed of compiled SpEL expressions.
  *
- * <p>By default these tests are marked @Ignore since they can fail on a busy machine
+ * <p>By default these tests are marked @Disabled since they can fail on a busy machine
  * because they compare relative performance of interpreted vs compiled.
  *
  * @author Andy Clement
  * @since 4.1
  */
-@Ignore
+@Disabled
 public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 	int count = 50000;  // number of evaluations that are timed in one run

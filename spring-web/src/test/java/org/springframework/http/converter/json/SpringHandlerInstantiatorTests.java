@@ -47,8 +47,8 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
@@ -69,7 +69,7 @@ public class SpringHandlerInstantiatorTests {
 	private ObjectMapper objectMapper;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -228,6 +228,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		// New in Jackson 2.7
+		@Override
 		public String getDescForKnownTypeIds() {
 			return null;
 		}

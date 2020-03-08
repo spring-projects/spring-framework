@@ -22,7 +22,7 @@ import example.scannable.FooServiceImpl;
 import example.scannable.NamedStubDao;
 import example.scannable.StubFooDao;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -31,13 +31,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation2.NamedStubDao2;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -176,7 +176,7 @@ public class ClassPathBeanDefinitionScannerTests {
 	public void testSimpleScanWithDefaultFiltersAndOverriddenCompatibleNamedBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(NamedStubDao.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("myNamedDao", bd);
 		int initialBeanCount = context.getBeanDefinitionCount();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);

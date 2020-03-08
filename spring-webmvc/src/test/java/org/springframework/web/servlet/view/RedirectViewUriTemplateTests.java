@@ -19,16 +19,16 @@ package org.springframework.web.servlet.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -39,7 +39,7 @@ public class RedirectViewUriTemplateTests {
 
 	private MockHttpServletResponse response;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();

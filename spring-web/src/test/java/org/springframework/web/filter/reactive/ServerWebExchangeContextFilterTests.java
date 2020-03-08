@@ -18,14 +18,14 @@ package org.springframework.web.filter.reactive;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

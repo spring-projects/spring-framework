@@ -21,9 +21,9 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.FatalBeanException;
@@ -31,8 +31,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -48,6 +46,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.NestedServletException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,7 +75,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	private MockHttpServletResponse response;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void setupOnce() {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
 		resolver.afterPropertiesSet();
@@ -83,7 +83,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		HANDLER_COUNT = resolver.getReturnValueHandlers().getHandlers().size();
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
 		this.resolver.setWarnLogCategory(this.resolver.getClass().getName());
@@ -377,8 +377,10 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Controller
 	static class ResponseBodyController extends WebApplicationObjectSupport implements ResponseBodyInterface {
 
+		@Override
 		public void handle() {}
 
+		@Override
 		@ExceptionHandler
 		@ResponseBody
 		public String handleException(IllegalArgumentException ex) {

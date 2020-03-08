@@ -25,7 +25,7 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Phillip Webb
  */
-public class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
+class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {

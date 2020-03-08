@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -225,7 +228,6 @@ public abstract class UriUtils {
 	 * @return the encoded query parameter
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) {
-
 		return encode(queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
@@ -238,6 +240,34 @@ public abstract class UriUtils {
 	 */
 	public static String encodeQueryParam(String queryParam, Charset charset) {
 		return encode(queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
+	}
+
+	/**
+	 * Encode the query parameters from the given {@code MultiValueMap} with UTF-8.
+	 * <p>This can be used with {@link UriComponentsBuilder#queryParams(MultiValueMap)}
+	 * when building a URI from an already encoded template.
+	 * <pre class="code">
+	 * MultiValueMap&lt;String, String&gt; params = new LinkedMultiValueMap<>(2);
+	 * // add to params...
+	 *
+	 * ServletUriComponentsBuilder.fromCurrentRequest()
+	 *         .queryParams(UriUtils.encodeQueryParams(params))
+	 *         .build(true)
+	 *         .toUriString();
+	 * </pre>
+	 * @param params the parameters to encode
+	 * @return a new {@code MultiValueMap} with the encoded names and values
+	 * @since 5.2.3
+	 */
+	public static MultiValueMap<String, String> encodeQueryParams(MultiValueMap<String, String> params) {
+		Charset charset = StandardCharsets.UTF_8;
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(params.size());
+		for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+			for (String value : entry.getValue()) {
+				result.add(encodeQueryParam(entry.getKey(), charset), encodeQueryParam(value, charset));
+			}
+		}
+		return result;
 	}
 
 	/**

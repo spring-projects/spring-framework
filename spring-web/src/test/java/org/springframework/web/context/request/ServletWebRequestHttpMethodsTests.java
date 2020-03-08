@@ -16,19 +16,18 @@
 
 package org.springframework.web.context.request;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,42 +38,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @author Markus Malkusch
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class ServletWebRequestHttpMethodsTests {
+class ServletWebRequestHttpMethodsTests {
 
 	private static final String CURRENT_TIME = "Wed, 9 Apr 2014 09:57:42 GMT";
 
-	private MockHttpServletRequest servletRequest;
+	private final MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 
-	private MockHttpServletResponse servletResponse;
+	private final MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 
-	private ServletWebRequest request;
+	private final ServletWebRequest request = new ServletWebRequest(servletRequest, servletResponse);
 
-	private Date currentDate;
-
-	@Parameter
-	public String method;
-
-	@Parameters(name = "{0}")
-	static public Iterable<Object[]> safeMethods() {
-		return Arrays.asList(new Object[][] {
-				{"GET"}, {"HEAD"}
-		});
-	}
+	private final Date currentDate = new Date();
 
 
-	@Before
-	public void setup() {
-		currentDate = new Date();
-		servletRequest = new MockHttpServletRequest(method, "https://example.org");
-		servletResponse = new MockHttpServletResponse();
-		request = new ServletWebRequest(servletRequest, servletResponse);
-	}
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedNon2xxStatus(String method) {
+		setUpRequest(method);
 
-
-	@Test
-	public void checkNotModifiedNon2xxStatus() {
 		long epochTime = currentDate.getTime();
 		servletRequest.addHeader("If-Modified-Since", epochTime);
 		servletResponse.setStatus(304);
@@ -84,8 +66,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
-	@Test  // SPR-13516
-	public void checkNotModifiedInvalidStatus() {
+	@ParameterizedHttpMethodTest  // SPR-13516
+	void checkNotModifiedInvalidStatus(String method) {
+		setUpRequest(method);
+
 		long epochTime = currentDate.getTime();
 		servletRequest.addHeader("If-Modified-Since", epochTime);
 		servletResponse.setStatus(0);
@@ -93,8 +77,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(request.checkNotModified(epochTime)).isFalse();
 	}
 
-	@Test  // SPR-14559
-	public void checkNotModifiedInvalidIfNoneMatchHeader() {
+	@ParameterizedHttpMethodTest  // SPR-14559
+	void checkNotModifiedInvalidIfNoneMatchHeader(String method) {
+		setUpRequest(method);
+
 		String etag = "\"etagvalue\"";
 		servletRequest.addHeader("If-None-Match", "missingquotes");
 		assertThat(request.checkNotModified(etag)).isFalse();
@@ -102,8 +88,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@Test
-	public void checkNotModifiedHeaderAlreadySet() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedHeaderAlreadySet(String method) {
+		setUpRequest(method);
+
 		long epochTime = currentDate.getTime();
 		servletRequest.addHeader("If-Modified-Since", epochTime);
 		servletResponse.addHeader("Last-Modified", CURRENT_TIME);
@@ -114,8 +102,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(CURRENT_TIME);
 	}
 
-	@Test
-	public void checkNotModifiedTimestamp() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestamp(String method) {
+		setUpRequest(method);
+
 		long epochTime = currentDate.getTime();
 		servletRequest.addHeader("If-Modified-Since", epochTime);
 
@@ -124,8 +114,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
 	}
 
-	@Test
-	public void checkModifiedTimestamp() {
+	@ParameterizedHttpMethodTest
+	void checkModifiedTimestamp(String method) {
+		setUpRequest(method);
+
 		long oneMinuteAgo = currentDate.getTime() - (1000 * 60);
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
@@ -134,8 +126,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
 	}
 
-	@Test
-	public void checkNotModifiedETag() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETag(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", etag);
 
@@ -144,8 +138,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@Test
-	public void checkNotModifiedETagWithSeparatorChars() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagWithSeparatorChars(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo, Bar\"";
 		servletRequest.addHeader("If-None-Match", etag);
 
@@ -155,8 +151,10 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 
-	@Test
-	public void checkModifiedETag() {
+	@ParameterizedHttpMethodTest
+	void checkModifiedETag(String method) {
+		setUpRequest(method);
+
 		String currentETag = "\"Foo\"";
 		String oldETag = "Bar";
 		servletRequest.addHeader("If-None-Match", oldETag);
@@ -166,8 +164,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(currentETag);
 	}
 
-	@Test
-	public void checkNotModifiedUnpaddedETag() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedUnpaddedETag(String method) {
+		setUpRequest(method);
+
 		String etag = "Foo";
 		String paddedETag = String.format("\"%s\"", etag);
 		servletRequest.addHeader("If-None-Match", paddedETag);
@@ -177,8 +177,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(paddedETag);
 	}
 
-	@Test
-	public void checkModifiedUnpaddedETag() {
+	@ParameterizedHttpMethodTest
+	void checkModifiedUnpaddedETag(String method) {
+		setUpRequest(method);
+
 		String currentETag = "Foo";
 		String oldETag = "Bar";
 		servletRequest.addHeader("If-None-Match", oldETag);
@@ -188,8 +190,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(String.format("\"%s\"", currentETag));
 	}
 
-	@Test
-	public void checkNotModifiedWildcardIsIgnored() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedWildcardIsIgnored(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", "*");
 
@@ -198,8 +202,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@Test
-	public void checkNotModifiedETagAndTimestamp() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndTimestamp(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", etag);
 		servletRequest.addHeader("If-Modified-Since", currentDate.getTime());
@@ -210,8 +216,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
 	}
 
-	@Test  // SPR-14224
-	public void checkNotModifiedETagAndModifiedTimestamp() {
+	@ParameterizedHttpMethodTest  // SPR-14224
+	void checkNotModifiedETagAndModifiedTimestamp(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", etag);
 		long currentEpoch = currentDate.getTime();
@@ -224,8 +232,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
 	}
 
-	@Test
-	public void checkModifiedETagAndNotModifiedTimestamp() {
+	@ParameterizedHttpMethodTest
+	void checkModifiedETagAndNotModifiedTimestamp(String method) {
+		setUpRequest(method);
+
 		String currentETag = "\"Foo\"";
 		String oldETag = "\"Bar\"";
 		servletRequest.addHeader("If-None-Match", oldETag);
@@ -238,8 +248,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
 	}
 
-	@Test
-	public void checkNotModifiedETagWeakStrong() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagWeakStrong(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		String weakETag = String.format("W/%s", etag);
 		servletRequest.addHeader("If-None-Match", etag);
@@ -249,8 +261,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(weakETag);
 	}
 
-	@Test
-	public void checkNotModifiedETagStrongWeak() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagStrongWeak(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", String.format("W/%s", etag));
 
@@ -259,8 +273,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@Test
-	public void checkNotModifiedMultipleETags() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedMultipleETags(String method) {
+		setUpRequest(method);
+
 		String etag = "\"Bar\"";
 		String multipleETags = String.format("\"Foo\", %s", etag);
 		servletRequest.addHeader("If-None-Match", multipleETags);
@@ -270,8 +286,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@Test
-	public void checkNotModifiedTimestampWithLengthPart() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestampWithLengthPart(String method) {
+		setUpRequest(method);
+
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
@@ -281,8 +299,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
 	}
 
-	@Test
-	public void checkModifiedTimestampWithLengthPart() {
+	@ParameterizedHttpMethodTest
+	void checkModifiedTimestampWithLengthPart(String method) {
+		setUpRequest(method);
+
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
@@ -292,8 +312,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
 	}
 
-	@Test
-	public void checkNotModifiedTimestampConditionalPut() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestampConditionalPut(String method) {
+		setUpRequest(method);
+
 		long currentEpoch = currentDate.getTime();
 		long oneMinuteAgo = currentEpoch - (1000 * 60);
 		servletRequest.setMethod("PUT");
@@ -304,8 +326,10 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
 	}
 
-	@Test
-	public void checkNotModifiedTimestampConditionalPutConflict() {
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestampConditionalPutConflict(String method) {
+		setUpRequest(method);
+
 		long currentEpoch = currentDate.getTime();
 		long oneMinuteAgo = currentEpoch - (1000 * 60);
 		servletRequest.setMethod("PUT");
@@ -314,6 +338,19 @@ public class ServletWebRequestHttpMethodsTests {
 		assertThat(request.checkNotModified(currentEpoch)).isTrue();
 		assertThat(servletResponse.getStatus()).isEqualTo(412);
 		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+	}
+
+	private void setUpRequest(String method) {
+		this.servletRequest.setMethod(method);
+		this.servletRequest.setRequestURI("https://example.org");
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(strings = { "GET", "HEAD" })
+	@interface ParameterizedHttpMethodTest {
 	}
 
 }

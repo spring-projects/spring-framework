@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.reactivex.Single;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -45,9 +45,10 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -61,11 +62,11 @@ import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,7 +83,7 @@ public class BodyInsertersTests {
 	private Map<String, Object> hints;
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -117,7 +118,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofString() {
 		String body = "foo";
-		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -134,7 +135,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObject() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
@@ -148,7 +149,7 @@ public class BodyInsertersTests {
 	@Test
 	public void ofObjectWithHints() {
 		User body = new User("foo", "bar");
-		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -224,16 +225,38 @@ public class BodyInsertersTests {
 
 	@Test
 	public void ofResource() throws IOException {
-		Resource body = new ClassPathResource("response.txt", getClass());
-		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
+		Resource resource = new ClassPathResource("response.txt", getClass());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, this.context);
+		Mono<Void> result = BodyInserters.fromResource(resource).insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
-		byte[] expectedBytes = Files.readAllBytes(body.getFile().toPath());
+		byte[] expectedBytes = Files.readAllBytes(resource.getFile().toPath());
 
 		StepVerifier.create(response.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
+					assertThat(resultBytes).isEqualTo(expectedBytes);
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test // gh-24366
+	public void ofResourceWithExplicitMediaType() throws IOException {
+		Resource resource = new ClassPathResource("response.txt", getClass());
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/");
+		request.getHeaders().setContentType(MediaType.TEXT_MARKDOWN);
+		Mono<Void> result = BodyInserters.fromResource(resource).insert(request, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		byte[] expectedBytes = Files.readAllBytes(resource.getFile().toPath());
+
+		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_MARKDOWN);
+		StepVerifier.create(request.getBody())
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);

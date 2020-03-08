@@ -22,17 +22,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -58,6 +58,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -72,7 +73,7 @@ public class DataSourceTransactionManagerTests  {
 	private DataSourceTransactionManager tm;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ds = mock(DataSource.class);
 		con = mock(Connection.class);
@@ -80,7 +81,7 @@ public class DataSourceTransactionManagerTests  {
 		tm = new DataSourceTransactionManager(ds);
 	}
 
-	@After
+	@AfterEach
 	public void verifyTransactionSynchronizationManagerState() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -125,6 +126,7 @@ public class DataSourceTransactionManagerTests  {
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+			given(con.getWarnings()).willThrow(new SQLException());
 		}
 
 		if (!lazyConnection || createStatement) {
@@ -151,6 +153,10 @@ public class DataSourceTransactionManagerTests  {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
+					}
+					else {
+						tCon.getWarnings();
+						tCon.clearWarnings();
 					}
 				}
 				catch (SQLException ex) {
@@ -703,7 +709,6 @@ public class DataSourceTransactionManagerTests  {
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
 
-
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -916,11 +921,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		ordered.verify(con).setReadOnly(false);
 		verify(con).close();
 	}
 
@@ -949,11 +956,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con, stmt);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(stmt).executeUpdate("SET TRANSACTION READ ONLY");
 		ordered.verify(stmt).close();
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
+		ordered.verify(con).setReadOnly(false);
 		ordered.verify(con).close();
 	}
 
@@ -967,9 +976,8 @@ public class DataSourceTransactionManagerTests  {
 		doTestTransactionWithTimeout(1);
 	}
 
+	@EnabledForTestGroups(PERFORMANCE)
 	private void doTestTransactionWithTimeout(int timeout) throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		PreparedStatement ps = mock(PreparedStatement.class);
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.prepareStatement("some SQL statement")).willReturn(ps);
@@ -1024,12 +1032,12 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).setAutoCommit(true);
 		verify(con).close();
-
 	}
 
 	@Test
 	public void testTransactionAwareDataSourceProxy() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		boolean condition1 = !TransactionSynchronizationManager.hasResource(ds);
@@ -1041,6 +1049,9 @@ public class DataSourceTransactionManagerTests  {
 				assertThat(DataSourceUtils.getConnection(ds)).isEqualTo(con);
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
+					Connection tCon = dsProxy.getConnection();
+					tCon.getWarnings();
+					tCon.clearWarnings();
 					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
 					// should be ignored
 					dsProxy.getConnection().close();
@@ -1286,7 +1297,8 @@ public class DataSourceTransactionManagerTests  {
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 	}
 
-	@Test public void testTransactionWithPropagationNotSupported() throws Exception {
+	@Test
+	public void testTransactionWithPropagationNotSupported() throws Exception {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 		boolean condition1 = !TransactionSynchronizationManager.hasResource(ds);
@@ -1429,7 +1441,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1490,7 +1501,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1551,7 +1561,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 

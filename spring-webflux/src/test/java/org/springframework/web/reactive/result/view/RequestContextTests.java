@@ -19,12 +19,12 @@ package org.springframework.web.reactive.result.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ public class RequestContextTests {
 	private Map<String, Object> model = new HashMap<>();
 
 
-	@Before
+	@BeforeEach
 	public void init() {
 		this.applicationContext = new GenericApplicationContext();
 		this.applicationContext.refresh();

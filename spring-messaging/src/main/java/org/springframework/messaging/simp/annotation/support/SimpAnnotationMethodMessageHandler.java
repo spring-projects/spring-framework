@@ -303,6 +303,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 
+	@Override
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		ApplicationContext context = getApplicationContext();
 		ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?

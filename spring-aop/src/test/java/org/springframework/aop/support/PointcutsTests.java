@@ -18,12 +18,12 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,12 +56,7 @@ public class PointcutsTests {
 	public static Pointcut allTestBeanMethodsPointcut = new StaticMethodMatcherPointcut() {
 		@Override
 		public ClassFilter getClassFilter() {
-			return new ClassFilter() {
-				@Override
-				public boolean matches(Class<?> clazz) {
-					return clazz.equals(TestBean.class);
-				}
-			};
+			return type -> type.equals(TestBean.class);
 		}
 
 		@Override

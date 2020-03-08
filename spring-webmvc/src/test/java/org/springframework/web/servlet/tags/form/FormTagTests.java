@@ -17,13 +17,14 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Collections;
+
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

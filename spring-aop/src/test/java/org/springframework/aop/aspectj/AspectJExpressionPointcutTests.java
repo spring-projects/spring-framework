@@ -23,18 +23,18 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.subpkg.DeepBean;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -57,7 +57,7 @@ public class AspectJExpressionPointcutTests {
 	private Method setSomeNumber;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		setAge = TestBean.class.getMethod("setAge", int.class);
@@ -67,7 +67,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchExplicit() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -117,8 +117,8 @@ public class AspectJExpressionPointcutTests {
 	 * @param which this or target
 	 */
 	private void testThisOrTarget(String which) throws SecurityException, NoSuchMethodException {
-		String matchesTestBean = which + "(org.springframework.tests.sample.beans.TestBean)";
-		String matchesIOther = which + "(org.springframework.tests.sample.beans.IOther)";
+		String matchesTestBean = which + "(org.springframework.beans.testfixture.beans.TestBean)";
+		String matchesIOther = which + "(org.springframework.beans.testfixture.beans.IOther)";
 		AspectJExpressionPointcut testBeanPc = new AspectJExpressionPointcut();
 		testBeanPc.setExpression(matchesTestBean);
 
@@ -142,7 +142,7 @@ public class AspectJExpressionPointcutTests {
 	}
 
 	private void testWithinPackage(boolean matchSubpackages) throws SecurityException, NoSuchMethodException {
-		String withinBeansPackage = "within(org.springframework.tests.sample.beans.";
+		String withinBeansPackage = "within(org.springframework.beans.testfixture.beans.";
 		// Subpackages are matched by **
 		if (matchSubpackages) {
 			withinBeansPackage += ".";
@@ -187,7 +187,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchWithArgs() throws Exception {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -206,7 +206,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testSimpleAdvice() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
@@ -219,7 +219,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testDynamicMatchingProxy() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
@@ -233,7 +233,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testInvalidExpression() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number) && args(Double)";
 		assertThatIllegalArgumentException().isThrownBy(
 				getPointcut(expression)::getClassFilter);  // call to getClassFilter forces resolution
 	}
@@ -264,7 +264,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testWithUnsupportedPointcutPrimitive() {
-		String expression = "call(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "call(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		assertThatExceptionOfType(UnsupportedPointcutPrimitiveException.class).isThrownBy(() ->
 				getPointcut(expression).getClassFilter()) // call to getClassFilter forces resolution...
 			.satisfies(ex -> assertThat(ex.getUnsupportedPrimitive()).isEqualTo(PointcutPrimitive.CALL));

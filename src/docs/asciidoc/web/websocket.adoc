@@ -1,7 +1,7 @@
 [[websocket]]
 = WebSockets
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
-[.small]#<<web-reactive.adoc#webflux-websocket, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket, WebFlux>>#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
 messaging that includes raw WebSocket interactions, WebSocket emulation through SockJS, and
@@ -14,7 +14,7 @@ include::websocket-intro.adoc[leveloffset=+1]
 
 [[websocket-server]]
 == WebSocket API
-[.small]#<<web-reactive.adoc#webflux-websocket-server, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server, WebFlux>>#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
@@ -23,7 +23,7 @@ server-side applications that handle WebSocket messages.
 
 [[websocket-server-handler]]
 === `WebSocketHandler`
-[.small]#<<web-reactive.adoc#webflux-websocket-server-handler, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handler, WebFlux>>#
 
 Creating a WebSocket server is as simple as implementing `WebSocketHandler` or, more
 likely, extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`. The following
@@ -112,7 +112,7 @@ sending. One option is to wrap the `WebSocketSession` with
 
 [[websocket-server-handshake]]
 === WebSocket Handshake
-[.small]#<<web-reactive.adoc#webflux-websocket-server-handshake, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handshake, WebFlux>>#
 
 The easiest way to customize the initial HTTP WebSocket handshake request is through
 a `HandshakeInterceptor`, which exposes methods for "`before`" and "`after`" the handshake.
@@ -258,7 +258,7 @@ Java initialization API. The following example shows how to do so:
 
 [[websocket-server-runtime-configuration]]
 === Server Configuration
-[.small]#<<web-reactive.adoc#webflux-websocket-server-config, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-config, WebFlux>>#
 
 Each underlying WebSocket engine exposes configuration properties that control
 runtime characteristics, such as the size of message buffer sizes, idle timeout,
@@ -385,7 +385,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 
 [[websocket-server-allowed-origins]]
 === Allowed Origins
-[.small]#<<web-reactive.adoc#webflux-websocket-server-cors, Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-cors, WebFlux>>#
 
 As of Spring Framework 4.1.5, the default behavior for WebSocket and SockJS is to accept
 only same-origin requests. It is also possible to allow all or a specified list of origins.
@@ -512,9 +512,9 @@ https://host:port/myApp/myEndpoint/{server-id}/{session-id}/{transport}
 
 where:
 
-* `{server-id}` is useful for routing requests in a cluster but is not used otherwise.
-* `{session-id}` correlates HTTP requests belonging to a SockJS session.
-* `{transport}` indicates the transport type (for example, `websocket`, `xhr-streaming`, and others).
+* pass:q[`{server-id}`] is useful for routing requests in a cluster but is not used otherwise.
+* pass:q[`{session-id}`] correlates HTTP requests belonging to a SockJS session.
+* pass:q[`{transport}`] indicates the transport type (for example, `websocket`, `xhr-streaming`, and others).
 
 The WebSocket transport needs only a single HTTP request to do the WebSocket handshake.
 All messages thereafter are exchanged on that socket.
@@ -1254,7 +1254,7 @@ level, `@MessageMapping` is used to express shared mappings across all methods i
 controller.
 
 By default, the mapping values are Ant-style path patterns (for example `/thing*`, `/thing/**`),
-including support for template variables (for example, `/thing/{id}`). The values can be
+including support for template variables (for example, pass:q[`/thing/{id}`]). The values can be
 referenced through `@DestinationVariable` method arguments. Applications can also switch to
 a dot-separated destination convention for mappings, as explained in
 <<websocket-stomp-destination-separator>>.
@@ -1344,7 +1344,7 @@ for the return value, by default, a message is sent directly to the client (thro
 When is this useful? Assume that the broker is mapped to `/topic` and `/queue`, while
 application controllers are mapped to `/app`. In this setup, the broker stores all
 subscriptions to `/topic` and `/queue` that are intended for repeated broadcasts, and
-there is no need for the application to get involved. A client could also also subscribe to
+there is no need for the application to get involved. A client could also subscribe to
 some `/app` destination, and a controller could return a value in response to that
 subscription without involving the broker without storing or using the subscription again
 (effectively a one-time request-reply exchange). One use case for this is populating a UI
@@ -1592,8 +1592,8 @@ in both the XML namespace and Java configuration as the `systemLogin` and
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials that are used for all TCP
 connections created on behalf of clients. This is exposed in both the XML namespace
-and Java configuration as the `clientLogin and `clientPasscode` properties with default
-values of `guest`and `guest`.
+and Java configuration as the `clientLogin` and `clientPasscode` properties with default
+values of `guest` and `guest`.
 
 NOTE: The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
 frame that it forwards to the broker on behalf of clients. Therefore, WebSocket clients
@@ -1787,8 +1787,8 @@ in applications that do not maintain a server-side session or in
 mobile applications where it is common to use headers for authentication).
 
 The https://tools.ietf.org/html/rfc6455#section-10.5[WebSocket protocol, RFC 6455]
-"`doesn't prescribe any particular way that servers can authenticate clients during
-the WebSocket handshake.`" In practice, however, browser clients can use only standard
+"doesn't prescribe any particular way that servers can authenticate clients during
+the WebSocket handshake." In practice, however, browser clients can use only standard
 authentication headers (that is, basic HTTP authentication) or cookies and cannot (for example)
 provide custom headers. Likewise, the SockJS JavaScript client does not provide
 a way to send HTTP headers with SockJS transport requests. See
@@ -1862,7 +1862,7 @@ with other users who subscribe to the same destination so that each user can rec
 unique stock position updates.
 
 On the sending side, messages can be sent to a destination such as
-`/user/{username}/queue/position-updates`, which in turn is translated
+pass:q[`/user/{username}/queue/position-updates`], which in turn is translated
 by the `UserDestinationMessageHandler` into one or more destinations, one for each
 session associated with the user. This lets any component within the application
 send messages that target a specific user without necessarily knowing anything more
@@ -1921,7 +1921,7 @@ session that sent the message being handled).
 
 You can send a message to user destinations from any application
 component by, for example, injecting the `SimpMessagingTemplate` created by the Java configuration or
-the XML namespace. (The bean name is `"brokerMessagingTemplate"` if required
+the XML namespace. (The bean name is `brokerMessagingTemplate` if required
 for qualification with `@Qualifier`.) The following example shows how to do so:
 
 [source,java,indent=0]
@@ -2462,7 +2462,7 @@ When you use `@EnableWebSocketMessageBroker` or `<websocket:message-broker>`, ke
 infrastructure components automatically gather statisticss and counters that provide
 important insight into the internal state of the application. The configuration
 also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
-available information in one place and by, default logs, it at the `INFO` level once
+available information in one place and by default logs it at the `INFO` level once
 every 30 minutes. This bean can be exported to JMX through Spring's
 `MBeanExporter` for viewing at runtime (for example, through JDK's `jconsole`).
 The following list summarizes the available information:
@@ -2535,7 +2535,7 @@ Ideally, controllers under test should be invoked as they are at runtime, much l
 the approach to testing controllers that handle HTTP requests by using the Spring MVC Test
 framework -- that is, without running a Servlet container but relying on the Spring Framework
 to invoke the annotated controllers. As with Spring MVC Test, you have two
-two possible alternatives here, either use a "`context-based`" or use a "`standalone`" setup:
+possible alternatives here, either use a "`context-based`" or use a "`standalone`" setup:
 
 * Load the actual Spring configuration with the help of the
 Spring TestContext framework, inject `clientInboundChannel` as a test field, and

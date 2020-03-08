@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import example.gh24375.AnnotatedComponent;
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
 import example.profilescan.ProfileMetaAnnotatedComponent;
@@ -38,11 +39,11 @@ import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
 import example.scannable.sub.BarComponent;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.index.CandidateComponentsTestClassLoader;
+import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
@@ -499,6 +500,15 @@ public class ClassPathScanningCandidateComponentProviderTests {
 			assertThat(ctx.containsBean(beanName)).isFalse();
 		}
 	}
+
+	@Test
+	public void componentScanningFindsComponentsAnnotatedWithAnnotationsContainingNestedAnnotations() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		Set<BeanDefinition> components = provider.findCandidateComponents(AnnotatedComponent.class.getPackage().getName());
+		assertThat(components).hasSize(1);
+		assertThat(components.iterator().next().getBeanClassName()).isEqualTo(AnnotatedComponent.class.getName());
+	}
+
 
 	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class<?> beanClass) {
 		for (BeanDefinition candidate : candidates) {

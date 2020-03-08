@@ -20,8 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,19 +29,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class DigestUtilsTests {
+class DigestUtilsTests {
 
 	private byte[] bytes;
 
 
-	@Before
-	public void createBytes() throws UnsupportedEncodingException {
+	@BeforeEach
+	void createBytes() throws UnsupportedEncodingException {
 		bytes = "Hello World".getBytes("UTF-8");
 	}
 
 
 	@Test
-	public void md5() throws IOException {
+	void md5() throws IOException {
 		byte[] expected = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 
@@ -53,7 +53,7 @@ public class DigestUtilsTests {
 	}
 
 	@Test
-	public void md5Hex() throws IOException {
+	void md5Hex() throws IOException {
 		String expected = "b10a8db164e0754105b7a99be72e3fe5";
 
 		String hash = DigestUtils.md5DigestAsHex(bytes);
@@ -64,7 +64,7 @@ public class DigestUtilsTests {
 	}
 
 	@Test
-	public void md5StringBuilder() throws IOException {
+	void md5StringBuilder() throws IOException {
 		String expected = "b10a8db164e0754105b7a99be72e3fe5";
 
 		StringBuilder builder = new StringBuilder();

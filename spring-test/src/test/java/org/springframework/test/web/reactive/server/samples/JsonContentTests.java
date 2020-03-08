@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
@@ -82,7 +82,7 @@ public class JsonContentTests {
 	public void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.body("{\"name\":\"John\"}")
+				.bodyValue("{\"name\":\"John\"}")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();

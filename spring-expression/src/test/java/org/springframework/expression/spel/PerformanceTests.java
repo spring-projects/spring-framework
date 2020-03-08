@@ -16,17 +16,17 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 ///CLOVER:OFF
 
@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Andy Clement
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class PerformanceTests {
 
 	public static final int ITERATIONS = 10000;
@@ -47,8 +48,6 @@ public class PerformanceTests {
 
 	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		long starttime = 0;
 		long endtime = 0;
 
@@ -91,8 +90,6 @@ public class PerformanceTests {
 
 	@Test
 	public void testPerformanceOfMethodAccess() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		long starttime = 0;
 		long endtime = 0;
 

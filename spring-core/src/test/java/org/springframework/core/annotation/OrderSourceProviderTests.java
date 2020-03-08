@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 
@@ -31,13 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class OrderSourceProviderTests {
+class OrderSourceProviderTests {
 
 	private final AnnotationAwareOrderComparator comparator = AnnotationAwareOrderComparator.INSTANCE;
 
 
 	@Test
-	public void plainComparator() {
+	void plainComparator() {
 		List<Object> items = new ArrayList<>();
 		C c = new C(5);
 		C c2 = new C(-5);
@@ -48,7 +48,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listNoFactoryMethod() {
+	void listNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
@@ -59,7 +59,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listFactoryMethod() {
+	void listFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
@@ -78,7 +78,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listFactoryMethodOverridesStaticOrder() {
+	void listFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);
@@ -97,7 +97,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayNoFactoryMethod() {
+	void arrayNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
@@ -108,7 +108,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethod() {
+	void arrayFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
@@ -127,7 +127,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethodOverridesStaticOrder() {
+	void arrayFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);

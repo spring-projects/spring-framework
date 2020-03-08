@@ -19,7 +19,7 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

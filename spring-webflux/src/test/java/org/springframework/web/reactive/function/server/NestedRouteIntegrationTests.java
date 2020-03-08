@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +40,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 /**
  * @author Arjen Poutsma
  */
-public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -60,8 +60,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 
-	@Test
-	public void bar() {
+	@ParameterizedHttpServerTest
+	void bar(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
 
@@ -69,8 +71,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		assertThat(result.getBody()).isEqualTo("/foo/bar");
 	}
 
-	@Test
-	public void baz() {
+	@ParameterizedHttpServerTest
+	void baz(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
@@ -78,8 +82,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		assertThat(result.getBody()).isEqualTo("/foo/baz");
 	}
 
-	@Test
-	public void variables() {
+	@ParameterizedHttpServerTest
+	void variables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
@@ -88,8 +94,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	// SPR-16868
-	@Test
-	public void parentVariables() {
+	@ParameterizedHttpServerTest
+	void parentVariables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
 
@@ -99,8 +107,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	// SPR 16692
-	@Test
-	public void removeFailedNestedPathVariables() {
+	@ParameterizedHttpServerTest
+	void removeFailedNestedPathVariables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
 
@@ -110,8 +120,10 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	// SPR 17210
-	@Test
-	public void removeFailedPathVariablesAnd() {
+	@ParameterizedHttpServerTest
+	void removeFailedPathVariablesAnd(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.postForEntity("http://localhost:" + port + "/qux/quux", "", String.class);
 
@@ -125,7 +137,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 		public Mono<ServerResponse> pattern(ServerRequest request) {
 			String pattern = matchingPattern(request).getPatternString();
-			return ServerResponse.ok().body(pattern);
+			return ServerResponse.ok().bodyValue(pattern);
 		}
 
 		@SuppressWarnings("unchecked")

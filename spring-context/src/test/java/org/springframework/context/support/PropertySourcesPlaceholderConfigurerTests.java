@@ -19,19 +19,19 @@ package org.springframework.context.support;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.mock.env.MockPropertySource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

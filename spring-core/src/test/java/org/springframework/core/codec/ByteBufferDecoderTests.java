@@ -20,11 +20,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,14 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferDecoderTests extends AbstractDecoderTestCase<ByteBufferDecoder> {
+class ByteBufferDecoderTests extends AbstractDecoderTests<ByteBufferDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public ByteBufferDecoderTests() {
+	ByteBufferDecoderTests() {
 		super(new ByteBufferDecoder());
 	}
 

@@ -23,22 +23,22 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,13 +60,13 @@ public class ScopingTests {
 	private GenericApplicationContext ctx;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		customScope = new CustomScope();
 		ctx = createContext(ScopedConfigurationClass.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		if (ctx != null) {
 			ctx.close();

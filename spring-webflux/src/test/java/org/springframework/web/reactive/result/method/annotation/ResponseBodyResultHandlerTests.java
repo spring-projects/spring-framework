@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import rx.Completable;
 import rx.Single;
@@ -42,7 +42,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
@@ -60,7 +60,7 @@ public class ResponseBodyResultHandlerTests {
 	private ResponseBodyResultHandler resultHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));

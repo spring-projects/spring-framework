@@ -16,13 +16,13 @@
 
 package org.springframework.aop.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,6 +98,14 @@ public class ControlFlowPointcutTests {
 		assertThat(new ControlFlowPointcut(One.class).hashCode()).isEqualTo(new ControlFlowPointcut(One.class).hashCode());
 		assertThat(new ControlFlowPointcut(One.class, "getAge").hashCode()).isEqualTo(new ControlFlowPointcut(One.class, "getAge").hashCode());
 		assertThat(new ControlFlowPointcut(One.class, "getAge").hashCode() == new ControlFlowPointcut(One.class).hashCode()).isFalse();
+	}
+
+	@Test
+	public void testToString() {
+		assertThat(new ControlFlowPointcut(One.class).toString())
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = null");
+		assertThat(new ControlFlowPointcut(One.class, "getAge").toString())
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = getAge");
 	}
 
 	public class One {

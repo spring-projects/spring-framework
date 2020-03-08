@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.support;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.AsyncEvent;
@@ -28,17 +29,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockFilterConfig;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -47,6 +42,12 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockFilterConfig;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
+import org.springframework.web.testfixture.servlet.PassThroughFilterChain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,7 +76,7 @@ public class OpenEntityManagerInViewTests {
 	private ServletWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
@@ -88,7 +89,7 @@ public class OpenEntityManagerInViewTests {
 		this.webRequest = new ServletWebRequest(this.request);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

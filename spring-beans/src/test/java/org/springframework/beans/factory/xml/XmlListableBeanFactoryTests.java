@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -30,11 +30,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.beans.testfixture.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.LifecycleBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +51,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	private DefaultListableBeanFactory factory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		parent = new DefaultListableBeanFactory();
 

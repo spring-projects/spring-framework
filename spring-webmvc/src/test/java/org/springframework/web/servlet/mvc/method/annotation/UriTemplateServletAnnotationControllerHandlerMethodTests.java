@@ -26,16 +26,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -49,6 +48,8 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.AbstractView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -673,13 +674,13 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		}
 	}
 
-// @Ignore("ControllerClassNameHandlerMapping")
+// @Disabled("ControllerClassNameHandlerMapping")
 //	public void controllerClassName() throws Exception {
 
-//	@Ignore("useDefaultSuffixPattern property not supported")
+//	@Disabled("useDefaultSuffixPattern property not supported")
 //	public void doubles() throws Exception {
 
-//	@Ignore("useDefaultSuffixPattern property not supported")
+//	@Disabled("useDefaultSuffixPattern property not supported")
 //	public void noDefaultSuffixPattern() throws Exception {
 
 }

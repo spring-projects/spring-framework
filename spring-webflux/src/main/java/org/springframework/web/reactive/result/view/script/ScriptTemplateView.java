@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -124,6 +125,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * See {@link ScriptTemplateConfigurer#setEngineSupplier(Supplier)} documentation.
+	 * @since 5.2
 	 */
 	public void setEngineSupplier(Supplier<ScriptEngine> engineSupplier) {
 		this.engineSupplier = engineSupplier;
@@ -276,8 +278,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	private ScriptEngine createEngineFromSupplier() {
+		Assert.state(this.engineSupplier != null, "No engine supplier available");
 		ScriptEngine engine = this.engineSupplier.get();
-		if (this.renderFunction != null && engine != null) {
+		if (this.renderFunction != null) {
 			Assert.isInstanceOf(Invocable.class, engine,
 					"ScriptEngine must implement Invocable when 'renderFunction' is specified");
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,16 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.IntPredicate;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferWrapper;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.LimitedDataBufferList;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
@@ -97,12 +96,16 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 		Flux<DataBuffer> inputFlux = Flux.defer(() -> {
 			DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delimiterBytes);
+
+			@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+			LimitChecker limiter = new LimitChecker(getMaxInMemorySize());
+
 			return Flux.from(input)
 					.concatMapIterable(buffer -> endFrameAfterDelimiter(buffer, matcher))
+					.doOnNext(limiter)
 					.bufferUntil(buffer -> buffer instanceof EndFrameBuffer)
-					.map(buffers -> joinAndStrip(buffers, this.stripDelimiter))
+					.map(list -> joinAndStrip(list, this.stripDelimiter))
 					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-
 		});
 
 		return super.decode(inputFlux, elementType, mimeType, hints);
@@ -153,23 +156,27 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 */
 	private static List<DataBuffer> endFrameAfterDelimiter(DataBuffer dataBuffer, DataBufferUtils.Matcher matcher) {
 		List<DataBuffer> result = new ArrayList<>();
-		do {
-			int endIdx = matcher.match(dataBuffer);
-			if (endIdx != -1) {
-				int readPosition = dataBuffer.readPosition();
-				int length = endIdx - readPosition + 1;
-				result.add(dataBuffer.retainedSlice(readPosition, length));
-				result.add(new EndFrameBuffer(matcher.delimiter()));
-				dataBuffer.readPosition(endIdx + 1);
+		try {
+			do {
+				int endIdx = matcher.match(dataBuffer);
+				if (endIdx != -1) {
+					int readPosition = dataBuffer.readPosition();
+					int length = (endIdx - readPosition + 1);
+					DataBuffer slice = dataBuffer.retainedSlice(readPosition, length);
+					result.add(slice);
+					result.add(new EndFrameBuffer(matcher.delimiter()));
+					dataBuffer.readPosition(endIdx + 1);
+				}
+				else {
+					result.add(DataBufferUtils.retain(dataBuffer));
+					break;
+				}
 			}
-			else {
-				result.add(DataBufferUtils.retain(dataBuffer));
-				break;
-			}
+			while (dataBuffer.readableByteCount() > 0);
 		}
-		while (dataBuffer.readableByteCount() > 0);
-
-		DataBufferUtils.release(dataBuffer);
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 		return result;
 	}
 
@@ -181,9 +188,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * @param stripDelimiter whether to strip the delimiter
 	 * @return the joined buffer
 	 */
-	private static DataBuffer joinAndStrip(List<DataBuffer> dataBuffers,
-			boolean stripDelimiter) {
-
+	private static DataBuffer joinAndStrip(List<DataBuffer> dataBuffers, boolean stripDelimiter) {
 		Assert.state(!dataBuffers.isEmpty(), "DataBuffers should not be empty");
 
 		byte[] matchingDelimiter = null;
@@ -264,7 +269,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 
-	private static class EndFrameBuffer implements DataBuffer {
+	private static class EndFrameBuffer extends DataBufferWrapper {
 
 		private static final DataBuffer BUFFER = new DefaultDataBufferFactory().wrap(new byte[0]);
 
@@ -272,6 +277,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 
 		public EndFrameBuffer(byte[] delimiter) {
+			super(BUFFER);
 			this.delimiter = delimiter;
 		}
 
@@ -279,151 +285,32 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 			return this.delimiter;
 		}
 
-		@Override
-		public DataBufferFactory factory() {
-			return BUFFER.factory();
-		}
-
-		@Override
-		public int indexOf(IntPredicate predicate, int fromIndex) {
-			return BUFFER.indexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-			return BUFFER.lastIndexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int readableByteCount() {
-			return BUFFER.readableByteCount();
-		}
-
-		@Override
-		public int writableByteCount() {
-			return BUFFER.writableByteCount();
-		}
-
-		@Override
-		public int capacity() {
-			return BUFFER.capacity();
-		}
-
-		@Override
-		public DataBuffer capacity(int capacity) {
-			return BUFFER.capacity(capacity);
-		}
-
-		@Override
-		public DataBuffer ensureCapacity(int capacity) {
-			return BUFFER.ensureCapacity(capacity);
-		}
-
-		@Override
-		public int readPosition() {
-			return BUFFER.readPosition();
-		}
-
-		@Override
-		public DataBuffer readPosition(int readPosition) {
-			return BUFFER.readPosition(readPosition);
-		}
-
-		@Override
-		public int writePosition() {
-			return BUFFER.writePosition();
-		}
-
-		@Override
-		public DataBuffer writePosition(int writePosition) {
-			return BUFFER.writePosition(writePosition);
-		}
-
-		@Override
-		public byte getByte(int index) {
-			return BUFFER.getByte(index);
-		}
-
-		@Override
-		public byte read() {
-			return BUFFER.read();
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination) {
-			return BUFFER.read(destination);
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination, int offset, int length) {
-			return BUFFER.read(destination, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(byte b) {
-			return BUFFER.write(b);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source) {
-			return BUFFER.write(source);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source, int offset, int length) {
-			return BUFFER.write(source, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(DataBuffer... buffers) {
-			return BUFFER.write(buffers);
-		}
-
-		@Override
-		public DataBuffer write(ByteBuffer... buffers) {
-			return BUFFER.write(buffers);
-		}
-
-		@Override
-		public DataBuffer write(CharSequence charSequence, Charset charset) {
-			return BUFFER.write(charSequence, charset);
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			return BUFFER.slice(index, length);
-		}
-
-		@Override
-		public DataBuffer retainedSlice(int index, int length) {
-			return BUFFER.retainedSlice(index, length);
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer() {
-			return BUFFER.asByteBuffer();
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer(int index, int length) {
-			return BUFFER.asByteBuffer(index, length);
-		}
-
-		@Override
-		public InputStream asInputStream() {
-			return BUFFER.asInputStream();
-		}
-
-		@Override
-		public InputStream asInputStream(boolean releaseOnClose) {
-			return BUFFER.asInputStream(releaseOnClose);
-		}
-
-		@Override
-		public OutputStream asOutputStream() {
-			return BUFFER.asOutputStream();
-		}
 	}
 
+
+	private static class LimitChecker implements Consumer<DataBuffer> {
+
+		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+		private final LimitedDataBufferList list;
+
+
+		LimitChecker(int maxInMemorySize) {
+			this.list = new LimitedDataBufferList(maxInMemorySize);
+		}
+
+		@Override
+		public void accept(DataBuffer buffer) {
+			if (buffer instanceof EndFrameBuffer) {
+				this.list.clear();
+			}
+			try {
+				this.list.add(buffer);
+			}
+			catch (DataBufferLimitException ex) {
+				DataBufferUtils.release(buffer);
+				throw ex;
+			}
+		}
+	}
 
 }

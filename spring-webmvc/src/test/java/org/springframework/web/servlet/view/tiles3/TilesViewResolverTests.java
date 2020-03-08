@@ -19,11 +19,11 @@ import java.util.Locale;
 
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,7 +44,7 @@ public class TilesViewResolverTests {
 	private Renderer renderer;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());

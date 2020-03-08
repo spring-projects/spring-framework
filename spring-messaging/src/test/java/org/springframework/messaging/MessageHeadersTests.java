@@ -23,9 +23,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

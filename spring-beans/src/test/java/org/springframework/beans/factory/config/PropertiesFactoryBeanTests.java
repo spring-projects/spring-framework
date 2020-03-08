@@ -18,12 +18,12 @@ package org.springframework.beans.factory.config;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Unit tests for {@link PropertiesFactoryBean}.

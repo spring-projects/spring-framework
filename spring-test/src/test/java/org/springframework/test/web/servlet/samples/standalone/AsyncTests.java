@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,6 +41,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -68,6 +69,7 @@ public class AsyncTests {
 	public void callable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
 				.andExpect(request().asyncStarted())
+				.andExpect(request().asyncResult(equalTo(new Person("Joe"))))
 				.andExpect(request().asyncResult(new Person("Joe")))
 				.andReturn();
 
@@ -249,6 +251,7 @@ public class AsyncTests {
 		public DeferredResult<Person> getDeferredResultWithDelayedError() {
 			final DeferredResult<Person> deferredResult = new DeferredResult<>();
 			new Thread() {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(100);

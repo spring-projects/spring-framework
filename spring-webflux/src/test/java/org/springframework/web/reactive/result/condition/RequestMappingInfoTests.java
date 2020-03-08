@@ -21,16 +21,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
@@ -47,7 +47,7 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  */
 public class RequestMappingInfoTests {
 
-	// TODO: CORS pre-flight (see @Ignore)
+	// TODO: CORS pre-flight (see @Disabled)
 
 
 	@Test
@@ -274,7 +274,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void preFlightRequest() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "https://domain.com")

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
@@ -35,8 +36,8 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
@@ -69,7 +70,7 @@ public class HtmlUnitRequestBuilderTests {
 	private HtmlUnitRequestBuilder requestBuilder;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		webRequest = new WebRequest(new URL("https://example.com/test/this/here"));
 		webRequest.setHttpMethod(HttpMethod.GET);

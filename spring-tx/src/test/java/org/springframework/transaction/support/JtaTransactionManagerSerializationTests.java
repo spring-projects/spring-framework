@@ -19,11 +19,11 @@ package org.springframework.transaction.support;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.jta.JtaTransactionManager;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

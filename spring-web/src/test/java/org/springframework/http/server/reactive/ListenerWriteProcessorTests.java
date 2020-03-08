@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -44,7 +44,7 @@ public class ListenerWriteProcessorTests {
 	private final TestSubscription subscription = new TestSubscription();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.processor.subscribe(this.resultSubscriber);
 		this.processor.onSubscribe(this.subscription);

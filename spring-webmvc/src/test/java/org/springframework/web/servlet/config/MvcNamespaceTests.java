@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
@@ -40,8 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
@@ -62,10 +63,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockRequestDispatcher;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.PathMatcher;
@@ -138,6 +135,10 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -167,7 +168,7 @@ public class MvcNamespaceTests {
 	private HandlerMethod handlerMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		TestMockServletContext servletContext = new TestMockServletContext();
 		appContext = new XmlWebApplicationContext();

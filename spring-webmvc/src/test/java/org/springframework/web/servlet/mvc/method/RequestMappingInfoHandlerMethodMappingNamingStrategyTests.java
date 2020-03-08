@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestMapping;

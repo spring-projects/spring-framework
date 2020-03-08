@@ -16,7 +16,7 @@
 
 package org.springframework.cache.concurrent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;

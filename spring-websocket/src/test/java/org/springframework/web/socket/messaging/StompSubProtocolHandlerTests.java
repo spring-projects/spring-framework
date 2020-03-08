@@ -25,14 +25,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -41,7 +42,6 @@ import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -66,8 +66,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -87,7 +87,7 @@ public class StompSubProtocolHandlerTests {
 	private ArgumentCaptor<Message> messageCaptor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.protocolHandler = new StompSubProtocolHandler();
 		this.channel = Mockito.mock(MessageChannel.class);
@@ -402,7 +402,7 @@ public class StompSubProtocolHandlerTests {
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
-		verifyZeroInteractions(this.channel);
+		verifyNoInteractions(this.channel);
 		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertThat(actual.getPayload().startsWith("ERROR")).isTrue();

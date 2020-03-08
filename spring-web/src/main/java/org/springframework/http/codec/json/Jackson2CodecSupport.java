@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpLogging;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -54,6 +57,15 @@ public abstract class Jackson2CodecSupport {
 	 * @see <a href="https://www.baeldung.com/jackson-json-view-annotation">Jackson JSON Views</a>
 	 */
 	public static final String JSON_VIEW_HINT = Jackson2CodecSupport.class.getName() + ".jsonView";
+
+	/**
+	 * The key for the hint to access the actual ResolvableType passed into
+	 * {@link org.springframework.http.codec.HttpMessageReader#read(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse, Map)}
+	 * (server-side only). Currently set when the method argument has generics because
+	 * in case of reactive types, use of {@code ResolvableType.getGeneric()} means no
+	 * MethodParameter source and no knowledge of the containing class.
+	 */
+	static final String ACTUAL_TYPE_HINT = Jackson2CodecSupport.class.getName() + ".actualType";
 
 	private static final String JSON_VIEW_HINT_ERROR =
 			"@JsonView only supported for write hints with exactly 1 class argument: ";
@@ -106,11 +118,20 @@ public abstract class Jackson2CodecSupport {
 	protected Map<String, Object> getHints(ResolvableType resolvableType) {
 		MethodParameter param = getParameter(resolvableType);
 		if (param != null) {
+			Map<String, Object> hints = null;
+			if (resolvableType.hasGenerics()) {
+				hints = new HashMap<>(2);
+				hints.put(ACTUAL_TYPE_HINT, resolvableType);
+			}
 			JsonView annotation = getAnnotation(param, JsonView.class);
 			if (annotation != null) {
 				Class<?>[] classes = annotation.value();
 				Assert.isTrue(classes.length == 1, JSON_VIEW_HINT_ERROR + param);
-				return Hints.from(JSON_VIEW_HINT, classes[0]);
+				hints = (hints != null ? hints : new HashMap<>(1));
+				hints.put(JSON_VIEW_HINT, classes[0]);
+			}
+			if (hints != null) {
+				return hints;
 			}
 		}
 		return Hints.none();

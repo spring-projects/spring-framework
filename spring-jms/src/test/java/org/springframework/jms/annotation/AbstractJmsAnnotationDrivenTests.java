@@ -17,10 +17,11 @@
 package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.jms.StubTextMessage;
@@ -43,44 +44,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- *
  * @author Stephane Nicoll
  */
-public abstract class AbstractJmsAnnotationDrivenTests {
+abstract class AbstractJmsAnnotationDrivenTests {
 
 	@Test
-	public abstract void sampleConfiguration();
+	abstract void sampleConfiguration();
 
 	@Test
-	public abstract void fullConfiguration();
+	abstract void fullConfiguration();
 
 	@Test
-	public abstract void fullConfigurableConfiguration();
+	abstract void fullConfigurableConfiguration();
 
 	@Test
-	public abstract void customConfiguration();
+	abstract void customConfiguration();
 
 	@Test
-	public abstract void explicitContainerFactory();
+	abstract void explicitContainerFactory();
 
 	@Test
-	public abstract void defaultContainerFactory();
+	abstract void defaultContainerFactory();
 
 	@Test
-	public abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
+	abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
 
 	@Test
-	public abstract void jmsListenerIsRepeatable();
+	abstract void jmsListenerIsRepeatable();
 
 	@Test
-	public abstract void jmsListeners();
+	abstract void jmsListeners();
 
 
 	/**
 	 * Test for {@link SampleBean} discovery. If a factory with the default name
 	 * is set, an endpoint will use it automatically
 	 */
-	public void testSampleConfiguration(ApplicationContext context) {
+	protected void testSampleConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory simpleFactory =
@@ -94,7 +94,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 * all endpoints provide a default registry. This shows that the default factory
 	 * is only retrieved if it needs to be.
 	 */
-	public void testFullConfiguration(ApplicationContext context) {
+	protected void testFullConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
 		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(1);
@@ -117,7 +117,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 * with "myCustomEndpointId". The custom endpoint does not provide
 	 * any factory so it's registered with the default one
 	 */
-	public void testCustomConfiguration(ApplicationContext context) {
+	protected void testCustomConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory customFactory =
@@ -141,7 +141,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 * factory to use as a default is registered with an explicit
 	 * default.
 	 */
-	public void testExplicitContainerFactoryConfiguration(ApplicationContext context) {
+	protected void testExplicitContainerFactoryConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
 		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
@@ -151,7 +151,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 * Test for {@link DefaultBean} that does not define the container
 	 * factory to use as a default is registered with the default name.
 	 */
-	public void testDefaultContainerFactoryConfiguration(ApplicationContext context) {
+	protected void testDefaultContainerFactoryConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
@@ -163,7 +163,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 *
 	 * The test should throw a {@link org.springframework.jms.listener.adapter.ListenerExecutionFailedException}
 	 */
-	public void testJmsHandlerMethodFactoryConfiguration(ApplicationContext context) throws JMSException {
+	protected void testJmsHandlerMethodFactoryConfiguration(ApplicationContext context) throws JMSException {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("defaultFactory", JmsListenerContainerTestFactory.class);
 		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(1);
@@ -180,7 +180,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	 * Test for {@link JmsListenerRepeatableBean} and {@link JmsListenersBean} that validates that the
 	 * {@code @JmsListener} annotation is repeatable and generate one specific container per annotation.
 	 */
-	public void testJmsListenerRepeatable(ApplicationContext context) {
+	protected void testJmsListenerRepeatable(ApplicationContext context) {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(2);

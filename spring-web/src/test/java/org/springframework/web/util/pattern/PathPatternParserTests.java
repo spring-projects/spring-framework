@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
@@ -32,7 +32,9 @@ import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Exercise the {@link PathPatternParser}.
+ *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class PathPatternParserTests {
 
@@ -118,7 +120,10 @@ public class PathPatternParserTests {
 	public void regexPathElementPatterns() {
 		checkError("/{var:[^/]*}", 8, PatternMessage.MISSING_CLOSE_CAPTURE);
 		checkError("/{var:abc", 8, PatternMessage.MISSING_CLOSE_CAPTURE);
-		checkError("/{var:a{{1,2}}}", 6, PatternMessage.REGEX_PATTERN_SYNTAX_EXCEPTION);
+
+		// Do not check the expected position due a change in RegEx parsing in JDK 13.
+		// See https://github.com/spring-projects/spring-framework/issues/23669
+		checkError("/{var:a{{1,2}}}", PatternMessage.REGEX_PATTERN_SYNTAX_EXCEPTION);
 
 		pathPattern = checkStructure("/{var:\\\\}");
 		PathElement next = pathPattern.getHeadSection().next;
@@ -184,6 +189,7 @@ public class PathPatternParserTests {
 		checkStructure("/{foo}");
 		checkStructure("/{f}/");
 		checkStructure("/{foo}/{bar}/{wibble}");
+		checkStructure("/{mobile-number}"); // gh-23101
 	}
 
 	@Test
@@ -411,7 +417,7 @@ public class PathPatternParserTests {
 	@Test
 	public void separatorTests() {
 		PathPatternParser parser = new PathPatternParser();
-		parser.setSeparator('.');
+		parser.setPathOptions(PathContainer.Options.create('.', false));
 		String rawPattern = "first.second.{last}";
 		PathPattern pattern = parser.parse(rawPattern);
 		assertThat(pattern.computePatternString()).isEqualTo(rawPattern);
@@ -431,18 +437,32 @@ public class PathPatternParserTests {
 		return pp;
 	}
 
+	/**
+	 * Delegates to {@link #checkError(String, int, PatternMessage, String...)},
+	 * passing {@code -1} as the {@code expectedPos}.
+	 * @since 5.2
+	 */
+	private void checkError(String pattern, PatternMessage expectedMessage, String... expectedInserts) {
+		checkError(pattern, -1, expectedMessage, expectedInserts);
+	}
+
+	/**
+	 * @param expectedPos the expected position, or {@code -1} if the position should not be checked
+	 */
 	private void checkError(String pattern, int expectedPos, PatternMessage expectedMessage,
 			String... expectedInserts) {
 
-		assertThatExceptionOfType(PatternParseException.class).isThrownBy(() ->
-				pathPattern = parse(pattern))
-		.satisfies(ex -> {
-			assertThat(ex.getPosition()).as(ex.toDetailedString()).isEqualTo(expectedPos);
-			assertThat(ex.getMessageType()).as(ex.toDetailedString()).isEqualTo(expectedMessage);
-			if (expectedInserts.length != 0) {
-				assertThat(ex.getInserts()).isEqualTo(expectedInserts);
-			}
-		});
+		assertThatExceptionOfType(PatternParseException.class)
+			.isThrownBy(() -> pathPattern = parse(pattern))
+			.satisfies(ex -> {
+				if (expectedPos >= 0) {
+					assertThat(ex.getPosition()).as(ex.toDetailedString()).isEqualTo(expectedPos);
+				}
+				assertThat(ex.getMessageType()).as(ex.toDetailedString()).isEqualTo(expectedMessage);
+				if (expectedInserts.length != 0) {
+					assertThat(ex.getInserts()).isEqualTo(expectedInserts);
+				}
+			});
 	}
 
 	@SafeVarargs

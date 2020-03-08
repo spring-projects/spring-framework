@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
@@ -5156,8 +5156,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	private void assertGetValueFail(Expression expression) {
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expression.getValue());
+		assertThatExceptionOfType(Exception.class).isThrownBy(expression::getValue);
 	}
 
 	private void assertIsCompiled(Expression expression) {
@@ -5188,6 +5187,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	public static class MyMessage implements Message<String> {
 
+		@Override
 		public MessageHeaders getHeaders() {
 			MessageHeaders mh = new MessageHeaders();
 			mh.put("command", "wibble");
@@ -5195,8 +5195,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			return mh;
 		}
 
+		@Override
 		public int[] getIa() { return new int[] {5,3}; }
 
+		@Override
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		public List getList() {
 			List l = new ArrayList();
@@ -5253,24 +5255,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		private Method method;
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class<?>[] {Payload2.class};
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			// target is a Payload2 instance
 			return true;
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			Payload2 payload2 = (Payload2)target;
 			return new TypedValue(payload2.getField(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		}
 
@@ -5496,6 +5503,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public Three getThree() {
 			return three;
 		}
+		@Override
 		public String toString() {
 			return "instanceof Two";
 		}
@@ -6108,6 +6116,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			return "pb";
 		}
 
+		@Override
 		public String toString() {
 			return "sh";
 		}

@@ -30,19 +30,20 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
@@ -51,27 +52,28 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
  */
-public class ApplicationContextExpressionTests {
+class ApplicationContextExpressionTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 
 	@Test
-	public void genericApplicationContext() throws Exception {
+	@SuppressWarnings("deprecation")
+	void genericApplicationContext() throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
@@ -104,7 +106,8 @@ public class ApplicationContextExpressionTests {
 
 		ac.getBeanFactory().setConversionService(new DefaultConversionService());
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties placeholders = new Properties();
 		placeholders.setProperty("code", "123");
 		ppc.setProperties(placeholders);
@@ -210,14 +213,14 @@ public class ApplicationContextExpressionTests {
 	}
 
 	@Test
-	public void prototypeCreationReevaluatesExpressions() {
+	void prototypeCreationReevaluatesExpressions() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 		GenericConversionService cs = new GenericConversionService();
 		cs.addConverter(String.class, String.class, String::trim);
 		ac.getBeanFactory().registerSingleton(GenericApplicationContext.CONVERSION_SERVICE_BEAN_NAME, cs);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		rbd.getPropertyValues().add("country2", new TypedStringValue("-#{systemProperties.country}-"));
 		ac.registerBeanDefinition("test", rbd);
@@ -245,12 +248,12 @@ public class ApplicationContextExpressionTests {
 	}
 
 	@Test
-	public void prototypeCreationIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
+	@EnabledForTestGroups(PERFORMANCE)
+	void prototypeCreationIsFastEnough() {
 		Assume.notLogging(factoryLog);
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("test", rbd);
@@ -272,10 +275,11 @@ public class ApplicationContextExpressionTests {
 			System.getProperties().remove("name");
 		}
 		assertThat(sw.getTotalTimeMillis() < 6000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
+		ac.close();
 	}
 
 	@Test
-	public void systemPropertiesSecurityManager() {
+	void systemPropertiesSecurityManager() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
@@ -308,10 +312,11 @@ public class ApplicationContextExpressionTests {
 			System.setSecurityManager(oldSecurityManager);
 			System.getProperties().remove("country");
 		}
+		ac.close();
 	}
 
 	@Test
-	public void stringConcatenationWithDebugLogging() {
+	void stringConcatenationWithDebugLogging() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
@@ -322,10 +327,11 @@ public class ApplicationContextExpressionTests {
 
 		String str = ac.getBean("str", String.class);
 		assertThat(str.startsWith("test-")).isTrue();
+		ac.close();
 	}
 
 	@Test
-	public void resourceInjection() throws IOException {
+	void resourceInjection() throws IOException {
 		System.setProperty("logfile", "do_not_delete_me.txt");
 		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ResourceInjectionBean.class)) {
 			ResourceInjectionBean resourceInjectionBean = ac.getBean(ResourceInjectionBean.class);

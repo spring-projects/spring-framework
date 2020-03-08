@@ -18,8 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -34,6 +32,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.protobuf.Msg;
 import org.springframework.web.reactive.protobuf.SecondMsg;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,33 +40,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for Protobuf support.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
-public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
-	public static final Msg TEST_MSG =
+	static final Msg TEST_MSG =
 			Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 
 	private WebClient webClient;
 
 
 	@Override
-	@Before
-	public void setup() throws Exception {
-		super.setup();
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
 		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(TestConfiguration .class);
-		wac.refresh();
-		return wac;
+		return new AnnotationConfigApplicationContext(TestConfiguration.class);
 	}
 
 
-	@Test
-	public void value() {
+	@ParameterizedHttpServerTest
+	void value(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/message")
 				.exchange()
@@ -83,8 +81,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void values() {
+	@ParameterizedHttpServerTest
+	void values(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Msg> result = this.webClient.get()
 				.uri("/messages")
 				.exchange()
@@ -102,8 +102,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void streaming() {
+	@ParameterizedHttpServerTest
+	void streaming(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Msg> result = this.webClient.get()
 				.uri("/message-stream")
 				.exchange()
@@ -121,8 +123,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verify();
 	}
 
-	@Test
-	public void empty() {
+	@ParameterizedHttpServerTest
+	void empty(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/empty")
 				.retrieve()
@@ -132,8 +136,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void defaultInstance() {
+	@ParameterizedHttpServerTest
+	void defaultInstance(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/default-instance")
 				.retrieve()

@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,8 +37,8 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.aop.DefaultLockable;
 import test.aop.Lockable;
 import test.aop.PerTargetAspect;
@@ -51,11 +50,11 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,7 +143,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		aspect2.setOrder(5);
 		advisors.addAll(
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 
 		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
 		assertThat(itb.getAge()).as("Around advice must NOT apply").isEqualTo(realAge);
@@ -170,7 +169,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		PerTargetAspectWithOrderAnnotation5 aspect2 = new PerTargetAspectWithOrderAnnotation5();
 		advisors.addAll(
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
-		Collections.sort(advisors, new OrderComparator());
+		OrderComparator.sort(advisors);
 
 		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
 		assertThat(itb.getAge()).as("Around advice must NOT apply").isEqualTo(realAge);
@@ -414,7 +413,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 	@Test
-	@Ignore
+	@Disabled
 	public void testIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
@@ -591,7 +590,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
-	@Aspect("pertypewithin(org.springframework.tests.sample.beans.IOther+)")
+	@Aspect("pertypewithin(org.springframework.beans.testfixture.beans.IOther+)")
 	public static class PerTypeWithinAspect {
 
 		public int count;
@@ -932,7 +931,7 @@ abstract class AbstractMakeModifiable {
 @Aspect
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
-	@DeclareParents(value = "org.springframework.tests.sample.beans.ITestBean+",
+	@DeclareParents(value = "org.springframework.beans.testfixture.beans.ITestBean+",
 			defaultImpl=ModifiableImpl.class)
 	public static MutableModifiable mixin;
 

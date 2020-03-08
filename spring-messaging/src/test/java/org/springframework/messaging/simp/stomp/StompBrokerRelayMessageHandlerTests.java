@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.util.ArrayList;
@@ -21,17 +22,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.ReconnectStrategy;
@@ -46,11 +47,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for StompBrokerRelayMessageHandler.
+ * Unit tests for {@link StompBrokerRelayMessageHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class StompBrokerRelayMessageHandlerTests {
+class StompBrokerRelayMessageHandlerTests {
 
 	private StompBrokerRelayMessageHandler brokerRelay;
 
@@ -59,8 +60,8 @@ public class StompBrokerRelayMessageHandlerTests {
 	private StubTcpOperations tcpClient;
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 
 		this.outboundChannel = new StubMessageChannel();
 
@@ -80,7 +81,7 @@ public class StompBrokerRelayMessageHandlerTests {
 
 
 	@Test
-	public void virtualHost() throws Exception {
+	void virtualHost() {
 
 		this.brokerRelay.setVirtualHost("ABC");
 
@@ -101,7 +102,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void loginAndPasscode() throws Exception {
+	void loginAndPasscode() {
 
 		this.brokerRelay.setSystemLogin("syslogin");
 		this.brokerRelay.setSystemPasscode("syspasscode");
@@ -125,7 +126,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void destinationExcluded() throws Exception {
+	void destinationExcluded() {
 
 		this.brokerRelay.start();
 
@@ -141,7 +142,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void messageFromBrokerIsEnriched() throws Exception {
+	void messageFromBrokerIsEnriched() {
 
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
@@ -161,7 +162,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	// SPR-12820
 
 	@Test
-	public void connectWhenBrokerNotAvailable() throws Exception {
+	void connectWhenBrokerNotAvailable() {
 
 		this.brokerRelay.start();
 		this.brokerRelay.stopInternal();
@@ -176,7 +177,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void sendAfterBrokerUnavailable() throws Exception {
+	void sendAfterBrokerUnavailable() {
 
 		this.brokerRelay.start();
 		assertThat(this.brokerRelay.getConnectionCount()).isEqualTo(1);
@@ -197,7 +198,8 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void systemSubscription() throws Exception {
+	@SuppressWarnings("rawtypes")
+	void systemSubscription() {
 
 		MessageHandler handler = mock(MessageHandler.class);
 		this.brokerRelay.setSystemSubscriptions(Collections.singletonMap("/topic/foo", handler));
@@ -247,18 +249,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	private static ListenableFutureTask<Void> getVoidFuture() {
 		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
 			@Override
-			public Void call() throws Exception {
-				return null;
-			}
-		});
-		futureTask.run();
-		return futureTask;
-	}
-
-	private static ListenableFutureTask<Boolean> getBooleanFuture() {
-		ListenableFutureTask<Boolean> futureTask = new ListenableFutureTask<>(new Callable<Boolean>() {
-			@Override
-			public Boolean call() throws Exception {
+			public Void call() {
 				return null;
 			}
 		});

@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
@@ -40,7 +40,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 /**
  * @author Arjen Poutsma
  */
-public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -54,20 +54,24 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 	}
 
 
-	@Test
-	public void mono() {
+	@ParameterizedHttpServerTest
+	void mono(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<Person> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
+				restTemplate.getForEntity("http://localhost:" + super.port + "/mono", Person.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
-	@Test
-	public void flux() {
+	@ParameterizedHttpServerTest
+	void flux(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
-				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);
+				restTemplate.exchange("http://localhost:" + super.port + "/flux", HttpMethod.GET, null, reference);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
@@ -76,9 +80,11 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
 
-	@Test
-	public void postMono() {
-		URI uri = URI.create("http://localhost:" + port + "/mono");
+	@ParameterizedHttpServerTest
+	void postMono(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		URI uri = URI.create("http://localhost:" + super.port + "/mono");
 		Person person = new Person("Jack");
 		RequestEntity<Person> requestEntity = RequestEntity.post(uri).body(person);
 		ResponseEntity<Person> result = restTemplate.exchange(requestEntity, Person.class);

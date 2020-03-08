@@ -26,11 +26,10 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link MethodMetadata} returned from a {@link SimpleMetadataReader}.
+ * ASM method visitor that creates {@link SimpleMethodMetadata}.
  *
  * @author Phillip Webb
  * @since 5.2

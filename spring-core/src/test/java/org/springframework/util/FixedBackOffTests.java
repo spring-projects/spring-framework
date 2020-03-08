@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.FixedBackOff;
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class FixedBackOffTests {
+class FixedBackOffTests {
 
 	@Test
-	public void defaultInstance() {
+	void defaultInstance() {
 		FixedBackOff backOff = new FixedBackOff();
 		BackOffExecution execution = backOff.start();
 		for (int i = 0; i < 100; i++) {
@@ -38,14 +38,14 @@ public class FixedBackOffTests {
 	}
 
 	@Test
-	public void noAttemptAtAll() {
+	void noAttemptAtAll() {
 		FixedBackOff backOff = new FixedBackOff(100L, 0L);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.nextBackOff()).isEqualTo(BackOffExecution.STOP);
 	}
 
 	@Test
-	public void maxAttemptsReached() {
+	void maxAttemptsReached() {
 		FixedBackOff backOff = new FixedBackOff(200L, 2);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.nextBackOff()).isEqualTo(200L);
@@ -54,7 +54,7 @@ public class FixedBackOffTests {
 	}
 
 	@Test
-	public void startReturnDifferentInstances() {
+	void startReturnDifferentInstances() {
 		FixedBackOff backOff = new FixedBackOff(100L, 1);
 		BackOffExecution execution = backOff.start();
 		BackOffExecution execution2 = backOff.start();
@@ -66,7 +66,7 @@ public class FixedBackOffTests {
 	}
 
 	@Test
-	public void liveUpdate() {
+	void liveUpdate() {
 		FixedBackOff backOff = new FixedBackOff(100L, 1);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.nextBackOff()).isEqualTo(100L);
@@ -79,7 +79,7 @@ public class FixedBackOffTests {
 	}
 
 	@Test
-	public void toStringContent() {
+	void toStringContent() {
 		FixedBackOff backOff = new FixedBackOff(200L, 10);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.toString()).isEqualTo("FixedBackOff{interval=200, currentAttempts=0, maxAttempts=10}");

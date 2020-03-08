@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

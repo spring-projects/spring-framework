@@ -18,16 +18,16 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,7 +46,7 @@ public class InvocableHandlerMethodTests {
 	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.request = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}

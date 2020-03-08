@@ -16,20 +16,19 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,12 +71,10 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	public void testNewlineInRequest() throws Exception {
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setUrlDecode(false);
 		Object controller = new Object();
-		Map<String, Object> urlMap = new LinkedHashMap<>();
-		urlMap.put("/*/baz", controller);
-		handlerMapping.setUrlMap(urlMap);
+		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping(
+			Collections.singletonMap("/*/baz", controller));
+		handlerMapping.setUrlDecode(false);
 		handlerMapping.setApplicationContext(new StaticApplicationContext());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo%0a%0dbar/baz");

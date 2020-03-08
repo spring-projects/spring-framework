@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import io.reactivex.Single;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,12 +41,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,7 +90,8 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()))
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
+						response.rawStatusCode() == 201)
 				.expectComplete()
 				.verify();
 	}

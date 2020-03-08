@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.StubMvcResult;
@@ -31,25 +31,21 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
-
-
 /**
- * Unit tests for
- * {@link org.springframework.test.web.servlet.result.ModelResultMatchers}.
+ * Unit tests for {@link ModelResultMatchers}.
  *
  * @author Craig Walls
+ * @author Sam Brannen
  */
-public class ModelResultMatchersTests {
+class ModelResultMatchersTests {
 
-	private ModelResultMatchers matchers;
-
+	private final ModelResultMatchers matchers = new ModelResultMatchers();
 	private MvcResult mvcResult;
 	private MvcResult mvcResultWithError;
 
-	@Before
-	public void setUp() throws Exception {
-		this.matchers = new ModelResultMatchers();
 
+	@BeforeEach
+	void setUp() throws Exception {
 		ModelAndView mav = new ModelAndView("view", "good", "good");
 		BindingResult bindingResult = new BeanPropertyBindingResult("good", "good");
 		mav.addObject(BindingResult.MODEL_KEY_PREFIX + "good", bindingResult);
@@ -68,118 +64,130 @@ public class ModelResultMatchersTests {
 	}
 
 	@Test
-	public void attributeExists() throws Exception {
+	void attributeExists() throws Exception {
 		this.matchers.attributeExists("good").match(this.mvcResult);
 	}
 
 	@Test
-	public void attributeExists_doesNotExist() throws Exception {
+	void attributeExists_doesNotExist() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeExists("bad").match(this.mvcResult));
 	}
 
 	@Test
-	public void  attributeDoesNotExist() throws Exception {
+	void attributeDoesNotExist() throws Exception {
 		this.matchers.attributeDoesNotExist("bad").match(this.mvcResult);
 	}
 
 	@Test
-	public void attributeDoesNotExist_doesExist() throws Exception {
+	void attributeDoesNotExist_doesExist() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeDoesNotExist("good").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attribute_equal() throws Exception {
+	void attribute_equal() throws Exception {
 		this.matchers.attribute("good", is("good")).match(this.mvcResult);
 	}
 
 	@Test
-	public void attribute_notEqual() throws Exception {
+	void attribute_notEqual() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attribute("good", is("bad")).match(this.mvcResult));
 	}
 
 	@Test
-	public void hasNoErrors() throws Exception {
+	void hasNoErrors() throws Exception {
 		this.matchers.hasNoErrors().match(this.mvcResult);
 	}
 
 	@Test
-	public void hasNoErrors_withErrors() throws Exception {
+	void hasNoErrors_withErrors() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.hasNoErrors().match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasErrors() throws Exception {
+	void attributeHasErrors() throws Exception {
 		this.matchers.attributeHasErrors("date").match(this.mvcResultWithError);
 	}
 
 	@Test
-	public void attributeHasErrors_withoutErrors() throws Exception {
+	void attributeErrorCount() throws Exception {
+		this.matchers.attributeErrorCount("date", 1).match(this.mvcResultWithError);
+	}
+
+	@Test
+	void attributeErrorCount_withWrongErrorCount() throws Exception {
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> this.matchers.attributeErrorCount("date", 2).match(this.mvcResultWithError))
+			.withMessage("Binding/validation error count for attribute 'date', expected:<2> but was:<1>");
+	}
+
+	@Test
+	void attributeHasErrors_withoutErrors() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasErrors("good").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasNoErrors() throws Exception {
+	void attributeHasNoErrors() throws Exception {
 		this.matchers.attributeHasNoErrors("good").match(this.mvcResult);
 	}
 
 	@Test
-	public void attributeHasNoErrors_withoutAttribute() throws Exception {
+	void attributeHasNoErrors_withoutAttribute() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasNoErrors("missing").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasNoErrors_withErrors() throws Exception {
+	void attributeHasNoErrors_withErrors() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasNoErrors("date").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasFieldErrors() throws Exception {
+	void attributeHasFieldErrors() throws Exception {
 		this.matchers.attributeHasFieldErrors("date", "time").match(this.mvcResultWithError);
 	}
 
 	@Test
-	public void attributeHasFieldErrors_withoutAttribute() throws Exception {
+	void attributeHasFieldErrors_withoutAttribute() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasFieldErrors("missing", "bad").match(this.mvcResult));
 	}
 
 	@Test
-	public void attributeHasFieldErrors_withoutErrorsForAttribute() throws Exception {
+	void attributeHasFieldErrors_withoutErrorsForAttribute() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasFieldErrors("date", "time").match(this.mvcResult));
 	}
 
 	@Test
-	public void attributeHasFieldErrors_withoutErrorsForField() throws Exception {
+	void attributeHasFieldErrors_withoutErrorsForField() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasFieldErrors("date", "good", "time").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasFieldErrorCode() throws Exception {
+	void attributeHasFieldErrorCode() throws Exception {
 		this.matchers.attributeHasFieldErrorCode("date", "time", "error").match(this.mvcResultWithError);
 	}
 
 	@Test
-	public void attributeHasFieldErrorCode_withoutErrorOnField() throws Exception {
+	void attributeHasFieldErrorCode_withoutErrorOnField() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasFieldErrorCode("date", "time", "incorrectError").match(this.mvcResultWithError));
 	}
 
 	@Test
-	public void attributeHasFieldErrorCode_startsWith() throws Exception {
+	void attributeHasFieldErrorCode_startsWith() throws Exception {
 		this.matchers.attributeHasFieldErrorCode("date", "time", startsWith("err")).match(this.mvcResultWithError);
 	}
 
 	@Test
-	public void attributeHasFieldErrorCode_startsWith_withoutErrorOnField() throws Exception {
+	void attributeHasFieldErrorCode_startsWith_withoutErrorOnField() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.matchers.attributeHasFieldErrorCode("date", "time", startsWith("inc")).match(this.mvcResultWithError));
 	}
@@ -187,4 +195,5 @@ public class ModelResultMatchersTests {
 	private MvcResult getMvcResult(ModelAndView modelAndView) {
 		return new StubMvcResult(null, null, null, null, modelAndView, null, null);
 	}
+
 }

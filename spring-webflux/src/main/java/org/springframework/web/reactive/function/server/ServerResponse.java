@@ -60,8 +60,20 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the (potentially non-standard) status code of this response.
+	 * @return the status as an integer
+	 * @since 5.2
+	 * @see #statusCode()
+	 * @see HttpStatus#resolve(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -387,49 +399,22 @@ public interface ServerResponse {
 
 		/**
 		 * Set the body of the response to the given {@code Object} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromObject(Object)}.
+		 * This is a shortcut for using a {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
 		 * @param body the body of the response
 		 * @return the built response
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
-		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
-		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
 		 * @since 5.2
 		 */
-		Mono<ServerResponse> body(Object body);
+		Mono<ServerResponse> bodyValue(Object body);
 
 		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromProducer(Object, Class)}.
-		 * @param producer the producer to write to the response. This must be a
-		 * {@link Publisher} or another producer adaptable to a
-		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
-		 * @param elementClass the class of elements contained in the producer
-		 * @return the built response
-		 * @since 5.2
-		 */
-		Mono<ServerResponse> body(Object producer, Class<?> elementClass);
-
-		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromProducer(Object, ParameterizedTypeReference)}.
-		 * @param producer the producer to write to the response. This must be a
-		 * {@link Publisher} or another producer adaptable to a
-		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
-		 * @param elementTypeRef a type reference describing the elements contained in the producer
-		 * @return the built response
-		 * @since 5.2
-		 */
-		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
-
-		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * Set the body from the given {@code Publisher}. Shortcut for
+		 * {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
 		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementClass the class of elements contained in the publisher
+		 * @param elementClass the type of elements published
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built response
@@ -437,17 +422,39 @@ public interface ServerResponse {
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, ParameterizedTypeReference)}.
-		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementTypeRef a type reference describing the elements contained in the publisher
+		 * Variant of {@link #body(Publisher, Class)} that allows using any
+		 * producer that can be resolved to {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param publisher the {@code Publisher} to use to write the response
+		 * @param elementTypeRef the type of elements produced
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built response
 		 */
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
 				ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * Variant of {@link #body(Publisher, Class)} that allows using any
+		 * producer that can be resolved to {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param producer the producer to write to the request
+		 * @param elementClass the type of elements produced
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Variant of {@link #body(Publisher, ParameterizedTypeReference)} that
+		 * allows using any producer that can be resolved to {@link Publisher}
+		 * via {@link ReactiveAdapterRegistry}.
+		 * @param producer the producer to write to the response
+		 * @param elementTypeRef the type of elements produced
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
@@ -457,17 +464,9 @@ public interface ServerResponse {
 		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
 
 		/**
-		 * Set the body of the response to the given {@code Object} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromObject(Object)}.
-		 * @param body the body of the response
-		 * @return the built response
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
-		 * {@link #body(Publisher, Class)} should be used.
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
-		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
-		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 * Set the response body to the given {@code Object} and return it.
+		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
 		 */
 		@Deprecated
 		Mono<ServerResponse> syncBody(Object body);

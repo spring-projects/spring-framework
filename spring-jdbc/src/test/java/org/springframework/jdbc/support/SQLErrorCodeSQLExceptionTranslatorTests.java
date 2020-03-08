@@ -20,7 +20,7 @@ import java.sql.BatchUpdateException;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;

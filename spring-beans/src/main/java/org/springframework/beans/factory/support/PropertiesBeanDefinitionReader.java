@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
@@ -414,17 +415,20 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		String className = null;
 		String parent = null;
-		String scope = GenericBeanDefinition.SCOPE_SINGLETON;
+		String scope = BeanDefinition.SCOPE_SINGLETON;
 		boolean isAbstract = false;
 		boolean lazyInit = false;
 
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 
+		String prefixWithSep = prefix + SEPARATOR;
+		int beginIndex = prefixWithSep.length();
+
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
-			if (key.startsWith(prefix + SEPARATOR)) {
-				String property = key.substring(prefix.length() + SEPARATOR.length());
+			if (key.startsWith(prefixWithSep)) {
+				String property = key.substring(beginIndex);
 				if (CLASS_KEY.equals(property)) {
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
@@ -442,8 +446,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (SINGLETON_KEY.equals(property)) {
 					// Spring 1.2 style
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					scope = ("".equals(val) || TRUE_VALUE.equals(val) ? GenericBeanDefinition.SCOPE_SINGLETON :
-							GenericBeanDefinition.SCOPE_PROTOTYPE);
+					scope = ("".equals(val) || TRUE_VALUE.equals(val) ? BeanDefinition.SCOPE_SINGLETON :
+							BeanDefinition.SCOPE_PROTOTYPE);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = StringUtils.trimWhitespace((String) entry.getValue());

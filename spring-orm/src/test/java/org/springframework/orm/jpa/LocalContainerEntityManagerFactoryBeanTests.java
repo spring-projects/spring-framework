@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -28,16 +29,16 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.persistence.spi.ProviderUtil;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -316,11 +317,13 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		}
 
 		// JPA 2.1 method
+		@Override
 		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
 		// JPA 2.1 method
+		@Override
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();
 		}

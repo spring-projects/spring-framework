@@ -20,20 +20,19 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.AbstractEnvironment;
-import org.springframework.core.env.StandardEnvironmentTests;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
@@ -47,14 +46,14 @@ public class EnvironmentSecurityManagerIntegrationTests {
 	private Map<String, String> env;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		originalSecurityManager = System.getSecurityManager();
-		env = StandardEnvironmentTests.getModifiableSystemEnvironment();
+		env = EnvironmentTestUtils.getModifiableSystemEnvironment();
 		env.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "p1");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		env.remove(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME);
 		System.setSecurityManager(originalSecurityManager);

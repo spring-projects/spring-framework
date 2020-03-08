@@ -20,13 +20,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PrioritizedParameterNameDiscovererTests {
+class PrioritizedParameterNameDiscovererTests {
 
 	private static final String[] FOO_BAR = new String[] { "foo", "bar" };
 
@@ -61,14 +61,14 @@ public class PrioritizedParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void noParametersDiscoverers() {
+	void noParametersDiscoverers() {
 		ParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		assertThat(pnd.getParameterNames(anyMethod)).isNull();
 		assertThat(pnd.getParameterNames((Constructor<?>) null)).isNull();
 	}
 
 	@Test
-	public void orderedParameterDiscoverers1() {
+	void orderedParameterDiscoverers1() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsFooBar);
 		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod))).isTrue();
@@ -79,7 +79,7 @@ public class PrioritizedParameterNameDiscovererTests {
 	}
 
 	@Test
-	public void orderedParameterDiscoverers2() {
+	void orderedParameterDiscoverers2() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsSomethingElse);
 		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod))).isTrue();

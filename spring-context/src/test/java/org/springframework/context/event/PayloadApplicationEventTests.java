@@ -19,7 +19,7 @@ package org.springframework.context.event;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PayloadApplicationEventTests {
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "resource" })
 	public void testEventClassWithInterface() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 		AuditablePayloadEvent event = new AuditablePayloadEvent<>(this, "xyz");

@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -38,13 +38,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -54,13 +52,15 @@ import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * ViewResolutionResultHandler relying on a canned {@link TestViewResolver}
@@ -114,7 +114,12 @@ public class ViewResolutionResultHandlerTests {
 	private void testSupports(MethodParameter returnType, boolean supports) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertThat(resultHandler.supports(handlerResult)).isEqualTo(supports);
+		if (supports) {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should be supported").isTrue();
+		}
+		else {
+			assertThat(resultHandler.supports(handlerResult)).as("return type [" + returnType + "] should not be supported").isFalse();
+		}
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Map;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
@@ -106,15 +107,16 @@ public abstract class MockMvcResultMatchers {
 	 * Asserts the request was forwarded to the given URL.
 	 * <p>This method accepts {@link org.springframework.util.AntPathMatcher}
 	 * patterns.
-	 * @param urlPattern an AntPath pattern to match against
+	 * @param urlPattern an Ant-style path pattern to match against
 	 * @since 4.0
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public static ResultMatcher forwardedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("'" + urlPattern + "' is not an Ant-style path pattern",
+					pathMatcher.isPattern(urlPattern));
 			String url = result.getResponse().getForwardedUrl();
-			assertTrue("Forwarded URL does not match the expected URL pattern",
+			assertTrue("Forwarded URL '" + url + "' does not match the expected URL pattern '" + urlPattern + "'",
 					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
@@ -144,15 +146,16 @@ public abstract class MockMvcResultMatchers {
 	 * Asserts the request was redirected to the given URL.
 	 * <p>This method accepts {@link org.springframework.util.AntPathMatcher}
 	 * patterns.
-	 * @param urlPattern an AntPath pattern to match against
+	 * @param urlPattern an Ant-style path pattern to match against
 	 * @since 4.0
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public static ResultMatcher redirectedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("No Ant-style path pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("'" + urlPattern + "' is not an Ant-style path pattern",
+					pathMatcher.isPattern(urlPattern));
 			String url = result.getResponse().getRedirectedUrl();
-			assertTrue("Redirected URL does not match the expected URL pattern",
+			assertTrue("Redirected URL '" + url + "' does not match the expected URL pattern '" + urlPattern + "'",
 					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}

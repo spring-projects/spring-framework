@@ -20,14 +20,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,13 +38,13 @@ import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.Phased;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ErrorHandler;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
@@ -67,12 +68,12 @@ public class JmsNamespaceHandlerTests {
 	private ToolingTestApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.context.close();
 	}

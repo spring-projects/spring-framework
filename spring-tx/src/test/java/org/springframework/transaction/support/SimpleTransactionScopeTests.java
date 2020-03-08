@@ -19,14 +19,14 @@ package org.springframework.transaction.support;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

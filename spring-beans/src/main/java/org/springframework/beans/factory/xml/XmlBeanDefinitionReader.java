@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -326,18 +327,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
-		try {
-			InputStream inputStream = encodedResource.getResource().getInputStream();
-			try {
-				InputSource inputSource = new InputSource(inputStream);
-				if (encodedResource.getEncoding() != null) {
-					inputSource.setEncoding(encodedResource.getEncoding());
-				}
-				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+
+		try (InputStream inputStream = encodedResource.getResource().getInputStream()) {
+			InputSource inputSource = new InputSource(inputStream);
+			if (encodedResource.getEncoding() != null) {
+				inputSource.setEncoding(encodedResource.getEncoding());
 			}
-			finally {
-				inputStream.close();
-			}
+			return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(

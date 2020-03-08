@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -145,7 +145,7 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() {
 		this.client.post()
-				.body(new Person("John"))
+				.bodyValue(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")

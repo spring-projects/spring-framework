@@ -261,20 +261,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object body) {
-			this.bodySpec.body(body);
-			return this;
-		}
-
-		@Override
-		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
-			this.bodySpec.body(producer, elementClass);
-			return this;
-		}
-
-		@Override
-		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-			this.bodySpec.body(producer, elementTypeRef);
+		public RequestHeadersSpec<?> bodyValue(Object body) {
+			this.bodySpec.bodyValue(body);
 			return this;
 		}
 
@@ -291,6 +279,18 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.bodySpec.body(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.bodySpec.body(producer, elementTypeRef);
+			return this;
+		}
+
+		@Override
 		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
 			this.bodySpec.body(inserter);
 			return this;
@@ -299,7 +299,7 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		@Deprecated
 		public RequestHeadersSpec<?> syncBody(Object body) {
-			return body(body);
+			return bodyValue(body);
 		}
 
 		@Override

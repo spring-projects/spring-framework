@@ -18,14 +18,15 @@ package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -53,7 +54,7 @@ public class WebAsyncManagerTests {
 	private MockHttpServletRequest servletRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);

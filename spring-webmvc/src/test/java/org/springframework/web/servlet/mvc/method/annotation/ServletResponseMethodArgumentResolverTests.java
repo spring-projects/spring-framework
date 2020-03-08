@@ -19,16 +19,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.Method;
+
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +51,7 @@ public class ServletResponseMethodArgumentResolverTests {
 	private Method method;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();

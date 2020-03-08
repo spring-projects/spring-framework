@@ -21,16 +21,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
@@ -47,7 +47,7 @@ public class AppCacheManifestTransformerTests {
 	private ResourceTransformerChain chain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));

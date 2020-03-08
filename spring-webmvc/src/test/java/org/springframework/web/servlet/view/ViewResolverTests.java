@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -29,19 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockRequestDispatcher;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -50,6 +47,10 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -71,7 +72,7 @@ public class ViewResolverTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest(this.sc);
 	private final HttpServletResponse response = new MockHttpServletResponse();
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.wac.setServletContext(this.sc);
 	}
@@ -514,6 +515,47 @@ public class ViewResolverTests {
 		viewResolver.resolveViewName("view", Locale.getDefault());
 
 		assertThat(count.intValue()).isEqualTo(3);
+	}
+
+	@Test
+	public void cacheFilterEnabled() throws Exception {
+		AtomicInteger count = new AtomicInteger();
+
+		// filter is enabled by default
+		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
+			@Override
+			protected View loadView(String viewName, Locale locale) {
+				assertThat(viewName).isEqualTo("view");
+				assertThat(locale).isEqualTo(Locale.getDefault());
+				count.incrementAndGet();
+				return new TestView();
+			}
+		};
+
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+
+		assertThat(count.intValue()).isEqualTo(1);
+	}
+
+	@Test
+	public void cacheFilterDisabled() throws Exception {
+		AtomicInteger count = new AtomicInteger();
+
+		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
+			@Override
+			protected View loadView(String viewName, Locale locale) {
+				count.incrementAndGet();
+				return new TestView();
+			}
+		};
+
+		viewResolver.setCacheFilter((view, viewName, locale) -> false);
+
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 

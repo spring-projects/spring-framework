@@ -23,25 +23,26 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.PushBuilder;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,7 +65,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	private Method method;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new ServletRequestMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();

@@ -19,6 +19,7 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
+
 import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -31,14 +32,14 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.remoting.RemoteTimeoutException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -61,7 +62,7 @@ public class JmsInvokerTests {
 	private Queue mockQueue;
 
 
-	@Before
+	@BeforeEach
 	public void setUpMocks() throws Exception {
 		mockConnectionFactory = mock(QueueConnectionFactory.class);
 		mockConnection = mock(QueueConnection.class);

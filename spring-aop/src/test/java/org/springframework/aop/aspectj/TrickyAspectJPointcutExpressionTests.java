@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -87,7 +87,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
 
 		// Then try again with a different class loader on the target...
-		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
+		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(TestServiceImpl.class.getClassLoader());
 		// Make sure the interface is loaded from the  parent class loader
 		loader.excludeClass(TestService.class.getName());
 		loader.excludeClass(TestException.class.getName());

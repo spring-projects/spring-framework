@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.Serializable;
+
 import javax.inject.Provider;
 
 import org.springframework.beans.BeansException;

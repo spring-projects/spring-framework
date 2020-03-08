@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -94,10 +95,19 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
-		alreadyFilteredAttributeName = updateForErrorDispatch(alreadyFilteredAttributeName, request);
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
-		if (hasAlreadyFilteredAttribute || skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
+		if (skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
+
+			// Proceed without invoking this filter...
+			filterChain.doFilter(request, response);
+		}
+		else if (hasAlreadyFilteredAttribute) {
+
+			if (DispatcherType.ERROR.equals(request.getDispatcherType())) {
+				doFilterNestedErrorDispatch(httpRequest, httpResponse, filterChain);
+				return;
+			}
 
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
@@ -114,7 +124,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			}
 		}
 	}
-
 
 	private boolean skipDispatch(HttpServletRequest request) {
 		if (isAsyncDispatch(request) && shouldNotFilterAsyncDispatch()) {
@@ -165,21 +174,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			name = getClass().getName();
 		}
 		return name + ALREADY_FILTERED_SUFFIX;
-	}
-
-	private String updateForErrorDispatch(String alreadyFilteredAttributeName, ServletRequest request) {
-
-		// Jetty does ERROR dispatch within sendError, so request attribute is still present
-		// Use a separate attribute for ERROR dispatches
-
-		if (DispatcherType.ERROR.equals(request.getDispatcherType()) && !shouldNotFilterErrorDispatch() &&
-				request.getAttribute(alreadyFilteredAttributeName) != null) {
-
-			return alreadyFilteredAttributeName + ".ERROR";
-		}
-
-
-		return alreadyFilteredAttributeName;
 	}
 
 	/**
@@ -237,5 +231,24 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	protected abstract void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException;
+
+	/**
+	 * Typically an ERROR dispatch happens after the REQUEST dispatch completes,
+	 * and the filter chain starts anew. On some servers however the ERROR
+	 * dispatch may be nested within the REQUEST dispatch, e.g. as a result of
+	 * calling {@code sendError} on the response. In that case we are still in
+	 * the filter chain, on the same thread, but the request and response have
+	 * been switched to the original, unwrapped ones.
+	 * <p>Sub-classes may use this method to filter such nested ERROR dispatches
+	 * and re-apply wrapping on the request or response. {@code ThreadLocal}
+	 * context, if any, should still be active as we are still nested within
+	 * the filter chain.
+	 * @since 5.1.9
+	 */
+	protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
+		filterChain.doFilter(request, response);
+	}
 
 }

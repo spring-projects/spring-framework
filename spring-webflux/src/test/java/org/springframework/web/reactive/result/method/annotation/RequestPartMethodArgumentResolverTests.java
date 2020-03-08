@@ -23,8 +23,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,7 +33,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -43,19 +43,19 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Unit tests for {@link RequestPartMethodArgumentResolver}.
@@ -71,7 +71,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private MultipartHttpMessageWriter writer;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<HttpMessageReader<?>> readers = ServerCodecConfigurer.create().getReaders();
 		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();

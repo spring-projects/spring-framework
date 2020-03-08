@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -57,35 +57,47 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	}
 
 
-	@Test
-	public void thrownException() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownException(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception", "Recovered from error: State");
 	}
 
-	@Test
-	public void thrownExceptionWithCause() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownExceptionWithCause(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception-with-cause", "Recovered from error: State");
 	}
 
-	@Test
-	public void thrownExceptionWithCauseToHandle() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownExceptionWithCauseToHandle(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception-with-cause-to-handle", "Recovered from error: IO");
 	}
 
-	@Test
-	public void errorBeforeFirstItem() throws Exception {
+	@ParameterizedHttpServerTest
+	void errorBeforeFirstItem(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test  // SPR-16051
-	public void exceptionAfterSeveralItems() {
+	@ParameterizedHttpServerTest  // SPR-16051
+	void exceptionAfterSeveralItems(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
 				performGet("/SPR-16051", new HttpHeaders(), String.class).getBody())
 			.withMessageStartingWith("Error while extracting response");
 	}
 
-	@Test  // SPR-16318
-	public void exceptionFromMethodWithProducesCondition() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-16318
+	void exceptionFromMethodWithProducesCondition(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Accept", "text/plain, application/problem+json");
 		assertThatExceptionOfType(HttpStatusCodeException.class).isThrownBy(() ->

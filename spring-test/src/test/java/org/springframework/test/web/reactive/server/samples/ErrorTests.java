@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -63,7 +63,7 @@ public class ErrorTests {
 		EntityExchangeResult<Void> result = this.client.post()
 				.uri("/post")
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new Person("Dan"))
+				.bodyValue(new Person("Dan"))
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody().isEmpty();

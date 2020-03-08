@@ -19,9 +19,9 @@ package org.springframework.messaging.simp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
@@ -47,13 +47,13 @@ public class SimpAttributesContextHolderTests {
 	private SimpAttributes simpAttributes;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		Map<String, Object> map = new ConcurrentHashMap<>();
 		this.simpAttributes = new SimpAttributes("session1", map);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		SimpAttributesContextHolder.resetAttributes();
 	}

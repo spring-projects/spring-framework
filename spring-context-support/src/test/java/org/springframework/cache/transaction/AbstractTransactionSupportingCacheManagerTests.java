@@ -16,9 +16,9 @@
 
 package org.springframework.cache.transaction;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -30,13 +30,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link AbstractTransactionSupportingCacheManager}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public abstract class AbstractTransactionSupportingCacheManagerTests<T extends CacheManager> {
 
 	public static final String CACHE_NAME = "testCacheManager";
 
-	@Rule
-	public final TestName name = new TestName();
+
+	protected String cacheName;
+
+	@BeforeEach
+	void trackCacheName(TestInfo testInfo) {
+		this.cacheName = testInfo.getTestMethod().get().getName();
+	}
 
 
 	/**
@@ -72,24 +78,22 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	@Test
 	public void getOnNewCache() {
 		T cacheManager = getCacheManager(false);
-		String cacheName = name.getMethodName();
-		addNativeCache(cacheName);
-		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
+		addNativeCache(this.cacheName);
+		assertThat(cacheManager.getCacheNames().contains(this.cacheName)).isFalse();
 		try {
-			assertThat(cacheManager.getCache(cacheName)).isInstanceOf(getCacheType());
-			assertThat(cacheManager.getCacheNames().contains(cacheName)).isTrue();
+			assertThat(cacheManager.getCache(this.cacheName)).isInstanceOf(getCacheType());
+			assertThat(cacheManager.getCacheNames().contains(this.cacheName)).isTrue();
 		}
 		finally {
-			removeNativeCache(cacheName);
+			removeNativeCache(this.cacheName);
 		}
 	}
 
 	@Test
 	public void getOnUnknownCache() {
 		T cacheManager = getCacheManager(false);
-		String cacheName = name.getMethodName();
-		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
-		assertThat(cacheManager.getCache(cacheName)).isNull();
+		assertThat(cacheManager.getCacheNames().contains(this.cacheName)).isFalse();
+		assertThat(cacheManager.getCache(this.cacheName)).isNull();
 	}
 
 	@Test
@@ -100,17 +104,16 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 
 	@Test
 	public void getTransactionalOnNewCache() {
-		String cacheName = name.getMethodName();
 		T cacheManager = getCacheManager(true);
-		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
-		addNativeCache(cacheName);
+		assertThat(cacheManager.getCacheNames().contains(this.cacheName)).isFalse();
+		addNativeCache(this.cacheName);
 		try {
-			assertThat(cacheManager.getCache(cacheName))
+			assertThat(cacheManager.getCache(this.cacheName))
 					.isInstanceOf(TransactionAwareCacheDecorator.class);
-			assertThat(cacheManager.getCacheNames().contains(cacheName)).isTrue();
+			assertThat(cacheManager.getCacheNames().contains(this.cacheName)).isTrue();
 		}
 		finally {
-			removeNativeCache(cacheName);
+			removeNativeCache(this.cacheName);
 		}
 	}
 

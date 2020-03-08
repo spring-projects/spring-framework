@@ -16,14 +16,15 @@
 
 package org.springframework.core.io.support;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -41,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 17.11.2004
  */
-public class PathMatchingResourcePatternResolverTests {
+class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
@@ -52,20 +53,20 @@ public class PathMatchingResourcePatternResolverTests {
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_REACTIVESTREAMS =
-			new String[] {"Processor.class", "Publisher.class", "Subscriber.class", "Subscription.class"};
+	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATIONS =
+			new String[] {"NonNull.class", "NonNullApi.class", "Nullable.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
 	@Test
-	public void invalidPrefixWithPatternElementInIt() throws IOException {
+	void invalidPrefixWithPatternElementInIt() throws IOException {
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
 				resolver.getResources("xx**:**/*.xy"));
 	}
 
 	@Test
-	public void singleResourceOnFileSystem() throws IOException {
+	void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
 		assertThat(resources.length).isEqualTo(1);
@@ -73,15 +74,15 @@ public class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
-	public void singleResourceInJar() throws IOException {
+	void singleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
 		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
-	@Ignore  // passes under Eclipse, fails under Ant
+	@Disabled
 	@Test
-	public void classpathStarWithPatternOnFileSystem() throws IOException {
+	void classpathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
@@ -97,19 +98,26 @@ public class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
-	public void classpathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:org/reactivestreams/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
+	void getResourcesOnFileSystemContainingHashtagsInTheirFileNames() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/**/resource#test*.txt");
+		assertThat(resources).extracting(Resource::getFile).extracting(File::getName)
+			.containsExactlyInAnyOrder("resource#test1.txt", "resource#test2.txt");
 	}
 
 	@Test
-	public void classpathStarWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/reactivestreams/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
+	void classpathWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath:reactor/util/annotation/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
 	}
 
 	@Test
-	public void rootPatternRetrievalInJarFiles() throws IOException {
+	void classpathStarWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:reactor/util/annotation/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
+	}
+
+	@Test
+	void rootPatternRetrievalInJarFiles() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:*.dtd");
 		boolean found = false;
 		for (Resource resource : resources) {

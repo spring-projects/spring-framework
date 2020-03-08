@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.view;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +37,7 @@ public class DefaultRequestToViewNameTranslatorTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.translator = new DefaultRequestToViewNameTranslator();
 		this.request = new MockHttpServletRequest();

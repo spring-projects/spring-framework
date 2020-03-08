@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +48,7 @@ public class ConcurrentMapCacheTests
 	protected ConcurrentMapCache cacheNoNull;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
@@ -85,8 +85,7 @@ public class ConcurrentMapCacheTests
 		assertThat(serializeCache.isStoreByValue()).isTrue();
 
 		Object key = createRandomKey();
-		List<String> content = new ArrayList<>();
-		content.addAll(Arrays.asList("one", "two", "three"));
+		List<String> content = new ArrayList<>(Arrays.asList("one", "two", "three"));
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();

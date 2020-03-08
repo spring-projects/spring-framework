@@ -18,12 +18,12 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContextEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.DescriptiveResource;
 

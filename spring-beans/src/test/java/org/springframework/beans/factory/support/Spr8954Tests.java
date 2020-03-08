@@ -19,8 +19,8 @@ package org.springframework.beans.factory.support;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -44,7 +44,7 @@ public class Spr8954Tests {
 
 	private DefaultListableBeanFactory bf;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));

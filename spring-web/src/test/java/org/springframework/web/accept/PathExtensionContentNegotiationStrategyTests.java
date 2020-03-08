@@ -20,14 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -45,7 +45,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	private MockHttpServletRequest servletRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(servletRequest);

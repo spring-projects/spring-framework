@@ -18,7 +18,7 @@ package org.springframework.core.task;
 
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ConcurrencyThrottleSupport;
 
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class SimpleAsyncTaskExecutorTests {
+class SimpleAsyncTaskExecutorTests {
 
 	@Test
-	public void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
+	void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
 		assertThat(executor.isThrottleActive()).isTrue();
@@ -43,13 +43,13 @@ public class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	public void throttleIsNotActiveByDefault() throws Exception {
+	void throttleIsNotActiveByDefault() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		assertThat(executor.isThrottleActive()).as("Concurrency throttle must not default to being active (on)").isFalse();
 	}
 
 	@Test
-	public void threadNameGetsSetCorrectly() throws Exception {
+	void threadNameGetsSetCorrectly() throws Exception {
 		final String customPrefix = "chankPop#";
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(customPrefix);
@@ -59,7 +59,7 @@ public class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	public void threadFactoryOverridesDefaults() throws Exception {
+	void threadFactoryOverridesDefaults() throws Exception {
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(new ThreadFactory() {
 			@Override
@@ -73,7 +73,7 @@ public class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	public void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
+	void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SimpleAsyncTaskExecutor().execute(null));
 	}

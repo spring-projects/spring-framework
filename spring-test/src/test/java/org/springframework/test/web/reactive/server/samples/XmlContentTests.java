@@ -20,12 +20,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -116,7 +117,7 @@ public class XmlContentTests {
 
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_XML)
-				.body(content)
+				.bodyValue(content)
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "/persons/John")

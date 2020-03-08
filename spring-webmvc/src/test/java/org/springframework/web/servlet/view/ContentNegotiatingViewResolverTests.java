@@ -24,14 +24,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
@@ -44,6 +41,9 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -58,7 +58,7 @@ public class ContentNegotiatingViewResolverTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void createViewResolver() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -69,7 +69,7 @@ public class ContentNegotiatingViewResolverTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestContextHolder() {
 		RequestContextHolder.resetRequestAttributes();
 	}

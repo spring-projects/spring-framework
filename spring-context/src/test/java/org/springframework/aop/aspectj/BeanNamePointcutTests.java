@@ -19,15 +19,15 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +54,7 @@ public class BeanNamePointcutTests {
 	private ClassPathXmlApplicationContext ctx;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean1 = (ITestBean) ctx.getBean("testBean1");

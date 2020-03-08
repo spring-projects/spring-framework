@@ -19,8 +19,9 @@ package org.springframework.test.web.client.match;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -91,6 +92,19 @@ public class MockRestRequestMatchersTests {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
 		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test
+	public void headerDoesNotExist() throws Exception {
+		MockRestRequestMatchers.headerDoesNotExist(null).match(this.request);
+		MockRestRequestMatchers.headerDoesNotExist("").match(this.request);
+		MockRestRequestMatchers.headerDoesNotExist("foo").match(this.request);
+
+		List<String> values = Arrays.asList("bar", "baz");
+		this.request.getHeaders().put("foo", values);
+		assertThatThrownBy(() -> MockRestRequestMatchers.headerDoesNotExist("foo").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessage("Expected header <foo> not to exist, but it exists with values: " + values);
 	}
 
 	@Test

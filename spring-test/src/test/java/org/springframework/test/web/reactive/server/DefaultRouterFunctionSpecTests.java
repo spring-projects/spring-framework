@@ -15,7 +15,7 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;

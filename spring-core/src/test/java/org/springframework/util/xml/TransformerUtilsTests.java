@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Properties;
+
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -25,7 +26,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -36,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rick Evans
  * @author Arjen Poutsma
  */
-public class TransformerUtilsTests {
+class TransformerUtilsTests {
 
 	@Test
-	public void enableIndentingSunnyDay() throws Exception {
+	void enableIndentingSunnyDay() throws Exception {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
@@ -51,7 +52,7 @@ public class TransformerUtilsTests {
 	}
 
 	@Test
-	public void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
+	void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
 		final String indentAmountProperty = "10";
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer, Integer.valueOf(indentAmountProperty));
@@ -64,7 +65,7 @@ public class TransformerUtilsTests {
 	}
 
 	@Test
-	public void disableIndentingSunnyDay() throws Exception {
+	void disableIndentingSunnyDay() throws Exception {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.disableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
@@ -73,25 +74,25 @@ public class TransformerUtilsTests {
 	}
 
 	@Test
-	public void enableIndentingWithNullTransformer() throws Exception {
+	void enableIndentingWithNullTransformer() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(null));
 	}
 
 	@Test
-	public void disableIndentingWithNullTransformer() throws Exception {
+	void disableIndentingWithNullTransformer() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.disableIndenting(null));
 	}
 
 	@Test
-	public void enableIndentingWithNegativeIndentAmount() throws Exception {
+	void enableIndentingWithNegativeIndentAmount() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(new StubTransformer(), -21938));
 	}
 
 	@Test
-	public void enableIndentingWithZeroIndentAmount() throws Exception {
+	void enableIndentingWithZeroIndentAmount() throws Exception {
 		TransformerUtils.enableIndenting(new StubTransformer(), 0);
 	}
 

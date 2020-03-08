@@ -22,23 +22,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ramnivas Laddad
  * @author Stephane Nicoll
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milliseconds
@@ -55,10 +56,8 @@ public class AnnotationAsyncExecutionAspectTests {
 	private CountingExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		executor = new CountingExecutor();
 		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
@@ -96,8 +95,6 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Test
 	public void voidMethodInAsyncClassGetsRoutedAsynchronously() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		obj.increment();
 		executor.waitForCompletion();

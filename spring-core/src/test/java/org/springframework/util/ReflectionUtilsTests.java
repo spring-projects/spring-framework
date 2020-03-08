@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Rob Harrop
@@ -40,10 +40,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @author Arjen Poutsma
  */
-public class ReflectionUtilsTests {
+class ReflectionUtilsTests {
 
 	@Test
-	public void findField() {
+	void findField() {
 		Field field = ReflectionUtils.findField(TestObjectSubclassWithPublicField.class, "publicField", String.class);
 		assertThat(field).isNotNull();
 		assertThat(field.getName()).isEqualTo("publicField");
@@ -64,7 +64,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void setField() {
+	void setField() {
 		TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
 		Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 
@@ -79,7 +79,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void invokeMethod() throws Exception {
+	void invokeMethod() throws Exception {
 		String rob = "Rob Harrop";
 
 		TestObject bean = new TestObject();
@@ -97,7 +97,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void declaresException() throws Exception {
+	void declaresException() throws Exception {
 		Method remoteExMethod = A.class.getDeclaredMethod("foo", Integer.class);
 		assertThat(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class)).isTrue();
 		assertThat(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class)).isTrue();
@@ -112,7 +112,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void copySrcToDestinationOfIncorrectClass() {
+	void copySrcToDestinationOfIncorrectClass() {
 		TestObject src = new TestObject();
 		String dest = new String();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -120,7 +120,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void rejectsNullSrc() {
+	void rejectsNullSrc() {
 		TestObject src = null;
 		String dest = new String();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -128,7 +128,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void rejectsNullDest() {
+	void rejectsNullDest() {
 		TestObject src = new TestObject();
 		String dest = null;
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -136,14 +136,14 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void validCopy() {
+	void validCopy() {
 		TestObject src = new TestObject();
 		TestObject dest = new TestObject();
 		testValidCopy(src, dest);
 	}
 
 	@Test
-	public void validCopyOnSubTypeWithNewField() {
+	void validCopyOnSubTypeWithNewField() {
 		TestObjectSubclassWithNewField src = new TestObjectSubclassWithNewField();
 		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		src.magic = 11;
@@ -157,7 +157,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void validCopyToSubType() {
+	void validCopyToSubType() {
 		TestObject src = new TestObject();
 		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		dest.magic = 11;
@@ -167,7 +167,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void validCopyToSubTypeWithFinalField() {
+	void validCopyToSubTypeWithFinalField() {
 		TestObjectSubclassWithFinalField src = new TestObjectSubclassWithFinalField();
 		TestObjectSubclassWithFinalField dest = new TestObjectSubclassWithFinalField();
 		// Check that this doesn't fail due to attempt to assign final
@@ -186,7 +186,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void doWithProtectedMethods() {
+	void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestObject.class, mc, new ReflectionUtils.MethodFilter() {
 			@Override
@@ -202,7 +202,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void duplicatesFound() {
+	void duplicatesFound() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestObjectSubclass.class, mc);
 		int absquatulateCount = 0;
@@ -215,20 +215,20 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void findMethod() throws Exception {
+	void findMethod() throws Exception {
 		assertThat(ReflectionUtils.findMethod(B.class, "bar", String.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "foo", Integer.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "getClass")).isNotNull();
 	}
 
-	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
+	@Disabled("[SPR-8644] findMethod() does not currently support var-args")
 	@Test
-	public void findMethodWithVarArgs() throws Exception {
+	void findMethodWithVarArgs() throws Exception {
 		assertThat(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class)).isNotNull();
 	}
 
 	@Test
-	public void isCglibRenamedMethod() throws SecurityException, NoSuchMethodException {
+	void isCglibRenamedMethod() throws SecurityException, NoSuchMethodException {
 		@SuppressWarnings("unused")
 		class C {
 			public void CGLIB$m1$123() {
@@ -266,7 +266,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void getAllDeclaredMethods() throws Exception {
+	void getAllDeclaredMethods() throws Exception {
 		class Foo {
 			@Override
 			public String toString() {
@@ -283,7 +283,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void getUniqueDeclaredMethods() throws Exception {
+	void getUniqueDeclaredMethods() throws Exception {
 		class Foo {
 			@Override
 			public String toString() {
@@ -300,7 +300,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void getUniqueDeclaredMethods_withCovariantReturnType() throws Exception {
+	void getUniqueDeclaredMethods_withCovariantReturnType() throws Exception {
 		class Parent {
 			@SuppressWarnings("unused")
 			public Number m1() {
@@ -326,9 +326,8 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void getUniqueDeclaredMethods_isFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-
+	@EnabledForTestGroups(PERFORMANCE)
+	void getUniqueDeclaredMethods_isFastEnough() {
 		@SuppressWarnings("unused")
 		class C {
 			void m00() { } void m01() { } void m02() { } void m03() { } void m04() { }
@@ -363,7 +362,7 @@ public class ReflectionUtilsTests {
 	}
 
 	@Test
-	public void getDecalredMethodsReturnsCopy() {
+	void getDeclaredMethodsReturnsCopy() {
 		Method[] m1 = ReflectionUtils.getDeclaredMethods(A.class);
 		Method[] m2 = ReflectionUtils.getDeclaredMethods(A.class);
 		assertThat(m1). isNotSameAs(m2);

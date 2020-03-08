@@ -16,10 +16,9 @@
 
 package org.springframework.web.reactive.function.client
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.flow.asFlow
+import kotlinx.coroutines.reactive.asFlow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
@@ -35,49 +34,34 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Deprecated("Use 'bodyWithType' instead.", replaceWith = ReplaceWith("bodyWithType(publisher)"))
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*> =
 		body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [WebClient.RequestBodySpec.body] providing a `bodyWithType<T>(Any)` variant
+ * Extension for [WebClient.RequestBodySpec.body] providing a `body(Flow<T>)` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
+ * @param flow the [Flow] to write to the request
+ * @param T the type of the elements contained in the flow
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeadersSpec<*> =
+		body(flow, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [WebClient.RequestBodySpec.body] providing a `body<T>(Any)` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param producer the producer to write to the request. This must be a
  * [Publisher] or another producer adaptable to a
  * [Publisher] via [org.springframework.core.ReactiveAdapterRegistry]
- * @param <T> the type of the elements contained in the producer
+ * @param T the type of the elements contained in the producer
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RequestBodySpec.bodyWithType(producer: Any): RequestHeadersSpec<*> =
+inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeadersSpec<*> =
 		body(producer, object : ParameterizedTypeReference<T>() {})
-
-/**
- * Extension for [WebClient.RequestBodySpec.body] providing a `bodyWithType(Publisher<T>)` variant
- * leveraging Kotlin reified type parameters. This extension is not subject to type
- * erasure and retains actual generic type arguments.
- * @param publisher the [Publisher] to write to the request
- * @param <T> the type of the elements contained in the publisher
- * @author Sebastien Deleuze
- * @since 5.2
- */
-inline fun <reified T : Any> RequestBodySpec.bodyWithType(publisher: Publisher<T>): RequestHeadersSpec<*> =
-		body(publisher, object : ParameterizedTypeReference<T>() {})
-
-/**
- * Extension for [WebClient.RequestBodySpec.body] providing a `bodyWithType(Flow<T>)` variant
- * leveraging Kotlin reified type parameters. This extension is not subject to type
- * erasure and retains actual generic type arguments.
- * @param flow the [Flow] to write to the request
- * @param <T> the type of the elements contained in the flow
- * @author Sebastien Deleuze
- * @since 5.2
- */
-@ExperimentalCoroutinesApi
-inline fun <reified T : Any> RequestBodySpec.bodyWithType(flow: Flow<T>): RequestHeadersSpec<*> =
-		body(flow, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchange].
@@ -118,7 +102,6 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 

@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
@@ -28,12 +28,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * @author Rob Harrop
  */
-public class PropertyPlaceholderHelperTests {
+class PropertyPlaceholderHelperTests {
 
 	private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}");
 
 	@Test
-	public void testWithProperties() {
+	void withProperties() {
 		String text = "foo=${foo}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
@@ -42,7 +42,7 @@ public class PropertyPlaceholderHelperTests {
 	}
 
 	@Test
-	public void testWithMultipleProperties() {
+	void withMultipleProperties() {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
@@ -52,7 +52,7 @@ public class PropertyPlaceholderHelperTests {
 	}
 
 	@Test
-	public void testRecurseInProperty() {
+	void recurseInProperty() {
 		String text = "foo=${bar}";
 		Properties props = new Properties();
 		props.setProperty("bar", "${baz}");
@@ -62,7 +62,7 @@ public class PropertyPlaceholderHelperTests {
 	}
 
 	@Test
-	public void testRecurseInPlaceholder() {
+	void recurseInPlaceholder() {
 		String text = "foo=${b${inner}}";
 		Properties props = new Properties();
 		props.setProperty("bar", "bar");
@@ -81,21 +81,15 @@ public class PropertyPlaceholderHelperTests {
 	}
 
 	@Test
-	public void testWithResolver() {
+	void withResolver() {
 		String text = "foo=${foo}";
-		PlaceholderResolver resolver = new PlaceholderResolver() {
+		PlaceholderResolver resolver = placeholderName -> "foo".equals(placeholderName) ? "bar" : null;
 
-			@Override
-			public String resolvePlaceholder(String placeholderName) {
-					return "foo".equals(placeholderName) ? "bar" : null;
-			}
-
-		};
 		assertThat(this.helper.replacePlaceholders(text, resolver)).isEqualTo("foo=bar");
 	}
 
 	@Test
-	public void testUnresolvedPlaceholderIsIgnored() {
+	void unresolvedPlaceholderIsIgnored() {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
@@ -104,7 +98,7 @@ public class PropertyPlaceholderHelperTests {
 	}
 
 	@Test
-	public void testUnresolvedPlaceholderAsError() {
+	void unresolvedPlaceholderAsError() {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");

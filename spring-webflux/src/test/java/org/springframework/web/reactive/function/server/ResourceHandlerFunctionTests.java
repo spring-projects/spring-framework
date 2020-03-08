@@ -21,8 +21,8 @@ import java.nio.file.Files;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -32,10 +32,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,7 +52,7 @@ public class ResourceHandlerFunctionTests {
 	private ServerResponse.Context context;
 
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
 		context = new ServerResponse.Context() {

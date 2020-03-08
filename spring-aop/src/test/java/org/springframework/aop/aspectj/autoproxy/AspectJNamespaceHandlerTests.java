@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
-import org.springframework.tests.beans.CollectingReaderEventListener;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +46,7 @@ public class AspectJNamespaceHandlerTests {
 	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);

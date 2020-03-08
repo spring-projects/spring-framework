@@ -21,8 +21,8 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.MessageSourceResolvable;
@@ -426,7 +426,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		ResourceBundle.clearCache();
 	}

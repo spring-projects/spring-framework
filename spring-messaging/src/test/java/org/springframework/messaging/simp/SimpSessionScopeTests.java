@@ -18,9 +18,9 @@ package org.springframework.messaging.simp;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -46,7 +46,7 @@ public class SimpSessionScopeTests {
 	private SimpAttributes simpAttributes;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.scope = new SimpSessionScope();
 		this.objectFactory = Mockito.mock(ObjectFactory.class);
@@ -54,7 +54,7 @@ public class SimpSessionScopeTests {
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		SimpAttributesContextHolder.resetAttributes();
 	}

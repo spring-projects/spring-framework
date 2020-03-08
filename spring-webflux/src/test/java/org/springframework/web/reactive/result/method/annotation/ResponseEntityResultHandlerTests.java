@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -40,7 +41,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -51,20 +52,21 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -80,7 +82,7 @@ public class ResponseEntityResultHandlerTests {
 	private ResponseEntityResultHandler resultHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resultHandler = createHandler();
 	}
@@ -365,7 +367,29 @@ public class ResponseEntityResultHandlerTests {
 
 		StepVerifier.create(resultHandler.handleResult(exchange, result))
 				.consumeErrorWith(ex -> assertThat(ex)
-						.isInstanceOf(IllegalStateException.class)
+						.isInstanceOf(HttpMessageNotWritableException.class)
+						.hasMessageContaining("with preset Content-Type"))
+				.verify();
+	}
+
+	@Test // gh-23287
+	public void handleWithProducibleContentTypeShouldFailWithServerError() {
+		ResponseEntity<String> value = ResponseEntity.ok().body("<foo/>");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		HandlerResult result = handlerResult(value, returnType);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_XML);
+				exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+
+		ResponseEntityResultHandler resultHandler = new ResponseEntityResultHandler(
+				Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
+				new RequestedContentTypeResolverBuilder().build()
+		);
+
+		StepVerifier.create(resultHandler.handleResult(exchange, result))
+				.consumeErrorWith(ex -> assertThat(ex)
+						.isInstanceOf(HttpMessageNotWritableException.class)
 						.hasMessageContaining("with preset Content-Type"))
 				.verify();
 	}

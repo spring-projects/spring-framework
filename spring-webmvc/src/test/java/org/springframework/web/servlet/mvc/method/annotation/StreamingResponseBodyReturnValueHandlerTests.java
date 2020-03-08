@@ -23,19 +23,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +59,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.handler = new StreamingResponseBodyReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();

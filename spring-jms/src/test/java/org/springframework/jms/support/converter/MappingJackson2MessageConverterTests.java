@@ -22,14 +22,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -55,7 +56,7 @@ public class MappingJackson2MessageConverterTests {
 	private Session sessionMock;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		sessionMock = mock(Session.class);
 		converter = new MappingJackson2MessageConverter();

@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -39,21 +38,25 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return new HttpWebHandlerAdapter(new CheckRequestHandler());
 	}
 
-	@Test
-	public void getFormParts() throws Exception {
+	@ParameterizedHttpServerTest
+	void getFormParts(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<MultiValueMap<String, Object>> request = RequestEntity
 				.post(new URI("http://localhost:" + port + "/form-parts"))
@@ -76,7 +79,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	}
 
 
-	public static class CheckRequestHandler implements WebHandler {
+	static class CheckRequestHandler implements WebHandler {
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {

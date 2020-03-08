@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  * @see #execute
  * @see ReactiveTransactionManager
  */
-@SuppressWarnings("serial")
 final class TransactionalOperatorImpl implements TransactionalOperator {
 
 	private static final Log logger = LogFactory.getLog(TransactionalOperatorImpl.class);
@@ -71,6 +70,21 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 		return this.transactionManager;
 	}
 
+	@Override
+	public <T> Mono<T> transactional(Mono<T> mono) {
+		return TransactionContextManager.currentContext().flatMap(context -> {
+			Mono<ReactiveTransaction> status = this.transactionManager.getReactiveTransaction(this.transactionDefinition);
+			// This is an around advice: Invoke the next interceptor in the chain.
+			// This will normally result in a target object being invoked.
+			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
+			// through usingWhen.
+			return status.flatMap(it -> Mono.usingWhen(Mono.just(it), ignore -> mono,
+					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::commit)
+					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
+		})
+		.subscriberContext(TransactionContextManager.getOrCreateContext())
+		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+	}
 
 	@Override
 	public <T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException {
@@ -80,9 +94,15 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 			// This will normally result in a target object being invoked.
 			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
 			// through usingWhen.
-			return status.flatMapMany(it -> Flux.usingWhen(Mono.just(it), action::doInTransaction,
-					this.transactionManager::commit, s -> Mono.empty())
-					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
+			return status.flatMapMany(it -> Flux
+					.usingWhen(
+							Mono.just(it),
+							action::doInTransaction,
+							this.transactionManager::commit,
+							(tx, ex) -> Mono.empty(),
+							this.transactionManager::commit)
+					.onErrorResume(ex ->
+							rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
 		.subscriberContext(TransactionContextManager.getOrCreateContext())
 		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());

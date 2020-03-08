@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ public class InjectionMetadata {
 	 */
 	public static final InjectionMetadata EMPTY = new InjectionMetadata(Object.class, Collections.emptyList()) {
 		@Override
+		protected boolean needsRefresh(Class<?> clazz) {
+			return false;
+		}
+		@Override
 		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		}
 		@Override
@@ -88,6 +92,16 @@ public class InjectionMetadata {
 		this.injectedElements = elements;
 	}
 
+
+	/**
+	 * Determine whether this metadata instance needs to be refreshed.
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @since 5.2.4
+	 */
+	protected boolean needsRefresh(Class<?> clazz) {
+		return this.targetClass != clazz;
+	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
@@ -138,7 +152,7 @@ public class InjectionMetadata {
 	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
 	 * @param elements the elements to inject (possibly empty)
 	 * @param clazz the target class
-	 * @return a new {@code InjectionMetadata} instance,
+	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance,
 	 * or {@link #EMPTY} in case of no elements
 	 * @since 5.2
 	 */
@@ -151,9 +165,10 @@ public class InjectionMetadata {
 	 * @param metadata the existing metadata instance
 	 * @param clazz the current target class
 	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @see #needsRefresh(Class)
 	 */
 	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
-		return (metadata == null || metadata.targetClass != clazz);
+		return (metadata == null || metadata.needsRefresh(clazz));
 	}
 
 

@@ -19,10 +19,10 @@ package org.springframework.test.context.jdbc;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +31,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,11 +45,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.1
  * @see MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @DirtiesContext
 @SqlConfig(dataSource = "dataSource1", transactionManager = "txMgr1")
-public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
+class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 	@Autowired
 	private DataSource dataSource1;
@@ -61,13 +59,13 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 	@Test
 	@Sql("data-add-dogbert.sql")
-	public void database1() {
+	void database1() {
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(dataSource = "dataSource2", transactionManager = "txMgr2"))
-	public void database2() {
+	void database2() {
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
 
@@ -84,17 +82,17 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 	static class Config {
 
 		@Bean
-		public PlatformTransactionManager txMgr1() {
+		PlatformTransactionManager txMgr1() {
 			return new DataSourceTransactionManager(dataSource1());
 		}
 
 		@Bean
-		public PlatformTransactionManager txMgr2() {
+		PlatformTransactionManager txMgr2() {
 			return new DataSourceTransactionManager(dataSource2());
 		}
 
 		@Bean
-		public DataSource dataSource1() {
+		DataSource dataSource1() {
 			return new EmbeddedDatabaseBuilder()//
 			.setName("database1")//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
@@ -103,7 +101,7 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 		}
 
 		@Bean
-		public DataSource dataSource2() {
+		DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder()//
 			.setName("database2")//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//

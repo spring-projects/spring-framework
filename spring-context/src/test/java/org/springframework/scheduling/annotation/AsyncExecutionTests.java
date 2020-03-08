@@ -29,13 +29,14 @@ import java.util.concurrent.TimeUnit;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -383,7 +384,7 @@ public class AsyncExecutionTests {
 		listenerConstructed = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);
-		listenerDef.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listenerDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
@@ -565,11 +566,13 @@ public class AsyncExecutionTests {
 	@Async
 	public static class AsyncClassBeanWithInterface implements RegularInterface {
 
+		@Override
 		public void doSomething(int i) {
 			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
 			assertThat(condition).isTrue();
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
 			assertThat(condition).isTrue();

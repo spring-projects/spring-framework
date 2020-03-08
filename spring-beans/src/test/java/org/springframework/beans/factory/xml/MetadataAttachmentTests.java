@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,7 +34,7 @@ public class MetadataAttachmentTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(

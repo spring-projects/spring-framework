@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
@@ -37,12 +38,12 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -350,7 +351,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThatExceptionOfType(JspException.class).as("use a non-Collection typed value as the value of 'items'").isThrownBy(
 				this.tag::doStartTag)
 			.withMessageContaining("items")
-			.withMessageContaining("org.springframework.tests.sample.beans.TestBean");
+			.withMessageContaining("org.springframework.beans.testfixture.beans.TestBean");
 	}
 
 	@Test

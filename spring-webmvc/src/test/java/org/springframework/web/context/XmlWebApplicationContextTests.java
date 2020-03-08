@@ -17,9 +17,10 @@
 package org.springframework.web.context;
 
 import java.util.Locale;
+
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -27,14 +28,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.AbstractApplicationContextTests;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.TestListener;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 import org.springframework.util.Assert;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -95,13 +96,13 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 
 	/**
 	 * Overridden as we can't trust superclass method
-	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
+	 * @see org.springframework.context.testfixture.AbstractApplicationContextTests#testEvents()
 	 */
 	@Override
-	protected void doTestEvents(TestListener listener, TestListener parentListener,
+	protected void doTestEvents(TestApplicationListener listener, TestApplicationListener parentListener,
 			MyEvent event) {
-		TestListener listenerBean = (TestListener) this.applicationContext.getBean("testListener");
-		TestListener parentListenerBean = (TestListener) this.applicationContext.getParent().getBean("parentListener");
+		TestApplicationListener listenerBean = (TestApplicationListener) this.applicationContext.getBean("testListener");
+		TestApplicationListener parentListenerBean = (TestApplicationListener) this.applicationContext.getParent().getBean("parentListener");
 		super.doTestEvents(listenerBean, parentListenerBean, event);
 	}
 

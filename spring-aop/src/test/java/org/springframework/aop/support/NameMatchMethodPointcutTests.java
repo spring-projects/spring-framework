@@ -16,16 +16,16 @@
 
 package org.springframework.aop.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +45,7 @@ public class NameMatchMethodPointcutTests {
 	/**
 	 * Create an empty pointcut, populating instance variables.
 	 */
-	@Before
+	@BeforeEach
 	public void setup() {
 		ProxyFactory pf = new ProxyFactory(new SerializablePerson());
 		nop = new SerializableNopInterceptor();

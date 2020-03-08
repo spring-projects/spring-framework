@@ -21,18 +21,16 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.test.StepVerifier;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.server.PathContainer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.AppCacheManifestTransformer;
@@ -47,6 +45,8 @@ import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +62,7 @@ public class ResourceHandlerRegistryTests {
 	private ResourceHandlerRegistration registration;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registry = new ResourceHandlerRegistry(new GenericApplicationContext());
 		this.registration = this.registry.addResourceHandler("/resources/**");

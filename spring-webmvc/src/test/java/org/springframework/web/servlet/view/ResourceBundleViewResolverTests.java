@@ -19,22 +19,23 @@ package org.springframework.web.servlet.view;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * @author Rod Johnson
@@ -51,7 +52,7 @@ public class ResourceBundleViewResolverTests {
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());

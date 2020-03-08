@@ -18,8 +18,8 @@ package org.springframework.beans.factory.xml;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -30,8 +30,8 @@ import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.beans.CollectingReaderEventListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +48,7 @@ public class EventPublicationTests {
 
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);

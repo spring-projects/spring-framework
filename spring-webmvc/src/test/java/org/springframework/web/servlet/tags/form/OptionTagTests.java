@@ -21,19 +21,20 @@ import java.beans.PropertyEditorSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.mock.web.test.MockBodyContent;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.Colour;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.testfixture.servlet.MockBodyContent;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;

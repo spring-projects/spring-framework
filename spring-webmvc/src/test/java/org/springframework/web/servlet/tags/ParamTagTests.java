@@ -21,11 +21,11 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockBodyContent;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockBodyContent;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,7 +42,7 @@ public class ParamTagTests extends AbstractTagTests {
 
 	private MockParamSupportTag parent = new MockParamSupportTag();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		PageContext context = createPageContext();
 		tag.setPageContext(context);

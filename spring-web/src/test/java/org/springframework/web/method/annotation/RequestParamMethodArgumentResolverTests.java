@@ -20,18 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.servlet.http.Part;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.test.MockPart;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,17 +38,22 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Test fixture with {@link RequestParamMethodArgumentResolver}.

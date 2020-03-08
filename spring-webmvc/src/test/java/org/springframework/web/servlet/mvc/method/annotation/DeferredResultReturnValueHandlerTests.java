@@ -18,12 +18,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -33,9 +31,11 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link DeferredResultMethodReturnValueHandler}.
@@ -51,7 +51,7 @@ public class DeferredResultReturnValueHandlerTests {
 	private NativeWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.handler = new DeferredResultMethodReturnValueHandler();
 		this.request = new MockHttpServletRequest();

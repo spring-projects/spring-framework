@@ -16,15 +16,15 @@
 
 package org.springframework.web.servlet.mvc;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +40,7 @@ public class ParameterizableViewControllerTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.controller = new ParameterizableViewController();
 		this.request = new MockHttpServletRequest("GET", "/");

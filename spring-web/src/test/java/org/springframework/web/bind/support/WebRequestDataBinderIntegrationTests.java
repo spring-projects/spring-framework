@@ -17,6 +17,7 @@
 package org.springframework.web.bind.support;
 
 import java.util.List;
+
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,9 +29,9 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -62,7 +63,7 @@ public class WebRequestDataBinderIntegrationTests {
 	protected static MediaType contentType;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void startJettyServer() throws Exception {
 		// Let server pick its own random, available port.
 		jettyServer = new Server(0);
@@ -87,7 +88,7 @@ public class WebRequestDataBinderIntegrationTests {
 		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopJettyServer() throws Exception {
 		if (jettyServer != null) {
 			jettyServer.stop();

@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -27,17 +28,17 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class StaxResultTests {
+class StaxResultTests {
 
 	private static final String XML = "<root xmlns='namespace'><child/></root>";
 
@@ -45,15 +46,15 @@ public class StaxResultTests {
 
 	private XMLOutputFactory inputFactory;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		transformer = transformerFactory.newTransformer();
 		inputFactory = XMLOutputFactory.newInstance();
 	}
 
 	@Test
-	public void streamWriterSource() throws Exception {
+	void streamWriterSource() throws Exception {
 		StringWriter stringWriter = new StringWriter();
 		XMLStreamWriter streamWriter = inputFactory.createXMLStreamWriter(stringWriter);
 		Reader reader = new StringReader(XML);
@@ -66,7 +67,7 @@ public class StaxResultTests {
 	}
 
 	@Test
-	public void eventWriterSource() throws Exception {
+	void eventWriterSource() throws Exception {
 		StringWriter stringWriter = new StringWriter();
 		XMLEventWriter eventWriter = inputFactory.createXMLEventWriter(stringWriter);
 		Reader reader = new StringReader(XML);

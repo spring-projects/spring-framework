@@ -20,7 +20,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.support.destination.DestinationResolver;
 

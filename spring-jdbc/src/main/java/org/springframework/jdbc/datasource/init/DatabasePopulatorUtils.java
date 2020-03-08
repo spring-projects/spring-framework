@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -51,10 +52,10 @@ public abstract class DatabasePopulatorUtils {
 				DataSourceUtils.releaseConnection(connection, dataSource);
 			}
 		}
+		catch (ScriptException ex) {
+			throw ex;
+		}
 		catch (Throwable ex) {
-			if (ex instanceof ScriptException) {
-				throw (ScriptException) ex;
-			}
 			throw new UncategorizedScriptException("Failed to execute database script", ex);
 		}
 	}

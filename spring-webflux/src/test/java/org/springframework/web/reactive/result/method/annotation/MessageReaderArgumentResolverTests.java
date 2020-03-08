@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -46,22 +47,22 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -77,7 +78,7 @@ public class MessageReaderArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(new TestBeanValidator());

@@ -23,11 +23,12 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
@@ -53,7 +54,7 @@ public class ScriptTemplateViewTests {
 	private StaticApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.configurer = new ScriptTemplateConfigurer();
 		this.context = new StaticApplicationContext();

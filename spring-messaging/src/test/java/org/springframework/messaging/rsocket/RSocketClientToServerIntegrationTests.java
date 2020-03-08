@@ -18,14 +18,15 @@ package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.RSocketFactory;
+import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
@@ -34,13 +35,12 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,27 +60,33 @@ public class RSocketClientToServerIntegrationTests {
 	private static RSocketRequester requester;
 
 
-	@BeforeClass
+	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
+
+		MimeType metadataMimeType = MimeTypeUtils.parseMimeType(
+				WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
+
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
+		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
+		SocketAcceptor responder = messageHandler.responder();
 
 		server = RSocketFactory.receive()
 				.addResponderPlugin(interceptor)
 				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(context.getBean(RSocketMessageHandler.class).serverAcceptor())
+				.acceptor(responder)
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
 				.block();
 
 		requester = RSocketRequester.builder()
-				.rsocketFactory(factory -> factory.frameDecoder(PayloadDecoder.ZERO_COPY))
+				.metadataMimeType(metadataMimeType)
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
 				.connectTcp("localhost", 7000)
 				.block();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownOnce() {
 		requester.rsocket().dispose();
 		server.dispose();
@@ -153,13 +159,13 @@ public class RSocketClientToServerIntegrationTests {
 
 	@Test
 	public void voidReturnValue() {
-		Flux<String> result = requester.route("void-return-value").data("Hello").retrieveFlux(String.class);
+		Mono<String> result = requester.route("void-return-value").data("Hello").retrieveMono(String.class);
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void voidReturnValueFromExceptionHandler() {
-		Flux<String> result = requester.route("void-return-value").data("bad").retrieveFlux(String.class);
+		Mono<String> result = requester.route("void-return-value").data("bad").retrieveMono(String.class);
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
 	}
 
@@ -266,11 +272,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			return RSocketStrategies.builder()
-					.decoder(StringDecoder.allMimeTypes())
-					.encoder(CharSequenceEncoder.allMimeTypes())
-					.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
-					.build();
+			return RSocketStrategies.create();
 		}
 	}
 

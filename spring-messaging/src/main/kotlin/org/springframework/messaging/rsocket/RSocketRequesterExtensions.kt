@@ -17,11 +17,10 @@
 package org.springframework.messaging.rsocket
 
 import io.rsocket.transport.ClientTransport
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.flow.asFlow
+import kotlinx.coroutines.reactive.asFlow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Flux
@@ -62,11 +61,11 @@ suspend fun RSocketRequester.Builder.connectWebSocketAndAwait(uri: URI): RSocket
  * @param producer the source of payload data value(s). This must be a
  * [Publisher] or another producer adaptable to a
  * [Publisher] via [org.springframework.core.ReactiveAdapterRegistry]
- * @param <T> the type of values to be produced
+ * @param T the type of values to be produced
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer: Any): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer: Any): RSocketRequester.RetrieveSpec =
 		data(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
@@ -74,11 +73,11 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(producer:
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param publisher the source of payload data value(s)
- * @param <T> the type of values to be produced
+ * @param T the type of values to be produced
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher: Publisher<T>): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher: Publisher<T>): RSocketRequester.RetrieveSpec =
 		data(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
@@ -86,63 +85,70 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  * @param flow the [Flow] to write to the request
- * @param <T> the source of payload data value(s)
+ * @param T the source of payload data value(s)
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
-inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flow<T>): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flow<T>): RSocketRequester.RetrieveSpec =
 		data(flow, object : ParameterizedTypeReference<T>() {})
 
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.send].
+ * Coroutines variant of [RSocketRequester.RetrieveSpec.send].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun RSocketRequester.ResponseSpec.sendAndAwait() {
+suspend fun RSocketRequester.RetrieveSpec.sendAndAwait() {
 	send().awaitFirstOrNull()
 }
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.retrieveMono].
+ * Coroutines variant of [RSocketRequester.RetrieveSpec.retrieveMono].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveAndAwait(): T =
+suspend inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveAndAwait(): T =
 		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 /**
- * Coroutines variant of [RSocketRequester.ResponseSpec.retrieveFlux].
+ * Nullable coroutines variant of [RSocketRequester.RetrieveSpec.retrieveMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.1
+ */
+suspend inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveAndAwaitOrNull(): T? =
+		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitFirstOrNull()
+
+/**
+ * Coroutines variant of [RSocketRequester.RetrieveSpec.retrieveFlux].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlow(): Flow<T> =
+inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveFlow(): Flow<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {}).asFlow()
 
 /**
- * Extension for [RSocketRequester.ResponseSpec.retrieveMono] providing a `retrieveMono<Foo>()`
+ * Extension for [RSocketRequester.RetrieveSpec.retrieveMono] providing a `retrieveMono<Foo>()`
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveMono(): Mono<T> =
+inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveMono(): Mono<T> =
 		retrieveMono(object : ParameterizedTypeReference<T>() {})
 
 
 /**
- * Extension for [RSocketRequester.ResponseSpec.retrieveFlux] providing a `retrieveFlux<Foo>()`
+ * Extension for [RSocketRequester.RetrieveSpec.retrieveFlux] providing a `retrieveFlux<Foo>()`
  * variant leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlux(): Flux<T> =
+inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveFlux(): Flux<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {})

@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -40,18 +40,18 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link HttpEntityMethodArgumentResolver}.When adding a test also

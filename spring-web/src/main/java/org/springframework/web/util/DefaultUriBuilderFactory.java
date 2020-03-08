@@ -195,16 +195,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	// UriTemplateHandler
 
+	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
+	@Override
 	public URI expand(String uriTemplate, Object... uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
 	// UriBuilderFactory
 
+	@Override
 	public UriBuilder uriString(String uriTemplate) {
 		return new DefaultUriBuilder(uriTemplate);
 	}

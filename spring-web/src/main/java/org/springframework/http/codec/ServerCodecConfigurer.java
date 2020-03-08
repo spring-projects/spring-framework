@@ -62,6 +62,12 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 
+	/**
+	 * {@inheritDoc}.
+	 */
+	@Override
+	ServerCodecConfigurer clone();
+
 
 	/**
 	 * Static factory method for a {@code ServerCodecConfigurer}.
@@ -75,6 +81,23 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 	 * {@link CodecConfigurer.DefaultCodecs} extension with extra client-side options.
 	 */
 	interface ServerDefaultCodecs extends DefaultCodecs {
+
+		/**
+		 * Configure the {@code HttpMessageReader} to use for multipart requests.
+		 * <p>By default, if
+		 * <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
+		 * is present, this is set to
+		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageReader
+		 * MultipartHttpMessageReader} created with an instance of
+		 * {@link org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
+		 * SynchronossPartHttpMessageReader}.
+		 * <p>Note that {@link #maxInMemorySize(int)} and/or
+		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
+		 * applied to the given reader, if applicable.
+		 * @param reader the message reader to use for multipart requests.
+		 * @since 5.1.11
+		 */
+		void multipartReader(HttpMessageReader<?> reader);
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.

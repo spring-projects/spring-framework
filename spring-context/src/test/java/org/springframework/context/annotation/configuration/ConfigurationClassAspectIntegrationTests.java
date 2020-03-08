@@ -20,11 +20,12 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,6 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -97,7 +97,7 @@ public class ConfigurationClassAspectIntegrationTests {
 			return new TestBean("name");
 		}
 
-		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
@@ -122,7 +122,7 @@ public class ConfigurationClassAspectIntegrationTests {
 	@Aspect
 	static class NameChangingAspect {
 
-		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}

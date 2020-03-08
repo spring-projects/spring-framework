@@ -16,15 +16,12 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Transactional integration tests that verify rollback semantics for
@@ -33,24 +30,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
+@SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
 @DirtiesContext
-public class PopulatedSchemaTransactionalSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class PopulatedSchemaTransactionalSqlScriptsTests extends AbstractTransactionalTests {
 
 	@BeforeTransaction
 	@AfterTransaction
-	public void verifyPreAndPostTransactionDatabaseState() {
+	void verifyPreAndPostTransactionDatabaseState() {
 		assertNumUsers(0);
 	}
 
 	@Test
 	@SqlGroup(@Sql("data-add-dogbert.sql"))
-	public void methodLevelScripts() {
+	void methodLevelScripts() {
 		assertNumUsers(1);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }

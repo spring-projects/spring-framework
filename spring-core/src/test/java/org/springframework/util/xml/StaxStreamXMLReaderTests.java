@@ -18,12 +18,13 @@ package org.springframework.util.xml;
 
 import java.io.InputStream;
 import java.io.StringReader;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -35,7 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
+class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTests {
 
 	public static final String CONTENT = "<root xmlns='http://springframework.org/spring-ws'><child/></root>";
 
@@ -45,7 +46,7 @@ public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	public void partial() throws Exception {
+	void partial() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(CONTENT));
 		streamReader.nextTag();  // skip to root

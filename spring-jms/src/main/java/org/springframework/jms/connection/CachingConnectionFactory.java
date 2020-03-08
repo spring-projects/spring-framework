@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -591,7 +592,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public int hashCode() {
-			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
+			return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector));
 		}
 
 		@Override
