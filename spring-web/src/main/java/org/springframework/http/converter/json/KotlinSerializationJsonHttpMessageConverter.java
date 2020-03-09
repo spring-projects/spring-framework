@@ -16,12 +16,17 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import kotlinx.serialization.json.Json;
 import kotlinx.serialization.json.JsonConfiguration;
 import kotlinx.serialization.json.JsonDecodingException;
 import kotlinx.serialization.modules.EmptyModule;
 import kotlinx.serialization.modules.SerialModule;
 import org.jetbrains.annotations.NotNull;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -31,10 +36,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.KotlinSerializationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write JSON using
@@ -73,7 +74,8 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 		try {
 			this.resolver.resolve(clazz);
 			return true;
-		} catch (Exception e) {
+		}
+		catch (Exception ex) {
 			return false;
 		}
 	}
@@ -89,7 +91,8 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 
 		try {
 			return this.json.parse(this.resolver.resolve(clazz), jsonText);
-		} catch (JsonDecodingException ex) {
+		}
+		catch (JsonDecodingException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
@@ -104,7 +107,8 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 			MediaType contentType = outputMessage.getHeaders().getContentType();
 			outputMessage.getBody().write(json.getBytes(getCharsetToUse(contentType)));
 			outputMessage.getBody().flush();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}

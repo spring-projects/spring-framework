@@ -16,11 +16,11 @@
 
 package org.springframework.http.converter;
 
-import kotlinx.serialization.JvmResolvingKt;
-import kotlinx.serialization.KSerializer;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import kotlinx.serialization.JvmResolvingKt;
+import kotlinx.serialization.KSerializer;
 
 /**
  * Caching resolver for kotlinx.serialization serializers.
