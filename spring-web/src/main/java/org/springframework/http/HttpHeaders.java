@@ -205,6 +205,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String CONTENT_TYPE = "Content-Type";
 	/**
+	 * The HTTP {@code Content-ID} header field name.
+	 * @see <a href="https://tools.ietf.org/html/rfc2392">RFC 2392</a>
+	 */
+	public static final String CONTENT_ID = "Content-ID";
+	/**
 	 * The HTTP {@code Cookie} header field name.
 	 * @see <a href="https://tools.ietf.org/html/rfc2109#section-4.3.4">Section 4.3.4 of RFC 2109</a>
 	 */
