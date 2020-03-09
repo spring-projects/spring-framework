@@ -8,7 +8,7 @@ plugins {
 	id "io.freefair.aspectj" version '5.0.0' apply false
 	id "com.github.ben-manes.versions" version '0.28.0'
 	id "me.champeau.gradle.jmh" version "0.5.0" apply false
-	id "org.jetbrains.kotlin.plugin.serialization" version "1.3.60" apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version "1.3.70" apply false
 }
 
 ext {
@@ -88,7 +88,10 @@ configure(allprojects) { project ->
 			}
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.26"
-			dependency "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0"
+			dependencySet(group: 'org.jetbrains.kotlinx', version: '0.20.0') {
+				entry 'kotlinx-serialization-runtime'
+				entry 'kotlinx-serialization-cbor'
+			}
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.5"

@@ -45,7 +45,7 @@ public class KotlinSerializationCborHttpMessageConverter extends AbstractHttpMes
 	) throws IOException, HttpMessageNotReadableException {
 		try {
 			byte[] payload = StreamUtils.copyToByteArray(inputMessage.getBody());
-			return Cbor.Companion.load(this.resolver.resolve(clazz), payload);
+			return Cbor.Default.load(this.resolver.resolve(clazz), payload);
 		} catch (Exception ex) {
 			throw new HttpMessageNotReadableException("Could not read CBOR: " + ex.getMessage(), ex, inputMessage);
 		}
@@ -57,7 +57,7 @@ public class KotlinSerializationCborHttpMessageConverter extends AbstractHttpMes
 			HttpOutputMessage outputMessage
 	) throws IOException, HttpMessageNotWritableException {
 		try {
-			outputMessage.getBody().write(Cbor.Companion.dump(this.resolver.resolve(o.getClass()), o));
+			outputMessage.getBody().write(Cbor.Default.dump(this.resolver.resolve(o.getClass()), o));
 			outputMessage.getBody().flush();
 		} catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write CBOR: " + ex.getMessage(), ex);
