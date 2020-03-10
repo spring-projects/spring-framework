@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,8 @@ public class DefaultServerRequestTests {
 		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
 		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.header(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(headers.firstHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
 	}
 
