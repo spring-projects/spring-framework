@@ -254,7 +254,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			return getSingletonInstance();
 		}
 		else {
-			if (this.targetName == null) {
+			if (this.targetName == null && logger.isInfoEnabled()) {
 				logger.info("Using non-singleton proxies with singleton targets is often undesirable. " +
 						"Enable prototype proxies by setting the 'targetName' property.");
 			}
