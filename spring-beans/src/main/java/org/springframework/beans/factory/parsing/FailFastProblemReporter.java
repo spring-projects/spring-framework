@@ -38,7 +38,9 @@ import org.springframework.lang.Nullable;
  */
 public class FailFastProblemReporter implements ProblemReporter {
 
-	private Log logger = LogFactory.getLog(getClass());
+	private final Log defaultLogger = LogFactory.getLog(getClass());
+
+	private Log logger = this.defaultLogger;
 
 
 	/**
@@ -48,7 +50,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
 	public void setLogger(@Nullable Log logger) {
-		this.logger = (logger != null ? logger : LogFactory.getLog(getClass()));
+		this.logger = (logger != null ? logger : this.defaultLogger);
 	}
 
 
