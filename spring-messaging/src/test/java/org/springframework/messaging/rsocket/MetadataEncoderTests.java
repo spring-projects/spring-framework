@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,11 +131,11 @@ public class MetadataEncoderTests {
 	public void routeWithVars() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
-						.route("a.{b}.{c}", "BBB", "C.C.C")
+						.route("a.{b}.{c}.d", "BBB", "C.C.C")
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("a.BBB.C%2EC%2EC");
+		assertThat(dumpString(buffer)).isEqualTo("a.BBB.C%2EC%2EC.d");
 	}
 
 	@Test
