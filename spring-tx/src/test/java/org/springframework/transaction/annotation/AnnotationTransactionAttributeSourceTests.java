@@ -384,6 +384,31 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertThat(atas.getTransactionAttribute(getMetaClassMethod, GroovyTestBean.class)).isNull();
 	}
 
+	@Test
+	public void inheritedTranactionalMethod() throws Exception {
+		Method baseMethod = BaseDao.class.getMethod("baseMethod");
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+
+		TransactionAttribute baseMethodDao1Attr = atas.getTransactionAttribute(baseMethod, Dao1.class);
+		TransactionAttribute baseMethodDao2Attr = atas.getTransactionAttribute(baseMethod, Dao2.class);
+
+		assertThat(baseMethodDao1Attr.getQualifier()).isEqualTo("TxManager1");
+		assertThat(baseMethodDao2Attr.getQualifier()).isEqualTo("TxManager2");
+
+		//////////////////////////////////////////////////////////////////////
+
+		Method specificMethodDao1 = Dao1.class.getMethod("specificMethod");
+		Method specificMethodDao2 = Dao2.class.getMethod("specificMethod");
+		TransactionAttribute specificMethodDao1Attr = atas.getTransactionAttribute(specificMethodDao1, Dao1.class);
+		TransactionAttribute specificMethodDao2Attr = atas.getTransactionAttribute(specificMethodDao2, Dao2.class);
+
+		assertThat(specificMethodDao1Attr.getQualifier()).isEqualTo("TxManager1");
+		assertThat(specificMethodDao2Attr.getQualifier()).isEqualTo("TxManager2");
+
+		assertThat(specificMethodDao1Attr.isReadOnly()).isEqualTo(false);
+		assertThat(specificMethodDao2Attr.isReadOnly()).isEqualTo(true);
+	}
 
 	interface ITestBean1 {
 
@@ -946,6 +971,29 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		@Override
 		public void setMetaClass(MetaClass metaClass) {
+		}
+	}
+
+
+	@Transactional
+	abstract static class BaseDao {
+
+		public void baseMethod() {
+		}
+	}
+
+	@Transactional("TxManager1")
+	static class Dao1 extends BaseDao {
+
+		public void specificMethod() {
+		}
+	}
+
+	@Transactional("TxManager2")
+	static class Dao2 extends BaseDao {
+
+		@Transactional(readOnly = true)
+		public void specificMethod() {
 		}
 	}
 
