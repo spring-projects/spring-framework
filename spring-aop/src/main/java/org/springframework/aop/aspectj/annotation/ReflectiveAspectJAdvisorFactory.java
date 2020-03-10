@@ -74,7 +74,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	static {
 		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
-						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
+						Around.class, Before.class, AfterReturning.class, AfterThrowing.class, After.class),
 				(Converter<Method, Annotation>) method -> {
 					AspectJAnnotation<?> annotation =
 						AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
