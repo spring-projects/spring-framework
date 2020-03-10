@@ -253,20 +253,24 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private void doValidateClass(Class<?> proxySuperClass, @Nullable ClassLoader proxyClassLoader, Set<Class<?>> ifcs) {
 		if (proxySuperClass != Object.class) {
+			final boolean infoEnabled = logger.isInfoEnabled();
+			final boolean debugEnabled = logger.isDebugEnabled();
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();
 				if (!Modifier.isStatic(mod) && !Modifier.isPrivate(mod)) {
 					if (Modifier.isFinal(mod)) {
-						if (implementsInterface(method, ifcs)) {
+						if (infoEnabled && implementsInterface(method, ifcs)) {
 							logger.info("Unable to proxy interface-implementing method [" + method + "] because " +
 									"it is marked as final: Consider using interface-based JDK proxies instead!");
 						}
-						logger.debug("Final method [" + method + "] cannot get proxied via CGLIB: " +
-								"Calls to this method will NOT be routed to the target instance and " +
-								"might lead to NPEs against uninitialized fields in the proxy instance.");
+						if (debugEnabled) {
+							logger.debug("Final method [" + method + "] cannot get proxied via CGLIB: " +
+									"Calls to this method will NOT be routed to the target instance and " +
+									"might lead to NPEs against uninitialized fields in the proxy instance.");
+						}
 					}
-					else if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) &&
+					else if (debugEnabled && !Modifier.isPublic(mod) && !Modifier.isProtected(mod) &&
 							proxyClassLoader != null && proxySuperClass.getClassLoader() != proxyClassLoader) {
 						logger.debug("Method [" + method + "] is package-visible across different ClassLoaders " +
 								"and cannot get proxied via CGLIB: Declare this method as public or protected " +
@@ -526,7 +530,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private static class StaticDispatcher implements Dispatcher, Serializable {
 
 		@Nullable
-		private Object target;
+		private final Object target;
 
 		public StaticDispatcher(@Nullable Object target) {
 			this.target = target;
@@ -552,7 +556,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
-		public Object loadObject() throws Exception {
+		public Object loadObject() {
 			return this.advised;
 		}
 	}
@@ -959,11 +963,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 			return true;
 		}
 
-		private boolean equalsAdviceClasses(Advisor a, Advisor b) {
+		private static boolean equalsAdviceClasses(Advisor a, Advisor b) {
 			return (a.getAdvice().getClass() == b.getAdvice().getClass());
 		}
 
-		private boolean equalsPointcuts(Advisor a, Advisor b) {
+		private static boolean equalsPointcuts(Advisor a, Advisor b) {
 			// If only one of the advisor (but not both) is PointcutAdvisor, then it is a mismatch.
 			// Takes care of the situations where an IntroductionAdvisor is used (see SPR-3959).
 			return (!(a instanceof PointcutAdvisor) ||
