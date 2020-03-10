@@ -48,6 +48,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -522,8 +523,13 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
 		String[] globalInterceptorNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
-		List<Object> beans = new ArrayList<>(globalAdvisorNames.length + globalInterceptorNames.length);
-		Map<Object, String> names = new HashMap<>(beans.size());
+		if(ObjectUtils.isEmpty(globalAdvisorNames) && ObjectUtils.isEmpty(globalInterceptorNames)){
+			return;
+		}
+		int expectedSize = globalAdvisorNames.length + globalInterceptorNames.length;
+		List<Object> beans = new ArrayList<>(expectedSize);
+		int initialCapacity = (int) ((float) expectedSize / 0.75F + 1.0F);
+		Map<Object, String> names = new HashMap<>(initialCapacity);
 		for (String name : globalAdvisorNames) {
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
