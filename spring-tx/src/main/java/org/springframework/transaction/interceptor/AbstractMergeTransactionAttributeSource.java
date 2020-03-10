@@ -32,18 +32,29 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Abstract implementation of {@link TransactionAttributeSource} that caches
- * attributes for methods and implements a merge policy with following priorities:
+ * attributes for methods and implements a merge policy for transaction attributes
+ * (see {@link Transactional} annotation) with following priorities (high to low):
  * <ol>
- * <li>method in the target class;
+ * <li>specific method;
+ * <li>declaring class of the specific method;
  * <li>target class;
  * <li>method in the declaring class/interface;
  * <li>declaring class/interface.
  * </ol>
  *
  * <p>The merge policy means that all transaction attributes which are not
- * explicitly set on a specific definition place (see above) will be inherited
- * from the place with next lower priority.
+ * explicitly set [1] on a specific definition place (see above) will be inherited
+ * from the place with the next lower priority.
  *
+ * <p>On the contrary, the previous default {@link AbstractFallbackTransactionAttributeSource} implemented a fallback policy,
+ * where all attributes were read from the first found definition place (essentially in the above order), and all others were ignored.
+ *
+ * <p>See analysis in <a href="https://github.com/spring-projects/spring-framework/issues/24291">Inherited @Transactional methods use wrong TransactionManager</a>.
+ *
+ * <p>[1] If the value of an attribute is equal to its default value, the current implementation
+ * cannot distinguish, whether this value has been set explicitly or implicitly,
+ * and considers such attribute as "not explicitly set". Therefore it's currently impossible to override a non-default value with a default value.
+
  * <p>This implementation caches attributes by method after they are first used.
  * If it is ever desirable to allow dynamic changing of transaction attributes
  * (which is very unlikely), caching could be made configurable. Caching is
@@ -162,19 +173,26 @@ public abstract class AbstractMergeTransactionAttributeSource implements Transac
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
-		// 1st priority is the method in the target class.
+		// 1st priority is the specific method.
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 
-		// 2nd priority is the target class.
-		if (targetClass != null && ClassUtils.isUserLevelMethod(method)) {
+		// 2nd priority is the declaring class of the specific method.
+		Class<?> declaringClass = specificMethod.getDeclaringClass();
+		boolean userLevelMethod = ClassUtils.isUserLevelMethod(method);
+		if (userLevelMethod) {
+			txAttr = merge(txAttr, findTransactionAttribute(declaringClass));
+		}
+
+		// 3rd priority is the target class
+		if (targetClass != null && !targetClass.equals(declaringClass) && userLevelMethod) {
 			txAttr = merge(txAttr, findTransactionAttribute(targetClass));
 		}
 
-		if (specificMethod != method) {
-			// 3rd priority is the method in the declaring class/interface.
+		if (method != specificMethod) {
+			// 4th priority is the method in the declaring class/interface.
 			txAttr = merge(txAttr, findTransactionAttribute(method));
 
-			// 4th priority is the declaring class/interface.
+			// 5th priority is the declaring class/interface.
 			txAttr = merge(txAttr, findTransactionAttribute(method.getDeclaringClass()));
 		}
 
