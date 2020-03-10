@@ -198,6 +198,16 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void headersCors() {
+		RequestPredicate predicate = RequestPredicates.headers(headers -> false);
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("OPTIONS", "https://example.com");
+		servletRequest.addHeader("Origin", "https://example.com");
+		servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
+		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
+		assertThat(predicate.test(request)).isTrue();
+	}
+
+	@Test
 	public void contentType() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);

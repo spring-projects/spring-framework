@@ -199,6 +199,18 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void headersCors() {
+		RequestPredicate predicate = RequestPredicates.headers(headers -> false);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.options("https://example.com")
+				.header("Origin", "https://example.com")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT")
+				.build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+	}
+
+
+	@Test
 	public void contentType() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
