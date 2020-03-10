@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -444,9 +445,22 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethods.contains(request.method());
-			traceMatch("Method", this.httpMethods, request.method(), match);
+			HttpMethod method = method(request);
+			boolean match = this.httpMethods.contains(method);
+			traceMatch("Method", this.httpMethods, method, match);
 			return match;
+		}
+
+		@Nullable
+		private static HttpMethod method(ServerRequest request) {
+			if (CorsUtils.isPreFlightRequest(request.servletRequest())) {
+				String accessControlRequestMethod =
+						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+				return HttpMethod.resolve(accessControlRequestMethod);
+			}
+			else {
+				return request.method();
+			}
 		}
 
 		@Override
