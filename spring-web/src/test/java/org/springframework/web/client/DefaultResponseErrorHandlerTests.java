@@ -32,6 +32,7 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -210,6 +211,25 @@ public class DefaultResponseErrorHandlerTests {
 		assertThat(handler.hasError(response)).isFalse();
 		assertThat(body.isClosed()).isFalse();
 		assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)).isEqualTo("Hello World");
+	}
+
+
+	@Test
+	public void bodyAvailableAfterHandlingUnknownStatusClientError() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		TestByteArrayInputStream body = new TestByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8));
+
+		given(response.getRawStatusCode()).willReturn(432);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(body);
+
+		UnknownHttpStatusCodeException caught = catchThrowableOfType(() -> handler.handleError(response),
+				UnknownHttpStatusCodeException.class);
+
+		assertThat(caught.getResponseBodyAsString()).isEqualTo("Hello World");
+
 	}
 
 
