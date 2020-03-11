@@ -36,7 +36,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
@@ -239,14 +238,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
-			throw new HttpMessageNotReadableException("Invalid JSON input: " + ex.getOriginalMessage(), ex, inputMessage);
-		}
-		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
+		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonMappingException ex) {  // typically ValueInstantiationException
-			throw new HttpMessageConversionException("JSON conversion problem: " + ex.getOriginalMessage(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
@@ -296,14 +289,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			writeSuffix(generator, object);
 			generator.flush();
 		}
-		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
-			throw new HttpMessageNotWritableException("Invalid JSON input: " + ex.getOriginalMessage(), ex);
-		}
-		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
+		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonMappingException ex) {  // typically ValueInstantiationException
-			throw new HttpMessageConversionException("JSON mapping problem: " + ex.getPathReference(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);

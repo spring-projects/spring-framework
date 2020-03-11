@@ -30,12 +30,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -72,7 +70,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final Map<MediaType, byte[]> STREAM_SEPARATORS;
 
 	static {
-		STREAM_SEPARATORS = new HashMap<>();
+		STREAM_SEPARATORS = new HashMap<>(4);
 		STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
 		STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
 	}
@@ -166,14 +164,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			writer.writeValue(generator, value);
 			generator.flush();
 		}
-		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
-			throw new EncodingException("Invalid JSON input: " + ex.getOriginalMessage(), ex);
-		}
-		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
+		catch (InvalidDefinitionException ex) {
 			throw new CodecException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonMappingException ex) {  // typically ValueInstantiationException
-			throw new CodecException("JSON conversion problem: " + ex.getOriginalMessage(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
