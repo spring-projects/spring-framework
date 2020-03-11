@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,8 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	@Override
 	public boolean rollbackOn(Throwable ex) {
-		if (logger.isTraceEnabled()) {
+		final boolean traceEnabled = logger.isTraceEnabled();
+		if (traceEnabled) {
 			logger.trace("Applying rules to determine whether transaction should rollback on " + ex);
 		}
 
@@ -147,13 +148,15 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 			}
 		}
 
-		if (logger.isTraceEnabled()) {
+		if (traceEnabled) {
 			logger.trace("Winning rollback rule is: " + winner);
 		}
 
 		// User superclass behavior (rollback on unchecked) if no rule matches.
 		if (winner == null) {
-			logger.trace("No relevant rollback rule found: applying default rules");
+			if(traceEnabled) {
+				logger.trace("No relevant rollback rule found: applying default rules");
+			}
 			return super.rollbackOn(ex);
 		}
 
