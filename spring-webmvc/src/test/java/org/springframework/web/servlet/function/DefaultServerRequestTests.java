@@ -16,10 +16,16 @@
 
 package org.springframework.web.servlet.function;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +35,14 @@ import java.util.OptionalLong;
 import javax.servlet.http.Cookie;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -41,6 +50,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
 
@@ -48,6 +58,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * @author Arjen Poutsma
@@ -300,7 +311,193 @@ public class DefaultServerRequestTests {
 				this.messageConverters);
 
 		assertThat(request.principal().get()).isEqualTo(principal);
+	}
 
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestamp(String method) throws Exception {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, now.toEpochMilli());
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(now, "");
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+		});
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedTimestamp(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(now, "");
+
+		assertThat(result).isEmpty();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETag(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "\"Foo\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(eTag);
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+		});
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagWithSeparatorChars(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "\"Foo, Bar\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(eTag);
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+		});
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETag(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String currentETag = "\"Foo\"";
+		String oldEtag = "Bar";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, oldEtag);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(currentETag);
+
+		assertThat(result).isEmpty();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedUnpaddedETag(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "Foo";
+		String paddedEtag = String.format("\"%s\"", eTag);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, paddedEtag);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(eTag);
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getETag()).isEqualTo(paddedEtag);
+		});
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedUnpaddedETag(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String currentETag = "Foo";
+		String oldEtag = "Bar";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, oldEtag);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(currentETag);
+
+		assertThat(result).isEmpty();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedWildcardIsIgnored(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "\"Foo\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "*");
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(eTag);
+
+		assertThat(result).isEmpty();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndTimestamp(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, now.toEpochMilli());
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+			assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+		});
+
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndModifiedTimestamp(String method) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
+				.ifNoneMatch(eTag)
+				.ifModifiedSince(oneMinuteAgo.toEpochMilli())
+				);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		assertThat(result).hasValueSatisfying(serverResponse -> {
+			assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+			assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+		});
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETagAndNotModifiedTimestamp(String method) throws Exception {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		String currentETag = "\"Foo\"";
+		String oldEtag = "\"Bar\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, oldEtag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, now.toEpochMilli());
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Optional<ServerResponse> result = request.checkNotModified(now, currentETag);
+
+		assertThat(result).isEmpty();
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(strings = { "GET", "HEAD" })
+	@interface ParameterizedHttpMethodTest {
 	}
 
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1015,6 +1016,21 @@ public abstract class RequestPredicates {
 		@Override
 		public HttpServletRequest servletRequest() {
 			return this.request.servletRequest();
+		}
+
+		@Override
+		public Optional<ServerResponse> checkNotModified(Instant lastModified) {
+			return this.request.checkNotModified(lastModified);
+		}
+
+		@Override
+		public Optional<ServerResponse> checkNotModified(String etag) {
+			return this.request.checkNotModified(etag);
+		}
+
+		@Override
+		public Optional<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+			return this.request.checkNotModified(lastModified, etag);
 		}
 
 		@Override

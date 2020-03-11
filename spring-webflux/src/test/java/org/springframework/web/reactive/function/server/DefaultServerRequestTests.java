@@ -16,12 +16,18 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +36,8 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -43,6 +51,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
@@ -436,6 +445,262 @@ public class DefaultServerRequestTests {
 					assertThat(formFieldPart.value()).isEqualTo("qux");
 				})
 				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestamp(String method) throws Exception {
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfModifiedSince(now);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedTimestamp(String method) {
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfModifiedSince(oneMinuteAgo);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETag(String method) {
+		String eTag = "\"Foo\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagWithSeparatorChars(String method) {
+		String eTag = "\"Foo, Bar\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETag(String method) {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "Bar";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedUnpaddedETag(String method) {
+		String eTag = "Foo";
+		String paddedEtag = String.format("\"%s\"", eTag);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(paddedEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(paddedEtag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedUnpaddedETag(String method) {
+		String currentETag = "Foo";
+		String oldEtag = "Bar";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedWildcardIsIgnored(String method) {
+		String eTag = "\"Foo\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch("*");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndTimestamp(String method) {
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		headers.setIfModifiedSince(now);
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndModifiedTimestamp(String method) {
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		headers.setIfModifiedSince(oneMinuteAgo);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETagAndNotModifiedTimestamp(String method) throws Exception {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "\"Bar\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		headers.setIfModifiedSince(now);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(strings = {"GET", "HEAD"})
+	@interface ParameterizedHttpMethodTest {
+
 	}
 
 }
