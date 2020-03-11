@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
 		internalBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
+				beanPostProcessor instanceof AopInfrastructureBean);
+		internalBeanFactory.getSmartBeanPostProcessors().removeIf(beanPostProcessor ->
 				beanPostProcessor instanceof AopInfrastructureBean);
 
 		return internalBeanFactory;

@@ -65,6 +65,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
@@ -153,8 +154,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** BeanPostProcessors to apply in createBean. */
 	private final List<BeanPostProcessor> beanPostProcessors = new CopyOnWriteArrayList<>();
 
+	/** Smart BeanPostProcessors to apply when predicting bean types. */
+	private final List<BeanPostProcessor> smartBeanPostProcessors = new CopyOnWriteArrayList<>();
+
 	/** Indicates whether any InstantiationAwareBeanPostProcessors have been registered. */
 	private volatile boolean hasInstantiationAwareBeanPostProcessors;
+
+	/** Indicates whether any SmartInstantiationAwareBeanPostProcessor have been registered. */
+	private volatile boolean hasSmartInstantiationAwareBeanPostProcessors;
 
 	/** Indicates whether any DestructionAwareBeanPostProcessors have been registered. */
 	private volatile boolean hasDestructionAwareBeanPostProcessors;
@@ -923,6 +930,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 			this.hasInstantiationAwareBeanPostProcessors = true;
 		}
+		if (beanPostProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
+			this.smartBeanPostProcessors.remove(beanPostProcessor);
+			this.hasSmartInstantiationAwareBeanPostProcessors = true;
+			this.smartBeanPostProcessors.add(beanPostProcessor);
+		}
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
 		}
@@ -944,13 +956,31 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * Return the list of smart BeanPostProcessors that will get applied
+	 * to beans created with this factory.
+	 */
+	public List<BeanPostProcessor> getSmartBeanPostProcessors() {
+		return this.smartBeanPostProcessors;
+	}
+
+	/**
 	 * Return whether this factory holds a InstantiationAwareBeanPostProcessor
-	 * that will get applied to singleton beans on shutdown.
+	 * that will get applied to singleton beans on creation.
 	 * @see #addBeanPostProcessor
 	 * @see org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor
 	 */
 	protected boolean hasInstantiationAwareBeanPostProcessors() {
 		return this.hasInstantiationAwareBeanPostProcessors;
+	}
+
+	/**
+	 * Return whether this factory holds a SmartInstantiationAwareBeanPostProcessor
+	 * that will get applied to singleton beans on creation.
+	 * @see #addBeanPostProcessor
+	 * @see org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor
+	 */
+	protected boolean hasSmartInstantiationAwareBeanPostProcessors() {
+		return this.hasSmartInstantiationAwareBeanPostProcessors;
 	}
 
 	/**
@@ -1028,8 +1058,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.customEditors.putAll(otherAbstractFactory.customEditors);
 			this.typeConverter = otherAbstractFactory.typeConverter;
 			this.beanPostProcessors.addAll(otherAbstractFactory.beanPostProcessors);
+			this.smartBeanPostProcessors.addAll(otherAbstractFactory.smartBeanPostProcessors);
 			this.hasInstantiationAwareBeanPostProcessors = this.hasInstantiationAwareBeanPostProcessors ||
 					otherAbstractFactory.hasInstantiationAwareBeanPostProcessors;
+			this.hasSmartInstantiationAwareBeanPostProcessors = this.hasSmartInstantiationAwareBeanPostProcessors ||
+					otherAbstractFactory.hasSmartInstantiationAwareBeanPostProcessors;
 			this.hasDestructionAwareBeanPostProcessors = this.hasDestructionAwareBeanPostProcessors ||
 					otherAbstractFactory.hasDestructionAwareBeanPostProcessors;
 			this.scopes.putAll(otherAbstractFactory.scopes);
