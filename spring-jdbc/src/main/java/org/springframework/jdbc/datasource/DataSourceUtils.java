@@ -177,11 +177,11 @@ public abstract class DataSourceUtils {
 			throws SQLException {
 
 		Assert.notNull(con, "No Connection specified");
-
+		final boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (definition != null && definition.isReadOnly()) {
 			try {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Setting JDBC Connection [" + con + "] read-only");
 				}
 				con.setReadOnly(true);
@@ -196,14 +196,16 @@ public abstract class DataSourceUtils {
 					exToCheck = exToCheck.getCause();
 				}
 				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
-				logger.debug("Could not set JDBC Connection read-only", ex);
+				if(debugEnabled){
+					logger.debug("Could not set JDBC Connection read-only", ex);
+				}
 			}
 		}
 
 		// Apply specific isolation level, if any.
 		Integer previousIsolationLevel = null;
 		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			if (logger.isDebugEnabled()) {
+			if (debugEnabled) {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
@@ -232,10 +234,11 @@ public abstract class DataSourceUtils {
 			Connection con, @Nullable Integer previousIsolationLevel, boolean resetReadOnly) {
 
 		Assert.notNull(con, "No Connection specified");
+		final boolean debugEnabled = logger.isDebugEnabled();
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Resetting isolation level of JDBC Connection [" +
 							con + "] to " + previousIsolationLevel);
 				}
@@ -244,14 +247,16 @@ public abstract class DataSourceUtils {
 
 			// Reset read-only flag if we originally switched it to true on transaction begin.
 			if (resetReadOnly) {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Resetting read-only flag of JDBC Connection [" + con + "]");
 				}
 				con.setReadOnly(false);
 			}
 		}
 		catch (Throwable ex) {
-			logger.debug("Could not reset JDBC Connection after transaction", ex);
+			if(debugEnabled){
+				logger.debug("Could not reset JDBC Connection after transaction", ex);
+			}
 		}
 	}
 
@@ -266,10 +271,11 @@ public abstract class DataSourceUtils {
 	@Deprecated
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
+		final boolean debugEnabled = logger.isDebugEnabled();
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Resetting isolation level of JDBC Connection [" +
 							con + "] to " + previousIsolationLevel);
 				}
@@ -285,7 +291,9 @@ public abstract class DataSourceUtils {
 			}
 		}
 		catch (Throwable ex) {
-			logger.debug("Could not reset JDBC Connection after transaction", ex);
+			if(debugEnabled){
+				logger.debug("Could not reset JDBC Connection after transaction", ex);
+			}
 		}
 	}
 

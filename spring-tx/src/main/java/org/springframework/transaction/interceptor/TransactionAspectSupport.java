@@ -433,14 +433,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			catch (TransactionSystemException ex2) {
 				if (throwableHolder.throwable != null) {
-					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+					if(logger.isErrorEnabled()){
+						logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+					}
 					ex2.initApplicationException(throwableHolder.throwable);
 				}
 				throw ex2;
 			}
 			catch (Throwable ex2) {
 				if (throwableHolder.throwable != null) {
-					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+					if(logger.isErrorEnabled()){
+						logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+					}
 				}
 				throw ex2;
 			}
