@@ -486,11 +486,6 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
-		public void setStatus(int sc, String sm) {
-			this.status = sc;
-		}
-
-		@Override
 		public int getStatus() {
 			return this.status;
 		}
