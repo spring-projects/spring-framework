@@ -749,7 +749,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
+	abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
 
 		@Override
 		public String toString() {
