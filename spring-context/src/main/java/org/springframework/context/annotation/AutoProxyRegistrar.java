@@ -34,6 +34,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Chris Beams
  * @since 3.1
  * @see org.springframework.cache.annotation.EnableCaching
+ * @see org.springframework.transaction.annotation.EnableTransactionManagement
  */
 public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
