@@ -819,7 +819,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			boolean unexpectedRollback = unexpected;
 
-			final boolean debugEnabled = logger.isDebugEnabled();
 			try {
 				triggerBeforeCompletion(status);
 
@@ -1239,6 +1238,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected void registerAfterCompletionWithExistingTransaction(
 			Object transaction, List<TransactionSynchronization> synchronizations) throws TransactionException {
+
 		logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +
 				"processing Spring after-completion callbacks immediately, with outcome status 'unknown'");
 		invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
