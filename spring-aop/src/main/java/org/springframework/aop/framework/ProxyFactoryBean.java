@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			return getSingletonInstance();
 		}
 		else {
-			if (this.targetName == null && logger.isInfoEnabled()) {
+			if (this.targetName == null) {
 				logger.info("Using non-singleton proxies with singleton targets is often undesirable. " +
 						"Enable prototype proxies by setting the 'targetName' property.");
 			}
@@ -600,8 +600,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			// We expected this to be an Advisor or Advice,
 			// but it wasn't. This is a configuration error.
 			throw new AopConfigException("Unknown advisor type " + next.getClass() +
-					"; Can only include Advisor or Advice type beans in interceptorNames chain except for last entry, " +
-					"which may also be target or TargetSource", ex);
+					"; can only include Advisor or Advice type beans in interceptorNames chain " +
+					"except for last entry which may also be target instance or TargetSource", ex);
 		}
 	}
 
