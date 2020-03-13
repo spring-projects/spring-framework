@@ -42,9 +42,8 @@ public class CorsRegistry {
 	 *
 	 * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
 	 * well as Ant-style path patterns (such as {@code "/admin/**"}).
-	 * <p>By default, all origins, all headers, credentials and {@code GET},
-	 * {@code HEAD}, and {@code POST} methods are allowed, and the max age
-	 * is set to 30 minutes.
+	 * <p>By default, all origins, all headers and {@code GET}, {@code HEAD},
+	 * and {@code POST} methods are allowed, and the max age is set to 30 minutes.
 	 *
 	 * <p>The following defaults are applied to the {@link CorsRegistration}:
 	 * <ul>
