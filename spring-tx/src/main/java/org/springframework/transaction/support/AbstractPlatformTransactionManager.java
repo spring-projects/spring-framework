@@ -851,9 +851,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 						}
 					}
 					else {
-						if(debugEnabled){
-							logger.debug("Should roll back transaction but cannot - no transaction available");
-						}
+						logger.debug("Should roll back transaction but cannot - no transaction available");
 					}
 					// Unexpected rollback only matters here if we're asked to fail early
 					if (!isFailEarlyOnGlobalRollbackOnly()) {
@@ -888,7 +886,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void doRollbackOnCommitException(DefaultTransactionStatus status, Throwable ex) throws TransactionException {
 		try {
-			final boolean debugEnabled =  logger.isDebugEnabled();
 			if (status.isNewTransaction()) {
 				if (status.isDebug()) {
 					logger.debug("Initiating transaction rollback after commit exception", ex);
@@ -1242,11 +1239,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected void registerAfterCompletionWithExistingTransaction(
 			Object transaction, List<TransactionSynchronization> synchronizations) throws TransactionException {
-		if(logger.isDebugEnabled()){
-			logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +
-					"processing Spring after-completion callbacks immediately, with outcome status 'unknown'");
-		}
-
+		logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +
+				"processing Spring after-completion callbacks immediately, with outcome status 'unknown'");
 		invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
