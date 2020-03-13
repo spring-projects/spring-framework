@@ -106,7 +106,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateMessagesWithErrorAndConnectionClosing() throws Exception {
+	public void delegateMessagesWithError() throws Exception {
 
 		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
 				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
@@ -127,6 +127,23 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		verify(this.webSocketHandler).handleMessage(session, new TextMessage(msg1));
 		verify(this.webSocketHandler).handleMessage(session, new TextMessage(msg2));
 		verify(this.webSocketHandler).afterConnectionClosed(session, CloseStatus.SERVER_ERROR);
+		verifyNoMoreInteractions(this.webSocketHandler);
+	}
+
+	@Test // gh-23828
+	public void delegateMessagesEmptyAfterConnectionClosed() throws Exception {
+
+		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
+				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
+
+		session.delegateConnectionEstablished();
+		session.close(CloseStatus.NORMAL);
+		session.delegateMessages("", " ", "\n");
+
+		// No exception for empty messages
+
+		verify(this.webSocketHandler).afterConnectionEstablished(session);
+		verify(this.webSocketHandler).afterConnectionClosed(session, CloseStatus.NORMAL);
 		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 

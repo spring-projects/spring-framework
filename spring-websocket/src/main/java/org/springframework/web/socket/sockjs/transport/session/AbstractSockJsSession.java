@@ -380,10 +380,16 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
 		for (int i = 0; i < messages.length; i++) {
 			try {
-				if (isClosed()) {
-					throw new SockJsMessageDeliveryException(this.id, getUndelivered(messages, i), "Session closed");
+				if (!isClosed()) {
+					this.handler.handleMessage(this, new TextMessage(messages[i]));
 				}
-				this.handler.handleMessage(this, new TextMessage(messages[i]));
+				else {
+					List<String> undelivered = getUndelivered(messages, i);
+					if (undelivered.isEmpty()) {
+						return;
+					}
+					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
+				}
 			}
 			catch (Exception ex) {
 				throw new SockJsMessageDeliveryException(this.id, getUndelivered(messages, i), ex);
