@@ -196,9 +196,8 @@ public abstract class DataSourceUtils {
 					exToCheck = exToCheck.getCause();
 				}
 				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
-				if(debugEnabled){
-					logger.debug("Could not set JDBC Connection read-only", ex);
-				}
+				logger.debug("Could not set JDBC Connection read-only", ex);
+
 			}
 		}
 
@@ -254,9 +253,7 @@ public abstract class DataSourceUtils {
 			}
 		}
 		catch (Throwable ex) {
-			if(debugEnabled){
-				logger.debug("Could not reset JDBC Connection after transaction", ex);
-			}
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 	}
 
@@ -291,9 +288,7 @@ public abstract class DataSourceUtils {
 			}
 		}
 		catch (Throwable ex) {
-			if(debugEnabled){
-				logger.debug("Could not reset JDBC Connection after transaction", ex);
-			}
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 	}
 

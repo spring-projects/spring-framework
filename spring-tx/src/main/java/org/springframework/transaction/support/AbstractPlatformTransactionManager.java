@@ -640,11 +640,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			resume(transaction, suspendedResources);
 		}
 		catch (RuntimeException | Error resumeEx) {
-			if(logger.isErrorEnabled()){
-				String exMessage = "Inner transaction begin exception overridden by outer transaction resume exception";
-				logger.error(exMessage, beginEx);
-			}
-
+			String exMessage = "Inner transaction begin exception overridden by outer transaction resume exception";
+			logger.error(exMessage, beginEx);
 			throw resumeEx;
 		}
 	}
@@ -696,7 +693,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		if (defStatus.isLocalRollbackOnly()) {
-			if (defStatus.isDebug() && logger.isDebugEnabled()) {
+			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
 			}
 			processRollback(defStatus, false);
@@ -704,7 +701,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		if (!shouldCommitOnGlobalRollbackOnly() && defStatus.isGlobalRollbackOnly()) {
-			if (defStatus.isDebug() && logger.isDebugEnabled()) {
+			if (defStatus.isDebug()) {
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
 			}
 			processRollback(defStatus, true);
@@ -732,14 +729,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				beforeCompletionInvoked = true;
 
 				if (status.hasSavepoint()) {
-					if (status.isDebug() && logger.isDebugEnabled()) {
+					if (status.isDebug()) {
 						logger.debug("Releasing transaction savepoint");
 					}
 					unexpectedRollback = status.isGlobalRollbackOnly();
 					status.releaseHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
-					if (status.isDebug() && logger.isDebugEnabled()) {
+					if (status.isDebug()) {
 						logger.debug("Initiating transaction commit");
 					}
 					unexpectedRollback = status.isGlobalRollbackOnly();
@@ -826,14 +823,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				triggerBeforeCompletion(status);
 
-				if (status.hasSavepoint() && debugEnabled) {
+				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Rolling back transaction to savepoint");
 					}
 					status.rollbackToHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
-					if (status.isDebug() && debugEnabled) {
+					if (status.isDebug()) {
 						logger.debug("Initiating transaction rollback");
 					}
 					doRollback(status);
@@ -842,13 +839,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					// Participating in larger transaction
 					if (status.hasTransaction()) {
 						if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
-							if (status.isDebug() && debugEnabled) {
+							if (status.isDebug()) {
 								logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
 							}
 							doSetRollbackOnly(status);
 						}
 						else {
-							if (status.isDebug() && debugEnabled) {
+							if (status.isDebug()) {
 								logger.debug("Participating transaction failed - letting transaction originator decide on rollback");
 							}
 						}
@@ -893,22 +890,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			final boolean debugEnabled =  logger.isDebugEnabled();
 			if (status.isNewTransaction()) {
-				if (status.isDebug() && debugEnabled) {
+				if (status.isDebug()) {
 					logger.debug("Initiating transaction rollback after commit exception", ex);
 				}
 				doRollback(status);
 			}
 			else if (status.hasTransaction() && isGlobalRollbackOnParticipationFailure()) {
-				if (status.isDebug() && debugEnabled) {
+				if (status.isDebug()) {
 					logger.debug("Marking existing transaction as rollback-only after commit exception", ex);
 				}
 				doSetRollbackOnly(status);
 			}
 		}
 		catch (RuntimeException | Error rbex) {
-			if(logger.isErrorEnabled()){
-				logger.error("Commit exception overridden by rollback exception", ex);
-			}
+			logger.error("Commit exception overridden by rollback exception", ex);
 			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 			throw rbex;
 		}
@@ -922,7 +917,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected final void triggerBeforeCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
-			if (status.isDebug() && logger.isTraceEnabled()) {
+			if (status.isDebug()) {
 				logger.trace("Triggering beforeCommit synchronization");
 			}
 			TransactionSynchronizationUtils.triggerBeforeCommit(status.isReadOnly());
@@ -935,7 +930,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected final void triggerBeforeCompletion(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
-			if (status.isDebug() && logger.isTraceEnabled()) {
+			if (status.isDebug()) {
 				logger.trace("Triggering beforeCompletion synchronization");
 			}
 			TransactionSynchronizationUtils.triggerBeforeCompletion();
@@ -948,7 +943,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void triggerAfterCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
-			if (status.isDebug() && logger.isTraceEnabled()) {
+			if (status.isDebug()) {
 				logger.trace("Triggering afterCommit synchronization");
 			}
 			TransactionSynchronizationUtils.triggerAfterCommit();
@@ -965,7 +960,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
 			TransactionSynchronizationManager.clearSynchronization();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
-				if (status.isDebug() && logger.isTraceEnabled()) {
+				if (status.isDebug()) {
 					logger.trace("Triggering afterCompletion synchronization");
 				}
 				// No transaction or new transaction for the current scope ->
@@ -1013,7 +1008,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {
-			if (status.isDebug() && logger.isDebugEnabled()) {
+			if (status.isDebug()) {
 				logger.debug("Resuming suspended transaction after completion of inner transaction");
 			}
 			Object transaction = (status.hasTransaction() ? status.getTransaction() : null);
