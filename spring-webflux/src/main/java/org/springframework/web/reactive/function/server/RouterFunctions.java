@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -486,7 +487,7 @@ public abstract class RouterFunctions {
 		 * {@code OrderController.routerFunction()}.
 		 * to the {@code changeUser} method in {@code userController}:
 		 * <pre class="code">
-		 * RouterFunctionlt;ServerResponsegt; route =
+		 * RouterFunction&lt;ServerResponse&gt; route =
 		 *   RouterFunctions.route()
 		 *     .GET("/users", userController::listUsers)
 		 *     .add(orderController.routerFunction());
@@ -803,8 +804,8 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
-			return this.first.route(request)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next();
 		}
 
 		@Override
@@ -833,9 +834,9 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.first.route(request)
-					.map(RouterFunctions::cast)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request).map(RouterFunctions::cast)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next()
+					.map(RouterFunctions::cast);
 		}
 
 		@Override
