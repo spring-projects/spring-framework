@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import okio.Buffer;
 import org.apache.commons.logging.Log;
 
 import org.springframework.lang.Nullable;
@@ -36,6 +37,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * An encoder for STOMP frames.
@@ -45,7 +47,7 @@ import org.springframework.util.Assert;
  * @since 4.0
  * @see StompDecoder
  */
-public class StompEncoder  {
+public class StompEncoder {
 
 	private static final byte LF = '\n';
 
@@ -55,6 +57,12 @@ public class StompEncoder  {
 
 	private static final int HEADER_KEY_CACHE_LIMIT = 32;
 
+	private static final boolean okioPresent;
+
+	static {
+		ClassLoader classLoader = StompEncoder.class.getClassLoader();
+		okioPresent = ClassUtils.isPresent("okio.Buffer", classLoader);
+	}
 
 	private final Map<String, byte[]> headerKeyAccessCache = new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
 
@@ -94,32 +102,44 @@ public class StompEncoder  {
 		Assert.notNull(payload, "'payload' is required");
 
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
-			DataOutputStream output = new DataOutputStream(baos);
+			if (okioPresent) {
+				Buffer buffer = new Buffer();
 
-			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
-				logger.trace("Encoding heartbeat");
-				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
+				doEncode(headers, payload, new DataOutputStream(buffer.outputStream()));
+
+				return buffer.readByteArray();
 			}
-
 			else {
-				StompCommand command = StompHeaderAccessor.getCommand(headers);
-				if (command == null) {
-					throw new IllegalStateException("Missing STOMP command: " + headers);
-				}
+				ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
 
-				output.write(command.toString().getBytes(StandardCharsets.UTF_8));
-				output.write(LF);
-				writeHeaders(command, headers, payload, output);
-				output.write(LF);
-				writeBody(payload, output);
-				output.write((byte) 0);
+				doEncode(headers, payload, new DataOutputStream(baos));
+
+				return baos.toByteArray();
 			}
-
-			return baos.toByteArray();
 		}
 		catch (IOException ex) {
-			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers,  ex);
+			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers, ex);
+		}
+	}
+
+	private void doEncode(Map<String, Object> headers, byte[] payload, DataOutputStream output) throws IOException {
+		if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
+			logger.trace("Encoding heartbeat");
+			output.write(StompDecoder.HEARTBEAT_PAYLOAD);
+		}
+
+		else {
+			StompCommand command = StompHeaderAccessor.getCommand(headers);
+			if (command == null) {
+				throw new IllegalStateException("Missing STOMP command: " + headers);
+			}
+
+			output.write(command.toString().getBytes(StandardCharsets.UTF_8));
+			output.write(LF);
+			writeHeaders(command, headers, payload, output);
+			output.write(LF);
+			writeBody(payload, output);
+			output.write((byte) 0);
 		}
 	}
 
@@ -127,7 +147,7 @@ public class StompEncoder  {
 			DataOutputStream output) throws IOException {
 
 		@SuppressWarnings("unchecked")
-		Map<String,List<String>> nativeHeaders =
+		Map<String, List<String>> nativeHeaders =
 				(Map<String, List<String>>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		if (logger.isTraceEnabled()) {
@@ -214,7 +234,7 @@ public class StompEncoder  {
 				sb = getStringBuilder(sb, inString, i);
 				sb.append("\\r");
 			}
-			else if (sb != null){
+			else if (sb != null) {
 				sb.append(c);
 			}
 		}

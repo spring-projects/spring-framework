@@ -142,6 +142,7 @@ configure(allprojects) { project ->
 				}
 			}
 
+			dependency "com.squareup.okio:okio:1.17.2"
 			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.7') {
 				entry 'okhttp'
 				entry 'mockwebserver'

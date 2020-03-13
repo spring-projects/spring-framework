@@ -16,6 +16,7 @@ dependencies {
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("com.squareup.okio:okio")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile(testFixtures(project(":spring-core")))
 	testCompile("javax.inject:javax.inject-tck")
