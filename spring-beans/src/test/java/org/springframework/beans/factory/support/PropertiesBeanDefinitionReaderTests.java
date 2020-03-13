@@ -20,6 +20,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
+
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,6 +59,24 @@ public class PropertiesBeanDefinitionReaderTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertThat(bean.getName()).isEqualTo("Rob Harrop");
 		assertThat(bean.getAge()).isEqualTo(23);
+	}
+
+	private void withEncodedResource(Function<Resource, EncodedResource> function) {
+		final ClassPathResource resource = new ClassPathResource("encodedResource.properties", getClass());
+		final EncodedResource encodedResource = function.apply(resource);
+		this.reader.loadBeanDefinitions(encodedResource);
+		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
+		assertThat(bean.getName()).isEqualTo("刘福来");
+	}
+
+	@Test
+	public void withEncodedResourceWithEncoding() {
+		this.withEncodedResource(resource -> new EncodedResource(resource, "UTF-8"));
+	}
+
+	@Test
+	public void withEncodedResourceWithCharset() {
+		this.withEncodedResource(resource -> new EncodedResource(resource, StandardCharsets.UTF_8));
 	}
 
 }

@@ -18,7 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -254,11 +254,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		Properties props = new Properties();
 		try {
-			try (InputStream is = encodedResource.getResource().getInputStream()) {
-				if (encodedResource.getEncoding() != null) {
-					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
+			if (encodedResource.requiresReader()) {
+				try (Reader reader = encodedResource.getReader()) {
+					getPropertiesPersister().load(props, reader);
 				}
-				else {
+			}
+			else {
+				try (InputStream is = encodedResource.getResource().getInputStream()) {
 					getPropertiesPersister().load(props, is);
 				}
 			}
