@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -377,20 +378,36 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
-		List<String> undelivered = new ArrayList<>(Arrays.asList(messages));
-		for (String message : messages) {
+		for (int i = 0; i < messages.length; i++) {
 			try {
-				if (isClosed()) {
-					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
+				if (!isClosed()) {
+					this.handler.handleMessage(this, new TextMessage(messages[i]));
 				}
 				else {
-					this.handler.handleMessage(this, new TextMessage(message));
-					undelivered.remove(0);
+					List<String> undelivered = getUndelivered(messages, i);
+					if (undelivered.isEmpty()) {
+						return;
+					}
+					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
 				}
 			}
 			catch (Exception ex) {
-				throw new SockJsMessageDeliveryException(this.id, undelivered, ex);
+				throw new SockJsMessageDeliveryException(this.id, getUndelivered(messages, i), ex);
 			}
+		}
+	}
+
+	private static List<String> getUndelivered(String[] messages, int i) {
+		switch (messages.length - i) {
+			case 0:
+				return Collections.emptyList();
+			case 1:
+				return (messages[i].trim().isEmpty() ?
+						Collections.emptyList() : Collections.singletonList(messages[i]));
+			default:
+				return Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
+						.filter(message -> !message.trim().isEmpty())
+						.collect(Collectors.toList());
 		}
 	}
 
