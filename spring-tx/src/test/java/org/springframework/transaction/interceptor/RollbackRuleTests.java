@@ -94,8 +94,10 @@ public class RollbackRuleTests {
 		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
 	}
 
+	@SuppressWarnings("serial")
 	static class EnclosingException extends RuntimeException{
 
+		@SuppressWarnings("serial")
 		static class EnclosedException extends RuntimeException{
 
 		}
