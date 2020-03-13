@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
@@ -34,7 +33,7 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Chris Beams
  * @since 3.1
- * @see EnableCaching
+ * @see org.springframework.cache.annotation.EnableCaching
  */
 public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
