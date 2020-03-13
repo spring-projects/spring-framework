@@ -197,7 +197,6 @@ public abstract class DataSourceUtils {
 				}
 				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
 				logger.debug("Could not set JDBC Connection read-only", ex);
-
 			}
 		}
 
