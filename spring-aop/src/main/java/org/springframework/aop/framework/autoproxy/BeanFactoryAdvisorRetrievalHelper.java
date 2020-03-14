@@ -17,6 +17,7 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -75,7 +76,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			this.cachedAdvisorBeanNames = advisorNames;
 		}
 		if (advisorNames.length == 0) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 
 		List<Advisor> advisors = new ArrayList<>();
