@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.reactive.ApacheClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -50,10 +51,15 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private static final boolean jettyClientPresent;
 
+	private static final boolean apacheClientPresent;
+
 	static {
 		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
 		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		apacheClientPresent =
+				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
+						ClassUtils.isPresent("org.apache.hc.core5.reactive.ReactiveDataConsumer", loader);
 	}
 
 
@@ -274,6 +280,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();
+		}
+		else if (apacheClientPresent) {
+			return new ApacheClientHttpConnector();
 		}
 		throw new IllegalStateException("No suitable default ClientHttpConnector found");
 	}

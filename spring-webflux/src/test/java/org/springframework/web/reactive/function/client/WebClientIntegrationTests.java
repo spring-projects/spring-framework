@@ -54,7 +54,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ApacheClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -70,6 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Denys Ivano
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Martin Tarjányi
  */
 class WebClientIntegrationTests {
 
@@ -81,9 +84,12 @@ class WebClientIntegrationTests {
 	}
 
 	static Stream<ClientHttpConnector> arguments() {
-		return Stream.of(new JettyClientHttpConnector(), new ReactorClientHttpConnector());
+		return Stream.of(
+				new ReactorClientHttpConnector(),
+				new JettyClientHttpConnector(),
+				new ApacheClientHttpConnector()
+		);
 	}
-
 
 	private MockWebServer server;
 
@@ -352,10 +358,12 @@ class WebClientIntegrationTests {
 		startServer(connector);
 
 		prepareResponse(response -> response.setResponseCode(500)
-				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+				.setHeader("Content-Type", "text/plain")
+				.setBody("Internal Server error"));
 
 		Mono<ResponseEntity<String>> result = this.webClient.get()
-				.uri("/").accept(MediaType.APPLICATION_JSON)
+				.uri("/")
+				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.toEntity(String.class);
 
@@ -639,6 +647,42 @@ class WebClientIntegrationTests {
 		});
 	}
 
+	@ParameterizedWebClientTest
+	void shouldReceiveResponseCookies(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "text/plain")
+				.addHeader("Set-Cookie", "testkey1=testvalue1;")
+				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
+				.setBody("test"));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/test")
+				.exchange();
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> {
+					assertThat(response.cookies()).containsOnlyKeys("testkey1", "testkey2");
+
+					ResponseCookie cookie1 = response.cookies().get("testkey1").get(0);
+					assertThat(cookie1.getValue()).isEqualTo("testvalue1");
+					assertThat(cookie1.isSecure()).isFalse();
+					assertThat(cookie1.isHttpOnly()).isFalse();
+					assertThat(cookie1.getMaxAge().getSeconds()).isEqualTo(-1);
+
+					ResponseCookie cookie2 = response.cookies().get("testkey2").get(0);
+					assertThat(cookie2.getValue()).isEqualTo("testvalue2");
+					assertThat(cookie2.isSecure()).isTrue();
+					assertThat(cookie2.isHttpOnly()).isTrue();
+					assertThat(cookie2.getMaxAge().getSeconds()).isEqualTo(42);
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+	}
+
 	@ParameterizedWebClientTest  // SPR-16246
 	void shouldSendLargeTextFile(ClientHttpConnector connector) throws Exception {
 		startServer(connector);
@@ -821,7 +865,7 @@ class WebClientIntegrationTests {
 				.expectErrorSatisfies(throwable -> {
 					assertThat(throwable instanceof UnknownHttpStatusCodeException).isTrue();
 					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
-					assertThat(ex.getMessage()).isEqualTo(("Unknown status code ["+errorStatus+"]"));
+					assertThat(ex.getMessage()).isEqualTo(("Unknown status code [" + errorStatus + "]"));
 					assertThat(ex.getRawStatusCode()).isEqualTo(errorStatus);
 					assertThat(ex.getStatusText()).isEqualTo("");
 					assertThat(ex.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
@@ -1065,7 +1109,7 @@ class WebClientIntegrationTests {
 				.flatMap(response -> response.toEntity(Void.class));
 
 		StepVerifier.create(result).assertNext(r ->
-			assertThat(r.getStatusCode().is2xxSuccessful()).isTrue()
+				assertThat(r.getStatusCode().is2xxSuccessful()).isTrue()
 		).verifyComplete();
 	}
 
