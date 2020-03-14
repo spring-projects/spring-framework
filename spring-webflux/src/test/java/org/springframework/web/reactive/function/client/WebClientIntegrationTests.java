@@ -58,8 +58,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -74,6 +76,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Denys Ivano
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Martin Tarjányi
  */
 class WebClientIntegrationTests {
 
@@ -85,7 +88,11 @@ class WebClientIntegrationTests {
 	}
 
 	static Stream<ClientHttpConnector> arguments() {
-		return Stream.of(new JettyClientHttpConnector(), new ReactorClientHttpConnector());
+		return Stream.of(
+				new ReactorClientHttpConnector(),
+				new JettyClientHttpConnector(),
+				new HttpComponentsClientHttpConnector()
+		);
 	}
 
 
@@ -113,7 +120,10 @@ class WebClientIntegrationTests {
 	void retrieve(ClientHttpConnector connector) {
 		startServer(connector);
 
-		prepareResponse(response -> response.setBody("Hello Spring!"));
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+						.addHeader("Set-Cookie", "testkey1=testvalue1;")
+						.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
+						.setBody("Hello Spring!"));
 
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
@@ -1077,6 +1087,42 @@ class WebClientIntegrationTests {
 				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(2);
+	}
+
+	@ParameterizedWebClientTest
+	void exchangeResponseCookies(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "text/plain")
+				.addHeader("Set-Cookie", "testkey1=testvalue1;")
+				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
+				.setBody("test"));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/test")
+				.exchange();
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> {
+					assertThat(response.cookies()).containsOnlyKeys("testkey1", "testkey2");
+
+					ResponseCookie cookie1 = response.cookies().get("testkey1").get(0);
+					assertThat(cookie1.getValue()).isEqualTo("testvalue1");
+					assertThat(cookie1.isSecure()).isFalse();
+					assertThat(cookie1.isHttpOnly()).isFalse();
+					assertThat(cookie1.getMaxAge().getSeconds()).isEqualTo(-1);
+
+					ResponseCookie cookie2 = response.cookies().get("testkey2").get(0);
+					assertThat(cookie2.getValue()).isEqualTo("testvalue2");
+					assertThat(cookie2.isSecure()).isTrue();
+					assertThat(cookie2.isHttpOnly()).isTrue();
+					assertThat(cookie2.getMaxAge().getSeconds()).isEqualTo(42);
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
 	}
 
 

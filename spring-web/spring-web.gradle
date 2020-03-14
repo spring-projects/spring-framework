@@ -35,6 +35,8 @@ dependencies {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-reactive-httpclient")
+	optional('org.apache.httpcomponents.client5:httpclient5:5.0')
+	optional('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	optional("com.squareup.okhttp3:okhttp")
 	optional("org.apache.httpcomponents:httpclient")
 	optional("org.apache.httpcomponents:httpasyncclient")
