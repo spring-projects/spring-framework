@@ -25,7 +25,6 @@ import reactor.core.publisher.MonoSink;
  * @author Martin Tarjányi
  * @since 5.3
  * @param <T> the result type
- * @see <a href="https://github.com/jetty-project/jetty-reactive-httpclient">Jetty ReactiveStreams HttpClient</a>
  */
 class MonoFutureCallbackAdapter<T> implements FutureCallback<T> {
 	private final MonoSink<T> sink;
