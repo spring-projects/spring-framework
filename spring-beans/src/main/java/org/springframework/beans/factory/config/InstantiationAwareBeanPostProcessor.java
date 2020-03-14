@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.lang.Nullable;
 
 /**
@@ -96,7 +97,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * Post-process the given property values before the factory applies them
-	 * to the given bean, without any need for property descriptors.
+	 * to the given bean({@link AbstractAutowireCapableBeanFactory#applyPropertyValues}),
+	 * without any need for property descriptors.
 	 * <p>Implementations should return {@code null} (the default) if they provide a custom
 	 * {@link #postProcessPropertyValues} implementation, and {@code pvs} otherwise.
 	 * In a future version of this interface (with {@link #postProcessPropertyValues} removed),
@@ -111,6 +113,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @since 5.1
 	 * @see #postProcessPropertyValues
+	 * @see AbstractAutowireCapableBeanFactory#populateBean
+	 * @see AbstractAutowireCapableBeanFactory#applyPropertyValues
 	 */
 	@Nullable
 	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
