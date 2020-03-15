@@ -98,7 +98,7 @@ public class RollbackRuleTests {
 	static class EnclosingException extends RuntimeException {
 
 		@SuppressWarnings("serial")
-		static class EnclosedException extends RuntimeException{
+		static class EnclosedException extends RuntimeException {
 
 		}
 	}
