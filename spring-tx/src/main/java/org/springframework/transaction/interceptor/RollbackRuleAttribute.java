@@ -54,7 +54,7 @@ public class RollbackRuleAttribute implements Serializable{
 	/**
 	 * Create a new instance of the {@code RollbackRuleAttribute} class.
 	 * <p>This is the preferred way to construct a rollback rule that matches
-	 * the supplied {@link Exception} class (and subclasses).
+	 * the supplied {@link Exception} class, its subclasses, and its nested classes.
 	 * @param clazz throwable class; must be {@link Throwable} or a subclass
 	 * of {@code Throwable}
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is
