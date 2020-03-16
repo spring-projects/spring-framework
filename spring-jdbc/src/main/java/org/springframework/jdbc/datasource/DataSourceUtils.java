@@ -270,7 +270,7 @@ public abstract class DataSourceUtils {
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
-				if (debugEnabled) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("Resetting isolation level of JDBC Connection [" +
 							con + "] to " + previousIsolationLevel);
 				}
