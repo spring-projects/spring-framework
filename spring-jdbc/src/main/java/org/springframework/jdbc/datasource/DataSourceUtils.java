@@ -177,6 +177,7 @@ public abstract class DataSourceUtils {
 			throws SQLException {
 
 		Assert.notNull(con, "No Connection specified");
+
 		boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (definition != null && definition.isReadOnly()) {
