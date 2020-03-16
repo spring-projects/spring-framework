@@ -56,6 +56,8 @@ import org.springframework.lang.Nullable;
  */
 public abstract class ClassUtils {
 
+	public static final Class<?>[] EMPTY_CLASS_ARRAY = {};
+
 	/** Suffix for array class names: {@code "[]"}. */
 	public static final String ARRAY_SUFFIX = "[]";
 
@@ -682,7 +684,7 @@ public abstract class ClassUtils {
 	 * @see StringUtils#toStringArray
 	 */
 	public static Class<?>[] toClassArray(Collection<Class<?>> collection) {
-		return collection.toArray(new Class<?>[0]);
+		return collection.isEmpty() ? EMPTY_CLASS_ARRAY : collection.toArray(EMPTY_CLASS_ARRAY);
 	}
 
 	/**
@@ -1066,6 +1068,17 @@ public abstract class ClassUtils {
 	 */
 	public static boolean hasConstructor(Class<?> clazz, Class<?>... paramTypes) {
 		return (getConstructorIfAvailable(clazz, paramTypes) != null);
+	}
+
+	/**
+	 * Determine whether the given class has a public no-args constructor.
+	 * <p>Essentially translates {@code NoSuchMethodException} to "false".
+	 * @param clazz the clazz to analyze
+	 * @return whether the class has public no-args constructor
+	 * @see Class#getMethod
+	 */
+	public static boolean hasConstructor(Class<?> clazz) {
+		return hasConstructor(clazz, EMPTY_CLASS_ARRAY);
 	}
 
 	/**
