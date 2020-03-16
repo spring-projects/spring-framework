@@ -345,7 +345,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
 		Object transaction = doGetTransaction();
-		final boolean debugEnabled = logger.isDebugEnabled();
+		boolean debugEnabled = logger.isDebugEnabled();
 
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
