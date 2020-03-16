@@ -232,7 +232,7 @@ public abstract class DataSourceUtils {
 			Connection con, @Nullable Integer previousIsolationLevel, boolean resetReadOnly) {
 
 		Assert.notNull(con, "No Connection specified");
-		final boolean debugEnabled = logger.isDebugEnabled();
+		boolean debugEnabled = logger.isDebugEnabled();
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
