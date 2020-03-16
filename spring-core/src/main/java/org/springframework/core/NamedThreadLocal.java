@@ -55,7 +55,7 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 	 * @throws NullPointerException if the specified supplier is null
 	 * @since 5.2.5
 	 */
-	public static <S> ThreadLocal<S> withInitial(String name ,Supplier<? extends S> supplier) {
+	public static <S> ThreadLocal<S> withInitial(String name, Supplier<? extends S> supplier) {
 		return new SuppliedNamedThreadLocal<>(name, supplier);
 	}
 
@@ -74,7 +74,7 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 
 		private final Supplier<? extends T> supplier;
 
-		SuppliedNamedThreadLocal(String name ,Supplier<? extends T> supplier) {
+		SuppliedNamedThreadLocal(String name, Supplier<? extends T> supplier) {
 			super(name);
 			this.supplier = Objects.requireNonNull(supplier);
 		}
