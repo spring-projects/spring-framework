@@ -267,7 +267,6 @@ public abstract class DataSourceUtils {
 	@Deprecated
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
-		final boolean debugEnabled = logger.isDebugEnabled();
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
