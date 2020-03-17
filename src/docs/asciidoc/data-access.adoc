@@ -2730,13 +2730,13 @@ The following query finds and populates a single domain object:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Actor actor = this.jdbcTemplate.queryForObject(
+	Actor actor = jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
 			(resultSet, rowNum) -> {
-				Actor newActor = new Actor();
-				newActor.setFirstName(resultSet.getString("first_name"));
-				newActor.setLastName(resultSet.getString("last_name"));
-				return newActor;
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
 			},
 			1212L);
 ----
@@ -2750,7 +2750,7 @@ The following query finds and populates a single domain object:
 		}
 ----
 
-The following query finds and populates a number of domain objects:
+The following query finds and populates a list of domain objects:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -2771,7 +2771,6 @@ The following query finds and populates a number of domain objects:
 			Actor(rs.getString("first_name"), rs.getString("last_name"))
 ----
 
-
 If the last two snippets of code actually existed in the same application, it would make
 sense to remove the duplication present in the two `RowMapper` lambda expressions and
 extract them out into a single field that could then be referenced by DAO methods as needed.
@@ -2780,7 +2779,6 @@ For example, it may be better to write the preceding code snippet as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-
 	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
 		Actor actor = new Actor();
 		actor.setFirstName(resultSet.getString("first_name"));
@@ -2791,7 +2789,6 @@ For example, it may be better to write the preceding code snippet as follows:
 	public List<Actor> findAllActors() {
 		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
 	}
-
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -4043,10 +4040,10 @@ The following example shows a batch update that uses a batch size of 100:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					actors,
 					100,
-					(PreparedStatement ps, Actor argument) -> {
-						ps.setString(1, argument.getFirstName());
-						ps.setString(2, argument.getLastName());
-						ps.setLong(3, argument.getId().longValue());
+					(PreparedStatement ps, Actor actor) -> {
+						ps.setString(1, actor.getFirstName());
+						ps.setString(2, actor.getLastName());
+						ps.setLong(3, actor.getId().longValue());
 					});
 			return updateCounts;
 		}
@@ -5542,9 +5539,9 @@ database. To accommodate these types, Spring provides a `SqlReturnType` for hand
 them when they are returned from the stored procedure call and `SqlTypeValue` when they
 are passed in as a parameter to the stored procedure.
 
-The `SqlReturnType` interface has a single method (named
-`getTypeValue`) that must be implemented. This interface is used as part of the
-declaration of an `SqlOutParameter`. The following example shows returning the value of an Oracle `STRUCT` object of the user
+The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
+implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
+The following example shows returning the value of an Oracle `STRUCT` object of the user
 declared type `ITEM_TYPE`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
