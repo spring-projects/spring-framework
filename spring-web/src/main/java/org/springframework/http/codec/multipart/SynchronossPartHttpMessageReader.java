@@ -243,8 +243,10 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			}
 			catch (IOException ex) {
 				cancel();
-				int index = this.storageFactory.getCurrentPartIndex();
-				this.listener.onError("Parser error for part [" + index + "]", ex);
+				if (this.listener != null) {
+					int index = this.storageFactory.getCurrentPartIndex();
+					this.listener.onError("Parser error for part [" + index + "]", ex);
+				}
 			}
 			finally {
 				DataBufferUtils.release(buffer);
