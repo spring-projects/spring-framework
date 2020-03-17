@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import java.util.Arrays;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -42,6 +44,14 @@ public abstract class NestedExceptionUtils {
 	 */
 	@Nullable
 	public static String buildMessage(@Nullable String message, @Nullable Throwable cause) {
+		boolean foundThrowablePrintStackTrace = Arrays.stream(Thread.currentThread().getStackTrace())
+				.anyMatch( stackTraceElement ->
+					"java.lang.Throwable".equals(stackTraceElement.getClassName()) &&
+					"printStackTrace".equals(stackTraceElement.getMethodName())
+				);
+		if (foundThrowablePrintStackTrace) {
+			return message;
+		}
 		if (cause == null) {
 			return message;
 		}

@@ -106,4 +106,20 @@ class NestedExceptionTests {
 		assertThat(stackTrace.contains(rootCauseMsg)).isTrue();
 	}
 
+	@Test
+	void nestedExceptionMessageExcludeCauseWhenPrintStacktrace() {
+		String rootCauseMsg = "this is the message of the root cause";
+		NestedRuntimeException rootCause = new NestedRuntimeException(rootCauseMsg, null){};
+		NestedRuntimeException nex = new NestedRuntimeException("this is the message of cause", rootCause){};
+
+		// check PrintStackTrace
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter pw = new PrintWriter(baos);
+		nex.printStackTrace(pw);
+		pw.flush();
+		String stackTrace = new String(baos.toByteArray());
+		assertThat(stackTrace).containsOnlyOnce(rootCause.getClass().getName());
+		assertThat(stackTrace).containsOnlyOnce(rootCauseMsg);
+	}
+
 }
