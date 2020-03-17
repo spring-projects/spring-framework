@@ -2793,16 +2793,12 @@ For example, it may be better to write the preceding code snippet as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	fun findAllActors(): List<Actor> {
-		return jdbcTemplate.query("select first_name, last_name from t_actor", ActorMapper())
+	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
+		return Actor(rs.getString("first_name"), rs.getString("last_name"))
 	}
 
-	class ActorMapper : RowMapper<Actor> {
-
-		override fun mapRow(rs: ResultSet, rowNum: Int) = Actor(
-				rs.getString("first_name"),
-				rs.getString("last_name"))
-		}
+	fun findAllActors(): List<Actor> {
+		return jdbcTemplate.query("select first_name, last_name from t_actor", actorMapper)
 	}
 ----
 
