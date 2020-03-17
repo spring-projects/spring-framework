@@ -34,7 +34,7 @@ public class NestedServletExceptionTests {
 	public void testNestedServletExceptionStringThrowable() {
 		Throwable cause = new RuntimeException();
 		NestedServletException exception = new NestedServletException("foo", cause);
-		assertThat(exception.getMessage()).isEqualTo(NestedExceptionUtils.buildMessage("foo", cause));
+		assertThat(exception.getMessage()).isEqualTo(NestedExceptionUtils.buildMessage(exception,"foo", cause));
 		assertThat(exception.getCause()).isEqualTo(cause);
 	}
 

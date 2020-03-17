@@ -73,7 +73,7 @@ public class NestedIOException extends IOException {
 	@Override
 	@Nullable
 	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
+		return NestedExceptionUtils.buildMessage(this, super.getMessage(), getCause());
 	}
 
 }

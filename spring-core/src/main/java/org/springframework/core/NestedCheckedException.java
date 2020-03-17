@@ -74,7 +74,7 @@ public abstract class NestedCheckedException extends Exception {
 	@Override
 	@Nullable
 	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
+		return NestedExceptionUtils.buildMessage(this, super.getMessage(), getCause());
 	}
 
 
