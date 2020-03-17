@@ -38,6 +38,7 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -780,6 +781,11 @@ public abstract class BeanUtils {
 			if (kotlinConstructor == null) {
 				return ctor.newInstance(args);
 			}
+
+			if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers()))) {
+				KCallablesJvm.setAccessible(kotlinConstructor, true);
+			}
+
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
 			Assert.isTrue(args.length <= parameters.size(),

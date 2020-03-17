@@ -18,6 +18,7 @@ package org.springframework.beans
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.KotlinDetector
 
 /**
  * Kotlin tests for {@link BeanUtils}.
@@ -74,6 +75,22 @@ class KotlinBeanUtilsTests {
 		assertThat(baz.param2).isEqualTo(12)
 	}
 
+	@Test
+	fun `Instantiate class with private constructor`() {
+		assertThat(KotlinDetector.isKotlinReflectPresent()).isTrue()
+		BeanUtils.instantiateClass(PrivateConstructor::class.java.getDeclaredConstructor())
+	}
+
+	@Test
+	fun `Instantiate class with protected constructor`() {
+		BeanUtils.instantiateClass(ProtectedConstructor::class.java.getDeclaredConstructor())
+	}
+
+	@Test
+	fun `Instantiate private class`() {
+		BeanUtils.instantiateClass(PrivateClass::class.java.getDeclaredConstructor())
+	}
+
 	class Foo(val param1: String, val param2: Int)
 
 	class Bar(val param1: String, val param2: Int = 12)
@@ -106,4 +123,9 @@ class KotlinBeanUtilsTests {
 		constructor(param1: String)
 	}
 
+	class PrivateConstructor private constructor()
+
+	class ProtectedConstructor protected constructor()
+
+	private class PrivateClass
 }
