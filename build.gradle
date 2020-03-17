@@ -8,6 +8,7 @@ plugins {
 	id "io.freefair.aspectj" version '5.0.0' apply false
 	id "com.github.ben-manes.versions" version '0.28.0'
 	id "me.champeau.gradle.jmh" version "0.5.0" apply false
+	id 'io.spring.javadoc-aggregate' version '0.0.2-SNAPSHOT'
 }
 
 ext {

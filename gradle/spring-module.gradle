@@ -1,3 +1,4 @@
+apply plugin: 'io.spring.javadoc'
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
 apply plugin: 'me.champeau.gradle.jmh'

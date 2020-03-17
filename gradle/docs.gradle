@@ -18,23 +18,10 @@ repositories {
 /**
  * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
  */
-task api(type: Javadoc) {
+aggregateJavadoc {
 	group = "Documentation"
 	description = "Generates aggregated Javadoc API documentation."
 	title = "${rootProject.description} ${version} API"
-
-	dependsOn {
-		moduleProjects.collect {
-			it.tasks.getByName("jar")
-		}
-	}
-	doFirst {
-		classpath = files(
-				// ensure the javadoc process can resolve types compiled from .aj sources
-				project(":spring-aspects").sourceSets.main.output
-		)
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-	}
 
 	options {
 		encoding = "UTF-8"
@@ -51,9 +38,6 @@ task api(type: Javadoc) {
 			addBooleanOption('html5', true)
 		}
 	}
-	source moduleProjects.collect { project ->
-		project.sourceSets.main.allJava
-	}
 	maxMemory = "1024m"
 	destinationDir = file("$buildDir/docs/javadoc")
 }
@@ -63,7 +47,7 @@ task api(type: Javadoc) {
  */
 dokka {
 	dependsOn {
-		tasks.getByName("api")
+		tasks.getByName("aggregateJavadoc")
 	}
 
 	doFirst {
@@ -174,7 +158,7 @@ asciidoctor {
 /**
  * Zip all docs (API and reference) into a single archive
  */
-task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
+task docsZip(type: Zip, dependsOn: ['aggregateJavadoc', 'asciidoctor', 'dokka']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
 			"for deployment at https://docs.spring.io/spring-framework/docs."
@@ -184,7 +168,7 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	from("src/dist") {
 		include "changelog.txt"
 	}
-	from (api) {
+	from (aggregateJavadoc) {
 		into "javadoc-api"
 	}
 	from ("$asciidoctor.outputDir/html5") {
