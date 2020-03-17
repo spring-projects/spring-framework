@@ -295,6 +295,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 *
 	 * @param generator the generator to use for writing content.
 	 * @param object    the object to write to the output message.
+	 * @return  java.lang.Object  the processed object
 	 */
 	protected Object writePrefix(JsonGenerator generator, Object object) throws IOException {
 		return object;
