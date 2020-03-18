@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.springframework.lang.Nullable;
@@ -222,26 +225,19 @@ public final class Conventions {
 	 */
 	public static String attributeNameToPropertyName(String attributeName) {
 		Assert.notNull(attributeName, "'attributeName' must not be null");
-		if (!attributeName.contains("-")) {
+		ArrayList<String> list = new ArrayList<>(Arrays.asList(attributeName.replaceAll(" ", "").split("-")));
+		
+		list.removeAll(Collections.singleton(""));
+		if (list.isEmpty()) {
 			return attributeName;
 		}
-		char[] chars = attributeName.toCharArray();
-		char[] result = new char[chars.length -1]; // not completely accurate but good guess
-		int currPos = 0;
-		boolean upperCaseNext = false;
-		for (char c : chars) {
-			if (c == '-') {
-				upperCaseNext = true;
-			}
-			else if (upperCaseNext) {
-				result[currPos++] = Character.toUpperCase(c);
-				upperCaseNext = false;
-			}
-			else {
-				result[currPos++] = c;
-			}
+		
+		String result = list.get(0);
+		for(int i = 1; i < list.size(); i++) {
+			result += list.get(i).substring(0, 1).toUpperCase() + list.get(i).substring(1);
 		}
-		return new String(result, 0, currPos);
+		
+		return result;
 	}
 
 	/**
