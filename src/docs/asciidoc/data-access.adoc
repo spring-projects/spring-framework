@@ -2794,7 +2794,7 @@ For example, it may be better to write the preceding code snippet as follows:
 .Kotlin
 ----
 	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
-		return Actor(rs.getString("first_name"), rs.getString("last_name"))
+		Actor(rs.getString("first_name"), rs.getString("last_name"))
 	}
 
 	fun findAllActors(): List<Actor> {
