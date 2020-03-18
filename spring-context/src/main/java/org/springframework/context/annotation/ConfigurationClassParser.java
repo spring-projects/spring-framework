@@ -865,10 +865,6 @@ class ConfigurationClassParser {
 			this.group = group;
 		}
 
-		public Group getGroup() {
-			return this.group;
-		}
-
 		public void add(DeferredImportSelectorHolder deferredImport) {
 			this.deferredImports.add(deferredImport);
 		}
