@@ -166,11 +166,14 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 						.createGenerator(byteBuilder, encoding);
 				writer.writeValue(generator, value);
 				generator.flush();
-			} catch (InvalidDefinitionException ex) {
+			}
+			catch (InvalidDefinitionException ex) {
 				throw new CodecException("Type definition error: " + ex.getType(), ex);
-			} catch (JsonProcessingException ex) {
+			}
+			catch (JsonProcessingException ex) {
 				throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				throw new IllegalStateException(
 						"Unexpected I/O error while writing to byte array builder", ex);
 			}
