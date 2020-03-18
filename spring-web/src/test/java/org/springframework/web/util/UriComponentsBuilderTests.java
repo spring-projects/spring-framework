@@ -514,6 +514,54 @@ public class UriComponentsBuilderTests {
 		assertThat(result.toString()).isEqualTo("https://a.example.org/mvc-showcase");
 	}
 
+	@Test
+	public void fromHttpRequestWithForwardedHostAndPrefix() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(8080);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "a.example.org");
+		request.addHeader("X-Forwarded-Prefix", "/foo");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.toString()).isEqualTo("http://a.example.org/foo/mvc-showcase");
+	}
+
+	@Test
+	public void fromHttpRequestWithForwardedHostAndPrefixWithTrailingSlash() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(8080);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "a.example.org");
+		request.addHeader("X-Forwarded-Prefix", "/foo/");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.toString()).isEqualTo("http://a.example.org/foo/mvc-showcase");
+	}
+
+	@Test
+	public void fromHttpRequestWithMultipleForwardedHostAndPrefix() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(8080);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org");
+		request.addHeader("X-Forwarded-Prefix", "/foo, /bar, /baz");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.toString()).isEqualTo("http://a.example.org/foo/mvc-showcase");
+	}
+
 	@Test  // SPR-12742
 	public void fromHttpRequestWithTrailingSlash() {
 		UriComponents before = UriComponentsBuilder.fromPath("/foo/").build();

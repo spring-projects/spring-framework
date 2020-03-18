@@ -775,6 +775,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				if (StringUtils.hasText(portHeader)) {
 					port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
 				}
+
+				String prefixHeader = headers.getFirst("X-Forwarded-Prefix");
+				if (StringUtils.hasText(prefixHeader)) {
+					PathComponent pathComponent = pathBuilder.build();
+					String path = (pathComponent != null ? pathComponent.getPath() : "");
+					String forwardedPath = StringUtils.tokenizeToStringArray(prefixHeader, ",")[0];
+					if (StringUtils.hasText(path)) {
+						forwardedPath += path;
+					}
+					replacePath(forwardedPath);
+				}
 			}
 		}
 		catch (NumberFormatException ex) {
