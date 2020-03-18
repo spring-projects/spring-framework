@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.3"
-			mavenBom "io.netty:netty-bom:4.1.47.Final"
+			mavenBom "io.netty:netty-bom:4.1.48.Final"
 			mavenBom "io.projectreactor:reactor-bom:Dysprosium-SR5"
 			mavenBom "io.rsocket:rsocket-bom:1.0.0-RC6"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.27.v20200227"
@@ -43,7 +43,6 @@ configure(allprojects) { project ->
 				entry 'log4j-jul'
 			}
 			dependency "org.slf4j:slf4j-api:1.7.30"
-
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
 			dependencySet(group: 'org.aspectj', version: '1.9.5') {
@@ -51,8 +50,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			// If customJavaHome has been set, we assume we need Groovy 3.0 for testing purposes.
-			dependencySet(group: 'org.codehaus.groovy', version: System.getProperty("customJavaHome") ? '3.0.1' : '2.5.9') {
+			dependencySet(group: 'org.codehaus.groovy', version: '2.5.10') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'
