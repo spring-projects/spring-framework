@@ -154,27 +154,29 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		ObjectWriter writer = createObjectWriter(valueType, mimeType, hints);
-		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
-		JsonEncoding encoding = getJsonEncoding(mimeType);
+		byte[] bytes;
+		try (ByteArrayBuilder byteBuilder = new ByteArrayBuilder(
+				writer.getFactory()._getBufferRecycler())) {
+			JsonEncoding encoding = getJsonEncoding(mimeType);
 
-		logValue(hints, value);
+			logValue(hints, value);
 
-		try {
-			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(byteBuilder, encoding);
-			writer.writeValue(generator, value);
-			generator.flush();
-		}
-		catch (InvalidDefinitionException ex) {
-			throw new CodecException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonProcessingException ex) {
-			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
-		}
+			try {
+				JsonGenerator generator = getObjectMapper().getFactory()
+						.createGenerator(byteBuilder, encoding);
+				writer.writeValue(generator, value);
+				generator.flush();
+			} catch (InvalidDefinitionException ex) {
+				throw new CodecException("Type definition error: " + ex.getType(), ex);
+			} catch (JsonProcessingException ex) {
+				throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
+			} catch (IOException ex) {
+				throw new IllegalStateException(
+						"Unexpected I/O error while writing to byte array builder", ex);
+			}
 
-		byte[] bytes = byteBuilder.toByteArray();
+			bytes = byteBuilder.toByteArray();
+		}
 		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 
