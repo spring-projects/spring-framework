@@ -94,11 +94,6 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			if (!this.removeOnly) {
 				URI uri = UriComponentsBuilder.fromHttpRequest(request).build(true).toUri();
 				builder.uri(uri);
-				String prefix = getForwardedPrefix(request);
-				if (prefix != null) {
-					builder.path(prefix + uri.getRawPath());
-					builder.contextPath(prefix);
-				}
 			}
 			removeForwardedHeaders(builder);
 			request = builder.build();

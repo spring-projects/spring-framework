@@ -778,7 +778,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 				String prefixHeader = headers.getFirst("X-Forwarded-Prefix");
 				if (StringUtils.hasText(prefixHeader)) {
-					PathComponent pathComponent = pathBuilder.build();
+					PathComponent pathComponent = this.pathBuilder.build();
 					String path = (pathComponent != null ? pathComponent.getPath() : "");
 					String forwardedPath = StringUtils.tokenizeToStringArray(prefixHeader, ",")[0];
 					if (StringUtils.hasText(path)) {
