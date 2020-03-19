@@ -391,7 +391,7 @@ The following example shows how to customize Apache `HttpClient` settings:
 	val client = HttpAsyncClients.custom().apply {
 		setDefaultRequestConfig(...)
 	}.build()
-	val connector: ClientHttpConnector = ApacheClientHttpConnector(client)
+	val connector = ApacheClientHttpConnector(client)
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 

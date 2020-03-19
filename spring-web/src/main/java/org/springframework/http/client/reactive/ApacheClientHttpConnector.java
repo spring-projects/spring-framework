@@ -33,6 +33,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -47,7 +48,7 @@ import org.springframework.lang.Nullable;
 public class ApacheClientHttpConnector implements ClientHttpConnector {
 	private final CloseableHttpAsyncClient client;
 
-	private final DefaultDataBufferFactory dataBufferFactory;
+	private final DataBufferFactory dataBufferFactory;
 
 	/**
 	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.

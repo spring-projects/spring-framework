@@ -18,9 +18,9 @@ package org.springframework.http.client.reactive;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpResponse;
@@ -29,7 +29,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -54,7 +54,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 
 	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
 
-	public ApacheClientHttpResponse(DefaultDataBufferFactory dataBufferFactory,
+	public ApacheClientHttpResponse(DataBufferFactory dataBufferFactory,
 			Message<HttpResponse, Publisher<ByteBuffer>> message,
 			HttpClientContext context) {
 
@@ -87,7 +87,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 				result.add(cookie.getName(), ResponseCookie.from(cookie.getName(), cookie.getValue())
 						.domain(cookie.getDomain())
 						.path(cookie.getPath())
-						.maxAge(Long.parseLong(Objects.toString(cookie.getAttribute(MAX_AGE_ATTR), "-1")))
+						.maxAge(getMaxAgeSeconds(cookie))
 						.secure(cookie.isSecure())
 						.httpOnly(cookie.containsAttribute("httponly"))
 						.build()));
@@ -107,5 +107,11 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 
 	private void addHeader(HttpHeaders httpHeaders, Header header) {
 		httpHeaders.add(header.getName(), header.getValue());
+	}
+
+	private long getMaxAgeSeconds(Cookie cookie) {
+		String maxAgeAttribute = cookie.getAttribute(MAX_AGE_ATTR);
+
+		return maxAgeAttribute == null ? -1 : Long.parseLong(maxAgeAttribute);
 	}
 }
