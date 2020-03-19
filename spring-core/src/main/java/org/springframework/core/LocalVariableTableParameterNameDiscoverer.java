@@ -92,13 +92,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 */
 	private Map<Executable, String[]> inspectClass(Class<?> clazz) {
 		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
-		if (is == null) {
-			// We couldn't load the class file, which is not fatal as it
-			// simply means this method of discovering parameter names won't work.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cannot find '.class' file for class [" + clazz +
-						"] - unable to determine constructor/method parameter names");
-			}
+		
+		// We couldn't load the class file, which is not fatal as it
+		// simply means this method of discovering parameter names won't work.
+		if (is == null && logger.isDebugEnabled()) {
+			logger.debug("Cannot find '.class' file for class [" + clazz +
+					"] - unable to determine constructor/method parameter names");
 			return NO_DEBUG_INFO_MAP;
 		}
 		try {
