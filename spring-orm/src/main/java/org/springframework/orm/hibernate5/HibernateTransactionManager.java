@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -480,6 +481,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					Connection con = ((SessionImplementor) session).connection();
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
+					txObject.setReadOnly(definition.isReadOnly());
 					if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
 						int currentHoldability = con.getHoldability();
 						if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
@@ -711,7 +713,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				if (previousHoldability != null) {
 					con.setHoldability(previousHoldability);
 				}
-				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
+				DataSourceUtils.resetConnectionAfterTransaction(
+						con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
 			}
 			catch (HibernateException ex) {
 				logger.debug("Could not access JDBC Connection of Hibernate Session", ex);

@@ -19,14 +19,14 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -40,7 +40,7 @@ public class ThreadPoolExecutorFactoryBeanTests {
 
 		FutureTask<String> task = new FutureTask<>(() -> "foo");
 		executor.execute(task);
-		assertEquals("foo", task.get());
+		assertThat(task.get()).isEqualTo("foo");
 		context.close();
 	}
 

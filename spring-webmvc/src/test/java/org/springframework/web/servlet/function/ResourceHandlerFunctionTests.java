@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,32 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -52,13 +57,14 @@ public class ResourceHandlerFunctionTests {
 
 	private ResourceHttpMessageConverter messageConverter;
 
-	@Before
+	@BeforeEach
 	public void createContext() {
 		this.messageConverter = new ResourceHttpMessageConverter();
+		ResourceRegionHttpMessageConverter regionConverter = new ResourceRegionHttpMessageConverter();
 		this.context = new ServerResponse.Context() {
 			@Override
 			public List<HttpMessageConverter<?>> messageConverters() {
-				return Collections.singletonList(messageConverter);
+				return Arrays.asList(messageConverter, regionConverter);
 			}
 
 		};
@@ -71,22 +77,77 @@ public class ResourceHandlerFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
-		assertEquals(HttpStatus.OK, response.statusCode());
-		assertTrue(response instanceof EntityResponse);
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response).isInstanceOf(EntityResponse.class);
 		@SuppressWarnings("unchecked")
 		EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
-		assertEquals(this.resource, entityResponse.entity());
+		assertThat(entityResponse.entity()).isEqualTo(this.resource);
 
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
-		assertNull(mav);
+		assertThat(mav).isNull();
 
-		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		byte[] expectedBytes = Files.readAllBytes(this.resource.getFile().toPath());
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertArrayEquals(expectedBytes, actualBytes);
-		assertEquals(MediaType.TEXT_PLAIN_VALUE, servletResponse.getContentType());
-		assertEquals(this.resource.contentLength(),servletResponse.getContentLength());
+		assertThat(actualBytes).isEqualTo(expectedBytes);
+		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
+	}
+
+	@Test
+	public void getRange() throws IOException, ServletException {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		servletRequest.addHeader("Range", "bytes=0-5");
+		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
+
+		ServerResponse response = this.handlerFunction.handle(request);
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response).isInstanceOf(EntityResponse.class);
+		@SuppressWarnings("unchecked")
+		EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
+		assertThat(entityResponse.entity()).isEqualTo(this.resource);
+
+		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
+		assertThat(mav).isNull();
+
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
+		byte[] expectedBytes = new byte[6];
+		try (InputStream is = this.resource.getInputStream()) {
+			is.read(expectedBytes);
+		}
+		byte[] actualBytes = servletResponse.getContentAsByteArray();
+		assertThat(actualBytes).isEqualTo(expectedBytes);
+		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(servletResponse.getContentLength()).isEqualTo(6);
+		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
+	}
+
+	@Test
+	public void getInvalidRange() throws IOException, ServletException {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		servletRequest.addHeader("Range", "bytes=0-10, 0-10, 0-10, 0-10, 0-10, 0-10");
+		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
+
+		ServerResponse response = this.handlerFunction.handle(request);
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response).isInstanceOf(EntityResponse.class);
+		@SuppressWarnings("unchecked")
+		EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
+		assertThat(entityResponse.entity()).isEqualTo(this.resource);
+
+		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
+		assertThat(mav).isNull();
+
+		assertThat(servletResponse.getStatus()).isEqualTo(416);
+		byte[] expectedBytes = Files.readAllBytes(this.resource.getFile().toPath());
+		byte[] actualBytes = servletResponse.getContentAsByteArray();
+		assertThat(actualBytes).isEqualTo(expectedBytes);
+		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
+		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
 	}
 
 	@Test
@@ -95,22 +156,22 @@ public class ResourceHandlerFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
-		assertEquals(HttpStatus.OK, response.statusCode());
-		assertTrue(response instanceof EntityResponse);
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response).isInstanceOf(EntityResponse.class);
 		@SuppressWarnings("unchecked")
 		EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
-		assertEquals(this.resource.getFilename(), entityResponse.entity().getFilename());
+		assertThat(entityResponse.entity().getFilename()).isEqualTo(this.resource.getFilename());
 
 
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
-		assertNull(mav);
+		assertThat(mav).isNull();
 
-		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertEquals(0, actualBytes.length);
-		assertEquals(MediaType.TEXT_PLAIN_VALUE, servletResponse.getContentType());
-		assertEquals(this.resource.contentLength(),servletResponse.getContentLength());
+		assertThat(actualBytes.length).isEqualTo(0);
+		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
 	}
 
 
@@ -120,17 +181,18 @@ public class ResourceHandlerFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
-		assertEquals(HttpStatus.OK, response.statusCode());
-		assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS), response.headers().getAllow());
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.headers().getAllow()).isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
 
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
-		assertNull(mav);
+		assertThat(mav).isNull();
 
-		assertEquals(200, servletResponse.getStatus());
-		assertEquals("GET,HEAD,OPTIONS", servletResponse.getHeader("Allow"));
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertEquals(0, actualBytes.length);
+		assertThat(actualBytes.length).isEqualTo(0);
 	}
+
 
 }

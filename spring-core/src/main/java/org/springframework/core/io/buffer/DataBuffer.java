@@ -290,6 +290,23 @@ public interface DataBuffer {
 	DataBuffer slice(int index, int length);
 
 	/**
+	 * Create a new {@code DataBuffer} whose contents is a shared, retained subsequence of this
+	 * data buffer's content.  Data between this data buffer and the returned buffer is
+	 * shared; though changes in the returned buffer's position will not be reflected
+	 * in the reading nor writing position of this data buffer.
+	 * <p><strong>Note</strong> that unlike {@link #slice(int, int)}, this method
+	 * <strong>will</strong> call {@link DataBufferUtils#retain(DataBuffer)} (or equivalent) on the
+	 * resulting slice.
+	 * @param index the index at which to start the slice
+	 * @param length the length of the slice
+	 * @return the specified, retained slice of this data buffer
+	 * @since 5.2
+	 */
+	default DataBuffer retainedSlice(int index, int length) {
+		return DataBufferUtils.retain(slice(index, length));
+	}
+
+	/**
 	 * Expose this buffer's bytes as a {@link ByteBuffer}. Data between this
 	 * {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
 	 * changes in the returned buffer's {@linkplain ByteBuffer#position() position}
@@ -337,5 +354,27 @@ public interface DataBuffer {
 	 * @return this data buffer as an output stream
 	 */
 	OutputStream asOutputStream();
+
+	/**
+	 * Return this buffer's data a String using the specified charset. Default implementation
+	 * delegates to {@code toString(readPosition(), readableByteCount(), charset)}.
+	 * @param charset the character set to use
+	 * @return a string representation of all this buffers data
+	 * @since 5.2
+	 */
+	default String toString(Charset charset) {
+		Assert.notNull(charset, "Charset must not be null");
+		return toString(readPosition(), readableByteCount(), charset);
+	}
+
+	/**
+	 * Return a part of this buffer's data as a String using the specified charset.
+	 * @param index the index at which to start the string
+	 * @param length the number of bytes to use for the string
+	 * @param charset the charset to use
+	 * @return a string representation of a part of this buffers data
+	 * @since 5.2
+	 */
+	String toString(int index, int length, Charset charset);
 
 }

@@ -5,14 +5,14 @@ There are pros and cons for considering validation as business logic, and Spring
 a design for validation (and data binding) that does not exclude either one of them.
 Specifically, validation should not be tied to the web tier and should be easy to localize,
 and it should be possible to plug in any available validator. Considering these concerns,
-Spring has come up with a `Validator` interface that is both basic and eminently usable
+Spring provides a `Validator` contract that is both basic and eminently usable
 in every layer of an application.
 
 Data binding is useful for letting user input be dynamically bound to the domain
 model of an application (or whatever objects you use to process user input). Spring
 provides the aptly named `DataBinder` to do exactly that. The `Validator` and the
 `DataBinder` make up the `validation` package, which is primarily used in but not
-limited to the MVC framework.
+limited to the web layer.
 
 The `BeanWrapper` is a fundamental concept in the Spring Framework and is used in a lot
 of places. However, you probably do not need to use the `BeanWrapper`
@@ -28,19 +28,12 @@ general type conversion facility, as well as a higher-level "`format`" package f
 formatting UI field values. You can use these packages as simpler alternatives to
 `PropertyEditorSupport` implementations. They are also discussed in this chapter.
 
-.JSR-303/JSR-349 Bean Validation
-****
-As of version 4.0, Spring Framework supports Bean Validation 1.0 (JSR-303) and
-Bean Validation 1.1 (JSR-349) for setup support and adapting them to Spring's
-`Validator` interface.
-
-An application can choose to enable Bean Validation once globally, as described in
-<<validation-beanvalidation>>, and use it exclusively for all validation needs.
-
-An application can also register additional Spring `Validator` instances for each
-`DataBinder` instance, as described in <<validation-binder>>. This may be useful for
-plugging in validation logic without the use of annotations.
-****
+Spring supports Java Bean Validation through setup infrastructure and an adaptor to
+Spring's own `Validator` contract. Application can enable Bean Validation once globally,
+as described in <<validation-beanvalidation>>, and use it exclusively for all validation
+needs. In the web layer, they can further register controller-local local Spring
+`Validator` instances per `DataBinder`, as described in <<validation-binder>>, which can
+be useful for plugging in custom validation logic creating annotations.
 
 
 
@@ -54,8 +47,8 @@ validators can report validation failures to the `Errors` object.
 
 Consider the following example of a small data object:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class Person {
 
@@ -64,6 +57,11 @@ Consider the following example of a small data object:
 
 		// the usual getters and setters...
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class Person(val name: String, val age: Int)
 ----
 
 The next example provides validation behavior for the `Person` class by implementing the
@@ -77,13 +75,13 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides. The following
 example implements `Validator` for `Person` instances:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class PersonValidator implements Validator {
 
 		/**
-		 * This Validator validates *only* Person instances
+		 * This Validator validates only Person instances
 		 */
 		public boolean supports(Class clazz) {
 			return Person.class.equals(clazz);
@@ -96,6 +94,29 @@ example implements `Validator` for `Person` instances:
 				e.rejectValue("age", "negativevalue");
 			} else if (p.getAge() > 110) {
 				e.rejectValue("age", "too.darn.old");
+			}
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class PersonValidator : Validator {
+
+		/**
+		 * This Validator validates only Person instances
+		 */
+		override fun supports(clazz: Class<*>): Boolean {
+			return Person::class.java == clazz
+		}
+
+		override fun validate(obj: Any, e: Errors) {
+			ValidationUtils.rejectIfEmpty(e, "name", "name.empty")
+			val p = obj as Person
+			if (p.age < 0) {
+				e.rejectValue("age", "negativevalue")
+			} else if (p.age > 110) {
+				e.rejectValue("age", "too.darn.old")
 			}
 		}
 	}
@@ -117,8 +138,8 @@ within the `AddressValidator` class without resorting to copy-and-paste, you can
 dependency-inject or instantiate an `AddressValidator` within your `CustomerValidator`,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class CustomerValidator implements Validator {
 
@@ -152,6 +173,40 @@ as the following example shows:
 				ValidationUtils.invokeValidator(this.addressValidator, customer.getAddress(), errors);
 			} finally {
 				errors.popNestedPath();
+			}
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class CustomerValidator(private val addressValidator: Validator) : Validator {
+
+		init {
+			if (addressValidator == null) {
+				throw IllegalArgumentException("The supplied [Validator] is required and must not be null.")
+			}
+			if (!addressValidator.supports(Address::class.java)) {
+				throw IllegalArgumentException("The supplied [Validator] must support the validation of [Address] instances.")
+			}
+		}
+
+		/**
+		* This Validator validates Customer instances, and any subclasses of Customer too
+		*/
+		override fun supports(clazz: Class<*>): Boolean {
+			return Customer::class.java.isAssignableFrom(clazz)
+		}
+
+		override fun validate(target: Any, errors: Errors) {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "field.required")
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "field.required")
+			val customer = target as Customer
+			try {
+				errors.pushNestedPath("address")
+				ValidationUtils.invokeValidator(this.addressValidator, customer.address, errors)
+			} finally {
+				errors.popNestedPath()
 			}
 		}
 	}
@@ -223,11 +278,9 @@ perform actions on that bean, such as setting and retrieving properties.
 [[beans-beans-conventions]]
 === Setting and Getting Basic and Nested Properties
 
-Setting and getting properties is done by using the `setPropertyValue`,
-`setPropertyValues`, `getPropertyValue`, and `getPropertyValues` methods which come
-with a couple of overloaded variants. Springs javadoc describes them in more detail.
-The JavaBeans specification has conventions for indicating properties of an
-object. The following table shows some examples of these conventions:
+Setting and getting properties is done through the `setPropertyValue` and
+`getPropertyValue` overloaded method variants of `BeanWrapper`. See their Javadoc for
+details. The below table shows some examples of these conventions:
 
 [[beans-beans-conventions-properties-tbl]]
 .Examples of properties
@@ -259,8 +312,8 @@ and their default implementations, you should skip ahead to the
 The following two example classes use the `BeanWrapper` to get and set
 properties:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class Company {
 
@@ -284,9 +337,17 @@ properties:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class Company {
+		var name: String? = null
+		var managingDirector: Employee? = null
+	}
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class Employee {
 
@@ -311,12 +372,20 @@ properties:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class Employee {
+		var name: String? = null
+		var salary: Float? = null
+	}
+----
 
 The following code snippets show some examples of how to retrieve and manipulate some of
 the properties of instantiated `Companies` and `Employees`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
@@ -332,6 +401,24 @@ the properties of instantiated `Companies` and `Employees`:
 
 	// retrieving the salary of the managingDirector through the company
 	Float salary = (Float) company.getPropertyValue("managingDirector.salary");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val company = BeanWrapperImpl(Company())
+	// setting the company name..
+	company.setPropertyValue("name", "Some Company Inc.")
+	// ... can also be done like this:
+	val value = PropertyValue("name", "Some Company Inc.")
+	company.setPropertyValue(value)
+
+	// ok, let's create the director and tie it to the company:
+	val jim = BeanWrapperImpl(Employee())
+	jim.setPropertyValue("name", "Jim Stravinsky")
+	company.setPropertyValue("managingDirector", jim.wrappedInstance)
+
+	// retrieving the salary of the managingDirector through the company
+	val salary = company.getPropertyValue("managingDirector.salary") as Float?
 ----
 
 
@@ -443,8 +530,7 @@ name as that class, with `Editor` appended. For example, one could have the foll
 class and package structure, which would be sufficient for the `SomethingEditor` class to be
 recognized and used as the `PropertyEditor` for `Something`-typed properties.
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 com
   chank
@@ -460,8 +546,7 @@ here]). The following example use the `BeanInfo` mechanism to
 explicitly register one or more `PropertyEditor` instances with the properties of an
 associated class:
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 com
   chank
@@ -473,8 +558,8 @@ com
 The following Java source code for the referenced `SomethingBeanInfo` class
 associates a `CustomNumberEditor` with the `age` property of the `Something` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class SomethingBeanInfo extends SimpleBeanInfo {
 
@@ -491,6 +576,27 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 			catch (IntrospectionException ex) {
 				throw new Error(ex.toString());
 			}
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class SomethingBeanInfo : SimpleBeanInfo() {
+
+		override fun getPropertyDescriptors(): Array<PropertyDescriptor> {
+			try {
+				val numberPE = CustomNumberEditor(Int::class.java, true)
+				val ageDescriptor = object : PropertyDescriptor("age", Something::class.java) {
+					override fun createPropertyEditor(bean: Any): PropertyEditor {
+						return numberPE
+					}
+				}
+				return arrayOf(ageDescriptor)
+			} catch (ex: IntrospectionException) {
+				throw Error(ex.toString())
+			}
+
 		}
 	}
 ----
@@ -533,8 +639,8 @@ support for additional `PropertyEditor` instances to an `ApplicationContext`.
 Consider the following example, which defines a user class called `ExoticType` and
 another class called `DependsOnExoticType`, which needs `ExoticType` set as a property:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package example;
 
@@ -556,13 +662,24 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package example
+
+	class ExoticType(val name: String)
+
+	class DependsOnExoticType {
+
+		var type: ExoticType? = null
+	}
+----
 
 When things are properly set up, we want to be able to assign the type property as a
 string, which a `PropertyEditor` converts into an actual
 `ExoticType` instance. The following bean definition shows how to set up this relationship:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="sample" class="example.DependsOnExoticType">
 		<property name="type" value="aNameForExoticType"/>
@@ -571,8 +688,8 @@ string, which a `PropertyEditor` converts into an actual
 
 The `PropertyEditor` implementation could look similar to the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// converts string representation to ExoticType object
 	package example;
@@ -584,12 +701,26 @@ The `PropertyEditor` implementation could look similar to the following:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// converts string representation to ExoticType object
+	package example
+
+	import java.beans.PropertyEditorSupport
+
+	class ExoticTypeEditor : PropertyEditorSupport() {
+
+		override fun setAsText(text: String) {
+			value = ExoticType(text.toUpperCase())
+		}
+	}
+----
 
 Finally, the following example shows how to use `CustomEditorConfigurer` to register the new `PropertyEditor` with the
 `ApplicationContext`, which will then be able to use it as needed:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
 		<property name="customEditors">
@@ -620,8 +751,8 @@ instances for each bean creation attempt.
 
 The following example shows how to create your own `PropertyEditorRegistrar` implementation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package com.foo.editors.spring;
 
@@ -636,6 +767,25 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package com.foo.editors.spring
+
+	import org.springframework.beans.PropertyEditorRegistrar
+	import org.springframework.beans.PropertyEditorRegistry
+
+	class CustomPropertyEditorRegistrar : PropertyEditorRegistrar {
+
+		override fun registerCustomEditors(registry: PropertyEditorRegistry) {
+
+			// it is expected that new PropertyEditor instances are created
+			registry.registerCustomEditor(ExoticType::class.java, ExoticTypeEditor())
+
+			// you could register as many custom property editors as are required here...
+		}
+	}
+----
 
 See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
@@ -644,8 +794,7 @@ See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an 
 The next example shows how to configure a `CustomEditorConfigurer` and inject an instance of our
 `CustomPropertyEditorRegistrar` into it:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
 		<property name="propertyEditorRegistrars">
@@ -665,8 +814,8 @@ conjunction with data-binding `Controllers` (such as `SimpleFormController`) can
 convenient. The following example uses a `PropertyEditorRegistrar` in the
 implementation of an `initBinder(..)` method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public final class RegisterUserController extends SimpleFormController {
 
@@ -679,6 +828,20 @@ implementation of an `initBinder(..)` method:
 		protected void initBinder(HttpServletRequest request,
 				ServletRequestDataBinder binder) throws Exception {
 			this.customPropertyEditorRegistrar.registerCustomEditors(binder);
+		}
+
+		// other methods to do with registering a User
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class RegisterUserController(
+		private val customPropertyEditorRegistrar: PropertyEditorRegistrar) : SimpleFormController() {
+
+		protected fun initBinder(request: HttpServletRequest,
+								binder: ServletRequestDataBinder) {
+			this.customPropertyEditorRegistrar.registerCustomEditors(binder)
 		}
 
 		// other methods to do with registering a User
@@ -711,14 +874,24 @@ application where type conversion is needed.
 The SPI to implement type conversion logic is simple and strongly typed, as the following
 interface definition shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.core.convert.converter;
 
 	public interface Converter<S, T> {
 
 		T convert(S source);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.core.convert.converter
+
+	interface Converter<S, T> {
+
+		fun convert(source: S): T
 	}
 ----
 
@@ -737,8 +910,8 @@ Several converter implementations are provided in the `core.convert.support` pac
 a convenience. These include converters from strings to numbers and other common types.
 The following listing shows the `StringToInteger` class, which is a typical `Converter` implementation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.core.convert.support;
 
@@ -746,6 +919,20 @@ The following listing shows the `StringToInteger` class, which is a typical `Con
 
 		public Integer convert(String source) {
 			return Integer.valueOf(source);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.core.convert.support
+
+	import org.springframework.core.convert.converter.Converter
+
+	internal class StringToInteger : Converter<String, Int> {
+
+		override fun convert(source: String): Int? {
+			return Integer.valueOf(source)
 		}
 	}
 ----
@@ -759,14 +946,24 @@ When you need to centralize the conversion logic for an entire class hierarchy
 (for example, when converting from `String` to `Enum` objects), you can implement
 `ConverterFactory`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.core.convert.converter;
 
 	public interface ConverterFactory<S, R> {
 
 		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.core.convert.converter
+
+	interface ConverterFactory<S, R> {
+
+		fun <T : R> getConverter(targetType: Class<T>): Converter<S, T>
 	}
 ----
 
@@ -776,8 +973,8 @@ where T is a subclass of R.
 
 Consider the `StringToEnumConverterFactory` as an example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
+.Java
 ----
 	package org.springframework.core.convert.support;
 
@@ -803,7 +1000,6 @@ Consider the `StringToEnumConverterFactory` as an example:
 ----
 
 
-
 [[core-convert-GenericConverter-SPI]]
 === Using `GenericConverter`
 
@@ -815,8 +1011,8 @@ context that you can use when you implement your conversion logic. Such context 
 type conversion be driven by a field annotation or by generic information declared on a
 field signature. The following listing shows the interface definition of `GenericConverter`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.core.convert.converter;
 
@@ -825,6 +1021,18 @@ field signature. The following listing shows the interface definition of `Generi
 		public Set<ConvertiblePair> getConvertibleTypes();
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.core.convert.converter
+
+	interface GenericConverter {
+
+		fun getConvertibleTypes(): Set<ConvertiblePair>?
+
+		fun convert(@Nullable source: Any?, sourceType: TypeDescriptor, targetType: TypeDescriptor): Any?
 	}
 ----
 
@@ -855,8 +1063,8 @@ on the target field, or you might want to run a `Converter` only if a specific m
 `ConditionalGenericConverter` is the union of the `GenericConverter` and
 `ConditionalConverter` interfaces that lets you define such custom matching criteria:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface ConditionalConverter {
 
@@ -865,6 +1073,16 @@ on the target field, or you might want to run a `Converter` only if a specific m
 
 	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface ConditionalConverter {
+
+		fun matches(sourceType: TypeDescriptor, targetType: TypeDescriptor): Boolean
+	}
+
+	interface ConditionalGenericConverter : GenericConverter, ConditionalConverter
 ----
 
 A good example of a `ConditionalGenericConverter` is an `EntityConverter` that converts
@@ -881,8 +1099,8 @@ might match only if the target entity type declares a static finder method (for 
 `ConversionService` defines a unified API for executing type conversion logic at
 runtime. Converters are often executed behind the following facade interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.core.convert;
 
@@ -895,6 +1113,23 @@ runtime. Converters are often executed behind the following facade interface:
 		boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.core.convert
+
+	interface ConversionService {
+
+		fun canConvert(sourceType: Class<*>, targetType: Class<*>): Boolean
+
+		fun <T> convert(source: Any, targetType: Class<T>): T
+
+		fun canConvert(sourceType: TypeDescriptor, targetType: TypeDescriptor): Boolean
+
+		fun convert(source: Any, sourceType: TypeDescriptor, targetType: TypeDescriptor): Any
 
 	}
 ----
@@ -926,8 +1161,7 @@ system is used.
 To register a default `ConversionService` with Spring, add the following bean definition
 with an `id` of `conversionService`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="conversionService"
 		class="org.springframework.context.support.ConversionServiceFactoryBean"/>
@@ -938,8 +1172,7 @@ maps, and other common types. To supplement or override the default converters w
 own custom converters, set the `converters` property. Property values can implement
 any of the `Converter`, `ConverterFactory`, or `GenericConverter` interfaces.
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="conversionService"
 			class="org.springframework.context.support.ConversionServiceFactoryBean">
@@ -965,19 +1198,29 @@ In certain situations, you may wish to apply formatting during conversion. See
 To work with a `ConversionService` instance programmatically, you can inject a reference to
 it like you would for any other bean. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Service
 	public class MyService {
 
-		@Autowired
 		public MyService(ConversionService conversionService) {
 			this.conversionService = conversionService;
 		}
 
 		public void doIt() {
 			this.conversionService.convert(...)
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Service
+	class MyService(private val conversionService: ConversionService) {
+		
+		fun doIt() {
+			conversionService.convert(...)
 		}
 	}
 ----
@@ -990,15 +1233,25 @@ you need to provide a formal definition of the source and target types.
 Fortunately, `TypeDescriptor` provides various options to make doing so straightforward,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	DefaultConversionService cs = new DefaultConversionService();
 
-	List<Integer> input = ....
+	List<Integer> input = ...
 	cs.convert(input,
 		TypeDescriptor.forObject(input), // List<Integer> type descriptor
 		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val cs = DefaultConversionService()
+
+	val input: List<Integer> = ...
+	cs.convert(input,
+			TypeDescriptor.forObject(input), // List<Integer> type descriptor
+			TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java)))
 ----
 
 Note that `DefaultConversionService` automatically registers converters that are
@@ -1048,8 +1301,8 @@ provides a unified type conversion API for both SPIs.
 The `Formatter` SPI to implement field formatting logic is simple and strongly typed. The
 following listing shows the `Formatter` interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.format;
 
@@ -1060,23 +1313,40 @@ following listing shows the `Formatter` interface definition:
 `Formatter` extends from the `Printer` and `Parser` building-block interfaces. The
 following listing shows the definitions of those two interfaces:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Printer<T> {
 
 		String print(T fieldValue, Locale locale);
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Printer<T> {
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+		fun print(fieldValue: T, locale: Locale): String
+	}
+----
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.text.ParseException;
 
 	public interface Parser<T> {
 
 		T parse(String clientValue, Locale locale) throws ParseException;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Parser<T> {
+
+		@Throws(ParseException::class)
+		fun parse(clientValue: String, locale: Locale): T
 	}
 ----
 
@@ -1093,12 +1363,12 @@ The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, 
 `PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
-formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
+formatting support based on the https://www.joda.org/joda-time/[Joda-Time library].
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.format.datetime;
 
@@ -1131,6 +1401,25 @@ The following `DateFormatter` is an example `Formatter` implementation:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class DateFormatter(private val pattern: String) : Formatter<Date> {
+
+		override fun print(date: Date, locale: Locale)
+				= getDateFormat(locale).format(date)
+
+		@Throws(ParseException::class)
+		override fun parse(formatted: String, locale: Locale)
+				= getDateFormat(locale).parse(formatted)
+
+		protected fun getDateFormat(locale: Locale): DateFormat {
+			val dateFormat = SimpleDateFormat(this.pattern, locale)
+			dateFormat.isLenient = false
+			return dateFormat
+		}
+	}
+----
 
 The Spring team welcomes community-driven `Formatter` contributions. See
 https://github.com/spring-projects/spring-framework/issues[GitHub Issues] to contribute.
@@ -1144,8 +1433,8 @@ Field formatting can be configured by field type or annotation. To bind
 an annotation to a `Formatter`, implement `AnnotationFormatterFactory`. The following
 listing shows the definition of the `AnnotationFormatterFactory` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.format;
 
@@ -1156,6 +1445,20 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 		Printer<?> getPrinter(A annotation, Class<?> fieldType);
 
 		Parser<?> getParser(A annotation, Class<?> fieldType);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.format
+
+	interface AnnotationFormatterFactory<A : Annotation> {
+
+		val fieldTypes: Set<Class<*>>
+
+		fun getPrinter(annotation: A, fieldType: Class<*>): Printer<*>
+
+		fun getParser(annotation: A, fieldType: Class<*>): Parser<*>
 	}
 ----
 
@@ -1170,8 +1473,8 @@ The following example `AnnotationFormatterFactory` implementation binds the `@Nu
 annotation to a formatter to let a number style or pattern be
 specified:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
@@ -1206,12 +1509,43 @@ specified:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class NumberFormatAnnotationFormatterFactory : AnnotationFormatterFactory<NumberFormat> {
+
+		override fun getFieldTypes(): Set<Class<*>> {
+			return setOf(Short::class.java, Int::class.java, Long::class.java, Float::class.java, Double::class.java, BigDecimal::class.java, BigInteger::class.java)
+		}
+
+		override fun getPrinter(annotation: NumberFormat, fieldType: Class<*>): Printer<Number> {
+			return configureFormatterFrom(annotation, fieldType)
+		}
+
+		override fun getParser(annotation: NumberFormat, fieldType: Class<*>): Parser<Number> {
+			return configureFormatterFrom(annotation, fieldType)
+		}
+
+		private fun configureFormatterFrom(annotation: NumberFormat, fieldType: Class<*>): Formatter<Number> {
+			return if (annotation.pattern.isNotEmpty()) {
+				NumberStyleFormatter(annotation.pattern)
+			} else {
+				val style = annotation.style
+				when {
+					style === NumberFormat.Style.PERCENT -> PercentStyleFormatter()
+					style === NumberFormat.Style.CURRENCY -> CurrencyStyleFormatter()
+					else -> NumberStyleFormatter()
+				}
+			}
+		}
+	}
+----
 
 To trigger formatting, you can annotate fields with @NumberFormat, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class MyModel {
 
@@ -1219,7 +1553,13 @@ example shows:
 		private BigDecimal decimal;
 	}
 ----
-
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyModel(
+		@field:NumberFormat(style = Style.CURRENCY) private val decimal: BigDecimal
+	)
+----
 
 
 [[format-annotations-api]]
@@ -1233,8 +1573,8 @@ package. You can use `@NumberFormat` to format `Number` fields such as `Double` 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class MyModel {
 
@@ -1242,7 +1582,13 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 		private Date date;
 	}
 ----
-
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyModel(
+		@DateTimeFormat(iso= ISO.DATE) private val date: Date
+	)
+----
 
 
 [[format-FormatterRegistry-SPI]]
@@ -1257,8 +1603,8 @@ for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 
 The following listing shows the `FormatterRegistry` SPI:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.format;
 
@@ -1270,7 +1616,23 @@ The following listing shows the `FormatterRegistry` SPI:
 
 		void addFormatterForFieldType(Formatter<?> formatter);
 
-		void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
+		void addFormatterForAnnotation(AnnotationFormatterFactory<?> factory);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.format
+
+	interface FormatterRegistry : ConverterRegistry {
+
+		fun addFormatterForFieldType(fieldType: Class<*>, printer: Printer<*>, parser: Parser<*>)
+
+		fun addFormatterForFieldType(fieldType: Class<*>, formatter: Formatter<*>)
+
+		fun addFormatterForFieldType(formatter: Formatter<*>)
+
+		fun addFormatterForAnnotation(factory: AnnotationFormatterFactory<*>)
 	}
 ----
 
@@ -1290,14 +1652,24 @@ these rules once, and they are applied whenever formatting is needed.
 `FormatterRegistrar` is an SPI for registering formatters and converters through the
 FormatterRegistry. The following listing shows its interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package org.springframework.format;
 
 	public interface FormatterRegistrar {
 
 		void registerFormatters(FormatterRegistry registry);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.springframework.format
+
+	interface FormatterRegistrar {
+
+		fun registerFormatters(registry: FormatterRegistry)
 	}
 ----
 
@@ -1321,21 +1693,21 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring 
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a Global Date and Time Format
 
-By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings by using the `DateFormat.SHORT` style. If you prefer, you can
-change this by defining your own global format.
+By default, date and time fields not annotated with `@DateTimeFormat` are converted from
+strings by using the `DateFormat.SHORT` style. If you prefer, you can change this by
+defining your own global format.
 
-To do so, you need to ensure that Spring does not register default formatters. Instead,
-you should register all formatters manually. Use the
-`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` or
-`org.springframework.format.datetime.DateFormatterRegistrar` class, depending on whether
-you use the Joda-Time library.
+To do that, ensure that Spring does not register default formatters. Instead, register
+formatters manually with the help of:
 
-For example, the following Java configuration registers a global `yyyyMMdd`
-format (this example does not depend on the Joda-Time library):
+* `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
+* `org.springframework.format.datetime.DateFormatterRegistrar`, or
+`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` for Joda-Time.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+For example, the following Java configuration registers a global `yyyyMMdd` format:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -1349,6 +1721,11 @@ format (this example does not depend on the Joda-Time library):
 			// Ensure @NumberFormat is still supported
 			conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 
+			// Register JSR-310 date conversion with a specific global format
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			registrar.registerFormatters(conversionService);
+
 			// Register date conversion with a specific global format
 			DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 			registrar.setFormatter(new DateFormatter("yyyyMMdd"));
@@ -1358,13 +1735,39 @@ format (this example does not depend on the Joda-Time library):
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun conversionService(): FormattingConversionService {
+			// Use the DefaultFormattingConversionService but do not register defaults
+			return DefaultFormattingConversionService(false).apply {
+
+				// Ensure @NumberFormat is still supported
+				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
+
+				// Register JSR-310 date conversion with a specific global format
+				val registrar = DateTimeFormatterRegistrar()
+				registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				registrar.registerFormatters(this)
+
+				// Register date conversion with a specific global format
+				val registrar = DateFormatterRegistrar()
+				registrar.setFormatter(DateFormatter("yyyyMMdd"))
+				registrar.registerFormatters(this)
+			}
+		}
+	}
+----
 
 If you prefer XML-based configuration, you can use a
 `FormattingConversionServiceFactoryBean`. The following example shows how to do so (this time using Joda
 Time):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1395,55 +1798,52 @@ Time):
 	</beans>
 ----
 
-NOTE: Joda-Time provides separate distinct types to represent `date`, `time`, and `date-time`
-values. The `dateFormatter`, `timeFormatter`, and `dateTimeFormatter` properties of the
-`JodaTimeFormatterRegistrar` should be used to configure the different formats for each
-type. The `DateTimeFormatterFactoryBean` provides a convenient way to create formatters.
-
-NOTE: If you use Spring MVC, remember to explicitly configure the conversion service that
-is used. For Java-based `@Configuration`, this means extending the
-`WebMvcConfigurationSupport` class and overriding the `mvcConversionService()` method.
-For XML, you should use the `conversion-service` attribute of the
-`mvc:annotation-driven` element.
-See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> for details.
-
+Note there are extra considerations when configuring date and time formats in web
+applications. Please see
+<<web.adoc#mvc-config-conversion, WebMVC Conversion and Formatting>> or
+<<web-reactive.adoc#webflux-config-conversion, WebFlux Conversion and Formatting>>.
 
 
 
 [[validation-beanvalidation]]
-== Spring Validation
+== Java Bean Validation
 
-Spring 3 introduced several enhancements to its validation support. First, the JSR-303
-Bean Validation API is fully supported. Second, when used programmatically, Spring's
-`DataBinder` can validate objects as well as bind to them. Third, Spring MVC has
-support for declaratively validating `@Controller` inputs.
+The Spring Framework provides support for the
+https://beanvalidation.org/[Java Bean Validation] API.
 
 
 
 [[validation-beanvalidation-overview]]
-=== Overview of the JSR-303 Bean Validation API
+=== Overview of Bean Validation
 
-JSR-303 standardizes validation constraint declaration and metadata for the Java
-platform. By using this API, you annotate domain model properties with declarative
-validation constraints and the runtime enforces them. You can use a number of built-in
-constraints. You can also define your own custom constraints.
+Bean Validation provides a common way of validation through constraint declaration and
+metadata for Java applications. To use it, you annotate domain model properties with
+declarative validation constraints which are then enforced by the runtime. There are
+built-in constraints, and you can also define your own custom constraints.
 
 Consider the following example, which shows a simple `PersonForm` model with two properties:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class PersonForm {
 		private String name;
 		private int age;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class PersonForm(
+			private val name: String,
+			private val age: Int
+	)
+----
 
-JSR-303 lets you define declarative validation constraints against such properties, as the
-following example shows:
+Bean Validation lets you declare constraints as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class PersonForm {
 
@@ -1455,14 +1855,21 @@ following example shows:
 		private int age;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class PersonForm(
+		@get:NotNull @get:Size(max=64)
+		private val name: String,
+		@get:Min(0)
+		private val age: Int
+	)
+----
 
-When a JSR-303 Validator validates an instance of this class, these constraints
-are enforced.
-
-For general information on JSR-303 and JSR-349, see the https://beanvalidation.org/[Bean
-Validation website]. For information on the specific capabilities of the default
-reference implementation, see the https://www.hibernate.org/412.html[Hibernate
-Validator] documentation. To learn how to set up a bean validation provider as a Spring
+A Bean Validation validator then validates instances of this class based on the declared
+constraints. See https://beanvalidation.org/[Bean Validation] for general information about
+the API. See the https://hibernate.org/validator/[Hibernate Validator] documentation for
+specific constraints. To learn how to set up a bean validation provider as a Spring
 bean, keep reading.
 
 
@@ -1470,39 +1877,54 @@ bean, keep reading.
 [[validation-beanvalidation-spring]]
 === Configuring a Bean Validation Provider
 
-Spring provides full support for the Bean Validation API. This includes convenient
-support for bootstrapping a JSR-303 or JSR-349 Bean Validation provider as a Spring bean.
-This lets you inject a `javax.validation.ValidatorFactory` or `javax.validation.Validator`
-wherever validation is needed in your application.
+Spring provides full support for the Bean Validation API including the bootstrapping of a
+Bean Validation provider as a Spring bean. This lets you inject a
+`javax.validation.ValidatorFactory` or `javax.validation.Validator` wherever validation is
+needed in your application.
 
-You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring bean,
-as the following example shows:
+You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
+bean, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+	@Configuration
+
+	public class AppConfig {
+
+		@Bean
+		public LocalValidatorFactoryBean validator() {
+			return new LocalValidatorFactoryBean;
+		}
+	}
+----
+[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+.XML
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 ----
 
-The basic configuration in the preceding example triggers bean validation to initialize by using its
-default bootstrap mechanism. A JSR-303 or JSR-349 provider, such as the Hibernate Validator,
-is expected to be present in the classpath and is automatically detected.
+The basic configuration in the preceding example triggers bean validation to initialize by
+using its default bootstrap mechanism. A Bean Validation provider, such as the Hibernate
+Validator, is expected to be present in the classpath and is automatically detected.
 
 
 [[validation-beanvalidation-spring-inject]]
 ==== Injecting a Validator
 
 `LocalValidatorFactoryBean` implements both `javax.validation.ValidatorFactory` and
-`javax.validation.Validator`, as well as Spring's
-`org.springframework.validation.Validator`. You can inject a reference to either of
-these interfaces into beans that need to invoke validation logic.
+`javax.validation.Validator`, as well as Spring's `org.springframework.validation.Validator`.
+You can inject a reference to either of these interfaces into beans that need to invoke
+validation logic.
 
 You can inject a reference to `javax.validation.Validator` if you prefer to work with the Bean
 Validation API directly, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import javax.validation.Validator;
 
@@ -1511,13 +1933,22 @@ Validation API directly, as the following example shows:
 
 		@Autowired
 		private Validator validator;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import javax.validation.Validator;
+
+	@Service
+	class MyService(@Autowired private val validator: Validator)
 ----
 
-You can inject a reference to `org.springframework.validation.Validator` if your bean requires
-the Spring Validation API, as the following example shows:
+You can inject a reference to `org.springframework.validation.Validator` if your bean
+requires the Spring Validation API, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import org.springframework.validation.Validator;
 
@@ -1528,17 +1959,24 @@ the Spring Validation API, as the following example shows:
 		private Validator validator;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.validation.Validator
+
+	@Service
+	class MyService(@Autowired private val validator: Validator)
+----
 
 
 [[validation-beanvalidation-spring-constraints]]
 ==== Configuring Custom Constraints
 
 Each bean validation constraint consists of two parts:
-* A `@Constraint` annotation
-that declares the constraint and its configurable properties.
-* An implementation
-of the `javax.validation.ConstraintValidator` interface that implements the constraint's
-behavior.
+
+* A `@Constraint` annotation that declares the constraint and its configurable properties.
+* An implementation of the `javax.validation.ConstraintValidator` interface that implements
+the constraint's behavior.
 
 To associate a declaration with an implementation, each `@Constraint` annotation
 references a corresponding `ConstraintValidator` implementation class. At runtime, a
@@ -1552,8 +1990,8 @@ that uses Spring to create `ConstraintValidator` instances. This lets your custo
 The following example shows a custom `@Constraint` declaration followed by an associated
 `ConstraintValidator` implementation that uses Spring for dependency injection:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -1561,9 +1999,17 @@ The following example shows a custom `@Constraint` declaration followed by an as
 	public @interface MyConstraint {
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
+	@Retention(AnnotationRetention.RUNTIME)
+	@Constraint(validatedBy = MyConstraintValidator::class)
+	annotation class MyConstraint
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import javax.validation.ConstraintValidator;
 
@@ -1572,9 +2018,20 @@ The following example shows a custom `@Constraint` declaration followed by an as
 		@Autowired;
 		private Foo aDependency;
 
-		...
+		// ...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import javax.validation.ConstraintValidator
+
+	class MyConstraintValidator(private val aDependency: Foo) : ConstraintValidator {
+
+		// ...
+	}
+----
+
 
 As the preceding example shows, a `ConstraintValidator` implementation can have its dependencies
 `@Autowired` as any other Spring bean.
@@ -1583,20 +2040,48 @@ As the preceding example shows, a `ConstraintValidator` implementation can have 
 [[validation-beanvalidation-spring-method]]
 ==== Spring-driven Method Validation
 
-You can integrate the method validation feature supported by Bean Validation 1.1 (and, as a custom
-extension, also by Hibernate Validator 4.3) into a Spring context
-through a `MethodValidationPostProcessor` bean definition, as follows:
+You can integrate the method validation feature supported by Bean Validation 1.1 (and, as
+a custom extension, also by Hibernate Validator 4.3) into a Spring context through a
+`MethodValidationPostProcessor` bean definition:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+	@Configuration
+
+	public class AppConfig {
+
+		@Bean
+		public MethodValidationPostProcessor validationPostProcessor() {
+			return new MethodValidationPostProcessor;
+		}
+	}
+
+----
+[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+.XML
 ----
 	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
 ----
 
-To be eligible for Spring-driven method validation, all target classes need to be annotated with
-Spring's `@Validated` annotation. (Optionally, you can also declare the validation groups to use.)
-See the {api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
-javadoc for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
+To be eligible for Spring-driven method validation, all target classes need to be annotated
+with Spring's `@Validated` annotation, which can optionally also declare the validation
+groups to use. See
+{api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
+for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
+
+[TIP]
+====
+Method validation relies on <<core.adoc#aop-introduction-proxies,AOP Proxies>> around the
+target classes, either JDK dynamic proxies for methods on interfaces or CGLIB proxies.
+There are certain limitations with the use of proxies, some of which are described in
+<<core.adoc#aop-understanding-aop-proxies,Understanding AOP Proxies>>. In addition remember
+to always use methods and accessors on proxied classes; direct field access will not work.
+====
+
+
 
 
 [[validation-beanvalidation-spring-other]]
@@ -1620,8 +2105,8 @@ configured, you can invoke the `Validator` by calling `binder.validate()`. Any v
 The following example shows how to use a `DataBinder` programmatically to invoke validation
 logic after binding to a target object:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Foo target = new Foo();
 	DataBinder binder = new DataBinder(target);
@@ -1636,11 +2121,28 @@ logic after binding to a target object:
 	// get BindingResult that includes any validation errors
 	BindingResult results = binder.getBindingResult();
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val target = Foo()
+	val binder = DataBinder(target)
+	binder.validator = FooValidator()
+
+	// bind to the target object
+	binder.bind(propertyValues)
+
+	// validate the target object
+	binder.validate()
+
+	// get BindingResult that includes any validation errors
+	val results = binder.bindingResult
+----
 
 You can also configure a `DataBinder` with multiple `Validator` instances through
 `dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when
 combining globally configured bean validation with a Spring `Validator` configured
-locally on a DataBinder instance. See <<validation-mvc-configuring>>.
+locally on a DataBinder instance. See
+<<web.adoc#mvc-config-validation,Spring MVC Validation Configuration>>.
 
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,7 +50,7 @@ import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
@@ -562,8 +563,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
 		String url = getContextPath() + relativeUrl;
-		UriTemplate template = new UriTemplate(url);
-		url = template.expand(params).toASCIIString();
+		url = UriComponentsBuilder.fromUriString(url).buildAndExpand(params).encode().toUri().toASCIIString();
 		if (this.response != null) {
 			url = this.response.encodeURL(url);
 		}

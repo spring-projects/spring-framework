@@ -589,12 +589,15 @@ in the same place as Spring's `GroovyObjectCustomizer`.
 
 This section describes how to use BeanShell beans in Spring.
 
-The BeanShell homepage includes the following description: {JB}
+The https://beanshell.github.io/intro.html[BeanShell homepage] includes the following
+description:
 
-"`BeanShell is a small, free, embeddable Java source interpreter with dynamic language
+----
+BeanShell is a small, free, embeddable Java source interpreter with dynamic language
 features, written in Java. BeanShell dynamically executes standard Java syntax and
 extends it with common scripting conveniences such as loose types, commands, and method
-closures like those in Perl and JavaScript.`"
+closures like those in Perl and JavaScript.
+----
 
 In contrast to Groovy, BeanShell-backed bean definitions require some (small) additional
 configuration. The implementation of the BeanShell dynamic language support in Spring is
@@ -875,6 +878,6 @@ the correct schema so that the tags in the `lang` namespace are available to you
 The following links go to further resources about the various dynamic languages referenced
 in this chapter:
 
-* The http://www.groovy-lang.org/[Groovy] homepage
-* The http://www.beanshell.org/[BeanShell] homepage
+* The https://www.groovy-lang.org/[Groovy] homepage
+* The https://beanshell.github.io/intro.html[BeanShell] homepage
 * The https://www.jruby.org[JRuby] homepage

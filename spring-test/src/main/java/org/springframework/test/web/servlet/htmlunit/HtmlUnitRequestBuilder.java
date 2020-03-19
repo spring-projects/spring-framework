@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -106,6 +108,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 
+	@Override
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
@@ -289,9 +292,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 		Cookie[] parentCookies = request.getCookies();
 		if (parentCookies != null) {
-			for (Cookie cookie : parentCookies) {
-				cookies.add(cookie);
-			}
+			Collections.addAll(cookies, parentCookies);
 		}
 
 		if (!ObjectUtils.isEmpty(cookies)) {

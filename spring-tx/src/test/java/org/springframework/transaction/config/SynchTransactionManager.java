@@ -17,7 +17,7 @@
 package org.springframework.transaction.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 /**
  * @author Juergen Hoeller

@@ -21,17 +21,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedResource;
+import org.springframework.web.servlet.resource.GzipSupport.GzippedFiles;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
@@ -41,6 +43,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 4.1
  */
+@ExtendWith(GzipSupport.class)
 public class CssLinkResourceTransformerTests {
 
 	private ResourceTransformerChain transformerChain;
@@ -48,7 +51,7 @@ public class CssLinkResourceTransformerTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -92,7 +95,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -100,7 +103,7 @@ public class CssLinkResourceTransformerTests {
 		this.request = new MockHttpServletRequest("GET", "/static/foo.css");
 		Resource expected = getResource("foo.css");
 		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -119,7 +122,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource transformedResource = (TransformedResource) chain.transform(this.request, resource);
 		String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
 		List<Resource> locations = Collections.singletonList(resource);
 		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
@@ -133,20 +136,19 @@ public class CssLinkResourceTransformerTests {
 		Resource expected = getResource("images/image.png");
 		Resource actual = this.transformerChain.transform(this.request, expected);
 
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
-	public void transformSkippedForGzippedResource() throws Exception {
-
-		EncodedResourceResolverTests.createGzippedFile("main.css");
+	public void transformSkippedForGzippedResource(GzippedFiles gzippedFiles) throws Exception {
+		gzippedFiles.create("main.css");
 
 		this.request = new MockHttpServletRequest("GET", "/static/main.css");
 		Resource original = new ClassPathResource("test/main.css", getClass());
 		EncodedResource gzipped = new EncodedResource(original, "gzip", ".gz");
 		Resource actual = this.transformerChain.transform(this.request, gzipped);
 
-		assertSame(gzipped, actual);
+		assertThat(actual).isSameAs(gzipped);
 	}
 
 	@Test // https://github.com/spring-projects/spring-framework/issues/22602
@@ -161,7 +163,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	private Resource getResource(String filePath) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -37,7 +38,6 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -193,12 +193,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	public RequestMappingHandlerAdapter() {
-		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
-
 		this.messageConverters = new ArrayList<>(4);
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
-		this.messageConverters.add(stringHttpMessageConverter);
+		this.messageConverters.add(new StringHttpMessageConverter());
 		try {
 			this.messageConverters.add(new SourceHttpMessageConverter<>());
 		}
@@ -417,7 +414,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * processing thread has exited and ends when the request is dispatched again
 	 * for further processing of the concurrently produced result.
 	 * <p>If this value is not set, the default timeout of the underlying
-	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	 * implementation is used.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
@@ -581,7 +578,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(adviceBeans);
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
@@ -825,18 +821,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * (never {@code null}).
 	 */
 	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
-		Class<?> handlerType = handlerMethod.getBeanType();
-		SessionAttributesHandler sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
-		if (sessionAttrHandler == null) {
-			synchronized (this.sessionAttributesHandlerCache) {
-				sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
-				if (sessionAttrHandler == null) {
-					sessionAttrHandler = new SessionAttributesHandler(handlerType, this.sessionAttributeStore);
-					this.sessionAttributesHandlerCache.put(handlerType, sessionAttrHandler);
-				}
-			}
-		}
-		return sessionAttrHandler;
+		return this.sessionAttributesHandlerCache.computeIfAbsent(
+				handlerMethod.getBeanType(),
+				type -> new SessionAttributesHandler(type, this.sessionAttributeStore));
 	}
 
 	/**
@@ -921,9 +908,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
 		// Global methods first
-		this.modelAttributeAdviceCache.forEach((clazz, methodSet) -> {
-			if (clazz.isApplicableToBeanType(handlerType)) {
-				Object bean = clazz.resolveBean();
+		this.modelAttributeAdviceCache.forEach((controllerAdviceBean, methodSet) -> {
+			if (controllerAdviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = controllerAdviceBean.resolveBean();
 				for (Method method : methodSet) {
 					attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
 				}
@@ -955,9 +942,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
 		// Global methods first
-		this.initBinderAdviceCache.forEach((clazz, methodSet) -> {
-			if (clazz.isApplicableToBeanType(handlerType)) {
-				Object bean = clazz.resolveBean();
+		this.initBinderAdviceCache.forEach((controllerAdviceBean, methodSet) -> {
+			if (controllerAdviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = controllerAdviceBean.resolveBean();
 				for (Method method : methodSet) {
 					initBinderMethods.add(createInitBinderMethod(bean, method));
 				}

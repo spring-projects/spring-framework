@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.junit4.ContextCustomizerSpringRunnerTests.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test which verifies support of
@@ -48,7 +48,7 @@ public class ContextCustomizerSpringRunnerTests {
 
 	@Test
 	public void injectedBean() {
-		assertEquals("foo", foo);
+		assertThat(foo).isEqualTo("foo");
 	}
 
 

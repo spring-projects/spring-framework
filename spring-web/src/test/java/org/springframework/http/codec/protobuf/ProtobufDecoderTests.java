@@ -20,32 +20,33 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.protobuf.Message;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTestCase;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.core.io.buffer.DataBufferUtils.*;
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
  * Unit tests for {@link ProtobufDecoder}.
  *
  * @author Sebastien Deleuze
  */
-public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecoder> {
+public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
@@ -62,19 +63,20 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void extensionRegistryNull() {
-		new ProtobufDecoder(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ProtobufDecoder(null));
 	}
 
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), null));
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE));
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM));
-		assertFalse(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE));
+		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();
 	}
 
 	@Override

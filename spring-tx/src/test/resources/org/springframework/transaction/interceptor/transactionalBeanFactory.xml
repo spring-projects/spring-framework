@@ -3,12 +3,12 @@
 
 <beans>
 
-	<bean id="targetDependency" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="targetDependency" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>dependency</value></property>
 	</bean>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.tests.sample.beans.DerivedTestBean" lazy-init="true">
+	<bean id="target" class="org.springframework.beans.testfixture.beans.DerivedTestBean" lazy-init="true">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 		<property name="spouse"><ref bean="targetDependency"/></property>
@@ -22,16 +22,16 @@
 		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="transactionAttributeSource">
 			<value>
-				org.springframework.tests.sample.beans.ITestBean.s*=PROPAGATION_MANDATORY
-				org.springframework.tests.sample.beans.AgeHolder.setAg*=PROPAGATION_REQUIRED
-				org.springframework.tests.sample.beans.ITestBean.set*= PROPAGATION_SUPPORTS , readOnly
+				org.springframework.beans.testfixture.beans.ITestBean.s*=PROPAGATION_MANDATORY
+				org.springframework.beans.testfixture.beans.AgeHolder.setAg*=PROPAGATION_REQUIRED
+				org.springframework.beans.testfixture.beans.ITestBean.set*= PROPAGATION_SUPPORTS , readOnly
 			</value>
 		</property>
 	</bean>
 
 	<bean id="proxyFactory1" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces">
-			<value>org.springframework.tests.sample.beans.ITestBean</value>
+			<value>org.springframework.beans.testfixture.beans.ITestBean</value>
 		</property>
 		<property name="interceptorNames">
 			<list>

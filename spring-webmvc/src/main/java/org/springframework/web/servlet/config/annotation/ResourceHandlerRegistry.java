@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.BeanInitializationException;
@@ -150,6 +151,7 @@ public class ResourceHandlerRegistry {
 	 * of no registrations.
 	 */
 	@Nullable
+	@SuppressWarnings("deprecation")
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
@@ -177,10 +179,7 @@ public class ResourceHandlerRegistry {
 			}
 		}
 
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(this.order);
-		handlerMapping.setUrlMap(urlMap);
-		return handlerMapping;
+		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
 }

@@ -18,17 +18,16 @@ package org.springframework.web.servlet.function;
 
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-@SuppressWarnings("unchecked")
 public class RouterFunctionTests {
 
 	@Test
@@ -38,14 +37,14 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> routerFunction2 = request -> Optional.of(handlerFunction);
 
 		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(handlerFunction, resultHandlerFunction.get());
+		assertThat(resultHandlerFunction.isPresent()).isTrue();
+		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
 	}
 
 
@@ -56,14 +55,14 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> routerFunction2 = request -> Optional.of(handlerFunction);
 
 		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
 
 		Optional<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(handlerFunction, resultHandlerFunction.get());
+		assertThat(resultHandlerFunction.isPresent()).isTrue();
+		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
 	}
 
 
@@ -73,13 +72,13 @@ public class RouterFunctionTests {
 		RequestPredicate requestPredicate = request -> true;
 
 		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
 
 		Optional<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
+		assertThat(resultHandlerFunction.isPresent()).isTrue();
 	}
 
 
@@ -99,7 +98,7 @@ public class RouterFunctionTests {
 				};
 
 		RouterFunction<EntityResponse<Integer>> result = routerFunction.filter(filterFunction);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
@@ -109,13 +108,12 @@ public class RouterFunctionTests {
 					try {
 						return hf.handle(request);
 					}
-					catch (Exception e) {
-						fail(e.getMessage());
-						return null;
+					catch (Exception ex) {
+						throw new AssertionError(ex.getMessage(), ex);
 					}
 				});
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(42, (int)resultHandlerFunction.get().entity());
+		assertThat(resultHandlerFunction.isPresent()).isTrue();
+		assertThat((int) resultHandlerFunction.get().entity()).isEqualTo(42);
 	}
 
 

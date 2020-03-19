@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -158,6 +159,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+	@Override
+	protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
+		doFilterInternal(request, response, filterChain);
+	}
 
 	/**
 	 * Hide "Forwarded" or "X-Forwarded-*" headers.

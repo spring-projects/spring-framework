@@ -25,9 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -42,8 +42,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -57,8 +55,10 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link RequestMappingHandlerAdapter}.
@@ -86,7 +86,7 @@ public class RequestMappingHandlerAdapterTests {
 	private StaticWebApplicationContext webAppContext;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void setupOnce() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setApplicationContext(new StaticWebApplicationContext());
@@ -97,7 +97,7 @@ public class RequestMappingHandlerAdapterTests {
 		HANDLER_COUNT = adapter.getReturnValueHandlers().size();
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.webAppContext = new StaticWebApplicationContext();
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
@@ -114,7 +114,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 
 		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
-		assertTrue(response.getHeader("Cache-Control").contains("max-age"));
+		assertThat(response.getHeader("Cache-Control").contains("max-age")).isTrue();
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 
 		this.handlerAdapter.handle(this.request, this.response, handlerMethod(handler, "handle"));
-		assertEquals("no-store", this.response.getHeader("Cache-Control"));
+		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("no-store");
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class RequestMappingHandlerAdapterTests {
 		HandlerMethod handlerMethod = handlerMethod(new RedirectAttributeController(), "handle", Model.class);
 		ModelAndView mav = this.handlerAdapter.handle(request, response, handlerMethod);
 
-		assertTrue("Without RedirectAttributes arg, model should be empty", mav.getModel().isEmpty());
+		assertThat(mav.getModel().isEmpty()).as("Without RedirectAttributes arg, model should be empty").isTrue();
 	}
 
 	@Test
@@ -152,7 +152,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertTrue(this.handlerAdapter.getArgumentResolvers().contains(resolver));
+		assertThat(this.handlerAdapter.getArgumentResolvers().contains(resolver)).isTrue();
 		assertMethodProcessorCount(RESOLVER_COUNT + 1, INIT_BINDER_RESOLVER_COUNT + 1, HANDLER_COUNT);
 	}
 
@@ -180,7 +180,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertTrue(this.handlerAdapter.getReturnValueHandlers().contains(handler));
+		assertThat(this.handlerAdapter.getReturnValueHandlers().contains(handler)).isTrue();
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT + 1);
 	}
 
@@ -202,8 +202,21 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals("lAttr1", mav.getModel().get("attr1"));
-		assertEquals("gAttr2", mav.getModel().get("attr2"));
+		assertThat(mav.getModel().get("attr1")).isEqualTo("lAttr1");
+		assertThat(mav.getModel().get("attr2")).isEqualTo("gAttr2");
+	}
+
+	@Test
+	public void prototypeControllerAdvice() throws Exception {
+		this.webAppContext.registerPrototype("maa", ModelAttributeAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		Map<String, Object> model1 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
+		Map<String, Object> model2 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
+
+		assertThat(model1.get("instance")).isNotSameAs(model2.get("instance"));
 	}
 
 	@Test
@@ -218,8 +231,8 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals("lAttr1", mav.getModel().get("attr1"));
-		assertEquals("gAttr2", mav.getModel().get("attr2"));
+		assertThat(mav.getModel().get("attr1")).isEqualTo("lAttr1");
+		assertThat(mav.getModel().get("attr2")).isEqualTo("gAttr2");
 	}
 
 	@Test
@@ -232,9 +245,9 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals("lAttr1", mav.getModel().get("attr1"));
-		assertEquals("gAttr2", mav.getModel().get("attr2"));
-		assertEquals(null,mav.getModel().get("attr3"));
+		assertThat(mav.getModel().get("attr1")).isEqualTo("lAttr1");
+		assertThat(mav.getModel().get("attr2")).isEqualTo("gAttr2");
+		assertThat(mav.getModel().get("attr3")).isEqualTo(null);
 	}
 
 	// SPR-10859
@@ -255,8 +268,8 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals(200, this.response.getStatus());
-		assertEquals("{\"status\":400,\"message\":\"body\"}", this.response.getContentAsString());
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentAsString()).isEqualTo("{\"status\":400,\"message\":\"body\"}");
 	}
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
@@ -265,9 +278,9 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
-		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().size());
-		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().size());
-		assertEquals(handlerCount, this.handlerAdapter.getReturnValueHandlers().size());
+		assertThat(this.handlerAdapter.getArgumentResolvers().size()).isEqualTo(resolverCount);
+		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers().size()).isEqualTo(initBinderResolverCount);
+		assertThat(this.handlerAdapter.getReturnValueHandlers().size()).isEqualTo(handlerCount);
 	}
 
 
@@ -322,6 +335,7 @@ public class RequestMappingHandlerAdapterTests {
 		public void addAttributes(Model model) {
 			model.addAttribute("attr1", "gAttr1");
 			model.addAttribute("attr2", "gAttr2");
+			model.addAttribute("instance", this);
 		}
 	}
 

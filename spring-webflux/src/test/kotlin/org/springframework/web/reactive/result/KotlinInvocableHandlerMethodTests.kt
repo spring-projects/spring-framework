@@ -19,14 +19,12 @@ package org.springframework.web.reactive.result
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get
-import org.springframework.mock.web.test.server.MockServerWebExchange
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.HandlerResult
@@ -35,7 +33,6 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod
 import org.springframework.web.reactive.result.method.annotation.ContinuationHandlerMethodArgumentResolver
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
-import reactor.test.expectError
 import java.lang.reflect.Method
 import kotlin.reflect.jvm.javaMethod
 
@@ -74,7 +71,7 @@ class KotlinInvocableHandlerMethodTests {
 		val result = invoke(CoroutinesController(), method)
 
 		StepVerifier.create(result)
-				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).expectError(IllegalStateException::class).verify() }
+				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).expectError(IllegalStateException::class.java).verify() }
 				.verifyComplete()
 	}
 
@@ -84,7 +81,7 @@ class KotlinInvocableHandlerMethodTests {
 		val result = invoke(CoroutinesController(), method)
 
 		assertHandlerResultValue(result, "created")
-		assertThat<HttpStatus>(this.exchange.response.statusCode, `is`(HttpStatus.CREATED))
+		assertThat(this.exchange.response.statusCode).isSameAs(HttpStatus.CREATED)
 	}
 
 	@Test
@@ -97,7 +94,7 @@ class KotlinInvocableHandlerMethodTests {
 		StepVerifier.create(result)
 				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).verifyComplete() }
 				.verifyComplete()
-		assertEquals("bar", this.exchange.response.headers.getFirst("foo"))
+		assertThat(this.exchange.response.headers.getFirst("foo")).isEqualTo("bar")
 	}
 
 	private fun invoke(handler: Any, method: Method, vararg providedArgs: Any?): Mono<HandlerResult> {

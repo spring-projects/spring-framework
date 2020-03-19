@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -329,7 +329,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (result == Boolean.TRUE);
+		return (Boolean.TRUE.equals(result));
 	}
 
 	@Override
@@ -344,7 +344,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (result == Boolean.TRUE);
+		return (Boolean.TRUE.equals(result));
 	}
 
 	@Override
@@ -758,7 +758,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public final boolean equals(Object other) {
+		public final boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
@@ -980,8 +980,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Strategy class used to manage {@link Reference References}. This class can be overridden if
-	 * alternative reference types need to be supported.
+	 * Strategy class used to manage {@link Reference References}.
+	 * This class can be overridden if alternative reference types need to be supported.
 	 */
 	protected class ReferenceManager {
 

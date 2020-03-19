@@ -4,11 +4,11 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target1" class="org.springframework.tests.sample.beans.SideEffectBean">
+	<bean id="target1" class="org.springframework.beans.testfixture.beans.SideEffectBean">
 		<property name="count"><value>10</value></property>
 	</bean>
 
-	<bean id="target2" class="org.springframework.tests.sample.beans.SideEffectBean" scope="singleton">
+	<bean id="target2" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="singleton">
 		<property name="count"><value>20</value></property>
 	</bean>
 

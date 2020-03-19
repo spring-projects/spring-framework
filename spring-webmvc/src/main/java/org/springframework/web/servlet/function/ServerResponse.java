@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -57,8 +58,19 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the (potentially non-standard) status code of this response.
+	 * @return the status as an integer
+	 * @see #statusCode()
+	 * @see HttpStatus#valueOf(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -71,12 +83,11 @@ public interface ServerResponse {
 	MultiValueMap<String, Cookie> cookies();
 
 	/**
-	 * Write this response to the servlet response (and return {@code null}, or return a model and
-	 * view.
+	 * Write this response to the given servlet response.
 	 * @param request the current request
 	 * @param response the response to write to
 	 * @param context the context to use when writing
-	 * @return {@code Mono<Void>} to indicate when writing is complete
+	 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
 	 */
 	@Nullable
 	ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
@@ -121,7 +132,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a new builder with a {@linkplain HttpStatus#CREATED 201 Created} status
+	 * Create a builder with a {@linkplain HttpStatus#CREATED 201 Created} status
 	 * and a location header set to the given URI.
 	 * @param location the location URI
 	 * @return the created builder
@@ -132,7 +143,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED 202 Accepted} status.
+	 * Create a builder with a {@linkplain HttpStatus#ACCEPTED 202 Accepted} status.
 	 * @return the created builder
 	 */
 	static BodyBuilder accepted() {
@@ -197,7 +208,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with an
+	 * Create a builder with a
 	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
 	 * @return the created builder
 	 */

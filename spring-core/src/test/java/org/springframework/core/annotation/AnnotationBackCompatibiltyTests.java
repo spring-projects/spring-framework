@@ -19,7 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,10 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 5.2
  */
-public class AnnotationBackCompatibiltyTests {
+class AnnotationBackCompatibiltyTests {
 
 	@Test
-	public void multiplRoutesToMetaAnnotation() {
+	void multiplRoutesToMetaAnnotation() {
 		Class<WithMetaMetaTestAnnotation1AndMetaTestAnnotation2> source = WithMetaMetaTestAnnotation1AndMetaTestAnnotation2.class;
 		// Merged annotation chooses lowest depth
 		MergedAnnotation<TestAnnotation> mergedAnnotation = MergedAnnotations.from(source).get(TestAnnotation.class);
@@ -43,7 +43,7 @@ public class AnnotationBackCompatibiltyTests {
 	}
 
 	@Test
-	public void defaultValue() {
+	void defaultValue() {
 		DefaultValueAnnotation synthesized = MergedAnnotations.from(WithDefaultValue.class).get(DefaultValueAnnotation.class).synthesize();
 		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
 		Object defaultValue = AnnotationUtils.getDefaultValue(synthesized, "enumValue");

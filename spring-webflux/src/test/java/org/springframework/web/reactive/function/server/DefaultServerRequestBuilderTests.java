@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -27,10 +27,10 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -61,11 +61,11 @@ public class DefaultServerRequestBuilderTests {
 				.body(body)
 				.build();
 
-		assertEquals(HttpMethod.HEAD, result.method());
-		assertEquals(1, result.headers().asHttpHeaders().size());
-		assertEquals("baar", result.headers().asHttpHeaders().getFirst("foo"));
-		assertEquals(1, result.cookies().size());
-		assertEquals("quux", result.cookies().getFirst("baz").getValue());
+		assertThat(result.method()).isEqualTo(HttpMethod.HEAD);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(1);
+		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
+		assertThat(result.cookies().size()).isEqualTo(1);
+		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
 				.expectNext("baz")

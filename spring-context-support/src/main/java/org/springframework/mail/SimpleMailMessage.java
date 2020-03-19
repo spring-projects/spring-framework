@@ -222,7 +222,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -276,9 +276,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	private static String[] copy(String[] state) {
-		String[] copy = new String[state.length];
-		System.arraycopy(state, 0, copy, 0, state.length);
-		return copy;
+		return state.clone();
 	}
 
 }

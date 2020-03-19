@@ -117,8 +117,8 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	 * @return the selected media type, or {@code null} if none
 	 */
 	@Nullable
-	protected MediaType selectMediaType(ServerWebExchange exchange,
-			Supplier<List<MediaType>> producibleTypesSupplier) {
+	protected MediaType selectMediaType(
+			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
@@ -156,9 +156,10 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		}
 
 		if (selected != null) {
+			selected = selected.removeQualityValue();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Using '" + selected + "' given " +
-						acceptableTypes + " and supported " + producibleTypes);
+				logger.debug("Using '" + selected + "' given " + acceptableTypes +
+						" and supported " + producibleTypes);
 			}
 		}
 		else if (logger.isDebugEnabled()) {
@@ -173,9 +174,8 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		return getContentTypeResolver().resolveMediaTypes(exchange);
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<MediaType> getProducibleTypes(ServerWebExchange exchange,
-			Supplier<List<MediaType>> producibleTypesSupplier) {
+	private List<MediaType> getProducibleTypes(
+			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
 
 		Set<MediaType> mediaTypes = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return (mediaTypes != null ? new ArrayList<>(mediaTypes) : producibleTypesSupplier.get());

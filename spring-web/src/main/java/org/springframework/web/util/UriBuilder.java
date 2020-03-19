@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
@@ -97,52 +98,96 @@ public interface UriBuilder {
 	UriBuilder pathSegment(String... pathSegments) throws IllegalArgumentException;
 
 	/**
-	 * Append the given query to the existing query of this builder.
-	 * The given query may contain URI template variables.
-	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
-	 * correct parsing of the URI string. For example if a query parameter
-	 * contains {@code '='} or {@code '&'} characters, the query string cannot
-	 * be parsed unambiguously. Such values should be substituted for URI
-	 * variables to enable correct parsing:
-	 * <pre class="code">
-	 * builder.query(&quot;filter={value}&quot;).uriString(&quot;hot&amp;cold&quot;);
-	 * </pre>
+	 * Parse the given query string into query parameters where parameters are
+	 * separated with {@code '&'} and their values, if any, with {@code '='}.
+	 * The query may contain URI template variables.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
 	 * @param query the query string
 	 */
 	UriBuilder query(String query);
 
 	/**
-	 * Set the query of this builder overriding all existing query parameters.
-	 * @param query the query string, or {@code null} to remove all query params
+	 * Clear existing query parameters and then delegate to {@link #query(String)}.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
+	 * @param query the query string; a {@code null} value removes all query parameters.
 	 */
 	UriBuilder replaceQuery(@Nullable String query);
 
 	/**
-	 * Append the given query parameter to the existing query parameters. The
-	 * given name or any of the values may contain URI template variables. If no
+	 * Append the given query parameter. Both the parameter name and values may
+	 * contain URI template variables to be expanded later from values. If no
 	 * values are given, the resulting URI will contain the query parameter name
-	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
+	 * only, e.g. {@code "?foo"} instead of {@code "?foo=bar"}.
+	 * <p><strong>Note:</strong> encoding, if applied, will only encode characters
+	 * that are illegal in a query parameter name or value such as {@code "="}
+	 * or {@code "&"}. All others that are legal as per syntax rules in
+	 * <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a> are not
+	 * encoded. This includes {@code "+"} which sometimes needs to be encoded
+	 * to avoid its interpretation as an encoded space. Stricter encoding may
+	 * be applied by using a URI template variable along with stricter encoding
+	 * on variable values. For more details please read the
+	 * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">"URI Encoding"</a>
+	 * section of the Spring Framework reference.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
+	 * @see #queryParam(String, Collection)
 	 */
 	UriBuilder queryParam(String name, Object... values);
 
 	/**
-	 * Add the given query parameters.
+	 * Variant of {@link #queryParam(String, Object...)} with a Collection.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @since 5.2
+	 * @see #queryParam(String, Object...)
+	 */
+	UriBuilder queryParam(String name, @Nullable Collection<?> values);
+
+	/**
+	 * Add multiple query parameters and values.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
 	 * @param params the params
 	 */
 	UriBuilder queryParams(MultiValueMap<String, String> params);
 
 	/**
-	 * Set the query parameter values overriding all existing query values for
-	 * the same parameter. If no values are given, the query parameter is removed.
+	 * Set the query parameter values replacing existing values, or if no
+	 * values are given, the query parameter is removed.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
 	 * @param name the query parameter name
 	 * @param values the query parameter values
+	 * @see #replaceQueryParam(String, Collection)
 	 */
 	UriBuilder replaceQueryParam(String name, Object... values);
 
 	/**
-	 * Set the query parameter values overriding all existing query values.
+	 * Variant of {@link #replaceQueryParam(String, Object...)} with a Collection.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @since 5.2
+	 * @see #replaceQueryParam(String, Object...)
+	 */
+	UriBuilder replaceQueryParam(String name, @Nullable Collection<?> values);
+
+	/**
+	 * Set the query parameter values after removing all existing ones.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
 	 * @param params the query parameter name
 	 */
 	UriBuilder replaceQueryParams(MultiValueMap<String, String> params);

@@ -18,12 +18,12 @@ package org.springframework.web.servlet.function;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -32,7 +32,7 @@ public class RequestPredicateTests {
 
 	private ServerRequest request;
 
-	@Before
+	@BeforeEach
 	public void createRequest() {
 		this.request = new DefaultServerRequest(new MockHttpServletRequest(),
 				Collections.emptyList());
@@ -44,9 +44,9 @@ public class RequestPredicateTests {
 		RequestPredicate predicate2 = request -> true;
 		RequestPredicate predicate3 = request -> false;
 
-		assertTrue(predicate1.and(predicate2).test(request));
-		assertTrue(predicate2.and(predicate1).test(request));
-		assertFalse(predicate1.and(predicate3).test(request));
+		assertThat(predicate1.and(predicate2).test(request)).isTrue();
+		assertThat(predicate2.and(predicate1).test(request)).isTrue();
+		assertThat(predicate1.and(predicate3).test(request)).isFalse();
 	}
 
 	@Test
@@ -54,12 +54,12 @@ public class RequestPredicateTests {
 		RequestPredicate predicate = request -> false;
 		RequestPredicate negated = predicate.negate();
 
-		assertTrue(negated.test(request));
+		assertThat(negated.test(request)).isTrue();
 
 		predicate = request -> true;
 		negated = predicate.negate();
 
-		assertFalse(negated.test(request));
+		assertThat(negated.test(request)).isFalse();
 	}
 
 	@Test
@@ -68,9 +68,9 @@ public class RequestPredicateTests {
 		RequestPredicate predicate2 = request -> false;
 		RequestPredicate predicate3 = request -> false;
 
-		assertTrue(predicate1.or(predicate2).test(request));
-		assertTrue(predicate2.or(predicate1).test(request));
-		assertFalse(predicate2.or(predicate3).test(request));
+		assertThat(predicate1.or(predicate2).test(request)).isTrue();
+		assertThat(predicate2.or(predicate1).test(request)).isTrue();
+		assertThat(predicate2.or(predicate3).test(request)).isFalse();
 	}
 
 }

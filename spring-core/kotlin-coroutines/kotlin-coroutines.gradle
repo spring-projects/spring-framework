@@ -1,0 +1,35 @@
+description = "Spring Core Coroutines support"
+
+apply plugin: "kotlin"
+
+configurations {
+	classesOnlyElements {
+		canBeConsumed = true
+		canBeResolved = false
+	}
+}
+
+artifacts {
+	classesOnlyElements(compileKotlin.destinationDir)
+}
+
+dependencies {
+	compile("org.jetbrains.kotlin:kotlin-reflect")
+	compile("org.jetbrains.kotlin:kotlin-stdlib")
+	compile("io.projectreactor:reactor-core")
+	compile("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	compile("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+}
+
+eclipse {
+	project {
+		buildCommand "org.jetbrains.kotlin.ui.kotlinBuilder"
+		buildCommand "org.eclipse.jdt.core.javabuilder"
+		natures "org.jetbrains.kotlin.core.kotlinNature"
+		natures "org.eclipse.jdt.core.javanature"
+		linkedResource name: "kotlin_bin", type: "2", locationUri: "org.jetbrains.kotlin.core.filesystem:/" + project.name + "/kotlin_bin"
+	}
+	classpath {
+		containers "org.jetbrains.kotlin.core.KOTLIN_CONTAINER"
+	}
+}

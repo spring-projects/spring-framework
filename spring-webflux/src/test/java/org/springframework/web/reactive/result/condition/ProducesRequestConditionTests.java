@@ -19,13 +19,17 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -39,7 +43,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
@@ -47,13 +51,13 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
 	}
 
 	@Test
 	public void getProducibleMediaTypes() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/xml");
-		assertEquals(Collections.emptySet(), condition.getProducibleMediaTypes());
+		assertThat(condition.getProducibleMediaTypes()).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
@@ -61,7 +65,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/*");
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
@@ -69,7 +73,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain", "application/xml");
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
@@ -77,7 +81,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "application/xml"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
 	}
 
 	@Test // gh-21670
@@ -85,22 +89,19 @@ public class ProducesRequestConditionTests {
 		String base = "application/atom+xml";
 		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
-		assertNotNull("Declared parameter value must match if present in request",
-				condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter value must match if present in request").isNotNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=entry"));
-		assertNull("Declared parameter value must match if present in request",
-				condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter value must match if present in request").isNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base));
-		assertNotNull("Declared parameter has no impact if not present in request",
-				condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter has no impact if not present in request").isNotNull();
 
 		condition = new ProducesRequestCondition(base);
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
-		assertNotNull("No impact from other parameters in request", condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).as("No impact from other parameters in request").isNotNull();
 	}
 
 	@Test
@@ -108,7 +109,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "bogus"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "bogus"));
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
 	}
 
 	@Test // SPR-17550
@@ -126,9 +127,26 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept",
 				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"));
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
+	@Test // gh-22853
+	public void matchAndCompare() {
+		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
+		builder.headerResolver();
+		builder.fixedResolver(MediaType.TEXT_HTML);
+		RequestedContentTypeResolver resolver = builder.build();
+
+		ProducesRequestCondition none = new ProducesRequestCondition(new String[0], null, resolver);
+		ProducesRequestCondition html = new ProducesRequestCondition(new String[] {"text/html"}, null, resolver);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "*/*"));
+
+		ProducesRequestCondition noneMatch = none.getMatchingCondition(exchange);
+		ProducesRequestCondition htmlMatch = html.getMatchingCondition(exchange);
+
+		assertThat(noneMatch.compareTo(htmlMatch, exchange)).isEqualTo(1);
+	}
 
 	@Test
 	public void compareTo() {
@@ -139,31 +157,31 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
 				.header("Accept", "application/xml, text/html"));
 
-		assertTrue(html.compareTo(xml, exchange) > 0);
-		assertTrue(xml.compareTo(html, exchange) < 0);
-		assertTrue(xml.compareTo(none, exchange) < 0);
-		assertTrue(none.compareTo(xml, exchange) > 0);
-		assertTrue(html.compareTo(none, exchange) < 0);
-		assertTrue(none.compareTo(html, exchange) > 0);
+		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
+		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
+		assertThat(xml.compareTo(none, exchange) < 0).isTrue();
+		assertThat(none.compareTo(xml, exchange) > 0).isTrue();
+		assertThat(html.compareTo(none, exchange) < 0).isTrue();
+		assertThat(none.compareTo(html, exchange) > 0).isTrue();
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/xml, text/*"));
 
-		assertTrue(html.compareTo(xml, exchange) > 0);
-		assertTrue(xml.compareTo(html, exchange) < 0);
+		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
+		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/pdf"));
 
-		assertEquals(0, html.compareTo(xml, exchange));
-		assertEquals(0, xml.compareTo(html, exchange));
+		assertThat(html.compareTo(xml, exchange)).isEqualTo(0);
+		assertThat(xml.compareTo(html, exchange)).isEqualTo(0);
 
 		// See SPR-7000
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "text/html;q=0.9,application/xml"));
 
-		assertTrue(html.compareTo(xml, exchange) > 0);
-		assertTrue(xml.compareTo(html, exchange) < 0);
+		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
+		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
 	}
 
 	@Test
@@ -174,10 +192,10 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/*");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
 
 		result = condition2.compareTo(condition1, exchange);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
 	}
 
 	@Test
@@ -188,10 +206,10 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
 
 		result = condition2.compareTo(condition1, exchange);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
 	}
 
 	@Test
@@ -203,19 +221,19 @@ public class ProducesRequestConditionTests {
 				get("/").header("Accept", "text/plain", "application/xml"));
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
 
 		result = condition2.compareTo(condition1, exchange);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/xml", "text/plain"));
 
 		result = condition1.compareTo(condition2, exchange);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
 
 		result = condition2.compareTo(condition1, exchange);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
 	}
 
 	// SPR-8536
@@ -227,16 +245,14 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
-		assertTrue("Should have picked '*/*' condition as an exact match",
-				condition1.compareTo(condition2, exchange) < 0);
-		assertTrue("Should have picked '*/*' condition as an exact match",
-				condition2.compareTo(condition1, exchange) > 0);
+		assertThat(condition1.compareTo(condition2, exchange) < 0).as("Should have picked '*/*' condition as an exact match").isTrue();
+		assertThat(condition2.compareTo(condition1, exchange) > 0).as("Should have picked '*/*' condition as an exact match").isTrue();
 
 		condition1 = new ProducesRequestCondition("*/*");
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertTrue(condition1.compareTo(condition2, exchange) < 0);
-		assertTrue(condition2.compareTo(condition1, exchange) > 0);
+		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
+		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "*/*"));
@@ -244,14 +260,14 @@ public class ProducesRequestConditionTests {
 		condition1 = new ProducesRequestCondition();
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertTrue(condition1.compareTo(condition2, exchange) < 0);
-		assertTrue(condition2.compareTo(condition1, exchange) > 0);
+		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
+		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
 
 		condition1 = new ProducesRequestCondition("*/*");
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertTrue(condition1.compareTo(condition2, exchange) < 0);
-		assertTrue(condition2.compareTo(condition1, exchange) > 0);
+		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
+		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
 	}
 
 	// SPR-9021
@@ -263,8 +279,8 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
-		assertTrue(condition1.compareTo(condition2, exchange) < 0);
-		assertTrue(condition2.compareTo(condition1, exchange) > 0);
+		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
+		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
 	}
 
 	@Test
@@ -275,10 +291,10 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/xhtml");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertTrue("Should have used MediaType.equals(Object) to break the match", result < 0);
+		assertThat(result < 0).as("Should have used MediaType.equals(Object) to break the match").isTrue();
 
 		result = condition2.compareTo(condition1, exchange);
-		assertTrue("Should have used MediaType.equals(Object) to break the match", result > 0);
+		assertThat(result > 0).as("Should have used MediaType.equals(Object) to break the match").isTrue();
 	}
 
 	@Test
@@ -287,7 +303,7 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/xml");
 
 		ProducesRequestCondition result = condition1.combine(condition2);
-		assertEquals(condition2, result);
+		assertThat(result).isEqualTo(condition2);
 	}
 
 	@Test
@@ -296,7 +312,7 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition();
 
 		ProducesRequestCondition result = condition1.combine(condition2);
-		assertEquals(condition1, result);
+		assertThat(result).isEqualTo(condition1);
 	}
 
 	@Test
@@ -320,12 +336,12 @@ public class ProducesRequestConditionTests {
 		condition = new ProducesRequestCondition("application/xml");
 
 		result = condition.getMatchingCondition(exchange);
-		assertNull(result);
+		assertThat(result).isNull();
 	}
 
 	private void assertConditions(ProducesRequestCondition condition, String... expected) {
 		Collection<ProducesRequestCondition.ProduceMediaTypeExpression> expressions = condition.getContent();
-		assertEquals("Invalid number of conditions", expressions.size(), expected.length);
+		assertThat(expected.length).as("Invalid number of conditions").isEqualTo(expressions.size());
 		for (String s : expected) {
 			boolean found = false;
 			for (ProducesRequestCondition.ProduceMediaTypeExpression expr : expressions) {

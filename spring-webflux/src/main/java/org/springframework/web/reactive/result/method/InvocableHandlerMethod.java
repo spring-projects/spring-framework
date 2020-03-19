@@ -66,6 +66,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
+
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
 	 */
@@ -113,12 +114,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Configure a reactive registry. This is needed for cases where the response
-	 * is fully handled within the controller in combination with an async void
-	 * return value.
-	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
-	 * default settings.
-	 * @param registry the registry to use
+	 * Configure a reactive adapter registry. This is needed for cases where the response is
+	 * fully handled within the controller in combination with an async void return value.
+	 * <p>By default this is a {@link ReactiveAdapterRegistry} with default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
@@ -130,7 +128,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return a Mono with a {@link HandlerResult}.
+	 * @return a Mono with a {@link HandlerResult}
 	 */
 	@SuppressWarnings("KotlinInternalInJava")
 	public Mono<HandlerResult> invoke(
@@ -141,8 +139,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				ReflectionUtils.makeAccessible(getBridgedMethod());
 				Method method = getBridgedMethod();
-				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					value = CoroutinesUtils.invokeHandlerMethod(method, getBean(), args);
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())
+						&& CoroutinesUtils.isSuspendingFunction(method)) {
+					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
 				else {
 					value = method.invoke(getBean(), args);
@@ -181,10 +180,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private Mono<Object[]> getMethodArgumentValues(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		if (ObjectUtils.isEmpty(getMethodParameters())) {
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
-		MethodParameter[] parameters = getMethodParameters();
+
 		List<Mono<Object>> argMonos = new ArrayList<>(parameters.length);
 		for (MethodParameter parameter : parameters) {
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
@@ -200,7 +200,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				argMonos.add(this.resolvers.resolveArgument(parameter, bindingContext, exchange)
 						.defaultIfEmpty(NO_ARG_VALUE)
-						.doOnError(cause -> logArgumentErrorIfNecessary(exchange, parameter, cause)));
+						.doOnError(ex -> logArgumentErrorIfNecessary(exchange, parameter, ex)));
 			}
 			catch (Exception ex) {
 				logArgumentErrorIfNecessary(exchange, parameter, ex);
@@ -208,17 +208,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return Mono.zip(argMonos, values ->
-				Stream.of(values).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
+				Stream.of(values).map(value -> value != NO_ARG_VALUE ? value : null).toArray());
 	}
 
-	private void logArgumentErrorIfNecessary(
-			ServerWebExchange exchange, MethodParameter parameter, Throwable cause) {
-
-		// Leave stack trace for later, if error is not handled..
-		String message = cause.getMessage();
-		if (!message.contains(parameter.getExecutable().toGenericString())) {
+	private void logArgumentErrorIfNecessary(ServerWebExchange exchange, MethodParameter parameter, Throwable ex) {
+		// Leave stack trace for later, if error is not handled...
+		String exMsg = ex.getMessage();
+		if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
+				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, exMsg));
 			}
 		}
 	}

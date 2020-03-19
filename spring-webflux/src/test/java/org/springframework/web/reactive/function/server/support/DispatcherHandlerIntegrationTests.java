@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.server.support;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -24,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -33,15 +31,17 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  */
-public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -56,12 +56,14 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	}
 
 
-	@Test
-	public void nested() {
+	@ParameterizedHttpServerTest
+	void nested(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result = this.restTemplate
 				.getForEntity("http://localhost:" + this.port + "/foo/bar", String.class);
 
-		assertEquals(200, result.getStatusCodeValue());
+		assertThat(result.getStatusCodeValue()).isEqualTo(200);
 	}
 
 

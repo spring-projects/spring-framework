@@ -41,7 +41,11 @@ import org.springframework.util.ObjectUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 4.0
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
+@Deprecated
 abstract class AnnotationReadingVisitorUtils {
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,

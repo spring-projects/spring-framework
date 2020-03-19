@@ -17,15 +17,15 @@
 package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests
@@ -44,7 +44,7 @@ public class ExposeInvocationInterceptorTests {
 		String name = "tony";
 		tb.setName(name);
 		// Fires context checks
-		assertEquals(name, tb.getName());
+		assertThat(tb.getName()).isEqualTo(name);
 	}
 
 }
@@ -74,8 +74,7 @@ class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean
 
 	@Override
 	protected void assertions(MethodInvocation invocation) {
-		assertTrue(invocation.getThis() == this);
-		assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
-				ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
+		assertThat(invocation.getThis() == this).isTrue();
+		assertThat(ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass())).as("Invocation should be on ITestBean: " + invocation.getMethod()).isTrue();
 	}
 }

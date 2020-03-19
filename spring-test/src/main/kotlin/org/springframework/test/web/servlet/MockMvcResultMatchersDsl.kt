@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.result.*
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class MockMvcResultMatchersDsl(private val actions: ResultActions) {
+class MockMvcResultMatchersDsl internal constructor (private val actions: ResultActions) {
 
 	/**
 	 * @see MockMvcResultMatchers.request

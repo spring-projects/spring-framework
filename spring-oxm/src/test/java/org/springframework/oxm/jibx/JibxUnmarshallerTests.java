@@ -17,15 +17,16 @@
 package org.springframework.oxm.jibx;
 
 import java.io.ByteArrayInputStream;
+
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.JRE.JAVA_8;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
@@ -35,18 +36,12 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  */
 @Deprecated
+@EnabledOnJre(JAVA_8) // JiBX compiler is currently not compatible with JDK 9
 public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshaller> {
 
 	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
-
-
-	@BeforeClass
-	public static void compilerAssumptions() {
-		// JiBX compiler is currently not compatible with JDK 9
-		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
-	}
 
 
 	@Override
@@ -60,16 +55,16 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 	@Override
 	protected void testFlights(Object o) {
 		Flights flights = (Flights) o;
-		assertNotNull("Flights is null", flights);
-		assertEquals("Invalid amount of flight elements", 1, flights.sizeFlightList());
+		assertThat(flights).as("Flights is null").isNotNull();
+		assertThat(flights.sizeFlightList()).as("Invalid amount of flight elements").isEqualTo(1);
 		testFlight(flights.getFlight(0));
 	}
 
 	@Override
 	protected void testFlight(Object o) {
 		FlightType flight = (FlightType) o;
-		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getNumber());
+		assertThat(flight).as("Flight is null").isNotNull();
+		assertThat(flight.getNumber()).as("Number is invalid").isEqualTo(42L);
 	}
 
 
@@ -89,7 +84,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 		testFlights(flights);
 
 		FlightType flight = ((Flights)flights).getFlight(0);
-		assertEquals("Airline is invalid", "Air Libert\u00e9", flight.getAirline());
+		assertThat(flight.getAirline()).as("Airline is invalid").isEqualTo("Air Libert\u00e9");
 	}
 
 }

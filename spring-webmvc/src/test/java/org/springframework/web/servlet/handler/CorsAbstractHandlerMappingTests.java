@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@ package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
 import java.util.Collections;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,24 +38,25 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for CORS-related handling in {@link AbstractHandlerMapping}.
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class CorsAbstractHandlerMappingTests {
+class CorsAbstractHandlerMappingTests {
 
 	private MockHttpServletRequest request;
 
 	private AbstractHandlerMapping handlerMapping;
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		this.handlerMapping = new TestHandlerMapping();
 		this.handlerMapping.setInterceptors(mock(HandlerInterceptor.class));
@@ -65,58 +66,72 @@ public class CorsAbstractHandlerMappingTests {
 	}
 
 	@Test
-	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
+	void actualRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertTrue(chain.getHandler() instanceof SimpleHandler);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
 	}
 
 	@Test
-	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
+	void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertTrue(chain.getHandler() instanceof SimpleHandler);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isNotNull();
+		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
 	}
 
 	@Test
-	public void actualRequestWithCorsConfigurationProvider() throws Exception {
+	void actualRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/cors");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertTrue(chain.getHandler() instanceof CorsAwareHandler);
-		assertEquals(Collections.singletonList("*"), getRequiredCorsConfiguration(chain, false).getAllowedOrigins());
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(CorsAwareHandler.class);
+		assertThat(getRequiredCorsConfiguration(chain, false).getAllowedOrigins()).containsExactly("*");
+	}
+
+	@Test // see gh-23843
+	void actualRequestWithCorsConfigurationProviderForHandlerChain() throws Exception {
+		this.request.setMethod(RequestMethod.GET.name());
+		this.request.setRequestURI("/chain");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
+
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(CorsAwareHandler.class);
+		assertThat(getRequiredCorsConfiguration(chain, false).getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test
-	public void preflightRequestWithCorsConfigurationProvider() throws Exception {
+	void preflightRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/cors");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertNotNull(chain.getHandler());
-		assertEquals("PreFlightHandler", chain.getHandler().getClass().getSimpleName());
-		assertEquals(Collections.singletonList("*"), getRequiredCorsConfiguration(chain, true).getAllowedOrigins());
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isNotNull();
+		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(getRequiredCorsConfiguration(chain, true).getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test
-	public void actualRequestWithMappedCorsConfiguration() throws Exception {
+	void actualRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
@@ -124,15 +139,15 @@ public class CorsAbstractHandlerMappingTests {
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertTrue(chain.getHandler() instanceof SimpleHandler);
-		assertEquals(Collections.singletonList("*"), getRequiredCorsConfiguration(chain, false).getAllowedOrigins());
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
+		assertThat(getRequiredCorsConfiguration(chain, false).getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test
-	public void preflightRequestWithMappedCorsConfiguration() throws Exception {
+	void preflightRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
@@ -140,47 +155,47 @@ public class CorsAbstractHandlerMappingTests {
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertNotNull(chain.getHandler());
-		assertEquals("PreFlightHandler", chain.getHandler().getClass().getSimpleName());
-		assertEquals(Collections.singletonList("*"), getRequiredCorsConfiguration(chain, true).getAllowedOrigins());
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isNotNull();
+		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(getRequiredCorsConfiguration(chain, true).getAllowedOrigins()).containsExactly("*");
 	}
 
 	@Test
-	public void actualRequestWithCorsConfigurationSource() throws Exception {
+	void actualRequestWithCorsConfigurationSource() throws Exception {
 		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertTrue(chain.getHandler() instanceof SimpleHandler);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
 		CorsConfiguration config = getRequiredCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertEquals(Collections.singletonList("*"), config.getAllowedOrigins());
-		assertEquals(true, config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
 	@Test
-	public void preflightRequestWithCorsConfigurationSource() throws Exception {
+	void preflightRequestWithCorsConfigurationSource() throws Exception {
 		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
 
-		assertNotNull(chain);
-		assertNotNull(chain.getHandler());
-		assertEquals("PreFlightHandler", chain.getHandler().getClass().getSimpleName());
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isNotNull();
+		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
 		CorsConfiguration config = getRequiredCorsConfiguration(chain, true);
-		assertNotNull(config);
-		assertEquals(Collections.singletonList("*"), config.getAllowedOrigins());
-		assertEquals(true, config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
 
@@ -189,7 +204,7 @@ public class CorsAbstractHandlerMappingTests {
 		CorsConfiguration corsConfig = null;
 		if (isPreFlightRequest) {
 			Object handler = chain.getHandler();
-			assertEquals("PreFlightHandler", handler.getClass().getSimpleName());
+			assertThat(handler.getClass().getSimpleName()).isEqualTo("PreFlightHandler");
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handler);
 			corsConfig = (CorsConfiguration) accessor.getPropertyValue("config");
 		}
@@ -200,7 +215,7 @@ public class CorsAbstractHandlerMappingTests {
 				corsConfig = (CorsConfiguration) accessor.getPropertyValue("config");
 			}
 		}
-		assertNotNull(corsConfig);
+		assertThat(corsConfig).isNotNull();
 		return corsConfig;
 	}
 
@@ -210,6 +225,9 @@ public class CorsAbstractHandlerMappingTests {
 		protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 			if (request.getRequestURI().equals("/cors")) {
 				return new CorsAwareHandler();
+			}
+			else if (request.getRequestURI().equals("/chain")) {
+				return new HandlerExecutionChain(new CorsAwareHandler());
 			}
 			return new SimpleHandler();
 		}

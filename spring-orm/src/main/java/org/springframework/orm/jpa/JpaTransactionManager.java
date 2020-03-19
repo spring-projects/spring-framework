@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -401,6 +402,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			Object transactionData = getJpaDialect().beginTransaction(em,
 					new JpaTransactionDefinition(definition, timeoutToUse, txObject.isNewEntityManagerHolder()));
 			txObject.setTransactionData(transactionData);
+			txObject.setReadOnly(definition.isReadOnly());
 
 			// Register transaction timeout.
 			if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -602,9 +604,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 					getJpaDialect().releaseJdbcConnection(conHandle,
 							txObject.getEntityManagerHolder().getEntityManager());
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					// Just log it, to keep a transaction-related exception.
-					logger.error("Could not close JDBC connection after transaction", ex);
+					logger.error("Failed to release JDBC connection after transaction", ex);
 				}
 			}
 		}

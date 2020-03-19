@@ -502,7 +502,7 @@ public abstract class AnnotatedElementUtils {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, nestedAnnotationsAsMap);
 		return getAnnotations(element).stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(AnnotatedElementUtils::parentAndType))
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(AnnotatedElementUtils::nullIfEmpty, adaptations));
 	}
@@ -750,36 +750,25 @@ public abstract class AnnotatedElementUtils {
 	}
 
 	private static MergedAnnotations getAnnotations(AnnotatedElement element) {
-		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS,
-				RepeatableContainers.none(), AnnotationFilter.PLAIN);
+		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none());
 	}
 
 	private static MergedAnnotations getRepeatableAnnotations(AnnotatedElement element,
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
-		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS,
-				repeatableContainers, AnnotationFilter.PLAIN);
+		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, repeatableContainers);
 	}
 
 	private static MergedAnnotations findAnnotations(AnnotatedElement element) {
-		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
-				RepeatableContainers.none(), AnnotationFilter.PLAIN);
+		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none());
 	}
 
 	private static MergedAnnotations findRepeatableAnnotations(AnnotatedElement element,
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
-		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
-				repeatableContainers, AnnotationFilter.PLAIN);
-	}
-
-	private static Object parentAndType(MergedAnnotation<Annotation> annotation) {
-		if (annotation.getParent() == null) {
-			return annotation.getType().getName();
-		}
-		return annotation.getParent().getType().getName() + ":" + annotation.getParent().getType().getName();
+		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, repeatableContainers);
 	}
 
 	@Nullable
@@ -837,6 +826,6 @@ public abstract class AnnotatedElementUtils {
 			return this.annotations.clone();
 		}
 
-	};
+	}
 
 }

@@ -1,12 +1,6 @@
 description = "Spring Web"
 
-dependencyManagement {
-	imports {
-		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
-		mavenBom "io.netty:netty-bom:${nettyVersion}"
-		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
-	}
-}
+apply plugin: "kotlin"
 
 dependencies {
 	compile(project(":spring-beans"))
@@ -15,73 +9,78 @@ dependencies {
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
 	optional("javax.servlet:javax.servlet-api:3.1.0")
-	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
-	optional("javax.el:javax.el-api:3.0.1-b04")
-	optional("javax.faces:javax.faces-api:2.2")
-	optional("javax.json.bind:javax.json.bind-api:1.0")
-	optional("javax.mail:javax.mail-api:1.6.2")
-	optional("javax.validation:validation-api:1.1.0.Final")
-	optional("javax.xml.bind:jaxb-api:2.3.1")
-	optional("javax.xml.ws:jaxws-api:2.3.1")
-	optional("org.glassfish.main:javax.jws:4.0-b33")
-	optional("io.reactivex:rxjava:${rxjavaVersion}")
-	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
-	optional("io.netty:netty-all")
+	optional("javax.servlet.jsp:javax.servlet.jsp-api")
+	optional("javax.el:javax.el-api")
+	optional("javax.faces:javax.faces-api")
+	optional("javax.json.bind:javax.json.bind-api")
+	optional("javax.mail:javax.mail-api")
+	optional("javax.validation:validation-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.xml.ws:jaxws-api")
+	optional("org.glassfish.main:javax.jws")
+	optional("io.reactivex:rxjava")
+	optional("io.reactivex:rxjava-reactive-streams")
+	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.netty:netty-buffer")
+	optional("io.netty:netty-handler")
+	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
+	optional("io.netty:netty-transport")  // Until Netty4ClientHttpRequest is removed
 	optional("io.projectreactor.netty:reactor-netty")
-	optional("io.undertow:undertow-core:${undertowVersion}")
-	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	optional("io.undertow:undertow-core")
+	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
-	optional("com.squareup.okhttp3:okhttp:3.14.0")
-	optional("org.apache.httpcomponents:httpclient:4.5.8") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
-	optional("org.apache.httpcomponents:httpasyncclient:4.1.4") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
-	optional("commons-fileupload:commons-fileupload:1.4")
-	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
-	optional("com.fasterxml.woodstox:woodstox-core:5.2.0") {  // woodstox before aalto
-		exclude group: "stax", module: "stax-api"
-	}
-	optional("com.fasterxml:aalto-xml:1.1.1")
-	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
-	optional("com.google.code.gson:gson:2.8.5")
-	optional("com.google.protobuf:protobuf-java-util:3.6.1")
-	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("com.rometools:rome:1.12.0")
-	optional("com.caucho:hessian:4.0.51")
-	optional("org.codehaus.groovy:groovy:${groovyVersion}")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient")
+	optional("com.squareup.okhttp3:okhttp")
+	optional("org.apache.httpcomponents:httpclient")
+	optional("org.apache.httpcomponents:httpasyncclient")
+	optional("commons-fileupload:commons-fileupload")
+	optional("org.synchronoss.cloud:nio-multipart-parser")
+	optional("com.fasterxml.woodstox:woodstox-core")
+	optional("com.fasterxml:aalto-xml")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
+	optional("com.google.code.gson:gson")
+	optional("com.google.protobuf:protobuf-java-util")
+	optional("com.googlecode.protobuf-java-format:protobuf-java-format")
+	optional("com.rometools:rome")
+	optional("com.caucho:hessian")
+	optional("org.codehaus.groovy:groovy")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
-		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
-	}
-	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
-	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
-	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson2Version}")
-	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
-	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
-	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("org.apache.taglibs:taglibs-standard-jstlel")
+	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda")
+	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin")
+	testCompile("org.apache.tomcat:tomcat-util")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.14.0")
-	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	testCompile("org.skyscreamer:jsonassert:1.5.0")
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testRuntime("com.sun.mail:javax.mail:1.6.2")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
-	testRuntime("javax.json:javax.json-api:1.1.4")
-	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.11")
+	testCompile("com.squareup.okhttp3:mockwebserver")
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.skyscreamer:jsonassert")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testRuntime("com.sun.mail:javax.mail")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+	testRuntime("javax.json:javax.json-api")
+	testRuntime("org.apache.johnzon:johnzon-jsonb")
+	testFixturesApi("javax.servlet:javax.servlet-api")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.apache.taglibs:taglibs-standard-jstlel")
+	testFixturesImplementation("org.assertj:assertj-core")
 }

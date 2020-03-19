@@ -16,8 +16,6 @@
 
 package org.springframework.http.codec.json;
 
-import java.nio.charset.StandardCharsets;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
@@ -37,8 +35,8 @@ import org.springframework.util.MimeType;
 public class Jackson2SmileDecoder extends AbstractJackson2Decoder {
 
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
-					new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8),
-					new MimeType("application", "*+x-jackson-smile", StandardCharsets.UTF_8)};
+					new MimeType("application", "x-jackson-smile"),
+					new MimeType("application", "*+x-jackson-smile")};
 
 
 	public Jackson2SmileDecoder() {

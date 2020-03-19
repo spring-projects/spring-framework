@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.context.conversionservice;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
@@ -31,10 +31,10 @@ public class ConversionServiceContextConfigTests {
 	public void testConfigOk() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/context/conversionservice/conversionService.xml");
 		TestClient client = context.getBean("testClient", TestClient.class);
-		assertEquals(2, client.getBars().size());
-		assertEquals("value1", client.getBars().get(0).getValue());
-		assertEquals("value2", client.getBars().get(1).getValue());
-		assertTrue(client.isBool());
+		assertThat(client.getBars().size()).isEqualTo(2);
+		assertThat(client.getBars().get(0).getValue()).isEqualTo("value1");
+		assertThat(client.getBars().get(1).getValue()).isEqualTo("value2");
+		assertThat(client.isBool()).isTrue();
 	}
 
 }

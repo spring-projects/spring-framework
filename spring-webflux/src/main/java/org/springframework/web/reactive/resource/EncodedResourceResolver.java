@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,9 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 
 	private String getExtension(String coding) {
 		String extension = this.extensions.get(coding);
-		Assert.state(extension != null, () -> "No file extension associated with content coding " + coding);
+		if (extension == null) {
+			throw new IllegalStateException("No file extension associated with content coding " + coding);
+		}
 		return extension;
 	}
 

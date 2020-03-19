@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify the behavior requested in
@@ -52,9 +52,9 @@ public class LookUpNonexistentTxMgrTests {
 
 	@Test
 	public void nonTransactionalTest() {
-		assertEquals(0, txManager.begun);
-		assertEquals(0, txManager.inflight);
-		assertEquals(0, txManager.commits);
-		assertEquals(0, txManager.rollbacks);
+		assertThat(txManager.begun).isEqualTo(0);
+		assertThat(txManager.inflight).isEqualTo(0);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 	}
 }

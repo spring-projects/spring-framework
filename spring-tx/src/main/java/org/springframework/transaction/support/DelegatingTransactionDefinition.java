@@ -75,7 +75,7 @@ public abstract class DelegatingTransactionDefinition implements TransactionDefi
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return this.targetDefinition.equals(other);
 	}
 

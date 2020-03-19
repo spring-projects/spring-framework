@@ -101,6 +101,10 @@ operations on the output, but you need to adapt the output for use with another 
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
 of RxJava or another reactive library. See <<webflux-reactive-libraries>> for more details.
 
+NOTE: In addition to Reactive APIs, WebFlux can also be used with 
+<<languages.adoc#coroutines, Coroutines>> APIs in Kotlin which provides a more imperative style of programming.
+The following Kotlin code samples will be provided with Coroutines APIs.
+
 
 
 [[webflux-programming-models]]
@@ -378,58 +382,106 @@ https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spr
 The code snippets below show using the `HttpHandler` adapters with each server API:
 
 *Reactor Netty*
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-HttpHandler handler = ...
-ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
-HttpServer.create(host, port).newHandler(adapter).block();
+	HttpHandler handler = ...
+	ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
+	HttpServer.create().host(host).port(port).handle(adapter).bind().block();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val handler: HttpHandler = ...
+	val adapter = ReactorHttpHandlerAdapter(handler)
+	HttpServer.create().host(host).port(port).handle(adapter).bind().block()
 ----
 
 *Undertow*
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-HttpHandler handler = ...
-UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
-Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
-server.start();
+	HttpHandler handler = ...
+	UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
+	Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
+	server.start();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val handler: HttpHandler = ...
+	val adapter = UndertowHttpHandlerAdapter(handler)
+	val server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build()
+	server.start()
 ----
 
 *Tomcat*
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-HttpHandler handler = ...
-Servlet servlet = new TomcatHttpHandlerAdapter(handler);
+	HttpHandler handler = ...
+	Servlet servlet = new TomcatHttpHandlerAdapter(handler);
 
-Tomcat server = new Tomcat();
-File base = new File(System.getProperty("java.io.tmpdir"));
-Context rootContext = server.addContext("", base.getAbsolutePath());
-Tomcat.addServlet(rootContext, "main", servlet);
-rootContext.addServletMappingDecoded("/", "main");
-server.setHost(host);
-server.setPort(port);
-server.start();
+	Tomcat server = new Tomcat();
+	File base = new File(System.getProperty("java.io.tmpdir"));
+	Context rootContext = server.addContext("", base.getAbsolutePath());
+	Tomcat.addServlet(rootContext, "main", servlet);
+	rootContext.addServletMappingDecoded("/", "main");
+	server.setHost(host);
+	server.setPort(port);
+	server.start();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val handler: HttpHandler = ...
+	val servlet = TomcatHttpHandlerAdapter(handler)
+
+	val server = Tomcat()
+	val base = File(System.getProperty("java.io.tmpdir"))
+	val rootContext = server.addContext("", base.absolutePath)
+	Tomcat.addServlet(rootContext, "main", servlet)
+	rootContext.addServletMappingDecoded("/", "main")
+	server.host = host
+	server.setPort(port)
+	server.start()
 ----
 
 *Jetty*
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-HttpHandler handler = ...
-Servlet servlet = new JettyHttpHandlerAdapter(handler);
+	HttpHandler handler = ...
+	Servlet servlet = new JettyHttpHandlerAdapter(handler);
 
-Server server = new Server();
-ServletContextHandler contextHandler = new ServletContextHandler(server, "");
-contextHandler.addServlet(new ServletHolder(servlet), "/");
-contextHandler.start();
+	Server server = new Server();
+	ServletContextHandler contextHandler = new ServletContextHandler(server, "");
+	contextHandler.addServlet(new ServletHolder(servlet), "/");
+	contextHandler.start();
 
-ServerConnector connector = new ServerConnector(server);
-connector.setHost(host);
-connector.setPort(port);
-server.addConnector(connector);
-server.start();
+	ServerConnector connector = new ServerConnector(server);
+	connector.setHost(host);
+	connector.setPort(port);
+	server.addConnector(connector);
+	server.start();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val handler: HttpHandler = ...
+	val servlet = JettyHttpHandlerAdapter(handler)
+
+	val server = Server()
+	val contextHandler = ServletContextHandler(server, "")
+	contextHandler.addServlet(ServletHolder(servlet), "/")
+	contextHandler.start();
+
+	val connector = ServerConnector(server)
+	connector.host = host
+	connector.port = port
+	server.addConnector(connector)
+	server.start()
 ----
 
 *Servlet 3.1+ Container*
@@ -523,10 +575,15 @@ Spring ApplicationContext, or that can be registered directly with it:
 
 `ServerWebExchange` exposes the following method for access to form data:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-Mono<MultiValueMap<String, String>> getFormData();
+	Mono<MultiValueMap<String, String>> getFormData();
+----
+[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	suspend fun getFormData(): MultiValueMap<String, String>
 ----
 
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
@@ -537,14 +594,19 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 [[webflux-multipart]]
 ==== Multipart Data
-[.small]#<<web.adoc#mvc-multipart, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multipart, Web MVC>>#
 
 `ServerWebExchange` exposes the following method for access to multipart data:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-Mono<MultiValueMap<String, Part>> getMultipartData();
+	Mono<MultiValueMap<String, Part>> getMultipartData();
+----
+[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	suspend fun getMultipartData(): MultiValueMap<String, Part>
 ----
 
 The `DefaultServerWebExchange` uses the configured
@@ -564,7 +626,7 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 [[webflux-forwarded-headers]]
 ==== Forwarded Headers
-[.small]#<<web.adoc#filters-forwarded-headers, Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters-forwarded-headers, Web MVC>>#
 
 As a request goes through proxies (such as load balancers), the host, port, and
 scheme may change, and that makes it a challenge, from a client perspective, to create links that point to the correct
@@ -595,7 +657,7 @@ filters, and `ForwardedHeaderTransformer` is used instead.
 
 [[webflux-filters]]
 === Filters
-[.small]#<<web.adoc#filters, Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters, Web MVC>>#
 
 In the <<webflux-web-handler-api>>, you can use a `WebFilter` to apply interception-style
 logic before and after the rest of the processing chain of filters and the target
@@ -606,19 +668,19 @@ the bean declaration or by implementing `Ordered`.
 
 [[webflux-filters-cors]]
 ==== CORS
-[.small]#<<web.adoc#filters-cors, Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters-cors, Web MVC>>#
 
 Spring WebFlux provides fine-grained support for CORS configuration through annotations on
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
 `CorsFilter`, which must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+See the section on <<webflux-cors>> and the <<webflux-cors.adoc#webflux-cors-webfilter>> for more details.
 
 
 
 [[webflux-exception-handler]]
 === Exceptions
-[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page, Web MVC>>#
 
 In the <<webflux-web-handler-api>>, you can use a `WebExceptionHandler` to handle
 exceptions from the chain of `WebFilter` instances and the target `WebHandler`. When using the
@@ -649,7 +711,7 @@ The following table describes the available `WebExceptionHandler` implementation
 
 [[webflux-codecs]]
 === Codecs
-[.small]#<<integration.adoc#rest-message-conversion, Same as in Spring MVC>>#
+[.small]#<<integration.adoc#rest-message-conversion, Web MVC>>#
 
 The `spring-web` and `spring-core` modules provide support for serializing and
 deserializing byte content to and from higher level objects through non-blocking I/O with
@@ -740,7 +802,7 @@ consistently for access to the cached form data versus reading from the raw requ
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
 encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
 another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`. At present the
+collects the parts into a `MultiValueMap`. At present
 https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
 actual parsing.
 
@@ -755,13 +817,42 @@ for repeated, map-like access to parts, or otherwise rely on the
 `SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
 
 
+[[webflux-codecs-limits]]
+==== Limits
+
+`Decoder` and `HttpMessageReader` implementations that buffer some or all of the input
+stream can be configured with a limit on the maximum number of bytes to buffer in memory.
+In some cases buffering occurs because input is aggregated and represented as a single
+object — for example, a controller method with `@RequestBody byte[]`,
+`x-www-form-urlencoded` data, and so on. Buffering can also occur with streaming, when
+splitting the input stream — for example, delimited text, a stream of JSON objects, and
+so on. For those streaming cases, the limit applies to the number of bytes associated
+with one object in the stream.
+
+To configure buffer sizes, you can check if a given `Decoder` or `HttpMessageReader`
+exposes a `maxInMemorySize` property and if so the Javadoc will have details about default
+values. In WebFlux, the `ServerCodecConfigurer` provides a
+<<webflux-config-message-codecs,single place>> from where to set all codecs, through the
+`maxInMemorySize` property for default codecs. On the client side, the limit can be changed
+in <<web-reactive.adoc#webflux-client-builder-maxinmemorysize, WebClient.Builder>>.
+
+For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
+the size of non-file parts. For file parts it determines the threshold at which the part
+is written to disk. For file parts written to disk, there is an additional
+`maxDiskUsagePerPart` property to limit the amount of disk space per part. There is also
+a `maxParts` property to limit the overall number of parts in a multipart request.
+To configure all 3 in WebFlux, you'll need to supply a pre-configured instance of
+`MultipartHttpMessageReader` to `ServerCodecConfigurer`.
+
+
+
 [[webflux-codecs-streaming]]
 ==== Streaming
-[.small]#<<web.adoc#mvc-ann-async-http-streaming, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-async-http-streaming, Web MVC>>#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
 `application/stream+json`), it is important to send data periodically, in order to
-reliably detect a disconnected client sooner rather than later. Such a send could be an
+reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.
 
@@ -777,17 +868,15 @@ when consumed to avoid memory leaks.
 
 WebFlux applications generally do not need to be concerned with such issues, unless they
 consume or produce data buffers directly, as opposed to relying on codecs to convert to
-and from higher level objects. Or unless they choose to create custom codecs. For such
-cases please review the the information in <<core#databuffers, Data Buffers and Codecs>>,
+and from higher level objects, or unless they choose to create custom codecs. For such
+cases please review the information in <<core#databuffers, Data Buffers and Codecs>>,
 especially the section on <<core#databuffers-using, Using DataBuffer>>.
-
-
 
 
 
 [[webflux-logging]]
 === Logging
-[.small]#<<web.adoc#mvc-logging, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-logging, Web MVC>>#
 
 DEBUG level logging in Spring WebFlux is designed to be compact, minimal, and
 human-friendly. It focuses on high value bits of information that are useful over and
@@ -819,46 +908,98 @@ while a fully formatted prefix based on that ID is available from
 
 [[webflux-logging-sensitive-data]]
 ==== Sensitive Data
-[.small]#<<web.adoc#mvc-logging-sensitive-data, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-logging-sensitive-data, Web MVC>>#
 
 `DEBUG` and `TRACE` logging can log sensitive information. This is why form parameters and
 headers are masked by default and you must explicitly enable their logging in full.
 
-The followig example shows how to do so for server-side requests:
+The following example shows how to do so for server-side requests:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Configuration
-@EnableWebFlux
-class MyConfig implements WebFluxConfigurer {
+	@Configuration
+	@EnableWebFlux
+	class MyConfig implements WebFluxConfigurer {
 
-	@Override
-	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
-		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+		@Override
+		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			configurer.defaultCodecs().enableLoggingRequestDetails(true);
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class MyConfig : WebFluxConfigurer {
+
+		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
+			configurer.defaultCodecs().enableLoggingRequestDetails(true)
+		}
+	}
 ----
 
 The following example shows how to do so for client-side requests:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-Consumer<ClientCodecConfigurer> consumer = configurer ->
-		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+	Consumer<ClientCodecConfigurer> consumer = configurer ->
+			configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
-WebClient webClient = WebClient.builder()
-		.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
-		.build();
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(strategies -> strategies.codecs(consumer))
+			.build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val consumer: (ClientCodecConfigurer) -> Unit  = { configurer -> configurer.defaultCodecs().enableLoggingRequestDetails(true) }
+
+	val webClient = WebClient.builder()
+			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
+			.build()
 ----
 
+[[webflux-codecs-custom]]
+==== Custom codecs
 
+Applications can register custom codecs for supporting additional media types,
+or specific behaviors that are not supported by the default codecs.
 
+Some configuration options expressed by developers are enforced on default codecs.
+Custom codecs might want to get a chance to align with those preferences,
+like <<webflux-codecs-limits, enforcing buffering limits>>
+or <<webflux-logging-sensitive-data, logging sensitive data>>.
+
+The following example shows how to do so for client-side requests:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient webClient = WebClient.builder()
+			.codecs(configurer -> {
+					CustomDecoder decoder = new CustomDecoder();
+                    configurer.customCodecs().registerWithDefaultConfig(decoder);
+			})
+			.build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val webClient = WebClient.builder()
+			.codecs({ configurer ->
+					val decoder = CustomDecoder()
+            		configurer.customCodecs().registerWithDefaultConfig(decoder)
+			 })
+			.build()
+----
 
 [[webflux-dispatcher-handler]]
 == `DispatcherHandler`
-[.small]#<<web.adoc#mvc-servlet, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet, Web MVC>>#
 
 Spring WebFlux, similarly to Spring MVC, is designed around the front controller pattern,
 where a central `WebHandler`, the `DispatcherHandler`, provides a shared algorithm for
@@ -882,11 +1023,17 @@ Spring configuration in a WebFlux application typically contains:
 The configuration is given to `WebHttpHandlerBuilder` to build the processing chain,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-ApplicationContext context = ...
-HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
+	ApplicationContext context = ...
+	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val context: ApplicationContext = ...
+	val handler = WebHttpHandlerBuilder.applicationContext(context).build()
 ----
 
 The resulting `HttpHandler` is ready for use with a <<webflux-httphandler, server adapter>>.
@@ -895,7 +1042,7 @@ The resulting `HttpHandler` is ready for use with a <<webflux-httphandler, serve
 
 [[webflux-special-bean-types]]
 === Special Bean Types
-[.small]#<<web.adoc#mvc-servlet-special-bean-types, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-special-bean-types, Web MVC>>#
 
 The `DispatcherHandler` delegates to special beans to process requests and render the
 appropriate responses. By "`special beans,`" we mean Spring-managed `Object` instances that
@@ -937,7 +1084,7 @@ there are also some other beans detected at a lower level (see
 
 [[webflux-framework-config]]
 === WebFlux Config
-[.small]#<<web.adoc#mvc-servlet-config, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-config, Web MVC>>#
 
 Applications can declare the infrastructure beans (listed under
 <<webflux-web-handler-api-special-beans, Web Handler API>> and
@@ -952,7 +1099,7 @@ many extra convenient options.
 
 [[webflux-dispatcher-handler-sequence]]
 === Processing
-[.small]#<<web.adoc#mvc-servlet-sequence, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-sequence, Web MVC>>#
 
 `DispatcherHandler` processes requests as follows:
 
@@ -1003,7 +1150,7 @@ as a `HandlerResult`, along with some additional context, and passed to the firs
 
 [[webflux-dispatcher-exceptions]]
 === Exceptions
-[.small]#<<web.adoc#mvc-exceptionhandlers, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-exceptionhandlers, Web MVC>>#
 
 The `HandlerResult` returned from a `HandlerAdapter` can expose a function for error
 handling based on some handler-specific mechanism. This error function is called if:
@@ -1026,7 +1173,7 @@ See also <<webflux-ann-controller-exceptions>> in the "`Annotated Controller`" s
 
 [[webflux-viewresolution]]
 === View Resolution
-[.small]#<<web.adoc#mvc-viewresolver, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-viewresolver, Web MVC>>#
 
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
@@ -1037,7 +1184,7 @@ instance. The `View` is then used to render the response.
 
 [[webflux-viewresolution-handling]]
 ==== Handling
-[.small]#<<web.adoc#mvc-handling, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-handling, Web MVC>>#
 
 The `HandlerResult` passed into `ViewResolutionResultHandler` contains the return value
 from the handler and the model that contains attributes added during request
@@ -1073,7 +1220,7 @@ See <<webflux-view>> for more on the view technologies integrated with Spring We
 
 [[webflux-redirecting-redirect-prefix]]
 ==== Redirecting
-[.small]#<<web.adoc#mvc-redirecting-redirect-prefix, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-redirecting-redirect-prefix, Web MVC>>#
 
 The special `redirect:` prefix in a view name lets you perform a redirect. The
 `UrlBasedViewResolver` (and sub-classes) recognize this as an instruction that a
@@ -1088,7 +1235,7 @@ operate in terms of logical view names. A view name such as
 
 [[webflux-multiple-representations]]
 ==== Content Negotiation
-[.small]#<<web.adoc#mvc-multiple-representations, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multiple-representations, Web MVC>>#
 
 `ViewResolutionResultHandler` supports content negotiation. It compares the request
 media types with the media types supported by each selected `View`. The first `View`
@@ -1105,7 +1252,7 @@ always selected and used if they match the requested media type.
 
 [[webflux-controller]]
 == Annotated Controllers
-[.small]#<<web.adoc#mvc-controller, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-controller, Web MVC>>#
 
 Spring WebFlux provides an annotation-based programming model, where `@Controller` and
 `@RestController` components use annotations to express request mappings, request input,
@@ -1114,8 +1261,8 @@ do not have to extend base classes nor implement specific interfaces.
 
 The following listing shows a basic example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@RestController
 	public class HelloController {
@@ -1126,6 +1273,16 @@ The following listing shows a basic example:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	class HelloController {
+
+		@GetMapping("/hello")
+		fun handle() = "Hello WebFlux"
+	}
+----
 
 In the preceding example, the method returns a `String` to be written to the response body.
 
@@ -1133,7 +1290,7 @@ In the preceding example, the method returns a `String` to be written to the res
 
 [[webflux-ann-controller]]
 === `@Controller`
-[.small]#<<web.adoc#mvc-ann-controller, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-controller, Web MVC>>#
 
 You can define controller beans by using a standard Spring bean definition.
 The `@Controller` stereotype allows for auto-detection and is aligned with Spring general support
@@ -1144,12 +1301,24 @@ a web component.
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
 your Java configuration, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
-	@ComponentScan("org.example.web") <1>
+	@ComponentScan("org.example.web") // <1>
 	public class WebConfig {
+
+		// ...
+	}
+----
+<1> Scan the `org.example.web` package.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@ComponentScan("org.example.web") // <1>
+	class WebConfig {
 
 		// ...
 	}
@@ -1165,7 +1334,7 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 [[webflux-ann-requestmapping]]
 === Request Mapping
-[.small]#<<web.adoc#mvc-ann-requestmapping, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping, Web MVC>>#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -1187,8 +1356,8 @@ using `@RequestMapping`, which, by default, matches to all HTTP methods. At the 
 
 The following example uses type and method level mappings:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -1206,11 +1375,30 @@ The following example uses type and method level mappings:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	@RequestMapping("/persons")
+	class PersonController {
+
+		@GetMapping("/{id}")
+		fun getPerson(@PathVariable id: Long): Person {
+			// ...
+		}
+
+		@PostMapping
+		@ResponseStatus(HttpStatus.CREATED)
+		fun add(@RequestBody person: Person) {
+			// ...
+		}
+	}
+----
 
 
 [[webflux-ann-requestmapping-uri-templates]]
 ==== URI Patterns
-[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates, Web MVC>>#
 
 You can map requests by using glob patterns and wildcards:
 
@@ -1221,29 +1409,53 @@ You can map requests by using glob patterns and wildcards:
 You can also declare URI variables and access their values with `@PathVariable`,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
 		// ...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
+		// ...
+	}
+----
 
 You can declare URI variables at the class and method levels, as the following example shows:
 
-[source,java,intent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Controller
-@RequestMapping("/owners/{ownerId}") <1>
-public class OwnerController {
+	@Controller
+	@RequestMapping("/owners/{ownerId}") // <1>
+	public class OwnerController {
 
-	@GetMapping("/pets/{petId}") <2>
-	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
-		// ...
+		@GetMapping("/pets/{petId}") // <2>
+		public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+			// ...
+		}
 	}
-}
+----
+<1> Class-level URI mapping.
+<2> Method-level URI mapping.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	@RequestMapping("/owners/{ownerId}") // <1>
+	class OwnerController {
+
+		@GetMapping("/pets/{petId}") // <2>
+		fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
+			// ...
+		}
+	}
 ----
 <1> Class-level URI mapping.
 <2> Method-level URI mapping.
@@ -1266,11 +1478,19 @@ The syntax `{varName:regex}` declares a URI variable with a regular expression t
 syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5 .jar`, the following method
 extracts the name, version, and file extension:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	public void handle(@PathVariable String version, @PathVariable String ext) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
+	fun handle(@PathVariable version: String, @PathVariable ext: String) {
 		// ...
 	}
 ----
@@ -1292,7 +1512,7 @@ explicit, and less vulnerable to URL path based exploits.
 
 [[webflux-ann-requestmapping-pattern-comparison]]
 ==== Pattern Comparison
-[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison, Web MVC>>#
 
 When multiple patterns match a URL, they must be compared to find the best match. This is done
 with `PathPattern.SPECIFICITY_COMPARATOR`, which looks for patterns that are more specific.
@@ -1307,16 +1527,24 @@ sorted last instead. If two patterns are both catch-all, the longer is chosen.
 
 [[webflux-ann-requestmapping-consumes]]
 ==== Consumable Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-consumes, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-consumes, Web MVC>>#
 
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping(path = "/pets", consumes = "application/json")
 	public void addPet(@RequestBody Pet pet) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/pets", consumes = ["application/json"])
+	fun addPet(@RequestBody pet: Pet) {
 		// ...
 	}
 ----
@@ -1334,17 +1562,26 @@ TIP: `MediaType` provides constants for commonly used media types -- for example
 
 [[webflux-ann-requestmapping-produces]]
 ==== Producible Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-produces, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-produces, Web MVC>>#
 
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	@GetMapping(path = "/pets/{petId}", produces = "application/json;charset=UTF-8")
+	@GetMapping(path = "/pets/{petId}", produces = "application/json")
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets/{petId}", produces = ["application/json"])
+	@ResponseBody
+	fun getPet(@PathVariable String petId): Pet {
 		// ...
 	}
 ----
@@ -1352,45 +1589,59 @@ content types that a controller method produces, as the following example shows:
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than `text/plain`.
 
-NOTE: For JSON content type, you should specify the UTF-8 `charset` even if
-https://tools.ietf.org/html/rfc7159#section-11[RFC7159]
-clearly states that "`no charset parameter is defined for this registration,`" because some
-browsers require it to correctly interpret UTF-8 special characters.
-
 You can declare a shared `produces` attribute at the class level. Unlike most other request
 mapping attributes, however, when used at the class level, a method-level `produces` attribute
 overrides rather than extend the class level declaration.
 
 TIP: `MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_UTF8_VALUE`, `APPLICATION_XML_VALUE`.
+`APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 
 
 [[webflux-ann-requestmapping-params-and-headers]]
 ==== Parameters and Headers
-[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers, Web MVC>>#
 
 You can narrow request mappings based on query parameter conditions. You can test for the
 presence of a query parameter (`myParam`), for its absence (`!myParam`), or for a
 specific value (`myParam=myValue`). The following examples tests for a parameter with a value:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") <1>
+	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
 		// ...
 	}
 ----
 <1> Check that `myParam` equals `myValue`.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets/{petId}", params = ["myParam=myValue"]) // <1>
+	fun findPet(@PathVariable petId: String) {
+		// ...
+	}
+----
+<1> Check that `myParam` equals `myValue`.
 
 You can also use the same with request header conditions, as the follwing example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	@GetMapping(path = "/pets", headers = "myHeader=myValue") <1>
+	@GetMapping(path = "/pets", headers = "myHeader=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
+		// ...
+	}
+----
+<1> Check that `myHeader` equals `myValue`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets", headers = ["myHeader=myValue"]) // <1>
+	fun findPet(@PathVariable petId: String) {
 		// ...
 	}
 ----
@@ -1400,7 +1651,7 @@ You can also use the same with request header conditions, as the follwing exampl
 
 [[webflux-ann-requestmapping-head-options]]
 ==== HTTP HEAD, OPTIONS
-[.small]#<<web.adoc#mvc-ann-requestmapping-head-options, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-head-options, Web MVC>>#
 
 `@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` support HTTP HEAD
 transparently for request mapping purposes. Controller methods need not change.
@@ -1421,7 +1672,7 @@ is not necessary in the common case.
 
 [[webflux-ann-requestmapping-composed]]
 ==== Custom Annotations
-[.small]#<<web.adoc#mvc-ann-requestmapping-composed, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-composed, Web MVC>>#
 
 Spring WebFlux supports the use of <<core.adoc#beans-meta-annotations, composed annotations>>
 for request mapping. Those are annotations that are themselves meta-annotated with
@@ -1442,31 +1693,53 @@ you can check the custom attribute and return your own `RequestCondition`.
 
 [[webflux-ann-requestmapping-registration]]
 ==== Explicit Registrations
-[.small]#<<web.adoc#mvc-ann-requestmapping-registration, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-registration, Web MVC>>#
 
 You can programmatically register Handler methods, which can be used for dynamic
 registrations or for advanced cases, such as different instances of the same handler
 under different URLs. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Configuration
-public class MyConfig {
+	@Configuration
+	public class MyConfig {
 
-	@Autowired
-	public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) <1>
-			throws NoSuchMethodException {
+		@Autowired
+		public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) // <1>
+				throws NoSuchMethodException {
 
-		RequestMappingInfo info = RequestMappingInfo
-				.paths("/user/{id}").methods(RequestMethod.GET).build(); <2>
+			RequestMappingInfo info = RequestMappingInfo
+					.paths("/user/{id}").methods(RequestMethod.GET).build(); // <2>
 
-		Method method = UserHandler.class.getMethod("getUser", Long.class); <3>
+			Method method = UserHandler.class.getMethod("getUser", Long.class); // <3>
 
-		mapping.registerMapping(info, handler, method); <4>
+			mapping.registerMapping(info, handler, method); // <4>
+		}
+
 	}
+----
+<1> Inject target handlers and the handler mapping for controllers.
+<2> Prepare the request mapping metadata.
+<3> Get the handler method.
+<4> Add the registration.
 
-}
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class MyConfig {
+
+		@Autowired
+		fun setHandlerMapping(mapping: RequestMappingHandlerMapping, handler: UserHandler) { // <1>
+
+			val info = RequestMappingInfo.paths("/user/{id}").methods(RequestMethod.GET).build() // <2>
+
+			val method = UserHandler::class.java.getMethod("getUser", Long::class.java) // <3>
+
+			mapping.registerMapping(info, handler, method) // <4>
+		}
+	}
 ----
 <1> Inject target handlers and the handler mapping for controllers.
 <2> Prepare the request mapping metadata.
@@ -1477,7 +1750,7 @@ public class MyConfig {
 
 [[webflux-ann-methods]]
 === Handler Methods
-[.small]#<<web.adoc#mvc-ann-methods, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-methods, Web MVC>>#
 
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
@@ -1485,7 +1758,7 @@ supported controller method arguments and return values.
 
 [[webflux-ann-arguments]]
 ==== Method Arguments
-[.small]#<<web.adoc#mvc-ann-arguments, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-arguments, Web MVC>>#
 
 The following table shows the supported controller method arguments.
 
@@ -1574,9 +1847,8 @@ and others) and is equivalent to `required=false`.
   See "`Any other argument`" later in this table.
 
 | `Errors`, `BindingResult`
-| For access to errors from validation and data binding for a command object
-  (that is, a `@ModelAttribute` argument) or errors from the validation of a `@RequestBody` or
-  `@RequestPart` argument. An `Errors`, or `BindingResult` argument must be declared
+| For access to errors from validation and data binding for a command object, i.e. a
+  `@ModelAttribute` argument. An `Errors`, or `BindingResult` argument must be declared
   immediately after the validated method argument.
 
 | `SessionStatus` + class-level `@SessionAttributes`
@@ -1606,7 +1878,7 @@ and others) and is equivalent to `required=false`.
 
 [[webflux-ann-return-types]]
 ==== Return Values
-[.small]#<<web.adoc#mvc-ann-return-types, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-return-types, Web MVC>>#
 
 The following table shows the supported controller method return values. Note that reactive
 types from libraries such as Reactor, RxJava, <<webflux-reactive-libraries, or other>> are
@@ -1680,7 +1952,7 @@ generally supported for all return values.
 
 [[webflux-ann-typeconversion]]
 ==== Type Conversion
-[.small]#<<web.adoc#mvc-ann-typeconversion, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-typeconversion, Web MVC>>#
 
 Some annotated controller method arguments that represent String-based request input (for example,
 `@RequestParam`, `@RequestHeader`, `@PathVariable`, `@MatrixVariable`, and `@CookieValue`)
@@ -1688,13 +1960,13 @@ can require type conversion if the argument is declared as something other than 
 
 For such cases, type conversion is automatically applied based on the configured converters.
 By default, simple types (such as `int`, `long`, `Date`, and others) are supported. Type conversion
-can be customized through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by registering
+can be customized through a `WebDataBinder` (see <<webflux-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
 
 
 [[webflux-ann-matrix-variables]]
 ==== Matrix Variables
-[.small]#<<web.adoc#mvc-ann-matrix-variables, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-matrix-variables, Web MVC>>#
 
 https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux, we refer to those as "`matrix variables`" based on an
@@ -1712,8 +1984,8 @@ to mask variable content. That said, if you want to access matrix variables from
 controller method, you need to add a URI variable to the path segment where matrix
 variables are expected. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// GET /pets/42;q=11;r=22
 
@@ -1724,13 +1996,26 @@ variables are expected. The following example shows how to do so:
 		// q == 11
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// GET /pets/42;q=11;r=22
+
+	@GetMapping("/pets/{petId}")
+	fun findPet(@PathVariable petId: String, @MatrixVariable q: Int) {
+
+		// petId == 42
+		// q == 11
+	}
+----
+
 
 Given that all path segments can contain matrix variables, you may sometimes need to
 disambiguate which path variable the matrix variable is expected to be in,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// GET /owners/42;q=11/pets/21;q=22
 
@@ -1743,12 +2028,24 @@ as the following example shows:
 		// q2 == 22
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(
+			@MatrixVariable(name = "q", pathVar = "ownerId") q1: Int,
+			@MatrixVariable(name = "q", pathVar = "petId") q2: Int) {
+
+		// q1 == 11
+		// q2 == 22
+	}
+----
 
 You can define a matrix variable may be defined as optional and specify a default value
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// GET /pets/42
 
@@ -1758,18 +2055,43 @@ as the following example shows:
 		// q == 1
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// GET /pets/42
+
+	@GetMapping("/pets/{petId}")
+	fun findPet(@MatrixVariable(required = false, defaultValue = "1") q: Int) {
+
+		// q == 1
+	}
+----
 
 To get all matrix variables, use a `MultiValueMap`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
 
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
+
+		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(
+			@MatrixVariable matrixVars: MultiValueMap<String, String>,
+			@MatrixVariable(pathVar="petId") petMatrixVars: MultiValueMap<String, String>) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
@@ -1779,13 +2101,13 @@ To get all matrix variables, use a `MultiValueMap`, as the following example sho
 
 [[webflux-ann-requestparam]]
 ==== `@RequestParam`
-[.small]#<<web.adoc#mvc-ann-requestparam, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestparam, Web MVC>>#
 
 You can use the `@RequestParam` annotation to bind query parameters to a method argument in a
 controller. The following code snippet shows the usage:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	@RequestMapping("/pets")
@@ -1801,7 +2123,29 @@ controller. The following code snippet shows the usage:
 		}
 
 		// ...
+	}
+----
+<1> Using `@RequestParam`.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.ui.set
+
+	@Controller
+	@RequestMapping("/pets")
+	class EditPetForm {
+
+		// ...
+
+		@GetMapping
+		fun setupForm(@RequestParam("petId") petId: Int, model: Model): String { // <1>
+			val pet = clinic.loadPet(petId)
+			model["pet"] = pet
+			return "petForm"
+		}
+
+		// ...
 	}
 ----
 <1> Using `@RequestParam`.
@@ -1818,7 +2162,7 @@ to `false` or by declaring the argument with a `java.util.Optional`
 wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 When a `@RequestParam` annotation is declared on a `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all query parameters.
@@ -1832,7 +2176,7 @@ with `@RequestParam`.
 
 [[webflux-ann-requestheader]]
 ==== `@RequestHeader`
-[.small]#<<web.adoc#mvc-ann-requestheader, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestheader, Web MVC>>#
 
 You can use the `@RequestHeader` annotation to bind a request header to a method argument in a
 controller.
@@ -1852,13 +2196,26 @@ Keep-Alive              300
 
 The following example gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/demo")
 	public void handle(
-			@RequestHeader("Accept-Encoding") String encoding, <1>
-			@RequestHeader("Keep-Alive") long keepAlive) { <2>
+			@RequestHeader("Accept-Encoding") String encoding, // <1>
+			@RequestHeader("Keep-Alive") long keepAlive) { // <2>
+		//...
+	}
+----
+<1> Get the value of the `Accept-Encoging` header.
+<2> Get the value of the `Keep-Alive` header.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/demo")
+	fun handle(
+			@RequestHeader("Accept-Encoding") encoding: String, // <1>
+			@RequestHeader("Keep-Alive") keepAlive: Long) { // <2>
 		//...
 	}
 ----
@@ -1866,7 +2223,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 When a `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
@@ -1880,26 +2237,35 @@ example, a method parameter annotated with `@RequestHeader("Accept")` may be of 
 
 [[webflux-ann-cookievalue]]
 ==== `@CookieValue`
-[.small]#<<web.adoc#mvc-ann-cookievalue, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-cookievalue, Web MVC>>#
 
 You can use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
 in a controller.
 
 The following example shows a request with a cookie:
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
 ----
 
 The following code sample demonstrates how to get the cookie value:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/demo")
-	public void handle(@CookieValue("JSESSIONID") String cookie) { <1>
+	public void handle(@CookieValue("JSESSIONID") String cookie) { // <1>
+		//...
+	}
+----
+<1> Get the cookie value.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/demo")
+	fun handle(@CookieValue("JSESSIONID") cookie: String) { // <1>
 		//...
 	}
 ----
@@ -1907,12 +2273,12 @@ The following code sample demonstrates how to get the cookie value:
 
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See <<webflux-ann-typeconversion>>.
 
 
 [[webflux-ann-modelattrib-method-args]]
 ==== `@ModelAttribute`
-[.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Web MVC>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
 model or have it instantiated if not present. The model attribute is also overlain with
@@ -1920,11 +2286,19 @@ the values of query parameters and form fields whose names match to field names.
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@ModelAttribute Pet pet) { } <1>
+	public String processSubmit(@ModelAttribute Pet pet) { } // <1>
+----
+<1> Bind an instance of `Pet`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@ModelAttribute pet: Pet): String { } // <1>
 ----
 <1> Bind an instance of `Pet`.
 
@@ -1948,8 +2322,8 @@ Data binding can result in errors. By default, a `WebExchangeBindException` is r
 to check for such errors in the controller method, you can add a `BindingResult` argument
 immediately next to the `@ModelAttribute`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result) { <1>
@@ -1961,18 +2335,44 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 ----
 <1> Adding a `BindingResult`.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
+		}
+		// ...
+	}
+----
+<1> Adding a `BindingResult`.
+
 You can automatically apply validation after data binding by adding the
 `javax.validation.Valid` annotation or Spring's `@Validated` annotation (see also
 <<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { <1>
+	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
 		if (result.hasErrors()) {
 			return "petForm";
+		}
+		// ...
+	}
+----
+<1> Using `@Valid` on a model attribute argument.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@Valid @ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
 		}
 		// ...
 	}
@@ -1987,8 +2387,8 @@ argument, you must declare the `@ModelAttribute` argument before it without a re
 type wrapper, as shown earlier. Alternatively, you can handle any errors through the
 reactive type, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public Mono<String> processSubmit(@Valid @ModelAttribute("pet") Mono<Pet> petMono) {
@@ -2001,6 +2401,20 @@ reactive type, as the following example shows:
 			});
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@Valid @ModelAttribute("pet") petMono: Mono<Pet>): Mono<String> {
+		return petMono
+				.flatMap { pet ->
+					// ...
+				}
+				.onErrorResume{ ex ->
+					// ...
+				}
+	}
+----
 
 Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
 By default, any argument that is not a simple value type( as determined by
@@ -2011,7 +2425,7 @@ with `@ModelAttribute`.
 
 [[webflux-ann-sessionattributes]]
 ==== `@SessionAttributes`
-[.small]#<<web.adoc#mvc-ann-sessionattributes, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-sessionattributes, Web MVC>>#
 
 `@SessionAttributes` is used to store model attributes in the `WebSession` between
 requests. It is a type-level annotation that declares session attributes used by a
@@ -2021,12 +2435,23 @@ requests to access.
 
 Consider the following example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	@SessionAttributes("pet") <1>
 	public class EditPetForm {
+		// ...
+	}
+----
+<1> Using the `@SessionAttributes` annotation.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	@SessionAttributes("pet") // <1>
+	class EditPetForm {
 		// ...
 	}
 ----
@@ -2037,18 +2462,18 @@ it is automatically promoted to and saved in the `WebSession`. It remains there 
 another controller method uses a `SessionStatus` method argument to clear the storage,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
-	@SessionAttributes("pet") <1>
+	@SessionAttributes("pet") // <1>
 	public class EditPetForm {
 
 		// ...
 
 		@PostMapping("/pets/{id}")
-		public String handle(Pet pet, BindingResult errors, SessionStatus status) { <2>
-			if (errors.hasErrors) {
+		public String handle(Pet pet, BindingResult errors, SessionStatus status) { // <2>
+			if (errors.hasErrors()) {
 				// ...
 			}
 				status.setComplete();
@@ -2060,20 +2485,52 @@ as the following example shows:
 <1> Using the `@SessionAttributes` annotation.
 <2> Using a `SessionStatus` variable.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	@SessionAttributes("pet") // <1>
+	class EditPetForm {
+
+		// ...
+
+		@PostMapping("/pets/{id}")
+		fun handle(pet: Pet, errors: BindingResult, status: SessionStatus): String { // <2>
+			if (errors.hasErrors()) {
+				// ...
+			}
+			status.setComplete()
+			// ...
+		}
+	}
+----
+<1> Using the `@SessionAttributes` annotation.
+<2> Using a `SessionStatus` variable.
+
 
 [[webflux-ann-sessionattribute]]
 ==== `@SessionAttribute`
-[.small]#<<web.adoc#mvc-ann-sessionattribute, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-sessionattribute, Web MVC>>#
 
 If you need access to pre-existing session attributes that are managed globally
 (that is, outside the controller -- for example, by a filter) and may or may not be present,
 you can use the `@SessionAttribute` annotation on a method parameter, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/")
-	public String handle(@SessionAttribute User user) { <1>
+	public String handle(@SessionAttribute User user) { // <1>
+		// ...
+	}
+----
+<1> Using `@SessionAttribute`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/")
+	fun handle(@SessionAttribute user: User): String { // <1>
 		// ...
 	}
 ----
@@ -2089,14 +2546,14 @@ workflow, consider using `SessionAttributes`, as described in
 
 [[webflux-ann-requestattrib]]
 ==== `@RequestAttribute`
-[.small]#<<web.adoc#mvc-ann-requestattrib, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestattrib, Web MVC>>#
 
 Similarly to `@SessionAttribute`, you can use the `@RequestAttribute` annotation to
 access pre-existing request attributes created earlier (for example, by a `WebFilter`),
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/")
 	public String handle(@RequestAttribute Client client) { <1>
@@ -2105,45 +2562,71 @@ as the following example shows:
 ----
 <1> Using `@RequestAttribute`.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/")
+	fun handle(@RequestAttribute client: Client): String { // <1>
+		// ...
+	}
+----
+<1> Using `@RequestAttribute`.
+
 
 [[webflux-multipart-forms]]
 ==== Multipart Content
-[.small]#<<web.adoc#mvc-multipart-forms, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multipart-forms, Web MVC>>#
 
 As explained in <<webflux-multipart>>, `ServerWebExchange` provides access to multipart
 content. The best way to handle a file upload form (for example, from a browser) in a controller
 is through data binding to a <<webflux-ann-modelattrib-method-args, command object>>,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-class MyForm {
+	class MyForm {
 
-	private String name;
+		private String name;
 
-	private MultipartFile file;
+		private MultipartFile file;
 
-	// ...
-
-}
-
-@Controller
-public class FileUploadController {
-
-	@PostMapping("/form")
-	public String handleFormUpload(MyForm form, BindingResult errors) {
 		// ...
+
 	}
 
-}
+	@Controller
+	public class FileUploadController {
+
+		@PostMapping("/form")
+		public String handleFormUpload(MyForm form, BindingResult errors) {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyForm(
+			val name: String,
+			val file: MultipartFile)
+
+	@Controller
+	class FileUploadController {
+
+		@PostMapping("/form")
+		fun handleFormUpload(form: MyForm, errors: BindingResult): String {
+			// ...
+		}
+
+	}
 ----
 
 You can also submit multipart requests from non-browser clients in a RESTful service
 scenario. The following example uses a file along with JSON:
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 POST /someUrl
 Content-Type: multipart/mixed
@@ -2165,67 +2648,108 @@ Content-Transfer-Encoding: 8bit
 
 You can access individual parts with `@RequestPart`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/")
-	public String handle(@RequestPart("meta-data") Part metadata, <1>
-			@RequestPart("file-data") FilePart file) { <2>
+	public String handle(@RequestPart("meta-data") Part metadata, // <1>
+			@RequestPart("file-data") FilePart file) { // <2>
 		// ...
 	}
 ----
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/")
+	fun handle(@RequestPart("meta-data") Part metadata, // <1>
+			@RequestPart("file-data") FilePart file): String { // <2>
+		// ...
+	}
+----
+<1> Using `@RequestPart` to get the metadata.
+<2> Using `@RequestPart` to get the file.
+
+
 To deserialize the raw part content (for example, to JSON -- similar to `@RequestBody`),
 you can declare a concrete target `Object`, instead of `Part`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/")
-	public String handle(@RequestPart("meta-data") MetaData metadata) { <1>
+	public String handle(@RequestPart("meta-data") MetaData metadata) { // <1>
 		// ...
 	}
 ----
 <1> Using `@RequestPart` to get the metadata.
 
-You can use `@RequestPart` combination with `javax.validation.Valid` or Spring's
-`@Validated` annotation, which causes Standard Bean Validation to be applied.
-By default, validation errors cause a `WebExchangeBindException`, which is turned
-into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
-within the controller through an `Errors` or `BindingResult` argument, as the following example shows:
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/")
+	fun handle(@RequestPart("meta-data") metadata: MetaData): String { // <1>
+		// ...
+	}
+----
+<1> Using `@RequestPart` to get the metadata.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+You can use `@RequestPart` in combination with `javax.validation.Valid` or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
+errors lead to a `WebExchangeBindException` that results in a 400 (BAD_REQUEST) response.
+The exception contains a `BindingResult` with the error details and can also be handled
+in the controller method by declaring the argument with an async wrapper and then using
+error related operators:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@PostMapping("/")
-public String handle(@Valid @RequestPart("meta-data") MetaData metadata, <1>
-		BindingResult result) { <2>
-	// ...
-}
+	@PostMapping("/")
+	public String handle(@Valid @RequestPart("meta-data") Mono<MetaData> metadata) {
+		// use one of the onError* operators...
+	}
 ----
-<1> Using a `@Valid` annotation.
-<2> Using a `BindingResult` argument.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/")
+	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData): String {
+		// ...
+	}
+----
 
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/")
-	public String handle(@RequestBody Mono<MultiValueMap<String, Part>> parts) { <1>
+	public String handle(@RequestBody Mono<MultiValueMap<String, Part>> parts) { // <1>
 		// ...
 	}
 ----
 <1> Using `@RequestBody`.
 
-To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
-`Flux<Part>` instead, as the following example shows:
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/")
+	fun handle(@RequestBody parts: MultiValueMap<String, Part>): String { // <1>
+		// ...
+	}
+----
+<1> Using `@RequestBody`.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+
+To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
+`Flux<Part>` (or `Flow<Part>` in Kotlin) instead, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/")
 	public String handle(@RequestBody Flux<Part> parts) { <1>
@@ -2234,17 +2758,27 @@ To access multipart data sequentially, in streaming fashion, you can use `@Reque
 ----
 <1> Using `@RequestBody`.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/")
+	fun handle(@RequestBody parts: Flow<Part>): String { // <1>
+		// ...
+	}
+----
+<1> Using `@RequestBody`.
+
 
 [[webflux-ann-requestbody]]
 ==== `@RequestBody`
-[.small]#<<web.adoc#mvc-ann-requestbody, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestbody, Web MVC>>#
 
 You can use the `@RequestBody` annotation to have the request body read and deserialized into an
 `Object` through an <<webflux-codecs,HttpMessageReader>>.
 The following example uses a `@RequestBody` argument:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/accounts")
 	public void handle(@RequestBody Account account) {
@@ -2252,15 +2786,31 @@ The following example uses a `@RequestBody` argument:
 	}
 ----
 
-Unlike Spring MVC, in WebFlux, the `@RequestBody` method argument supports reactive types
-and fully non-blocking reading and (client-to-server) streaming. The following example
-uses a `Mono`:
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody account: Account) {
+		// ...
+	}
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+Unlike Spring MVC, in WebFlux, the `@RequestBody` method argument supports reactive types
+and fully non-blocking reading and (client-to-server) streaming.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/accounts")
 	public void handle(@RequestBody Mono<Account> account) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody accounts: Flow<Account>) {
 		// ...
 	}
 ----
@@ -2269,17 +2819,25 @@ You can use the <<webflux-config-message-codecs>> option of the <<webflux-config
 configure or customize message readers.
 
 You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
-`@Validated` annotation, which causes Standard Bean Validation to be applied.
-By default, validation errors cause a `WebExchangeBindException`, which is turned
-into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
-within the controller through an `Errors` or a `BindingResult` argument. The following
-example uses a `BindingResult` argument`:
+`@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
+errors cause a `WebExchangeBindException`, which results in a 400 (BAD_REQUEST) response.
+The exception contains a `BindingResult` with error details and can be handled in the
+controller method by declaring the argument with an async wrapper and then using error
+related operators:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/accounts")
-	public void handle(@Valid @RequestBody Account account, BindingResult result) {
+	public void handle(@Valid @RequestBody Mono<Account> account) {
+		// use one of the onError* operators...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@Valid @RequestBody account: Mono<Account>) {
 		// ...
 	}
 ----
@@ -2287,17 +2845,25 @@ example uses a `BindingResult` argument`:
 
 [[webflux-ann-httpentity]]
 ==== `HttpEntity`
-[.small]#<<web.adoc#mvc-ann-httpentity, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-httpentity, Web MVC>>#
 
 `HttpEntity` is more or less identical to using <<webflux-ann-requestbody>> but is based on a
 container object that exposes request headers and the body. The following example uses an
 `HttpEntity`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@PostMapping("/accounts")
 	public void handle(HttpEntity<Account> entity) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(entity: HttpEntity<Account>) {
 		// ...
 	}
 ----
@@ -2305,18 +2871,27 @@ container object that exposes request headers and the body. The following exampl
 
 [[webflux-ann-responsebody]]
 ==== `@ResponseBody`
-[.small]#<<web.adoc#mvc-ann-responsebody, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-responsebody, Web MVC>>#
 
 You can use the `@ResponseBody` annotation on a method to have the return serialized
 to the response body through an <<webflux-codecs, HttpMessageWriter>>. The following
 example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
 	public Account handle() {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	fun handle(): Account {
 		// ...
 	}
 ----
@@ -2339,18 +2914,28 @@ configure or customize message writing.
 
 [[webflux-ann-responseentity]]
 ==== `ResponseEntity`
-[.small]#<<web.adoc#mvc-ann-responseentity, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-responseentity, Web MVC>>#
 
 `ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/something")
 	public ResponseEntity<String> handle() {
 		String body = ... ;
 		String etag = ... ;
 		return ResponseEntity.ok().eTag(etag).build(body);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/something")
+	fun handle(): ResponseEntity<String> {
+		val body: String = ...
+		val etag: String = ...
+		return ResponseEntity.ok().eTag(etag).build(body)
 	}
 ----
 
@@ -2366,16 +2951,16 @@ Spring offers support for the Jackson JSON library.
 
 [[webflux-ann-jsonview]]
 ===== JSON Views
-[.small]#<<web.adoc#mvc-ann-jackson, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-jackson, Web MVC>>#
 
 Spring WebFlux provides built-in support for
-https://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views],
+https://www.baeldung.com/jackson-json-view-annotation[Jackson's Serialization Views],
 which allows rendering only a subset of all fields in an `Object`. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
 `@JsonView` annotation to activate a serialization view class, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@RestController
 	public class UserController {
@@ -2415,6 +3000,28 @@ which allows rendering only a subset of all fields in an `Object`. To use it wit
 	}
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	class UserController {
+
+		@GetMapping("/user")
+		@JsonView(User.WithoutPasswordView::class)
+		fun getUser(): User {
+			return User("eric", "7!jd#h23")
+		}
+	}
+
+	class User(
+			@JsonView(WithoutPasswordView::class) val username: String,
+			@JsonView(WithPasswordView::class) val password: String
+	) {
+		interface WithoutPasswordView
+		interface WithPasswordView : WithoutPasswordView
+	}
+----
+
 NOTE: `@JsonView` allows an array of view classes but you can only specify only one per
 controller method. Use a composite interface if you need to activate multiple views.
 
@@ -2422,7 +3029,7 @@ controller method. Use a composite interface if you need to activate multiple vi
 
 [[webflux-ann-modelattrib-methods]]
 === `Model`
-[.small]#<<web.adoc#mvc-ann-modelattrib-methods, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-modelattrib-methods, Web MVC>>#
 
 You can use the `@ModelAttribute` annotation:
 
@@ -2445,8 +3052,8 @@ related to the request body).
 
 The following example uses a `@ModelAttribute` method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@ModelAttribute
 	public void populateModel(@RequestParam String number, Model model) {
@@ -2454,14 +3061,31 @@ The following example uses a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@ModelAttribute
+	fun populateModel(@RequestParam number: String, model: Model) {
+		model.addAttribute(accountRepository.findAccount(number))
+		// add more ...
+	}
+----
 
 The following example adds one attribute only:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@ModelAttribute
 	public Account addAccount(@RequestParam String number) {
+		return accountRepository.findAccount(number);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@ModelAttribute
+	fun addAccount(@RequestParam number: String): Account {
 		return accountRepository.findAccount(number);
 	}
 ----
@@ -2477,8 +3101,8 @@ attributes can be transparently resolved (and the model updated) to their actual
 at the time of `@RequestMapping` invocation, provided a `@ModelAttribute` argument is
 declared without a wrapper, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@ModelAttribute
 	public void addAccount(@RequestParam String number) {
@@ -2491,6 +3115,23 @@ declared without a wrapper, as the following example shows:
 		// ...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.ui.set
+
+	@ModelAttribute
+	fun addAccount(@RequestParam number: String) {
+		val accountMono: Mono<Account> = accountRepository.findAccount(number)
+		model["account"] = accountMono
+	}
+
+	@PostMapping("/accounts")
+	fun handle(@ModelAttribute account: Account, errors: BindingResult): String {
+		// ...
+	}
+----
+
 
 In addition, any model attributes that have a reactive type wrapper are resolved to their
 actual values (and the model updated) just prior to view rendering.
@@ -2502,8 +3143,8 @@ controllers, unless the return value is a `String` that would otherwise be inter
 as a view name. `@ModelAttribute` can also help to customize the model attribute name,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -2512,12 +3153,22 @@ as the following example shows:
 		return account;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/accounts/{id}")
+	@ModelAttribute("myAccount")
+	fun handle(): Account {
+		// ...
+		return account
+	}
+----
 
 
 
 [[webflux-ann-initbinder]]
 === `DataBinder`
-[.small]#<<web.adoc#mvc-ann-initbinder, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-initbinder, Web MVC>>#
 
 `@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods, to
 initialize instances of `WebDataBinder`. Those, in turn, are used to:
@@ -2537,13 +3188,13 @@ do, except for `@ModelAttribute` (command object) arguments. Typically, they are
 with a `WebDataBinder` argument, for registrations, and a `void` return value.
 The following example uses the `@InitBinder` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	public class FormController {
 
-		@InitBinder <1>
+		@InitBinder // <1>
 		public void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
@@ -2555,12 +3206,29 @@ The following example uses the `@InitBinder` annotation:
 ----
 <1> Using the `@InitBinder` annotation.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class FormController {
+
+		@InitBinder // <1>
+		fun initBinder(binder: WebDataBinder) {
+			val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+			dateFormat.isLenient = false
+			binder.registerCustomEditor(Date::class.java, CustomDateEditor(dateFormat, false))
+		}
+
+		// ...
+	}
+----
+
 Alternatively, when using a `Formatter`-based setup through a shared
 `FormattingConversionService`, you could re-use the same approach and register
 controller-specific `Formatter` instances, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	public class FormController {
@@ -2575,31 +3243,63 @@ controller-specific `Formatter` instances, as the following example shows:
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class FormController {
+
+		@InitBinder
+		fun initBinder(binder: WebDataBinder) {
+			binder.addCustomFormatter(DateFormatter("yyyy-MM-dd")) // <1>
+		}
+
+		// ...
+	}
+----
+<1> Adding a custom formatter (a `DateFormatter`, in this case).
+
 
 
 [[webflux-ann-controller-exceptions]]
 === Managing Exceptions
-[.small]#<<web.adoc#mvc-ann-exceptionhandler, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-exceptionhandler, Web MVC>>#
 
-`@Controller` and <<mvc-ann-controller-advice, @ControllerAdvice>> classes can have
+`@Controller` and <<webflux-ann-controller-advice, @ControllerAdvice>> classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	public class SimpleController {
 
 		// ...
 
-		@ExceptionHandler <1>
+		@ExceptionHandler // <1>
 		public ResponseEntity<String> handle(IOException ex) {
 			// ...
 		}
 	}
 ----
-<1> Declaring an `@ExceptionHandler`:
+<1> Declaring an `@ExceptionHandler`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class SimpleController {
+
+		// ...
+
+		@ExceptionHandler // <1>
+		fun handle(ex: IOException): ResponseEntity<String> {
+			// ...
+		}
+	}
+----
+<1> Declaring an `@ExceptionHandler`.
 
 
 The exception can match against a top-level exception being propagated (that is, a direct
@@ -2624,7 +3324,7 @@ for more detail.
 
 [[webflux-ann-rest-exceptions]]
 ==== REST API exceptions
-[.small]#<<web.adoc#mvc-ann-rest-exceptions, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
 
 A common requirement for REST services is to include error details in the body of the
 response. The Spring Framework does not automatically do so, because the representation
@@ -2642,31 +3342,32 @@ an HTTP status code.
 
 [[webflux-ann-controller-advice]]
 === Controller Advice
-[.small]#<<web.adoc#mvc-ann-controller-advice, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-controller-advice, Web MVC>>#
 
-Typically, the `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply within
-the `@Controller` class (or class hierarchy) in which they are declared. If you want such
-methods to apply more globally (across controllers), you can declare them in a class
-marked with `@ControllerAdvice` or `@RestControllerAdvice`.
+Typically, the `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply
+within the `@Controller` class (or class hierarchy) in which they are declared. If you
+want such methods to apply more globally (across controllers), you can declare them in a
+class annotated with `@ControllerAdvice` or `@RestControllerAdvice`.
 
-`@ControllerAdvice` is marked with `@Component`, which means that such classes can be registered
-as Spring beans through <<core.adoc#beans-java-instantiating-container-scan, component scanning>>.
-`@RestControllerAdvice` is also a meta-annotation marked with both `@ControllerAdvice` and
-`@ResponseBody`, which essentially means `@ExceptionHandler` methods are rendered to the
-response body through message conversion (versus view resolution or template rendering).
+`@ControllerAdvice` is annotated with `@Component`, which means that such classes can be
+registered as Spring beans through <<core.adoc#beans-java-instantiating-container-scan,
+component scanning>>. `@RestControllerAdvice` is a composed annotation that is annotated
+with both `@ControllerAdvice` and `@ResponseBody`, which essentially means
+`@ExceptionHandler` methods are rendered to the response body through message conversion
+(versus view resolution or template rendering).
 
-On startup, the infrastructure classes for `@RequestMapping` and `@ExceptionHandler` methods
-detect Spring beans of type `@ControllerAdvice` and apply their methods at runtime.
-Global `@ExceptionHandler` methods (from a `@ControllerAdvice`) are applied *after* local
-ones (from the `@Controller`). By contrast, global `@ModelAttribute` and `@InitBinder`
-methods are applied *before* local ones.
+On startup, the infrastructure classes for `@RequestMapping` and `@ExceptionHandler`
+methods detect Spring beans annotated with `@ControllerAdvice` and then apply their
+methods at runtime. Global `@ExceptionHandler` methods (from a `@ControllerAdvice`) are
+applied _after_ local ones (from the `@Controller`). By contrast, global `@ModelAttribute`
+and `@InitBinder` methods are applied _before_ local ones.
 
-By default `@ControllerAdvice` methods apply to every request (that is, all controllers), but
-you can narrow that down to a subset of controllers through attributes on the annotation,
-as the following example shows:
+By default, `@ControllerAdvice` methods apply to every request (that is, all controllers),
+but you can narrow that down to a subset of controllers by using attributes on the
+annotation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = RestController.class)
@@ -2681,8 +3382,24 @@ as the following example shows:
 	public class ExampleAdvice3 {}
 ----
 
-The preceding selectors are evaluated at runtime and may negatively impact
-performance if you use them extensively. See the
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// Target all Controllers annotated with @RestController
+	@ControllerAdvice(annotations = [RestController::class])
+	public class ExampleAdvice1 {}
+
+	// Target all Controllers within specific packages
+	@ControllerAdvice("org.example.controllers")
+	public class ExampleAdvice2 {}
+
+	// Target all Controllers assignable to specific classes
+	@ControllerAdvice(assignableTypes = [ControllerInterface::class, AbstractController::class])
+	public class ExampleAdvice3 {}
+----
+
+The selectors in the preceding example are evaluated at runtime and may negatively impact
+performance if used extensively. See the
 {api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
 
@@ -2693,7 +3410,7 @@ include::webflux-functional.adoc[leveloffset=+1]
 
 [[webflux-uri-building]]
 == URI Links
-[.small]#<<web.adoc#mvc-uri-building, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-uri-building, Web MVC>>#
 
 This section describes various options available in the Spring Framework to prepare URIs.
 
@@ -2706,7 +3423,7 @@ include::webflux-cors.adoc[leveloffset=+1]
 
 [[webflux-web-security]]
 == Web Security
-[.small]#<<web.adoc#mvc-web-security, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-web-security, Web MVC>>#
 
 The https://projects.spring.io/spring-security/[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
@@ -2724,7 +3441,7 @@ include::webflux-view.adoc[leveloffset=+1]
 
 [[webflux-caching]]
 == HTTP Caching
-[.small]#<<web.adoc#mvc-caching, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching, Web MVC>>#
 
 HTTP caching can significantly improve the performance of a web application. HTTP caching
 revolves around the `Cache-Control` response header and subsequent conditional request
@@ -2740,7 +3457,7 @@ This section describes the HTTP caching related options available in Spring WebF
 
 [[webflux-caching-cachecontrol]]
 === `CacheControl`
-[.small]#<<web.adoc#mvc-caching-cachecontrol, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-cachecontrol, Web MVC>>#
 
 {api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
 configuring settings related to the `Cache-Control` header and is accepted as an argument
@@ -2753,8 +3470,8 @@ While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all 
 directives for the `Cache-Control` response header, the `CacheControl` type takes a
 use case-oriented approach that focuses on the common scenarios, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// Cache for an hour - "Cache-Control: max-age=3600"
 	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
@@ -2768,19 +3485,35 @@ use case-oriented approach that focuses on the common scenarios, as the followin
 	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	val ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS)
+
+	// Prevent caching - "Cache-Control: no-store"
+	val ccNoStore = CacheControl.noStore()
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	val ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic()
+
+----
+
 
 
 [[webflux-caching-etag-lastmodified]]
 === Controllers
-[.small]#<<web.adoc#mvc-caching-etag-lastmodified, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified, Web MVC>>#
 
 Controllers can add explicit support for HTTP caching. We recommend doing so, since the
 `lastModified` or `ETag` value for a resource needs to be calculated before it can be compared
 against conditional request headers. A controller can add an `ETag` and `Cache-Control`
 settings to a `ResponseEntity`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@GetMapping("/book/{id}")
 	public ResponseEntity<Book> showBook(@PathVariable Long id) {
@@ -2796,6 +3529,23 @@ settings to a `ResponseEntity`, as the following example shows:
 	}
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/book/{id}")
+	fun showBook(@PathVariable id: Long): ResponseEntity<Book> {
+
+		val book = findBook(id)
+		val version = book.getVersion()
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book)
+	}
+----
+
 The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
 to the conditional request headers indicates the content has not changed. Otherwise, the
 `ETag` and `Cache-Control` headers are added to the response.
@@ -2803,23 +3553,42 @@ to the conditional request headers indicates the content has not changed. Otherw
 You can also make the check against conditional request headers in the controller,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@RequestMapping
 	public String myHandleMethod(ServerWebExchange exchange, Model model) {
 
-		long eTag = ... <1>
+		long eTag = ... // <1>
 
 		if (exchange.checkNotModified(eTag)) {
-			return null; <2>
+			return null; // <2>
 		}
 
-		model.addAttribute(...); <3>
+		model.addAttribute(...); // <3>
 		return "myViewName";
 	}
 ----
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED). No further processing.
+<3> Continue with request processing.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RequestMapping
+	fun myHandleMethod(exchange: ServerWebExchange, model: Model): String? {
+
+		val eTag: Long = ... // <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null// <2>
+		}
+
+		model.addAttribute(...) // <3>
+		return "myViewName"
+	}
+----
 <1> Application-specific calculation.
 <2> Response has been set to 304 (NOT_MODIFIED). No further processing.
 <3> Continue with request processing.
@@ -2827,13 +3596,13 @@ as the following example shows:
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
 304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
-to 409 (PRECONDITION_FAILED) to prevent concurrent modification.
+to 412 (PRECONDITION_FAILED) to prevent concurrent modification.
 
 
 
 [[webflux-caching-static-resources]]
 === Static Resources
-[.small]#<<web.adoc#mvc-caching-static-resources, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-static-resources, Web MVC>>#
 
 You should serve static resources with a `Cache-Control` and conditional response headers
 for optimal performance. See the section on configuring <<webflux-config-static-resources>>.
@@ -2843,7 +3612,7 @@ for optimal performance. See the section on configuring <<webflux-config-static-
 
 [[webflux-config]]
 == WebFlux Config
-[.small]#<<web.adoc#mvc-config, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config, Web MVC>>#
 
 The WebFlux Java configuration declares the components that are required to process
 requests with annotated controllers or functional endpoints, and it offers an API to
@@ -2860,12 +3629,12 @@ gain full control over the configuration through the
 
 [[webflux-config-enable]]
 === Enabling WebFlux Config
-[.small]#<<web.adoc#mvc-config-enable, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-enable, Web MVC>>#
 
 You can use the `@EnableWebFlux` annotation in your Java config, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -2873,45 +3642,62 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 	}
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig
+----
+
 The preceding example registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
+<<webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
 
 
 
 [[webflux-config-customize]]
 === WebFlux config API
-[.small]#<<web.adoc#mvc-config-customize, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-customize, Web MVC>>#
 
 In your Java configuration, you can implement the `WebFluxConfigurer` interface,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		// Implement configuration methods...
-
 	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+@Configuration
+@EnableWebFlux
+class WebConfig : WebFluxConfigurer {
+
+	// Implement configuration methods...
+}
 ----
 
 
 
 [[webflux-config-conversion]]
 === Conversion, formatting
-[.small]#<<web.adoc#mvc-config-conversion, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-conversion, Web MVC>>#
 
-By default, formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
-formatting library is also installed if Joda-Time is present on the classpath.
+By default, formatters for various number and date types are installed, along with support
+for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
 
-The following example shows how to register custom formatters and converters:
+To register custom formatters and converters in Java config, use the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -2924,6 +3710,53 @@ The following example shows how to register custom formatters and converters:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			// ...
+		}
+	}
+----
+
+By default Spring WebFlux considers the request Locale when parsing and formatting date
+values. This works for forms where dates are represented as Strings with "input" form
+fields. For "date" and "time" form fields, however, browsers use a fixed format defined
+in the HTML spec. For such cases date and time formatting can be customized as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setUseIsoFormat(true);
+			registrar.registerFormatters(registry);
+      	}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			val registrar = DateTimeFormatterRegistrar()
+			registrar.setUseIsoFormat(true)
+			registrar.registerFormatters(registry)
+		}
+	}
+----
 
 NOTE: See <<core.adoc#format-FormatterRegistrar-SPI, `FormatterRegistrar` SPI>>
 and the `FormattingConversionServiceFactoryBean` for more information on when to
@@ -2933,18 +3766,18 @@ use `FormatterRegistrar` implementations.
 
 [[webflux-config-validation]]
 === Validation
-[.small]#<<web.adoc#mvc-config-validation, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-validation, Web MVC>>#
 
 By default, if <<core.adoc#validation-beanvalidation-overview, Bean Validation>> is present
 on the classpath (for example, the Hibernate Validator), the `LocalValidatorFactoryBean`
 is registered as a global <<core.adoc#validator,validator>> for use with `@Valid` and
-`Validated` on `@Controller` method arguments.
+`@Validated` on `@Controller` method arguments.
 
 In your Java configuration, you can customize the global `Validator` instance,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -2957,12 +3790,25 @@ as the following example shows:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun getValidator(): Validator {
+			// ...
+		}
+
+	}
+----
 
 Note that you can also register `Validator` implementations locally,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Controller
 	public class MyController {
@@ -2974,6 +3820,19 @@ as the following example shows:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class MyController {
+
+		@InitBinder
+		protected fun initBinder(binder: WebDataBinder) {
+			binder.addValidators(FooValidator())
+		}
+	}
+----
+
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
@@ -2982,7 +3841,7 @@ mark it with `@Primary` in order to avoid conflict with the one declared in the 
 
 [[webflux-config-content-negotiation]]
 === Content Type Resolvers
-[.small]#<<web.adoc#mvc-config-content-negotiation, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-content-negotiation, Web MVC>>#
 
 You can configure how Spring WebFlux determines the requested media types for
 `@Controller` instances from the request. By default, only the `Accept` header is checked,
@@ -2990,8 +3849,8 @@ but you can also enable a query parameter-based strategy.
 
 The following example shows how to customize the requested content type resolution:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3003,17 +3862,29 @@ The following example shows how to customize the requested content type resoluti
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureContentTypeResolver(builder: RequestedContentTypeResolverBuilder) {
+			// ...
+		}
+	}
+----
 
 
 
 [[webflux-config-message-codecs]]
 === HTTP message codecs
-[.small]#<<web.adoc#mvc-config-message-converters, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-message-converters, Web MVC>>#
 
 The following example shows how to customize how the request and response body are read and written:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3021,6 +3892,18 @@ The following example shows how to customize how the request and response body a
 
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
 			// ...
 		}
 	}
@@ -3038,21 +3921,21 @@ which customizes Jackson's default properties with the following ones:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-jdk7[`jackson-datatype-jdk7`]: Support for Java 7 types like `java.nio.file.Path`.
 * https://github.com/FasterXML/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
 * https://github.com/FasterXML/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * https://github.com/FasterXML/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
+* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 
 
 [[webflux-config-view-resolvers]]
 === View Resolvers
-[.small]#<<web.adoc#mvc-config-view-resolvers, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-view-resolvers, Web MVC>>#
 
 The following example shows how to configure view resolution:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3064,13 +3947,25 @@ The following example shows how to configure view resolution:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			// ...
+		}
+	}
+----
 
 The `ViewResolverRegistry` has shortcuts for view technologies with which the Spring Framework
 integrates. The following example uses FreeMarker (which also requires configuring the
 underlying FreeMarker view technology):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3092,11 +3987,30 @@ underlying FreeMarker view technology):
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+		
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+		}
+
+		// Configure Freemarker...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates")
+		}
+	}
+----
 
 You can also plug in any `ViewResolver` implementation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3110,14 +4024,27 @@ You can also plug in any `ViewResolver` implementation, as the following example
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			val resolver: ViewResolver = ...
+			registry.viewResolver(resolver
+		}
+	}
+----
 
 To support <<webflux-multiple-representations>> and rendering other formats
 through view resolution (besides HTML), you can configure one or more default views based
 on the `HttpMessageWriterView` implementation, which accepts any of the available
 <<webflux-codecs>> from `spring-web`. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3135,6 +4062,24 @@ on the `HttpMessageWriterView` implementation, which accepts any of the availabl
 		// ...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+
+			val encoder = Jackson2JsonEncoder()
+			registry.defaultViews(HttpMessageWriterView(encoder))
+		}
+
+		// ...
+	}
+----
 
 See <<webflux-view>> for more on the view technologies that are integrated with Spring WebFlux.
 
@@ -3142,7 +4087,7 @@ See <<webflux-view>> for more on the view technologies that are integrated with 
 
 [[webflux-config-static-resources]]
 === Static Resources
-[.small]#<<web.adoc#mvc-config-static-resources, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-static-resources, Web MVC>>#
 
 This option provides a convenient way to serve static resources from a list of
 {api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
@@ -3154,8 +4099,8 @@ and a reduction in HTTP requests made by the browser. The `Last-Modified` header
 evaluated and, if present, a `304` status code is returned. The following list shows
 the example:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3168,6 +4113,20 @@ the example:
 				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+		}
 	}
 ----
 
@@ -3185,8 +4144,8 @@ JavaScript resources used with a module loader).
 
 The following example shows how to use `VersionResourceResolver` in your Java configuration:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3198,6 +4157,22 @@ The following example shows how to use `VersionResourceResolver` in your Java co
 					.addResourceLocations("/public/")
 					.resourceChain(true)
 					.addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public/")
+					.resourceChain(true)
+					.addResolver(VersionResourceResolver().addContentVersionStrategy("/**"))
 		}
 
 	}
@@ -3227,14 +4202,14 @@ without versions -- for example, from `/jquery/jquery.min.js` to
 
 [[webflux-config-path-matching]]
 === Path Matching
-[.small]#<<web.adoc#mvc-config-path-matching, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-path-matching, Web MVC>>#
 
 You can customize options related to path matching. For details on the individual options, see the
 {api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
 The following example shows how to use `PathMatchConfigurer`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -3248,7 +4223,23 @@ The following example shows how to use `PathMatchConfigurer`:
 				.addPathPrefix("/api",
 						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
 
+		@Override
+		fun configurePathMatch(configurer: PathMatchConfigurer) {
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController::class.java))
+		}
 	}
 ----
 
@@ -3269,7 +4260,7 @@ reliance on it.
 
 [[webflux-config-advanced-java]]
 === Advanced Configuration Mode
-[.small]#<<web.adoc#mvc-config-advanced-java, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-advanced-java, Web MVC>>#
 
 `@EnableWebFlux` imports `DelegatingWebFluxConfiguration` that:
 
@@ -3281,14 +4272,22 @@ For advanced mode, you can remove `@EnableWebFlux` and extend directly from
 `DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Configuration
 	public class WebConfig extends DelegatingWebFluxConfiguration {
 
 		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class WebConfig : DelegatingWebFluxConfiguration {
 
+		// ...
 	}
 ----
 
@@ -3301,13 +4300,8 @@ the classpath.
 
 [[webflux-http2]]
 == HTTP/2
-[.small]#<<web.adoc#mvc-http2, Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-http2, Web MVC>>#
 
-Servlet 4 containers are required to support HTTP/2, and Spring Framework 5 is compatible
-with Servlet API 4. From a programming model perspective, there is nothing specific that
-applications need to do. However, there are considerations related to server configuration.
-For more details, see the
+HTTP/2 is supported with Reactor Netty, Tomcat, Jetty, and Undertow. However, there are
+considerations related to server configuration. For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
-
-Currently, Spring WebFlux does not support HTTP/2 with Netty. There is also no support for
-pushing resources programmatically to the client.

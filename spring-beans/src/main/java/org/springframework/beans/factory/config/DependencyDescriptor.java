@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -280,13 +279,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Increase this descriptor's nesting level.
-	 * @see MethodParameter#increaseNestingLevel()
 	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			this.methodParameter.increaseNestingLevel();
+			this.methodParameter = this.methodParameter.nested();
 		}
 	}
 
@@ -300,7 +298,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		this.containingClass = containingClass;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			GenericTypeResolver.resolveParameterType(this.methodParameter, containingClass);
+			this.methodParameter = this.methodParameter.withContainingClass(containingClass);
 		}
 	}
 
@@ -373,7 +371,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Determine the name of the wrapped parameter/field.
-	 * @return the declared name (never {@code null})
+	 * @return the declared name (may be {@code null} if unresolvable)
 	 */
 	@Nullable
 	public String getDependencyName() {
@@ -416,7 +414,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -430,7 +428,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass);
+		return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass));
 	}
 
 
@@ -457,7 +455,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 							this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
 				}
 				for (int i = 1; i < this.nestingLevel; i++) {
-					this.methodParameter.increaseNestingLevel();
+					this.methodParameter = this.methodParameter.nested();
 				}
 			}
 		}

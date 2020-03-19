@@ -18,6 +18,7 @@ package org.springframework.web.socket.client.standard;
 
 import java.util.Arrays;
 import java.util.List;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;

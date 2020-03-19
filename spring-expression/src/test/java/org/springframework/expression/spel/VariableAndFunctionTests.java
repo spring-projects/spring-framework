@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
@@ -74,18 +75,9 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
-		try {
-			@SuppressWarnings("unused")
-			Object v = parser.parseRaw("#notStatic()").getValue(ctx);
-			fail("Should have failed with exception - cannot call non static method that way");
-		}
-		catch (SpelEvaluationException se) {
-			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {
-				se.printStackTrace();
-				fail("Should have failed a message about the function needing to be static, not: "
-						+ se.getMessageCode());
-			}
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseRaw("#notStatic()").getValue(ctx)).
+			satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FUNCTION_MUST_BE_STATIC));
 	}
 
 

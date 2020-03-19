@@ -72,7 +72,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Class<?> targetMessageType = parameter.getParameterType();
-		Class<?> targetPayloadType = getPayloadType(parameter);
+		Class<?> targetPayloadType = getPayloadType(parameter, message);
 
 		if (!targetMessageType.isAssignableFrom(message.getClass())) {
 			throw new MethodArgumentTypeMismatchException(message, parameter, "Actual message type '" +
@@ -95,7 +95,19 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		return MessageBuilder.createMessage(payload, message.getHeaders());
 	}
 
-	private Class<?> getPayloadType(MethodParameter parameter) {
+	/**
+	 * Resolve the target class to convert the payload to.
+	 * <p>By default this is the generic type declared in the {@code Message}
+	 * method parameter but that can be overridden to select a more specific
+	 * target type after also taking into account the "Content-Type", e.g.
+	 * return {@code String} if target type is {@code Object} and
+	 * {@code "Content-Type:text/**"}.
+	 * @param parameter the target method parameter
+	 * @param message the message being processed
+	 * @return the target type to use
+	 * @since 5.2
+	 */
+	protected Class<?> getPayloadType(MethodParameter parameter, Message<?> message) {
 		Type genericParamType = parameter.getGenericParameterType();
 		ResolvableType resolvableType = ResolvableType.forType(genericParamType).as(Message.class);
 		return resolvableType.getGeneric().toClass();

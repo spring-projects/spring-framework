@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -40,14 +37,16 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for redirect view, and query string construction.
@@ -67,7 +66,7 @@ public class RedirectViewTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setContextPath("/context");
@@ -79,10 +78,11 @@ public class RedirectViewTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noUrlSet() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				rv::afterPropertiesSet);
 	}
 
 	@Test
@@ -91,8 +91,8 @@ public class RedirectViewTests {
 		rv.setUrl("https://url.somewhere.com");
 		rv.setHttp10Compatible(false);
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(303, response.getStatus());
-		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(303);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com");
 	}
 
 	@Test
@@ -102,8 +102,8 @@ public class RedirectViewTests {
 		rv.setHttp10Compatible(false);
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(301, response.getStatus());
-		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(301);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com");
 	}
 
 	@Test
@@ -112,8 +112,8 @@ public class RedirectViewTests {
 		rv.setUrl("https://url.somewhere.com");
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(301, response.getStatus());
-		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(301);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com");
 	}
 
 	@Test
@@ -122,8 +122,8 @@ public class RedirectViewTests {
 		rv.setUrl("https://url.somewhere.com");
 		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(201, response.getStatus());
-		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(201);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com");
 	}
 
 	@Test
@@ -133,8 +133,8 @@ public class RedirectViewTests {
 		rv.setHttp10Compatible(false);
 		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(201, response.getStatus());
-		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(201);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com");
 	}
 
 	@Test
@@ -148,11 +148,11 @@ public class RedirectViewTests {
 		request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
 		ModelMap model = new ModelMap("id", "1");
 		rv.render(model, request, response);
-		assertEquals(303, response.getStatus());
-		assertEquals("https://url.somewhere.com/path?id=1", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(303);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com/path?id=1");
 
-		assertEquals("/path", flashMap.getTargetRequestPath());
-		assertEquals(model, flashMap.getTargetRequestParams().toSingleValueMap());
+		assertThat(flashMap.getTargetRequestPath()).isEqualTo("/path");
+		assertThat(flashMap.getTargetRequestParams().toSingleValueMap()).isEqualTo(model);
 	}
 
 	@Test
@@ -206,15 +206,15 @@ public class RedirectViewTests {
 	public void remoteHost() throws Exception {
 		RedirectView rv = new RedirectView();
 
-		assertFalse(rv.isRemoteHost("https://url.somewhere.com"));
-		assertFalse(rv.isRemoteHost("/path"));
-		assertFalse(rv.isRemoteHost("http://url.somewhereelse.com"));
+		assertThat(rv.isRemoteHost("https://url.somewhere.com")).isFalse();
+		assertThat(rv.isRemoteHost("/path")).isFalse();
+		assertThat(rv.isRemoteHost("http://somewhereelse.example")).isFalse();
 
 		rv.setHosts(new String[] {"url.somewhere.com"});
 
-		assertFalse(rv.isRemoteHost("https://url.somewhere.com"));
-		assertFalse(rv.isRemoteHost("/path"));
-		assertTrue(rv.isRemoteHost("http://url.somewhereelse.com"));
+		assertThat(rv.isRemoteHost("https://url.somewhere.com")).isFalse();
+		assertThat(rv.isRemoteHost("/path")).isFalse();
+		assertThat(rv.isRemoteHost("http://somewhereelse.example")).isTrue();
 
 	}
 
@@ -263,7 +263,7 @@ public class RedirectViewTests {
 		rv.setExposeModelAttributes(false);
 		rv.render(model, request, response);
 
-		assertEquals(url, this.response.getRedirectedUrl());
+		assertThat(this.response.getRedirectedUrl()).isEqualTo(url);
 	}
 
 	@Test
@@ -366,8 +366,8 @@ public class RedirectViewTests {
 		rv.setUrl("https://url.somewhere.com?foo=bar#bazz");
 		request.setQueryString("a=b&c=d");
 		rv.render(new HashMap<>(), request, response);
-		assertEquals(302, response.getStatus());
-		assertEquals("https://url.somewhere.com?foo=bar&a=b&c=d#bazz", response.getHeader("Location"));
+		assertThat(response.getStatus()).isEqualTo(302);
+		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com?foo=bar&a=b&c=d#bazz");
 	}
 
 	private void doTest(Map<String, ?> map, String url, boolean contextRelative, String expectedUrl)
@@ -376,8 +376,8 @@ public class RedirectViewTests {
 		TestRedirectView rv = new TestRedirectView(url, contextRelative, map);
 		rv.render(map, request, response);
 
-		assertTrue("queryProperties() should have been called.", rv.queryPropertiesCalled);
-		assertEquals(expectedUrl, this.response.getRedirectedUrl());
+		assertThat(rv.queryPropertiesCalled).as("queryProperties() should have been called.").isTrue();
+		assertThat(this.response.getRedirectedUrl()).isEqualTo(expectedUrl);
 	}
 
 
@@ -398,7 +398,7 @@ public class RedirectViewTests {
 		 */
 		@Override
 		protected Map<String, Object> queryProperties(Map<String, Object> model) {
-			assertTrue("Map and model must be equal.", this.expectedModel.equals(model));
+			assertThat(this.expectedModel.equals(model)).as("Map and model must be equal.").isTrue();
 			this.queryPropertiesCalled = true;
 			return super.queryProperties(model);
 		}

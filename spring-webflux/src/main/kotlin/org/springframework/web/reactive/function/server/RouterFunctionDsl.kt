@@ -21,7 +21,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
-import reactor.core.publisher.cast
 import java.net.URI
 import java.util.function.Supplier
 
@@ -61,9 +60,10 @@ fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).bui
  * @author Yevhenii Melnyk
  * @since 5.0
  */
-class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
+class RouterFunctionDsl internal constructor (private val init: RouterFunctionDsl.() -> Unit) {
 
-	private val builder = RouterFunctions.route()
+	@PublishedApi
+	internal val builder = RouterFunctions.route()
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -149,76 +149,136 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	}
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun GET(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.GET(pattern) { f(it).cast() }
+		builder.GET(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code GET}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern and predicate.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun GET(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.GET(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `GET`
+	 * and the given [pattern] matches against the request path.
 	 * @see RequestPredicates.GET
 	 */
 	fun GET(pattern: String): RequestPredicate = RequestPredicates.GET(pattern)
 
 	/**
-	 * Route to the given handler function if the given request predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.HEAD(pattern) { f(it).cast() }
+		builder.HEAD(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code HEAD}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun HEAD(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.HEAD(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `HEAD`
+	 * and the given `pattern` matches against the request path.
 	 * @see RequestPredicates.HEAD
 	 */
 	fun HEAD(pattern: String): RequestPredicate = RequestPredicates.HEAD(pattern)
 
 	/**
-	 * Route to the given handler function if the given POST predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun POST(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.POST(pattern) { f(it).cast() }
+		builder.POST(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code POST}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun POST(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.POST(pattern, predicate, HandlerFunction<ServerResponse>  { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `POST`
+	 * and the given `pattern` matches against the request path.
 	 * @see RequestPredicates.POST
 	 */
 	fun POST(pattern: String): RequestPredicate = RequestPredicates.POST(pattern)
 
 	/**
-	 * Route to the given handler function if the given PUT predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun PUT(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.PUT(pattern) { f(it).cast() }
+		builder.PUT(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PUT}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PUT(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.PUT(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `PUT`
+	 * and the given `pattern` matches against the request path.
 	 * @see RequestPredicates.PUT
 	 */
 	fun PUT(pattern: String): RequestPredicate = RequestPredicates.PUT(pattern)
 
 	/**
-	 * Route to the given handler function if the given PATCH predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern and predicate.
+	 * @param pattern the pattern to match to
 	 */
 	fun PATCH(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.PATCH(pattern) { f(it).cast() }
+		builder.PATCH(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PATCH}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern and predicate.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun PATCH(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.PATCH(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `PATCH`
+	 * and the given `pattern` matches against the request path.
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is PATCH and if the given pattern
 	 * matches against the request path
@@ -226,16 +286,28 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	fun PATCH(pattern: String): RequestPredicate = RequestPredicates.PATCH(pattern)
 
 	/**
-	 * Route to the given handler function if the given DELETE predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun DELETE(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.DELETE(pattern) { f(it).cast() }
+		builder.DELETE(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code DELETE}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun DELETE(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.DELETE(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `DELETE`
+	 * and the given `pattern` matches against the request path.
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is DELETE and if the given pattern
 	 * matches against the request path
@@ -243,16 +315,28 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	fun DELETE(pattern: String): RequestPredicate = RequestPredicates.DELETE(pattern)
 
 	/**
-	 * Route to the given handler function if the given OPTIONS predicate applies.
-	 * @see RouterFunctions.route
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
 	 */
 	fun OPTIONS(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.OPTIONS(pattern) { f(it).cast() }
+		builder.OPTIONS(pattern) { f(it).cast(ServerResponse::class.java) }
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code OPTIONS}
-	 * and the given {@code pattern} matches against the request path.
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern.
+	 * @param pattern the pattern to match to
+	 * @param predicate additional predicate to match
+	 * @since 5.2
+	 */
+	fun OPTIONS(pattern: String, predicate: RequestPredicate, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.OPTIONS(pattern, predicate, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) })
+	}
+
+	/**
+	 * Return a [RequestPredicate] that matches if request's HTTP method is `OPTIONS`
+	 * and the given `pattern` matches against the request path.
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is OPTIONS and if the given pattern
 	 * matches against the request path
@@ -264,45 +348,45 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun accept(mediaType: MediaType, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	* Return a {@code RequestPredicate} that tests if the request's
-	* {@linkplain ServerRequest.Headers#accept() accept} header is
-	* {@linkplain MediaType#isCompatibleWith(MediaType) compatible} with any of the given media types.
+	* Return a [RequestPredicate] that tests if the request's
+	* [accept][ServerRequest.Headers.accept] header is
+	* [compatible][MediaType.isCompatibleWith] with any of the given media types.
 	* @param mediaTypes the media types to match the request's accept header against
 	* @return a predicate that tests the request's accept header against the given media types
 	*/
-	fun accept(mediaType: MediaType): RequestPredicate = RequestPredicates.accept(mediaType)
+	fun accept(vararg mediaTypes: MediaType): RequestPredicate = RequestPredicates.accept(*mediaTypes)
 
 	/**
 	 * Route to the given handler function if the given contentType predicate applies.
 	 * @see RouterFunctions.route
 	 */
-	fun contentType(mediaType: MediaType, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction<ServerResponse> { f(it).cast() }))
+	fun contentType(mediaTypes: MediaType, f: (ServerRequest) -> Mono<out ServerResponse>) {
+		builder.add(RouterFunctions.route(RequestPredicates.contentType(mediaTypes), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests if the request's
-	 * {@linkplain ServerRequest.Headers#contentType() content type} is
-	 * {@linkplain MediaType#includes(MediaType) included} by any of the given media types.
+	 * Return a [RequestPredicate] that tests if the request's
+	 * [content type][ServerRequest.Headers.contentType] is
+	 * [included][MediaType.includes] by any of the given media types.
 	 * @param mediaTypes the media types to match the request's content type against
 	 * @return a predicate that tests the request's content type against the given media types
 	 */
-	fun contentType(mediaType: MediaType): RequestPredicate = RequestPredicates.contentType(mediaType)
+	fun contentType(vararg mediaTypes: MediaType): RequestPredicate = RequestPredicates.contentType(*mediaTypes)
 
 	/**
 	 * Route to the given handler function if the given headers predicate applies.
 	 * @see RouterFunctions.route
 	 */
 	fun headers(headersPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.headers(headersPredicate), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.headers(headersPredicate), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request's headers against the given headers predicate.
+	 * Return a [RequestPredicate] that tests the request's headers against the given headers predicate.
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
@@ -314,11 +398,11 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun method(httpMethod: HttpMethod, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given HTTP method.
+	 * Return a [RequestPredicate] that tests against the given HTTP method.
 	 * @param httpMethod the HTTP method to match to
 	 * @return a predicate that tests against the given HTTP method
 	 */
@@ -329,11 +413,11 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun path(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
+	 * Return a [RequestPredicate] that tests the request path against the given path pattern.
 	 * @see RequestPredicates.path
 	 */
 	fun path(pattern: String): RequestPredicate = RequestPredicates.path(pattern)
@@ -343,11 +427,11 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun pathExtension(extension: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
+	 * Return a [RequestPredicate] that matches if the request's path has the given extension.
 	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
 	 */
@@ -358,11 +442,11 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if the request's path matches the given
+	 * Return a [RequestPredicate] that matches if the request's path matches the given
 	 * predicate.
 	 * @see RequestPredicates.pathExtension
 	 */
@@ -374,11 +458,11 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
+	 * Return a [RequestPredicate] that tests the request's query parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
 	 * @param predicate predicate to test against the query parameter value
@@ -393,7 +477,7 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(this, HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(this, HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
@@ -402,7 +486,7 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 * @see RouterFunctions.route
 	 */
 	operator fun String.invoke(f: (ServerRequest) -> Mono<out ServerResponse>) {
-		builder.add(RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction<ServerResponse> { f(it).cast() }))
+		builder.add(RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction<ServerResponse> { f(it).cast(ServerResponse::class.java) }))
 	}
 
 	/**
@@ -420,6 +504,83 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 */
 	fun resources(lookupFunction: (ServerRequest) -> Mono<Resource>) {
 		builder.resources(lookupFunction)
+	}
+
+	/**
+	 * Merge externally defined router functions into this one.
+	 * @param routerFunction the router function to be added
+	 * @since 5.2
+	 */
+	fun add(routerFunction: RouterFunction<ServerResponse>) {
+		builder.add(routerFunction)
+	}
+
+	/**
+	 * Filters all routes created by this router with the given filter function. Filter
+	 * functions are typically used to address cross-cutting concerns, such as logging,
+	 * security, etc.
+	 * @param filterFunction the function to filter all routes built by this router
+	 * @since 5.2
+	 */
+	fun filter(filterFunction: (ServerRequest, (ServerRequest) -> Mono<ServerResponse>) -> Mono<ServerResponse>) {
+		builder.filter { request, next ->
+			filterFunction(request) {
+				next.handle(request)
+			}
+		}
+	}
+
+	/**
+	 * Filter the request object for all routes created by this builder with the given request
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param requestProcessor a function that transforms the request
+	 * @since 5.2
+	 */
+	fun before(requestProcessor: (ServerRequest) -> ServerRequest) {
+		builder.before(requestProcessor)
+	}
+
+	/**
+	 * Filter the response object for all routes created by this builder with the given response
+	 * processing function. Filters are typically used to address cross-cutting concerns, such
+	 * as logging, security, etc.
+	 * @param responseProcessor a function that transforms the response
+	 * @since 5.2
+	 */
+	fun after(responseProcessor: (ServerRequest, ServerResponse) -> ServerResponse) {
+		builder.after(responseProcessor)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param predicate the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	fun onError(predicate: (Throwable) -> Boolean, responseProvider: (Throwable, ServerRequest) -> Mono<ServerResponse>) {
+		builder.onError(predicate, responseProvider)
+	}
+
+	/**
+	 * Filters all exceptions that match the predicate by applying the given response provider
+	 * function.
+	 * @param E the type of exception to filter
+	 * @param responseProvider a function that creates a response
+	 * @since 5.2
+	 */
+	inline fun <reified E : Throwable> onError(noinline responseProvider: (Throwable, ServerRequest) -> Mono<ServerResponse>) {
+		builder.onError({it is E}, responseProvider)
+	}
+
+	/**
+	 * Return a composed routing function created from all the registered routes.
+	 * @since 5.1
+	 */
+	internal fun build(): RouterFunction<ServerResponse> {
+		init()
+		return builder.build()
 	}
 
 	/**
@@ -537,14 +698,5 @@ class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 	 */
 	fun unprocessableEntity(): ServerResponse.BodyBuilder =
 			ServerResponse.unprocessableEntity()
-
-	/**
-	 * Return a composed routing function created from all the registered routes.
-	 * @since 5.1
-	 */
-	internal fun build(): RouterFunction<ServerResponse> {
-		init()
-		return builder.build()
-	}
 
 }

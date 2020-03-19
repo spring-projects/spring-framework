@@ -1,97 +1,74 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+	id "com.github.johnrengelman.shadow" version "5.2.0"
+}
+
 description = "Spring Core"
 
-dependencyManagement {
-	imports {
-		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
-		mavenBom "io.netty:netty-bom:${nettyVersion}"
-	}
-}
+apply plugin: "kotlin"
 
 // spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
 // cglib itself depends on asm and is therefore further transformed by the JarJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
-def cglibVersion = "3.2.10"
-def objenesisVersion = "3.0.1"
+def cglibVersion = "3.3.0"
+def objenesisVersion = "3.1"
 
 configurations {
-	jarjar
 	cglib
 	objenesis
-	coroutines {
-		transitive = false
-	}
+	coroutines
 }
 
-task cglibRepackJar(type: Jar) { repackJar ->
-	repackJar.baseName = "spring-cglib-repack"
-	repackJar.version = cglibVersion
-
-	doLast() {
-		project.ant {
-			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
-					classpath: configurations.jarjar.asPath
-			jarjar(destfile: repackJar.archivePath) {
-				configurations.cglib.each { originalJar ->
-					zipfileset(src: originalJar)
-				}
-				// Repackage net.sf.cglib => org.springframework.cglib
-				rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-				// As mentioned above, transform cglib's internal asm dependencies from
-				// org.objectweb.asm => org.springframework.asm. Doing this counts on the
-				// the fact that Spring and cglib depend on the same version of asm!
-				rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
-			}
-		}
-	}
+task cglibRepackJar(type: ShadowJar) {
+	baseName = 'spring-cglib-repack'
+	version = cglibVersion
+	configurations = [project.configurations.cglib]
+	relocate 'net.sf.cglib', 'org.springframework.cglib'
+	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
-task objenesisRepackJar(type: Jar) { repackJar ->
-	repackJar.baseName = "spring-objenesis-repack"
-	repackJar.version = objenesisVersion
-
-	doLast() {
-		project.ant {
-			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
-					classpath: configurations.jarjar.asPath
-			jarjar(destfile: repackJar.archivePath) {
-				configurations.objenesis.each { originalJar ->
-					zipfileset(src: originalJar)
-				}
-				// Repackage org.objenesis => org.springframework.objenesis
-				rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
-			}
-		}
-	}
+task objenesisRepackJar(type: ShadowJar) {
+	baseName = 'spring-objenesis-repack'
+	version = objenesisVersion
+	configurations = [project.configurations.objenesis]
+	relocate 'org.objenesis', 'org.springframework.objenesis'
 }
 
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	jarjar("org.pantsbuild:jarjar:1.7.2")
-	coroutines(project(":spring-core-coroutines"))
-
+	coroutines(project(path: ":kotlin-coroutines", configuration: 'classesOnlyElements'))
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
 	compile(project(":spring-jcl"))
-	compileOnly(project(":spring-core-coroutines"))
-	optional("net.sf.jopt-simple:jopt-simple:5.0.4")
-	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	compileOnly(project(":kotlin-coroutines"))
+	compileOnly("io.projectreactor.tools:blockhound")
+	optional("net.sf.jopt-simple:jopt-simple")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("io.projectreactor:reactor-core")
-	optional("io.reactivex:rxjava:${rxjavaVersion}")
-	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+	optional("io.reactivex:rxjava")
+	optional("io.reactivex:rxjava-reactive-streams")
+	optional("io.reactivex.rxjava2:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	testCompile("com.google.code.findbugs:jsr305:3.0.2")
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testCompile("javax.xml.bind:jaxb-api:2.3.1")
-	testCompile("com.fasterxml.woodstox:woodstox-core:5.2.0") {
-		exclude group: "stax", module: "stax-api"
-	}
-	testCompile(project(":spring-core-coroutines"))
+	testCompile("javax.annotation:javax.annotation-api")
+	testCompile("com.google.code.findbugs:jsr305")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testCompile("javax.xml.bind:jaxb-api")
+	testCompile("com.fasterxml.woodstox:woodstox-core")
+	testCompile(project(":kotlin-coroutines"))
+	testCompile("io.projectreactor.tools:blockhound")
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 }
 
 jar {
@@ -113,5 +90,5 @@ jar {
 		include "org/springframework/objenesis/**"
 	}
 
-	from { configurations.coroutines.collect { it.isDirectory() ? it : zipTree(it) } }
+	from configurations.coroutines
 }

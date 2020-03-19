@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +40,9 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -167,12 +171,27 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	}
 
 	private List<WebSocketExtension> buildWebSocketExtensions() {
-		Set<String> names = this.factory.getExtensionFactory().getExtensionNames();
+		Set<String> names = getExtensionNames();
 		List<WebSocketExtension> result = new ArrayList<>(names.size());
 		for (String name : names) {
 			result.add(new WebSocketExtension(name));
 		}
 		return result;
+	}
+
+	@SuppressWarnings({"unchecked", "deprecation"})
+	private Set<String> getExtensionNames() {
+		try {
+			return this.factory.getAvailableExtensionNames();
+		}
+		catch (IncompatibleClassChangeError ex) {
+			// Fallback for versions prior to 9.4.21:
+			// 9.4.20.v20190813: ExtensionFactory (abstract class -> interface)
+			// 9.4.21.v20190926: ExtensionFactory (interface -> abstract class) + deprecated
+			Class<?> clazz = org.eclipse.jetty.websocket.api.extensions.ExtensionFactory.class;
+			Method method = ClassUtils.getMethod(clazz, "getExtensionNames");
+			return (Set<String>) ReflectionUtils.invokeMethod(method, this.factory.getExtensionFactory());
+		}
 	}
 
 	@Override

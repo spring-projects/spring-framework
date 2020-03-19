@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -49,7 +51,10 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 
 	private static final ConsumesRequestCondition EMPTY_CONDITION = new ConsumesRequestCondition();
 
+
 	private final List<ConsumeMediaTypeExpression> expressions;
+
+	private boolean bodyRequired = true;
 
 
 	/**
@@ -72,7 +77,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	public ConsumesRequestCondition(String[] consumes, @Nullable String[] headers) {
 		this.expressions = new ArrayList<>(parseExpressions(consumes, headers));
-		Collections.sort(this.expressions);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 	}
 
 	/**
@@ -142,6 +149,29 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	}
 
 	/**
+	 * Whether this condition should expect requests to have a body.
+	 * <p>By default this is set to {@code true} in which case it is assumed a
+	 * request body is required and this condition matches to the "Content-Type"
+	 * header or falls back on "Content-Type: application/octet-stream".
+	 * <p>If set to {@code false}, and the request does not have a body, then this
+	 * condition matches automatically, i.e. without checking expressions.
+	 * @param bodyRequired whether requests are expected to have a body
+	 * @since 5.2
+	 */
+	public void setBodyRequired(boolean bodyRequired) {
+		this.bodyRequired = bodyRequired;
+	}
+
+	/**
+	 * Return the setting for {@link #setBodyRequired(boolean)}.
+	 * @since 5.2
+	 */
+	public boolean isBodyRequired() {
+		return this.bodyRequired;
+	}
+
+
+	/**
 	 * Returns the "other" instance if it has any expressions; returns "this"
 	 * instance otherwise. Practically that means a method-level "consumes"
 	 * overrides a type-level "consumes" condition.
@@ -170,14 +200,17 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		if (isEmpty()) {
 			return this;
 		}
+		if (!hasBody(request) && !this.bodyRequired) {
+			return EMPTY_CONDITION;
+		}
 
 		// Common media types are cached at the level of MimeTypeUtils
 
 		MediaType contentType;
 		try {
-			contentType = (StringUtils.hasLength(request.getContentType()) ?
+			contentType = StringUtils.hasLength(request.getContentType()) ?
 					MediaType.parseMediaType(request.getContentType()) :
-					MediaType.APPLICATION_OCTET_STREAM);
+					MediaType.APPLICATION_OCTET_STREAM;
 		}
 		catch (InvalidMediaTypeException ex) {
 			return null;
@@ -185,6 +218,13 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 
 		List<ConsumeMediaTypeExpression> result = getMatchingExpressions(contentType);
 		return !CollectionUtils.isEmpty(result) ? new ConsumesRequestCondition(result) : null;
+	}
+
+	private boolean hasBody(HttpServletRequest request) {
+		String contentLength = request.getHeader(HttpHeaders.CONTENT_LENGTH);
+		String transferEncoding = request.getHeader(HttpHeaders.TRANSFER_ENCODING);
+		return StringUtils.hasText(transferEncoding) ||
+				(StringUtils.hasText(contentLength) && !contentLength.trim().equals("0"));
 	}
 
 	@Nullable

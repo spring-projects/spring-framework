@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.tests.sample.beans.Employee;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test for verifying support for the
@@ -46,7 +46,7 @@ public class ExplicitLocationsBaseTests {
 
 	@Test
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
+		assertThat(this.employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).isEqualTo("John Smith");
 	}
 }

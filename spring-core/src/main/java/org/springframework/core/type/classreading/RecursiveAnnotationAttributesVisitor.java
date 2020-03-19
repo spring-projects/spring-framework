@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,11 @@ import org.springframework.lang.Nullable;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1.1
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
+@Deprecated
 class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVisitor {
 
 	protected final String annotationType;

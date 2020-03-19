@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,51 +19,53 @@ package org.springframework.core.codec;
 import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_16;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class CharSequenceEncoderTests
-		extends AbstractEncoderTestCase<CharSequenceEncoder> {
+class CharSequenceEncoderTests extends AbstractEncoderTests<CharSequenceEncoder> {
 
 	private final String foo = "foo";
 
 	private final String bar = "bar";
 
-	public CharSequenceEncoderTests() {
+	CharSequenceEncoderTests() {
 		super(CharSequenceEncoder.textPlainOnly());
 	}
 
 
 	@Override
+	@Test
 	public void canEncode() throws Exception {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.APPLICATION_JSON)).isFalse();
 
 		// SPR-15464
-		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
+		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<CharSequence> input = Flux.just(this.foo, this.bar);
 
@@ -74,16 +76,14 @@ public class CharSequenceEncoderTests
 	}
 
 	@Test
-	public void calculateCapacity() {
+	void calculateCapacity() {
 		String sequence = "Hello World!";
 		Stream.of(UTF_8, UTF_16, ISO_8859_1, US_ASCII, Charset.forName("BIG5"))
 				.forEach(charset -> {
 					int capacity = this.encoder.calculateCapacity(sequence, charset);
 					int length = sequence.length();
-					assertTrue(String.format("%s has capacity %d; length %d", charset, capacity, length),
-							capacity >= length);
+					assertThat(capacity >= length).as(String.format("%s has capacity %d; length %d", charset, capacity, length)).isTrue();
 				});
-
 	}
 
 }

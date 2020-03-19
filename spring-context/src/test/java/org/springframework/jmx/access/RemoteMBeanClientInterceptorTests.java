@@ -18,6 +18,7 @@ package org.springframework.jmx.access;
 
 import java.net.BindException;
 import java.net.MalformedURLException;
+
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -25,7 +26,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.util.SocketUtils;
 
@@ -34,16 +35,11 @@ import org.springframework.util.SocketUtils;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
+class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
-	private static final int SERVICE_PORT;
+	private final int servicePort = SocketUtils.findAvailableTcpPort();
 
-	private static final String SERVICE_URL;
-
-	static {
-		SERVICE_PORT = SocketUtils.findAvailableTcpPort();
-		SERVICE_URL = "service:jmx:jmxmp://localhost:" + SERVICE_PORT;
-	}
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + servicePort;
 
 
 	private JMXConnectorServer connectorServer;
@@ -60,13 +56,13 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		}
 		catch (BindException ex) {
 			System.out.println("Skipping remote JMX tests because binding to local port ["
-					+ SERVICE_PORT + "] failed: " + ex.getMessage());
+					+ this.servicePort + "] failed: " + ex.getMessage());
 			runTests = false;
 		}
 	}
 
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
-		return new JMXServiceURL(SERVICE_URL);
+		return new JMXServiceURL(this.serviceUrl);
 	}
 
 	@Override
@@ -75,7 +71,7 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		return this.connector.getMBeanServerConnection();
 	}
 
-	@After
+	@AfterEach
 	@Override
 	public void tearDown() throws Exception {
 		if (this.connector != null) {

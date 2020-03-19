@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,13 @@ package org.springframework.test.web.reactive.server
 
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlinx.coroutines.flow.Flow
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.server.router
+import java.util.concurrent.CompletableFuture
 
 /**
  * Mock object based tests for [WebTestClient] Kotlin extensions
@@ -30,28 +33,42 @@ import org.springframework.web.reactive.function.server.router
  */
 class WebTestClientExtensionsTests {
 
-	val requestBodySpec = mockk<WebTestClient.RequestBodySpec>(relaxed = true)
+	private val requestBodySpec = mockk<WebTestClient.RequestBodySpec>(relaxed = true)
 
-	val responseSpec = mockk<WebTestClient.ResponseSpec>(relaxed = true)
+	private val responseSpec = mockk<WebTestClient.ResponseSpec>(relaxed = true)
 
 
 	@Test
 	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<Foo>>()
 		requestBodySpec.body(body)
-		verify { requestBodySpec.body(body, Foo::class.java) }
+		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
+	}
+
+	@Test
+	fun `RequestBodySpec#body with Flow and reified type parameters`() {
+		val body = mockk<Flow<Foo>>()
+		requestBodySpec.body(body)
+		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
+	}
+
+	@Test
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
+		val body = mockk<CompletableFuture<Foo>>()
+		requestBodySpec.body<Foo>(body)
+		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	fun `ResponseSpec#expectBody with reified type parameters`() {
 		responseSpec.expectBody<Foo>()
-		verify { responseSpec.expectBody(Foo::class.java) }
+		verify { responseSpec.expectBody(object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	fun `KotlinBodySpec#isEqualTo`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
 				.get().uri("/").exchange().expectBody<String>().isEqualTo("foo")
 	}
@@ -59,29 +76,29 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `KotlinBodySpec#consumeWith`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().consumeWith { assertEquals("foo", it.responseBody) }
+				.get().uri("/").exchange().expectBody<String>().consumeWith { assertThat(it.responseBody).isEqualTo("foo") }
 	}
 
 	@Test
 	fun `KotlinBodySpec#returnResult`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().bodyValue("foo") } } )
 				.build()
-				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertEquals("foo", responseBody) }
+				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertThat(responseBody).isEqualTo("foo") }
 	}
 
 	@Test
 	fun `ResponseSpec#expectBodyList with reified type parameters`() {
 		responseSpec.expectBodyList<Foo>()
-		verify { responseSpec.expectBodyList(Foo::class.java) }
+		verify { responseSpec.expectBodyList(object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
 	fun `ResponseSpec#returnResult with reified type parameters`() {
 		responseSpec.returnResult<Foo>()
-		verify { responseSpec.returnResult(Foo::class.java) }
+		verify { responseSpec.returnResult(object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	class Foo

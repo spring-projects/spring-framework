@@ -13,9 +13,9 @@
 		<lookup-method name="getOneArgument" bean="jedi"/>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype"/>
 
-	<bean id="jedi" class="org.springframework.tests.sample.beans.TestBean" scope="prototype" autowire-candidate="false">
+	<bean id="jedi" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype" autowire-candidate="false">
 		<property name="jedi" value="true"/>
 	</bean>
 

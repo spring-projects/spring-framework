@@ -68,6 +68,51 @@ public class LogAccessor {
 	}
 
 
+	// Log level checks
+
+	/**
+	 * Is fatal logging currently enabled?
+	 */
+	public boolean isFatalEnabled() {
+		return this.log.isFatalEnabled();
+	}
+
+	/**
+	 * Is error logging currently enabled?
+	 */
+	public boolean isErrorEnabled() {
+		return this.log.isErrorEnabled();
+	}
+
+	/**
+	 * Is warn logging currently enabled?
+	 */
+	public boolean isWarnEnabled() {
+		return this.log.isWarnEnabled();
+	}
+
+	/**
+	 * Is info logging currently enabled?
+	 */
+	public boolean isInfoEnabled() {
+		return this.log.isInfoEnabled();
+	}
+
+	/**
+	 * Is debug logging currently enabled?
+	 */
+	public boolean isDebugEnabled() {
+		return this.log.isDebugEnabled();
+	}
+
+	/**
+	 * Is trace logging currently enabled?
+	 */
+	public boolean isTraceEnabled() {
+		return this.log.isTraceEnabled();
+	}
+
+
 	// Plain log methods
 
 	/**

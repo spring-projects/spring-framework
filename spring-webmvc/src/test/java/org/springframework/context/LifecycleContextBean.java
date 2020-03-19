@@ -16,10 +16,9 @@
 
 package org.springframework.context;
 
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
 
 /**
  * Simple bean to test ApplicationContext lifecycle methods for beans

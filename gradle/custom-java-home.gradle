@@ -1,0 +1,80 @@
+// -----------------------------------------------------------------------------
+//
+// This script adds support for the following two JVM system properties
+// that control the build for alternative JDKs (i.e., a JDK other than
+// the one used to launch the Gradle process).
+//
+// - customJavaHome: absolute path to the alternate JDK installation to
+//     use to compile Java code and execute tests. This system property
+//     is also used in spring-oxm.gradle to determine whether JiBX is
+//     supported.
+//
+// - customJavaSourceVersion: Java version supplied to the `--release`
+//     command line flag to control the Java source and target
+//     compatibility version. Supported versions include 9 or higher.
+//     Do not set this system property if Java 8 should be used.
+//
+// Examples:
+//
+// ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
+//
+// ./gradlew --no-build-cache -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home test
+//
+// ./gradlew -DcustomJavaHome=/Library/Java/JavaVirtualMachines/jdk-14.jdk/Contents/Home -DcustomJavaSourceVersion=14 test
+//
+//
+// Credits: inspired by work from Marc Philipp and Stephane Nicoll
+//
+// -----------------------------------------------------------------------------
+
+import org.gradle.internal.os.OperatingSystem
+// import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
+
+def customJavaHome = System.getProperty("customJavaHome")
+
+if (customJavaHome) {
+	def customJavaHomeDir = new File(customJavaHome)
+	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+
+	tasks.withType(JavaCompile) {
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHomeDir)
+		options.forkOptions.javaHome = customJavaHomeDir
+		inputs.property("customJavaHome", customJavaHome)
+		if (customJavaSourceVersion) {
+			options.compilerArgs += [ "--release", customJavaSourceVersion]
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+	}
+
+	tasks.withType(GroovyCompile) {
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHomeDir)
+		options.forkOptions.javaHome = customJavaHomeDir
+		inputs.property("customJavaHome", customJavaHome)
+		if (customJavaSourceVersion) {
+			options.compilerArgs += [ "--release", customJavaSourceVersion]
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+	}
+
+	/*
+	tasks.withType(KotlinJvmCompile) {
+		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHome)
+		kotlinOptions.jdkHome = customJavaHomeDir
+		inputs.property("customJavaHome", customJavaHome)
+	}
+	*/
+
+	tasks.withType(Test) {
+		def javaExecutable = customJavaHome + "/bin/java"
+		if (OperatingSystem.current().isWindows()) {
+			javaExecutable += ".exe"
+		}
+		logger.info("Java executable for " + it.name + " task in " + project.name + ": " + javaExecutable)
+		executable = javaExecutable
+		inputs.property("customJavaHome", customJavaHome)
+		if (customJavaSourceVersion) {
+			inputs.property("customJavaSourceVersion", customJavaSourceVersion)
+		}
+	}
+
+}

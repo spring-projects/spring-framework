@@ -19,16 +19,16 @@ package org.springframework.beans.factory.config;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Simple test to illustrate and verify scope usage.
@@ -42,7 +42,7 @@ public class SimpleScopeTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		beanFactory = new DefaultListableBeanFactory();
 		Scope scope = new NoOpScope() {
@@ -63,9 +63,9 @@ public class SimpleScopeTests {
 		beanFactory.registerScope("myScope", scope);
 
 		String[] scopeNames = beanFactory.getRegisteredScopeNames();
-		assertEquals(1, scopeNames.length);
-		assertEquals("myScope", scopeNames[0]);
-		assertSame(scope, beanFactory.getRegisteredScope("myScope"));
+		assertThat(scopeNames.length).isEqualTo(1);
+		assertThat(scopeNames[0]).isEqualTo("myScope");
+		assertThat(beanFactory.getRegisteredScope("myScope")).isSameAs(scope);
 
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				qualifiedResource(SimpleScopeTests.class, "context.xml"));
@@ -76,9 +76,9 @@ public class SimpleScopeTests {
 	public void testCanGetScopedObject() {
 		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");
 		TestBean tb2 = (TestBean) beanFactory.getBean("usesScope");
-		assertNotSame(tb1, tb2);
+		assertThat(tb2).isNotSameAs(tb1);
 		TestBean tb3 = (TestBean) beanFactory.getBean("usesScope");
-		assertSame(tb3, tb1);
+		assertThat(tb1).isSameAs(tb3);
 	}
 
 }

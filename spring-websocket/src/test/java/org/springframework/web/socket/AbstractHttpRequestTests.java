@@ -16,15 +16,15 @@
 
 package org.springframework.web.socket;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 /**
  * Base class for tests using {@link ServerHttpRequest} and {@link ServerHttpResponse}.
@@ -44,7 +44,7 @@ public abstract class AbstractHttpRequestTests {
 	protected ServerHttpAsyncRequestControl asyncControl;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		resetRequestAndResponse();
 	}

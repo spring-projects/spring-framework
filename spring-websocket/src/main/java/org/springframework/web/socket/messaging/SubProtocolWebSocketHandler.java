@@ -187,6 +187,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
+	@Override
 	public List<String> getSubProtocols() {
 		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
@@ -248,13 +249,14 @@ public class SubProtocolWebSocketHandler
 
 	/**
 	 * Return a String describing internal state and counters.
+	 * Effectively {@code toString()} on {@link #getStats() getStats()}.
 	 */
 	public String getStatsInfo() {
 		return this.stats.toString();
 	}
 
 	/**
-	 * Return a {@link Stats} object that containers various session counters.
+	 * Return a structured object with various session counters.
 	 * @since 5.2
 	 */
 	public Stats getStats() {
@@ -368,6 +370,9 @@ public class SubProtocolWebSocketHandler
 				if (logger.isDebugEnabled()) {
 					logger.debug("Terminating '" + session + "'", ex);
 				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("Terminating '" + session + "': " + ex.getMessage());
+				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
@@ -429,7 +434,7 @@ public class SubProtocolWebSocketHandler
 		}
 
 		SubProtocolHandler handler;
-		if (!StringUtils.isEmpty(protocol)) {
+		if (StringUtils.hasLength(protocol)) {
 			handler = this.protocolHandlerLookup.get(protocol);
 			if (handler == null) {
 				throw new IllegalStateException(
@@ -590,6 +595,7 @@ public class SubProtocolWebSocketHandler
 		int getTransportErrorSessions();
 	}
 
+
 	private class DefaultStats implements Stats {
 
 		private final AtomicInteger total = new AtomicInteger();
@@ -605,7 +611,6 @@ public class SubProtocolWebSocketHandler
 		private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
 		private final AtomicInteger transportError = new AtomicInteger();
-
 
 		@Override
 		public int getTotalSessions() {
@@ -675,6 +680,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 
+		@Override
 		public String toString() {
 			return SubProtocolWebSocketHandler.this.sessions.size() +
 					" current WS(" + this.webSocket.get() +

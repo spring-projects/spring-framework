@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
  */
 class RegexPathElement extends PathElement {
 
-	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
@@ -203,6 +203,7 @@ class RegexPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}

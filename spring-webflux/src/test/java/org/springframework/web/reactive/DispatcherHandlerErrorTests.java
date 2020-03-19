@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,8 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,12 +47,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -70,7 +67,7 @@ public class DispatcherHandlerErrorTests {
 	private DispatcherHandler dispatcherHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestConfig.class);
@@ -86,15 +83,15 @@ public class DispatcherHandlerErrorTests {
 
 		StepVerifier.create(mono)
 				.consumeErrorWith(ex -> {
-					assertThat(ex, instanceOf(ResponseStatusException.class));
-					assertThat(ex.getMessage(), is("404 NOT_FOUND \"No matching handler\""));
+					assertThat(ex).isInstanceOf(ResponseStatusException.class);
+					assertThat(ex.getMessage()).isEqualTo("404 NOT_FOUND \"No matching handler\"");
 				})
 				.verify();
 
 		// SPR-17475
 		AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
 		StepVerifier.create(mono).consumeErrorWith(exceptionRef::set).verify();
-		StepVerifier.create(mono).consumeErrorWith(ex -> assertNotSame(exceptionRef.get(), ex)).verify();
+		StepVerifier.create(mono).consumeErrorWith(ex -> assertThat(ex).isNotSameAs(exceptionRef.get())).verify();
 	}
 
 	@Test
@@ -103,7 +100,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -113,7 +110,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -123,10 +120,10 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertThat(error, instanceOf(IllegalStateException.class));
-					assertThat(error.getMessage(), startsWith("No HandlerResultHandler"));
-				})
+				.consumeErrorWith(error ->
+					assertThat(error)
+							.isInstanceOf(IllegalStateException.class)
+							.hasMessageStartingWith("No HandlerResultHandler"))
 				.verify();
 	}
 
@@ -138,7 +135,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertThat(error, instanceOf(NotAcceptableStatusException.class)))
+				.consumeErrorWith(error -> assertThat(error).isInstanceOf(NotAcceptableStatusException.class))
 				.verify();
 	}
 
@@ -150,7 +147,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -162,7 +159,7 @@ public class DispatcherHandlerErrorTests {
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, handlers);
 		webHandler.handle(exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exchange.getResponse().getStatusCode());
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 
