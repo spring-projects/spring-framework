@@ -39,6 +39,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -67,15 +68,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	private static final ThreadLocal<WebSocketHandlerContainer> containerHolder =
 			new NamedThreadLocal<>("WebSocketHandlerContainer");
 
-
+	@Nullable
 	private WebSocketPolicy policy;
 
+	@Nullable
 	private WebSocketServerFactory factory;
 
+	@Nullable
 	private ServletContext servletContext;
 
 	private volatile boolean running = false;
 
+	@Nullable
 	private volatile List<WebSocketExtension> supportedExtensions;
 
 
@@ -196,7 +200,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
+			@Nullable String selectedProtocol, List<WebSocketExtension> selectedExtensions, @Nullable Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
