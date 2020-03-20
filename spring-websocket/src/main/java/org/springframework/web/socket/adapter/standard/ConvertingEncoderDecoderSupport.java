@@ -85,7 +85,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 */
 	public void init(EndpointConfig config) {
 		ApplicationContext applicationContext = getApplicationContext();
-		if (applicationContext != null && applicationContext instanceof ConfigurableApplicationContext) {
+		if (applicationContext instanceof ConfigurableApplicationContext) {
 			ConfigurableListableBeanFactory beanFactory =
 					((ConfigurableApplicationContext) applicationContext).getBeanFactory();
 			beanFactory.autowireBean(this);
