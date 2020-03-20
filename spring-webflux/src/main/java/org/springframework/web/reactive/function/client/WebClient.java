@@ -651,17 +651,17 @@ public interface WebClient {
 
 		/**
 		 * Provide a function to map specific error status codes to an error
-		 * signal to to be propagated downstream instead of the response.
-		 * <p>By default, if there are not matching status handlers, responses
+		 * signal to be propagated downstream instead of the response.
+		 * <p>By default, if there are no matching status handlers, responses
 		 * with status codes >= 400 are mapped to
 		 * {@link WebClientResponseException} which is created with
 		 * {@link ClientResponse#createException()}.
 		 * <p>To suppress the treatment of a status code as an error and process
 		 * it as a normal response, return {@code Mono.empty()} from the function.
-		 * The response will then propagate downstream for processing.
-		 * <p>To ignore an error response, handle it earlier with a
-		 * {@link ExchangeFilterFunction filter}, or add {@code onErrorResume}
-		 * downstream, for example:
+		 * The response will then propagate downstream to be processed.
+		 * <p>To ignore an error response completely, and propagate neither
+		 * response nor error, use a {@link ExchangeFilterFunction filter}, or
+		 * add {@code onErrorResume} downstream, for example:
 		 * <pre class="code">
 		 * webClient.get()
 		 *     .uri("https://abc.com/account/123")
