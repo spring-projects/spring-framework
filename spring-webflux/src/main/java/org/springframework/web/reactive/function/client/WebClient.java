@@ -664,7 +664,7 @@ public interface WebClient {
 		 * downstream, for example:
 		 * <pre class="code">
 		 * webClient.get()
-		 *     .uri("http://abc.com/account/123")
+		 *     .uri("https://abc.com/account/123")
 		 *     .retrieve()
 		 *     .bodyToMono(Account.class)
 		 *     .onErrorResume(WebClientResponseException.class,
