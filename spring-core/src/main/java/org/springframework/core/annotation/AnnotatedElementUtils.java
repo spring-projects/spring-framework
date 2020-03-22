@@ -111,7 +111,7 @@ public abstract class AnnotatedElementUtils {
 	 * @param element the annotated element
 	 * @param annotationType the annotation type on which to find meta-annotations
 	 * @return the names of all meta-annotations present on the annotation,
-	 * or {@code null} if not found
+	 * or an empty set if not found
 	 * @since 4.2
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, String)
 	 * @see #hasMetaAnnotationTypes

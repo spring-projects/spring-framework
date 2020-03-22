@@ -100,8 +100,8 @@ import org.springframework.web.servlet.ModelAndView;
  * @see LastModified
  * @see SimpleControllerHandlerAdapter
  * @see AbstractController
- * @see org.springframework.web.testfixture.servlet.MockHttpServletRequest
- * @see org.springframework.web.testfixture.servlet.MockHttpServletResponse
+ * @see org.springframework.mock.web.MockHttpServletRequest
+ * @see org.springframework.mock.web.MockHttpServletResponse
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.web.context.ServletContextAware

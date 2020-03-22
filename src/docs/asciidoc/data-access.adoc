@@ -2715,7 +2715,7 @@ The following query looks for a `String`:
 ----
 	String lastName = this.jdbcTemplate.queryForObject(
 			"select last_name from t_actor where id = ?",
-			new Object[]{1212L}, String.class);
+			String.class, 1212L);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2730,17 +2730,15 @@ The following query finds and populates a single domain object:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Actor actor = this.jdbcTemplate.queryForObject(
+	Actor actor = jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
-			new Object[]{1212L},
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
-			});
+			(resultSet, rowNum) -> {
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
+			},
+			1212L);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2752,20 +2750,18 @@ The following query finds and populates a single domain object:
 		}
 ----
 
-The following query finds and populates a number of domain objects:
+The following query finds and populates a list of domain objects:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	List<Actor> actors = this.jdbcTemplate.query(
 			"select first_name, last_name from t_actor",
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
+			(resultSet, rowNum) -> {
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
 			});
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2775,43 +2771,34 @@ The following query finds and populates a number of domain objects:
 			Actor(rs.getString("first_name"), rs.getString("last_name"))
 ----
 
-
 If the last two snippets of code actually existed in the same application, it would make
-sense to remove the duplication present in the two `RowMapper` anonymous inner classes
-and extract them out into a single class (typically a `static` nested class) that could
-then be referenced by DAO methods as needed. For example, it may be better to write the
-preceding code snippet as follows:
+sense to remove the duplication present in the two `RowMapper` lambda expressions and
+extract them out into a single field that could then be referenced by DAO methods as needed.
+For example, it may be better to write the preceding code snippet as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultSet.getString("first_name"));
+		actor.setLastName(resultSet.getString("last_name"));
+		return actor;
+	};
+
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", new ActorMapper());
-	}
-
-	private static final class ActorMapper implements RowMapper<Actor> {
-
-		public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Actor actor = new Actor();
-			actor.setFirstName(rs.getString("first_name"));
-			actor.setLastName(rs.getString("last_name"));
-			return actor;
-		}
+		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	fun findAllActors(): List<Actor> {
-		return jdbcTemplate.query("select first_name, last_name from t_actor", ActorMapper())
+	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
+		Actor(rs.getString("first_name"), rs.getString("last_name"))
 	}
 
-	class ActorMapper : RowMapper<Actor> {
-
-		override fun mapRow(rs: ResultSet, rowNum: Int) = Actor(
-				rs.getString("first_name"),
-				rs.getString("last_name"))
-		}
+	fun findAllActors(): List<Actor> {
+		return jdbcTemplate.query("select first_name, last_name from t_actor", actorMapper)
 	}
 ----
 
@@ -3562,15 +3549,11 @@ on Oracle but may not work on other platforms:
 	final String name = "Rob";
 
 	KeyHolder keyHolder = new GeneratedKeyHolder();
-	jdbcTemplate.update(
-		new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] {"id"});
-				ps.setString(1, name);
-				return ps;
-			}
-		},
-		keyHolder);
+	jdbcTemplate.update(connection -> {
+		PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] { "id" });
+		ps.setString(1, name);
+		return ps;
+	}, keyHolder);
 
 	// keyHolder.getKey() now contains the generated key
 ----
@@ -4053,12 +4036,10 @@ The following example shows a batch update that uses a batch size of 100:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					actors,
 					100,
-					new ParameterizedPreparedStatementSetter<Actor>() {
-						public void setValues(PreparedStatement ps, Actor argument) throws SQLException {
-							ps.setString(1, argument.getFirstName());
-							ps.setString(2, argument.getLastName());
-							ps.setLong(3, argument.getId().longValue());
-						}
+					(PreparedStatement ps, Actor actor) -> {
+						ps.setString(1, actor.getFirstName());
+						ps.setString(2, actor.getLastName());
+						ps.setLong(3, actor.getId().longValue());
 					});
 			return updateCounts;
 		}
@@ -5554,9 +5535,9 @@ database. To accommodate these types, Spring provides a `SqlReturnType` for hand
 them when they are returned from the stored procedure call and `SqlTypeValue` when they
 are passed in as a parameter to the stored procedure.
 
-The `SqlReturnType` interface has a single method (named
-`getTypeValue`) that must be implemented. This interface is used as part of the
-declaration of an `SqlOutParameter`. The following example shows returning the value of an Oracle `STRUCT` object of the user
+The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
+implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
+The following example shows returning the value of an Oracle `STRUCT` object of the user
 declared type `ITEM_TYPE`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -5567,16 +5548,14 @@ declared type `ITEM_TYPE`:
 		public TestItemStoredProcedure(DataSource dataSource) {
 			// ...
 			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
-				new SqlReturnType() {
-					public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String 	) throws SQLException {
-						STRUCT struct = (STRUCT) cs.getObject(colIndx);
-						Object[] attr = struct.getAttributes();
-						TestItem item = new TestItem();
-						item.setId(((Number) attr[0]).longValue());
-						item.setDescription((String) attr[1]);
-						item.setExpirationDate((java.util.Date) attr[2]);
-						return item;
-					}
+				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
+					STRUCT struct = (STRUCT) cs.getObject(colIndx);
+					Object[] attr = struct.getAttributes();
+					TestItem item = new TestItem();
+					item.setId(((Number) attr[0]).longValue());
+					item.setDescription((String) attr[1]);
+					item.setExpirationDate((java.util.Date) attr[2]);
+					return item;
 				}));
 			// ...
 		}

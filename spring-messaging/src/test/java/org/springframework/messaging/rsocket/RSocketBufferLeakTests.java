@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import io.rsocket.AbstractRSocket;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.exceptions.ApplicationErrorException;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
@@ -147,6 +148,13 @@ class RSocketBufferLeakTests {
 	void ignoreInput() {
 		Mono<String> result = requester.route("ignore-input").data("a").retrieveMono(String.class);
 		StepVerifier.create(result).expectNext("bar").thenCancel().verify(Duration.ofSeconds(5));
+	}
+
+	@Test // gh-24741
+	void noSuchRouteOnChannelInteraction() {
+		Flux<String> input = Flux.just("foo", "bar", "baz");
+		Flux<String> result = requester.route("no-such-route").data(input).retrieveFlux(String.class);
+		StepVerifier.create(result).expectError(ApplicationErrorException.class).verify(Duration.ofSeconds(5));
 	}
 
 

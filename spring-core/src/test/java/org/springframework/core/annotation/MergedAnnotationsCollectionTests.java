@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
-	void interateIteratesInCorrectOrder() {
+	void iterateIteratesInCorrectOrder() {
 		MergedAnnotations annotations = getDirectAndSimple();
 		List<Class<?>> types = new ArrayList<>();
 		for (MergedAnnotation<?> annotation : annotations) {
@@ -146,10 +146,10 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void getReturnsAppropriateAnnotation() {
-		MergedAnnotations annotations = getMutiRoute1();
-		assertThat(annotations.get(MutiRouteTarget.class).getString(
+		MergedAnnotations annotations = getMultiRoute1();
+		assertThat(annotations.get(MultiRouteTarget.class).getString(
 				MergedAnnotation.VALUE)).isEqualTo("12");
-		assertThat(annotations.get(MutiRouteTarget.class.getName()).getString(
+		assertThat(annotations.get(MultiRouteTarget.class.getName()).getString(
 				MergedAnnotation.VALUE)).isEqualTo("12");
 	}
 
@@ -161,19 +161,19 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void getWithPredicateReturnsOnlyMatching() {
-		MergedAnnotations annotations = getMutiRoute1();
-		assertThat(annotations.get(MutiRouteTarget.class,
+		MergedAnnotations annotations = getMultiRoute1();
+		assertThat(annotations.get(MultiRouteTarget.class,
 				annotation -> annotation.getDistance() >= 3).getString(
 						MergedAnnotation.VALUE)).isEqualTo("111");
 	}
 
 	@Test
 	void getWithSelectorReturnsSelected() {
-		MergedAnnotations annotations = getMutiRoute1();
-		MergedAnnotationSelector<MutiRouteTarget> deepest = (existing,
+		MergedAnnotations annotations = getMultiRoute1();
+		MergedAnnotationSelector<MultiRouteTarget> deepest = (existing,
 				candidate) -> candidate.getDistance() > existing.getDistance() ? candidate
 						: existing;
-		assertThat(annotations.get(MutiRouteTarget.class, null, deepest).getString(
+		assertThat(annotations.get(MultiRouteTarget.class, null, deepest).getString(
 				MergedAnnotation.VALUE)).isEqualTo("111");
 	}
 
@@ -188,30 +188,30 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void streamWithTypeStreamsInCorrectOrder() {
-		MergedAnnotations annotations = getMutiRoute1();
+		MergedAnnotations annotations = getMultiRoute1();
 		List<String> values = new ArrayList<>();
-		annotations.stream(MutiRouteTarget.class).forEach(
+		annotations.stream(MultiRouteTarget.class).forEach(
 				annotation -> values.add(annotation.getString(MergedAnnotation.VALUE)));
 		assertThat(values).containsExactly("12", "111");
 	}
 
 	@Test
-	void getMetaWhenRootHasAttributeValuesShouldAlaisAttributes() {
-		MergedAnnotation<Alaised> root = MergedAnnotation.of(null, null, Alaised.class,
+	void getMetaWhenRootHasAttributeValuesShouldAliasAttributes() {
+		MergedAnnotation<Aliased> root = MergedAnnotation.of(null, null, Aliased.class,
 				Collections.singletonMap("testAlias", "test"));
 		MergedAnnotations annotations = MergedAnnotationsCollection.of(
 				Collections.singleton(root));
-		MergedAnnotation<AlaisTarget> metaAnnotation = annotations.get(AlaisTarget.class);
+		MergedAnnotation<AliasTarget> metaAnnotation = annotations.get(AliasTarget.class);
 		assertThat(metaAnnotation.getString("test")).isEqualTo("test");
 	}
 
 	@Test
-	void getMetaWhenRootHasNoAttributeValuesShouldAlaisAttributes() {
-		MergedAnnotation<Alaised> root = MergedAnnotation.of(null, null, Alaised.class,
+	void getMetaWhenRootHasNoAttributeValuesShouldAliasAttributes() {
+		MergedAnnotation<Aliased> root = MergedAnnotation.of(null, null, Aliased.class,
 				Collections.emptyMap());
 		MergedAnnotations annotations = MergedAnnotationsCollection.of(
 				Collections.singleton(root));
-		MergedAnnotation<AlaisTarget> metaAnnotation = annotations.get(AlaisTarget.class);
+		MergedAnnotation<AliasTarget> metaAnnotation = annotations.get(AliasTarget.class);
 		assertThat(root.getString("testAlias")).isEqualTo("newdefault");
 		assertThat(metaAnnotation.getString("test")).isEqualTo("newdefault");
 	}
@@ -223,9 +223,9 @@ class MergedAnnotationsCollectionTests {
 		return MergedAnnotationsCollection.of(list);
 	}
 
-	private MergedAnnotations getMutiRoute1() {
+	private MergedAnnotations getMultiRoute1() {
 		List<MergedAnnotation<?>> list = new ArrayList<>();
-		list.add(MergedAnnotation.of(null, null, MutiRoute1.class,
+		list.add(MergedAnnotation.of(null, null, MultiRoute1.class,
 				Collections.emptyMap()));
 		return MergedAnnotationsCollection.of(list);
 	}
@@ -264,49 +264,49 @@ class MergedAnnotationsCollectionTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MutiRouteTarget {
+	@interface MultiRouteTarget {
 
 		String value();
 
 	}
 
-	@MutiRoute11
-	@MutiRoute12
+	@MultiRoute11
+	@MultiRoute12
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MutiRoute1 {
+	@interface MultiRoute1 {
 
 	}
 
-	@MutiRoute111
+	@MultiRoute111
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MutiRoute11 {
+	@interface MultiRoute11 {
 
 	}
 
-	@MutiRouteTarget("12")
+	@MultiRouteTarget("12")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MutiRoute12 {
+	@interface MultiRoute12 {
 
 	}
 
-	@MutiRouteTarget("111")
+	@MultiRouteTarget("111")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MutiRoute111 {
+	@interface MultiRoute111 {
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface AlaisTarget {
+	@interface AliasTarget {
 
 		String test() default "default";
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@AlaisTarget
-	@interface Alaised {
+	@AliasTarget
+	@interface Aliased {
 
-		@AliasFor(annotation = AlaisTarget.class, attribute = "test")
+		@AliasFor(annotation = AliasTarget.class, attribute = "test")
 		String testAlias() default "newdefault";
 
 	}
