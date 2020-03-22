@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.message.BasicHttpRequest;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -110,10 +112,17 @@ class ApacheClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values()
+		if (getCookies().isEmpty()) {
+			return;
+		}
+
+		String cookiesString = getCookies().values()
 				.stream()
 				.flatMap(Collection::stream)
-				.forEach(httpCookie -> this.httpRequest.addHeader(HttpHeaders.COOKIE, httpCookie.toString()));
+				.map(HttpCookie::toString)
+				.collect(Collectors.joining("; "));
+
+		this.httpRequest.addHeader(HttpHeaders.COOKIE, cookiesString);
 	}
 
 	public HttpRequest getHttpRequest() {

@@ -84,7 +84,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		LinkedMultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.context.getCookieStore().getCookies().forEach(cookie ->
-				result.add(cookie.getName(), ResponseCookie.from(cookie.getName(), cookie.getValue())
+				result.add(cookie.getName(), ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
 						.domain(cookie.getDomain())
 						.path(cookie.getPath())
 						.maxAge(getMaxAgeSeconds(cookie))
