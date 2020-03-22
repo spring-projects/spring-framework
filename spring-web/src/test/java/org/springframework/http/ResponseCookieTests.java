@@ -86,7 +86,7 @@ public class ResponseCookieTests {
 
 		Arrays.asList("\"\"", "\t\"\" ", " \" \t \"\t")
 				.forEach(domain -> {
-					ResponseCookie cookie = ResponseCookie.fromClientResponse("id", "1fWa").domain("\"\"").build();
+					ResponseCookie cookie = ResponseCookie.fromClientResponse("id", "1fWa").domain(domain).build();
 					assertThat(cookie.getDomain()).isNull();
 				});
 
