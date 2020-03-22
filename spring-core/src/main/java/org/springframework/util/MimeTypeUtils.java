@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -421,9 +420,7 @@ public abstract class MimeTypeUtils {
 
 		private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
 
-		private final Lock readLock;
-
-		private final Lock writeLock;
+		private final ReadWriteLock lock;
 
 		private final Function<K, V> generator;
 
@@ -434,43 +431,36 @@ public abstract class MimeTypeUtils {
 			Assert.notNull(generator, "Generator function should not be null");
 			this.maxSize = maxSize;
 			this.generator = generator;
-
-			ReadWriteLock lock = new ReentrantReadWriteLock();
-			this.readLock = lock.readLock();
-			this.writeLock = lock.writeLock();
+			this.lock = new ReentrantReadWriteLock();
 		}
 
 		public V get(K key) {
-			V cached;
-
-			if ((cached = this.cache.get(key)) != null) {
-				if (this.size < this.maxSize / 2) {
+			V cached = this.cache.get(key);
+			if (cached != null) {
+				if (this.size < this.maxSize) {
 					return cached;
 				}
-
+				this.lock.readLock().lock();
 				try {
-					this.readLock.lock();
-					this.queue.add(key);
 					this.queue.remove(key);
+					this.queue.add(key);
 					return cached;
 				}
 				finally {
-					this.readLock.unlock();
+					this.lock.readLock().unlock();
 				}
 			}
-
-			this.writeLock.lock();
+			this.lock.writeLock().lock();
 			try {
-				// retrying in case of concurrent reads on the same key
-				if ((cached = this.cache.get(key)) != null) {
-					this.queue.add(key);
+				// Retrying in case of concurrent reads on the same key
+				cached = this.cache.get(key);
+				if (cached  != null) {
 					this.queue.remove(key);
+					this.queue.add(key);
 					return cached;
 				}
-
 				// Generate value first, to prevent size inconsistency
 				V value = this.generator.apply(key);
-
 				int cacheSize = this.size;
 				if (cacheSize == this.maxSize) {
 					K leastUsed = this.queue.poll();
@@ -479,15 +469,13 @@ public abstract class MimeTypeUtils {
 						cacheSize--;
 					}
 				}
-
 				this.queue.add(key);
 				this.cache.put(key, value);
 				this.size = cacheSize + 1;
-
 				return value;
 			}
 			finally {
-				this.writeLock.unlock();
+				this.lock.writeLock().unlock();
 			}
 		}
 	}
