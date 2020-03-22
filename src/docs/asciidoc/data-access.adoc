@@ -2733,10 +2733,10 @@ The following query finds and populates a single domain object:
 	Actor actor = jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
 			(resultSet, rowNum) -> {
-				Actor actor = new Actor();
-				actor.setFirstName(resultSet.getString("first_name"));
-				actor.setLastName(resultSet.getString("last_name"));
-				return actor;
+				Actor newActor = new Actor();
+				newActor.setFirstName(resultSet.getString("first_name"));
+				newActor.setLastName(resultSet.getString("last_name"));
+				return newActor;
 			},
 			1212L);
 ----
