@@ -447,7 +447,7 @@ public @interface Configuration {
 	 * subclass which comes with limitations such as the configuration class and
 	 * its methods not being allowed to declare {@code final}.
 	 * <p>The default is {@code true}, allowing for 'inter-bean references' via direct
-	 * method call within the configuration class as well as for external calls to
+	 * method calls within the configuration class as well as for external calls to
 	 * this configuration's {@code @Bean} methods, e.g. from another configuration class.
 	 * If this is not needed since each of this particular configuration's {@code @Bean}
 	 * methods is self-contained and designed as a plain factory method for container use,
