@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,9 +344,9 @@ import org.springframework.stereotype.Component;
  *
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
  * bootstrap time.  To avoid this, {@code @Configuration} may be used in conjunction with
- * the {@link Lazy @Lazy} annotation to indicate that all {@code @Bean} methods declared within
- * the class are by default lazily initialized. Note that {@code @Lazy} may be used on
- * individual {@code @Bean} methods as well.
+ * the {@link Lazy @Lazy} annotation to indicate that all {@code @Bean} methods declared
+ * within the class are by default lazily initialized. Note that {@code @Lazy} may be used
+ * on individual {@code @Bean} methods as well.
  *
  * <h2>Testing support for {@code @Configuration} classes</h2>
  *
