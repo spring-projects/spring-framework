@@ -8385,6 +8385,9 @@ See the following resources for more information about testing:
 * https://www.dbunit.org/[DbUnit]: JUnit extension (also usable with Ant and Maven) that
   is targeted at database-driven projects and, among other things, puts your database into
   a known state between test runs.
+* https://www.testcontainers.org/[Testcontainers]: Java library that supports JUnit
+  tests, providing lightweight, throwaway instances of common databases, Selenium web
+  browsers, or anything else that can run in a Docker container.
 * https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
 * https://github.com/Ninja-Squad/springmockk[SpringMockK]: Support for Spring Boot
   integration tests written in Kotlin using https://mockk.io/[MockK] instead of Mockito.
