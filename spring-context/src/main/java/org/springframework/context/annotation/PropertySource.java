@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,8 +170,11 @@ import org.springframework.core.io.support.PropertySourceFactory;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, a name will
-	 * be generated based on the description of the underlying resource.
+	 * Indicate the name of this property source. If omitted, the {@link #factory()}
+	 * will generate a name based on the underlying resource (in the case of
+	 * {@link org.springframework.core.io.support.DefaultPropertySourceFactory}:
+	 * derived from the resource description through a corresponding name-less
+	 * {@link org.springframework.core.io.support.ResourcePropertySource} constructor).
 	 * @see org.springframework.core.env.PropertySource#getName()
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
