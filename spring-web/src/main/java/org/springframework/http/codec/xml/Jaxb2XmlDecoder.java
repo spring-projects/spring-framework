@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,6 +195,10 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 			return unmarshal(events, targetType.toClass());
 		}
 		catch (XMLStreamException ex) {
+			throw Exceptions.propagate(ex);
+		}
+		catch (Throwable ex) {
+			ex = (ex.getCause() instanceof XMLStreamException ? ex.getCause() : ex);
 			throw Exceptions.propagate(ex);
 		}
 		finally {
