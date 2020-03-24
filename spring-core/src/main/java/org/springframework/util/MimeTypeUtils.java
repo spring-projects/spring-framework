@@ -190,7 +190,8 @@ public abstract class MimeTypeUtils {
 	 * @return whether need cache
 	 */
 	private static boolean ensureMimeTypeRequiredCache(String mimeType){
-		if(mimeType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE + ";"))
+		// TODO constant
+		if(mimeType.startsWith("multipart/form-data;"))
 			return false;
 		return true;
 	}
