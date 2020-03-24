@@ -4010,6 +4010,31 @@ via `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(/* ... */)
+	@Testcontainers
+	class ExampleIntegrationTests {
+
+		companion object {
+
+			@Container
+			@JvmStatic
+			val redis: RedisContainer = RedisContainer()
+
+			@DynamicPropertySource
+			@JvmStatic
+			fun redisProperties(registry: DynamicPropertyRegistry) {
+				registry.add("redis.host", redis::getContainerIpAddress)
+				registry.add("redis.port", redis::getMappedPort)
+			}
+		}
+
+		// tests ...
+
+	}
+----
 
 [[testcontext-ctx-management-web]]
 ===== Loading a `WebApplicationContext`
