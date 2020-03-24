@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -181,6 +182,19 @@ public abstract class MimeTypeUtils {
 		TEXT_XML = new MimeType("text", "xml");
 	}
 
+	/***
+	 * Whether need cache.
+	 * <p>For example "multipart/form-data; boundary=----WebKitFormBoundarymKzwdDkWNDNzQFP0",
+	 * this mimeType with random characters, wastes LRU cache space, resulting in severe performance degradation.
+	 * @param mimeType the mime type
+	 * @return whether need cache
+	 */
+	private static boolean ensureMimeTypeRequiredCache(String mimeType){
+		if(mimeType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE + ";"))
+			return false;
+		return true;
+	}
+
 
 	/**
 	 * Parse the given String into a single {@code MimeType}.
@@ -193,7 +207,9 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeType)) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
-		return cachedMimeTypes.get(mimeType);
+		if (ensureMimeTypeRequiredCache(mimeType))
+			return cachedMimeTypes.get(mimeType);
+		return parseMimeTypeInternal(mimeType);
 	}
 
 	private static MimeType parseMimeTypeInternal(String mimeType) {
