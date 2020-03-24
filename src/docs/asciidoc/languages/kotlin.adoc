@@ -668,6 +668,10 @@ annotations are meta-annotated with `@Component`.
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io] enables it by default, so, in practice,
 you can write your Kotlin beans without any additional `open` keyword, as in Java.
 
+NOTE: The Kotlin code samples in Spring Framework documentation do not specify explicitly `open` on these classes and
+their member functions, they are written for projects using the `kotlin-allopen` plugin since this is the most commonly
+used setup.
+
 === Using Immutable Class Instances for Persistence
 
 In Kotlin, it is convenient and considered to be a best practice to declare read-only properties
