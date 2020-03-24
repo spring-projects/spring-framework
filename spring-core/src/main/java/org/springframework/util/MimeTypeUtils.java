@@ -35,7 +35,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
