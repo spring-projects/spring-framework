@@ -2609,6 +2609,7 @@ advanced use cases.
 * <<testcontext-ctx-management-inheritance>>
 * <<testcontext-ctx-management-env-profiles>>
 * <<testcontext-ctx-management-property-sources>>
+* <<testcontext-ctx-management-dynamic-property-sources>>
 * <<testcontext-ctx-management-web>>
 * <<testcontext-ctx-management-caching>>
 * <<testcontext-ctx-management-ctx-hierarchies>>
