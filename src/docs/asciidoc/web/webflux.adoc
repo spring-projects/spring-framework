@@ -66,7 +66,7 @@ https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestre
 can produce data that an HTTP server (acting as
 https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber])
 can then write to the response. The main purpose of Reactive Streams is to let the
-  subscriber to control how quickly or how slowly the publisher produces data.
+  subscriber control how quickly or how slowly the publisher produces data.
 
 NOTE: *Common question: what if a publisher cannot slow down?* +
 The purpose of Reactive Streams is only to establish the mechanism and a boundary.
@@ -207,7 +207,7 @@ Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind, how
 the way they are used is very different. Spring MVC relies on Servlet blocking I/O and
 lets applications use the Servlet API directly if they need to. Spring WebFlux
 relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
-adapter and not exposed for direct use.
+adapter. It is not exposed for direct use.
 
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
@@ -219,7 +219,7 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 Performance has many characteristics and meanings. Reactive and non-blocking generally
 do not make applications run faster. They can, in some cases, (for example, if using the
 `WebClient` to execute remote calls in parallel). On the whole, it requires more work to do
-things the non-blocking way and that can increase slightly the required processing time.
+things the non-blocking way and that can slightly increase the required processing time.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small,
 fixed number of threads and less memory. That makes applications more resilient under load,
@@ -237,11 +237,11 @@ Both Spring MVC and Spring WebFlux support annotated controllers, but there is a
 difference in the concurrency model and the default assumptions for blocking and threads.
 
 In Spring MVC (and servlet applications in general), it is assumed that applications can
-block the current thread, (for example, for remote calls), and, for this reason, servlet containers
+block the current thread, (for example, for remote calls). For this reason, servlet containers
 use a large thread pool to absorb potential blocking during request handling.
 
 In Spring WebFlux (and non-blocking servers in general), it is assumed that applications
-do not block, and, therefore, non-blocking servers use  a small, fixed-size thread pool
+do not block. Therefore, non-blocking servers use  a small, fixed-size thread pool
 (event loop workers) to handle requests.
 
 TIP: "`To scale`" and "`small number of threads`" may sound contradictory but to never block the
@@ -257,7 +257,7 @@ easy escape hatch. Keep in mind, however, that blocking APIs are not a good fit 
 this concurrency model.
 
 .Mutable State
-In Reactor and RxJava, you declare logic through operators, and, at runtime, a reactive
+In Reactor and RxJava, you declare logic through operators. At runtime, a reactive
 pipeline is formed where data is processed sequentially, in distinct stages. A key benefit
 of this is that it frees applications from having to protect mutable state because
 application code within that pipeline is never invoked concurrently.
@@ -276,7 +276,7 @@ number of processing threads related to that (for example, `reactor-http-nio-` w
 Netty connector). However, if Reactor Netty is used for both client and server, the two
 share event loop resources by default.
 
-* Reactor and RxJava provide thread pool abstractions, called Schedulers, to use with the
+* Reactor and RxJava provide thread pool abstractions, called schedulers, to use with the
 `publishOn` operator that is used to switch processing to a different thread pool.
 The schedulers have names that suggest a specific concurrency strategy -- for example, "`parallel`"
 (for CPU-bound work with a limited number of threads) or "`elastic`" (for I/O-bound work with
@@ -316,8 +316,8 @@ https://github.com/reactor/reactor-netty[Reactor Netty] and for the reactive
 https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient].
 The higher level <<web-reactive.adoc#webflux-client, WebClient>> used in applications
 builds on this basic contract.
-* For client and server, <<webflux-codecs, codecs>> to use to serialize and
-deserialize HTTP request and response content.
+* For client and server, <<webflux-codecs, codecs>> for serialization and
+deserialization of HTTP request and response content.
 
 
 
@@ -325,8 +325,8 @@ deserialize HTTP request and response content.
 === `HttpHandler`
 
 {api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
-is a simple contract with a single method to handle a request and response. It is
-intentionally minimal, and its main, and only purpose is to be a minimal abstraction
+is a simple contract with a single method to handle a request and a response. It is
+intentionally minimal, and its main and only purpose is to be a minimal abstraction
 over different HTTP server APIs.
 
 The following table describes the supported server APIs:
@@ -573,7 +573,7 @@ Spring ApplicationContext, or that can be registered directly with it:
 [[webflux-form-data]]
 ==== Form Data
 
-`ServerWebExchange` exposes the following method for access to form data:
+`ServerWebExchange` exposes the following method for accessing form data:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -596,7 +596,7 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 ==== Multipart Data
 [.small]#<<web.adoc#mvc-multipart, Web MVC>>#
 
-`ServerWebExchange` exposes the following method for access to multipart data:
+`ServerWebExchange` exposes the following method for accessing multipart data:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -629,7 +629,7 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 [.small]#<<web.adoc#filters-forwarded-headers, Web MVC>>#
 
 As a request goes through proxies (such as load balancers), the host, port, and
-scheme may change, and that makes it a challenge, from a client perspective, to create links that point to the correct
+scheme may change. That makes it a challenge, from a client perspective, to create links that point to the correct
 host, port, and scheme.
 
 https://tools.ietf.org/html/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
@@ -638,8 +638,8 @@ non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
 `X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
 
 `ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
-the request, based on forwarded headers, and then removes those headers. You can declare
-it as a bean with a name  of `forwardedHeaderTransformer`, and it is
+the request, based on forwarded headers, and then removes those headers. If you declare
+it as a bean with the name `forwardedHeaderTransformer`, it will be
 <<webflux-web-handler-api-special-beans, detected>> and used.
 
 There are security considerations for forwarded headers, since an application cannot know
@@ -756,13 +756,13 @@ into ``TokenBuffer``'s each representing a JSON object.
 the `ObjectMapper` as soon as enough bytes are received for a fully formed object. The
 input content can be a JSON array, or
 https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] if the content-type is
-"application/stream+json".
+`application/stream+json`.
 
 The `Jackson2Encoder` works as follows:
 
 * For a single value publisher (e.g. `Mono`), simply serialize it through the
 `ObjectMapper`.
-* For a multi-value publisher with "application/json", by default collect the values with
+* For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.
 * For a multi-value publisher with a streaming media type such as
 `application/stream+json` or `application/stream+x-jackson-smile`, encode, write, and
@@ -784,7 +784,7 @@ encode a `Mono<List<String>>`.
 ==== Form Data
 
 `FormHttpMessageReader` and `FormHttpMessageWriter` support decoding and encoding
-"application/x-www-form-urlencoded" content.
+`application/x-www-form-urlencoded` content.
 
 On the server side where form content often needs to be accessed from multiple places,
 `ServerWebExchange` provides a dedicated `getFormData()` method that parses the content
@@ -837,11 +837,11 @@ values. In WebFlux, the `ServerCodecConfigurer` provides a
 in <<web-reactive.adoc#webflux-client-builder-maxinmemorysize, WebClient.Builder>>.
 
 For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
-the size of non-file parts. For file parts it determines the threshold at which the part
+the size of non-file parts. For file parts, it determines the threshold at which the part
 is written to disk. For file parts written to disk, there is an additional
 `maxDiskUsagePerPart` property to limit the amount of disk space per part. There is also
 a `maxParts` property to limit the overall number of parts in a multipart request.
-To configure all 3 in WebFlux, you'll need to supply a pre-configured instance of
+To configure all three in WebFlux, you'll need to supply a pre-configured instance of
 `MultipartHttpMessageReader` to `ServerCodecConfigurer`.
 
 
@@ -861,7 +861,7 @@ a heartbeat.
 ==== `DataBuffer`
 
 `DataBuffer` is the representation for a byte buffer in WebFlux. The Spring Core part of
-the reference has more on that in the section on
+this reference has more on that in the section on
 <<core#databuffers, Data Buffers and Codecs>>. The key point to understand is that on some
 servers like Netty, byte buffers are pooled and reference counted, and must be released
 when consumed to avoid memory leaks.
@@ -878,13 +878,13 @@ especially the section on <<core#databuffers-using, Using DataBuffer>>.
 === Logging
 [.small]#<<web.adoc#mvc-logging, Web MVC>>#
 
-DEBUG level logging in Spring WebFlux is designed to be compact, minimal, and
+`DEBUG` level logging in Spring WebFlux is designed to be compact, minimal, and
 human-friendly. It focuses on high value bits of information that are useful over and
 over again vs others that are useful only when debugging a specific issue.
 
-TRACE level logging generally follows the same principles as DEBUG (and for example also
-should not be a firehose) but can be used for debugging any issue. In addition some log
-messages may show a different level of detail at TRACE vs DEBUG.
+`TRACE` level logging generally follows the same principles as `DEBUG` (and for example also
+should not be a firehose) but can be used for debugging any issue. In addition, some log
+messages may show a different level of detail at `TRACE` vs `DEBUG`.
 
 Good logging comes from the experience of using the logs. If you spot anything that does
 not meet the stated goals, please let us know.
@@ -1015,7 +1015,7 @@ which puts together a request-processing chain, as described in <<webflux-web-ha
 
 Spring configuration in a WebFlux application typically contains:
 
-* `DispatcherHandler` with the bean name, `webHandler`
+* `DispatcherHandler` with the bean name `webHandler`
 * `WebFilter` and `WebExceptionHandler` beans
 * <<webflux-special-bean-types,`DispatcherHandler` special beans>>
 * Others
