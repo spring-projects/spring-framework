@@ -74,9 +74,7 @@ public abstract class ModuleVisitor {
         && api != Opcodes.ASM8_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
-    if (api == Opcodes.ASM8_EXPERIMENTAL) {
-      Constants.checkAsm8Experimental(this);
-    }
+    // SPRING PATCH: no preview mode check for ASM 8 experimental
     this.api = api;
     this.mv = moduleVisitor;
   }

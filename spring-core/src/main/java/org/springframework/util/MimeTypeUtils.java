@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,6 +192,10 @@ public abstract class MimeTypeUtils {
 	public static MimeType parseMimeType(String mimeType) {
 		if (!StringUtils.hasLength(mimeType)) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+		}
+		// do not cache multipart mime types with random boundaries
+		if (mimeType.startsWith("multipart")) {
+			return parseMimeTypeInternal(mimeType);
 		}
 		return cachedMimeTypes.get(mimeType);
 	}
@@ -420,50 +424,58 @@ public abstract class MimeTypeUtils {
 
 		private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
 
-		private final ReadWriteLock lock = new ReentrantReadWriteLock();
+		private final ReadWriteLock lock;
 
 		private final Function<K, V> generator;
+
+		private volatile int size = 0;
 
 		public ConcurrentLruCache(int maxSize, Function<K, V> generator) {
 			Assert.isTrue(maxSize > 0, "LRU max size should be positive");
 			Assert.notNull(generator, "Generator function should not be null");
 			this.maxSize = maxSize;
 			this.generator = generator;
+			this.lock = new ReentrantReadWriteLock();
 		}
 
 		public V get(K key) {
-			this.lock.readLock().lock();
-			try {
-				if (this.queue.size() < this.maxSize / 2) {
-					V cached = this.cache.get(key);
-					if (cached != null) {
-						return cached;
-					}
+			V cached = this.cache.get(key);
+			if (cached != null) {
+				if (this.size < this.maxSize) {
+					return cached;
 				}
-				else if (this.queue.remove(key)) {
+				this.lock.readLock().lock();
+				try {
+					this.queue.remove(key);
 					this.queue.add(key);
-					return this.cache.get(key);
+					return cached;
 				}
-			}
-			finally {
-				this.lock.readLock().unlock();
+				finally {
+					this.lock.readLock().unlock();
+				}
 			}
 			this.lock.writeLock().lock();
 			try {
-				// retrying in case of concurrent reads on the same key
-				if (this.queue.remove(key)) {
+				// Retrying in case of concurrent reads on the same key
+				cached = this.cache.get(key);
+				if (cached  != null) {
+					this.queue.remove(key);
 					this.queue.add(key);
-					return this.cache.get(key);
+					return cached;
 				}
-				if (this.queue.size() == this.maxSize) {
+				// Generate value first, to prevent size inconsistency
+				V value = this.generator.apply(key);
+				int cacheSize = this.size;
+				if (cacheSize == this.maxSize) {
 					K leastUsed = this.queue.poll();
 					if (leastUsed != null) {
 						this.cache.remove(leastUsed);
+						cacheSize--;
 					}
 				}
-				V value = this.generator.apply(key);
 				this.queue.add(key);
 				this.cache.put(key, value);
+				this.size = cacheSize + 1;
 				return value;
 			}
 			finally {

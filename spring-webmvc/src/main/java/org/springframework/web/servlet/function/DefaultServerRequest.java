@@ -86,8 +86,7 @@ class DefaultServerRequest implements ServerRequest {
 	private final Map<String, Object> attributes;
 
 
-	public DefaultServerRequest(HttpServletRequest servletRequest,
-			List<HttpMessageConverter<?>> messageConverters) {
+	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
 		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
 		this.allSupportedMediaTypes = allSupportedMediaTypes(messageConverters);
@@ -103,6 +102,7 @@ class DefaultServerRequest implements ServerRequest {
 				.sorted(MediaType.SPECIFICITY_COMPARATOR)
 				.collect(Collectors.toList());
 	}
+
 
 	@Override
 	public String methodName() {
@@ -187,11 +187,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
-			throws ServletException, IOException {
-
-		MediaType contentType =
-				this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
+	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass) throws ServletException, IOException {
+		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
@@ -232,10 +229,10 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, String> pathVariables() {
-		@SuppressWarnings("unchecked")
-		Map<String, String> pathVariables = (Map<String, String>) servletRequest()
-				.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		Map<String, String> pathVariables = (Map<String, String>)
+				servletRequest().getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		if (pathVariables != null) {
 			return pathVariables;
 		}
@@ -254,8 +251,9 @@ class DefaultServerRequest implements ServerRequest {
 		return Optional.ofNullable(this.serverHttpRequest.getPrincipal());
 	}
 
-	static Optional<ServerResponse> checkNotModified(HttpServletRequest servletRequest, @Nullable Instant lastModified,
-			@Nullable String etag) {
+
+	static Optional<ServerResponse> checkNotModified(
+			HttpServletRequest servletRequest, @Nullable Instant lastModified, @Nullable String etag) {
 
 		long lastModifiedTimestamp = -1;
 		if (lastModified != null && lastModified.isAfter(Instant.EPOCH)) {
@@ -274,13 +272,13 @@ class DefaultServerRequest implements ServerRequest {
 		}
 	}
 
+
 	/**
 	 * Default implementation of {@link Headers}.
 	 */
 	static class DefaultRequestHeaders implements Headers {
 
 		private final HttpHeaders delegate;
-
 
 		public DefaultRequestHeaders(HttpHeaders delegate) {
 			this.delegate = delegate;
@@ -339,10 +337,10 @@ class DefaultServerRequest implements ServerRequest {
 		}
 	}
 
+
 	private static final class ServletParametersMap extends AbstractMap<String, List<String>> {
 
 		private final HttpServletRequest servletRequest;
-
 
 		private ServletParametersMap(HttpServletRequest servletRequest) {
 			this.servletRequest = servletRequest;
@@ -389,7 +387,6 @@ class DefaultServerRequest implements ServerRequest {
 		public void clear() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
 
@@ -443,9 +440,8 @@ class DefaultServerRequest implements ServerRequest {
 			this.servletRequest.removeAttribute(name);
 			return value;
 		}
-
-
 	}
+
 
 	/**
 	 * Simple implementation of {@link HttpServletResponse} used by
@@ -453,7 +449,6 @@ class DefaultServerRequest implements ServerRequest {
 	 * {@link ServletWebRequest#checkNotModified(String, long)}. Throws an {@code UnsupportedOperationException}
 	 * for other methods.
 	 */
-	@SuppressWarnings("deprecation")
 	private static final class CheckNotModifiedResponse implements HttpServletResponse {
 
 		private final HttpHeaders headers = new HttpHeaders();
@@ -486,6 +481,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Deprecated
 		public void setStatus(int sc, String sm) {
 			this.status = sc;
 		}
@@ -496,6 +492,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Nullable
 		public String getHeader(String name) {
 			return this.headers.getFirst(name);
 		}
@@ -503,7 +500,7 @@ class DefaultServerRequest implements ServerRequest {
 		@Override
 		public Collection<String> getHeaders(String name) {
 			List<String> result = this.headers.get(name);
-			return result != null ? result : Collections.emptyList();
+			return (result != null ? result : Collections.emptyList());
 		}
 
 		@Override
@@ -513,6 +510,7 @@ class DefaultServerRequest implements ServerRequest {
 
 
 		// Unsupported
+
 		@Override
 		public void addCookie(Cookie cookie) {
 			throw new UnsupportedOperationException();
@@ -529,11 +527,13 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Deprecated
 		public String encodeUrl(String url) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
+		@Deprecated
 		public String encodeRedirectUrl(String url) {
 			throw new UnsupportedOperationException();
 		}

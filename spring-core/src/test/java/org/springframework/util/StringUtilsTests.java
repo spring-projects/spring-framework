@@ -399,6 +399,7 @@ class StringUtilsTests {
 		assertThat(StringUtils.cleanPath("file:../")).isEqualTo("file:../");
 		assertThat(StringUtils.cleanPath("file:./../")).isEqualTo("file:../");
 		assertThat(StringUtils.cleanPath("file:.././")).isEqualTo("file:../");
+		assertThat(StringUtils.cleanPath("file:/mypath/spring.factories")).isEqualTo("file:/mypath/spring.factories");
 		assertThat(StringUtils.cleanPath("file:///c:/some/../path/the%20file.txt")).isEqualTo("file:///c:/path/the%20file.txt");
 	}
 

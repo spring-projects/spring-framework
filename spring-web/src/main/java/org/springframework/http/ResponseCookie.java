@@ -248,7 +248,7 @@ public final class ResponseCookie extends HttpCookie {
 				if (lenient && !StringUtils.isEmpty(domain)) {
 					String s = domain.trim();
 					if (s.startsWith("\"") && s.endsWith("\"")) {
-						if (s.substring(1, domain.length() - 1).trim().isEmpty()) {
+						if (s.substring(1, s.length() - 1).trim().isEmpty()) {
 							return null;
 						}
 					}

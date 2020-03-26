@@ -65,34 +65,47 @@ dokka {
 	dependsOn {
 		tasks.getByName("api")
 	}
+
 	doFirst {
-		classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-		sourceDirs = files(moduleProjects
-				.findAll {
-					it.pluginManager.hasPlugin("kotlin")
+		configuration {
+			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+
+			moduleProjects.findAll {
+				it.pluginManager.hasPlugin("kotlin")
+			}.each { project ->
+				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+				kotlinDirs -= project.sourceSets.main.java.srcDirs
+				kotlinDirs.each { dir ->
+					if (dir.exists()) {
+						sourceRoot {
+							path = dir.path
+						}
+					}
 				}
-				.collect { project ->
-					def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-					kotlinDirs -= project.sourceSets.main.java.srcDirs
-				})
+			}
+		}
 	}
-	moduleName = "spring-framework"
+
 	outputFormat = "html"
 	outputDirectory = "$buildDir/docs/kdoc"
 
-	externalDocumentationLink {
-		url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-		packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-	}
-	externalDocumentationLink {
-		url = new URL("https://projectreactor.io/docs/core/release/api/")
-	}
-	externalDocumentationLink {
-		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
-	}
-	externalDocumentationLink {
-		url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+	configuration {
+		moduleName = "spring-framework"
+
+		externalDocumentationLink {
+			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
+		}
+		externalDocumentationLink {
+			url = new URL("https://projectreactor.io/docs/core/release/api/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class SortedProperties extends Properties {
 	public void store(OutputStream out, @Nullable String comments) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		super.store(baos, (this.omitComments ? null : comments));
-		String contents = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
+		String contents = baos.toString(StandardCharsets.ISO_8859_1.name());
 		for (String line : contents.split(EOL)) {
 			if (!(this.omitComments && line.startsWith("#"))) {
 				out.write((line + EOL).getBytes(StandardCharsets.ISO_8859_1));

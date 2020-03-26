@@ -834,7 +834,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testClone() {
+	public void testCloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
 		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1").encode();
 
@@ -854,6 +854,37 @@ public class UriComponentsBuilderTests {
 		assertThat(result2.getPath()).isEqualTo("/p1/ps1/p2/ps2%3Ba");
 		assertThat(result2.getQuery()).isEqualTo("q1&q2");
 		assertThat(result2.getFragment()).isEqualTo("f2");
+	}
+
+	@Test // gh-24772
+	public void testDeepClone() {
+		HashMap<String, Object> vars = new HashMap<>();
+		vars.put("ps1", "foo");
+		vars.put("ps2", "bar");
+
+		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
+		builder1.scheme("http").host("e1.com").userInfo("user:pwd").path("/p1").pathSegment("{ps1}")
+				.pathSegment("{ps2}").queryParam("q1").fragment("f1").uriVariables(vars).encode();
+
+		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+
+		UriComponents result1 = builder1.build();
+		assertThat(result1.getScheme()).isEqualTo("http");
+		assertThat(result1.getUserInfo()).isEqualTo("user:pwd");
+		assertThat(result1.getHost()).isEqualTo("e1.com");
+		assertThat(result1.getPath()).isEqualTo("/p1/%s/%s", vars.get("ps1"), vars.get("ps2"));
+		assertThat(result1.getQuery()).isEqualTo("q1");
+		assertThat(result1.getFragment()).isEqualTo("f1");
+		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
+
+		UriComponents result2 = builder2.build();
+		assertThat(result2.getScheme()).isEqualTo("http");
+		assertThat(result2.getUserInfo()).isEqualTo("user:pwd");
+		assertThat(result2.getHost()).isEqualTo("e1.com");
+		assertThat(result2.getPath()).isEqualTo("/p1/%s/%s", vars.get("ps1"), vars.get("ps2"));
+		assertThat(result2.getQuery()).isEqualTo("q1");
+		assertThat(result2.getFragment()).isEqualTo("f1");
+		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
 	}
 
 	@Test  // SPR-11856

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,35 +157,32 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public Mono<Void> releaseBody() {
-		return body(BodyExtractors.toDataBuffers())
-				.map(DataBufferUtils::release)
-				.then();
+		return body(BodyExtractors.toDataBuffers()).map(DataBufferUtils::release).then();
 	}
 
 	@Override
 	public Mono<ResponseEntity<Void>> toBodilessEntity() {
-		return releaseBody()
-				.then(WebClientUtils.toEntity(this, Mono.empty()));
+		return releaseBody().then(WebClientUtils.mapToEntity(this, Mono.empty()));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-		return WebClientUtils.toEntity(this, bodyToMono(bodyType));
+		return WebClientUtils.mapToEntity(this, bodyToMono(bodyType));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
-		return WebClientUtils.toEntity(this, bodyToMono(bodyTypeReference));
+		return WebClientUtils.mapToEntity(this, bodyToMono(bodyTypeReference));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
-		return WebClientUtils.toEntityList(this, bodyToFlux(elementClass));
+		return WebClientUtils.mapToEntityList(this, bodyToFlux(elementClass));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
-		return WebClientUtils.toEntityList(this, bodyToFlux(elementTypeRef));
+		return WebClientUtils.mapToEntityList(this, bodyToFlux(elementTypeRef));
 	}
 
 	@Override

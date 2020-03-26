@@ -2609,6 +2609,7 @@ advanced use cases.
 * <<testcontext-ctx-management-inheritance>>
 * <<testcontext-ctx-management-env-profiles>>
 * <<testcontext-ctx-management-property-sources>>
+* <<testcontext-ctx-management-dynamic-property-sources>>
 * <<testcontext-ctx-management-web>>
 * <<testcontext-ctx-management-caching>>
 * <<testcontext-ctx-management-ctx-hierarchies>>
@@ -3947,7 +3948,6 @@ to define properties in both a subclass and its superclass by using inline prope
 		// ...
 	}
 ----
-
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -3961,6 +3961,79 @@ to define properties in both a subclass and its superclass by using inline prope
 	@ContextConfiguration
 	class ExtendedTest : BaseTest() {
 		// ...
+	}
+----
+
+[[testcontext-ctx-management-dynamic-property-sources]]
+===== Context Configuration with Dynamic Property Sources
+
+As of Spring Framework 5.2.5, the TestContext framework provides support for _dynamic_
+property sources via the `@DynamicPropertySource` annotation. This annotation can be used
+in integration tests that need to add properties with dynamic values to the set of
+`PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
+integration test.
+
+NOTE: The `@DynamicPropertySource` annotation and its supporting infrastructure were
+originally designed to allow properties from
+https://www.testcontainers.org/[Testcontainers] based tests to be exposed easily to
+Spring integration tests. However, this feature may also be used with any form of
+external resource whose lifecycle is maintained outside the test's `ApplicationContext`.
+
+In contrast to the <<testcontext-ctx-management-property-sources,`@TestPropertySource`>>
+annotation that is applied at the class level, `@DynamicPropertySource` must be applied
+to a `static` method that accepts a single `DynamicPropertyRegistry` argument which is
+used to add _name-value_ pairs to the `Environment`. Values are dynamic and provided via
+a `Supplier` which is only invoked when the property is resolved. Typically, method
+references are used to supply values, as can be seen in the following example which uses
+the Testcontainers project to manage a Redis container outside of the Spring
+`ApplicationContext`. The IP address and port of the managed Redis container are made
+available to components within the test's `ApplicationContext` via the `redis.host` and
+`redis.port` properties. These properties can be injected into Spring-managed components
+via `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@SpringJUnitConfig(/* ... */)
+	@Testcontainers
+	class ExampleIntegrationTests {
+
+		@Container
+		static RedisContainer redis = new RedisContainer();
+
+		@DynamicPropertySource
+		static void redisProperties(DynamicPropertyRegistry registry) {
+			registry.add("redis.host", redis::getContainerIpAddress);
+			registry.add("redis.port", redis::getMappedPort);
+		}
+
+		// tests ...
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(/* ... */)
+	@Testcontainers
+	class ExampleIntegrationTests {
+
+		companion object {
+
+			@Container
+			@JvmStatic
+			val redis: RedisContainer = RedisContainer()
+
+			@DynamicPropertySource
+			@JvmStatic
+			fun redisProperties(registry: DynamicPropertyRegistry) {
+				registry.add("redis.host", redis::getContainerIpAddress)
+				registry.add("redis.port", redis::getMappedPort)
+			}
+		}
+
+		// tests ...
+
 	}
 ----
 
@@ -8385,6 +8458,9 @@ See the following resources for more information about testing:
 * https://www.dbunit.org/[DbUnit]: JUnit extension (also usable with Ant and Maven) that
   is targeted at database-driven projects and, among other things, puts your database into
   a known state between test runs.
+* https://www.testcontainers.org/[Testcontainers]: Java library that supports JUnit
+  tests, providing lightweight, throwaway instances of common databases, Selenium web
+  browsers, or anything else that can run in a Docker container.
 * https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
 * https://github.com/Ninja-Squad/springmockk[SpringMockK]: Support for Spring Boot
   integration tests written in Kotlin using https://mockk.io/[MockK] instead of Mockito.

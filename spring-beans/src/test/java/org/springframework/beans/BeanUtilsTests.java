@@ -96,6 +96,12 @@ class BeanUtilsTests {
 	}
 
 	@Test
+	void testInstantiatePrivateClassWithPrivateConstructor() throws NoSuchMethodException {
+		Constructor<PrivateBeanWithPrivateConstructor> ctor = PrivateBeanWithPrivateConstructor.class.getDeclaredConstructor();
+		BeanUtils.instantiateClass(ctor);
+	}
+
+	@Test
 	void testGetPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
@@ -552,6 +558,12 @@ class BeanUtilsTests {
 
 		public String getValue() {
 			return value;
+		}
+	}
+
+	private static class PrivateBeanWithPrivateConstructor {
+
+		private PrivateBeanWithPrivateConstructor() {
 		}
 	}
 
