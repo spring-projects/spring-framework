@@ -27,11 +27,14 @@ import reactor.core.publisher.MonoSink;
  * @param <T> the result type
  */
 class MonoFutureCallbackAdapter<T> implements FutureCallback<T> {
+
 	private final MonoSink<T> sink;
+
 
 	public MonoFutureCallbackAdapter(MonoSink<T> sink) {
 		this.sink = sink;
 	}
+
 
 	@Override
 	public void completed(T result) {

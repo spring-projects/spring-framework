@@ -46,6 +46,7 @@ import static org.apache.hc.client5.http.cookie.Cookie.MAX_AGE_ATTR;
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
 class ApacheClientHttpResponse implements ClientHttpResponse {
+
 	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
 
 	private final Flux<DataBuffer> dataBufferFlux;
@@ -53,6 +54,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 	private final HttpClientContext context;
 
 	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
+
 
 	public ApacheClientHttpResponse(DataBufferFactory dataBufferFactory,
 			Message<HttpResponse, Publisher<ByteBuffer>> message,
@@ -69,6 +71,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 				})
 				.map(dataBufferFactory::wrap);
 	}
+
 
 	@Override
 	public HttpStatus getStatusCode() {
@@ -94,6 +97,12 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 		return result;
 	}
 
+	private long getMaxAgeSeconds(Cookie cookie) {
+		String maxAgeAttribute = cookie.getAttribute(MAX_AGE_ATTR);
+
+		return maxAgeAttribute == null ? -1 : Long.parseLong(maxAgeAttribute);
+	}
+
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.dataBufferFlux;
@@ -107,11 +116,5 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 
 	private void addHeader(HttpHeaders httpHeaders, Header header) {
 		httpHeaders.add(header.getName(), header.getValue());
-	}
-
-	private long getMaxAgeSeconds(Cookie cookie) {
-		String maxAgeAttribute = cookie.getAttribute(MAX_AGE_ATTR);
-
-		return maxAgeAttribute == null ? -1 : Long.parseLong(maxAgeAttribute);
 	}
 }

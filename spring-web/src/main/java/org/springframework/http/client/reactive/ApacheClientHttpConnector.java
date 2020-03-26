@@ -46,9 +46,11 @@ import org.springframework.lang.Nullable;
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
 public class ApacheClientHttpConnector implements ClientHttpConnector {
+
 	private final CloseableHttpAsyncClient client;
 
 	private final DataBufferFactory dataBufferFactory;
+
 
 	/**
 	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
@@ -65,6 +67,7 @@ public class ApacheClientHttpConnector implements ClientHttpConnector {
 		this.client = client;
 		this.client.start();
 	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -87,7 +90,9 @@ public class ApacheClientHttpConnector implements ClientHttpConnector {
 		context.setCookieStore(new BasicCookieStore());
 
 		return Mono.<Message<HttpResponse, Publisher<ByteBuffer>>>create(sink -> {
-			ReactiveResponseConsumer reactiveResponseConsumer = new ReactiveResponseConsumer(new MonoFutureCallbackAdapter<>(sink));
+			ReactiveResponseConsumer reactiveResponseConsumer =
+					new ReactiveResponseConsumer(new MonoFutureCallbackAdapter<>(sink));
+
 			this.client.execute(basicRequestProducer, reactiveResponseConsumer, context, null);
 		}).map(message -> new ApacheClientHttpResponse(this.dataBufferFactory, message, context));
 	}

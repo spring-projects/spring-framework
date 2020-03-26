@@ -44,6 +44,7 @@ import static org.springframework.http.MediaType.ALL_VALUE;
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
 class ApacheClientHttpRequest extends AbstractClientHttpRequest {
+
 	private final HttpRequest httpRequest;
 
 	private final DataBufferFactory dataBufferFactory;
@@ -52,10 +53,12 @@ class ApacheClientHttpRequest extends AbstractClientHttpRequest {
 
 	private long contentLength = -1;
 
+
 	public ApacheClientHttpRequest(HttpMethod method, URI uri, DataBufferFactory dataBufferFactory) {
 		this.httpRequest = new BasicHttpRequest(method.name(), uri);
 		this.dataBufferFactory = dataBufferFactory;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
