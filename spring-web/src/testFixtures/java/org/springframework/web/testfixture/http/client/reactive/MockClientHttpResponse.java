@@ -134,9 +134,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	private static String dumpString(DataBuffer buffer, Charset charset) {
 		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+		return buffer.toString(charset);
 	}
 
 	private Charset getCharset() {

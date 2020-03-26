@@ -48,9 +48,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
-	private HttpMethod httpMethod;
+	private final HttpMethod httpMethod;
 
-	private URI url;
+	private final URI url;
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -160,9 +160,7 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	private static String bufferToString(DataBuffer buffer, Charset charset) {
 		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+		return buffer.toString(charset);
 	}
 
 }

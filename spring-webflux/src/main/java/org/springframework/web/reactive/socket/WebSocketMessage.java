@@ -84,9 +84,7 @@ public class WebSocketMessage {
 	 * @since 5.0.5
 	 */
 	public String getPayloadAsText(Charset charset) {
-		byte[] bytes = new byte[this.payload.readableByteCount()];
-		this.payload.read(bytes);
-		return new String(bytes, charset);
+		return this.payload.toString(charset);
 	}
 
 	/**

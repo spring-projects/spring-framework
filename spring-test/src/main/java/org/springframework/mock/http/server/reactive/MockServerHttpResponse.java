@@ -153,10 +153,9 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 	private static String bufferToString(DataBuffer buffer, Charset charset) {
 		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
+		String str = buffer.toString(charset);
 		DataBufferUtils.release(buffer);
-		return new String(bytes, charset);
+		return str;
 	}
 
 }
