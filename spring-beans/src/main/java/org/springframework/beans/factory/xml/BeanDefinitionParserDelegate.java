@@ -90,7 +90,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Value of a T/F attribute that represents true.
-	 * Anything else represents false. Case sensitive.
+	 * Anything else represents false.
 	 */
 	public static final String TRUE_VALUE = "true";
 
