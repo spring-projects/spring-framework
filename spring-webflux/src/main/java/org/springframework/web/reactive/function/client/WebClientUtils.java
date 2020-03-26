@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 
 /**
  * Internal methods shared between {@link DefaultWebClient} and {@link DefaultClientResponse}.
@@ -35,37 +32,28 @@ import org.springframework.lang.Nullable;
  */
 abstract class WebClientUtils {
 
+	private static final String VALUE_NONE = "\n\t\t\n\t\t\n\uE000\uE001\uE002\n\t\t\t\t\n";
+
+
 	/**
-	 * Create a delayed {@link ResponseEntity} from the given response and body.
+	 * Map the given response to a single value {@code ResponseEntity<T>}.
 	 */
-	public static <T> Mono<ResponseEntity<T>> toEntity(ClientResponse response, Mono<T> bodyMono) {
-		return Mono.defer(() -> {
-			HttpHeaders headers = response.headers().asHttpHeaders();
-			int status = response.rawStatusCode();
-			return bodyMono
-					.map(body -> createEntity(body, headers, status))
-					.switchIfEmpty(Mono.fromCallable( () -> createEntity(null, headers, status)));
-		});
+	@SuppressWarnings("unchecked")
+	public static <T> Mono<ResponseEntity<T>> mapToEntity(ClientResponse response, Mono<T> bodyMono) {
+		return ((Mono<Object>) bodyMono).defaultIfEmpty(VALUE_NONE).map(body ->
+				ResponseEntity.status(response.rawStatusCode())
+						.headers(response.headers().asHttpHeaders())
+						.body(body != VALUE_NONE ? (T) body : null));
 	}
 
 	/**
-	 * Create a delayed {@link ResponseEntity} list from the given response and body.
+	 * Map the given response to a {@code ResponseEntity<List<T>>}.
 	 */
-	public static <T> Mono<ResponseEntity<List<T>>> toEntityList(ClientResponse response, Publisher<T> body) {
-		return Mono.defer(() -> {
-			HttpHeaders headers = response.headers().asHttpHeaders();
-			int status = response.rawStatusCode();
-			return Flux.from(body)
-					.collectList()
-					.map(list -> createEntity(list, headers, status));
-		});
-	}
-
-	public static <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
-		HttpStatus resolvedStatus = HttpStatus.resolve(status);
-		return resolvedStatus != null
-				? new ResponseEntity<>(body, headers, resolvedStatus)
-				: ResponseEntity.status(status).headers(headers).body(body);
+	public static <T> Mono<ResponseEntity<List<T>>> mapToEntityList(ClientResponse response, Publisher<T> body) {
+		return Flux.from(body).collectList().map(list ->
+				ResponseEntity.status(response.rawStatusCode())
+						.headers(response.headers().asHttpHeaders())
+						.body(list));
 	}
 
 }
