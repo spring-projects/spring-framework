@@ -31,16 +31,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -295,6 +299,57 @@ class WebClientIntegrationTests {
 			assertThat(request.getPath()).isEqualTo("/json");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 		});
+	}
+
+	@Test // gh-24788
+	void retrieveJsonArrayAsBodilessEntityShouldReleasesConnection() {
+
+		// Constrain connection pool and make consecutive requests.
+		// 2nd request should hang if response was not drained.
+
+		ConnectionProvider connectionProvider = ConnectionProvider.create("test", 1);
+
+		this.server = new MockWebServer();
+		WebClient webClient = WebClient
+				.builder()
+				.clientConnector(new ReactorClientHttpConnector(HttpClient.create(connectionProvider)))
+				.baseUrl(this.server.url("/").toString())
+				.build();
+
+		for (int i=1 ; i <= 2; i++) {
+
+			// Response must be large enough to circumvent eager prefetching
+
+			String json = Flux.just("{\"bar\":\"bar\",\"foo\":\"foo\"}")
+					.repeat(100)
+					.collect(Collectors.joining(",", "[", "]"))
+					.block();
+
+			prepareResponse(response -> response
+					.setHeader("Content-Type", "application/json")
+					.setBody(json));
+
+			Mono<ResponseEntity<Void>> result = webClient.get()
+					.uri("/json").accept(MediaType.APPLICATION_JSON)
+					.retrieve()
+					.toBodilessEntity();
+
+			StepVerifier.create(result)
+					.consumeNextWith(entity -> {
+						assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+						assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+						assertThat(entity.getHeaders().getContentLength()).isEqualTo(2627);
+						assertThat(entity.getBody()).isNull();
+					})
+					.expectComplete()
+					.verify(Duration.ofSeconds(3));
+
+			expectRequestCount(i);
+			expectRequest(request -> {
+				assertThat(request.getPath()).isEqualTo("/json");
+				assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+			});
+		}
 	}
 
 	@ParameterizedWebClientTest

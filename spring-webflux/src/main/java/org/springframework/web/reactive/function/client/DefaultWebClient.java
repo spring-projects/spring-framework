@@ -575,7 +575,7 @@ class DefaultWebClient implements WebClient {
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
 					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
-							.doOnNext(entity -> response.releaseBody()) // body is drained in other cases
+							.flatMap(entity -> response.releaseBody().thenReturn(entity))
 			);
 		}
 
