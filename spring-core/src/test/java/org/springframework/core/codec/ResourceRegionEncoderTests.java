@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -182,7 +181,7 @@ class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 
 	protected Consumer<DataBuffer> stringConsumer(String expected) {
 		return dataBuffer -> {
-			String value = DataBufferTestUtils.dumpString(dataBuffer, UTF_8);
+			String value = dataBuffer.toString(UTF_8);
 			DataBufferUtils.release(dataBuffer);
 			assertThat(value).isEqualTo(expected);
 		};

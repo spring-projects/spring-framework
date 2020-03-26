@@ -19,7 +19,6 @@ package org.springframework.http.codec.multipart;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -37,7 +36,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -46,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,7 +104,7 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 		assertThat(part.name()).isEqualTo("filePart");
 		assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
 		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
-		assertThat(DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8)).isEqualTo("Lorem Ipsum.");
+		assertThat(buffer.toString(UTF_8)).isEqualTo("Lorem Ipsum.");
 		DataBufferUtils.release(buffer);
 
 		part = parts.getFirst("textPart");

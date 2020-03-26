@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -99,8 +99,8 @@ public class PayloadUtilsTests {
 		Payload payload = PayloadUtils.createPayload(data, metadata);
 
 		assertThat(payload).isInstanceOf(DefaultPayload.class);
-		assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
-		assertThat(payload.getMetadataUtf8()).isEqualTo(dataBufferToString(metadata));
+		assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
+		assertThat(payload.getMetadataUtf8()).isEqualTo(metadata.toString(UTF_8));
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class PayloadUtilsTests {
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
 			assertThat(payload.data()).isSameAs(data.getNativeBuffer());
-			assertThat(payload.getMetadataUtf8()).isEqualTo(dataBufferToString(metadata));
+			assertThat(payload.getMetadataUtf8()).isEqualTo(metadata.toString(UTF_8));
 		}
 		finally {
 			payload.release();
@@ -125,7 +125,7 @@ public class PayloadUtilsTests {
 		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
-			assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
+			assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
 			assertThat(payload.metadata()).isSameAs(metadata.getNativeBuffer());
 		}
 		finally {
@@ -152,7 +152,7 @@ public class PayloadUtilsTests {
 		Payload payload = PayloadUtils.createPayload(data);
 
 		assertThat(payload).isInstanceOf(DefaultPayload.class);
-		assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
+		assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
 	}
 
 
@@ -166,10 +166,6 @@ public class PayloadUtilsTests {
 		DefaultDataBuffer buffer = this.defaultBufferFactory.allocateBuffer();
 		buffer.write(content, StandardCharsets.UTF_8);
 		return buffer;
-	}
-
-	private String dataBufferToString(DataBuffer metadata) {
-		return DataBufferTestUtils.dumpString(metadata, StandardCharsets.UTF_8);
 	}
 
 }

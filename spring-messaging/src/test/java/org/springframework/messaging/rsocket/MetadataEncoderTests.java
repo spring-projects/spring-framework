@@ -33,7 +33,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -124,7 +123,7 @@ public class MetadataEncoderTests {
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("toA");
+		assertThat(buffer.toString(UTF_8)).isEqualTo("toA");
 	}
 
 	@Test
@@ -135,7 +134,7 @@ public class MetadataEncoderTests {
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("a.BBB.C%2EC%2EC.d");
+		assertThat(buffer.toString(UTF_8)).isEqualTo("a.BBB.C%2EC%2EC.d");
 	}
 
 	@Test
@@ -146,7 +145,7 @@ public class MetadataEncoderTests {
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("Raw data");
+		assertThat(buffer.toString(UTF_8)).isEqualTo("Raw data");
 	}
 
 	@Test
@@ -157,7 +156,7 @@ public class MetadataEncoderTests {
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("toA");
+		assertThat(buffer.toString(UTF_8)).isEqualTo("toA");
 	}
 
 	@Test
@@ -233,10 +232,6 @@ public class MetadataEncoderTests {
 		assertThat(tags.hasNext()).isTrue();
 		assertThat(tags.next()).isEqualTo(route);
 		assertThat(tags.hasNext()).isFalse();
-	}
-
-	private String dumpString(DataBuffer buffer) {
-		return DataBufferTestUtils.dumpString(buffer, UTF_8);
 	}
 
 }
