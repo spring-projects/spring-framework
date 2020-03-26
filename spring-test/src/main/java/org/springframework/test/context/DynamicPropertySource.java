@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * to add <em>name-value</em> pairs to the {@code Environment}'s set of
  * {@code PropertySources}. Values are dynamic and provided via a
  * {@link java.util.function.Supplier} which is only invoked when the property
- * is resolved. Typically, method references are used to supply values,as in the
+ * is resolved. Typically, method references are used to supply values, as in the
  * following example.
  *
  * <h3>Example</h3>
