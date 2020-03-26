@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * <p>Methods annotated with {@code @DynamicPropertySource} must be {@code static}
  * and must have a single {@link DynamicPropertyRegistry} argument which is used
  * to add <em>name-value</em> pairs to the {@code Environment}'s set of
- * {@code PropertySources}. Values are dynamic and provided via a {@link Supplier}
+ * {@code PropertySources}. Values are dynamic and provided via a {@link java.util.function.Supplier}
  * which is only invoked when the property is resolved. Typically, method references
  * are used to supply values, as in the following example.
  *
