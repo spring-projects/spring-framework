@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +191,8 @@ public class DefaultDataBuffer implements DataBuffer {
 		if (newCapacity > oldCapacity) {
 			ByteBuffer oldBuffer = this.byteBuffer;
 			ByteBuffer newBuffer = allocate(newCapacity, oldBuffer.isDirect());
-			((Buffer) oldBuffer).position(0).limit(oldBuffer.capacity());
-			((Buffer) newBuffer).position(0).limit(oldBuffer.capacity());
+			oldBuffer.position(0).limit(oldBuffer.capacity());
+			newBuffer.position(0).limit(oldBuffer.capacity());
 			newBuffer.put(oldBuffer);
 			newBuffer.clear();
 			setNativeBuffer(newBuffer);
@@ -205,8 +205,8 @@ public class DefaultDataBuffer implements DataBuffer {
 					writePosition = newCapacity;
 					writePosition(writePosition);
 				}
-				((Buffer) oldBuffer).position(readPosition).limit(writePosition);
-				((Buffer) newBuffer).position(readPosition).limit(writePosition);
+				oldBuffer.position(readPosition).limit(writePosition);
+				newBuffer.position(readPosition).limit(writePosition);
 				newBuffer.put(oldBuffer);
 				newBuffer.clear();
 			}
@@ -265,7 +265,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.readPosition + length;
-		((Buffer) tmp).clear().position(this.readPosition).limit(limit);
+		tmp.clear().position(this.readPosition).limit(limit);
 		tmp.get(destination, offset, length);
 
 		this.readPosition += length;
@@ -295,7 +295,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.writePosition + length;
-		((Buffer) tmp).clear().position(this.writePosition).limit(limit);
+		tmp.clear().position(this.writePosition).limit(limit);
 		tmp.put(source, offset, length);
 
 		this.writePosition += length;
@@ -324,7 +324,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		int length = source.remaining();
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.writePosition + source.remaining();
-		((Buffer) tmp).clear().position(this.writePosition).limit(limit);
+		tmp.clear().position(this.writePosition).limit(limit);
 		tmp.put(source);
 		this.writePosition += length;
 	}
@@ -340,7 +340,7 @@ public class DefaultDataBuffer implements DataBuffer {
 			buffer.position(index);
 			ByteBuffer slice = this.byteBuffer.slice();
 			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-			((Buffer) slice).limit(length);
+			slice.limit(length);
 			return new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);
 		}
 		finally {

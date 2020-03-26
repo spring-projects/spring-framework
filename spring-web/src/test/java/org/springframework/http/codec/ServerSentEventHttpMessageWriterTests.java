@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -134,7 +133,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(dataBuffer -> {
-					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
+					String value = dataBuffer.toString(charset);
 					DataBufferUtils.release(dataBuffer);
 					assertThat(value).isEqualTo("data:\u00A3\n\n");
 				})
@@ -192,7 +191,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(dataBuffer -> {
-					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
+					String value = dataBuffer.toString(charset);
 					DataBufferUtils.release(dataBuffer);
 					assertThat(value).isEqualTo("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n");
 				})
