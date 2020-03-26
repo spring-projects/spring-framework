@@ -54,9 +54,9 @@ public abstract class DataBufferTestUtils {
 	 * @return the string representation of the given data buffer
 	 */
 	public static String dumpString(DataBuffer buffer, Charset charset) {
+		Assert.notNull(buffer, "'buffer' must not be null");
 		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = dumpBytes(buffer);
-		return new String(bytes, charset);
+		return buffer.toString(charset);
 	}
 
 }
