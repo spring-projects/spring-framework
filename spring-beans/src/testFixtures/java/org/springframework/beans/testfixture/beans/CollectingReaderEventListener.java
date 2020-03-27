@@ -65,7 +65,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	public ComponentDefinition[] getComponentDefinitions() {
 		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
-		return collection.toArray(new ComponentDefinition[collection.size()]);
+		return collection.toArray(new ComponentDefinition[0]);
 	}
 
 	@Override
