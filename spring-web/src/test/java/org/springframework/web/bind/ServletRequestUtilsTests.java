@@ -42,7 +42,7 @@ class ServletRequestUtilsTests {
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getIntParameter(request, "param1")).isEqualTo(new Integer(5));
+		assertThat(ServletRequestUtils.getIntParameter(request, "param1")).isEqualTo(5);
 		assertThat(ServletRequestUtils.getIntParameter(request, "param1", 6)).isEqualTo(5);
 		assertThat(ServletRequestUtils.getRequiredIntParameter(request, "param1")).isEqualTo(5);
 

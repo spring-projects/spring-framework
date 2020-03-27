@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1216,16 +1216,16 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void arrayConstructorWithAutowiring() {
-		lbf.registerSingleton("integer1", new Integer(4));
-		lbf.registerSingleton("integer2", new Integer(5));
+		lbf.registerSingleton("integer1",4);
+		lbf.registerSingleton("integer2", 5);
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
 		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
-		assertThat(ab.getIntegerArray()[0]).isEqualTo(new Integer(4));
-		assertThat(ab.getIntegerArray()[1]).isEqualTo(new Integer(5));
+		assertThat(ab.getIntegerArray()[0]).isEqualTo(4);
+		assertThat(ab.getIntegerArray()[1]).isEqualTo(5);
 	}
 
 	@Test
@@ -1240,8 +1240,8 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void doubleArrayConstructorWithAutowiring() throws MalformedURLException {
-		lbf.registerSingleton("integer1", new Integer(4));
-		lbf.registerSingleton("integer2", new Integer(5));
+		lbf.registerSingleton("integer1", 4);
+		lbf.registerSingleton("integer2", 5);
 		lbf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		lbf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
@@ -1250,8 +1250,8 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
-		assertThat(ab.getIntegerArray()[0]).isEqualTo(new Integer(4));
-		assertThat(ab.getIntegerArray()[1]).isEqualTo(new Integer(5));
+		assertThat(ab.getIntegerArray()[0]).isEqualTo(4);
+		assertThat(ab.getIntegerArray()[1]).isEqualTo(5);
 		assertThat(ab.getResourceArray()[0]).isEqualTo(new UrlResource("http://localhost:8080"));
 		assertThat(ab.getResourceArray()[1]).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
@@ -2721,7 +2721,7 @@ class DefaultListableBeanFactoryTests {
 	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		int ageSetByPropertyValue = 27;
-		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", new Integer(ageSetByPropertyValue)));
+		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", ageSetByPropertyValue));
 		lbf.registerBeanDefinition("test", bd);
 		final String nameSetOnField = "nameSetOnField";
 		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessorAdapter() {
@@ -3232,7 +3232,7 @@ class DefaultListableBeanFactoryTests {
 				}
 			}
 			else if (value instanceof String && int.class.isAssignableFrom(requiredType)) {
-				return new Integer(5);
+				return 5;
 			}
 			else {
 				return value;

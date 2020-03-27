@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -457,7 +457,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parser.parseExpression("T(Integer).valueOf(42)");
 		expression.getValue(Integer.class);
 		assertCanCompile(expression);
-		assertThat(expression.getValue(Integer.class)).isEqualTo(new Integer(42));
+		assertThat(expression.getValue(Integer.class)).isEqualTo(42);
 
 		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those values
 
@@ -4024,7 +4024,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("foo");
 		assertCanCompile(expression);
 		tc.reset();
-		tc.obj=new Integer(42);
+		tc.obj=42;
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 				expression.getValue(tc))
 			.withCauseInstanceOf(ClassCastException.class);
@@ -4035,7 +4035,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue("abc")).isEqualTo('a');
 		assertCanCompile(expression);
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				expression.getValue(new Integer(42)))
+				expression.getValue(42))
 			.withCauseInstanceOf(ClassCastException.class);
 	}
 
@@ -4072,10 +4072,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	@Test
 	public void methodReference_simpleInstanceMethodNoArgReturnPrimitive() throws Exception {
 		expression = parser.parseExpression("intValue()");
-		int resultI = expression.getValue(new Integer(42), Integer.TYPE);
+		int resultI = expression.getValue(42, Integer.TYPE);
 		assertThat(resultI).isEqualTo(42);
 		assertCanCompile(expression);
-		int resultC = expression.getValue(new Integer(42), Integer.TYPE);
+		int resultC = expression.getValue(42, Integer.TYPE);
 		assertThat(resultC).isEqualTo(42);
 	}
 
