@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.Descriptor;
 import javax.management.MBeanServerConnection;
@@ -31,6 +32,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -218,6 +220,10 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 
 		try {
+			Awaitility.await()
+				.atMost(500, TimeUnit.MILLISECONDS)
+				.pollInterval(10, TimeUnit.MILLISECONDS)
+				.until(() -> !connector.isActive());
 			bean.getName();
 		}
 		catch (JmxException ex) {
