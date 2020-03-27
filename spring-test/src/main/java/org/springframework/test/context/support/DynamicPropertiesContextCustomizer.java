@@ -73,7 +73,6 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
 	}
 
-	@Nullable
 	private Map<String, Supplier<Object>> buildDynamicPropertiesMap() {
 		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
 		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
