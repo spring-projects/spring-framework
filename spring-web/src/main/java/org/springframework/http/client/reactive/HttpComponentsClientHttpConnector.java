@@ -24,6 +24,7 @@ import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.Message;
 import org.apache.hc.core5.http.nio.support.BasicRequestProducer;
@@ -32,6 +33,7 @@ import org.apache.hc.core5.reactive.ReactiveResponseConsumer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -107,4 +109,29 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		return new ReactiveEntityProducer(byteBufferFlux, request.getContentLength(), null, null);
 	}
+
+
+	private static class MonoFutureCallbackAdapter<T> implements FutureCallback<T> {
+
+		private final MonoSink<T> sink;
+
+		public MonoFutureCallbackAdapter(MonoSink<T> sink) {
+			this.sink = sink;
+		}
+
+		@Override
+		public void completed(T result) {
+			this.sink.success(result);
+		}
+
+		@Override
+		public void failed(Exception ex) {
+			this.sink.error(ex);
+		}
+
+		@Override
+		public void cancelled() {
+		}
+	}
+
 }

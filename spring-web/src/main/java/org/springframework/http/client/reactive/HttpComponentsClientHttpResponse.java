@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.Message;
 import org.reactivestreams.Publisher;
@@ -111,10 +110,8 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		return Arrays.stream(this.message.getHead().getHeaders())
-				.collect(HttpHeaders::new, this::addHeader, HttpHeaders::putAll);
-	}
-
-	private void addHeader(HttpHeaders httpHeaders, Header header) {
-		httpHeaders.add(header.getName(), header.getValue());
+				.collect(HttpHeaders::new,
+						(httpHeaders, header) -> httpHeaders.add(header.getName(), header.getValue()),
+						HttpHeaders::putAll);
 	}
 }
