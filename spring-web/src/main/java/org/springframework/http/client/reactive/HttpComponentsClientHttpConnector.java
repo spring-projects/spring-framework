@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-public class ApacheClientHttpConnector implements ClientHttpConnector {
+public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 	private final CloseableHttpAsyncClient client;
 
@@ -55,14 +55,14 @@ public class ApacheClientHttpConnector implements ClientHttpConnector {
 	/**
 	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
 	 */
-	public ApacheClientHttpConnector() {
+	public HttpComponentsClientHttpConnector() {
 		this(HttpAsyncClients.createDefault());
 	}
 
 	/**
 	 * Constructor with an initialized {@link CloseableHttpAsyncClient}.
 	 */
-	public ApacheClientHttpConnector(CloseableHttpAsyncClient client) {
+	public HttpComponentsClientHttpConnector(CloseableHttpAsyncClient client) {
 		this.dataBufferFactory = new DefaultDataBufferFactory();
 		this.client = client;
 		this.client.start();
@@ -73,12 +73,12 @@ public class ApacheClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		ApacheClientHttpRequest request = new ApacheClientHttpRequest(method, uri, this.dataBufferFactory);
+		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri, this.dataBufferFactory);
 
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request)));
 	}
 
-	private Mono<ClientHttpResponse> execute(ApacheClientHttpRequest request) {
+	private Mono<ClientHttpResponse> execute(HttpComponentsClientHttpRequest request) {
 		Flux<ByteBuffer> byteBufferFlux = request.getByteBufferFlux();
 
 		ReactiveEntityProducer reactiveEntityProducer = createReactiveEntityProducer(request, byteBufferFlux);
@@ -94,11 +94,11 @@ public class ApacheClientHttpConnector implements ClientHttpConnector {
 					new ReactiveResponseConsumer(new MonoFutureCallbackAdapter<>(sink));
 
 			this.client.execute(basicRequestProducer, reactiveResponseConsumer, context, null);
-		}).map(message -> new ApacheClientHttpResponse(this.dataBufferFactory, message, context));
+		}).map(message -> new HttpComponentsClientHttpResponse(this.dataBufferFactory, message, context));
 	}
 
 	@Nullable
-	private ReactiveEntityProducer createReactiveEntityProducer(ApacheClientHttpRequest request,
+	private ReactiveEntityProducer createReactiveEntityProducer(HttpComponentsClientHttpRequest request,
 			@Nullable Flux<ByteBuffer> byteBufferFlux) {
 
 		if (byteBufferFlux == null) {

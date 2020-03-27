@@ -370,10 +370,10 @@ shows:
 
 
 
-[[webflux-client-builder-apache]]
-=== Apache
+[[webflux-client-builder-http-components]]
+=== HttpComponents
 
-The following example shows how to customize Apache `HttpClient` settings:
+The following example shows how to customize Apache HttpComponents `HttpClient` settings:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -381,7 +381,7 @@ The following example shows how to customize Apache `HttpClient` settings:
 	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
 	clientBuilder.setDefaultRequestConfig(...);
 	CloseableHttpAsyncClient client = clientBuilder.build();
-	ClientHttpConnector connector = new ApacheClientHttpConnector(client);
+	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
@@ -391,7 +391,7 @@ The following example shows how to customize Apache `HttpClient` settings:
 	val client = HttpAsyncClients.custom().apply {
 		setDefaultRequestConfig(...)
 	}.build()
-	val connector = ApacheClientHttpConnector(client)
+	val connector = HttpComponentsClientHttpConnector(client)
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 

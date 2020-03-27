@@ -49,7 +49,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @since 4.0
  * @see HttpComponentsClientHttpRequestFactory#createRequest
  * @deprecated as of Spring 5.0, in favor of
- * {@link org.springframework.http.client.reactive.ApacheClientHttpConnector}
+ * {@link org.springframework.http.client.reactive.HttpComponentsClientHttpConnector}
  */
 @Deprecated
 final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {

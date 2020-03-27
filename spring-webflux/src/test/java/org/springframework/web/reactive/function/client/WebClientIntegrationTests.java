@@ -59,8 +59,8 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.reactive.ApacheClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -90,7 +90,7 @@ class WebClientIntegrationTests {
 		return Stream.of(
 				new ReactorClientHttpConnector(),
 				new JettyClientHttpConnector(),
-				new ApacheClientHttpConnector()
+				new HttpComponentsClientHttpConnector()
 		);
 	}
 

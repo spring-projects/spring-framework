@@ -38,7 +38,7 @@ import org.springframework.util.StreamUtils;
  * @since 4.0
  * @see HttpComponentsAsyncClientHttpRequest#executeAsync()
  * @deprecated as of Spring 5.0, in favor of
- * {@link org.springframework.http.client.reactive.ApacheClientHttpConnector}
+ * {@link org.springframework.http.client.reactive.HttpComponentsClientHttpConnector}
  */
 @Deprecated
 final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResponse {

@@ -45,7 +45,7 @@ import static org.apache.hc.client5.http.cookie.Cookie.MAX_AGE_ATTR;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-class ApacheClientHttpResponse implements ClientHttpResponse {
+class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
 
@@ -56,7 +56,7 @@ class ApacheClientHttpResponse implements ClientHttpResponse {
 	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
 
 
-	public ApacheClientHttpResponse(DataBufferFactory dataBufferFactory,
+	public HttpComponentsClientHttpResponse(DataBufferFactory dataBufferFactory,
 			Message<HttpResponse, Publisher<ByteBuffer>> message,
 			HttpClientContext context) {
 
