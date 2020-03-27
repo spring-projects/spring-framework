@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -628,12 +628,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 			}
 		}
 
-		final Integer INTEGER = Integer.valueOf(7);
+		final Integer INTEGER = 7;
 
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
 		List<TypeDescriptor> args = new ArrayList<>();
-		args.add(TypeDescriptor.forObject(new Integer(42)));
+		args.add(TypeDescriptor.forObject(42));
 
 		ConversionPriority1 target = new ConversionPriority1();
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
@@ -1485,10 +1485,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
 		StandardEvaluationContext sec = new StandardEvaluationContext();
-		sec.setVariable("no", new Integer(1));
+		sec.setVariable("no", 1);
 		assertThat(expression.getValue(sec).toString().startsWith("Integer")).isTrue();
 		sec = new StandardEvaluationContext();
-		sec.setVariable("no", new Float(1.0));
+		sec.setVariable("no", 1.0F);
 		assertThat(expression.getValue(sec).toString().startsWith("Number")).isTrue();
 		sec = new StandardEvaluationContext();
 		sec.setVariable("no", "1.0");
@@ -1694,7 +1694,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		public Integer tryToInvokeWithNull2(int i) {
-			return new Integer(i);
+			return i;
 		}
 
 		public String tryToInvokeWithNull3(Integer value, String... strings) {

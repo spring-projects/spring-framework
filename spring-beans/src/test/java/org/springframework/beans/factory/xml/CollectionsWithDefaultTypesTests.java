@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ public class CollectionsWithDefaultTypesTests {
 		List l = (List) jumble.getJumble();
 		assertThat(l.get(0).equals("literal")).isTrue();
 		Integer[] array1 = (Integer[]) l.get(1);
-		assertThat(array1[0].equals(new Integer(2))).isTrue();
-		assertThat(array1[1].equals(new Integer(4))).isTrue();
+		assertThat(array1[0].equals(2)).isTrue();
+		assertThat(array1[1].equals(4)).isTrue();
 		int[] array2 = (int[]) l.get(2);
 		assertThat(array2[0] == 3).isTrue();
 		assertThat(array2[1] == 5).isTrue();

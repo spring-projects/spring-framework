@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class MessageHeadersTests {
 
 	@Test
 	public void testNonTypedAccessOfHeaderValue() {
-		Integer value = new Integer(123);
+		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
@@ -116,7 +116,7 @@ public class MessageHeadersTests {
 
 	@Test
 	public void testTypedAccessOfHeaderValue() {
-		Integer value = new Integer(123);
+		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
@@ -125,7 +125,7 @@ public class MessageHeadersTests {
 
 	@Test
 	public void testHeaderValueAccessWithIncorrectType() {
-		Integer value = new Integer(123);
+		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
@@ -151,7 +151,7 @@ public class MessageHeadersTests {
 	public void testHeaderKeys() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("key1", "val1");
-		map.put("key2", new Integer(123));
+		map.put("key2", 123);
 		MessageHeaders headers = new MessageHeaders(map);
 		Set<String> keys = headers.keySet();
 		assertThat(keys.contains("key1")).isTrue();

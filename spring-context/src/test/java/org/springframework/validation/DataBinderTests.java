@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,7 +332,7 @@ public class DataBinderTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("object", "1");
 		binder.bind(pvs);
-		assertThat(tb.getObject()).isEqualTo(new Integer(1));
+		assertThat(tb.getObject()).isEqualTo(1);
 	}
 
 	@Test
@@ -460,7 +460,7 @@ public class DataBinderTests {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
 			binder.bind(pvs);
-			assertThat(tb.getIntegerList().get(0)).isEqualTo(new Integer(1));
+			assertThat(tb.getIntegerList().get(0)).isEqualTo(1);
 			assertThat(binder.getBindingResult().getFieldValue("integerList[0]")).isEqualTo("1");
 		}
 		finally {
@@ -932,7 +932,7 @@ public class DataBinderTests {
 		binder.registerCustomEditor(int.class, "age", new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
-				setValue(new Integer(99));
+				setValue(99);
 			}
 			@Override
 			public String getAsText() {
@@ -1231,7 +1231,7 @@ public class DataBinderTests {
 		assertThat((errors.getFieldErrors("age").get(0)).getCode()).isEqualTo("TOO_YOUNG");
 		assertThat((errors.getFieldErrors("age").get(0)).getObjectName()).isEqualTo("tb");
 		assertThat((errors.getFieldErrors("age").get(0)).getField()).isEqualTo("age");
-		assertThat((errors.getFieldErrors("age").get(0)).getRejectedValue()).isEqualTo(new Integer(0));
+		assertThat((errors.getFieldErrors("age").get(0)).getRejectedValue()).isEqualTo(0);
 		assertThat((errors.getFieldErrors("age").get(1)).getCode()).isEqualTo("AGE_NOT_ODD");
 
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -1248,7 +1248,7 @@ public class DataBinderTests {
 		assertThat(errors.getFieldErrorCount("spouse.age")).isEqualTo(1);
 		assertThat(errors.getFieldError("spouse.age").getCode()).isEqualTo("TOO_YOUNG");
 		assertThat((errors.getFieldErrors("spouse.age").get(0)).getObjectName()).isEqualTo("tb");
-		assertThat((errors.getFieldErrors("spouse.age").get(0)).getRejectedValue()).isEqualTo(new Integer(0));
+		assertThat((errors.getFieldErrors("spouse.age").get(0)).getRejectedValue()).isEqualTo(0);
 	}
 
 	@Test
@@ -1303,7 +1303,7 @@ public class DataBinderTests {
 		assertThat((errors.getFieldErrors("age").get(0)).getCode()).isEqualTo("validation.TOO_YOUNG");
 		assertThat((errors.getFieldErrors("age").get(0)).getObjectName()).isEqualTo("tb");
 		assertThat((errors.getFieldErrors("age").get(0)).getField()).isEqualTo("age");
-		assertThat((errors.getFieldErrors("age").get(0)).getRejectedValue()).isEqualTo(new Integer(0));
+		assertThat((errors.getFieldErrors("age").get(0)).getRejectedValue()).isEqualTo(0);
 		assertThat((errors.getFieldErrors("age").get(1)).getCode()).isEqualTo("validation.AGE_NOT_ODD");
 
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -1320,7 +1320,7 @@ public class DataBinderTests {
 		assertThat(errors.getFieldErrorCount("spouse.age")).isEqualTo(1);
 		assertThat(errors.getFieldError("spouse.age").getCode()).isEqualTo("validation.TOO_YOUNG");
 		assertThat((errors.getFieldErrors("spouse.age").get(0)).getObjectName()).isEqualTo("tb");
-		assertThat((errors.getFieldErrors("spouse.age").get(0)).getRejectedValue()).isEqualTo(new Integer(0));
+		assertThat((errors.getFieldErrors("spouse.age").get(0)).getRejectedValue()).isEqualTo(0);
 	}
 
 	@Test
@@ -1374,9 +1374,9 @@ public class DataBinderTests {
 		boolean condition = tb.getSet() instanceof TreeSet;
 		assertThat(condition).isTrue();
 		assertThat(tb.getSet().size()).isEqualTo(3);
-		assertThat(tb.getSet().contains(new Integer(10))).isTrue();
-		assertThat(tb.getSet().contains(new Integer(20))).isTrue();
-		assertThat(tb.getSet().contains(new Integer(30))).isTrue();
+		assertThat(tb.getSet().contains(10)).isTrue();
+		assertThat(tb.getSet().contains(20)).isTrue();
+		assertThat(tb.getSet().contains(30)).isTrue();
 
 		pvs = new MutablePropertyValues();
 		pvs.add("set", null);
@@ -1840,7 +1840,7 @@ public class DataBinderTests {
 		assertThat(ex2.getGlobalError().getCode()).isEqualTo("invalid");
 		assertThat(ex2.hasFieldErrors("age")).isTrue();
 		assertThat(ex2.getFieldError("age").getCode()).isEqualTo("invalidField");
-		assertThat(ex2.getFieldValue("age")).isEqualTo(new Integer(99));
+		assertThat(ex2.getFieldValue("age")).isEqualTo(99);
 
 		ex2.rejectValue("name", "invalidField", "someMessage");
 		assertThat(ex2.hasFieldErrors("name")).isTrue();
