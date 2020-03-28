@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -73,7 +72,6 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
 	}
 
-	@Nullable
 	private Map<String, Supplier<Object>> buildDynamicPropertiesMap() {
 		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
 		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
