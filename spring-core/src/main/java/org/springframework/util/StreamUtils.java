@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
@@ -238,6 +239,24 @@ public abstract class StreamUtils {
 		return new NonClosingOutputStream(out);
 	}
 
+	/**
+	 * More effective equivalent of {@code new String(baos.toByteArray(), charset)}
+	 * As far as at invocation point {@code charset} is already available,
+	 * no exception is expected to be thrown.
+	 *
+	 * @param baos    {@link ByteArrayOutputStream} to be flushed into String
+	 * @param charset applicable {@link Charset}
+	 * @return String represenation of bytes stored in {@code baos}
+	 */
+	public static String baosToString(ByteArrayOutputStream baos, Charset charset) {
+		Assert.notNull(baos, "No ByteArrayOutputStream specified");
+		Assert.notNull(charset, "No Charset specified");
+		try {
+			return baos.toString(charset.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	private static class NonClosingInputStream extends FilterInputStream {
 

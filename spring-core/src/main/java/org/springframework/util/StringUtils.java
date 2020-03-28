@@ -774,7 +774,7 @@ public abstract class StringUtils {
 				bos.write(ch);
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), charset) : source);
+		return changed ? StreamUtils.baosToString(bos, charset) : source;
 	}
 
 	/**

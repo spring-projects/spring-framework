@@ -36,6 +36,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -359,7 +360,7 @@ final class HierarchicalUriComponents extends UriComponents {
 				bos.write(hex2);
 			}
 		}
-		return new String(bos.toByteArray(), charset);
+		return StreamUtils.baosToString(bos, charset);
 	}
 
 	private Type getHostType() {

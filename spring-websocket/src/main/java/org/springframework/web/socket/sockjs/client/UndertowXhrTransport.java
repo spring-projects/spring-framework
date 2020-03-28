@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StringReadChannelListener;
+import org.springframework.util.StreamUtils;
 import org.xnio.ChannelListener;
 import org.xnio.ChannelListeners;
 import org.xnio.IoUtils;
@@ -405,8 +406,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				throw new SockJsException("Session closed.", this.session.getId(), null);
 			}
 
-			PooledByteBuffer pooled = bufferPool.allocate();
-			try {
+			try (PooledByteBuffer pooled = bufferPool.allocate()) {
 				int r;
 				do {
 					ByteBuffer buffer = pooled.getBuffer();
@@ -436,20 +436,16 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			catch (IOException exc) {
 				onFailure(exc);
 			}
-			finally {
-				pooled.close();
-			}
 		}
 
 		private void handleFrame() {
-			byte[] bytes = this.outputStream.toByteArray();
+			String content = StreamUtils.baosToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
-			String content = new String(bytes, SockJsFrame.CHARSET);
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);
 			}
 			if (!PRELUDE.equals(content)) {
-				this.session.handleFrame(new String(bytes, SockJsFrame.CHARSET));
+				this.session.handleFrame(content);
 			}
 		}
 
