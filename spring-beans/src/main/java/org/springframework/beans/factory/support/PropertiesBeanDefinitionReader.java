@@ -455,11 +455,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
 					if (property.endsWith(REF_SUFFIX)) {
-						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+						int index = Integer.parseInt(property.substring(CONSTRUCTOR_ARG_PREFIX.length(), property.length() - REF_SUFFIX.length()));
 						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
 					}
 					else {
-						int index = Integer.parseInt(property.substring(1));
+						int index = Integer.parseInt(property.substring(CONSTRUCTOR_ARG_PREFIX.length()));
 						cas.addIndexedArgumentValue(index, readValue(entry));
 					}
 				}
@@ -521,7 +521,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			// If it starts with a reference prefix...
 			if (strVal.startsWith(REF_PREFIX)) {
 				// Expand the reference.
-				String targetName = strVal.substring(1);
+				String targetName = strVal.substring(REF_PREFIX.length());
 				if (targetName.startsWith(REF_PREFIX)) {
 					// Escaped prefix -> use plain value.
 					val = targetName;
