@@ -46,9 +46,9 @@ import static org.apache.hc.client5.http.cookie.Cookie.MAX_AGE_ATTR;
  */
 class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
-	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
+	private final DataBufferFactory dataBufferFactory;
 
-	private final Flux<DataBuffer> dataBufferFlux;
+	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
 
 	private final HttpClientContext context;
 
@@ -59,16 +59,9 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 			Message<HttpResponse, Publisher<ByteBuffer>> message,
 			HttpClientContext context) {
 
+		this.dataBufferFactory = dataBufferFactory;
 		this.message = message;
 		this.context = context;
-
-		this.dataBufferFlux = Flux.from(this.message.getBody())
-				.doOnSubscribe(s -> {
-					if (!this.rejectSubscribers.compareAndSet(false, true)) {
-						throw new IllegalStateException("The client response body can only be consumed once.");
-					}
-				})
-				.map(dataBufferFactory::wrap);
 	}
 
 
@@ -104,7 +97,13 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.dataBufferFlux;
+		return Flux.from(this.message.getBody())
+				.doOnSubscribe(s -> {
+					if (!this.rejectSubscribers.compareAndSet(false, true)) {
+						throw new IllegalStateException("The client response body can only be consumed once.");
+					}
+				})
+				.map(this.dataBufferFactory::wrap);
 	}
 
 	@Override
