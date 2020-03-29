@@ -20,8 +20,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.message.BasicHttpRequest;
 import org.reactivestreams.Publisher;
@@ -30,7 +32,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -49,12 +50,17 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final DataBufferFactory dataBufferFactory;
 
+	private final HttpClientContext context;
+
 	private Flux<ByteBuffer> byteBufferFlux;
 
 	private long contentLength = -1;
 
 
-	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, DataBufferFactory dataBufferFactory) {
+	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, HttpClientContext context,
+			DataBufferFactory dataBufferFactory) {
+
+		this.context = context;
 		this.httpRequest = new BasicHttpRequest(method.name(), uri);
 		this.dataBufferFactory = dataBufferFactory;
 	}
@@ -119,13 +125,17 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 			return;
 		}
 
-		String cookiesString = getCookies().values()
+		CookieStore cookieStore = this.context.getCookieStore();
+
+		getCookies().values()
 				.stream()
 				.flatMap(Collection::stream)
-				.map(HttpCookie::toString)
-				.collect(Collectors.joining("; "));
-
-		this.httpRequest.addHeader(HttpHeaders.COOKIE, cookiesString);
+				.forEach(cookie -> {
+					BasicClientCookie clientCookie = new BasicClientCookie(cookie.getName(), cookie.getValue());
+					clientCookie.setDomain(getURI().getHost());
+					clientCookie.setPath(getURI().getPath());
+					cookieStore.addCookie(clientCookie);
+				});
 	}
 
 	public HttpRequest getHttpRequest() {

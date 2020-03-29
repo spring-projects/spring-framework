@@ -19,6 +19,7 @@ package org.springframework.http.client.reactive;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
@@ -53,6 +54,8 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 	private final DataBufferFactory dataBufferFactory;
 
+	private final Supplier<? extends HttpClientContext> contextSupplier;
+
 
 	/**
 	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
@@ -62,10 +65,25 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Constructor with an initialized {@link CloseableHttpAsyncClient}.
+	 * Constructor with a pre-configured {@link CloseableHttpAsyncClient} instance.
+	 * @param client the client to use
 	 */
 	public HttpComponentsClientHttpConnector(CloseableHttpAsyncClient client) {
+		this(client, HttpClientContext::create);
+	}
+
+	/**
+	 * Constructor with a pre-configured {@link CloseableHttpAsyncClient} instance
+	 * and a {@link HttpClientContext} supplier lambda which is called before each request
+	 * and passed to the client.
+	 * @param client the client to use
+	 * @param contextSupplier a {@link HttpClientContext} supplier
+	 */
+	public HttpComponentsClientHttpConnector(CloseableHttpAsyncClient client,
+			Supplier<? extends HttpClientContext> contextSupplier) {
+
 		this.dataBufferFactory = new DefaultDataBufferFactory();
+		this.contextSupplier = contextSupplier;
 		this.client = client;
 		this.client.start();
 	}
@@ -75,21 +93,25 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri, this.dataBufferFactory);
+		HttpClientContext context = this.contextSupplier.get();
 
-		return requestCallback.apply(request).then(Mono.defer(() -> execute(request)));
+		if (context.getCookieStore() == null) {
+			context.setCookieStore(new BasicCookieStore());
+		}
+
+		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri,
+				context, this.dataBufferFactory);
+
+		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
 	}
 
-	private Mono<ClientHttpResponse> execute(HttpComponentsClientHttpRequest request) {
+	private Mono<ClientHttpResponse> execute(HttpComponentsClientHttpRequest request, HttpClientContext context) {
 		Flux<ByteBuffer> byteBufferFlux = request.getByteBufferFlux();
 
 		ReactiveEntityProducer reactiveEntityProducer = createReactiveEntityProducer(request, byteBufferFlux);
 
 		BasicRequestProducer basicRequestProducer = new BasicRequestProducer(request.getHttpRequest(),
 				reactiveEntityProducer);
-
-		HttpClientContext context = HttpClientContext.create();
-		context.setCookieStore(new BasicCookieStore());
 
 		return Mono.<Message<HttpResponse, Publisher<ByteBuffer>>>create(sink -> {
 			ReactiveResponseConsumer reactiveResponseConsumer =
