@@ -26,6 +26,7 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.Message;
 import org.apache.hc.core5.http.nio.support.BasicRequestProducer;
@@ -38,6 +39,7 @@ import reactor.core.publisher.MonoSink;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
@@ -129,7 +131,15 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 			return null;
 		}
 
-		return new ReactiveEntityProducer(byteBufferFlux, request.getContentLength(), null, null);
+		String contentEncoding = request.getHeaders().getFirst(HttpHeaders.CONTENT_ENCODING);
+
+		ContentType contentType = null;
+
+		if (request.getHeaders().getContentType() != null) {
+			contentType = ContentType.parse(request.getHeaders().getContentType().toString());
+		}
+
+		return new ReactiveEntityProducer(byteBufferFlux, request.getContentLength(), contentType, contentEncoding);
 	}
 
 
