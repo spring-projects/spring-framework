@@ -24,8 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 
 import org.springframework.lang.Nullable;
+import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
  * Utility methods for working with the file system.
