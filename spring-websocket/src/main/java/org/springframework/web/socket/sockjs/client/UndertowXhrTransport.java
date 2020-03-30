@@ -38,7 +38,6 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StringReadChannelListener;
-import org.springframework.util.StreamUtils;
 import org.xnio.ChannelListener;
 import org.xnio.ChannelListeners;
 import org.xnio.IoUtils;
@@ -54,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
@@ -439,7 +439,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		}
 
 		private void handleFrame() {
-			String content = StreamUtils.baosToString(this.outputStream, SockJsFrame.CHARSET);
+			String content = StreamUtils.copyToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);

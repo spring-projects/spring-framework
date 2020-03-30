@@ -398,18 +398,18 @@ public final class ContentDisposition {
 		Assert.notNull(filename, "'input' String` should not be null");
 		Assert.notNull(charset, "'charset' should not be null");
 		byte[] value = filename.getBytes(charset);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
 		while (index < value.length) {
 			byte b = value[index];
 			if (isRFC5987AttrChar(b)) {
-				bos.write((char) b);
+				baos.write((char) b);
 				index++;
 			}
 			else if (b == '%' && index < value.length - 2) {
 				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
 				try {
-					bos.write(Integer.parseInt(String.valueOf(array), 16));
+					baos.write(Integer.parseInt(String.valueOf(array), 16));
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
@@ -420,7 +420,7 @@ public final class ContentDisposition {
 				throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT);
 			}
 		}
-		return StreamUtils.baosToString(bos, charset);
+		return StreamUtils.copyToString(baos, charset);
 	}
 
 	private static boolean isRFC5987AttrChar(byte c) {

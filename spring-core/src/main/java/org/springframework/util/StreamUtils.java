@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,27 @@ public abstract class StreamUtils {
 			out.append(buffer, 0, bytesRead);
 		}
 		return out.toString();
+	}
+
+	/**
+	 * Copy the contents of the given {@link ByteArrayOutputStream} into a {@link String}.
+	 * <p>This is a more effective equivalent of {@code new String(baos.toByteArray(), charset)}.
+	 * <p>As long as the {@code charset} is already available at the point of
+	 * invocation, no exception is expected to be thrown by this method.
+	 * @param baos the {@code ByteArrayOutputStream} to be copied into a String
+	 * @param charset the {@link Charset} to use to decode the bytes
+	 * @return the String that has been copied to (possibly empty)
+	 * @since 5.2.6
+	 */
+	public static String copyToString(ByteArrayOutputStream baos, Charset charset) {
+		Assert.notNull(baos, "No ByteArrayOutputStream specified");
+		Assert.notNull(charset, "No Charset specified");
+		try {
+			return baos.toString(charset.name());
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException("Failed to copy contents of ByteArrayOutputStream into a String", ex);
+		}
 	}
 
 	/**
@@ -237,25 +258,6 @@ public abstract class StreamUtils {
 	public static OutputStream nonClosing(OutputStream out) {
 		Assert.notNull(out, "No OutputStream specified");
 		return new NonClosingOutputStream(out);
-	}
-
-	/**
-	 * More effective equivalent of {@code new String(baos.toByteArray(), charset)}
-	 * As far as at invocation point {@code charset} is already available,
-	 * no exception is expected to be thrown.
-	 *
-	 * @param baos    {@link ByteArrayOutputStream} to be flushed into String
-	 * @param charset applicable {@link Charset}
-	 * @return String represenation of bytes stored in {@code baos}
-	 */
-	public static String baosToString(ByteArrayOutputStream baos, Charset charset) {
-		Assert.notNull(baos, "No ByteArrayOutputStream specified");
-		Assert.notNull(charset, "No Charset specified");
-		try {
-			return baos.toString(charset.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	private static class NonClosingInputStream extends FilterInputStream {

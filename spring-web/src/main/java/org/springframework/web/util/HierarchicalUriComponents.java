@@ -347,20 +347,20 @@ final class HierarchicalUriComponents extends UriComponents {
 			return source;
 		}
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length);
 		for (byte b : bytes) {
 			if (type.isAllowed(b)) {
-				bos.write(b);
+				baos.write(b);
 			}
 			else {
-				bos.write('%');
+				baos.write('%');
 				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-				bos.write(hex1);
-				bos.write(hex2);
+				baos.write(hex1);
+				baos.write(hex2);
 			}
 		}
-		return StreamUtils.baosToString(bos, charset);
+		return StreamUtils.copyToString(baos, charset);
 	}
 
 	private Type getHostType() {

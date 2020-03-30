@@ -749,7 +749,7 @@ public abstract class StringUtils {
 		}
 		Assert.notNull(charset, "Charset must not be null");
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
 		boolean changed = false;
 		for (int i = 0; i < length; i++) {
 			int ch = source.charAt(i);
@@ -762,7 +762,7 @@ public abstract class StringUtils {
 					if (u == -1 || l == -1) {
 						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
 					}
-					bos.write((char) ((u << 4) + l));
+					baos.write((char) ((u << 4) + l));
 					i += 2;
 					changed = true;
 				}
@@ -771,10 +771,10 @@ public abstract class StringUtils {
 				}
 			}
 			else {
-				bos.write(ch);
+				baos.write(ch);
 			}
 		}
-		return changed ? StreamUtils.baosToString(bos, charset) : source;
+		return (changed ? StreamUtils.copyToString(baos, charset) : source);
 	}
 
 	/**

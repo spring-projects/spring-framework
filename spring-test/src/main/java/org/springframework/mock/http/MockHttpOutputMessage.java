@@ -76,7 +76,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	 * @param charset the charset to use to turn the body content to a String
 	 */
 	public String getBodyAsString(Charset charset) {
-		return StreamUtils.baosToString(this.body, charset);
+		return StreamUtils.copyToString(this.body, charset);
 	}
 
 }

@@ -217,7 +217,7 @@ public class StompDecoder {
 		while (byteBuffer.remaining() > 0 && !tryConsumeEndOfLine(byteBuffer)) {
 			command.write(byteBuffer.get());
 		}
-		return StreamUtils.baosToString(command, StandardCharsets.UTF_8);
+		return StreamUtils.copyToString(command, StandardCharsets.UTF_8);
 	}
 
 	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
@@ -232,7 +232,7 @@ public class StompDecoder {
 				headerStream.write(byteBuffer.get());
 			}
 			if (headerStream.size() > 0 && headerComplete) {
-				String header = StreamUtils.baosToString(headerStream, StandardCharsets.UTF_8);
+				String header = StreamUtils.copyToString(headerStream, StandardCharsets.UTF_8);
 				int colonIndex = header.indexOf(':');
 				if (colonIndex <= 0) {
 					if (byteBuffer.remaining() > 0) {

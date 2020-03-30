@@ -248,7 +248,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		}
 
 		private void handleFrame() {
-			String content = StreamUtils.baosToString(this.outputStream, SockJsFrame.CHARSET);
+			String content = StreamUtils.copyToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);
