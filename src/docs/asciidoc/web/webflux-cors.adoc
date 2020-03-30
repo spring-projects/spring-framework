@@ -50,7 +50,7 @@ Each `HandlerMapping` can be
 {api-spring-framework}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the WebFlux Java configuration to declare such mappings, which results in a single,
-global map passed to all `HadlerMappping` implementations.
+global map passed to all `HandlerMapping` implementations.
 
 You can combine global CORS configuration at the `HandlerMapping` level with more
 fine-grained, handler-level CORS configuration. For example, annotated controllers can use
