@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,16 +229,13 @@ class SettableListenableFutureTests {
 	void getWaitsForCompletion() throws ExecutionException, InterruptedException {
 		final String string = "hello";
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(20L);
-					settableListenableFuture.set(string);
-				}
-				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
-				}
+		new Thread(() -> {
+			try {
+				Thread.sleep(20L);
+				settableListenableFuture.set(string);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
 			}
 		}).start();
 
@@ -258,16 +255,13 @@ class SettableListenableFutureTests {
 	void getWithTimeoutWaitsForCompletion() throws ExecutionException, InterruptedException, TimeoutException {
 		final String string = "hello";
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(20L);
-					settableListenableFuture.set(string);
-				}
-				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
-				}
+		new Thread(() -> {
+			try {
+				Thread.sleep(20L);
+				settableListenableFuture.set(string);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
 			}
 		}).start();
 
@@ -347,16 +341,13 @@ class SettableListenableFutureTests {
 
 	@Test
 	void cancelStateThrowsExceptionWhenCallingGetWithTimeout() throws ExecutionException, TimeoutException, InterruptedException {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(20L);
-					settableListenableFuture.cancel(true);
-				}
-				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
-				}
+		new Thread(() -> {
+			try {
+				Thread.sleep(20L);
+				settableListenableFuture.cancel(true);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
 			}
 		}).start();
 
