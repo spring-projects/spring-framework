@@ -108,7 +108,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.apache.poi:poi-ooxml:4.1.2"
 			dependency "org.beanshell:bsh:2.0b5"
-			dependency "org.freemarker:freemarker:2.3.29"
+			dependency "org.freemarker:freemarker:2.3.30"
 			dependency "org.hsqldb:hsqldb:2.5.0"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
@@ -117,17 +117,17 @@ configure(allprojects) { project ->
 			dependency "org.ehcache:ehcache:3.4.0"
 			dependency "org.hibernate:hibernate-core:5.4.12.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.2.Final"
-			dependency "org.webjars:webjars-locator-core:0.43"
+			dependency "org.webjars:webjars-locator-core:0.44"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.31') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.33') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.31') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.33') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -146,7 +146,7 @@ configure(allprojects) { project ->
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.11") {
+			dependency("org.apache.httpcomponents:httpclient:4.5.12") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
@@ -154,7 +154,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.2"
 
-			dependency "org.jruby:jruby:9.2.11.0"
+			dependency "org.jruby:jruby:9.2.11.1"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
