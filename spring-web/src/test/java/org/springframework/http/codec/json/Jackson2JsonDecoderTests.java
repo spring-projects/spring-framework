@@ -66,9 +66,9 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
  */
 public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder> {
 
-	private Pojo pojo1 = new Pojo("f1", "b1");
+	private final Pojo pojo1 = new Pojo("f1", "b1");
 
-	private Pojo pojo2 = new Pojo("f2", "b2");
+	private final Pojo pojo2 = new Pojo("f2", "b2");
 
 
 	public Jackson2JsonDecoderTests() {
@@ -219,6 +219,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void decodeNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 
@@ -231,6 +232,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void decodeMonoNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 
