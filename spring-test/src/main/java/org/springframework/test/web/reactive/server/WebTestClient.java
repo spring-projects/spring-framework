@@ -963,7 +963,7 @@ public interface WebTestClient {
 		 * <p>The XPath expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
 		 * @param expression the XPath expression
-		 * @param namespaces namespaces to use
+		 * @param namespaces the namespaces to use
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */

@@ -59,7 +59,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
-	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <p>Servlet containers don't expose a client disconnected callback; see
 	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * Therefore network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
@@ -122,7 +122,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @param id the session ID
 	 * @param config the SockJS service configuration options
 	 * @param handler the recipient of SockJS messages
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
 	public AbstractSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler handler,

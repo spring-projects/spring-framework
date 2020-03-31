@@ -278,7 +278,7 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests the request's parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the parameter to test against
-	 * @param predicate predicate to test against the parameter value
+	 * @param predicate the predicate to test against the parameter value
 	 * @return a predicate that matches the given predicate against the parameter of the given name
 	 * @see ServerRequest#param(String)
 	 */

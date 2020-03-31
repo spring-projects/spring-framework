@@ -65,11 +65,11 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Delete the supplied {@link File} - for directories,
+	 * Delete the supplied {@link File} &mdash; for directories,
 	 * recursively delete any nested directories or files as well.
 	 * @param root the root {@code File} to delete
 	 * @return {@code true} if the {@code File} existed and was deleted,
-	 * or {@code false} it it did not exist
+	 * or {@code false} if it did not exist
 	 * @throws IOException in the case of I/O errors
 	 * @since 5.0
 	 */

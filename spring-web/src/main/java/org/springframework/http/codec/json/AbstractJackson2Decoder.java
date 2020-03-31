@@ -136,8 +136,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	/**
 	 * Process the input publisher into a flux. Default implementation returns
-	 * {@link Flux#from(Publisher)}, but subclasses can choose to to customize
-	 * this behaviour.
+	 * {@link Flux#from(Publisher)}, but subclasses can choose to customize
+	 * this behavior.
 	 * @param input the {@code DataBuffer} input stream to process
 	 * @param elementType the expected type of elements in the output stream
 	 * @param mimeType the MIME type associated with the input stream (optional)

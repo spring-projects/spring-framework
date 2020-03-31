@@ -67,8 +67,8 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	}
 
 	/**
-	 * Sub-classes should override this to create  deep copy of
-	 * {@link BaseDefaultCodecs} which can can be client or server specific.
+	 * Sub-classes should override this to create a deep copy of
+	 * {@link BaseDefaultCodecs} which can be client or server specific.
 	 * @since 5.1.12
 	 */
 	protected abstract BaseDefaultCodecs cloneDefaultCodecs();

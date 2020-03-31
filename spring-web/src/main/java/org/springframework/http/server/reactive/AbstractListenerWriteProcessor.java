@@ -212,7 +212,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * buffers apply to the underlying container.
 	 * @param data the item to write
 	 * @return whether the current data item was written and another one
-	 * requested ({@code true}), or or otherwise if more writes are required.
+	 * requested ({@code true}), or otherwise if more writes are required.
 	 */
 	protected abstract boolean write(T data) throws IOException;
 

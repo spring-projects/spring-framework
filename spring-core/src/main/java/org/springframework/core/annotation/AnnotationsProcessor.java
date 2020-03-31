@@ -36,7 +36,7 @@ interface AnnotationsProcessor<C, R> {
 	/**
 	 * Called when an aggregate is about to be processed. This method may return
 	 * a {@code non-null} result to short-circuit any further processing.
-	 * @param context context information relevant to the processor
+	 * @param context the context information relevant to the processor
 	 * @param aggregateIndex the aggregate index about to be processed
 	 * @return a {@code non-null} result if no further processing is required
 	 */
@@ -48,7 +48,7 @@ interface AnnotationsProcessor<C, R> {
 	/**
 	 * Called when an array of annotations can be processed. This method may
 	 * return a {@code non-null} result to short-circuit any further processing.
-	 * @param context context information relevant to the processor
+	 * @param context the context information relevant to the processor
 	 * @param aggregateIndex the aggregate index of the provided annotations
 	 * @param source the original source of the annotations, if known
 	 * @param annotations the annotations to process (this array may contain

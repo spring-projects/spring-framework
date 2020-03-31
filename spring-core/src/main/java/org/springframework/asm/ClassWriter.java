@@ -916,7 +916,7 @@ public class ClassWriter extends ClassVisitor {
    * if the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name name of the invoked method.
+   * @param name the name of the invoked method.
    * @param descriptor field descriptor of the constant type.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.
@@ -937,7 +937,7 @@ public class ClassWriter extends ClassVisitor {
    * the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name name of the invoked method.
+   * @param name the name of the invoked method.
    * @param descriptor descriptor of the invoke method.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.

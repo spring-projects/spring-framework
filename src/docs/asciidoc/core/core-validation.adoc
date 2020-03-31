@@ -29,11 +29,11 @@ formatting UI field values. You can use these packages as simpler alternatives t
 `PropertyEditorSupport` implementations. They are also discussed in this chapter.
 
 Spring supports Java Bean Validation through setup infrastructure and an adaptor to
-Spring's own `Validator` contract. Application can enable Bean Validation once globally,
+Spring's own `Validator` contract. Applications can enable Bean Validation once globally,
 as described in <<validation-beanvalidation>>, and use it exclusively for all validation
-needs. In the web layer, they can further register controller-local local Spring
+needs. In the web layer, applications can further register controller-local Spring
 `Validator` instances per `DataBinder`, as described in <<validation-binder>>, which can
-be useful for plugging in custom validation logic creating annotations.
+be useful for plugging in custom validation logic.
 
 
 

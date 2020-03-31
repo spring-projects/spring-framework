@@ -42,7 +42,7 @@ public class PathPatternParser {
 
 
 	/**
-	 * Whether a {@link PathPattern} produced by this parser should should
+	 * Whether a {@link PathPattern} produced by this parser should
 	 * automatically match request paths with a trailing slash.
 	 *
 	 * <p>If set to {@code true} a {@code PathPattern} without a trailing slash
