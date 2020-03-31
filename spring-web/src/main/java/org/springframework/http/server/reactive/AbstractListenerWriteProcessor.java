@@ -213,6 +213,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * @param data the item to write
 	 * @return whether the current data item was written and another one
 	 * requested ({@code true}), or otherwise if more writes are required.
+	 * @return {@code true} if the current data item was written completely and
+	 * a new item requested, or {@code false} if it was written partially and
+	 * we'll need more write callbacks before it is fully written
 	 */
 	protected abstract boolean write(T data) throws IOException;
 
