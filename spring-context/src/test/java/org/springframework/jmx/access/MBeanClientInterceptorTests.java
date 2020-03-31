@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.Descriptor;
 import javax.management.MBeanServerConnection;
@@ -32,13 +31,11 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
-import org.springframework.jmx.JmxException;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
@@ -217,17 +214,6 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 		finally {
 			connector.stop();
-		}
-
-		try {
-			Awaitility.await()
-				.atMost(500, TimeUnit.MILLISECONDS)
-				.pollInterval(10, TimeUnit.MILLISECONDS)
-				.until(() -> !connector.isActive());
-			bean.getName();
-		}
-		catch (JmxException ex) {
-			// expected
 		}
 	}
 
