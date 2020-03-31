@@ -831,10 +831,10 @@ with one object in the stream.
 
 To configure buffer sizes, you can check if a given `Decoder` or `HttpMessageReader`
 exposes a `maxInMemorySize` property and if so the Javadoc will have details about default
-values. In WebFlux, the `ServerCodecConfigurer` provides a
-<<webflux-config-message-codecs,single place>> from where to set all codecs, through the
-`maxInMemorySize` property for default codecs. On the client side, the limit can be changed
-in <<web-reactive.adoc#webflux-client-builder-maxinmemorysize, WebClient.Builder>>.
+values. On the server side, `ServerCodecConfigurer` provides a single place from where to
+set all codecs, see <<webflux-config-message-codecs>>. On the client side, the limit for
+all codecs can be changed in
+<<web-reactive.adoc#webflux-client-builder-maxinmemorysize, WebClient.Builder>>.
 
 For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
 the size of non-file parts. For file parts, it determines the threshold at which the part
@@ -3892,7 +3892,7 @@ The following example shows how to customize how the request and response body a
 
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
-			// ...
+			configurer.defaultCodecs().maxInMemorySize(512 * 1024);
 		}
 	}
 ----
