@@ -24,8 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 
 import org.springframework.lang.Nullable;
+import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
  * Utility methods for working with the file system.
@@ -123,7 +125,7 @@ public abstract class FileSystemUtils {
 		BasicFileAttributes srcAttr = Files.readAttributes(src, BasicFileAttributes.class);
 
 		if (srcAttr.isDirectory()) {
-			Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					Files.createDirectories(dest.resolve(src.relativize(dir)));
