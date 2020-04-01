@@ -59,10 +59,10 @@ import org.springframework.util.StringUtils;
  * <li><code>/resources/{&#42;path}</code> &mdash; matches all files
  * underneath the {@code /resources/} path and captures their relative path in
  * a variable named "path"; {@code /resources/image.png} will match with
- * "spring" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
- * with "spring" &rarr; "/css/spring.css"</li>
+ * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
+ * with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
- * and assign the value {@code "spring"} to the {@code filename} variable</li>
+ * and assign the value {@code "filename"} to the {@code filename} variable</li>
  * </ul>
  *
  * @author Andy Clement
