@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -165,7 +165,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class ConcreteFactoryBeanImplementationConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -179,7 +179,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class ParameterizedFactoryBeanImplementationConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -193,7 +193,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class ParameterizedFactoryBeanInterfaceConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -207,7 +207,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class NonPublicParameterizedFactoryBeanInterfaceConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -221,7 +221,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class RawFactoryBeanInterfaceConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -236,7 +236,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class WildcardParameterizedFactoryBeanInterfaceConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean
@@ -250,7 +250,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 	@Configuration
 	static class FactoryBeanCallingConfig {
 
-		@Autowired
+		@Autoweird
 		private DummyBean dummyBean;
 
 		@Bean

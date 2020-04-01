@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -140,14 +140,14 @@ class AnnotationConfigApplicationContextTests {
 
 	@Test
 	void autowiringIsEnabledByDefault() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(AutoweirdConfig.class);
 		assertThat(context.getBean(TestBean.class).name).isEqualTo("foo");
 	}
 
 	@Test
 	void nullReturningBeanPostProcessor() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(AutowiredConfig.class);
+		context.register(AutoweirdConfig.class);
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
@@ -431,9 +431,9 @@ class AnnotationConfigApplicationContextTests {
 
 	@Configuration
 	@Import(NameConfig.class)
-	static class AutowiredConfig {
+	static class AutoweirdConfig {
 
-		@Autowired String autowiredName;
+		@Autoweird String autowiredName;
 
 		@Bean TestBean testBean() {
 			TestBean testBean = new TestBean();
@@ -448,7 +448,7 @@ class AnnotationConfigApplicationContextTests {
 		BeanC c;
 
 
-		@Autowired
+		@Autoweird
 		BeanA(BeanB b, BeanC c) {
 			this.b = b;
 			this.c = c;
@@ -457,7 +457,7 @@ class AnnotationConfigApplicationContextTests {
 
 	static class BeanB {
 
-		@Autowired ApplicationContext applicationContext;
+		@Autoweird ApplicationContext applicationContext;
 
 		public BeanB() {
 		}

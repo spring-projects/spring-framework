@@ -18,7 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -44,7 +44,7 @@ public class ImportedConfigurationClassEnhancementTests {
 
 	@Test
 	public void autowiredConfigClassIsEnhancedWhenRegisteredViaConstructor() {
-		autowiredConfigClassIsEnhanced(ConfigThatDoesNotImport.class, ConfigToBeAutowired.class);
+		autowiredConfigClassIsEnhanced(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
 	}
 
 	private void autowiredConfigClassIsEnhanced(Class<?>... configClasses) {
@@ -61,7 +61,7 @@ public class ImportedConfigurationClassEnhancementTests {
 
 	@Test
 	public void autowiredConfigClassBeanMethodsRespectScopingWhenRegisteredViaConstructor() {
-		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutowired.class);
+		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
 	}
 
 	private void autowiredConfigClassBeanMethodsRespectScoping(Class<?>... configClasses) {
@@ -85,7 +85,7 @@ public class ImportedConfigurationClassEnhancementTests {
 
 
 	@Configuration
-	static class ConfigToBeAutowired {
+	static class ConfigToBeAutoweird {
 
 		public @Bean TestBean testBean() {
 			return new TestBean();
@@ -94,10 +94,10 @@ public class ImportedConfigurationClassEnhancementTests {
 
 	static class Config {
 
-		@Autowired ConfigToBeAutowired autowiredConfig;
+		@Autoweird ConfigToBeAutowired autowiredConfig;
 	}
 
-	@Import(ConfigToBeAutowired.class)
+	@Import(ConfigToBeAutoweird.class)
 	@Configuration
 	static class ConfigThatDoesImport extends Config {
 	}
@@ -110,7 +110,7 @@ public class ImportedConfigurationClassEnhancementTests {
 	@Import(TestBean.class)
 	static class ConfigThatImportsNonConfigClass {
 
-		@Autowired TestBean testBean;
+		@Autoweird TestBean testBean;
 	}
 
 }

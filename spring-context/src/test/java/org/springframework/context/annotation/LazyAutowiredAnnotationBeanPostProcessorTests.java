@@ -23,8 +23,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Autoweird;
+import org.springframework.beans.factory.annotation.AutoweirdAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class LazyAutowiredAnnotationBeanPostProcessorTests {
+public class LazyAutoweirdAnnotationBeanPostProcessorTests {
 
 	private void doTestLazyResourceInjection(Class<? extends TestBeanHolder> annotatedBeanClass) {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
@@ -121,7 +121,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	public void testLazyResourceInjectionWithNonExistingTarget() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(FieldResourceInjectionBean.class);
@@ -138,7 +138,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	public void testLazyOptionalResourceInjectionWithNonExistingTarget() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(OptionalFieldResourceInjectionBean.class);
@@ -162,10 +162,10 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 	public static class FieldResourceInjectionBean implements TestBeanHolder {
 
-		@Autowired @Lazy
+		@Autoweird @Lazy
 		private TestBean testBean;
 
-		@Autowired @Lazy
+		@Autoweird @Lazy
 		private List<TestBean> testBeans;
 
 		@Override
@@ -181,10 +181,10 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 	public static class OptionalFieldResourceInjectionBean implements TestBeanHolder {
 
-		@Autowired(required = false) @Lazy
+		@Autoweird(required = false) @Lazy
 		private TestBean testBean;
 
-		@Autowired(required = false) @Lazy
+		@Autoweird(required = false) @Lazy
 		private List<TestBean> testBeans;
 
 		@Override
@@ -214,7 +214,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		private TestBean testBean;
 
-		@Autowired
+		@Autoweird
 		public void setTestBean(@Lazy TestBean testBean) {
 			if (this.testBean != null) {
 				throw new IllegalStateException("Already called");
@@ -233,7 +233,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		private TestBean testBean;
 
-		@Autowired @Lazy
+		@Autoweird @Lazy
 		public void setTestBean(TestBean testBean) {
 			if (this.testBean != null) {
 				throw new IllegalStateException("Already called");
@@ -271,7 +271,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		private final TestBean testBean;
 
-		@Autowired
+		@Autoweird
 		public ConstructorResourceInjectionBean(@Lazy TestBean testBean) {
 			this.testBean = testBean;
 		}
@@ -287,7 +287,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		private final TestBean testBean;
 
-		@Autowired @Lazy
+		@Autoweird @Lazy
 		public ConstructorResourceInjectionBeanWithConstructorLevelLazy(TestBean testBean) {
 			this.testBean = testBean;
 		}
@@ -315,7 +315,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	@Autowired @Lazy
+	@Autoweird @Lazy
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface LazyInject {
 	}

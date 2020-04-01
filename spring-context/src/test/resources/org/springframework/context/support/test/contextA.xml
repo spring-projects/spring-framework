@@ -23,9 +23,9 @@
 		<property name="resources" value="/org/springframework/context/support/test/context*.xml"/>
 	</bean>
 
-	<bean name="autowiredService" class="org.springframework.context.support.AutowiredService" autowire="byName"/>
+	<bean name="autowiredService" class="org.springframework.context.support.AutoweirdService" autowire="byName"/>
 
-	<bean name="autowiredService2" class="org.springframework.context.support.AutowiredService" autowire="byType"/>
+	<bean name="autowiredService2" class="org.springframework.context.support.AutoweirdService" autowire="byType"/>
 
 	<bean name="wrappedAssemblerOne" class="org.springframework.context.support.TestProxyFactoryBean">
 		<property name="target" ref="assemblerOne"/>

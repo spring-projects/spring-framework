@@ -20,7 +20,7 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -30,9 +30,9 @@ import org.springframework.scheduling.annotation.AsyncResult;
  * @author Juergen Hoeller
  */
 @Lazy
-public class AutowiredQualifierFooService implements FooService {
+public class AutoweirdQualifierFooService implements FooService {
 
-	@Autowired
+	@Autoweird
 	@Qualifier("testing")
 	private FooDao fooDao;
 

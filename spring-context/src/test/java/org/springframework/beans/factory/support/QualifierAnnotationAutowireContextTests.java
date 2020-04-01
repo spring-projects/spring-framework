@@ -27,7 +27,7 @@ import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -582,7 +582,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static class QualifiedFieldTestBean {
 
-		@Autowired
+		@Autoweird
 		@TestQualifier
 		private Person person;
 
@@ -594,7 +594,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static class MetaQualifiedFieldTestBean {
 
-		@MyAutowired
+		@MyAutoweird
 		private Person person;
 
 		public Person getPerson() {
@@ -603,10 +603,10 @@ public class QualifierAnnotationAutowireContextTests {
 	}
 
 
-	@Autowired
+	@Autoweird
 	@TestQualifier
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MyAutowired {
+	@interface MyAutoweird {
 	}
 
 
@@ -614,7 +614,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 		private Person person;
 
-		@Autowired
+		@Autoweird
 		public void setPerson(@TestQualifier Person person) {
 			this.person = person;
 		}
@@ -629,7 +629,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 		private Person person;
 
-		@Autowired
+		@Autoweird
 		public QualifiedConstructorArgumentTestBean(@TestQualifier Person person) {
 			this.person = person;
 		}
@@ -643,7 +643,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static class QualifiedFieldWithDefaultValueTestBean {
 
-		@Autowired
+		@Autoweird
 		@TestQualifierWithDefaultValue
 		private Person person;
 
@@ -655,7 +655,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static class QualifiedFieldWithMultipleAttributesTestBean {
 
-		@Autowired
+		@Autoweird
 		@TestQualifierWithMultipleAttributes(number=123)
 		private Person person;
 
@@ -667,7 +667,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static class QualifiedFieldWithBaseQualifierDefaultValueTestBean {
 
-		@Autowired
+		@Autoweird
 		@Qualifier
 		private Person person;
 
@@ -681,7 +681,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 		private Person person;
 
-		@Autowired
+		@Autoweird
 		public QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean(
 				@Qualifier("juergen") Person person) {
 			this.person = person;

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
@@ -223,7 +223,7 @@ public class QualifierAnnotationTests {
 	@SuppressWarnings("unused")
 	private static class NonQualifiedTestBean {
 
-		@Autowired
+		@Autoweird
 		private Person anonymous;
 
 		public Person getAnonymous() {
@@ -234,7 +234,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByValueTestBean {
 
-		@Autowired @Qualifier("larry")
+		@Autoweird @Qualifier("larry")
 		private Person larry;
 
 		public Person getLarry() {
@@ -245,7 +245,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByParentValueTestBean {
 
-		@Autowired @Qualifier("parentLarry")
+		@Autoweird @Qualifier("parentLarry")
 		private Person larry;
 
 		public Person getLarry() {
@@ -256,10 +256,10 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByBeanNameTestBean {
 
-		@Autowired @Qualifier("larryBean")
+		@Autoweird @Qualifier("larryBean")
 		private Person larry;
 
-		@Autowired @Qualifier("testProperties")
+		@Autoweird @Qualifier("testProperties")
 		public Properties myProps;
 
 		public Person getLarry() {
@@ -270,7 +270,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByFieldNameTestBean {
 
-		@Autowired
+		@Autoweird
 		private Person larryBean;
 
 		public Person getLarry() {
@@ -283,7 +283,7 @@ public class QualifierAnnotationTests {
 
 		private Person larryBean;
 
-		@Autowired
+		@Autoweird
 		public void setLarryBean(Person larryBean) {
 			this.larryBean = larryBean;
 		}
@@ -296,7 +296,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByAliasTestBean {
 
-		@Autowired @Qualifier("stooge")
+		@Autoweird @Qualifier("stooge")
 		private Person stooge;
 
 		public Person getStooge() {
@@ -307,7 +307,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByAnnotationTestBean {
 
-		@Autowired @Qualifier("special")
+		@Autoweird @Qualifier("special")
 		private Person larry;
 
 		public Person getLarry() {
@@ -318,7 +318,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByCustomValueTestBean {
 
-		@Autowired @SimpleValueQualifier("curly")
+		@Autoweird @SimpleValueQualifier("curly")
 		private Person curly;
 
 		public Person getCurly() {
@@ -329,7 +329,7 @@ public class QualifierAnnotationTests {
 
 	private static class QualifiedByAnnotationValueTestBean {
 
-		@Autowired @SimpleValueQualifier("special")
+		@Autoweird @SimpleValueQualifier("special")
 		private Person larry;
 
 		public Person getLarry() {
@@ -341,10 +341,10 @@ public class QualifierAnnotationTests {
 	@SuppressWarnings("unused")
 	private static class QualifiedByAttributesTestBean {
 
-		@Autowired @MultipleAttributeQualifier(name="moe", age=42)
+		@Autoweird @MultipleAttributeQualifier(name="moe", age=42)
 		private Person moeSenior;
 
-		@Autowired @MultipleAttributeQualifier(name="moe", age=15)
+		@Autoweird @MultipleAttributeQualifier(name="moe", age=15)
 		private Person moeJunior;
 
 		public Person getMoeSenior() {
@@ -404,10 +404,10 @@ public class QualifierAnnotationTests {
 
 	public static class MultiQualifierClient {
 
-		@Autowired @Qualifier(FACTORY_QUALIFIER)
+		@Autoweird @Qualifier(FACTORY_QUALIFIER)
 		public Theta factoryTheta;
 
-		@Autowired @Qualifier(IMPL_QUALIFIER)
+		@Autoweird @Qualifier(IMPL_QUALIFIER)
 		public Theta implTheta;
 	}
 

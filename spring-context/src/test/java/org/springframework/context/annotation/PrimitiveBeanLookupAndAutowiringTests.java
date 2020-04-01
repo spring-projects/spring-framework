@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests changes introduced for SPR-8874, allowing beans of primitive types to be looked
- * up via getBean(Class), or to be injected using @Autowired or @Injected or @Resource.
+ * up via getBean(Class), or to be injected using @Autoweird or @Injected or @Resource.
  * Prior to these changes, an attempt to lookup or inject a bean of type boolean would
  * fail because all spring beans are Objects, regardless of initial type due to the way
  * that ObjectFactory works.
@@ -62,11 +62,11 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	}
 
 	@Test
-	public void primitiveAutowiredInjection() {
+	public void primitiveAutoweirdInjection() {
 		ApplicationContext ctx =
-				new AnnotationConfigApplicationContext(Config.class, AutowiredComponent.class);
-		assertThat(ctx.getBean(AutowiredComponent.class).b).isEqualTo(true);
-		assertThat(ctx.getBean(AutowiredComponent.class).i).isEqualTo(42);
+				new AnnotationConfigApplicationContext(Config.class, AutoweirdComponent.class);
+		assertThat(ctx.getBean(AutoweirdComponent.class).b).isEqualTo(true);
+		assertThat(ctx.getBean(AutoweirdComponent.class).i).isEqualTo(42);
 	}
 
 	@Test
@@ -92,14 +92,14 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	}
 
 
-	static class AutowiredComponent {
-		@Autowired boolean b;
-		@Autowired int i;
+	static class AutoweirdComponent {
+		@Autoweird boolean b;
+		@Autoweird int i;
 	}
 
 
 	static class ResourceComponent {
 		@Resource boolean b;
-		@Autowired int i;
+		@Autoweird int i;
 	}
 }

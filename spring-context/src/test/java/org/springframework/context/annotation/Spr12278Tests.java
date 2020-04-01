@@ -73,7 +73,7 @@ public class Spr12278Tests {
 
 		private final String autowiredName;
 
-		// No @Autowired - implicit wiring
+		// No @Autoweird - implicit wiring
 		public SingleConstructorComponent(String autowiredName) {
 			this.autowiredName = autowiredName;
 		}

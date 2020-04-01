@@ -40,8 +40,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Autoweird;
+import org.springframework.beans.factory.annotation.AutoweirdAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
@@ -438,7 +438,7 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedInnerClasses.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
-		beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+		beanFactory.addBeanPostProcessor(new AutoweirdAnnotationBeanPostProcessor());
 
 		Foo foo = beanFactory.getBean(Foo.class);
 		boolean condition = foo instanceof ExtendedFoo;
@@ -449,7 +449,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void scopedProxyTargetMarkedAsNonAutowireCandidate() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ScopedProxyConfigurationClass.class));
@@ -479,7 +479,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjection() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
@@ -496,7 +496,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithScoped() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
@@ -513,7 +513,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithScopedProxy() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class);
@@ -533,7 +533,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithScopedProxyUsingAsm() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class.getName());
@@ -553,7 +553,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithImplTypeAtInjectionPoint() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(SpecificRepositoryInjectionBean.class);
@@ -570,7 +570,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithFactoryBean() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
@@ -920,7 +920,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testSelfReferenceExclusionForFactoryMethodOnSameBean() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
@@ -934,7 +934,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testConfigWithDefaultMethods() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
@@ -948,7 +948,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testConfigWithDefaultMethodsUsingAsm() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
@@ -962,7 +962,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void testCircularDependency() {
-		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		AutoweirdAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
 		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
@@ -1268,7 +1268,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	public static class ScopedProxyConsumer {
 
-		@Autowired
+		@Autoweird
 		public ITestBean testBean;
 	}
 
@@ -1313,10 +1313,10 @@ public class ConfigurationClassPostProcessorTests {
 
 	public static class RepositoryInjectionBean {
 
-		@Autowired
+		@Autoweird
 		public Repository<String> stringRepository;
 
-		@Autowired
+		@Autoweird
 		public Repository<Integer> integerRepository;
 	}
 
@@ -1457,7 +1457,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	public static class SpecificRepositoryInjectionBean {
 
-		@Autowired
+		@Autoweird
 		public GenericRepository<?> genericRepository;
 	}
 
@@ -1472,14 +1472,14 @@ public class ConfigurationClassPostProcessorTests {
 
 	public static class RepositoryFactoryBeanInjectionBean {
 
-		@Autowired
+		@Autoweird
 		public RepositoryFactoryBean<?> repositoryFactoryBean;
 
-		@Autowired
+		@Autoweird
 		@Qualifier("repoFactoryBean")
 		public RepositoryFactoryBean<?> qualifiedRepositoryFactoryBean;
 
-		@Autowired
+		@Autoweird
 		@Qualifier("&repoFactoryBean")
 		public RepositoryFactoryBean<?> prefixQualifiedRepositoryFactoryBean;
 	}
@@ -1672,7 +1672,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class ConcreteConfig extends AbstractConfig {
 
-		@Autowired
+		@Autoweird
 		private ServiceBeanProvider provider;
 
 		@Bean
@@ -1713,7 +1713,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class ConcreteConfigWithDefaultMethods implements DefaultMethodsConfig {
 
-		@Autowired
+		@Autoweird
 		private ServiceBeanProvider provider;
 
 		@Bean
@@ -1739,7 +1739,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class A {
 
-		@Autowired(required = true)
+		@Autoweird(required = true)
 		Z z;
 
 		@Bean
@@ -1754,7 +1754,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class AStrich {
 
-		@Autowired
+		@Autoweird
 		B b;
 
 		@Bean
@@ -1853,7 +1853,7 @@ public class ConfigurationClassPostProcessorTests {
 
 	static class FooImpl {
 
-		@Autowired
+		@Autoweird
 		public BarImpl bar;
 	}
 
@@ -1906,7 +1906,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class MapArgumentConfiguration {
 
-		@Autowired
+		@Autoweird
 		ConfigurableEnvironment env;
 
 		Map<String, Runnable> testBeans;
@@ -1930,7 +1930,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class CollectionInjectionConfiguration {
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		public List<TestBean> testBeans;
 
 		@Bean
@@ -1942,7 +1942,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class MapInjectionConfiguration {
 
-		@Autowired
+		@Autoweird
 		private Map<String, Runnable> testBeans;
 
 		@Bean

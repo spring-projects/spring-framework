@@ -18,7 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
@@ -58,7 +58,7 @@ public class ImportWithConditionTests {
 	@Import({ConditionalConfiguration.class, UnconditionalConfiguration.class})
 	protected static class ConditionalThenUnconditional {
 
-		@Autowired
+		@Autoweird
 		private BeanOne beanOne;
 	}
 
@@ -67,7 +67,7 @@ public class ImportWithConditionTests {
 	@Import({UnconditionalConfiguration.class, ConditionalConfiguration.class})
 	protected static class UnconditionalThenConditional {
 
-		@Autowired
+		@Autoweird
 		private BeanOne beanOne;
 	}
 

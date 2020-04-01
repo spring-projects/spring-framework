@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -48,61 +48,61 @@ import org.springframework.core.io.Resource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * System tests covering use of {@link Autowired} and {@link Value} within
+ * System tests covering use of {@link Autoweird} and {@link Value} within
  * {@link Configuration} classes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class AutowiredConfigurationTests {
+public class AutoweirdConfigurationTests {
 
 	@Test
-	public void testAutowiredConfigurationDependencies() {
+	public void testAutoweirdConfigurationDependencies() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
+				AutoweirdConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
 
 		assertThat(context.getBean("colour", Colour.class)).isEqualTo(Colour.RED);
 		assertThat(context.getBean("testBean", TestBean.class).getName()).isEqualTo(Colour.RED.toString());
 	}
 
 	@Test
-	public void testAutowiredConfigurationMethodDependencies() {
+	public void testAutoweirdConfigurationMethodDependencies() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				AutowiredMethodConfig.class, ColorConfig.class);
+				AutoweirdMethodConfig.class, ColorConfig.class);
 
 		assertThat(context.getBean(Colour.class)).isEqualTo(Colour.RED);
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("RED-RED");
 	}
 
 	@Test
-	public void testAutowiredConfigurationMethodDependenciesWithOptionalAndAvailable() {
+	public void testAutoweirdConfigurationMethodDependenciesWithOptionalAndAvailable() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				OptionalAutowiredMethodConfig.class, ColorConfig.class);
+				OptionalAutoweirdMethodConfig.class, ColorConfig.class);
 
 		assertThat(context.getBean(Colour.class)).isEqualTo(Colour.RED);
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("RED-RED");
 	}
 
 	@Test
-	public void testAutowiredConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
+	public void testAutoweirdConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				OptionalAutowiredMethodConfig.class);
+				OptionalAutoweirdMethodConfig.class);
 
 		assertThat(context.getBeansOfType(Colour.class).isEmpty()).isTrue();
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("");
 	}
 
 	@Test
-	public void testAutowiredSingleConstructorSupported() {
+	public void testAutoweirdSingleConstructorSupported() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
-				new ClassPathResource("annotation-config.xml", AutowiredConstructorConfig.class));
+				new ClassPathResource("annotation-config.xml", AutoweirdConstructorConfig.class));
 		GenericApplicationContext ctx = new GenericApplicationContext(factory);
-		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutowiredConstructorConfig.class));
+		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutoweirdConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(AutowiredConstructorConfig.class).colour);
+		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(AutoweirdConstructorConfig.class).colour);
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class AutowiredConfigurationTests {
 	}
 
 	@Test
-	public void testAutowiredAnnotatedConstructorSupported() {
+	public void testAutoweirdAnnotatedConstructorSupported() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", MultipleConstructorConfig.class));
@@ -132,7 +132,7 @@ public class AutowiredConfigurationTests {
 	@Test
 	public void testValueInjection() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"ValueInjectionTests.xml", AutowiredConfigurationTests.class);
+				"ValueInjectionTests.xml", AutoweirdConfigurationTests.class);
 		doTestValueInjection(context);
 	}
 
@@ -200,7 +200,7 @@ public class AutowiredConfigurationTests {
 	@Test
 	public void testCustomPropertiesWithClassPathContext() throws IOException {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
+				"AutoweirdConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
 
 		TestBean testBean = context.getBean("testBean", TestBean.class);
 		assertThat(testBean.getName()).isEqualTo("localhost");
@@ -211,7 +211,7 @@ public class AutowiredConfigurationTests {
 	public void testCustomPropertiesWithGenericContext() throws IOException {
 		GenericApplicationContext context = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(
-				new ClassPathResource("AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class));
+				new ClassPathResource("AutoweirdConfigurationTests-custom.xml", AutowiredConfigurationTests.class));
 		context.refresh();
 
 		TestBean testBean = context.getBean("testBean", TestBean.class);
@@ -225,9 +225,9 @@ public class AutowiredConfigurationTests {
 
 
 	@Configuration
-	static class AutowiredConfig {
+	static class AutoweirdConfig {
 
-		@Autowired
+		@Autoweird
 		private Colour colour;
 
 		@Bean
@@ -238,7 +238,7 @@ public class AutowiredConfigurationTests {
 
 
 	@Configuration
-	static class AutowiredMethodConfig {
+	static class AutoweirdMethodConfig {
 
 		@Bean
 		public TestBean testBean(Colour colour, List<Colour> colours) {
@@ -248,7 +248,7 @@ public class AutowiredConfigurationTests {
 
 
 	@Configuration
-	static class OptionalAutowiredMethodConfig {
+	static class OptionalAutoweirdMethodConfig {
 
 		@Bean
 		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
@@ -263,12 +263,12 @@ public class AutowiredConfigurationTests {
 
 
 	@Configuration
-	static class AutowiredConstructorConfig {
+	static class AutoweirdConstructorConfig {
 
 		Colour colour;
 
-		// @Autowired
-		AutowiredConstructorConfig(Colour colour) {
+		// @Autoweird
+		AutoweirdConstructorConfig(Colour colour) {
 			this.colour = colour;
 		}
 	}
@@ -279,7 +279,7 @@ public class AutowiredConfigurationTests {
 
 		Colour colour;
 
-		// @Autowired
+		// @Autoweird
 		ObjectFactoryConstructorConfig(ObjectFactory<Colour> colourFactory) {
 			this.colour = colourFactory.getObject();
 		}
@@ -291,7 +291,7 @@ public class AutowiredConfigurationTests {
 
 		Colour colour;
 
-		@Autowired
+		@Autoweird
 		MultipleConstructorConfig(Colour colour) {
 			this.colour = colour;
 		}
@@ -435,7 +435,7 @@ public class AutowiredConfigurationTests {
 
 		private final Provider<String> name2;
 
-		@Autowired
+		@Autoweird
 		public ValueConfigWithProviderConstructorArguments(@Value("#{systemProperties[myProp]}") Provider<String> name,
 				@Value("#{systemProperties[myProp]}") Provider<String> name2) {
 			this.name = name;

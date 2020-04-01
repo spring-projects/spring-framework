@@ -23,7 +23,7 @@ import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -101,8 +101,8 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importXmlWithAutowiredConfig() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlAutowiredConfig.class);
+	public void importXmlWithAutoweirdConfig() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlAutoweirdConfig.class);
 		String name = ctx.getBean("xmlBeanName", String.class);
 		assertThat(name).isEqualTo("xml.declared");
 		ctx.close();
@@ -158,8 +158,8 @@ public class ImportResourceTests {
 
 	@Configuration
 	@ImportResource("classpath:org/springframework/context/annotation/configuration/ImportXmlConfig-context.xml")
-	static class ImportXmlAutowiredConfig {
-		@Autowired TestBean xmlDeclaredBean;
+	static class ImportXmlAutoweirdConfig {
+		@Autoweird TestBean xmlDeclaredBean;
 
 		public @Bean String xmlBeanName() {
 			return xmlDeclaredBean.getName();

@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,25 +60,25 @@ public class Spr16179Tests {
 
 	public static class AssemblerInjection {
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		Assembler<SomeType> assembler0;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		Assembler<SomeOtherType> assembler1;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		Assembler<Page<String>> assembler2;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		Assembler<Page> assembler3;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		Assembler<Page<?>> assembler4;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		PageAssembler<?> assembler5;
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		PageAssembler<String> assembler6;
 	}
 

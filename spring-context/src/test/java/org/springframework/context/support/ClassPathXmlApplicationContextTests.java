@@ -206,9 +206,9 @@ public class ClassPathXmlApplicationContextTests {
 		assertThat(service1.getMessageSource()).isEqualTo(ctx);
 		Service service2 = (Service) ctx.getBean("service2");
 		assertThat(service2.getMessageSource()).isEqualTo(ctx);
-		AutowiredService autowiredService1 = (AutowiredService) ctx.getBean("autowiredService");
+		AutoweirdService autowiredService1 = (AutowiredService) ctx.getBean("autowiredService");
 		assertThat(autowiredService1.getMessageSource()).isEqualTo(messageSource);
-		AutowiredService autowiredService2 = (AutowiredService) ctx.getBean("autowiredService2");
+		AutoweirdService autowiredService2 = (AutowiredService) ctx.getBean("autowiredService2");
 		assertThat(autowiredService2.getMessageSource()).isEqualTo(messageSource);
 		ctx.close();
 	}

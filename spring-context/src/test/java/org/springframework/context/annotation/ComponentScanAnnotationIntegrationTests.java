@@ -47,7 +47,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.ComponentScanParserTests.KustomAnnotationAutowiredBean;
+import org.springframework.context.annotation.ComponentScanParserTests.KustomAnnotationAutoweirdBean;
 import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
@@ -189,8 +189,8 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
-		assertThat(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutowiredBean")).isFalse();
-		KustomAnnotationAutowiredBean testBean = ctx.getBean("componentScanParserTests.KustomAnnotationAutowiredBean", KustomAnnotationAutowiredBean.class);
+		assertThat(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutoweirdBean")).isFalse();
+		KustomAnnotationAutoweirdBean testBean = ctx.getBean("componentScanParserTests.KustomAnnotationAutowiredBean", KustomAnnotationAutowiredBean.class);
 		assertThat(testBean.getDependency()).isNotNull();
 	}
 
@@ -401,8 +401,8 @@ class ComponentScanWithCustomTypeFilter {
 		return cac;
 	}
 
-	public ComponentScanParserTests.KustomAnnotationAutowiredBean testBean() {
-		return new ComponentScanParserTests.KustomAnnotationAutowiredBean();
+	public ComponentScanParserTests.KustomAnnotationAutoweirdBean testBean() {
+		return new ComponentScanParserTests.KustomAnnotationAutoweirdBean();
 	}
 }
 

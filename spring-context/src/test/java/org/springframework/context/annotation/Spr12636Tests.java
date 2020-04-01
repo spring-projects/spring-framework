@@ -22,7 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
@@ -82,7 +82,7 @@ public class Spr12636Tests {
 
 		public final List<UserService> userServices;
 
-		@Autowired
+		@Autoweird
 		UserServiceCollector(List<UserService> userServices) {
 			this.userServices = userServices;
 		}

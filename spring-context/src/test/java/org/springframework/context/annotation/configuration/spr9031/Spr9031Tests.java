@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -75,7 +75,7 @@ public class Spr9031Tests {
 	static class LowLevelConfig {
 		// fails to wire when LowLevelConfig is processed with ASM because nested @Filter
 		// annotation is not parsed
-		@Autowired Spr9031Component scanned;
+		@Autoweird Spr9031Component scanned;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

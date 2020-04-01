@@ -19,7 +19,7 @@ package org.springframework.context.annotation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -40,20 +40,20 @@ public class ConfigurationClassAndBFPPTests {
 	@Test
 	public void autowiringFailsWithBFPPAsInstanceMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(TestBeanConfig.class, AutowiredConfigWithBFPPAsInstanceMethod.class);
+		ctx.register(TestBeanConfig.class, AutoweirdConfigWithBFPPAsInstanceMethod.class);
 		ctx.refresh();
 		// instance method BFPP interferes with lifecycle -> autowiring fails!
 		// WARN-level logging should have been issued about returning BFPP from non-static @Bean method
-		assertThat(ctx.getBean(AutowiredConfigWithBFPPAsInstanceMethod.class).autowiredTestBean).isNull();
+		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsInstanceMethod.class).autowiredTestBean).isNull();
 	}
 
 	@Test
 	public void autowiringSucceedsWithBFPPAsStaticMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(TestBeanConfig.class, AutowiredConfigWithBFPPAsStaticMethod.class);
+		ctx.register(TestBeanConfig.class, AutoweirdConfigWithBFPPAsStaticMethod.class);
 		ctx.refresh();
 		// static method BFPP does not interfere with lifecycle -> autowiring succeeds
-		assertThat(ctx.getBean(AutowiredConfigWithBFPPAsStaticMethod.class).autowiredTestBean).isNotNull();
+		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsStaticMethod.class).autowiredTestBean).isNotNull();
 	}
 
 
@@ -67,8 +67,8 @@ public class ConfigurationClassAndBFPPTests {
 
 
 	@Configuration
-	static class AutowiredConfigWithBFPPAsInstanceMethod {
-		@Autowired TestBean autowiredTestBean;
+	static class AutoweirdConfigWithBFPPAsInstanceMethod {
+		@Autoweird TestBean autowiredTestBean;
 
 		@Bean
 		public BeanFactoryPostProcessor bfpp() {
@@ -83,8 +83,8 @@ public class ConfigurationClassAndBFPPTests {
 
 
 	@Configuration
-	static class AutowiredConfigWithBFPPAsStaticMethod {
-		@Autowired TestBean autowiredTestBean;
+	static class AutoweirdConfigWithBFPPAsStaticMethod {
+		@Autoweird TestBean autowiredTestBean;
 
 		@Bean
 		public static final BeanFactoryPostProcessor bfpp() {

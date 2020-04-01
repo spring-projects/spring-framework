@@ -1,4 +1,4 @@
-example.scannable.AutowiredQualifierFooService=example.scannable.FooService
+example.scannable.AutoweirdQualifierFooService=example.scannable.FooService
 example.scannable.DefaultNamedComponent=org.springframework.stereotype.Component
 example.scannable.NamedComponent=org.springframework.stereotype.Component
 example.scannable.FooService=example.scannable.FooService

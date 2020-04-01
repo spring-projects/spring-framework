@@ -17,7 +17,7 @@
 package org.springframework.aop.framework;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -29,9 +29,9 @@ public class ClassWithComplexConstructor {
 
 	private final Dependency dependency;
 
-	@Autowired ClassWithComplexConstructor selfReference;
+	@Autoweird ClassWithComplexConstructor selfReference;
 
-	@Autowired
+	@Autoweird
 	public ClassWithComplexConstructor(Dependency dependency) {
 		Assert.notNull(dependency, "No Dependency bean injected");
 		this.dependency = dependency;

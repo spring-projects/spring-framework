@@ -42,7 +42,7 @@ import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorFactory;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -183,13 +183,13 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationWithAutowiredValidator() {
+	public void testSpringValidationWithAutoweirdValidator() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LocalValidatorFactoryBean.class);
 		LocalValidatorFactoryBean validator = ctx.getBean(LocalValidatorFactoryBean.class);
 
 		ValidPerson person = new ValidPerson();
-		person.expectsAutowiredValidator = true;
+		person.expectsAutoweirdValidator = true;
 		person.setName("Juergen");
 		person.getAddress().setStreet("Juergen's Street");
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
@@ -298,7 +298,7 @@ public class ValidatorFactoryTests {
 		@Valid
 		private Set<ValidAddress> addressSet = new LinkedHashSet<>();
 
-		public boolean expectsAutowiredValidator = false;
+		public boolean expectsAutoweirdValidator = false;
 
 		public String getName() {
 			return name;
@@ -364,7 +364,7 @@ public class ValidatorFactoryTests {
 
 	public static class NameAddressValidator implements ConstraintValidator<NameAddressValid, ValidPerson> {
 
-		@Autowired
+		@Autoweird
 		private Environment environment;
 
 		@Override
@@ -373,7 +373,7 @@ public class ValidatorFactoryTests {
 
 		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext context) {
-			if (value.expectsAutowiredValidator) {
+			if (value.expectsAutoweirdValidator) {
 				assertThat(this.environment).isNotNull();
 			}
 			boolean valid = (value.name == null || !value.address.street.contains(value.name));

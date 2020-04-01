@@ -24,7 +24,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,25 +50,25 @@ public abstract class FooServiceImpl implements FooService {
 	private static final Comparator<MessageBean> COMPARATOR_BY_MESSAGE = Comparator.comparing(MessageBean::getMessage);
 
 
-	@Autowired private FooDao fooDao;
+	@Autoweird private FooDao fooDao;
 
-	@Autowired public BeanFactory beanFactory;
+	@Autoweird public BeanFactory beanFactory;
 
-	@Autowired public List<ListableBeanFactory> listableBeanFactory;
+	@Autoweird public List<ListableBeanFactory> listableBeanFactory;
 
-	@Autowired public ResourceLoader resourceLoader;
+	@Autoweird public ResourceLoader resourceLoader;
 
-	@Autowired public ResourcePatternResolver resourcePatternResolver;
+	@Autoweird public ResourcePatternResolver resourcePatternResolver;
 
-	@Autowired public ApplicationEventPublisher eventPublisher;
+	@Autoweird public ApplicationEventPublisher eventPublisher;
 
-	@Autowired public MessageSource messageSource;
+	@Autoweird public MessageSource messageSource;
 
-	@Autowired public ApplicationContext context;
+	@Autoweird public ApplicationContext context;
 
-	@Autowired public ConfigurableApplicationContext[] configurableContext;
+	@Autoweird public ConfigurableApplicationContext[] configurableContext;
 
-	@Autowired public AbstractApplicationContext genericContext;
+	@Autoweird public AbstractApplicationContext genericContext;
 
 	private boolean initCalled = false;
 

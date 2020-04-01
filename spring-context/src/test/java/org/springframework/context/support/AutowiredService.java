@@ -21,7 +21,7 @@ import org.springframework.context.MessageSource;
 /**
  * @author Juergen Hoeller
  */
-public class AutowiredService {
+public class AutoweirdService {
 
 	private MessageSource messageSource;
 

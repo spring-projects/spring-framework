@@ -19,7 +19,7 @@ package org.springframework.context.annotation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
@@ -60,7 +60,7 @@ public class ConfigurationWithFactoryBeanAndParametersTests {
 
 		Foo foo;
 
-		@Autowired
+		@Autoweird
 		public Bar(Foo foo) {
 			this.foo = foo;
 		}

@@ -22,10 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import example.profilescan.ProfileAnnotatedComponent;
-import example.scannable.AutowiredQualifierFooService;
+import example.scannable.AutoweirdQualifierFooService;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -91,9 +91,9 @@ public class ComponentScanParserTests {
 	}
 
 	@Test
-	public void componentScanWithAutowiredQualifier() {
-		ClassPathXmlApplicationContext context = loadContext("componentScanWithAutowiredQualifierTests.xml");
-		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
+	public void componentScanWithAutoweirdQualifier() {
+		ClassPathXmlApplicationContext context = loadContext("componentScanWithAutoweirdQualifierTests.xml");
+		AutoweirdQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
 		assertThat(fooService.isInitCalled()).isTrue();
 		assertThat(fooService.foo(123)).isEqualTo("bar");
 		context.close();
@@ -102,7 +102,7 @@ public class ComponentScanParserTests {
 	@Test
 	public void customAnnotationUsedForBothComponentScanAndQualifier() {
 		ClassPathXmlApplicationContext context = loadContext("customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
-		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
+		KustomAnnotationAutoweirdBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertThat(testBean.getDependency()).isNotNull();
 		context.close();
 	}
@@ -110,7 +110,7 @@ public class ComponentScanParserTests {
 	@Test
 	public void customTypeFilter() {
 		ClassPathXmlApplicationContext context = loadContext("customTypeFilterTests.xml");
-		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
+		KustomAnnotationAutoweirdBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertThat(testBean.getDependency()).isNotNull();
 		context.close();
 	}
@@ -154,9 +154,9 @@ public class ComponentScanParserTests {
 	 * Intentionally spelling "custom" with a "k" since there are numerous
 	 * classes in this package named *Custom*.
 	 */
-	public static class KustomAnnotationAutowiredBean {
+	public static class KustomAnnotationAutoweirdBean {
 
-		@Autowired
+		@Autoweird
 		@CustomAnnotation
 		private KustomAnnotationDependencyBean dependency;
 

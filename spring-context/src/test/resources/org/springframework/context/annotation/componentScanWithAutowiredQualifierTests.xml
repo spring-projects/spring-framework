@@ -7,7 +7,7 @@
 				http://www.springframework.org/schema/context
 				https://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-	<bean id="fooService" class="example.scannable.AutowiredQualifierFooService"/>
+	<bean id="fooService" class="example.scannable.AutoweirdQualifierFooService"/>
 
 	<context:component-scan base-package="example.scannable"/>
 

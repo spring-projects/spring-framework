@@ -9,8 +9,8 @@
 
 	<context:annotation-config/>
 
-	<util:properties id="myProps" location="classpath:org/springframework/context/annotation/configuration/AutowiredConfigurationTests-custom.properties"/>
+	<util:properties id="myProps" location="classpath:org/springframework/context/annotation/configuration/AutoweirdConfigurationTests-custom.properties"/>
 
-	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$PropertiesConfig"/>
+	<bean class="org.springframework.context.annotation.configuration.AutoweirdConfigurationTests$PropertiesConfig"/>
 
 </beans>

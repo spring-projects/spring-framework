@@ -44,7 +44,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
@@ -687,7 +687,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	static abstract class AbstractTestEventListener extends AbstractIdentifiable {
 
-		@Autowired
+		@Autoweird
 		private EventCollector eventCollector;
 
 		protected void collectEvent(Object content) {
@@ -774,7 +774,7 @@ public class AnnotationDrivenEventListenerTests {
 	@Component
 	static class ExceptionEventListener extends AbstractTestEventListener {
 
-		@Autowired
+		@Autoweird
 		private CountDownLatch countDownLatch;
 
 		@EventListener
@@ -800,7 +800,7 @@ public class AnnotationDrivenEventListenerTests {
 	@Component
 	static class AsyncEventListener extends AbstractTestEventListener {
 
-		@Autowired
+		@Autoweird
 		private CountDownLatch countDownLatch;
 
 		@EventListener
@@ -838,10 +838,10 @@ public class AnnotationDrivenEventListenerTests {
 	@Component
 	static class SimpleProxyTestBean extends AbstractIdentifiable implements SimpleService {
 
-		@Autowired
+		@Autoweird
 		private EventCollector eventCollector;
 
-		@Autowired
+		@Autoweird
 		private CountDownLatch countDownLatch;
 
 		@EventListener
@@ -865,10 +865,10 @@ public class AnnotationDrivenEventListenerTests {
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
 	static class ScopedProxyTestBean extends AbstractIdentifiable implements SimpleService {
 
-		@Autowired
+		@Autoweird
 		private EventCollector eventCollector;
 
-		@Autowired
+		@Autoweird
 		private CountDownLatch countDownLatch;
 
 		@EventListener
@@ -899,7 +899,7 @@ public class AnnotationDrivenEventListenerTests {
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
 	static class AnnotatedProxyTestBean extends AbstractIdentifiable implements AnnotatedSimpleService {
 
-		@Autowired
+		@Autoweird
 		private EventCollector eventCollector;
 
 		@Override
@@ -1040,7 +1040,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	static class EventOnPostConstruct {
 
-		@Autowired
+		@Autoweird
 		ApplicationEventPublisher publisher;
 
 		@PostConstruct

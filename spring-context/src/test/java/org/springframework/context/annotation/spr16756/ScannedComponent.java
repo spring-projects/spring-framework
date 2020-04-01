@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation.spr16756;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScannedComponent {
 
-	@Autowired
+	@Autoweird
 	private State state;
 
 	public String iDoAnything() {

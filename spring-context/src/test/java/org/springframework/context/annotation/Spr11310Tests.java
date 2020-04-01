@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 
@@ -79,10 +79,10 @@ public class Spr11310Tests {
 
 
 	private static class StringHolder {
-		@Autowired
+		@Autoweird
 		private List<String> itemsList;
 
-		@Autowired
+		@Autoweird
 		private String[] itemsArray;
 
 	}

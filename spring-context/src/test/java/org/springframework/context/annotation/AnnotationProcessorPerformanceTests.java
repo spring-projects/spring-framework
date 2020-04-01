@@ -28,7 +28,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -85,10 +85,10 @@ public class AnnotationProcessorPerformanceTests {
 	}
 
 	@Test
-	public void prototypeCreationWithAutowiredPropertiesIsFastEnough() {
+	public void prototypeCreationWithAutoweirdPropertiesIsFastEnough() {
 		GenericApplicationContext ctx = createContext();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
+		RootBeanDefinition rbd = new RootBeanDefinition(AutoweirdAnnotatedTestBean.class);
 		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
@@ -97,10 +97,10 @@ public class AnnotationProcessorPerformanceTests {
 	}
 
 	@Test
-	public void prototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
+	public void prototypeCreationWithOverriddenAutoweirdPropertiesIsFastEnough() {
 		GenericApplicationContext ctx = createContext();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
+		RootBeanDefinition rbd = new RootBeanDefinition(AutoweirdAnnotatedTestBean.class);
 		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
@@ -147,10 +147,10 @@ public class AnnotationProcessorPerformanceTests {
 		}
 	}
 
-	private static class AutowiredAnnotatedTestBean extends TestBean {
+	private static class AutoweirdAnnotatedTestBean extends TestBean {
 
 		@Override
-		@Autowired
+		@Autoweird
 		@SuppressWarnings("deprecation")
 		@org.springframework.beans.factory.annotation.Required
 		public void setSpouse(ITestBean spouse) {

@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests cornering the issue reported in SPR-8080. If the product of a @Bean method
- * was @Autowired into a configuration class while at the same time the declaring
+ * was @Autoweird into a configuration class while at the same time the declaring
  * configuration class for the @Bean method in question has a @PostConstruct
  * (or other initializer) method, the container would become confused about the
  * 'currently in creation' status of the autowired bean and result in creating multiple
@@ -105,7 +105,7 @@ public class ConfigurationClassPostConstructAndAutowiringTests {
 
 		TestBean testBean;
 
-		@Autowired
+		@Autoweird
 		void setTestBean(TestBean testBean) {
 			this.testBean = testBean;
 		}

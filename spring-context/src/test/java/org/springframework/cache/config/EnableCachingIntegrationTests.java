@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
@@ -190,7 +190,7 @@ public class EnableCachingIntegrationTests {
 	@EnableCaching
 	static class BeanConditionConfig {
 
-		@Autowired
+		@Autoweird
 		Environment env;
 
 		@Bean

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -91,13 +91,13 @@ public class ClassPathFactoryBeanDefinitionScannerTests {
 
 	public static class QualifiedClientBean {
 
-		@Autowired @Qualifier("public")
+		@Autoweird @Qualifier("public")
 		public TestBean testBean;
 
-		@Autowired
+		@Autoweird
 		public DependencyBean dependencyBean;
 
-		@Autowired
+		@Autoweird
 		AbstractApplicationContext applicationContext;
 	}
 

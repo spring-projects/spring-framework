@@ -25,7 +25,7 @@ import example.gh24375.AnnotatedComponent;
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
 import example.profilescan.ProfileMetaAnnotatedComponent;
-import example.scannable.AutowiredQualifierFooService;
+import example.scannable.AutoweirdQualifierFooService;
 import example.scannable.CustomStereotype;
 import example.scannable.DefaultNamedComponent;
 import example.scannable.FooDao;
@@ -190,7 +190,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AssignableTypeFilter(FooService.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		// Interfaces/Abstract class are filtered out automatically.
-		assertThat(containsBeanClass(candidates, AutowiredQualifierFooService.class)).isTrue();
+		assertThat(containsBeanClass(candidates, AutoweirdQualifierFooService.class)).isTrue();
 		assertThat(containsBeanClass(candidates, FooServiceImpl.class)).isTrue();
 		assertThat(containsBeanClass(candidates, ScopedProxyTestBean.class)).isTrue();
 		assertThat(candidates.size()).isEqualTo(3);

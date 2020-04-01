@@ -19,7 +19,7 @@ package org.springframework.context.conversionservice;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.core.io.Resource;
 
 /**
@@ -45,7 +45,7 @@ public class TestClient {
 		return bars;
 	}
 
-	@Autowired
+	@Autoweird
 	public void setBars(List<Bar> bars) {
 		this.bars = bars;
 	}

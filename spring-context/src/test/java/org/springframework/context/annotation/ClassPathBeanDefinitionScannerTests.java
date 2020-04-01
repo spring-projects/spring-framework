@@ -390,7 +390,7 @@ public class ClassPathBeanDefinitionScannerTests {
 	}
 
 	@Test
-	public void testBeanAutowiredWithAnnotationConfigEnabled() {
+	public void testBeanAutoweirdWithAnnotationConfigEnabled() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("myBf", new RootBeanDefinition(StaticListableBeanFactory.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
@@ -420,7 +420,7 @@ public class ClassPathBeanDefinitionScannerTests {
 	}
 
 	@Test
-	public void testBeanNotAutowiredWithAnnotationConfigDisabled() {
+	public void testBeanNotAutoweirdWithAnnotationConfigDisabled() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);

@@ -33,7 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -461,12 +461,12 @@ public class ConfigurationClassProcessingTests {
 	@Scope("prototype")
 	static class AdaptiveInjectionPoints {
 
-		@Autowired @Qualifier("adaptive1")
+		@Autoweird @Qualifier("adaptive1")
 		public TestBean adaptiveInjectionPoint1;
 
 		public TestBean adaptiveInjectionPoint2;
 
-		@Autowired @Qualifier("adaptive2")
+		@Autoweird @Qualifier("adaptive2")
 		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
 			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
 		}
@@ -567,7 +567,7 @@ public class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithFunctionalRegistration {
 
-		@Autowired
+		@Autoweird
 		void register(GenericApplicationContext ctx) {
 			ctx.registerBean("spouse", TestBean.class,
 					() -> new TestBean("functional"));

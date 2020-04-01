@@ -196,7 +196,7 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Activates various annotations to be detected in bean classes: Spring's @Required and
-	@Autowired, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available),
+	@Autoweird, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available),
 	JAX-WS's @WebServiceRef (if available), EJB 3's @EJB (if available), and JPA's
 	@PersistenceContext and @PersistenceUnit (if available). Alternatively, you may
 	choose to activate the individual BeanPostProcessors for those annotations.
@@ -220,7 +220,7 @@
 	will be detected.
 
 	Note: This tag implies the effects of the 'annotation-config' tag, activating @Required,
-	@Autowired, @PostConstruct, @PreDestroy, @Resource, @PersistenceContext and @PersistenceUnit
+	@Autoweird, @PostConstruct, @PreDestroy, @Resource, @PersistenceContext and @PersistenceUnit
 	annotations in the component classes, which is usually desired for autodetected components
 	(without external configuration). Turn off the 'annotation-config' attribute to deactivate
 	this default behavior, for example in order to use custom BeanPostProcessor definitions

@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -352,10 +352,10 @@ class ApplicationContextExpressionTests {
 	@SuppressWarnings("serial")
 	public static class ValueTestBean implements Serializable {
 
-		@Autowired @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")
+		@Autoweird @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")
 		public String name;
 
-		@Autowired @Value("#{mySpecialAttr}")
+		@Autoweird @Value("#{mySpecialAttr}")
 		public int age;
 
 		@Value("#{mySpecialAttr}")
@@ -376,7 +376,7 @@ class ApplicationContextExpressionTests {
 		@Value("${codeX:#{null}}")
 		private transient Optional<String> optionalValue3;
 
-		@Autowired @Qualifier("original")
+		@Autoweird @Qualifier("original")
 		public transient TestBean tb;
 	}
 
@@ -391,7 +391,7 @@ class ApplicationContextExpressionTests {
 
 		public TestBean tb;
 
-		@Autowired
+		@Autoweird
 		public ConstructorValueTestBean(
 				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
 				@Value("#{mySpecialAttr}") int age,
@@ -415,7 +415,7 @@ class ApplicationContextExpressionTests {
 
 		public TestBean tb;
 
-		@Autowired
+		@Autoweird
 		public void configure(
 				@Qualifier("original") TestBean tb,
 				@Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ") String name,
@@ -454,7 +454,7 @@ class ApplicationContextExpressionTests {
 			this.country = country;
 		}
 
-		@Autowired @Qualifier("original")
+		@Autoweird @Qualifier("original")
 		public void setTb(TestBean tb) {
 			this.tb = tb;
 		}

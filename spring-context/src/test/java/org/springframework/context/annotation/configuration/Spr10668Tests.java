@@ -18,7 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +44,7 @@ public class Spr10668Tests {
 	@Configuration
 	public static class ParentConfig {
 
-		@Autowired(required = false)
+		@Autoweird(required = false)
 		MyComponent component;
 	}
 

@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autoweird;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -189,9 +189,9 @@ public class BeanMethodQualificationTests {
 	@Component @Lazy
 	static class StandardPojo {
 
-		@Autowired @Qualifier("interesting") TestBean testBean;
+		@Autoweird @Qualifier("interesting") TestBean testBean;
 
-		@Autowired @Boring TestBean testBean2;
+		@Autoweird @Boring TestBean testBean2;
 	}
 
 	@Qualifier
@@ -251,12 +251,12 @@ public class BeanMethodQualificationTests {
 		String name();
 	}
 
-	@Autowired @Qualifier("interesting")
+	@Autoweird @Qualifier("interesting")
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface InterestingNeed {
 	}
 
-	@Autowired @Qualifier("interesting")
+	@Autoweird @Qualifier("interesting")
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface InterestingNeedWithRequiredOverride {
 
