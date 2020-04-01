@@ -411,6 +411,7 @@ Spring's testing annotations include the following:
 * <<spring-testing-annotation-contexthierarchy>>
 * <<spring-testing-annotation-activeprofiles>>
 * <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dynamicpropertysource>>
 * <<spring-testing-annotation-dirtiescontext>>
 * <<spring-testing-annotation-testexecutionlisteners>>
 * <<spring-testing-annotation-commit>>
@@ -758,13 +759,6 @@ locations of properties files and inlined properties to be added to the set of
 `PropertySources` in the `Environment` for an `ApplicationContext` loaded for an
 integration test.
 
-Test property sources have higher precedence than those loaded from the operating
-system's environment or Java system properties as well as property sources added by the
-application declaratively through `@PropertySource` or programmatically. Thus, test
-property sources can be used to selectively override properties defined in system and
-application property sources. Furthermore, inlined properties have higher precedence than
-properties loaded from resource locations.
-
 The following example demonstrates how to declare a properties file from the classpath:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -815,6 +809,65 @@ The following example demonstrates how to declare inlined properties:
 <1> Declare `timezone` and `port` properties.
 
 See <<testcontext-ctx-management-property-sources>> for examples and further details.
+
+[[spring-testing-annotation-dynamicpropertysource]]
+===== `@DynamicPropertySource`
+
+`@DynamicPropertySource` is a method-level annotation that you can use to register
+_dynamic_ properties to be added to the set of `PropertySources` in the `Environment` for
+an `ApplicationContext` loaded for an integration test. Dynamic properties are useful
+when you do not know the value of the properties upfront – for example, if the properties
+are managed by an external resource such as for a container managed by the
+https://www.testcontainers.org/[Testcontainers] project.
+
+The following example demonstrates how to register a dynamic property:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@ContextConfiguration
+	class MyIntegrationTests {
+
+		static MyExternalServer server = // ...
+
+		@DynamicPropertySource // <1>
+		static void dynamicProperties(DynamicPropertyRegistry registry) { // <2>
+			registry.add("server.port", server::getPort); // <3>
+		}
+
+		// tests ...
+	}
+----
+<1> Annotate a `static` method with `@DynamicPropertySource`.
+<2> Accept a `DynamicPropertyRegistry` as an argument.
+<3> Register a dynamic `server.port` property to be retrieved lazily from the server.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@ContextConfiguration
+	class MyIntegrationTests {
+
+		companion object {
+
+			@JvmStatic
+			val server: MyExternalServer = // ...
+
+			@DynamicPropertySource // <1>
+			@JvmStatic
+			fun dynamicProperties(registry: DynamicPropertyRegistry) { // <2>
+				registry.add("server.port", server::getPort) // <3>
+			}
+		}
+
+		// tests ...
+	}
+----
+<1> Annotate a `static` method with `@DynamicPropertySource`.
+<2> Accept a `DynamicPropertyRegistry` as an argument.
+<3> Register a dynamic `server.port` property to be retrieved lazily from the server.
+
+See <<testcontext-ctx-management-dynamic-property-sources>> for further details.
 
 [[spring-testing-annotation-dirtiescontext]]
 ===== `@DirtiesContext`
@@ -3835,12 +3888,14 @@ file is `classpath:com/example/MyTest.properties`. If the default cannot be dete
 
 ====== Precedence
 
-Test property sources have higher precedence than those loaded from the operating
-system's environment, Java system properties, or property sources added by the
-application declaratively by using `@PropertySource` or programmatically. Thus, test
-property sources can be used to selectively override properties defined in system and
-application property sources. Furthermore, inlined properties have higher precedence than
-properties loaded from resource locations.
+Test properties have higher precedence than those defined in the operating system's
+environment, Java system properties, or property sources added by the application
+declaratively by using `@PropertySource` or programmatically. Thus, test properties can
+be used to selectively override properties loaded from system and application property
+sources. Furthermore, inlined properties have higher precedence than properties loaded
+from resource locations. Note, however, that properties registered via
+<<testcontext-ctx-management-dynamic-property-sources, `@DynamicPropertySource`>> have
+higher precedence than those loaded via `@TestPropertySource`.
 
 In the next example, the `timezone` and `port` properties and any properties defined in
 `"/test.properties"` override any properties of the same name that are defined in system
@@ -3968,8 +4023,8 @@ to define properties in both a subclass and its superclass by using inline prope
 ===== Context Configuration with Dynamic Property Sources
 
 As of Spring Framework 5.2.5, the TestContext framework provides support for _dynamic_
-property sources via the `@DynamicPropertySource` annotation. This annotation can be used
-in integration tests that need to add properties with dynamic values to the set of
+properties via the `@DynamicPropertySource` annotation. This annotation can be used in
+integration tests that need to add properties with dynamic values to the set of
 `PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
 integration test.
 
@@ -3988,8 +4043,9 @@ references are used to supply values, as can be seen in the following example wh
 the Testcontainers project to manage a Redis container outside of the Spring
 `ApplicationContext`. The IP address and port of the managed Redis container are made
 available to components within the test's `ApplicationContext` via the `redis.host` and
-`redis.port` properties. These properties can be injected into Spring-managed components
-via `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
+`redis.port` properties. These properties can be accessed via Spring's `Environment`
+abstraction or injected directly into Spring-managed components – for example, via
+`@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -4036,6 +4092,14 @@ via `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
 
 	}
 ----
+
+====== Precedence
+
+Dynamic properties have higher precedence than those loaded from `@TestPropertySource`,
+the operating system's environment, Java system properties, or property sources added by
+the application declaratively by using `@PropertySource` or programmatically. Thus,
+dynamic properties can be used to selectively override properties loaded via
+`@TestPropertySource`, system property sources, and application property sources.
 
 [[testcontext-ctx-management-web]]
 ===== Loading a `WebApplicationContext`
@@ -4272,7 +4336,9 @@ framework uses the following configuration parameters to build the context cache
 * `locations` (from `@ContextConfiguration`)
 * `classes` (from `@ContextConfiguration`)
 * `contextInitializerClasses` (from `@ContextConfiguration`)
-* `contextCustomizers` (from `ContextCustomizerFactory`)
+* `contextCustomizers` (from `ContextCustomizerFactory`) – this includes
+  `@DynamicPropertySource` methods as well as various features from Spring Boot's
+  testing support such as `@MockBean` and `@SpyBean`.
 * `contextLoader` (from `@ContextConfiguration`)
 * `parent` (from `@ContextHierarchy`)
 * `activeProfiles` (from `@ActiveProfiles`)

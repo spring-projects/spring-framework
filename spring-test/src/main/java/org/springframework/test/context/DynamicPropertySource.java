@@ -41,8 +41,17 @@ import java.lang.annotation.Target;
  * is resolved. Typically, method references are used to supply values, as in the
  * following example.
  *
- * <h3>Example</h3>
+ * <h3>Precedence</h3>
+ * <p>Dynamic properties have higher precedence than those loaded from
+ * {@link TestPropertySource @TestPropertySource}, the operating system's
+ * environment, Java system properties, or property sources added by the
+ * application declaratively by using
+ * {@link org.springframework.context.annotation.PropertySource @PropertySource}
+ * or programmatically. Thus, dynamic properties can be used to selectively
+ * override properties loaded via {@code @TestPropertySource}, system property
+ * sources, and application property sources.
  *
+ * <h3>Example</h3>
  * <pre class="code">
  * &#064;SpringJUnitConfig(...)
  * &#064;Testcontainers
