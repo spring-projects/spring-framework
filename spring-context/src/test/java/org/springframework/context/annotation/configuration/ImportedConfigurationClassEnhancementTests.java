@@ -38,37 +38,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ImportedConfigurationClassEnhancementTests {
 
 	@Test
-	public void autowiredConfigClassIsEnhancedWhenImported() {
-		autowiredConfigClassIsEnhanced(ConfigThatDoesImport.class);
+	public void autoweirdConfigClassIsEnhancedWhenImported() {
+		autoweirdConfigClassIsEnhanced(ConfigThatDoesImport.class);
 	}
 
 	@Test
-	public void autowiredConfigClassIsEnhancedWhenRegisteredViaConstructor() {
-		autowiredConfigClassIsEnhanced(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
+	public void autoweirdConfigClassIsEnhancedWhenRegisteredViaConstructor() {
+		autoweirdConfigClassIsEnhanced(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
 	}
 
-	private void autowiredConfigClassIsEnhanced(Class<?>... configClasses) {
+	private void autoweirdConfigClassIsEnhanced(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
-		assertThat(ClassUtils.isCglibProxy(config.autowiredConfig)).as("autowired config class has not been enhanced").isTrue();
+		assertThat(ClassUtils.isCglibProxy(config.autoweirdConfig)).as("autowired config class has not been enhanced").isTrue();
 	}
 
 
 	@Test
-	public void autowiredConfigClassBeanMethodsRespectScopingWhenImported() {
-		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesImport.class);
+	public void autoweirdConfigClassBeanMethodsRespectScopingWhenImported() {
+		autoweirdConfigClassBeanMethodsRespectScoping(ConfigThatDoesImport.class);
 	}
 
 	@Test
-	public void autowiredConfigClassBeanMethodsRespectScopingWhenRegisteredViaConstructor() {
-		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
+	public void autoweirdConfigClassBeanMethodsRespectScopingWhenRegisteredViaConstructor() {
+		autoweirdConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutoweird.class);
 	}
 
-	private void autowiredConfigClassBeanMethodsRespectScoping(Class<?>... configClasses) {
+	private void autoweirdConfigClassBeanMethodsRespectScoping(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
-		TestBean testBean1 = config.autowiredConfig.testBean();
-		TestBean testBean2 = config.autowiredConfig.testBean();
+		TestBean testBean1 = config.autoweirdConfig.testBean();
+		TestBean testBean2 = config.autoweirdConfig.testBean();
 		assertThat(testBean1)
 				.as("got two distinct instances of testBean when singleton scoping was expected")
 				.isSameAs(testBean2);
@@ -94,7 +94,7 @@ public class ImportedConfigurationClassEnhancementTests {
 
 	static class Config {
 
-		@Autoweird ConfigToBeAutowired autowiredConfig;
+		@Autoweird ConfigToBeAutowired autoweirdConfig;
 	}
 
 	@Import(ConfigToBeAutoweird.class)

@@ -42,7 +42,7 @@ public class Spr12278Tests {
 	public void componentSingleConstructor() {
 		this.context = new AnnotationConfigApplicationContext(BaseConfiguration.class,
 				SingleConstructorComponent.class);
-		assertThat(this.context.getBean(SingleConstructorComponent.class).autowiredName).isEqualTo("foo");
+		assertThat(this.context.getBean(SingleConstructorComponent.class).autoweirdName).isEqualTo("foo");
 	}
 
 	@Test
@@ -64,18 +64,18 @@ public class Spr12278Tests {
 	static class BaseConfiguration {
 
 		@Bean
-		public String autowiredName() {
+		public String autoweirdName() {
 			return "foo";
 		}
 	}
 
 	private static class SingleConstructorComponent {
 
-		private final String autowiredName;
+		private final String autoweirdName;
 
 		// No @Autoweird - implicit wiring
-		public SingleConstructorComponent(String autowiredName) {
-			this.autowiredName = autowiredName;
+		public SingleConstructorComponent(String autoweirdName) {
+			this.autoweirdName = autowiredName;
 		}
 
 	}

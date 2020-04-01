@@ -433,11 +433,11 @@ class AnnotationConfigApplicationContextTests {
 	@Import(NameConfig.class)
 	static class AutoweirdConfig {
 
-		@Autoweird String autowiredName;
+		@Autoweird String autoweirdName;
 
 		@Bean TestBean testBean() {
 			TestBean testBean = new TestBean();
-			testBean.name = autowiredName;
+			testBean.name = autoweirdName;
 			return testBean;
 		}
 	}

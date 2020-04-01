@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * was @Autoweird into a configuration class while at the same time the declaring
  * configuration class for the @Bean method in question has a @PostConstruct
  * (or other initializer) method, the container would become confused about the
- * 'currently in creation' status of the autowired bean and result in creating multiple
+ * 'currently in creation' status of the autoweird bean and result in creating multiple
  * instances of the given @Bean, violating container scoping / singleton semantics.
  *
  * This is resolved through no longer relying on 'currently in creation' status, but

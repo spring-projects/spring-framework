@@ -815,15 +815,15 @@ class XmlBeanFactoryTests {
 	private void doTestAutowire(DefaultListableBeanFactory xbf) {
 		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("spouse");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod1.getSpouse()).isEqualTo(kerry);
 
 		DependenciesBean rod1a = (DependenciesBean) xbf.getBean("rod1a");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod1a.getSpouse()).isEqualTo(kerry);
 
 		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod2.getSpouse()).isEqualTo(kerry);
 
 		DependenciesBean rod2a = (DependenciesBean) xbf.getBean("rod2a");
@@ -832,13 +832,13 @@ class XmlBeanFactoryTests {
 
 		ConstructorDependenciesBean rod3 = (ConstructorDependenciesBean) xbf.getBean("rod3");
 		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod3.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod3.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod3.getOther()).isEqualTo(other);
 
 		ConstructorDependenciesBean rod3a = (ConstructorDependenciesBean) xbf.getBean("rod3a");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod3a.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod3a.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod3a.getOther()).isEqualTo(other);
@@ -847,7 +847,7 @@ class XmlBeanFactoryTests {
 				xbf.getBean("rod4", ConstructorDependenciesBean.class));
 
 		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
-		// Should not have been autowired
+		// Should not have been autoweird
 		assertThat((Object) rod5.getSpouse()).isNull();
 
 		BeanFactory appCtx = (BeanFactory) xbf.getBean("childAppCtx");
@@ -861,12 +861,12 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEFAULT_AUTOWIRE_CONTEXT);
 
 		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod1.getSpouse()).isNotNull();
 		assertThat(rod1.getSpouse().getName().equals("Kerry")).isTrue();
 
 		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod2.getSpouse()).isNotNull();
 		assertThat(rod2.getSpouse().getName().equals("Kerry")).isTrue();
 	}
@@ -877,7 +877,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorDependenciesBean rod1 = (ConstructorDependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("kerry2");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod1.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod1.getAge()).isEqualTo(0);
 		assertThat(rod1.getName()).isEqualTo(null);
@@ -885,7 +885,7 @@ class XmlBeanFactoryTests {
 		ConstructorDependenciesBean rod2 = (ConstructorDependenciesBean) xbf.getBean("rod2");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod2.getSpouse1()).isEqualTo(kerry2);
 		assertThat(rod2.getSpouse2()).isEqualTo(kerry1);
 		assertThat(rod2.getAge()).isEqualTo(0);
@@ -893,7 +893,7 @@ class XmlBeanFactoryTests {
 
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
 		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod.getOther()).isEqualTo(other);
@@ -901,7 +901,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod.getName()).isEqualTo(null);
 
 		xbf.getBean("rod4", ConstructorDependenciesBean.class);
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod.getOther()).isEqualTo(other);
@@ -918,7 +918,7 @@ class XmlBeanFactoryTests {
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod5.getSpouse1()).isEqualTo(kerry2);
 		assertThat(rod5.getSpouse2()).isEqualTo(kerry1);
 		assertThat(rod5.getOther()).isEqualTo(other);
@@ -926,7 +926,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod5.getName()).isEqualTo("myname");
 
 		DerivedConstructorDependenciesBean rod6 = (DerivedConstructorDependenciesBean) xbf.getBean("rod6");
-		// should have been autowired
+		// should have been autoweird
 		assertThat(rod6.initialized).isTrue();
 		assertThat(!rod6.destroyed).isTrue();
 		assertThat(rod6.getSpouse1()).isEqualTo(kerry2);

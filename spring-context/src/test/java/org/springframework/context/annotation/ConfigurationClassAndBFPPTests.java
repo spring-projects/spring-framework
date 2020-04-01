@@ -44,7 +44,7 @@ public class ConfigurationClassAndBFPPTests {
 		ctx.refresh();
 		// instance method BFPP interferes with lifecycle -> autowiring fails!
 		// WARN-level logging should have been issued about returning BFPP from non-static @Bean method
-		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsInstanceMethod.class).autowiredTestBean).isNull();
+		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsInstanceMethod.class).autoweirdTestBean).isNull();
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class ConfigurationClassAndBFPPTests {
 		ctx.register(TestBeanConfig.class, AutoweirdConfigWithBFPPAsStaticMethod.class);
 		ctx.refresh();
 		// static method BFPP does not interfere with lifecycle -> autowiring succeeds
-		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsStaticMethod.class).autowiredTestBean).isNotNull();
+		assertThat(ctx.getBean(AutoweirdConfigWithBFPPAsStaticMethod.class).autoweirdTestBean).isNotNull();
 	}
 
 
@@ -68,7 +68,7 @@ public class ConfigurationClassAndBFPPTests {
 
 	@Configuration
 	static class AutoweirdConfigWithBFPPAsInstanceMethod {
-		@Autoweird TestBean autowiredTestBean;
+		@Autoweird TestBean autoweirdTestBean;
 
 		@Bean
 		public BeanFactoryPostProcessor bfpp() {
@@ -84,7 +84,7 @@ public class ConfigurationClassAndBFPPTests {
 
 	@Configuration
 	static class AutoweirdConfigWithBFPPAsStaticMethod {
-		@Autoweird TestBean autowiredTestBean;
+		@Autoweird TestBean autoweirdTestBean;
 
 		@Bean
 		public static final BeanFactoryPostProcessor bfpp() {

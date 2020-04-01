@@ -53,13 +53,13 @@ public class QualifierAnnotationAutowireContextTests {
 
 
 	@Test
-	public void autowiredFieldWithSingleNonQualifiedCandidate() {
+	public void autoweirdFieldWithSingleNonQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 
@@ -67,95 +67,95 @@ public class QualifierAnnotationAutowireContextTests {
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredMethodParameterWithSingleNonQualifiedCandidate() {
+	public void autoweirdMethodParameterWithSingleNonQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 
 	}
 
 	@Test
-	public void autowiredConstructorArgumentWithSingleNonQualifiedCandidate() {
+	public void autoweirdConstructorArgumentWithSingleNonQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
 				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autoweird"));
 	}
 
 	@Test
-	public void autowiredFieldWithSingleQualifiedCandidate() {
+	public void autoweirdFieldWithSingleQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired", new RootBeanDefinition(QualifiedFieldTestBean.class));
+		context.registerBeanDefinition("autoweird", new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
-		QualifiedFieldTestBean bean = (QualifiedFieldTestBean) context.getBean("autowired");
+		QualifiedFieldTestBean bean = (QualifiedFieldTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredMethodParameterWithSingleQualifiedCandidate() {
+	public void autoweirdMethodParameterWithSingleQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedMethodParameterTestBean bean =
-				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+				(QualifiedMethodParameterTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredMethodParameterWithStaticallyQualifiedCandidate() {
+	public void autoweirdMethodParameterWithStaticallyQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(QualifiedPerson.class, cavs, null);
 		context.registerBeanDefinition(JUERGEN,
 				ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(person, JUERGEN), context, true).getBeanDefinition());
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedMethodParameterTestBean bean =
-				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+				(QualifiedMethodParameterTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredMethodParameterWithStaticallyQualifiedCandidateAmongOthers() {
+	public void autoweirdMethodParameterWithStaticallyQualifiedCandidateAmongOthers() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
@@ -165,34 +165,34 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(DefaultValueQualifiedPerson.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedMethodParameterTestBean bean =
-				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+				(QualifiedMethodParameterTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredConstructorArgumentWithSingleQualifiedCandidate() {
+	public void autoweirdConstructorArgumentWithSingleQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedConstructorArgumentTestBean bean =
-				(QualifiedConstructorArgumentTestBean) context.getBean("autowired");
+				(QualifiedConstructorArgumentTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredFieldWithMultipleNonQualifiedCandidates() {
+	public void autoweirdFieldWithMultipleNonQualifiedCandidates() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -202,19 +202,19 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredMethodParameterWithMultipleNonQualifiedCandidates() {
+	public void autoweirdMethodParameterWithMultipleNonQualifiedCandidates() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -224,19 +224,19 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredConstructorArgumentWithMultipleNonQualifiedCandidates() {
+	public void autoweirdConstructorArgumentWithMultipleNonQualifiedCandidates() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -246,16 +246,16 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
 				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autoweird"));
 	}
 
 	@Test
-	public void autowiredFieldResolvesQualifiedCandidate() {
+	public void autoweirdFieldResolvesQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -266,16 +266,16 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
-		QualifiedFieldTestBean bean = (QualifiedFieldTestBean) context.getBean("autowired");
+		QualifiedFieldTestBean bean = (QualifiedFieldTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredFieldResolvesMetaQualifiedCandidate() {
+	public void autoweirdFieldResolvesMetaQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -286,16 +286,16 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(MetaQualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
-		MetaQualifiedFieldTestBean bean = (MetaQualifiedFieldTestBean) context.getBean("autowired");
+		MetaQualifiedFieldTestBean bean = (MetaQualifiedFieldTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredMethodParameterResolvesQualifiedCandidate() {
+	public void autoweirdMethodParameterResolvesQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -306,17 +306,17 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedMethodParameterTestBean bean =
-				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+				(QualifiedMethodParameterTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredConstructorArgumentResolvesQualifiedCandidate() {
+	public void autoweirdConstructorArgumentResolvesQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -327,17 +327,17 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedConstructorArgumentTestBean bean =
-				(QualifiedConstructorArgumentTestBean) context.getBean("autowired");
+				(QualifiedConstructorArgumentTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredFieldResolvesQualifiedCandidateWithDefaultValueAndNoValueOnBeanDefinition() {
+	public void autoweirdFieldResolvesQualifiedCandidateWithDefaultValueAndNoValueOnBeanDefinition() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -349,17 +349,17 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldWithDefaultValueTestBean bean =
-				(QualifiedFieldWithDefaultValueTestBean) context.getBean("autowired");
+				(QualifiedFieldWithDefaultValueTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredFieldDoesNotResolveCandidateWithDefaultValueAndConflictingValueOnBeanDefinition() {
+	public void autoweirdFieldDoesNotResolveCandidateWithDefaultValueAndConflictingValueOnBeanDefinition() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -371,19 +371,19 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredFieldResolvesWithDefaultValueAndExplicitDefaultValueOnBeanDefinition() {
+	public void autoweirdFieldResolvesWithDefaultValueAndExplicitDefaultValueOnBeanDefinition() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -395,17 +395,17 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldWithDefaultValueTestBean bean =
-				(QualifiedFieldWithDefaultValueTestBean) context.getBean("autowired");
+				(QualifiedFieldWithDefaultValueTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
 	@Test
-	public void autowiredFieldResolvesWithMultipleQualifierValues() {
+	public void autoweirdFieldResolvesWithMultipleQualifierValues() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -421,17 +421,17 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldWithMultipleAttributesTestBean bean =
-				(QualifiedFieldWithMultipleAttributesTestBean) context.getBean("autowired");
+				(QualifiedFieldWithMultipleAttributesTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(MARK);
 	}
 
 	@Test
-	public void autowiredFieldDoesNotResolveWithMultipleQualifierValuesAndConflictingDefaultValue() {
+	public void autoweirdFieldDoesNotResolveWithMultipleQualifierValuesAndConflictingDefaultValue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -448,19 +448,19 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredFieldResolvesWithMultipleQualifierValuesAndExplicitDefaultValue() {
+	public void autoweirdFieldResolvesWithMultipleQualifierValuesAndExplicitDefaultValue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -477,17 +477,17 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldWithMultipleAttributesTestBean bean =
-				(QualifiedFieldWithMultipleAttributesTestBean) context.getBean("autowired");
+				(QualifiedFieldWithMultipleAttributesTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(MARK);
 	}
 
 	@Test
-	public void autowiredFieldDoesNotResolveWithMultipleQualifierValuesAndMultipleMatchingCandidates() {
+	public void autoweirdFieldDoesNotResolveWithMultipleQualifierValuesAndMultipleMatchingCandidates() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -504,19 +504,19 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
 				context::refresh)
 			.satisfies(ex -> {
 				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
+				assertThat(ex.getBeanName()).isEqualTo("autoweird");
 			});
 	}
 
 	@Test
-	public void autowiredFieldResolvesWithBaseQualifierAndDefaultValue() {
+	public void autoweirdFieldResolvesWithBaseQualifierAndDefaultValue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -527,17 +527,17 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class));
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedFieldWithBaseQualifierDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldWithBaseQualifierDefaultValueTestBean bean =
-				(QualifiedFieldWithBaseQualifierDefaultValueTestBean) context.getBean("autowired");
+				(QualifiedFieldWithBaseQualifierDefaultValueTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo(MARK);
 	}
 
 	@Test
-	public void autowiredFieldResolvesWithBaseQualifierAndNonDefaultValue() {
+	public void autoweirdFieldResolvesWithBaseQualifierAndNonDefaultValue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue("the real juergen");
@@ -549,17 +549,17 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "not really juergen"));
 		context.registerBeanDefinition("juergen1", person1);
 		context.registerBeanDefinition("juergen2", person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean bean =
-				(QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean) context.getBean("autowired");
+				(QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean) context.getBean("autoweird");
 		assertThat(bean.getPerson().getName()).isEqualTo("the real juergen");
 	}
 
 	@Test
-	public void autowiredFieldDoesNotResolveWithBaseQualifierAndNonDefaultValueAndMultipleMatchingCandidates() {
+	public void autoweirdFieldDoesNotResolveWithBaseQualifierAndNonDefaultValueAndMultipleMatchingCandidates() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue("the real juergen");
@@ -571,12 +571,12 @@ public class QualifierAnnotationAutowireContextTests {
 		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "juergen"));
 		context.registerBeanDefinition("juergen1", person1);
 		context.registerBeanDefinition("juergen2", person2);
-		context.registerBeanDefinition("autowired",
+		context.registerBeanDefinition("autoweird",
 				new RootBeanDefinition(QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
 				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autoweird"));
 	}
 
 

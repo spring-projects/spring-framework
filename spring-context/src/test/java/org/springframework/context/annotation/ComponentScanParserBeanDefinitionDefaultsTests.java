@@ -84,9 +84,9 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
 		context.refresh();
 		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertThat(bean.getConstructorDependency()).as("no dependencies should have been autowired").isNull();
-		assertThat(bean.getPropertyDependency1()).as("no dependencies should have been autowired").isNull();
-		assertThat(bean.getPropertyDependency2()).as("no dependencies should have been autowired").isNull();
+		assertThat(bean.getConstructorDependency()).as("no dependencies should have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency1()).as("no dependencies should have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency2()).as("no dependencies should have been autoweird").isNull();
 	}
 
 	@Test
@@ -96,9 +96,9 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireNoTests.xml");
 		context.refresh();
 		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertThat(bean.getConstructorDependency()).as("no dependencies should have been autowired").isNull();
-		assertThat(bean.getPropertyDependency1()).as("no dependencies should have been autowired").isNull();
-		assertThat(bean.getPropertyDependency2()).as("no dependencies should have been autowired").isNull();
+		assertThat(bean.getConstructorDependency()).as("no dependencies should have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency1()).as("no dependencies should have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency2()).as("no dependencies should have been autoweird").isNull();
 	}
 
 	@Test
@@ -108,10 +108,10 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireConstructorTests.xml");
 		context.refresh();
 		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertThat(bean.getConstructorDependency()).as("constructor dependency should have been autowired").isNotNull();
+		assertThat(bean.getConstructorDependency()).as("constructor dependency should have been autoweird").isNotNull();
 		assertThat(bean.getConstructorDependency().getName()).isEqualTo("cd");
-		assertThat(bean.getPropertyDependency1()).as("property dependencies should not have been autowired").isNull();
-		assertThat(bean.getPropertyDependency2()).as("property dependencies should not have been autowired").isNull();
+		assertThat(bean.getPropertyDependency1()).as("property dependencies should not have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency2()).as("property dependencies should not have been autoweird").isNull();
 	}
 
 	@Test
@@ -130,9 +130,9 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireByNameTests.xml");
 		context.refresh();
 		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertThat(bean.getConstructorDependency()).as("constructor dependency should not have been autowired").isNull();
-		assertThat(bean.getPropertyDependency1()).as("propertyDependency1 should not have been autowired").isNull();
-		assertThat(bean.getPropertyDependency2()).as("propertyDependency2 should have been autowired").isNotNull();
+		assertThat(bean.getConstructorDependency()).as("constructor dependency should not have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency1()).as("propertyDependency1 should not have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency2()).as("propertyDependency2 should have been autoweird").isNotNull();
 		assertThat(bean.getPropertyDependency2().getName()).isEqualTo("pd2");
 	}
 
@@ -143,9 +143,9 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
 		context.refresh();
 		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertThat(bean.getConstructorDependency()).as("constructor dependency should not have been autowired").isNull();
-		assertThat(bean.getPropertyDependency1()).as("property dependencies should not have been autowired").isNull();
-		assertThat(bean.getPropertyDependency2()).as("property dependencies should not have been autowired").isNull();
+		assertThat(bean.getConstructorDependency()).as("constructor dependency should not have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency1()).as("property dependencies should not have been autoweird").isNull();
+		assertThat(bean.getPropertyDependency2()).as("property dependencies should not have been autoweird").isNull();
 	}
 
 	@Test

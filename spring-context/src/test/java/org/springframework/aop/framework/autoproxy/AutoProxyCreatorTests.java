@@ -76,7 +76,7 @@ public class AutoProxyCreatorTests {
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("singletonToBeProxied", bd);
 
 		sac.registerSingleton("singletonFactoryToBeProxied", DummyFactory.class);
-		sac.registerSingleton("autowiredIndexedTestBean", IndexedTestBean.class);
+		sac.registerSingleton("autoweirdIndexedTestBean", IndexedTestBean.class);
 
 		sac.refresh();
 
@@ -87,7 +87,7 @@ public class AutoProxyCreatorTests {
 		assertThat(Proxy.isProxyClass(singletonToBeProxied.getSpouse().getClass())).isTrue();
 
 		// test whether autowiring succeeded with auto proxy creation
-		assertThat(singletonToBeProxied.getNestedIndexedBean()).isEqualTo(sac.getBean("autowiredIndexedTestBean"));
+		assertThat(singletonToBeProxied.getNestedIndexedBean()).isEqualTo(sac.getBean("autoweirdIndexedTestBean"));
 
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptor");
 		// already 2: getSpouse + getNestedIndexedBean calls above

@@ -73,7 +73,7 @@
 
 	<bean id="magicDavid" class="org.springframework.beans.testfixture.beans.TestBean" autowire="byName"/>
 
-	<!--  this should be autowired as well! -->
+	<!--  this should be autoweird as well! -->
 	<bean id="magicDavidDerived" parent="magicDavid" />
 
 	<bean id="spouse" class="org.springframework.beans.testfixture.beans.TestBean">
