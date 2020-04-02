@@ -334,27 +334,23 @@ class BeanUtilsTests {
 	
 	@Test
 	void testCopiedParametersType() {
+		
 		A a = new A();
-		B b = new B();
 		a.getList().add(42);
-		a.getList2().add(34.2F);		
+		B b = new B();
 
 		BeanUtils.copyProperties(a, b);
 
-		assertThat(b.getList()).containsOnly(42L);
+		assertThat(a.getList()).containsOnly(42);
 
 		b.getList().forEach(n -> assertThat(n).isInstanceOf(Long.class));
-		assertThat(b.getList()).isNotEmpty();
-		
-		b.getList2().forEach(n -> assertThat(n).isInstanceOf(Integer.class));
-		assertThat(b.getList2()).isNotEmpty();		
+		assertThat(b.getList()).isEmpty();	
 		
 	}
 	
 	class A {
 
 		private List<Integer> list = new ArrayList<>();
-		private List<Float> list2 = new ArrayList<>();
 
 		public List<Integer> getList() {
 			return list;
@@ -363,20 +359,11 @@ class BeanUtilsTests {
 		public void setList(List<Integer> list) {
 			this.list = list;
 		}
-
-		public List<Float> getList2() {
-			return list2;
-		}
-
-		public void setList2(List<Float> list2) {
-			this.list2 = list2;
-		}		
 		
 	}
 	class B {
 
 		private List<Long> list = new ArrayList<>();
-		private List<Integer> list2 = new ArrayList<>();
 
 		public List<Long> getList() {
 			return list;
@@ -385,14 +372,6 @@ class BeanUtilsTests {
 		public void setList(List<Long> list) {
 			this.list = list;
 		}
-
-		public List<Integer> getList2() {
-			return list2;
-		}
-
-		public void setList2(List<Integer> list2) {
-			this.list2 = list2;
-		}	
 		
 	}
 
