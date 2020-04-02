@@ -24,8 +24,12 @@ import java.util.Collection;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.message.BasicHttpRequest;
+import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.http.nio.support.BasicRequestProducer;
+import org.apache.hc.core5.reactive.ReactiveEntityProducer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,6 +38,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 import static org.springframework.http.MediaType.ALL_VALUE;
 
@@ -52,9 +57,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final HttpClientContext context;
 
+	@Nullable
 	private Flux<ByteBuffer> byteBufferFlux;
-
-	private long contentLength = -1;
 
 
 	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, HttpClientContext context,
@@ -107,7 +111,6 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
-		this.contentLength = headers.getContentLength();
 
 		headers.entrySet()
 				.stream()
@@ -138,15 +141,27 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 				});
 	}
 
-	public HttpRequest getHttpRequest() {
-		return this.httpRequest;
+	public AsyncRequestProducer toRequestProducer() {
+		ReactiveEntityProducer reactiveEntityProducer = createReactiveEntityProducer();
+
+		return new BasicRequestProducer(this.httpRequest, reactiveEntityProducer);
 	}
 
-	public Flux<ByteBuffer> getByteBufferFlux() {
-		return this.byteBufferFlux;
-	}
+	@Nullable
+	private ReactiveEntityProducer createReactiveEntityProducer() {
+		if (this.byteBufferFlux == null) {
+			return null;
+		}
 
-	public long getContentLength() {
-		return this.contentLength;
+		String contentEncoding = getHeaders().getFirst(HttpHeaders.CONTENT_ENCODING);
+
+		ContentType contentType = null;
+
+		if (getHeaders().getContentType() != null) {
+			contentType = ContentType.parse(getHeaders().getContentType().toString());
+		}
+
+		return new ReactiveEntityProducer(this.byteBufferFlux, getHeaders().getContentLength(),
+				contentType, contentEncoding);
 	}
 }
