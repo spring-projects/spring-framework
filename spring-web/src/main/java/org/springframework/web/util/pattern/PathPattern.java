@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
  * with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
- * and assign the value {@code "filename"} to the {@code filename} variable</li>
+ * and assign the value {@code "spring"} to the {@code filename} variable</li>
  * </ul>
  *
  * @author Andy Clement
