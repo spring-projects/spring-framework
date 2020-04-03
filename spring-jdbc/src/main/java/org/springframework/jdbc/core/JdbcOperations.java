@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,7 +353,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
-	<T> T query(String sql, Object[] args, ResultSetExtractor<T> rse) throws DataAccessException;
+	<T> T query(String sql, @Nullable Object[] args, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of arguments
@@ -423,7 +423,7 @@ public interface JdbcOperations {
 	 * @param rch a callback that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
-	void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException;
+	void query(String sql, @Nullable Object[] args, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -496,7 +496,7 @@ public interface JdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
+	<T> List<T> query(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -551,7 +551,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
-	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
+	<T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -612,7 +612,7 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Class)
 	 */
 	@Nullable
-	<T> T queryForObject(String sql, Object[] args, Class<T> requiredType) throws DataAccessException;
+	<T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -713,7 +713,7 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */
-	<T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) throws DataAccessException;
+	<T> List<T> queryForList(String sql, @Nullable Object[] args, Class<T> elementType) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
