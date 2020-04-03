@@ -1400,6 +1400,39 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetBeanByTypeWithLateRegistration() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		try {
+			lbf.getBean(TestBean.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithLateRegistrationAgainstFrozen() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.freezeConfiguration();
+		try {
+			lbf.getBean(TestBean.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
+	@Test
 	public void testGetBeanByTypeDefinedInParent() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
