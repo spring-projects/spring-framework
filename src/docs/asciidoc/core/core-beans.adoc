@@ -346,8 +346,8 @@ bean definition files through an `importBeans` directive.
 === Using the Container
 
 The `ApplicationContext` is the interface for an advanced factory capable of maintaining
-a registry of different beans and their dependencies. By using the method `T getBean(String
-name, Class<T> requiredType)`, you can retrieve instances of your beans.
+a registry of different beans and their dependencies. By using the method
+`T getBean(String name, Class<T> requiredType)`, you can retrieve instances of your beans.
 
 The `ApplicationContext` lets you read bean definitions and access them, as the following
 example shows:
@@ -849,12 +849,29 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in the
-Spring container and that creates objects through an
+NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in
+the Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >>.
+<<beans-factory-extension-factorybean, `FactoryBean` >> implementation class.
+
+
+[[beans-factory-type-determination]]
+==== Determining a Bean's Runtime Type
+
+The runtime type of a specific bean is non-trivial to determine. A specified class in
+the bean metadata definition is just an initial class reference, potentially combined
+with a declared factory method or being a `FactoryBean` class which may lead to a
+different runtime type of the bean, or not being set at all in case of an instance-level
+factory method (which is resolved via the specified `factory-bean` name instead).
+Additionally, AOP proxying may wrap a bean instance with an interface-based proxy with
+limited exposure of the target bean's actual type (just its implemented interfaces).
+
+The recommended way to find out about the actual runtime type of a particular bean is
+a `BeanFactory.getType` call for the specified bean name. This takes all of the above
+cases into account and returns the type of object that a `BeanFactory.getBean` call is
+going to return for the same bean name.
 
 
 
@@ -874,9 +891,9 @@ application where objects collaborate to achieve a goal.
 === Dependency Injection
 
 Dependency injection (DI) is a process whereby objects define their dependencies
-(that is, the other objects with which they work) only through constructor arguments, arguments
-to a factory method, or properties that are set on the object instance after it is
-constructed or returned from a factory method. The container then injects those
+(that is, the other objects with which they work) only through constructor arguments,
+arguments to a factory method, or properties that are set on the object instance after
+it is constructed or returned from a factory method. The container then injects those
 dependencies when it creates the bean. This process is fundamentally the inverse (hence
 the name, Inversion of Control) of the bean itself controlling the instantiation
 or location of its dependencies on its own by using direct construction of classes or

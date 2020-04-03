@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -403,16 +403,29 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify the class for this bean.
+	 * @see #setBeanClassName(String)
 	 */
 	public void setBeanClass(@Nullable Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
 
 	/**
-	 * Return the class of the wrapped bean (assuming it is resolved already).
-	 * @return the bean class (never {@code null})
+	 * Return the specified class of the bean definition (assuming it is resolved already).
+	 * <p><b>NOTE:</b> This is an initial class reference as declared in the bean metadata
+	 * definition, potentially combined with a declared factory method or a
+	 * {@link org.springframework.beans.factory.FactoryBean} which may lead to a different
+	 * runtime type of the bean, or not being set at all in case of an instance-level
+	 * factory method (which is resolved via {@link #getFactoryBeanName()} instead).
+	 * <b>Do not use this for runtime type introspection of arbitrary bean definitions.</b>
+	 * The recommended way to find out about the actual runtime type of a particular bean
+	 * is a {@link org.springframework.beans.factory.BeanFactory#getType} call for the
+	 * specified bean name; this takes all of the above cases into account and returns the
+	 * type of object that a {@link org.springframework.beans.factory.BeanFactory#getBean}
+	 * call is going to return for the same bean name.
+	 * @return the resolved bean class (never {@code null})
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class yet
+	 * @see #getBeanClassName()
 	 * @see #hasBeanClass()
 	 * @see #setBeanClass(Class)
 	 * @see #resolveBeanClass(ClassLoader)
