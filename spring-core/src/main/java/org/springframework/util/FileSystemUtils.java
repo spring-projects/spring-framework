@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
 import org.springframework.lang.Nullable;
+
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
