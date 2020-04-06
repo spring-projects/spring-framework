@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.transaction;
+package org.springframework.test.context.transaction.manager;
 
 import javax.sql.DataSource;
 
@@ -31,6 +31,8 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.transaction.AfterTransaction;
+import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -49,15 +51,15 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  */
 @SpringJUnitConfig
 @DirtiesContext
-final class PrimaryTransactionManagerTests {
+final /* Intentionally FINAL */ class PrimaryTransactionManagerTests {
 
-	private JdbcTemplate jdbcTemplate;
-
+	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	void setDataSource(DataSource dataSource1) {
+	PrimaryTransactionManagerTests(DataSource dataSource1) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource1);
 	}
+
 
 	@BeforeTransaction
 	void beforeTransaction() {
@@ -112,6 +114,7 @@ final class PrimaryTransactionManagerTests {
 		DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
 		}
+
 	}
 
 }
