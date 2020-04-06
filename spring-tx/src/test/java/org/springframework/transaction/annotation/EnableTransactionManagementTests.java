@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,14 @@ public class EnableTransactionManagementTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, TxManagerConfig.class);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
 
 		// invoke a transactional method, causing the PlatformTransactionManager bean to be resolved.
 		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
 		ctx.close();
 	}
 
@@ -102,8 +107,18 @@ public class EnableTransactionManagementTests {
 				EnableTxConfig.class, MultiTxManagerConfig.class);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 
+		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
+		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
+
 		// invoke a transactional method, causing the PlatformTransactionManager bean to be resolved.
 		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(0);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+		assertThat(txManager2.begun).isEqualTo(1);
+		assertThat(txManager2.commits).isEqualTo(1);
+		assertThat(txManager2.rollbacks).isEqualTo(0);
+
 		ctx.close();
 	}
 
