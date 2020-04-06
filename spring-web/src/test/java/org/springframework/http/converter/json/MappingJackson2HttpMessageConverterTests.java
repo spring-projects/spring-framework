@@ -19,13 +19,9 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -141,6 +137,16 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result.contains("\"bool\":true")).isTrue();
 		assertThat(result.contains("\"bytes\":\"AQI=\"")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	public void writeWithJsonType() throws IOException {
+		doWriteWithJsonType(new JacksonChildBean());
+	}
+
+	@Test // issue #24498
+	public void writeOptionalWithJsonType() throws IOException {
+		doWriteWithJsonType(Optional.of(new JacksonChildBean()));
 	}
 
 	@Test
@@ -442,6 +448,16 @@ public class MappingJackson2HttpMessageConverterTests {
 			.withMessageStartingWith("Type definition error:");
 	}
 
+	public void doWriteWithJsonType(Object body) throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+
+		converter.write(body, null, outputMessage);
+		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
+		System.out.println(result);
+		assertThat(result.contains("\"@type\":\"MappingJackson2HttpMessageConverterTests$JacksonChildBean\"")).isTrue();
+		assertThat(result.contains("\"firstName\":\"test\"")).isTrue();
+		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(MediaType.APPLICATION_JSON);
+	}
 
 	interface MyInterface {
 
@@ -625,6 +641,19 @@ public class MappingJackson2HttpMessageConverterTests {
 		public String getProperty2() {
 			return property2;
 		}
+	}
+
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+	@JsonSubTypes({@JsonSubTypes.Type(JacksonChildBean.class)})
+	public interface JacksonParentBean {
+	}
+
+	public class JacksonChildBean implements JacksonParentBean {
+
+		@JsonProperty
+		String firstName = "test";
+
 	}
 
 }
