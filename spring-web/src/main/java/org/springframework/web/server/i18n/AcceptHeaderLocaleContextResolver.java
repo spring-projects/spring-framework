@@ -98,7 +98,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 	@Nullable
 	private Locale resolveSupportedLocale(@Nullable List<Locale> requestLocales) {
 		if (CollectionUtils.isEmpty(requestLocales)) {
-			return this.defaultLocale;  // may be null
+			return getDefaultLocale();  // may be null
 		}
 		List<Locale> supportedLocales = getSupportedLocales();
 		if (supportedLocales.isEmpty()) {
@@ -128,7 +128,8 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 			return languageMatch;
 		}
 
-		return (this.defaultLocale != null ? this.defaultLocale : requestLocales.get(0));
+		final Locale defaultLocale = getDefaultLocale();
+		return (defaultLocale != null ? defaultLocale : requestLocales.get(0));
 	}
 
 	@Override
