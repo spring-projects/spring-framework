@@ -306,7 +306,7 @@ class StringUtilsTests {
 	void quoteIfString() {
 		assertThat(StringUtils.quoteIfString("myString")).isEqualTo("'myString'");
 		assertThat(StringUtils.quoteIfString("")).isEqualTo("''");
-		assertThat(StringUtils.quoteIfString(5)).isEqualTo(Integer.valueOf(5));
+		assertThat(StringUtils.quoteIfString(5)).isEqualTo(5);
 		assertThat(StringUtils.quoteIfString(null)).isNull();
 	}
 
@@ -498,7 +498,7 @@ class StringUtilsTests {
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
 		assertThat(sa.length).isEqualTo(4);
-		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("") && sa[3].equals("c")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
@@ -539,7 +539,7 @@ class StringUtilsTests {
 	}
 
 	@Test
-	void delimitedListToStringArrayWithEmptyString() {
+	void delimitedListToStringArrayWithEmptyDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
 		assertThat(sa.length).isEqualTo(3);
 		assertThat(sa[0]).isEqualTo("a");
@@ -601,7 +601,7 @@ class StringUtilsTests {
 		// Could read these from files
 		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
 		assertThat(sa.length).as("a,,b produces array length 3").isEqualTo(3);
-		assertThat(sa[0].equals("a") && sa[1].equals("") && sa[2].equals("b")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].isEmpty() && sa[2].equals("b")).as("components are correct").isTrue();
 
 		sa = new String[] {"", "", "a", ""};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
