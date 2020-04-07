@@ -107,7 +107,7 @@ configure(allprojects) { project ->
 				entry 'derbyclient'
 			}
 			dependency "org.apache.poi:poi-ooxml:4.1.2"
-			dependency "org.beanshell:bsh:2.0b5"
+			dependency "org.apache-extras.beanshell:bsh:2.0b6"
 			dependency "org.freemarker:freemarker:2.3.30"
 			dependency "org.hsqldb:hsqldb:2.5.0"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
