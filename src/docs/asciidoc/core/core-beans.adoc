@@ -4816,10 +4816,12 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 
 [NOTE]
 ====
-As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
-no longer necessary if the target bean defines only one constructor to begin with.
-However, if several constructors are available, at least one must be annotated 
-with `@Autowired` in order to instruct the container which one to use.
+As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is no longer
+necessary if the target bean defines only one constructor to begin with. However, if
+several constructors are available and there is no primary/default constructor, at least
+one of the constructors must be annotated with `@Autowired` in order to instruct the
+container which one to use. See the discussion on
+<<beans-autowired-annotation-constructor-resolution, constructor resolution>> for details.
 ====
 
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,
@@ -5086,7 +5088,9 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 
 A non-required method will not be called at all if its dependency (or one of its
 dependencies, in case of multiple arguments) is not available. A non-required field will
-not get populated at all in such case, leaving its default value in place.
+not get populated at all in such cases, leaving its default value in place.
+
+[[beans-autowired-annotation-constructor-resolution]]
 
 Injected constructor and factory method arguments are a special case since the `required`
 attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
@@ -5108,9 +5112,11 @@ declare the annotation, they will all have to declare `required=false` in order 
 considered as candidates for autowiring (analogous to `autowire=constructor` in XML).
 The constructor with the greatest number of dependencies that can be satisfied by matching
 beans in the Spring container will be chosen. If none of the candidates can be satisfied,
-then a primary/default constructor (if present) will be used. If a class only declares a
-single constructor to begin with, it will always be used, even if not annotated. Note that
-an annotated constructor does not have to be public.
+then a primary/default constructor (if present) will be used. Similarly, if a class
+declares multiple constructors but none of them is annotated with `@Autowired`, then a
+primary/default constructor (if present) will be used. If a class only declares a single
+constructor to begin with, it will always be used, even if not annotated. Note that an
+annotated constructor does not have to be public.
 
 The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
 annotation on setter methods. Setting the `required` attribute to `false` indicates that
