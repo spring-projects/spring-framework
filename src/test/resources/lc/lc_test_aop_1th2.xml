@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:lc="http://www.lc.com/schema/lc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.lc.com/schema/lc
+		http://www.lc.com/schema/lc.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	   	>
+	<!-- proxy-target-class="true" -->
+	<aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="true"/>
+	<bean id="testBean1th" class="lc.org.beans.TestBean1th">
+	</bean>
+	<bean id="testBean2th" class="lc.org.beans.TestBean2th" />
+	<bean class="lc.org.aop.AopBean"/>
+	<bean class="lc.org.aop.AspectJTest1th"/>
+	<bean class="lc.org.aop.AspectJTest1th2"/>
+</beans>

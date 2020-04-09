@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:lc="http://www.lc.com/schema/lc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		">
+	<!-- http://www.lc.com/schema/lc
+		http://www.lc.com/schema/lc.xsd -->
+	<!-- id="testBean1th"  -->
+	<bean id="testBean1th" name="bean1th" class="lc.org.beans.TestBean1th" >
+		<property name="name">
+			<value>test</value>
+		</property>
+		<replaced-method name="m" replacer="bean1thReplacer">
+			<!-- <arg-type>java.lang.String</arg-type> -->
+			<arg-type match="java.lang.String"/>
+		</replaced-method>
+	</bean>
+	<bean id="testBean1th2" class="lc.org.beans.factory.Tb1thFactoryBean">
+		<property name="info" value="lc,24"/>
+	</bean>
+	<bean name="bean1thReplacer" class="lc.org.beans.TB1thReplace"/>
+	<!--
+	<lc:custom id="customer" name="JimiDeer" hobby="ball"/>
+	-->
+	<bean id="helloServiceImpl" class="lc.org.rmi.HelloServiceImpl" />
+	<bean id="myRmi" class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="service" ref="helloServiceImpl"/>
+		<property name="serviceName" value="helloRMI"/>
+		<property name="serviceInterface" value="lc.org.rmi.HelloService"/>
+		<property name="registryPort" value="9999"/>
+	</bean>
+</beans>
