@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -420,7 +420,7 @@ public abstract class MimeTypeUtils {
 
 		private final int maxSize;
 
-		private final ConcurrentLinkedQueue<K> queue = new ConcurrentLinkedQueue<>();
+		private final ConcurrentLinkedDeque<K> queue = new ConcurrentLinkedDeque<>();
 
 		private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
 
@@ -446,8 +446,9 @@ public abstract class MimeTypeUtils {
 				}
 				this.lock.readLock().lock();
 				try {
-					this.queue.remove(key);
-					this.queue.add(key);
+					if (this.queue.removeLastOccurrence(key)) {
+						this.queue.offer(key);
+					}
 					return cached;
 				}
 				finally {
@@ -459,8 +460,9 @@ public abstract class MimeTypeUtils {
 				// Retrying in case of concurrent reads on the same key
 				cached = this.cache.get(key);
 				if (cached  != null) {
-					this.queue.remove(key);
-					this.queue.add(key);
+					if (this.queue.removeLastOccurrence(key)) {
+						this.queue.offer(key);
+					}
 					return cached;
 				}
 				// Generate value first, to prevent size inconsistency
@@ -473,7 +475,7 @@ public abstract class MimeTypeUtils {
 						cacheSize--;
 					}
 				}
-				this.queue.add(key);
+				this.queue.offer(key);
 				this.cache.put(key, value);
 				this.size = cacheSize + 1;
 				return value;
