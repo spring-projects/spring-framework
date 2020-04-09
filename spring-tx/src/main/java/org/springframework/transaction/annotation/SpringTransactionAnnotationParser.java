@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -34,6 +35,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * Strategy implementation for parsing Spring's {@link Transactional} annotation.
  *
  * @author Juergen Hoeller
+ * @author Mark Paluch
  * @since 2.5
  */
 @SuppressWarnings("serial")
@@ -71,6 +73,7 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		rbta.setTimeout(attributes.getNumber("timeout").intValue());
 		rbta.setReadOnly(attributes.getBoolean("readOnly"));
 		rbta.setQualifier(attributes.getString("value"));
+		rbta.setLabels(Arrays.asList(attributes.getStringArray("label")));
 
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
 		for (Class<?> rbRule : attributes.getClassArray("rollbackFor")) {

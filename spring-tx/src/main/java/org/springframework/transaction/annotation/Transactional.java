@@ -51,6 +51,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Paluch
  * @since 1.2
  * @see org.springframework.transaction.interceptor.TransactionAttribute
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
@@ -186,5 +187,18 @@ public @interface Transactional {
 	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	String[] noRollbackForClassName() default {};
+
+	/**
+	 * Defines zero (0) or more transaction labels. Labels may be used to
+	 * describe a transaction and they can be evaluated by individual transaction
+	 * manager. Labels may serve a solely descriptive purpose or map to
+	 * pre-defined transaction manager-specific options.
+	 * <p>See the description of the actual transaction manager implementation
+	 * how it evaluates transaction labels.
+	 *
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#getLabels()
+	 */
+	String[] label() default {};
 
 }
