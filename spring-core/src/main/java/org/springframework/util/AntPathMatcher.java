@@ -68,6 +68,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Vladislav Kisel
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -647,6 +648,18 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final Pattern pattern;
 
+		private final String originalPattern;
+
+		/**
+		 * True if this matcher accepts any value (e.g. regex <code>.*</code>)
+		 */
+		private final boolean acceptAny;
+
+		/**
+		 * True if given pattern is a literal pattern, thus candidate string may be tested by strings comparison for better perf.
+		 */
+		private final boolean allowStringComparison;
+
 		private final List<String> variableNames = new LinkedList<>();
 
 		public AntPathStringMatcher(String pattern) {
@@ -686,6 +699,10 @@ public class AntPathMatcher implements PathMatcher {
 			patternBuilder.append(quote(pattern, end, pattern.length()));
 			this.pattern = (caseSensitive ? Pattern.compile(patternBuilder.toString()) :
 					Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+
+			this.originalPattern = pattern;
+			this.acceptAny = this.pattern.pattern().equals(DEFAULT_VARIABLE_PATTERN);
+			this.allowStringComparison = end == 0;
 		}
 
 		private String quote(String s, int start, int end) {
@@ -700,16 +717,22 @@ public class AntPathMatcher implements PathMatcher {
 		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
 		public boolean matchStrings(String str, @Nullable Map<String, String> uriTemplateVariables) {
+			// Check whether current pattern accepts any value or given string is exact match
+			if (this.acceptAny) {
+				if (uriTemplateVariables != null) {
+					assertUrlVariablesCount(1);
+					uriTemplateVariables.put(this.variableNames.get(0), str);
+				}
+				return true;
+			}
+			else if (this.allowStringComparison && str.equals(this.originalPattern)) {
+				return true;
+			}
+
 			Matcher matcher = this.pattern.matcher(str);
 			if (matcher.matches()) {
 				if (uriTemplateVariables != null) {
-					// SPR-8455
-					if (this.variableNames.size() != matcher.groupCount()) {
-						throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
-								this.pattern + " does not match the number of URI template variables it defines, " +
-								"which can occur if capturing groups are used in a URI template regex. " +
-								"Use non-capturing groups instead.");
-					}
+					assertUrlVariablesCount(matcher.groupCount());
 					for (int i = 1; i <= matcher.groupCount(); i++) {
 						String name = this.variableNames.get(i - 1);
 						String value = matcher.group(i);
@@ -722,6 +745,17 @@ public class AntPathMatcher implements PathMatcher {
 				return false;
 			}
 		}
+
+		// SPR-8455
+		private void assertUrlVariablesCount(int expected) {
+			if (this.variableNames.size() != expected) {
+				throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+						this.pattern + " does not match the number of URI template variables it defines, " +
+						"which can occur if capturing groups are used in a URI template regex. " +
+						"Use non-capturing groups instead.");
+			}
+		}
+
 	}
 
 
