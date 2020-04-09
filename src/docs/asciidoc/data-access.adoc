@@ -1423,6 +1423,11 @@ properties of the `@Transactional` annotation:
 | `noRollbackForClassName`
 | Array of `String` class names, which must be derived from `Throwable.`
 | Optional array of names of exception classes that must not cause rollback.
+
+| `label`
+| Array of `String` labels to add an expressive description to the transaction.
+| Labels may be evaluated by transaction managers to associate
+implementation-specific behavior with the actual transaction.
 |===
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
@@ -1508,13 +1513,13 @@ following annotation definitions:
 ----
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional("order")
+	@Transactional(value = "order", label = "causal-consistency")
 	public @interface OrderTx {
 	}
 
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional("account")
+	@Transactional("account", label = "retryable")
 	public @interface AccountTx {
 	}
 ----
@@ -1523,12 +1528,12 @@ following annotation definitions:
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
-	@Transactional("order")
+	@Transactional(value = "order", label = ["causal-consistency"])
 	annotation class OrderTx
 
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
-	@Transactional("account")
+	@Transactional(value = "account", label = ["retryable"])
 	annotation class AccountTx
 ----
 
@@ -1567,8 +1572,9 @@ The preceding annotations lets us write the example from the previous section as
 	}
 ----
 
-In the preceding example, we used the syntax to define the transaction manager qualifier, but we could also
-have included propagation behavior, rollback rules, timeouts, and other features.
+In the preceding example, we used the syntax to define the transaction manager qualifier
+and transactional labels, but we could also have included propagation behavior,
+rollback rules, timeouts, and other features.
 
 
 [[tx-propagation]]
