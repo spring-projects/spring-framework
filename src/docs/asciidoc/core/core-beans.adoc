@@ -5477,7 +5477,7 @@ references do not participate in regular candidate selection and are therefore i
 particular never primary. On the contrary, they always end up as lowest precedence.
 In practice, you should use self references as a last resort only (for example, for
 calling other methods on the same instance through the bean's transactional proxy).
-Consider factoring out the effected methods to a separate delegate bean in such a scenario.
+Consider factoring out the affected methods to a separate delegate bean in such a scenario.
 Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
 by its unique name.
 
@@ -6776,7 +6776,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		@Bean
 		protected TestBean protectedInstance(
 				@Qualifier("public") TestBean spouse,
-				@Value("#{privateInstance.age}") String country) {
+				@Value("#{privateInstance.country}") String country) {
 			TestBean tb = new TestBean("protectedInstance", 1);
 			tb.setSpouse(spouse);
 			tb.setCountry(country);
