@@ -6776,7 +6776,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		@Bean
 		protected TestBean protectedInstance(
 				@Qualifier("public") TestBean spouse,
-				@Value("#{privateInstance.age}") String country) {
+				@Value("#{privateInstance.country}") String country) {
 			TestBean tb = new TestBean("protectedInstance", 1);
 			tb.setSpouse(spouse);
 			tb.setCountry(country);
@@ -6813,7 +6813,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		@Bean
 		protected fun protectedInstance(
 				@Qualifier("public") spouse: TestBean,
-				@Value("#{privateInstance.age}") country: String) = TestBean("protectedInstance", 1).apply {
+				@Value("#{privateInstance.country}") country: String) = TestBean("protectedInstance", 1).apply {
 			this.spouse = spouse
 			this.country = country
 		}
@@ -6827,7 +6827,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 	}
 ----
 
-The example autowires the `String` method parameter `country` to the value of the `age`
+The example autowires the `String` method parameter `country` to the value of the `country`
 property on another bean named `privateInstance`. A Spring Expression Language element
 defines the value of the property through the notation `#{ <expression> }`. For `@Value`
 annotations, an expression resolver is preconfigured to look for bean names when
