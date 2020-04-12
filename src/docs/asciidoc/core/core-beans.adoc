@@ -6776,7 +6776,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		@Bean
 		protected TestBean protectedInstance(
 				@Qualifier("public") TestBean spouse,
-				@Value("#{privateInstance.country}") String country) {
+				@Value("#{privateInstance.age}") String country) {
 			TestBean tb = new TestBean("protectedInstance", 1);
 			tb.setSpouse(spouse);
 			tb.setCountry(country);
@@ -6842,7 +6842,7 @@ beans of prototype scope. For other scopes, the factory method only ever sees th
 injection point that triggered the creation of a new bean instance in the given scope
 (for example, the dependency that triggered the creation of a lazy singleton bean).
 You can use the provided injection point metadata with semantic care in such scenarios.
-The following example shows how to do use `InjectionPoint`:
+The following example shows how to use `InjectionPoint`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
