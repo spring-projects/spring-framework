@@ -175,6 +175,28 @@ class BeanUtilsTests {
 	}
 
 	@Test
+	void copyPropertiesHonorsGenericTypeMatches() {
+		IntegerListHolder1 integerListHolder1 = new IntegerListHolder1();
+		integerListHolder1.getList().add(42);
+		IntegerListHolder2 integerListHolder2 = new IntegerListHolder2();
+
+		BeanUtils.copyProperties(integerListHolder1, integerListHolder2);
+		assertThat(integerListHolder1.getList()).containsOnly(42);
+		assertThat(integerListHolder2.getList()).containsOnly(42);
+	}
+
+	@Test
+	void copyPropertiesDoesNotHonorGenericTypeMismatches() {
+		IntegerListHolder1 integerListHolder = new IntegerListHolder1();
+		integerListHolder.getList().add(42);
+		LongListHolder longListHolder = new LongListHolder();
+
+		BeanUtils.copyProperties(integerListHolder, longListHolder);
+		assertThat(integerListHolder.getList()).containsOnly(42);
+		assertThat(longListHolder.getList()).isEmpty();
+	}
+
+	@Test
 	void testCopyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
@@ -337,24 +359,10 @@ class BeanUtilsTests {
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
 	}
-	
-	@Test
-	void testCopiedParametersType() {
-		
-		A a = new A();
-		a.getList().add(42);
-		B b = new B();
 
-		BeanUtils.copyProperties(a, b);
 
-		assertThat(a.getList()).containsOnly(42);
-
-		b.getList().forEach(n -> assertThat(n).isInstanceOf(Long.class));
-		assertThat(b.getList()).isEmpty();	
-		
-	}
-	
-	class A {
+	@SuppressWarnings("unused")
+	private static class IntegerListHolder1 {
 
 		private List<Integer> list = new ArrayList<>();
 
@@ -365,9 +373,24 @@ class BeanUtilsTests {
 		public void setList(List<Integer> list) {
 			this.list = list;
 		}
-		
 	}
-	class B {
+
+	@SuppressWarnings("unused")
+	private static class IntegerListHolder2 {
+
+		private List<Integer> list = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class LongListHolder {
 
 		private List<Long> list = new ArrayList<>();
 
@@ -378,7 +401,6 @@ class BeanUtilsTests {
 		public void setList(List<Long> list) {
 			this.list = list;
 		}
-		
 	}
 
 
