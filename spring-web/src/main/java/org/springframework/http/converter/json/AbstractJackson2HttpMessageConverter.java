@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
@@ -233,6 +234,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
 				if (deserializationView != null) {
 					return this.objectMapper.readerWithView(deserializationView).forType(javaType).
+							without(JsonParser.Feature.AUTO_CLOSE_SOURCE).
 							readValue(inputMessage.getBody());
 				}
 			}
