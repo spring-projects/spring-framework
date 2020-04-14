@@ -110,7 +110,7 @@ dokka {
 }
 
 task downloadResources(type: Download) {
-	def version = "0.2.0.RELEASE"
+	def version = "0.2.1.RELEASE"
 	src "https://repo.spring.io/release/io/spring/docresources/" +
 			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
@@ -164,7 +164,7 @@ asciidoctor {
 			sectnums: '',
 			'source-highlighter': 'highlight.js',
 			highlightjsdir: 'js/highlight',
-			'highlightjs-theme': 'github',
+			'highlightjs-theme': 'github', // 'googlecode',
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
