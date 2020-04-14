@@ -591,8 +591,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		public void register(T mapping, Object handler, Method method) {
 			// Assert that the handler method is not a suspending one.
-			if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
-				throw new IllegalStateException("Unsupported suspending handler method detected: " + method);
+			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+				Class<?>[] parameterTypes = method.getParameterTypes();
+				if ((parameterTypes.length > 0) && "kotlin.coroutines.Continuation".equals(parameterTypes[parameterTypes.length - 1].getName())) {
+					throw new IllegalStateException("Unsupported suspending handler method detected: " + method);
+				}
 			}
 			this.readWriteLock.writeLock().lock();
 			try {
