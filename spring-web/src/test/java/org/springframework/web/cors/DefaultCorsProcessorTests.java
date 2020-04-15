@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -399,6 +399,18 @@ public class DefaultCorsProcessorTests {
 		this.processor.processRequest(null, this.request, this.response);
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isFalse();
 		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
+	}
+
+	@Test
+	public void preventDuplicatedVaryHeaders() throws Exception {
+		this.request.setMethod(HttpMethod.GET.name());
+		this.response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
+		this.response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+		this.response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.getHeaders(HttpHeaders.VARY)).containsOnlyOnce(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 	}
 
 }

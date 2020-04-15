@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.cors;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,9 +61,16 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
-		response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-		response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+		Collection<String> varyHeaders = response.getHeaders(HttpHeaders.VARY);
+		if (!varyHeaders.contains(HttpHeaders.ORIGIN)) {
+			response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
+		}
+		if (!varyHeaders.contains(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD)) {
+			response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+		}
+		if (!varyHeaders.contains(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS)) {
+			response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+		}
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;
