@@ -175,7 +175,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	/**
 	 * Check the HTTP method and determine the methods for the response of a
 	 * pre-flight request. The default implementation simply delegates to
-	 * {@link CorsConfiguration#checkOrigin(String)}.
+	 * {@link CorsConfiguration#checkHttpMethod(HttpMethod)}.
 	 */
 	@Nullable
 	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {
