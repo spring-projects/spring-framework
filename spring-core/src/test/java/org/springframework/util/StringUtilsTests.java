@@ -22,8 +22,7 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Rod Johnson
@@ -242,6 +241,15 @@ class StringUtilsTests {
 		// Null old pattern: should ignore
 		s = StringUtils.replace(inString, null, newPattern);
 		assertThat(s).as("Replace non-matched is returned as-is").isSameAs(inString);
+	}
+
+	@Test
+	void onlyNumbers() {
+		assertThat(StringUtils.onlyNumbers("111.222.333-44").equals("11122233344")).isTrue();
+		assertThat(StringUtils.onlyNumbers("(11) 2 3333-4444").equals("11233334444")).isTrue();
+		assertThat(StringUtils.onlyNumbers("1111@2222").equals("11112222")).isTrue();
+		assertThat(StringUtils.onlyNumbers("!1@2#3$4%5ˆ6&7*8(9)0").equals("1234567890")).isTrue();
+		assertThat(StringUtils.onlyNumbers("AbCdE123WuEd456").equals("123456")).isTrue();
 	}
 
 	@Test

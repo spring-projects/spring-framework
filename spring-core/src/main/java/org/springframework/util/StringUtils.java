@@ -70,6 +70,8 @@ public abstract class StringUtils {
 
 	private static final String CURRENT_PATH = ".";
 
+	private static final String ONLY_NUMBERS_REGEX = "\\D+";
+
 	private static final char EXTENSION_SEPARATOR = '.';
 
 
@@ -429,6 +431,15 @@ public abstract class StringUtils {
 		// append any characters to the right of a match
 		sb.append(inString, pos, inString.length());
 		return sb.toString();
+	}
+
+	/**
+	 * Replace all not numbers to empity String
+	 * @param str the original {@code String}
+	 * @return the resulting {@code String}
+	 */
+	public static String onlyNumbers(String str) {
+		return str.replaceAll(ONLY_NUMBERS_REGEX, "");
 	}
 
 	/**
