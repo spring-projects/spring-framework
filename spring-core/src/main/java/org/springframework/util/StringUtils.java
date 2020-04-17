@@ -461,6 +461,9 @@ public abstract class StringUtils {
 				result[lastCharIndex++] = c;
 			}
 		}
+		if (lastCharIndex == inString.length()) {
+			return inString;
+		}
 		return new String(result, 0, lastCharIndex);
 	}
 
