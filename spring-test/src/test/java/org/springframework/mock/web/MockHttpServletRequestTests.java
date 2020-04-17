@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
 /**
@@ -388,16 +390,23 @@ public class MockHttpServletRequestTests {
 
 	@Test
 	public void getServerNameViaHostHeaderAsIpv6AddressWithoutPort() {
-		String ipv6Address = "[2001:db8:0:1]";
-		request.addHeader(HOST, ipv6Address);
-		assertEquals("2001:db8:0:1", request.getServerName());
+		String host = "[2001:db8:0:1]";
+		request.addHeader(HOST, host);
+		assertEquals(host, request.getServerName());
 	}
 
 	@Test
 	public void getServerNameViaHostHeaderAsIpv6AddressWithPort() {
-		String ipv6Address = "[2001:db8:0:1]:8081";
-		request.addHeader(HOST, ipv6Address);
-		assertEquals("2001:db8:0:1", request.getServerName());
+		request.addHeader(HOST, "[2001:db8:0:1]:8081");
+		assertEquals("[2001:db8:0:1]", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Invalid Host header: "));
+		request.getServerName();
 	}
 
 	@Test
@@ -409,6 +418,22 @@ public class MockHttpServletRequestTests {
 	public void getServerPortWithCustomPort() {
 		request.setServerPort(8080);
 		assertEquals(8080, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd:8080"); // missing closing bracket
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Invalid Host header: "));
+		request.getServerPort();
+	}
+
+	@Test
+	public void getServerPortWithIpv6AddressAndInvalidPortViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:bogus"); // "bogus" is not a port number
+		exception.expect(NumberFormatException.class);
+		exception.expectMessage("bogus");
+		request.getServerPort();
 	}
 
 	@Test
@@ -473,6 +498,43 @@ public class MockHttpServletRequestTests {
 		request.addHeader(HOST, testServer);
 		StringBuffer requestURL = request.getRequestURL();
 		assertEquals("http://" + testServer, requestURL.toString());
+	}
+
+	@Test
+	public void getRequestURLWithIpv6AddressViaServerNameWithoutPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertEquals("http://[::ffff:abcd:abcd]", url.toString());
+	}
+
+	@Test
+	public void getRequestURLWithIpv6AddressViaServerNameWithPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		request.setServerPort(9999);
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertEquals("http://[::ffff:abcd:abcd]:9999", url.toString());
+	}
+
+	@Test
+	public void getRequestURLWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Invalid Host header: "));
+		request.getRequestURL();
+	}
+
+	@Test
+	public void getRequestURLWithIpv6AddressViaHostHeaderWithoutPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertEquals("http://[::ffff:abcd:abcd]", url.toString());
+	}
+
+	@Test
+	public void getRequestURLWithIpv6AddressViaHostHeaderWithPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:9999");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertEquals("http://[::ffff:abcd:abcd]:9999", url.toString());
 	}
 
 	@Test
