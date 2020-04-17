@@ -130,7 +130,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	private boolean isMultipartRequest(WebRequest request) {
 		String contentType = request.getHeader("Content-Type");
-		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
+		return StringUtils.startsWithIgnoreCase(contentType, "multipart");
 	}
 
 	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
