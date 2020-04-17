@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.function.Function;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
@@ -39,13 +40,14 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import static org.springframework.http.MediaType.ALL_VALUE;
 
 /**
  * {@link ClientHttpRequest} implementation for the Apache HttpComponents HttpClient 5.x.
- *
  * @author Martin Tarjányi
+ * @author Arjen Poutsma
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
@@ -72,7 +74,9 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+		HttpMethod method = HttpMethod.resolve(this.httpRequest.getMethod());
+		Assert.state(method != null, "Method must not be null");
+		return method;
 	}
 
 	@Override
@@ -100,7 +104,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return writeWith(Flux.from(body).flatMap(p -> p));
+		return writeWith(Flux.from(body).flatMap(Function.identity()));
 	}
 
 	@Override

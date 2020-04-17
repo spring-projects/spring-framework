@@ -39,6 +39,7 @@ import org.springframework.util.MultiValueMap;
  * {@link ClientHttpResponse} implementation for the Apache HttpComponents HttpClient 5.x.
  *
  * @author Martin Tarjányi
+ * @author Arjen Poutsma
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */

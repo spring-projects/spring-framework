@@ -27,6 +27,7 @@ import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpStreamResetException;
 import org.apache.hc.core5.http.Message;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.reactive.ReactiveResponseConsumer;
@@ -43,6 +44,7 @@ import org.springframework.util.Assert;
  * {@link ClientHttpConnector} implementation for the Apache HttpComponents HttpClient 5.x.
  *
  * @author Martin Tarjányi
+ * @author Arjen Poutsma
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
@@ -148,7 +150,12 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		@Override
 		public void failed(Exception ex) {
-			this.sink.error(ex);
+			Throwable t = ex;
+			if (t instanceof HttpStreamResetException) {
+				HttpStreamResetException httpStreamResetException = (HttpStreamResetException) ex;
+				t = httpStreamResetException.getCause();
+			}
+			this.sink.error(t);
 		}
 
 		@Override
