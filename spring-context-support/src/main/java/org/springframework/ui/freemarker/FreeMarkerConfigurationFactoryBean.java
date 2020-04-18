@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,21 @@
 
 package org.springframework.ui.freemarker;
 
+import java.io.File;
 import java.io.IOException;
 
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 
 /**
@@ -63,6 +70,36 @@ public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationF
 		this.configuration = createConfiguration();
 	}
 
+
+	@Override
+	protected TemplateLoader getTemplateLoaderForPath(String templateLoaderPath) {
+		ResourceLoader resourceLoader = getResourceLoader();
+		//add path pattern support
+		if (isPreferFileSystemAccess() && resourceLoader instanceof ResourcePatternResolver) {
+			try {
+				ResourcePatternResolver resourcePatternResolver = (ResourcePatternResolver) resourceLoader;
+				Resource[] resources = resourcePatternResolver.getResources(templateLoaderPath);
+				TemplateLoader[] templateLoaders = new TemplateLoader[resources.length];
+				for (int i = 0; i < resources.length; i++) {
+					// will fail if not resolvable in the file system
+					File file = resources[i].getFile();
+					if (logger.isDebugEnabled()) {
+						logger.debug(
+								"Template loader path [" + resources[i] + "] resolved to file path [" + file.getAbsolutePath() + "]");
+					}
+					templateLoaders[i] = new FileTemplateLoader(file);
+				}
+				return new MultiTemplateLoader(templateLoaders);
+
+			} catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot resolve template loader path [" + templateLoaderPath +
+							"] to [java.io.File]: using SpringTemplateLoader as fallback", ex);
+				}
+			}
+		}
+		return super.getTemplateLoaderForPath(templateLoaderPath);
+	}
 
 	@Override
 	@Nullable
