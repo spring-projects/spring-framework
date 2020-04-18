@@ -331,24 +331,23 @@ class BeanUtilsTests {
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
 	}
-	
+
 	@Test
-	void testCopiedParametersType() {
-		
-		A a = new A();
+	void copyPropertiesWithGenericTypes() {
+		ListComponentA a = new ListComponentA();
 		a.getList().add(42);
-		B b = new B();
+		ListComponentB b = new ListComponentB();
+		ListComponentC c = new ListComponentC();
 
 		BeanUtils.copyProperties(a, b);
-
 		assertThat(a.getList()).containsOnly(42);
+		assertThat(b.getList()).containsOnly(42);
 
-		b.getList().forEach(n -> assertThat(n).isInstanceOf(Long.class));
-		assertThat(b.getList()).isEmpty();	
-		
+		BeanUtils.copyProperties(a, c);
+		assertThat(c.getList()).isEmpty();
 	}
-	
-	class A {
+
+	static class ListComponentA {
 
 		private List<Integer> list = new ArrayList<>();
 
@@ -359,9 +358,22 @@ class BeanUtilsTests {
 		public void setList(List<Integer> list) {
 			this.list = list;
 		}
-		
 	}
-	class B {
+
+	static class ListComponentB {
+
+		private List<Integer> list = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+	}
+
+	static class ListComponentC {
 
 		private List<Long> list = new ArrayList<>();
 
@@ -372,7 +384,6 @@ class BeanUtilsTests {
 		public void setList(List<Long> list) {
 			this.list = list;
 		}
-		
 	}
 
 
