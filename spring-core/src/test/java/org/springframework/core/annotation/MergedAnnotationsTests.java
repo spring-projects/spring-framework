@@ -702,6 +702,7 @@ class MergedAnnotationsTests {
 				SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES).stream().map(MergedAnnotation::getType);
 		assertThat(classes).containsExactly(Component.class, Indexed.class);
 	}
+
 	@Test
 	void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
@@ -776,24 +777,19 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getFromMethodWithBridgeMethod() throws Exception {
-		Method method = TransactionalStringGeneric.class.getMethod("something",
-				Object.class);
+		Method method = TransactionalStringGeneric.class.getMethod("something", Object.class);
 		assertThat(method.isBridge()).isTrue();
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
-				-1);
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
 				Order.class).getDistance()).isEqualTo(0);
 		boolean runningInEclipse = Arrays.stream(
 				new Exception().getStackTrace()).anyMatch(
 						element -> element.getClassName().startsWith("org.eclipse.jdt"));
-		// As of JDK 8, invoking getAnnotation() on a bridge method actually
-		// finds an
+		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
 		// annotation on its 'bridged' method [1]; however, the Eclipse compiler
-		// will not
-		// support this until Eclipse 4.9 [2]. Thus, we effectively ignore the
-		// following
-		// assertion if the test is currently executing within the Eclipse IDE.
+		// will not support this until Eclipse 4.9 [2]. Thus, we effectively ignore the
+		// following assertion if the test is currently executing within the Eclipse IDE.
 		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
 		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396
 		if (!runningInEclipse) {
@@ -843,8 +839,7 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getFromMethodWithInterfaceOnSuper() throws Exception {
-		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod(
-				"foo");
+		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
 				Order.class).getDistance()).isEqualTo(0);
 	}
@@ -1369,8 +1364,10 @@ class MergedAnnotationsTests {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		RequestMapping webMapping = method.getAnnotation(RequestMapping.class);
 		assertThat(webMapping).isNotNull();
+
 		RequestMapping synthesizedWebMapping = MergedAnnotation.from(webMapping).synthesize();
 		RequestMapping synthesizedAgainWebMapping = MergedAnnotation.from(synthesizedWebMapping).synthesize();
+
 		assertThat(synthesizedWebMapping).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesizedAgainWebMapping).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesizedWebMapping).isEqualTo(synthesizedAgainWebMapping);
