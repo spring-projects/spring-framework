@@ -219,7 +219,7 @@ public abstract class MimeTypeUtils {
 			throw new InvalidMimeTypeException(mimeType, "does not contain subtype after '/'");
 		}
 		String type = fullType.substring(0, subIndex);
-		String subtype = fullType.substring(subIndex + 1, fullType.length());
+		String subtype = fullType.substring(subIndex + 1);
 		if (MimeType.WILDCARD_TYPE.equals(type) && !MimeType.WILDCARD_TYPE.equals(subtype)) {
 			throw new InvalidMimeTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
 		}
@@ -248,7 +248,7 @@ public abstract class MimeTypeUtils {
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex >= 0) {
 					String attribute = parameter.substring(0, eqIndex).trim();
-					String value = parameter.substring(eqIndex + 1, parameter.length()).trim();
+					String value = parameter.substring(eqIndex + 1).trim();
 					parameters.put(attribute, value);
 				}
 			}

@@ -569,8 +569,7 @@ public class Enhancer extends AbstractClassGenerator {
 				interceptDuringConstruction,
 				serialVersionUID);
 		this.currentKey = key;
-		Object result = super.create(key);
-		return result;
+		return super.create(key);
 	}
 
 	@Override
@@ -826,8 +825,7 @@ public class Enhancer extends AbstractClassGenerator {
 	@Override
 	protected Object unwrapCachedValue(Object cached) {
 		if (currentKey instanceof EnhancerKey) {
-			EnhancerFactoryData data = ((WeakReference<EnhancerFactoryData>) cached).get();
-			return data;
+			return ((WeakReference<EnhancerFactoryData>) cached).get();
 		}
 		return super.unwrapCachedValue(cached);
 	}
