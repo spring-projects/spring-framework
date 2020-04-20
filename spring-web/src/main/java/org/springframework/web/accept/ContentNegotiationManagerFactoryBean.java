@@ -85,15 +85,14 @@ import org.springframework.web.context.ServletContextAware;
  * methods and set the exact strategies to use via
  * {@link #setStrategies(List)}.
  *
- * <p><strong>Note:</strong> As of 5.2.4,
+ * <p><strong>Deprecation Note:</strong> As of 5.2.4,
  * {@link #setFavorPathExtension(boolean) favorPathExtension} and
  * {@link #setIgnoreUnknownPathExtensions(boolean) ignoreUnknownPathExtensions}
- * are deprecated in order to discourage use of path extensions for content
- * negotiation as well as for request mapping (with similar deprecations in
+ * are deprecated in order to discourage using path extensions for content
+ * negotiation and for request mapping with similar deprecations on
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
- * RequestMappingHandlerMapping}). For further context, please read issue
+ * RequestMappingHandlerMapping}. For further context, please read issue
  * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 3.2
@@ -149,7 +148,10 @@ public class ContentNegotiationManagerFactoryBean
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the 'Accept' header.
 	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
-	 * extension config options.
+	 * extension config options. As there is no replacement for this method,
+	 * for the time being it's necessary to continue using it in order to set it
+	 * to {@code false}. In 5.3 when {@code false} becomes the default, use of
+	 * this property will no longer be necessary.
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {

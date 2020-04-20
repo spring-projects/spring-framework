@@ -58,17 +58,13 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * {@link RequestMapping @RequestMapping} annotations in
  * {@link Controller @Controller} classes.
  *
- * <p><strong>Note:</strong></p> In 5.2.4,
+ * <p><strong>Deprecation Note:</strong></p> In 5.2.4,
  * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch} and
  * {@link #setUseRegisteredSuffixPatternMatch(boolean) useRegisteredSuffixPatternMatch}
  * are deprecated in order to discourage use of path extensions for request
  * mapping and for content negotiation (with similar deprecations in
  * {@link ContentNegotiationManager}). For further context, please read issue
  * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
- *
- * <p>In 5.3, {@link #setUseRegisteredSuffixPatternMatch(boolean) useRegisteredSuffixPatternMatch}
- * switches to being on by default so that path matching becomes constrained
- * to registered suffixes only.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -101,7 +97,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * <p>Also see {@link #setUseRegisteredSuffixPatternMatch(boolean)} for
 	 * more fine-grained control over specific suffixes to allow.
 	 * @deprecated as of 5.2.4. See class level comment about deprecation of
-	 * path extension config options.
+	 * path extension config options. As there is no replacement for this method,
+	 * for the time being it's necessary to set it to {@code false}. In 5.3
+	 * when {@code false} becomes the default, use of this property will no
+	 * longer be necessary.
 	 */
 	@Deprecated
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
@@ -115,8 +114,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "false".
 	 * @deprecated as of 5.2.4. See class level comment about deprecation of
-	 * path extension config options note also that in 5.3 the default for this
-	 * property will switch from {@code false} to {@code true}.
+	 * path extension config options.
 	 */
 	@Deprecated
 	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
