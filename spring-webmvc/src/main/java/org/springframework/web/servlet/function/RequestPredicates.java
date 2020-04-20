@@ -40,6 +40,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -992,6 +993,16 @@ public abstract class RequestPredicates {
 		@Override
 		public MultiValueMap<String, String> params() {
 			return this.request.params();
+		}
+
+		@Override
+		public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
+			return this.request.multipartData();
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			return this.request.pathVariable(name);
 		}
 
 		@Override

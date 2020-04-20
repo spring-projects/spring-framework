@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
@@ -37,6 +38,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -197,6 +199,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public String methodName() {
 			return this.methodName;
+		}
+
+		@Override
+		public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
+			return servletRequest().getParts().stream()
+					.collect(Collectors.groupingBy(Part::getName,
+							LinkedMultiValueMap::new,
+							Collectors.toList()));
 		}
 
 		@Override

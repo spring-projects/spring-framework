@@ -44,6 +44,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -84,6 +85,9 @@ class DefaultServerRequest implements ServerRequest {
 	private final MultiValueMap<String, String> params;
 
 	private final Map<String, Object> attributes;
+
+	@Nullable
+	private MultiValueMap<String, Part> parts;
 
 
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
@@ -226,6 +230,19 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public MultiValueMap<String, String> params() {
 		return this.params;
+	}
+
+	@Override
+	public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
+		MultiValueMap<String, Part> result = this.parts;
+		if (result == null) {
+			result = servletRequest().getParts().stream()
+					.collect(Collectors.groupingBy(Part::getName,
+							LinkedMultiValueMap::new,
+							Collectors.toList()));
+			this.parts = result;
+		}
+		return result;
 	}
 
 	@Override

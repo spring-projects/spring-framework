@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.Part;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,6 +129,25 @@ public class DefaultServerRequestTests {
 				new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.param("foo")).isEqualTo(Optional.of("bar"));
+	}
+
+	@Test
+	public void multipartData() throws Exception {
+		MockPart formPart = new MockPart("form", "foo".getBytes(UTF_8));
+		MockPart filePart = new MockPart("file", "foo.txt", "foo".getBytes(UTF_8));
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("POST", "/");
+		servletRequest.addPart(formPart);
+		servletRequest.addPart(filePart);
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		MultiValueMap<String, Part> result = request.multipartData();
+
+		assertThat(result).hasSize(2);
+		assertThat(result.get("form")).containsExactly(formPart);
+		assertThat(result.get("file")).containsExactly(filePart);
 	}
 
 	@Test

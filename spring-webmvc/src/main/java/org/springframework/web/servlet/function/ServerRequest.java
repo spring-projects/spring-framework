@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -185,6 +186,17 @@ public interface ServerRequest {
 	 * @see HttpServletRequest#getParameterMap()
 	 */
 	MultiValueMap<String, String> params();
+
+	/**
+	 * Get the parts of a multipart request, provided the Content-Type is
+	 * {@code "multipart/form-data"}, or an exception otherwise.
+	 * @return the multipart data, mapping from name to part(s)
+	 * @throws IOException           if an I/O error occurred during the retrieval
+	 * @throws ServletException      if this request is not of type {@code "multipart/form-data"}
+	 * @since 5.3
+	 * @see HttpServletRequest#getParts()
+	 */
+	MultiValueMap<String, Part> multipartData() throws IOException, ServletException;
 
 	/**
 	 * Get the path variable with the given name, if present.
