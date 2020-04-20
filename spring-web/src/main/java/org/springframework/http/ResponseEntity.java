@@ -136,9 +136,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		if (this.status instanceof HttpStatus) {
 			return (HttpStatus) this.status;
 		}
-		else {
-			return HttpStatus.valueOf((Integer) this.status);
-		}
+
+		return HttpStatus.valueOf((Integer) this.status);
 	}
 
 	/**
@@ -150,9 +149,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		if (this.status instanceof HttpStatus) {
 			return ((HttpStatus) this.status).value();
 		}
-		else {
-			return (Integer) this.status;
-		}
+
+		return (Integer) this.status;
 	}
 
 
