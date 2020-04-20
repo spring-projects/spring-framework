@@ -23,9 +23,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -389,6 +391,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			addMatchingMappings(directPathMatches, matches, request);
 		}
 		if (matches.isEmpty()) {
+			List<T> partialPathMatches = this.mappingRegistry.getMappingsByPartialPathUrl(lookupPath);
+			if (partialPathMatches != null) {
+				addMatchingMappings(partialPathMatches, matches, request);
+			}
+		}
+		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
@@ -536,6 +544,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
+		private final MultiValueMap<String, T> urlPathVariableLookup = new LinkedMultiValueMap<String, T>();
+
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
@@ -557,6 +567,16 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		@Nullable
 		public List<T> getMappingsByUrl(String urlPath) {
 			return this.urlLookup.get(urlPath);
+		}
+
+		public List<T> getMappingsByPartialPathUrl(String urlPath) {
+			List<T> matchedPathUrls = new ArrayList<T>();
+			for (Entry<String, List<T>> entry : this.urlPathVariableLookup.entrySet()) {
+				if (urlPath.startsWith(entry.getKey())) {
+					matchedPathUrls.addAll(entry.getValue());
+				}
+			}
+			return matchedPathUrls;
 		}
 
 		/**
@@ -608,6 +628,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.urlLookup.add(url, mapping);
 				}
 
+				Set<String> pathVariableUrls = getStaticPathForPathVariableUrls(mapping);
+				for (String url : pathVariableUrls) {
+					this.urlPathVariableLookup.add(url, mapping);
+				}
+
 				String name = null;
 				if (getNamingStrategy() != null) {
 					name = getNamingStrategy().getName(handlerMethod, mapping);
@@ -647,6 +672,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return urls;
 		}
 
+		private Set<String> getStaticPathForPathVariableUrls(T mapping) {
+			Set<String> urls = new HashSet<String>(1);
+			for (String path : getMappingPathPatterns(mapping)) {
+				if (getPathMatcher().isUriVariablePattern(path)) {
+					if (path.indexOf("{") > 1) {
+						String partialPath = path.substring(0, path.indexOf("{")-1);
+						urls.add(partialPath);
+					}
+				}
+			}
+			return urls;
+		}
+
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
 			List<HandlerMethod> oldList = this.nameLookup.get(name);
 			if (oldList == null) {
@@ -681,6 +719,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						list.remove(definition.getMapping());
 						if (list.isEmpty()) {
 							this.urlLookup.remove(url);
+						}
+					}
+				}
+
+				for (String url : definition.getDirectUrls()) {
+					for (String staticUrl : this.urlPathVariableLookup.keySet()) {
+						if (url.startsWith(staticUrl)) {
+							List<T> list = this.urlPathVariableLookup.get(staticUrl);
+							if (list != null) {
+								list.remove(definition.getMapping());
+								if (list.isEmpty()) {
+									this.urlPathVariableLookup.remove(url);
+								}
+							}
 						}
 					}
 				}

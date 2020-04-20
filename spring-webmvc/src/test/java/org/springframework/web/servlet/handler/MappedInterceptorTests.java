@@ -164,5 +164,10 @@ public class MappedInterceptorTests {
 		public String combine(String pattern1, String pattern2) {
 			return null;
 		}
+
+		@Override
+		public boolean isUriVariablePattern(String path) {
+			return false;
+		}
 	}
 }

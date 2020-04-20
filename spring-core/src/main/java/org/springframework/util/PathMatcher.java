@@ -46,6 +46,8 @@ public interface PathMatcher {
 	 */
 	boolean isPattern(String path);
 
+	boolean isUriVariablePattern(String path);
+
 	/**
 	 * Match the given {@code path} against the given {@code pattern},
 	 * according to this PathMatcher's matching strategy.

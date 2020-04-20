@@ -633,6 +633,24 @@ public class AntPathMatcher implements PathMatcher {
 		return new AntPatternComparator(path);
 	}
 
+	@Override
+	public boolean isUriVariablePattern(String path) {
+		if (path == null) {
+			return false;
+		}
+		boolean uriVar = false;
+		for (int i = 0; i < path.length(); i++) {
+			char c = path.charAt(i);
+			if (c == '{') {
+				uriVar = true;
+				continue;
+			}
+			if (c == '}' && uriVar) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Tests whether or not a string matches against a pattern via a {@link Pattern}.
