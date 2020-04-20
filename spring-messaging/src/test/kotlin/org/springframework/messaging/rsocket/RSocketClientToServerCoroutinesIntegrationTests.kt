@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.messaging.rsocket
 
 import io.netty.buffer.PooledByteBufAllocator
-import io.rsocket.RSocketFactory
+import io.rsocket.core.RSocketServer
 import io.rsocket.frame.decoder.PayloadDecoder
 import io.rsocket.transport.netty.server.CloseableChannel
 import io.rsocket.transport.netty.server.TcpServerTransport
@@ -257,15 +257,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		fun setupOnce() {
 			context = AnnotationConfigApplicationContext(ServerConfig::class.java)
 
-			server = RSocketFactory.receive()
-					.frameDecoder(PayloadDecoder.ZERO_COPY)
-					.acceptor(context.getBean(RSocketMessageHandler::class.java).responder())
-					.transport(TcpServerTransport.create("localhost", 7000))
-					.start()
+			server = RSocketServer.create(context.getBean(RSocketMessageHandler::class.java).responder())
+					.payloadDecoder(PayloadDecoder.ZERO_COPY)
+					.bind(TcpServerTransport.create("localhost", 7000))
 					.block()!!
 
 			requester = RSocketRequester.builder()
-					.rsocketFactory { factory -> factory.frameDecoder(PayloadDecoder.ZERO_COPY) }
+					.rsocketConnector { connector -> connector.payloadDecoder(PayloadDecoder.ZERO_COPY) }
 					.rsocketStrategies(context.getBean(RSocketStrategies::class.java))
 					.connectTcp("localhost", 7000)
 					.block()!!

@@ -25,8 +25,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.ReferenceCounted;
 import io.rsocket.AbstractRSocket;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.core.RSocketServer;
 import io.rsocket.exceptions.ApplicationErrorException;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.plugins.RSocketInterceptor;
@@ -80,16 +80,14 @@ class RSocketBufferLeakTests {
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
 		SocketAcceptor responder = messageHandler.responder();
 
-		server = RSocketFactory.receive()
-				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.addResponderPlugin(payloadInterceptor) // intercept responding
-				.acceptor(responder)
-				.transport(TcpServerTransport.create("localhost", 7000))
-				.start()
+		server = RSocketServer.create(responder)
+				.payloadDecoder(PayloadDecoder.ZERO_COPY)
+				.interceptors(registry -> registry.forResponder(payloadInterceptor)) // intercept responding
+				.bind(TcpServerTransport.create("localhost", 7000))
 				.block();
 
 		requester = RSocketRequester.builder()
-				.rsocketFactory(factory -> factory.addRequesterPlugin(payloadInterceptor))
+				.rsocketConnector(conn -> conn.interceptors(registry -> registry.forRequester(payloadInterceptor)))
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
 				.connectTcp("localhost", 7000)
 				.block();
@@ -157,6 +155,18 @@ class RSocketBufferLeakTests {
 		StepVerifier.create(result).expectError(ApplicationErrorException.class).verify(Duration.ofSeconds(5));
 	}
 
+	@Test
+	public void echoChannel() {
+		Flux<String> result = requester.route("echo-channel")
+				.data(Flux.range(1, 10).map(i -> "Hello " + i), String.class)
+				.retrieveFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Hello 1 async").expectNextCount(8).expectNext("Hello 10 async")
+				.thenCancel()  // https://github.com/rsocket/rsocket-java/issues/613
+				.verify(Duration.ofSeconds(5));
+	}
+
 
 	@Controller
 	static class ServerController {
@@ -191,6 +201,11 @@ class RSocketBufferLeakTests {
 		@MessageMapping("ignore-input")
 		Mono<String> ignoreInput() {
 			return Mono.delay(Duration.ofMillis(10)).map(l -> "bar");
+		}
+
+		@MessageMapping("echo-channel")
+		Flux<String> echoChannel(Flux<String> payloads) {
+			return payloads.delayElements(Duration.ofMillis(10)).map(payload -> payload + " async");
 		}
 	}
 

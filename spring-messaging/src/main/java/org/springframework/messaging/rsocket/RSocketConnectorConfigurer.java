@@ -15,24 +15,21 @@
  */
 package org.springframework.messaging.rsocket;
 
+import io.rsocket.core.RSocketConnector;
+
 /**
- * Strategy to apply configuration to a client side {@code RSocketFactory}.
- * that's being prepared by {@link RSocketRequester.Builder} to connect
- * to a server.
+ * Strategy to apply configuration to an {@code RSocketConnector}. For use with
+ * {@link RSocketRequester.Builder#rsocketConnector RSocketRequester.Builder}.
  *
  * @author Rossen Stoyanchev
- * @since 5.2
- * @deprecated as of 5.2.6 following the deprecation of
- * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
- * in RSocket 1.0 RC7. Please, use {@link RSocketConnectorConfigurer}.
+ * @since 5.2.6
  */
 @FunctionalInterface
-@Deprecated
-public interface ClientRSocketFactoryConfigurer {
+public interface RSocketConnectorConfigurer {
 
 	/**
-	 * Apply configuration to the given {@code ClientRSocketFactory}.
+	 * Apply configuration to the given {@code RSocketConnector}.
 	 */
-	void configure(io.rsocket.RSocketFactory.ClientRSocketFactory rsocketFactory);
+	void configure(RSocketConnector connector);
 
 }
