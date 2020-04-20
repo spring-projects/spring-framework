@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,23 +58,42 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 
 	/**
-	 * Creates a new instance with the given URL patterns.
-	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
-	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
+	 * Creates a new instance with the given URL patterns. Each pattern that is
+	 * not empty and does not start with "/" is prepended with "/".
+	 * @param patterns 0 or more URL patterns; if 0 the condition will match to
+	 * every request.
 	 */
 	public PatternsRequestCondition(String... patterns) {
 		this(Arrays.asList(patterns), null, null, true, true, null);
 	}
 
 	/**
-	 * Additional constructor with flags for using suffix pattern (.*) and
-	 * trailing slash matches.
+	 * Alternative constructor with additional, optional {@link UrlPathHelper},
+	 * {@link PathMatcher}, and whether to automatically match trailing slashes.
+	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
+	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
+	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
+	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
+	 * @since 5.2.4
+	 */
+	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
+			@Nullable PathMatcher pathMatcher, boolean useTrailingSlashMatch) {
+
+		this(Arrays.asList(patterns), urlPathHelper, pathMatcher, false, useTrailingSlashMatch, null);
+	}
+
+	/**
+	 * Alternative constructor with additional optional parameters.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param urlPathHelper for determining the lookup path of a request
 	 * @param pathMatcher for path matching with patterns
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+	 * on the deprecation of path extension config options.
 	 */
+	@Deprecated
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
 			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch) {
 
@@ -82,15 +101,18 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	/**
-	 * Creates a new instance with the given URL patterns.
-	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
+	 * Alternative constructor with additional optional parameters.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
 	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param fileExtensions a list of file extensions to consider for path matching
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+	 * on the deprecation of path extension config options.
 	 */
+	@Deprecated
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
 			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch,
 			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {

@@ -24,21 +24,21 @@ import javax.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.test.MockPart;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
 
 /**
  * Test fixture with {@link RequestParamMapMethodArgumentResolver}.

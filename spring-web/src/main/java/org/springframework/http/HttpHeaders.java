@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1520,6 +1520,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			return result;
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Remove the well-known {@code "Content-*"} HTTP headers.
+	 * <p>Such headers should be cleared from the response if the intended
+	 * body can't be written due to errors.
+	 * @since 5.2.3
+	 */
+	public void clearContentHeaders() {
+		this.headers.remove(HttpHeaders.CONTENT_DISPOSITION);
+		this.headers.remove(HttpHeaders.CONTENT_ENCODING);
+		this.headers.remove(HttpHeaders.CONTENT_LANGUAGE);
+		this.headers.remove(HttpHeaders.CONTENT_LENGTH);
+		this.headers.remove(HttpHeaders.CONTENT_LOCATION);
+		this.headers.remove(HttpHeaders.CONTENT_RANGE);
+		this.headers.remove(HttpHeaders.CONTENT_TYPE);
 	}
 
 	/**

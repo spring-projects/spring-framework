@@ -70,10 +70,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.GenericBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -93,24 +99,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.test.MockServletConfig;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.GenericBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -151,6 +146,12 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockServletConfig;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -288,7 +289,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("testBeanSet", "1", "2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("[1, 2]-org.springframework.tests.sample.beans.TestBean");
+		assertThat(response.getContentAsString()).isEqualTo("[1, 2]-org.springframework.beans.testfixture.beans.TestBean");
 	}
 
 	@Test  // SPR-12903
@@ -319,8 +320,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertThat(response.getStatus()).as("Invalid response status").isEqualTo(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		String allowHeader = response.getHeader("Allow");
 		assertThat(allowHeader).as("No Allow header").isNotNull();
-		Set<String> allowedMethods = new HashSet<>();
-		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
+		Set<String> allowedMethods = new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
 		assertThat(allowedMethods.size()).as("Invalid amount of supported methods").isEqualTo(6);
 		assertThat(allowedMethods.contains("PUT")).as("PUT not allowed").isTrue();
 		assertThat(allowedMethods.contains("DELETE")).as("DELETE not allowed").isTrue();
@@ -1011,7 +1011,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).as("Invalid content-type").isEqualTo("application/json");
 	}
 
 	@Test
@@ -1548,7 +1548,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json;charset=ISO-8859-1");
+		assertThat(response.getHeader("Content-Type")).isEqualTo("application/json");
 		assertThat(response.getContentAsString()).isEqualTo("homeJson");
 	}
 
@@ -2643,7 +2643,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute
 		public Principal getPrincipal() {
-			return new TestPrincipal();
+			return new TestPrincipal("test");
 		}
 
 		@RequestMapping("/myPath")
@@ -2658,14 +2658,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			assertThat(errors.hasErrors()).isFalse();
 			errors.reject("myCode");
 			writer.write("myView");
-		}
-	}
-
-	static class TestPrincipal implements Principal {
-
-		@Override
-		public String getName() {
-			return "test";
 		}
 	}
 

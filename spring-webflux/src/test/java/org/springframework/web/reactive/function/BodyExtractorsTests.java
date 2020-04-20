@@ -59,9 +59,9 @@ import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpResponse;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

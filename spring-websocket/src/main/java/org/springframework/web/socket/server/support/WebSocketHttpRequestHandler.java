@@ -77,8 +77,18 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler, HandshakeHandler handshakeHandler) {
 		Assert.notNull(wsHandler, "wsHandler must not be null");
 		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
-		this.wsHandler = new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
+		this.wsHandler = decorate(wsHandler);
 		this.handshakeHandler = handshakeHandler;
+	}
+
+	/**
+	 * Decorate the {@code WebSocketHandler} passed into the constructor.
+	 * <p>By default, {@link LoggingWebSocketHandlerDecorator} and
+	 * {@link ExceptionWebSocketHandlerDecorator} are added.
+	 * @since 5.2.2
+	 */
+	protected WebSocketHandler decorate(WebSocketHandler handler) {
+		return new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(handler));
 	}
 
 
@@ -171,7 +181,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 		catch (HandshakeFailureException ex) {
 			failure = ex;
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
 		finally {

@@ -26,7 +26,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.Test;
 import test.aop.PerThisAspect;
 
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

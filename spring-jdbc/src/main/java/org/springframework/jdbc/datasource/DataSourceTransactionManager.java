@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
 	 * <p>This will typically be a locally defined DataSource, for example an
@@ -194,7 +195,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * through an explicit statement on the transactional connection:
 	 * "SET TRANSACTION READ ONLY" as understood by Oracle, MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
-	 * can be customized through through {@link #prepareTransactionalConnection}.
+	 * can be customized through {@link #prepareTransactionalConnection}.
 	 * <p>This mode of read-only handling goes beyond the {@link Connection#setReadOnly}
 	 * hint that Spring applies by default. In contrast to that standard JDBC hint,
 	 * "SET TRANSACTION READ ONLY" enforces an isolation-level-like connection mode

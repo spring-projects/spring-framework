@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,7 +308,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void paramaterizedType() throws Exception {
+	void parameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("parameterizedType"));
 		assertThat(type.getType()).isInstanceOf(ParameterizedType.class);
 	}
@@ -684,8 +684,15 @@ class ResolvableTypeTests {
 
 	@Test
 	void resolveBoundedTypeVariableResult() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVaraibleResult"));
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVariableResult"));
 		assertThat(type.resolve()).isEqualTo(CharSequence.class);
+	}
+
+
+	@Test
+	void resolveBoundedTypeVariableWildcardResult() throws Exception {
+		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVariableWildcardResult"));
+		assertThat(type.getGeneric(1).asCollection().resolveGeneric()).isEqualTo(CharSequence.class);
 	}
 
 	@Test
@@ -695,27 +702,14 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void resolveTypeVaraibleFromMethodReturn() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("typedReturn"));
-		assertThat(type.resolve()).isNull();
-	}
-
-	@Test
-	void resolveTypeVaraibleFromMethodReturnWithInstanceClass() throws Exception {
-		ResolvableType type = ResolvableType.forMethodReturnType(
-				Methods.class.getMethod("typedReturn"), TypedMethods.class);
-		assertThat(type.resolve()).isEqualTo(String.class);
-	}
-
-	@Test
-	void resolveTypeVaraibleFromSimpleInterfaceType() {
+	void resolveTypeVariableFromSimpleInterfaceType() {
 		ResolvableType type = ResolvableType.forClass(
 				MySimpleInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(String.class);
 	}
 
 	@Test
-	void resolveTypeVaraibleFromSimpleCollectionInterfaceType() {
+	void resolveTypeVariableFromSimpleCollectionInterfaceType() {
 		ResolvableType type = ResolvableType.forClass(
 				MyCollectionInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(Collection.class);
@@ -723,14 +717,14 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void resolveTypeVaraibleFromSimpleSuperclassType() {
+	void resolveTypeVariableFromSimpleSuperclassType() {
 		ResolvableType type = ResolvableType.forClass(
 				MySimpleSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(String.class);
 	}
 
 	@Test
-	void resolveTypeVaraibleFromSimpleCollectionSuperclassType() {
+	void resolveTypeVariableFromSimpleCollectionSuperclassType() {
 		ResolvableType type = ResolvableType.forClass(
 				MyCollectionSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(Collection.class);
@@ -1415,7 +1409,9 @@ class ResolvableTypeTests {
 
 		void charSequenceParameter(List<CharSequence> cs);
 
-		<R extends CharSequence & Serializable> R boundedTypeVaraibleResult();
+		<R extends CharSequence & Serializable> R boundedTypeVariableResult();
+
+		Map<String, ? extends List<? extends CharSequence>> boundedTypeVariableWildcardResult();
 
 		void nested(Map<Map<String, Integer>, Map<Byte, Long>> p);
 
@@ -1624,7 +1620,7 @@ class ResolvableTypeTests {
 		public ResolvableTypeAssert isAssignableFrom(ResolvableType... types) {
 			for (ResolvableType type : types) {
 				if (!actual.isAssignableFrom(type)) {
-					throw new AssertionError("Expecting " + decribe(actual) + " to be assignable from " + decribe(type));
+					throw new AssertionError("Expecting " + describe(actual) + " to be assignable from " + describe(type));
 				}
 			}
 			return this;
@@ -1633,13 +1629,13 @@ class ResolvableTypeTests {
 		public ResolvableTypeAssert isNotAssignableFrom(ResolvableType... types) {
 			for (ResolvableType type : types) {
 				if (actual.isAssignableFrom(type)) {
-					throw new AssertionError("Expecting " + decribe(actual) + " to not be assignable from " + decribe(type));
+					throw new AssertionError("Expecting " + describe(actual) + " to not be assignable from " + describe(type));
 				}
 			}
 			return this;
 		}
 
-		private String decribe(ResolvableType type) {
+		private String describe(ResolvableType type) {
 			if (type == ResolvableType.NONE) {
 				return "NONE";
 			}

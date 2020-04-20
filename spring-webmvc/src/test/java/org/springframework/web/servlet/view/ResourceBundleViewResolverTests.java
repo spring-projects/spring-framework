@@ -28,10 +28,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

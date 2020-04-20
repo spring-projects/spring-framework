@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
 
+	private boolean handlePing = false;
+
 
 	/**
 	 * Configure the maximum allowable frame payload length. Setting this value
@@ -68,8 +70,32 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return this.maxFramePayloadLength;
 	}
 
+	/**
+	 * Configure whether to let ping frames through to be handled by the
+	 * {@link WebSocketHandler} given to the upgrade method. By default, Reactor
+	 * Netty automatically replies with pong frames in response to pings. This is
+	 * useful in a proxy for allowing ping and pong frames through.
+	 * <p>By default this is set to {@code false} in which case ping frames are
+	 * handled automatically by Reactor Netty. If set to {@code true}, ping
+	 * frames will be passed through to the {@link WebSocketHandler}.
+	 * @param handlePing whether to let Ping frames through for handling
+	 * @since 5.2.4
+	 */
+	public void setHandlePing(boolean handlePing) {
+		this.handlePing = handlePing;
+	}
+
+	/**
+	 * Return the configured {@link #setHandlePing(boolean)}.
+	 * @since 5.2.4
+	 */
+	public boolean getHandlePing() {
+		return this.handlePing;
+	}
+
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
@@ -78,14 +104,19 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		return reactorResponse.sendWebsocket(subProtocol, this.maxFramePayloadLength,
-				(in, out) -> {
-					ReactorNettyWebSocketSession session =
-							new ReactorNettyWebSocketSession(
-									in, out, handshakeInfo, bufferFactory, this.maxFramePayloadLength);
-					URI uri = exchange.getRequest().getURI();
-					return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
-				});
+		// Trigger WebFlux preCommit actions and upgrade
+		return response.setComplete()
+				.then(Mono.defer(() -> reactorResponse.sendWebsocket(
+						subProtocol,
+						this.maxFramePayloadLength,
+						this.handlePing,
+						(in, out) -> {
+							ReactorNettyWebSocketSession session =
+									new ReactorNettyWebSocketSession(
+											in, out, handshakeInfo, bufferFactory, this.maxFramePayloadLength);
+							URI uri = exchange.getRequest().getURI();
+							return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
+						})));
 	}
 
 	private static HttpServerResponse getNativeResponse(ServerHttpResponse response) {

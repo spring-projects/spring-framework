@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="aTestBean"/>
 	</bean>
 

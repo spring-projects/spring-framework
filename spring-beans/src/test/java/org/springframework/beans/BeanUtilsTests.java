@@ -34,12 +34,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -93,6 +93,12 @@ class BeanUtilsTests {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
+	}
+
+	@Test
+	void testInstantiatePrivateClassWithPrivateConstructor() throws NoSuchMethodException {
+		Constructor<PrivateBeanWithPrivateConstructor> ctor = PrivateBeanWithPrivateConstructor.class.getDeclaredConstructor();
+		BeanUtils.instantiateClass(ctor);
 	}
 
 	@Test
@@ -552,6 +558,12 @@ class BeanUtilsTests {
 
 		public String getValue() {
 			return value;
+		}
+	}
+
+	private static class PrivateBeanWithPrivateConstructor {
+
+		private PrivateBeanWithPrivateConstructor() {
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,12 @@ public abstract class CorsUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the request is a valid CORS pre-flight one.
-	 * To be used in combination with {@link #isCorsRequest(HttpServletRequest)} since
-	 * regular CORS checks are not invoked here for performance reasons.
+	 * Returns {@code true} if the request is a valid CORS pre-flight one by checking {code OPTIONS} method with
+	 * {@code Origin} and {@code Access-Control-Request-Method} headers presence.
 	 */
 	public static boolean isPreFlightRequest(HttpServletRequest request) {
 		return (HttpMethod.OPTIONS.matches(request.getMethod()) &&
+				request.getHeader(HttpHeaders.ORIGIN) != null &&
 				request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TaskManagementConfigUtils;
-import org.springframework.tests.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Tests use of @EnableScheduling on @Configuration classes.
@@ -422,12 +422,7 @@ public class EnableSchedulingTests {
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler());
 			taskRegistrar.addFixedRateTask(new IntervalTask(
-					new Runnable() {
-						@Override
-						public void run() {
-							worker().executedByThread = Thread.currentThread().getName();
-						}
-					},
+					() -> worker().executedByThread = Thread.currentThread().getName(),
 					10, 0));
 		}
 	}

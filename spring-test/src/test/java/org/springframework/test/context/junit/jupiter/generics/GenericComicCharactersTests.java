@@ -53,7 +53,7 @@ abstract class GenericComicCharactersTests<T extends Character> {
 	void autowiredFields() {
 		assertThat(this.character).as("Character should have been @Autowired by Spring").isNotNull();
 		assertThat(this.character).as("character's name").extracting(Character::getName).isEqualTo(getExpectedName());
-		assertThat(this.characters).as("Number of characters in context").size().isEqualTo(getExpectedNumCharacters());
+		assertThat(this.characters).as("Number of characters in context").hasSize(getExpectedNumCharacters());
 	}
 
 	@Test

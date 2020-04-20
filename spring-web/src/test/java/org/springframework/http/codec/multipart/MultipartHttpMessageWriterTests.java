@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,17 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -68,17 +68,23 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.MULTIPART_FORM_DATA)).isTrue();
+		assertThat(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				MediaType.MULTIPART_MIXED)).isTrue();
+		assertThat(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				MediaType.MULTIPART_RELATED)).isTrue();
+		assertThat(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA)).isFalse();
-		assertThat(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 	}
 
 	@Test
-	public void writeMultipart() throws Exception {
+	public void writeMultipartFormData() throws Exception {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override
@@ -109,7 +115,8 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block(Duration.ofSeconds(5));
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints)
+				.block(Duration.ofSeconds(5));
 
 		MultiValueMap<String, Part> requestParts = parse(hints);
 		assertThat(requestParts.size()).isEqualTo(7);
@@ -165,6 +172,33 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("AaBbCc");
+	}
+
+	@Test // gh-24582
+	public void writeMultipartRelated() {
+
+		MediaType mediaType = MediaType.parseMediaType("multipart/related;type=foo");
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.part("name 1", "value 1");
+		bodyBuilder.part("name 2", "value 2");
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
+
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(result, null, mediaType, this.response, hints)
+				.block(Duration.ofSeconds(5));
+
+		MediaType contentType = this.response.getHeaders().getContentType();
+		assertThat(contentType).isNotNull();
+		assertThat(contentType.isCompatibleWith(mediaType)).isTrue();
+		assertThat(contentType.getParameter("type")).isEqualTo("foo");
+		assertThat(contentType.getParameter("boundary")).isNotEmpty();
+		assertThat(contentType.getParameter("charset")).isEqualTo("UTF-8");
+
+		MultiValueMap<String, Part> requestParts = parse(hints);
+		assertThat(requestParts.size()).isEqualTo(2);
+		assertThat(requestParts.getFirst("name 1").name()).isEqualTo("name 1");
+		assertThat(requestParts.getFirst("name 2").name()).isEqualTo("name 2");
 	}
 
 	@SuppressWarnings("ConstantConditions")

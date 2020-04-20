@@ -22,8 +22,8 @@ import org.springframework.core.MethodParameter
 import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest
-import org.springframework.mock.web.test.server.MockServerWebExchange
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer

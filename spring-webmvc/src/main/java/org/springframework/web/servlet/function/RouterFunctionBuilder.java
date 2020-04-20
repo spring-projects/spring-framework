@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,9 +237,10 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 
 	@Override
 	public RouterFunction<ServerResponse> build() {
-		RouterFunction<ServerResponse> result = this.routerFunctions.stream()
-				.reduce(RouterFunction::and)
-				.orElseThrow(IllegalStateException::new);
+		if (this.routerFunctions.isEmpty()) {
+			throw new IllegalStateException("No routes registered. Register a route with GET(), POST(), etc.");
+		}
+		RouterFunction<ServerResponse> result = new BuiltRouterFunction(this.routerFunctions);
 
 		if (this.filterFunctions.isEmpty()) {
 			return result;
@@ -253,5 +254,36 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 			return result.filter(filter);
 		}
 	}
+
+
+	/**
+	 * Router function returned by {@link #build()} that simply iterates over the registered routes.
+	 */
+	private static class BuiltRouterFunction extends RouterFunctions.AbstractRouterFunction<ServerResponse> {
+
+		private List<RouterFunction<ServerResponse>> routerFunctions;
+
+		public BuiltRouterFunction(List<RouterFunction<ServerResponse>> routerFunctions) {
+			Assert.notEmpty(routerFunctions, "RouterFunctions must not be empty");
+			this.routerFunctions = routerFunctions;
+		}
+
+		@Override
+		public Optional<HandlerFunction<ServerResponse>> route(ServerRequest request) {
+			for (RouterFunction<ServerResponse> routerFunction : this.routerFunctions) {
+				Optional<HandlerFunction<ServerResponse>> result = routerFunction.route(request);
+				if (result.isPresent()) {
+					return result;
+				}
+			}
+			return Optional.empty();
+		}
+
+		@Override
+		public void accept(RouterFunctions.Visitor visitor) {
+			this.routerFunctions.forEach(routerFunction -> routerFunction.accept(visitor));
+		}
+	}
+
 
 }

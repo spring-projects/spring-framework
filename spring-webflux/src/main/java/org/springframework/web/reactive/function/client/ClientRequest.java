@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,11 +96,10 @@ public interface ClientRequest {
 
 	/**
 	 * Return a log message prefix to use to correlate messages for this request.
-	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
-	 * along with some extra formatting so that the prefix can be conveniently
-	 * prepended with no further formatting no separators required.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} surrounded with "[" and "]".
 	 * @return the log message prefix or an empty String if the
-	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * {@link #LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
 	 * @since 5.1
 	 */
 	String logPrefix();

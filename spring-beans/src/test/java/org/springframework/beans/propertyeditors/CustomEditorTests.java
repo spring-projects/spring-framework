@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.tests.sample.beans.BooleanTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.NumberTestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.BooleanTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.NumberTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -75,7 +75,7 @@ public class CustomEditorTests {
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(ITestBean.class, new TestBeanEditor());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
+		pvs.addPropertyValue(new PropertyValue("age", 55));
 		pvs.addPropertyValue(new PropertyValue("name", newName));
 		pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
 		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
@@ -94,7 +94,7 @@ public class CustomEditorTests {
 		bw.setExtractOldValueForEditor(true);
 		bw.registerCustomEditor(ITestBean.class, new OldValueAccessingTestBeanEditor());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
+		pvs.addPropertyValue(new PropertyValue("age", 55));
 		pvs.addPropertyValue(new PropertyValue("name", newName));
 		pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
 		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
@@ -593,9 +593,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.tests.sample.beans.TestBean[]");
+		classEditor.setAsText("org.springframework.beans.testfixture.beans.TestBean[]");
 		assertThat(classEditor.getValue()).isEqualTo(TestBean[].class);
-		assertThat(classEditor.getAsText()).isEqualTo("org.springframework.tests.sample.beans.TestBean[]");
+		assertThat(classEditor.getAsText()).isEqualTo("org.springframework.beans.testfixture.beans.TestBean[]");
 	}
 
 	/*
@@ -756,7 +756,7 @@ public class CustomEditorTests {
 	public void testCustomNumberEditor() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
 		editor.setAsText("5");
-		assertThat(editor.getValue()).isEqualTo(new Integer(5));
+		assertThat(editor.getValue()).isEqualTo(5);
 		assertThat(editor.getAsText()).isEqualTo("5");
 		editor.setValue(null);
 		assertThat(editor.getValue()).isEqualTo(null);
@@ -767,14 +767,14 @@ public class CustomEditorTests {
 	public void testCustomNumberEditorWithHex() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
 		editor.setAsText("0x" + Integer.toHexString(64));
-		assertThat(editor.getValue()).isEqualTo(new Integer(64));
+		assertThat(editor.getValue()).isEqualTo(64);
 	}
 
 	@Test
 	public void testCustomNumberEditorWithEmptyAsNull() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, true);
 		editor.setAsText("5");
-		assertThat(editor.getValue()).isEqualTo(new Integer(5));
+		assertThat(editor.getValue()).isEqualTo(5);
 		assertThat(editor.getAsText()).isEqualTo("5");
 		editor.setAsText("");
 		assertThat(editor.getValue()).isEqualTo(null);

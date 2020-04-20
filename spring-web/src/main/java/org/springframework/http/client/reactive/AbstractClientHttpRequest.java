@@ -137,13 +137,13 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 
 	/**
-	 * Apply header changes from {@link #getHeaders()} to the underlying response.
+	 * Apply header changes from {@link #getHeaders()} to the underlying request.
 	 * This method is called once only.
 	 */
 	protected abstract void applyHeaders();
 
 	/**
-	 * Add cookies from {@link #getHeaders()} to the underlying response.
+	 * Add cookies from {@link #getHeaders()} to the underlying request.
 	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();

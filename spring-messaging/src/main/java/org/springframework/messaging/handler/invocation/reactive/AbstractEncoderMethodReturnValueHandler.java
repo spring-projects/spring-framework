@@ -154,7 +154,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 
 		Encoder<?> encoder = getEncoder(elementType, mimeType);
-		return Flux.from((Publisher) publisher).map(value ->
+		return Flux.from(publisher).map(value ->
 				encodeValue(value, elementType, encoder, bufferFactory, mimeType, hints));
 	}
 

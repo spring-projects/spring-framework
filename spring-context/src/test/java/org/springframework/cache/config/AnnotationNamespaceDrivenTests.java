@@ -22,6 +22,7 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.testfixture.cache.AbstractCacheAnnotationTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

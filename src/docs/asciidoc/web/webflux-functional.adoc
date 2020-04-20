@@ -1,6 +1,6 @@
 [[webflux-fn]]
 = Functional Endpoints
-[.small]#<<web.adoc#webmvc-fn, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn, Web MVC>>#
 
 Spring WebFlux includes WebFlux.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
@@ -12,11 +12,11 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 [[webflux-fn-overview]]
 == Overview
-[.small]#<<web.adoc#webmvc-fn-overview, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn-overview, Web MVC>>#
 
 In WebFlux.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a delayed `ServerResponse` (i.e. `Mono<ServerResponse>`).
-Both the request as the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer JDK 8-friendly
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
@@ -112,7 +112,7 @@ Most applications can run through the WebFlux Java configuration, see <<webflux-
 
 [[webflux-fn-handler-functions]]
 == HandlerFunction
-[.small]#<<web.adoc#webmvc-fn-handler-functions, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn-handler-functions, Web MVC>>#
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response.
@@ -440,7 +440,7 @@ See <<core.adoc#validation-beanvalidation, Spring Validation>>.
 
 [[webflux-fn-router-functions]]
 == `RouterFunction`
-[.small]#<<web.adoc#webmvc-fn-router-functions, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn-router-functions, Web MVC>>#
 
 Router functions are used to route the requests to the corresponding `HandlerFunction`.
 Typically, you do not write router functions yourself, but rather use a method on the
@@ -474,7 +474,7 @@ header:
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
-			request -> ServerResponse.ok().bodyValue("Hello World"));
+			request -> ServerResponse.ok().bodyValue("Hello World")).build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -538,7 +538,7 @@ RouterFunction<ServerResponse> route = route()
 	.add(otherRoute) // <4>
 	.build();
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -562,7 +562,7 @@ RouterFunction<ServerResponse> route = route()
 		POST("/person", handler::createPerson) // <3>
 	}.and(otherRoute) // <4>
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -639,7 +639,7 @@ We can further improve by using the `nest` method together with `accept`:
 
 [[webflux-fn-running]]
 == Running a Server
-[.small]#<<web.adoc#webmvc-fn-running, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn-running, Web MVC>>#
 
 How do you run a router function in an HTTP server? A simple option is to convert a router
 function to an `HttpHandler` by using one of the following:
@@ -745,7 +745,7 @@ The following example shows a WebFlux Java configuration (see
 
 [[webflux-fn-handler-filter-function]]
 == Filtering Handler Functions
-[.small]#<<web.adoc#webmvc-fn-handler-filter-function, Same as in Spring MVC>>#
+[.small]#<<web.adoc#webmvc-fn-handler-filter-function, Web MVC>>#
 
 You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
 function builder.
@@ -854,4 +854,4 @@ Besides using the `filter` method on the router function builder, it is possible
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
 
 NOTE: CORS support for functional endpoints is provided through a dedicated
-<<webflux-cors-webfilter, `CorsWebFilter`>>.
+<<webflux-cors.adoc#webflux-cors-webfilter, `CorsWebFilter`>>.

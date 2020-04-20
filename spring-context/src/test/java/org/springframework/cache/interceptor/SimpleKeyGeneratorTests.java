@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,16 @@ package org.springframework.cache.interceptor;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.io.SerializationTestUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-
-
-
 
 /**
  * Tests for {@link SimpleKeyGenerator} and {@link SimpleKey}.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class SimpleKeyGeneratorTests {
 
@@ -47,7 +46,7 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void singleValue(){
+	public void singleValue() {
 		Object k1 = generateKey(new Object[] { "a" });
 		Object k2 = generateKey(new Object[] { "a" });
 		Object k3 = generateKey(new Object[] { "different" });
@@ -59,7 +58,7 @@ public class SimpleKeyGeneratorTests {
 	}
 
 	@Test
-	public void multipleValues()  {
+	public void multipleValues() {
 		Object k1 = generateKey(new Object[] { "a", 1, "b" });
 		Object k2 = generateKey(new Object[] { "a", 1, "b" });
 		Object k3 = generateKey(new Object[] { "b", 1, "a" });
@@ -108,6 +107,17 @@ public class SimpleKeyGeneratorTests {
 		Object k1 = generateKey(new Object[] { new String[]{"a", "b"}, "c" });
 		Object k2 = generateKey(new Object[] { new String[]{"a", "b"}, "c" });
 		Object k3 = generateKey(new Object[] { new String[]{"b", "a"}, "c" });
+		assertThat(k1.hashCode()).isEqualTo(k2.hashCode());
+		assertThat(k1.hashCode()).isNotEqualTo(k3.hashCode());
+		assertThat(k1).isEqualTo(k2);
+		assertThat(k1).isNotEqualTo(k3);
+	}
+
+	@Test
+	public void serializedKeys() throws Exception {
+		Object k1 = SerializationTestUtils.serializeAndDeserialize(generateKey(new Object[] { "a", 1, "b" }));
+		Object k2 = SerializationTestUtils.serializeAndDeserialize(generateKey(new Object[] { "a", 1, "b" }));
+		Object k3 = SerializationTestUtils.serializeAndDeserialize(generateKey(new Object[] { "b", 1, "a" }));
 		assertThat(k1.hashCode()).isEqualTo(k2.hashCode());
 		assertThat(k1.hashCode()).isNotEqualTo(k3.hashCode());
 		assertThat(k1).isEqualTo(k2);

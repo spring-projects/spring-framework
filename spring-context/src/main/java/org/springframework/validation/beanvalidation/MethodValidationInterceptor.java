@@ -145,7 +145,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			factoryBeanType = FactoryBean.class;
 		}
 		return (factoryBeanType != null && !method.getName().equals("getObject") &&
-				ClassUtils.hasMethod(factoryBeanType, method.getName(), method.getParameterTypes()));
+				ClassUtils.hasMethod(factoryBeanType, method));
 	}
 
 	/**

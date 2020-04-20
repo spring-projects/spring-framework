@@ -15,6 +15,10 @@ dependencies {
 	optional("org.codehaus.fabric3.api:commonj")
 	optional("org.freemarker:freemarker")
 	testCompile(project(":spring-context"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.hibernate:hibernate-validator")
 	testCompile("javax.annotation:javax.annotation-api")
@@ -22,4 +26,7 @@ dependencies {
 	testRuntime("org.ehcache:ehcache")
 	testRuntime("org.glassfish:javax.el")
 	testRuntime("com.sun.mail:javax.mail")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.mockito:mockito-core")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -157,7 +157,7 @@ class EncoderHttpMessageWriterTests {
 	void setContentLengthForMonoBody() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DataBuffer buffer = factory.wrap("body".getBytes(StandardCharsets.UTF_8));
-		configureEncoder(buffer, MimeTypeUtils.TEXT_PLAIN);
+		configureEncoder(Flux.just(buffer), MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 
@@ -180,7 +180,7 @@ class EncoderHttpMessageWriterTests {
 		configureEncoder(MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.empty(), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
-		StepVerifier.create(this.response.getBody()).expectComplete();
+		StepVerifier.create(this.response.getBody()).verifyComplete();
 		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(0);
 	}
 

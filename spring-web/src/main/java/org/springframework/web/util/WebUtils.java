@@ -591,7 +591,7 @@ public abstract class WebUtils {
 	 * either via a button (directly with name) or via an image (name + ".x" or
 	 * name + ".y").
 	 * @param request current HTTP request
-	 * @param name name of the parameter
+	 * @param name the name of the parameter
 	 * @return if the parameter was sent
 	 * @see #SUBMIT_IMAGE_SUFFIXES
 	 */

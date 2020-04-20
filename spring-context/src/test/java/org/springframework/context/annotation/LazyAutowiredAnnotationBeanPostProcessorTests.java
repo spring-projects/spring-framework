@@ -25,9 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -41,7 +42,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	private void doTestLazyResourceInjection(Class<? extends TestBeanHolder> annotatedBeanClass) {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 		RootBeanDefinition abd = new RootBeanDefinition(annotatedBeanClass);
-		abd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ac.registerBeanDefinition("annotatedBean", abd);
 		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
 		tbd.setLazyInit(true);
@@ -64,7 +65,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 		RootBeanDefinition abd = new RootBeanDefinition(FieldResourceInjectionBean.class);
-		abd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ac.registerBeanDefinition("annotatedBean", abd);
 		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
 		tbd.setLazyInit(true);
@@ -124,7 +125,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(FieldResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 
 		FieldResourceInjectionBean bean = (FieldResourceInjectionBean) bf.getBean("annotatedBean");
@@ -141,7 +142,7 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		RootBeanDefinition bd = new RootBeanDefinition(OptionalFieldResourceInjectionBean.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 
 		OptionalFieldResourceInjectionBean bean = (OptionalFieldResourceInjectionBean) bf.getBean("annotatedBean");

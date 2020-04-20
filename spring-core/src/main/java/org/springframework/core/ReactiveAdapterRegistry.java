@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,15 @@ import io.reactivex.Flowable;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
+import reactor.blockhound.BlockHound;
+import reactor.blockhound.integration.BlockHoundIntegration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -354,4 +357,32 @@ public class ReactiveAdapterRegistry {
 			);
 		}
 	}
+
+
+	/**
+	 * {@code BlockHoundIntegration} for spring-core classes.
+	 * <p>Whitelists the following:
+	 * <ul>
+	 * <li>Reading class info via {@link LocalVariableTableParameterNameDiscoverer}.
+	 * <li>Locking within {@link ConcurrentReferenceHashMap}.
+	 * </ul>
+	 * @since 5.2.4
+	 */
+	public static class SpringCoreBlockHoundIntegration implements BlockHoundIntegration {
+
+		@Override
+		public void applyTo(BlockHound.Builder builder) {
+
+			// Avoid hard references potentially anywhere in spring-core (no need for structural dependency)
+
+			builder.allowBlockingCallsInside(
+					"org.springframework.core.LocalVariableTableParameterNameDiscoverer", "inspectClass");
+
+			String className = "org.springframework.util.ConcurrentReferenceHashMap$Segment";
+			builder.allowBlockingCallsInside(className, "doTask");
+			builder.allowBlockingCallsInside(className, "clear");
+			builder.allowBlockingCallsInside(className, "restructure");
+		}
+	}
+
 }

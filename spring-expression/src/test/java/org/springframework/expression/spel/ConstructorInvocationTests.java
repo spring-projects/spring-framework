@@ -162,8 +162,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		ctx.addConstructorResolver(dummy);
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(2);
 
-		List<ConstructorResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getConstructorResolvers());
+		List<ConstructorResolver> copy = new ArrayList<>(ctx.getConstructorResolvers());
 		assertThat(ctx.removeConstructorResolver(dummy)).isTrue();
 		assertThat(ctx.removeConstructorResolver(dummy)).isFalse();
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(1);

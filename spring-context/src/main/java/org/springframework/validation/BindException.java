@@ -58,7 +58,7 @@ public class BindException extends Exception implements BindingResult {
 
 	/**
 	 * Create a new BindException instance for a target bean.
-	 * @param target target bean to bind onto
+	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
 	 * @see BeanPropertyBindingResult
 	 */

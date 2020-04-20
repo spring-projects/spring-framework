@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,21 +159,15 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching jar file [" + jarFilePath + "] for entries matching [" + entryPattern + "]");
 		}
-		try {
-			JarFile jarFile = new JarFile(jarFilePath);
-			try {
-				for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-					JarEntry entry = entries.nextElement();
-					String entryPath = entry.getName();
-					if (getPathMatcher().match(entryPattern, entryPath)) {
-						result.add(new UrlResource(
-								ResourceUtils.URL_PROTOCOL_JAR,
-								ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
-					}
+		try (JarFile jarFile = new JarFile(jarFilePath)) {
+			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+				JarEntry entry = entries.nextElement();
+				String entryPath = entry.getName();
+				if (getPathMatcher().match(entryPattern, entryPath)) {
+					result.add(new UrlResource(
+							ResourceUtils.URL_PROTOCOL_JAR,
+							ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
 				}
-			}
-			finally {
-				jarFile.close();
 			}
 		}
 		catch (IOException ex) {

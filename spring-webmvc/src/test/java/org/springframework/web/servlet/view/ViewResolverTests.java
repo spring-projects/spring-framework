@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockRequestDispatcher;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -51,6 +47,10 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -227,7 +227,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setApplicationContext(this.wac);
 
@@ -236,14 +236,14 @@ public class ViewResolverTests {
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example1");
 		Map<String, Object> attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertThat(attributes.get("key1")).isEqualTo("value1");
-		assertThat(attributes.get("key2")).isEqualTo(new Integer(2));
+		assertThat(attributes.get("key2")).isEqualTo(2);
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertThat(view).isInstanceOf(JstlView.class);
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example2");
 		attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertThat(attributes.get("key1")).isEqualTo("value1");
-		assertThat(attributes.get("key2")).isEqualTo(new Integer(2));
+		assertThat(attributes.get("key2")).isEqualTo(2);
 
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -255,7 +255,7 @@ public class ViewResolverTests {
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
 		assertThat(this.request.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 		assertThat(this.request.getAttribute("key1")).isEqualTo("value1");
-		assertThat(this.request.getAttribute("key2")).isEqualTo(new Integer(2));
+		assertThat(this.request.getAttribute("key2")).isEqualTo(2);
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setExposeContextBeansAsAttributes(true);
 		vr.setApplicationContext(this.wac);
@@ -281,7 +281,7 @@ public class ViewResolverTests {
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
-						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(new Integer(2));
+						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isSameAs(wac.getBean("myBean"));
 						assertThat(forwardRequest.getAttribute("myBean2")).isSameAs(wac.getBean("myBean2"));
 					}
@@ -304,7 +304,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setExposedContextBeanNames(new String[] {"myBean2"});
 		vr.setApplicationContext(this.wac);
@@ -317,7 +317,7 @@ public class ViewResolverTests {
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
-						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(new Integer(2));
+						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isNull();
 						assertThat(forwardRequest.getAttribute("myBean2")).isSameAs(wac.getBean("myBean2"));
 					}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,13 +103,14 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * @param codec for encoding and decoding the input/output byte streams
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
+	@SuppressWarnings("deprecation")
 	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
 		Assert.notNull(host, "host is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.elastic("tcp-client-pool");
+		this.poolResources = ConnectionProvider.fixed("tcp-client-pool", 10000);
 		this.codec = codec;
 
 		this.tcpClient = TcpClient.create(this.poolResources)
@@ -128,12 +129,13 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * @since 5.1.3
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
+	@SuppressWarnings("deprecation")
 	public ReactorNettyTcpClient(Function<TcpClient, TcpClient> clientConfigurer, ReactorNettyCodec<P> codec) {
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.elastic("tcp-client-pool");
+		this.poolResources = ConnectionProvider.fixed("tcp-client-pool", 10000);
 		this.codec = codec;
 
 		this.tcpClient = clientConfigurer.apply(TcpClient
@@ -197,6 +199,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 		Assert.notNull(strategy, "ReconnectStrategy is required");

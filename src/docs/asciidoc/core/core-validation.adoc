@@ -5,14 +5,14 @@ There are pros and cons for considering validation as business logic, and Spring
 a design for validation (and data binding) that does not exclude either one of them.
 Specifically, validation should not be tied to the web tier and should be easy to localize,
 and it should be possible to plug in any available validator. Considering these concerns,
-Spring has come up with a `Validator` interface that is both basic and eminently usable
+Spring provides a `Validator` contract that is both basic and eminently usable
 in every layer of an application.
 
 Data binding is useful for letting user input be dynamically bound to the domain
 model of an application (or whatever objects you use to process user input). Spring
 provides the aptly named `DataBinder` to do exactly that. The `Validator` and the
 `DataBinder` make up the `validation` package, which is primarily used in but not
-limited to the MVC framework.
+limited to the web layer.
 
 The `BeanWrapper` is a fundamental concept in the Spring Framework and is used in a lot
 of places. However, you probably do not need to use the `BeanWrapper`
@@ -28,19 +28,12 @@ general type conversion facility, as well as a higher-level "`format`" package f
 formatting UI field values. You can use these packages as simpler alternatives to
 `PropertyEditorSupport` implementations. They are also discussed in this chapter.
 
-.JSR-303/JSR-349 Bean Validation
-****
-As of version 4.0, Spring Framework supports Bean Validation 1.0 (JSR-303) and
-Bean Validation 1.1 (JSR-349) for setup support and adapting them to Spring's
-`Validator` interface.
-
-An application can choose to enable Bean Validation once globally, as described in
-<<validation-beanvalidation>>, and use it exclusively for all validation needs.
-
-An application can also register additional Spring `Validator` instances for each
-`DataBinder` instance, as described in <<validation-binder>>. This may be useful for
-plugging in validation logic without the use of annotations.
-****
+Spring supports Java Bean Validation through setup infrastructure and an adaptor to
+Spring's own `Validator` contract. Applications can enable Bean Validation once globally,
+as described in <<validation-beanvalidation>>, and use it exclusively for all validation
+needs. In the web layer, applications can further register controller-local Spring
+`Validator` instances per `DataBinder`, as described in <<validation-binder>>, which can
+be useful for plugging in custom validation logic.
 
 
 
@@ -285,11 +278,9 @@ perform actions on that bean, such as setting and retrieving properties.
 [[beans-beans-conventions]]
 === Setting and Getting Basic and Nested Properties
 
-Setting and getting properties is done by using the `setPropertyValue`,
-`setPropertyValues`, `getPropertyValue`, and `getPropertyValues` methods which come
-with a couple of overloaded variants. Springs javadoc describes them in more detail.
-The JavaBeans specification has conventions for indicating properties of an
-object. The following table shows some examples of these conventions:
+Setting and getting properties is done through the `setPropertyValue` and
+`getPropertyValue` overloaded method variants of `BeanWrapper`. See their Javadoc for
+details. The below table shows some examples of these conventions:
 
 [[beans-beans-conventions-properties-tbl]]
 .Examples of properties
@@ -1702,18 +1693,18 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring 
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a Global Date and Time Format
 
-By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings by using the `DateFormat.SHORT` style. If you prefer, you can
-change this by defining your own global format.
+By default, date and time fields not annotated with `@DateTimeFormat` are converted from
+strings by using the `DateFormat.SHORT` style. If you prefer, you can change this by
+defining your own global format.
 
-To do so, you need to ensure that Spring does not register default formatters. Instead,
-you should register all formatters manually. Use the
-`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` or
-`org.springframework.format.datetime.DateFormatterRegistrar` class, depending on whether
-you use the Joda-Time library.
+To do that, ensure that Spring does not register default formatters. Instead, register
+formatters manually with the help of:
 
-For example, the following Java configuration registers a global `yyyyMMdd`
-format (this example does not depend on the Joda-Time library):
+* `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
+* `org.springframework.format.datetime.DateFormatterRegistrar`, or
+`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` for Joda-Time.
+
+For example, the following Java configuration registers a global `yyyyMMdd` format:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1729,6 +1720,11 @@ format (this example does not depend on the Joda-Time library):
 
 			// Ensure @NumberFormat is still supported
 			conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+
+			// Register JSR-310 date conversion with a specific global format
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			registrar.registerFormatters(conversionService);
 
 			// Register date conversion with a specific global format
 			DateFormatterRegistrar registrar = new DateFormatterRegistrar();
@@ -1749,8 +1745,15 @@ format (this example does not depend on the Joda-Time library):
 		fun conversionService(): FormattingConversionService {
 			// Use the DefaultFormattingConversionService but do not register defaults
 			return DefaultFormattingConversionService(false).apply {
+
 				// Ensure @NumberFormat is still supported
 				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
+
+				// Register JSR-310 date conversion with a specific global format
+				val registrar = DateTimeFormatterRegistrar()
+				registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				registrar.registerFormatters(this)
+
 				// Register date conversion with a specific global format
 				val registrar = DateFormatterRegistrar()
 				registrar.setFormatter(DateFormatter("yyyyMMdd"))
@@ -1795,38 +1798,28 @@ Time):
 	</beans>
 ----
 
-NOTE: Joda-Time provides separate distinct types to represent `date`, `time`, and `date-time`
-values. The `dateFormatter`, `timeFormatter`, and `dateTimeFormatter` properties of the
-`JodaTimeFormatterRegistrar` should be used to configure the different formats for each
-type. The `DateTimeFormatterFactoryBean` provides a convenient way to create formatters.
-
-NOTE: If you use Spring MVC, remember to explicitly configure the conversion service that
-is used. For Java-based `@Configuration`, this means extending the
-`WebMvcConfigurationSupport` class and overriding the `mvcConversionService()` method.
-For XML, you should use the `conversion-service` attribute of the
-`mvc:annotation-driven` element.
-See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> for details.
-
+Note there are extra considerations when configuring date and time formats in web
+applications. Please see
+<<web.adoc#mvc-config-conversion, WebMVC Conversion and Formatting>> or
+<<web-reactive.adoc#webflux-config-conversion, WebFlux Conversion and Formatting>>.
 
 
 
 [[validation-beanvalidation]]
-== Spring Validation
+== Java Bean Validation
 
-Spring 3 introduced several enhancements to its validation support. First, the JSR-303
-Bean Validation API is fully supported. Second, when used programmatically, Spring's
-`DataBinder` can validate objects as well as bind to them. Third, Spring MVC has
-support for declaratively validating `@Controller` inputs.
+The Spring Framework provides support for the
+https://beanvalidation.org/[Java Bean Validation] API.
 
 
 
 [[validation-beanvalidation-overview]]
-=== Overview of the JSR-303 Bean Validation API
+=== Overview of Bean Validation
 
-JSR-303 standardizes validation constraint declaration and metadata for the Java
-platform. By using this API, you annotate domain model properties with declarative
-validation constraints and the runtime enforces them. You can use a number of built-in
-constraints. You can also define your own custom constraints.
+Bean Validation provides a common way of validation through constraint declaration and
+metadata for Java applications. To use it, you annotate domain model properties with
+declarative validation constraints which are then enforced by the runtime. There are
+built-in constraints, and you can also define your own custom constraints.
 
 Consider the following example, which shows a simple `PersonForm` model with two properties:
 
@@ -1847,8 +1840,7 @@ Consider the following example, which shows a simple `PersonForm` model with two
 	)
 ----
 
-JSR-303 lets you define declarative validation constraints against such properties, as the
-following example shows:
+Bean Validation lets you declare constraints as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1874,13 +1866,10 @@ following example shows:
 	)
 ----
 
-When a JSR-303 Validator validates an instance of this class, these constraints
-are enforced.
-
-For general information on JSR-303 and JSR-349, see the https://beanvalidation.org/[Bean
-Validation website]. For information on the specific capabilities of the default
-reference implementation, see the https://www.hibernate.org/412.html[Hibernate
-Validator] documentation. To learn how to set up a bean validation provider as a Spring
+A Bean Validation validator then validates instances of this class based on the declared
+constraints. See https://beanvalidation.org/[Bean Validation] for general information about
+the API. See the https://hibernate.org/validator/[Hibernate Validator] documentation for
+specific constraints. To learn how to set up a bean validation provider as a Spring
 bean, keep reading.
 
 
@@ -1888,32 +1877,48 @@ bean, keep reading.
 [[validation-beanvalidation-spring]]
 === Configuring a Bean Validation Provider
 
-Spring provides full support for the Bean Validation API. This includes convenient
-support for bootstrapping a JSR-303 or JSR-349 Bean Validation provider as a Spring bean.
-This lets you inject a `javax.validation.ValidatorFactory` or `javax.validation.Validator`
-wherever validation is needed in your application.
+Spring provides full support for the Bean Validation API including the bootstrapping of a
+Bean Validation provider as a Spring bean. This lets you inject a
+`javax.validation.ValidatorFactory` or `javax.validation.Validator` wherever validation is
+needed in your application.
 
-You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring bean,
-as the following example shows:
+You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
+bean, as the following example shows:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+	@Configuration
+
+	public class AppConfig {
+
+		@Bean
+		public LocalValidatorFactoryBean validator() {
+			return new LocalValidatorFactoryBean;
+		}
+	}
+----
+[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+.XML
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 ----
 
-The basic configuration in the preceding example triggers bean validation to initialize by using its
-default bootstrap mechanism. A JSR-303 or JSR-349 provider, such as the Hibernate Validator,
-is expected to be present in the classpath and is automatically detected.
+The basic configuration in the preceding example triggers bean validation to initialize by
+using its default bootstrap mechanism. A Bean Validation provider, such as the Hibernate
+Validator, is expected to be present in the classpath and is automatically detected.
 
 
 [[validation-beanvalidation-spring-inject]]
 ==== Injecting a Validator
 
 `LocalValidatorFactoryBean` implements both `javax.validation.ValidatorFactory` and
-`javax.validation.Validator`, as well as Spring's
-`org.springframework.validation.Validator`. You can inject a reference to either of
-these interfaces into beans that need to invoke validation logic.
+`javax.validation.Validator`, as well as Spring's `org.springframework.validation.Validator`.
+You can inject a reference to either of these interfaces into beans that need to invoke
+validation logic.
 
 You can inject a reference to `javax.validation.Validator` if you prefer to work with the Bean
 Validation API directly, as the following example shows:
@@ -1939,8 +1944,8 @@ Validation API directly, as the following example shows:
 	class MyService(@Autowired private val validator: Validator)
 ----
 
-You can inject a reference to `org.springframework.validation.Validator` if your bean requires
-the Spring Validation API, as the following example shows:
+You can inject a reference to `org.springframework.validation.Validator` if your bean
+requires the Spring Validation API, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1968,11 +1973,10 @@ the Spring Validation API, as the following example shows:
 ==== Configuring Custom Constraints
 
 Each bean validation constraint consists of two parts:
-* A `@Constraint` annotation
-that declares the constraint and its configurable properties.
-* An implementation
-of the `javax.validation.ConstraintValidator` interface that implements the constraint's
-behavior.
+
+* A `@Constraint` annotation that declares the constraint and its configurable properties.
+* An implementation of the `javax.validation.ConstraintValidator` interface that implements
+the constraint's behavior.
 
 To associate a declaration with an implementation, each `@Constraint` annotation
 references a corresponding `ConstraintValidator` implementation class. At runtime, a
@@ -2036,19 +2040,48 @@ As the preceding example shows, a `ConstraintValidator` implementation can have 
 [[validation-beanvalidation-spring-method]]
 ==== Spring-driven Method Validation
 
-You can integrate the method validation feature supported by Bean Validation 1.1 (and, as a custom
-extension, also by Hibernate Validator 4.3) into a Spring context
-through a `MethodValidationPostProcessor` bean definition, as follows:
+You can integrate the method validation feature supported by Bean Validation 1.1 (and, as
+a custom extension, also by Hibernate Validator 4.3) into a Spring context through a
+`MethodValidationPostProcessor` bean definition:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+	@Configuration
+
+	public class AppConfig {
+
+		@Bean
+		public MethodValidationPostProcessor validationPostProcessor() {
+			return new MethodValidationPostProcessor;
+		}
+	}
+
+----
+[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+.XML
 ----
 	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
 ----
 
-To be eligible for Spring-driven method validation, all target classes need to be annotated with
-Spring's `@Validated` annotation. (Optionally, you can also declare the validation groups to use.)
-See the {api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
-javadoc for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
+To be eligible for Spring-driven method validation, all target classes need to be annotated
+with Spring's `@Validated` annotation, which can optionally also declare the validation
+groups to use. See
+{api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
+for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
+
+[TIP]
+====
+Method validation relies on <<core.adoc#aop-introduction-proxies,AOP Proxies>> around the
+target classes, either JDK dynamic proxies for methods on interfaces or CGLIB proxies.
+There are certain limitations with the use of proxies, some of which are described in
+<<core.adoc#aop-understanding-aop-proxies,Understanding AOP Proxies>>. In addition remember
+to always use methods and accessors on proxied classes; direct field access will not work.
+====
+
+
 
 
 [[validation-beanvalidation-spring-other]]
@@ -2108,7 +2141,8 @@ logic after binding to a target object:
 You can also configure a `DataBinder` with multiple `Validator` instances through
 `dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when
 combining globally configured bean validation with a Spring `Validator` configured
-locally on a DataBinder instance. See <<validation-mvc-configuring>>.
+locally on a DataBinder instance. See
+<<web.adoc#mvc-config-validation,Spring MVC Validation Configuration>>.
 
 
 

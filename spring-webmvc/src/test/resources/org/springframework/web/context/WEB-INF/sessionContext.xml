@@ -3,12 +3,12 @@
 
 <beans>
 
-	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="rob" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="dummy"/>
 		<property name="age" value="-1"/>
 	</bean>
 
-	<bean id="rodProto" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="rodProto" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name" value="dummy"/>
 		<property name="age" value="-1"/>
 	</bean>

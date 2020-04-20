@@ -102,6 +102,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	 * {@link #decode(DataBuffer, ResolvableType, MimeType, Map)} instead
 	 */
 	@Deprecated
+	@Nullable
 	protected T decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

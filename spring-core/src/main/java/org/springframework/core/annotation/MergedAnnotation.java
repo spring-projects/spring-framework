@@ -455,7 +455,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * merged annotation.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values
 	 * are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
@@ -463,7 +463,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get an immutable {@link Map} that contains all the annotation attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	Map<String, Object> asMap(Adapt... adaptations);
@@ -473,7 +473,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
 	 * @param factory a map factory
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values
 	 */
 	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);

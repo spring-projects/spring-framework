@@ -38,8 +38,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -349,12 +347,12 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
-		public int read(@NotNull byte[] b, int off, int len) throws IOException {
+		public int read(byte[] b, int off, int len) throws IOException {
 			return this.delegate.read(b, off, len);
 		}
 
 		@Override
-		public int read(@NotNull byte[] b) throws IOException {
+		public int read(byte[] b) throws IOException {
 			return this.delegate.read(b);
 		}
 
