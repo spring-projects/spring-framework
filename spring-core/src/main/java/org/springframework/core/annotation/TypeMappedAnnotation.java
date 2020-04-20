@@ -329,7 +329,18 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected A createSynthesized() {
+		if (this.rootAttributes instanceof Annotation) {
+			// Nothing to synthesize?
+			if (this.resolvedRootMirrors.length == 0 && this.resolvedMirrors.length == 0) {
+				return (A) this.rootAttributes;
+			}
+			// Already synthesized?
+			if (this.rootAttributes instanceof SynthesizedAnnotation) {
+				return (A) this.rootAttributes;
+			}
+		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
 	}
 
