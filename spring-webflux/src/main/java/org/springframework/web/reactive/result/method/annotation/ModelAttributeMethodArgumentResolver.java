@@ -122,7 +122,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
-			return binder.bind(exchange)
+			return bindRequestParameters(binder, exchange)
 					.doOnError(bindingResultMono::onError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
@@ -145,6 +145,15 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}));
 		});
+	}
+
+	/**
+	 * Extension point to bind the request to the target object.
+	 * @param binder the data binder instance to use for the binding
+	 * @param exchange the current request
+	 */
+	protected Mono<Void> bindRequestParameters(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder.bind(exchange);
 	}
 
 	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
