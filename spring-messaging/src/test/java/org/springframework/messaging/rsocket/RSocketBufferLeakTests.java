@@ -36,6 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -149,6 +150,7 @@ class RSocketBufferLeakTests {
 	}
 
 	@Test // gh-24741
+	@Disabled // pending https://github.com/rsocket/rsocket-java/pull/777
 	void noSuchRouteOnChannelInteraction() {
 		Flux<String> input = Flux.just("foo", "bar", "baz");
 		Flux<String> result = requester.route("no-such-route").data(input).retrieveFlux(String.class);
