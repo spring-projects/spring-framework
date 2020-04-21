@@ -151,13 +151,15 @@ public class MultipartFormDataRequestMatchers {
 	}
 
 
-	private void assertByteArrayMatch(String parameterName, List<byte[]> expectedFiles, List<MultipartFile> actualFiles) {
+	private void assertByteArrayMatch(String parameterName, List<byte[]> expectedFiles,
+									  List<MultipartFile> actualFiles) {
 		for (int index = 0; index < actualFiles.size(); index++) {
 			MultipartFile multiPartFile = actualFiles.get(index);
 			byte[] expectedContent = expectedFiles.get(index);
 
 			try {
-				assertEquals("Content mismatch for file " + parameterName, expectedContent, multiPartFile.getBytes());
+				assertEquals("Content mismatch for file " + parameterName, expectedContent,
+						multiPartFile.getBytes());
 			}
 			catch (IOException ex) {
 				throw new AssertionError("Could not get bytes from actual multipart files", ex);
@@ -173,7 +175,8 @@ public class MultipartFormDataRequestMatchers {
 			try {
 				byte[] fileContent = IOUtils.toByteArray(expectedResource.getInputStream());
 
-				assertEquals("Content mismatch for file " + parameterName, fileContent, multiPartFile.getBytes());
+				assertEquals("Content mismatch for file " + parameterName, fileContent,
+						multiPartFile.getBytes());
 				assertEquals("Filename ", expectedResource.getFilename(), multiPartFile.getOriginalFilename());
 			}
 			catch (IOException ex) {
