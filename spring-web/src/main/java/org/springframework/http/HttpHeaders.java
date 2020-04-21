@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -672,7 +672,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the {@code Content-Disposition} header when creating a
-	 * {@code "multipart/form-data"} request.
+	 * {@code "multipart/form-data"} request. The given filename is formatted
+	 * as a quoted-string, as defined in RFC 2616, section 2.2, and any quote
+	 * characters within the filename value will be escaped with a backslash,
+	 * e.g. {@code "foo\"bar.txt"} becomes {@code "foo\\\"bar.txt"}.
 	 * <p>Applications typically would not set this header directly but
 	 * rather prepare a {@code MultiValueMap<String, Object>}, containing an
 	 * Object or a {@link org.springframework.core.io.Resource} for each part,
@@ -686,7 +689,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		builder.append(name).append('\"');
 		if (filename != null) {
 			builder.append("; filename=\"");
-			builder.append(filename).append('\"');
+			builder.append(escapeQuotationsInFilename(filename)).append('\"');
 		}
 		set(CONTENT_DISPOSITION, builder.toString());
 	}
@@ -707,20 +710,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Deprecated
 	public void setContentDispositionFormData(String name, String filename, Charset charset) {
-		Assert.notNull(name, "'name' must not be null");
-		StringBuilder builder = new StringBuilder("form-data; name=\"");
-		builder.append(name).append('\"');
-		if (filename != null) {
-			if (charset == null || charset.name().equals("US-ASCII")) {
-				builder.append("; filename=\"");
-				builder.append(filename).append('\"');
-			}
-			else {
-				builder.append("; filename*=");
-				builder.append(encodeHeaderFieldParam(filename, charset));
-			}
+		if (filename == null || charset == null || charset.name().equals("US-ASCII")) {
+			setContentDispositionFormData(name, filename);
+			return;
 		}
-		set(CONTENT_DISPOSITION, builder.toString());
+		Assert.notNull(name, "'name' must not be null");
+		String encodedFileName = encodeHeaderFieldParam(filename, charset);
+		set(CONTENT_DISPOSITION, "form-data; name=\"" + name + '\"' + "; filename*=" + encodedFileName);
 	}
 
 	/**
@@ -1324,6 +1320,23 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return new HttpHeaders(headers, true);
 	}
 
+	private static String escapeQuotationsInFilename(String filename) {
+		if (filename.indexOf('"') == -1 && filename.indexOf('\\') == -1) {
+			return filename;
+		}
+		boolean escaped = false;
+		StringBuilder sb = new StringBuilder();
+		for (char c : filename.toCharArray()) {
+			sb.append((c == '"' && !escaped) ? "\\\"" : c);
+			escaped = (!escaped && c == '\\');
+		}
+		// Remove backslash at the end..
+		if (escaped) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Encode the given header field param as describe in RFC 5987.
 	 * @param input the header field param
@@ -1331,12 +1344,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	static String encodeHeaderFieldParam(String input, Charset charset) {
+	private static String encodeHeaderFieldParam(String input, Charset charset) {
 		Assert.notNull(input, "Input String should not be null");
 		Assert.notNull(charset, "Charset should not be null");
-		if (charset.name().equals("US-ASCII")) {
-			return input;
-		}
+		Assert.isTrue(!charset.name().equals("US-ASCII"), "ASCII does not require encoding");
 		Assert.isTrue(charset.name().equals("UTF-8") || charset.name().equals("ISO-8859-1"),
 				"Charset should be UTF-8 or ISO-8859-1");
 		byte[] source = input.getBytes(charset);

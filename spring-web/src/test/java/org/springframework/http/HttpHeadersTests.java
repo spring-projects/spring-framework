@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.http;
 
+import org.hamcrest.Matchers;
+import org.junit.Test;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -28,12 +32,15 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.function.BiConsumer;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -311,21 +318,70 @@ public class HttpHeadersTests {
 		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void contentDisposition() {
 		headers.setContentDispositionFormData("name", null);
 		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
 				headers.getFirst("Content-Disposition"));
 
-		headers.setContentDispositionFormData("name", "filename");
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
+		headers.setContentDispositionFormData("name", "foo.txt");
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"foo.txt\"",
+				headers.getFirst("Content-Disposition"));
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test // SPR-14547
+	public void contentDispositionWithCharset() {
+
+		headers.setContentDispositionFormData("name", "foo.txt", StandardCharsets.US_ASCII);
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"foo.txt\"",
 				headers.getFirst("Content-Disposition"));
 
-		headers.setContentDispositionFormData("name", "中文.txt", Charset.forName("UTF-8"));
+		headers.setContentDispositionFormData("name", "中文.txt", StandardCharsets.UTF_8);
 		assertEquals("Invalid Content-Disposition header",
 				"form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
 				headers.getFirst("Content-Disposition"));
+
+		try {
+			headers.setContentDispositionFormData("name", "foo.txt", StandardCharsets.UTF_16);
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	@Test // gh-24580
+	public void contentDispositionWithFilenameWithQuotes() {
+		BiConsumer<String, String> tester = (filenameIn, filenameOut) -> {
+			headers.setContentDispositionFormData("name", filenameIn);
+			assertEquals("form-data; name=\"name\"; filename=\"" + filenameOut + "\"",
+					headers.getFirst("Content-Disposition"));
+		};
+
+		tester.accept("foo.txt", "foo.txt");
+
+		String filename = "\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		filename = "\\\"foo.txt";
+		tester.accept(filename, filename);
+
+		filename = "\\\\\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		filename = "\\\\\\\"foo.txt";
+		tester.accept(filename, filename);
+
+		filename = "\\\\\\\\\"foo.txt";
+		tester.accept(filename, "\\" + filename);
+
+		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
+		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
+
+		tester.accept("foo.txt\\", "foo.txt");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
 	}
 
 	@Test  // SPR-11917
@@ -409,19 +465,4 @@ public class HttpHeadersTests {
 		headers.setAccessControlRequestMethod(HttpMethod.POST);
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
 	}
-
-	@Test  // SPR-14547
-	public void encodeHeaderFieldParam() {
-		String result = HttpHeaders.encodeHeaderFieldParam("test.txt", Charset.forName("US-ASCII"));
-		assertEquals("test.txt", result);
-
-		result = HttpHeaders.encodeHeaderFieldParam("中文.txt", Charset.forName("UTF-8"));
-		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void encodeHeaderFieldParamInvalidCharset() {
-		HttpHeaders.encodeHeaderFieldParam("test", Charset.forName("UTF-16"));
-	}
-
 }
