@@ -130,8 +130,7 @@ public abstract class PropertiesLoaderUtils {
 	 * @throws IOException if loading failed
 	 */
 	public static void fillProperties(Properties props, Resource resource) throws IOException {
-		InputStream is = resource.getInputStream();
-		try {
+		try (InputStream is = resource.getInputStream()) {
 			String filename = resource.getFilename();
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 				props.loadFromXML(is);
@@ -139,9 +138,6 @@ public abstract class PropertiesLoaderUtils {
 			else {
 				props.load(is);
 			}
-		}
-		finally {
-			is.close();
 		}
 	}
 
