@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.http.MockHttpInputMessage;
@@ -41,7 +42,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * <p>An instance of this class is typically accessed via {@link MockRestRequestMatchers#formData()}
  *
  * @author Valentin Spac
- * @since 5.2
+ * @since 5.3
  */
 public class FormDataRequestMatchers {
 
@@ -51,40 +52,36 @@ public class FormDataRequestMatchers {
 				.map(Matchers::equalTo)
 				.collect(Collectors.toList());
 
-		return this.value(parameter, matcherList);
+		return value(parameter, matcherList);
 	}
 
 	@SafeVarargs
 	@SuppressWarnings("varargs")
 	public final RequestMatcher value(String parameter, Matcher<? super String>... matchers) {
-		return this.value(parameter, Arrays.stream(matchers).collect(Collectors.toList()));
+		return value(parameter, Arrays.stream(matchers).collect(Collectors.toList()));
 	}
 
 	public RequestMatcher value(String parameter, Matcher<Iterable<? extends String>> matchers) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultiValueMap<String, String> requestParams) {
-				assertValueCount(parameter, requestParams, 1);
+		return request -> {
+			MultiValueMap<String, String> requestParams = FormDataRequestParser.requestParams(request);
+			assertValueCount(parameter, requestParams, 1);
 
-				List<String> values = requestParams.get(parameter);
-				assertThat("Request parameter [" + parameter + "]", values, matchers);
-			}
+			List<String> values = requestParams.get(parameter);
+			assertThat("Request parameter [" + parameter + "]", values, matchers);
 		};
 	}
 
 
 	private RequestMatcher value(String parameter, List<Matcher<? super String>> matchers) {
-		return new AbstractFormDataRequestMatcher() {
-			@Override
-			protected void matchInternal(MultiValueMap<String, String> requestParams) {
-				assertValueCount(parameter, requestParams, matchers.size());
+		return request -> {
+			MultiValueMap<String, String> requestParams = FormDataRequestParser.requestParams(request);
+			assertValueCount(parameter, requestParams, matchers.size());
 
-				List<String> values = requestParams.get(parameter);
+			List<String> values = requestParams.get(parameter);
 
-				Assert.state(values != null, "No request parameter values");
-				for (int i = 0; i < matchers.size(); i++) {
-					assertThat("Request parameter [" + parameter + "]", values.get(i), matchers.get(i));
-				}
+			Assert.state(values != null, "No request parameter values");
+			for (int i = 0; i < matchers.size(); i++) {
+				assertThat("Request parameter [" + parameter + "]", values.get(i), matchers.get(i));
 			}
 		};
 	}
@@ -100,24 +97,16 @@ public class FormDataRequestMatchers {
 		}
 	}
 
-	private abstract static class AbstractFormDataRequestMatcher implements RequestMatcher {
-		private FormHttpMessageConverter formHttpMessageConverter;
+	private static class FormDataRequestParser {
+		private static final FormHttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
 
-		AbstractFormDataRequestMatcher() {
-			this.formHttpMessageConverter = new FormHttpMessageConverter();
-		}
-
-		@Override
-		public final void match(ClientHttpRequest request) throws IOException, AssertionError {
+		@NotNull
+		private static MultiValueMap<String, String> requestParams(ClientHttpRequest request) throws IOException {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			MockHttpInputMessage mockHttpInputMessage = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
 
-			MultiValueMap<String, String> requestParams = this.formHttpMessageConverter.read(null, mockHttpInputMessage);
-
-			matchInternal(requestParams);
+			return formHttpMessageConverter.read(null, mockHttpInputMessage);
 		}
-
-		abstract void matchInternal(MultiValueMap<String, String> requestParams) throws IOException;
 	}
 
 }
