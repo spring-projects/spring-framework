@@ -159,6 +159,13 @@ public class ContentRequestMatchers {
 	}
 
 	/**
+	 * Access to request body matchers. Matches content type {@link MediaType#MULTIPART_FORM_DATA}
+	 */
+	public MultipartFormDataRequestMatchers multipart() {
+		return new MultipartFormDataRequestMatchers();
+	}
+
+	/**
 	 * Parse the request body and the given String as XML and assert that the
 	 * two are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
