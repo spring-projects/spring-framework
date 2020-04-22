@@ -27,7 +27,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.DuplexConnection;
-import io.rsocket.RSocketFactory;
 import io.rsocket.core.DefaultConnectionSetupPayload;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -109,7 +108,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		verify(this.transport).connect(anyInt());
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
-		verify(factoryConfigurer).configure(any(RSocketFactory.ClientRSocketFactory.class));
+		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
 		assertThat(this.connectorConfigurer.connector()).isNotNull();
 	}
 
