@@ -1956,7 +1956,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithAttributeAliasesInNestedAnnotations() throws Exception {
+	void synthesizeWithArrayOfAnnotations() throws Exception {
 		Hierarchy hierarchy = HierarchyClass.class.getAnnotation(Hierarchy.class);
 		assertThat(hierarchy).isNotNull();
 		Hierarchy synthesizedHierarchy = MergedAnnotation.from(hierarchy).synthesize();
@@ -1964,33 +1964,17 @@ class MergedAnnotationsTests {
 		TestConfiguration[] configs = synthesizedHierarchy.value();
 		assertThat(configs).isNotNull();
 		assertThat(configs).allMatch(SynthesizedAnnotation.class::isInstance);
-		assertThat(
-				Arrays.stream(configs).map(TestConfiguration::location)).containsExactly(
-						"A", "B");
-		assertThat(Arrays.stream(configs).map(TestConfiguration::value)).containsExactly(
-				"A", "B");
-	}
+		assertThat(configs).extracting(TestConfiguration::value).containsExactly("A", "B");
+		assertThat(configs).extracting(TestConfiguration::location).containsExactly("A", "B");
 
-	@Test
-	void synthesizeWithArrayOfAnnotations() throws Exception {
-		Hierarchy hierarchy = HierarchyClass.class.getAnnotation(Hierarchy.class);
-		assertThat(hierarchy).isNotNull();
-		Hierarchy synthesizedHierarchy = MergedAnnotation.from(hierarchy).synthesize();
-		assertThat(synthesizedHierarchy).isInstanceOf(SynthesizedAnnotation.class);
-		TestConfiguration contextConfig = TestConfigurationClass.class.getAnnotation(
-				TestConfiguration.class);
+		TestConfiguration contextConfig = TestConfigurationClass.class.getAnnotation(TestConfiguration.class);
 		assertThat(contextConfig).isNotNull();
-		TestConfiguration[] configs = synthesizedHierarchy.value();
-		assertThat(
-				Arrays.stream(configs).map(TestConfiguration::location)).containsExactly(
-						"A", "B");
 		// Alter array returned from synthesized annotation
 		configs[0] = contextConfig;
+		assertThat(configs).extracting(TestConfiguration::value).containsExactly("simple.xml", "B");
 		// Re-retrieve the array from the synthesized annotation
 		configs = synthesizedHierarchy.value();
-		assertThat(
-				Arrays.stream(configs).map(TestConfiguration::location)).containsExactly(
-						"A", "B");
+		assertThat(configs).extracting(TestConfiguration::value).containsExactly("A", "B");
 	}
 
 	@Test
