@@ -47,6 +47,10 @@ import org.springframework.util.StringUtils;
  * and captures it as a variable named "spring"</li>
  * </ul>
  *
+ * Notable behavior difference with {@code AntPathMatcher}:<br>
+ * {@code **} and its capturing variant <code>{*spring}</code> cannot be used in the middle of a pattern
+ * string, only at the end: {@code /pages/{**}} is valid, but {@code /pages/{**}/details} is not.
+ *
  * <h3>Examples</h3>
  * <ul>
  * <li>{@code /pages/t?st.html} &mdash; matches {@code /pages/test.html} as well as

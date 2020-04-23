@@ -1402,12 +1402,44 @@ The following example uses type and method level mappings:
 
 You can map requests by using glob patterns and wildcards:
 
-* `?` matches one character
-* `*` matches zero or more characters within a path segment
-* `**` match zero or more path segments
+[cols="2,3,5"]
+|===
+|Pattern |Description |Example
 
-You can also declare URI variables and access their values with `@PathVariable`,
-as the following example shows:
+| `+?+`
+| Matches one character
+| `+"/pages/t?st.html"+`
+
+matches `+"/pages/test.html"+`
+and `+"/pages/t3st.html"+`
+
+| `+*+`
+| Matches zero or more characters within a path segment
+| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
+
+`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`
+
+| `+**+`
+| Matches zero or more path segments until the end of the path
+| `+"/resources/**"+` matches `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
+
+`+"/resources/**/file.png"+` is invalid as `+**+` is only allowed at the end of the path.
+
+| `+{name}+`
+| Matches a path segment and captures it as a variable named "name"
+| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
+
+| `+{name:[a-z]+}+`
+| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
+| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
+
+| `+{*path}+`
+| Matches zero or more path segments until the end of the path and captures it as a variable named "path"
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=resources/file.png+`
+
+|===
+
+Captured URI variables can be accessed with `@PathVariable`, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
