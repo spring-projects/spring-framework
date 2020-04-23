@@ -40,7 +40,7 @@ public abstract class AbstractCircularImportDetectionTests {
 	public void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
-			newParser().parse(loadAsConfigurationSource(A.class), "A");
+			newParser().parse(loadAsConfigurationSource(A.class), "A", false);
 		}
 		catch (BeanDefinitionParsingException ex) {
 			assertThat(ex.getMessage().contains(
@@ -55,7 +55,7 @@ public abstract class AbstractCircularImportDetectionTests {
 	public void complexCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
-			newParser().parse(loadAsConfigurationSource(X.class), "X");
+			newParser().parse(loadAsConfigurationSource(X.class), "X", false);
 		}
 		catch (BeanDefinitionParsingException ex) {
 			assertThat(ex.getMessage().contains(

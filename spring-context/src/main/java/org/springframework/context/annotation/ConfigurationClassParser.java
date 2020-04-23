@@ -104,6 +104,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Vladislav Kisel
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -171,13 +172,14 @@ class ConfigurationClassParser {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
 				if (bd instanceof AnnotatedBeanDefinition) {
-					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
+					boolean isFoundByScan = ScannedGenericBeanDefinition.class.isAssignableFrom(bd.getClass());
+					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName(), isFoundByScan);
 				}
 				else if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
 					parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
 				}
 				else {
-					parse(bd.getBeanClassName(), holder.getBeanName());
+					parse(bd.getBeanClassName(), holder.getBeanName(), false);
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
@@ -192,18 +194,18 @@ class ConfigurationClassParser {
 		this.deferredImportSelectorHandler.process();
 	}
 
-	protected final void parse(@Nullable String className, String beanName) throws IOException {
+	protected final void parse(@Nullable String className, String beanName, boolean isFoundByScan) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
+		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER, isFoundByScan);
 	}
 
 	protected final void parse(Class<?> clazz, String beanName) throws IOException {
-		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER);
+		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER, false);
 	}
 
-	protected final void parse(AnnotationMetadata metadata, String beanName) throws IOException {
-		processConfigurationClass(new ConfigurationClass(metadata, beanName), DEFAULT_EXCLUSION_FILTER);
+	protected final void parse(AnnotationMetadata metadata, String beanName, boolean isFoundByScan) throws IOException {
+		processConfigurationClass(new ConfigurationClass(metadata, beanName), DEFAULT_EXCLUSION_FILTER, isFoundByScan);
 	}
 
 	/**
@@ -221,7 +223,7 @@ class ConfigurationClassParser {
 	}
 
 
-	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
+	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter, boolean isFoundByScan) throws IOException {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
@@ -233,6 +235,10 @@ class ConfigurationClassParser {
 					existingClass.mergeImportedBy(configClass);
 				}
 				// Otherwise ignore new imported config class; existing non-imported class overrides it.
+				return;
+			}
+			else if (existingClass.isImported() && isFoundByScan) {
+				// The config found by scan should not override the imported one
 				return;
 			}
 			else {
@@ -300,7 +306,7 @@ class ConfigurationClassParser {
 						bdCand = holder.getBeanDefinition();
 					}
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
-						parse(bdCand.getBeanClassName(), holder.getBeanName());
+						parse(bdCand.getBeanClassName(), holder.getBeanName(), true);
 					}
 				}
 			}
@@ -368,7 +374,7 @@ class ConfigurationClassParser {
 				else {
 					this.importStack.push(configClass);
 					try {
-						processConfigurationClass(candidate.asConfigClass(configClass), filter);
+						processConfigurationClass(candidate.asConfigClass(configClass), filter, false);
 					}
 					finally {
 						this.importStack.pop();
@@ -596,7 +602,7 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
-						processConfigurationClass(candidate.asConfigClass(configClass), exclusionFilter);
+						processConfigurationClass(candidate.asConfigClass(configClass), exclusionFilter, false);
 					}
 				}
 			}

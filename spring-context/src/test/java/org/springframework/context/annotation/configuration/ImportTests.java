@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.componentscan.ordered.SiblingImportingConfigA;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Vladislav Kisel
  */
 public class ImportTests {
 
@@ -354,6 +356,22 @@ public class ImportTests {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * An imported config must override a scanned one, thus bean definitions from the imported class is overridden by its importer.
+	 * gh #24643
+	 */
+	@Test
+	public void importedConfigOverridesScannedOne() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.scan(SiblingImportingConfigA.class.getPackage().getName());
+		ctx.refresh();
+
+		assertThat(ctx.getBean("a-imports-b")).isEqualTo("valueFromA");
+		assertThat(ctx.getBean("b-imports-a")).isEqualTo("valueFromBR");
 	}
 
 }
