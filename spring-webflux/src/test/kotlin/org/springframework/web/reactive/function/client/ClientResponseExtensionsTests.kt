@@ -55,6 +55,12 @@ class ClientResponseExtensionsTests {
 	}
 
 	@Test
+	fun `bodyToFlow with generic type parameters`() {
+		response.bodyToFlow(Foo::class)
+		verify { response.bodyToFlux(Foo::class.java) }
+	}
+
+	@Test
 	fun `toEntity with reified type parameters`() {
 		response.toEntity<List<Foo>>()
 		verify { response.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
@@ -76,11 +82,29 @@ class ClientResponseExtensionsTests {
 	}
 
 	@Test
+	fun awaitBodyGeneric() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono(String::class.java) } returns Mono.just("foo")
+		runBlocking {
+			assertThat(response.awaitBody(String::class)).isEqualTo("foo")
+		}
+	}
+
+	@Test
 	fun awaitBodyOrNull() {
 		val response = mockk<ClientResponse>()
 		every { response.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
 			assertThat(response.awaitBodyOrNull<String>()).isNull()
+		}
+	}
+
+	@Test
+	fun awaitBodyOrNullGeneric() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono(String::class.java) } returns Mono.empty()
+		runBlocking {
+			assertThat(response.awaitBodyOrNull(String::class)).isNull()
 		}
 	}
 
@@ -95,12 +119,32 @@ class ClientResponseExtensionsTests {
 	}
 
 	@Test
+	fun awaitEntityGeneric() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity("foo", HttpStatus.OK)
+		every { response.toEntity(String::class.java) } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitEntity(String::class)).isEqualTo(entity)
+		}
+	}
+
+	@Test
 	fun awaitEntityList() {
 		val response = mockk<ClientResponse>()
 		val entity = ResponseEntity(listOf("foo"), HttpStatus.OK)
 		every { response.toEntityList<String>() } returns Mono.just(entity)
 		runBlocking {
 			assertThat(response.awaitEntityList<String>()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun awaitEntityListGeneric() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity(listOf("foo"), HttpStatus.OK)
+		every { response.toEntityList(String::class.java) } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitEntityList(String::class)).isEqualTo(entity)
 		}
 	}
 

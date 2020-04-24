@@ -24,6 +24,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import kotlin.reflect.KClass
 
 /**
  * Extension for [ClientResponse.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -57,6 +58,16 @@ inline fun <reified T : Any> ClientResponse.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 
 /**
+ * Generic Coroutines [kotlinx.coroutines.flow.Flow] based variant of [ClientResponse.bodyToFlux].
+ * Please consider inline variant `bodyToFlow<Foo>` if possible
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+fun <T : Any> ClientResponse.bodyToFlow(clazz: KClass<T>): Flow<T> =
+		bodyToFlux(clazz.java).asFlow()
+
+/**
  * Extension for [ClientResponse.toEntity] providing a `toEntity<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
@@ -88,6 +99,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
 
 /**
+ * Generic non-nullable Coroutines variant of [ClientResponse.bodyToMono].
+ * Please consider inline variant `awaitBody<Foo>` if possible
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ClientResponse.awaitBody(clazz: KClass<T>): T =
+		bodyToMono(clazz.java).awaitSingle()
+
+/**
  * Nullable coroutines variant of [ClientResponse.bodyToMono].
  *
  * @author Sebastien Deleuze
@@ -95,6 +116,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitFirstOrNull()
+
+/**
+ * Generic Nullable coroutines variant of [ClientResponse.bodyToMono].
+ * Please consider inline variant `awaitBodyOrNull<Foo>` if possible
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ClientResponse.awaitBodyOrNull(clazz: KClass<T>): T? =
+		bodyToMono(clazz.java).awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ClientResponse.toEntity].
@@ -106,6 +137,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntity(): ResponseEntit
 		toEntity<T>().awaitSingle()
 
 /**
+ * Generic Coroutines variant of [ClientResponse.toEntity].
+ * Please consider inline variant `awaitEntity<Foo>` if possible
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ClientResponse.awaitEntity(clazz: KClass<T>): ResponseEntity<T> =
+		toEntity(clazz.java).awaitSingle()
+
+/**
  * Coroutines variant of [ClientResponse.toEntityList].
  *
  * @author Sebastien Deleuze
@@ -113,3 +154,13 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntity(): ResponseEntit
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitEntityList(): ResponseEntity<List<T>> =
 		toEntityList<T>().awaitSingle()
+
+/**
+ * Generic Coroutines variant of [ClientResponse.toEntityList].
+ * Please consider inline variant `awaitEntityList<Foo>` if possible
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ClientResponse.awaitEntityList(clazz: KClass<T>): ResponseEntity<List<T>> =
+		toEntityList(clazz.java).awaitSingle()

@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.InetSocketAddress
 import java.security.Principal
+import kotlin.reflect.KClass
 
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -63,6 +64,15 @@ inline fun <reified T : Any> ServerRequest.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 
 /**
+ * Generic Coroutines [kotlinx.coroutines.flow.Flow] based variant of [ServerRequest.bodyToFlux].
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+fun <T : Any> ServerRequest.bodyToFlow(clazz: KClass<T>): Flow<T> =
+		bodyToFlux(clazz.java).asFlow()
+
+/**
  * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
  * @author Sebastien Deleuze
@@ -72,6 +82,15 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
 
 /**
+ * Non-nullable Generic Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ServerRequest.awaitBody(clazz: KClass<T>): T =
+		bodyToMono(clazz.java).awaitSingle()
+
+/**
  * Nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
  * @author Sebastien Deleuze
@@ -79,6 +98,15 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
  */
 suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitFirstOrNull()
+
+/**
+ * Nullable Generic Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Igor Manushin
+ * @since 5.2
+ */
+suspend fun <T : Any> ServerRequest.awaitBodyOrNull(clazz: KClass<T>): T? =
+		bodyToMono(clazz.java).awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.formData].

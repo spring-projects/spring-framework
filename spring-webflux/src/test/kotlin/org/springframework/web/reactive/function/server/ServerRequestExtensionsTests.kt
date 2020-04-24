@@ -63,7 +63,13 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun awaitBody() {
+	fun `bodyToFlow with generic type parameters`() {
+		request.bodyToFlow(String::class)
+		verify { request.bodyToFlux(String::class.java) }
+	}
+
+	@Test
+	fun `awaitBody with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
 			assertThat(request.awaitBody<String>()).isEqualTo("foo")
@@ -71,10 +77,26 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun awaitBodyOrNull() {
+	fun `awaitBody with generic type parameters`() {
+		every { request.bodyToMono(String::class.java) } returns Mono.just("foo")
+		runBlocking {
+			assertThat(request.awaitBody(String::class)).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
 			assertThat(request.awaitBodyOrNull<String>()).isNull()
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull with generic type parameters`() {
+		every { request.bodyToMono(String::class.java) } returns Mono.empty()
+		runBlocking {
+			assertThat(request.awaitBodyOrNull(String::class)).isNull()
 		}
 	}
 
