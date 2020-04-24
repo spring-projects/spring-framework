@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import kotlin.reflect.KClass
 
 /**
  * Extension for [ClientResponse.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -57,6 +58,16 @@ inline fun <reified T : Any> ClientResponse.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 
 /**
+ * `KClass` coroutines [kotlinx.coroutines.flow.Flow] based variant of [ClientResponse.bodyToFlux].
+ * Please consider `bodyToFlow<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+fun <T : Any> ClientResponse.bodyToFlow(clazz: KClass<T>): Flow<T> =
+		bodyToFlux(clazz.java).asFlow()
+
+/**
  * Extension for [ClientResponse.toEntity] providing a `toEntity<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
@@ -88,6 +99,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
 
 /**
+ * `KClass` non-nullable coroutines variant of [ClientResponse.bodyToMono].
+ * Please consider `awaitBody<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+suspend fun <T : Any> ClientResponse.awaitBody(clazz: KClass<T>): T =
+		bodyToMono(clazz.java).awaitSingle()
+
+/**
  * Nullable coroutines variant of [ClientResponse.bodyToMono].
  *
  * @author Sebastien Deleuze
@@ -95,6 +116,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitFirstOrNull()
+
+/**
+ * `KClass` nullable coroutines variant of [ClientResponse.bodyToMono].
+ * Please consider `awaitBodyOrNull<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+suspend fun <T : Any> ClientResponse.awaitBodyOrNull(clazz: KClass<T>): T? =
+		bodyToMono(clazz.java).awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ClientResponse.toEntity].
@@ -106,6 +137,16 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntity(): ResponseEntit
 		toEntity<T>().awaitSingle()
 
 /**
+ * `KClass` coroutines variant of [ClientResponse.toEntity].
+ * Please consider `awaitEntity<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+suspend fun <T : Any> ClientResponse.awaitEntity(clazz: KClass<T>): ResponseEntity<T> =
+		toEntity(clazz.java).awaitSingle()
+
+/**
  * Coroutines variant of [ClientResponse.toEntityList].
  *
  * @author Sebastien Deleuze
@@ -113,3 +154,13 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntity(): ResponseEntit
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitEntityList(): ResponseEntity<List<T>> =
 		toEntityList<T>().awaitSingle()
+
+/**
+ * `KClass` coroutines variant of [ClientResponse.toEntityList].
+ * Please consider `awaitEntityList<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+suspend fun <T : Any> ClientResponse.awaitEntityList(clazz: KClass<T>): ResponseEntity<List<T>> =
+		toEntityList(clazz.java).awaitSingle()
