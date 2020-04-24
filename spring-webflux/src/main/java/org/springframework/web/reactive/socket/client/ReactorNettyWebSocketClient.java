@@ -128,6 +128,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
 		return getHttpClient()
