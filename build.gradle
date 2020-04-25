@@ -186,18 +186,18 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.2.4') {
+			dependencySet(group: 'org.mockito', version: '3.3.3') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.9.3"
+			dependency "io.mockk:mockk:1.10.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.38.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.39.1") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.38.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.39.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -327,7 +327,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.30"
+		toolVersion = "8.31"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
