@@ -596,8 +596,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private int getAttributeIndex(String attributeName, boolean required) {
 		Assert.hasText(attributeName, "Attribute name must not be null");
-		int attributeIndex = (isFiltered(attributeName) ? -1 :
-				this.mapping.getAttributes().indexOf(attributeName));
+		int attributeIndex = (isFiltered(attributeName) ? -1 : this.mapping.getAttributes().indexOf(attributeName));
 		if (attributeIndex == -1 && required) {
 			throw new NoSuchElementException("No attribute named '" + attributeName +
 					"' present in merged annotation " + getType().getName());
@@ -648,6 +647,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Nullable
 	static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
 			AnnotationTypeMapping mapping, MergedAnnotation<?> annotation, IntrospectionFailureLogger logger) {
+
 		if (annotation instanceof TypeMappedAnnotation) {
 			TypeMappedAnnotation<?> typeMappedAnnotation = (TypeMappedAnnotation<?>) annotation;
 			return createIfPossible(mapping, typeMappedAnnotation.source,
