@@ -16,7 +16,7 @@ the same <<web#mvc-servlet>>.
 
 In WebMvc.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a `ServerResponse`.
-Both the request as the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer JDK 8-friendly
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
