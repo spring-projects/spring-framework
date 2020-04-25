@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,13 @@ import org.springframework.lang.Nullable;
  *     .map(mergedAnnotation -&gt; mergedAnnotation.getString("value"))
  *     .forEach(System.out::println);
  * </pre>
+ *
+ * <p><b>NOTE: The {@code MergedAnnotations} API and its underlying model have
+ * been designed for composable annotations in Spring's common component model,
+ * with a focus on attribute aliasing and meta-annotation relationships.</b>
+ * There is no support for retrieving plain Java annotations with this API;
+ * please use standard Java reflection or Spring's {@link AnnotationUtils}
+ * for simple annotation retrieval purposes.
  *
  * @author Phillip Webb
  * @author Sam Brannen
