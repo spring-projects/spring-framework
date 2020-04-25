@@ -18,7 +18,7 @@ dependencies {
 	optional("javax.xml.ws:jaxws-api:2.3.1")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy:${groovyVersion}")
-	optional("org.beanshell:bsh:2.0b5")
+	optional("org.apache-extras.beanshell:bsh:2.0b6")
 	optional("joda-time:joda-time:2.10.5")
 	optional("org.hibernate:hibernate-validator:5.4.3.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
