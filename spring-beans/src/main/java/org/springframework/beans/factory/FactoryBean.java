@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,15 @@ import org.springframework.lang.Nullable;
  *
  * <p><b>{@code FactoryBean} is a programmatic contract. Implementations are not
  * supposed to rely on annotation-driven injection or other reflective facilities.</b>
- * {@link #getObjectType()} {@link #getObject()} invocations may arrive early in
- * the bootstrap process, even ahead of any post-processor setup. If you need access
+ * {@link #getObjectType()} {@link #getObject()} invocations may arrive early in the
+ * bootstrap process, even ahead of any post-processor setup. If you need access to
  * other beans, implement {@link BeanFactoryAware} and obtain them programmatically.
+ *
+ * <p><b>The container is only responsible for managing the lifecycle of the FactoryBean
+ * instance, not the lifecycle of the objects created by the FactoryBean.</b> Therefore,
+ * a destroy method on an exposed bean object (such as {@link java.io.Closeable#close()}
+ * will <i>not</i> be called automatically. Instead, a FactoryBean should implement
+ * {@link DisposableBean} and delegate any such close call to the underlying object.
  *
  * <p>Finally, FactoryBean objects participate in the containing BeanFactory's
  * synchronization of bean creation. There is usually no need for internal

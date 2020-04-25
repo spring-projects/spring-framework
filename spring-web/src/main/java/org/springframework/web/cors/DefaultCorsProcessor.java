@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	/**
 	 * Check the HTTP method and determine the methods for the response of a
 	 * pre-flight request. The default implementation simply delegates to
-	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}.
+	 * {@link org.springframework.web.cors.CorsConfiguration#checkHttpMethod(HttpMethod)}.
 	 */
 	@Nullable
 	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {
