@@ -769,8 +769,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (this.parentBeanFactory != null && this.parentBeanFactory != parentBeanFactory) {
 			throw new IllegalStateException("Already associated with parent BeanFactory: " + this.parentBeanFactory);
 		}
-		if(this == parentBeanFactory) {
-			throw new IllegalStateException("Can not set parent bean factory to self.");
+		if (this == parentBeanFactory) {
+			throw new IllegalStateException("Cannot set parent bean factory to self");
 		}
 		this.parentBeanFactory = parentBeanFactory;
 	}
