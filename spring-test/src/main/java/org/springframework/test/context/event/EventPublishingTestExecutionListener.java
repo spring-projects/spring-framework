@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.event;
 
+import org.springframework.test.context.SpringTestExecutionListenerOrder;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -81,7 +82,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public final int getOrder() {
-		return 10_000;
+		return SpringTestExecutionListenerOrder.EVENT_PUBLISHING.getValue();
 	}
 
 	/**

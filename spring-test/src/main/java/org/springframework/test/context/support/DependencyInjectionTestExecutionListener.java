@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.Conventions;
+import org.springframework.test.context.SpringTestExecutionListenerOrder;
 import org.springframework.test.context.TestContext;
 
 /**
@@ -59,7 +60,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 */
 	@Override
 	public final int getOrder() {
-		return 2000;
+		return SpringTestExecutionListenerOrder.DEPENDENCY_INJECTION.getValue();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.SpringTestExecutionListenerOrder;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
@@ -105,7 +106,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 */
 	@Override
 	public final int getOrder() {
-		return 5000;
+		return SpringTestExecutionListenerOrder.SQL_SCRIPTS.getValue();
 	}
 
 	/**
