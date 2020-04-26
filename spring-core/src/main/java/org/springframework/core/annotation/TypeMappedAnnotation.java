@@ -110,9 +110,6 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private final int[] resolvedMirrors;
 
-	@Nullable
-	private String string;
-
 
 	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
 			@Nullable Object source, @Nullable Object rootAttributes, ValueExtractor valueExtractor,
@@ -344,48 +341,6 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return false;
 		}
 		return this.mapping.isSynthesizable();
-	}
-
-	@Override
-	public String toString() {
-		String string = this.string;
-		if (string == null) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("@");
-			builder.append(getType().getName());
-			builder.append("(");
-			for (int i = 0; i < this.mapping.getAttributes().size(); i++) {
-				Method attribute = this.mapping.getAttributes().get(i);
-				builder.append(i == 0 ? "" : ", ");
-				builder.append(attribute.getName());
-				builder.append("=");
-				builder.append(toString(getValue(i, Object.class)));
-			}
-			builder.append(")");
-			string = builder.toString();
-			this.string = string;
-		}
-		return string;
-	}
-
-	private Object toString(@Nullable Object value) {
-		if (value == null) {
-			return "";
-		}
-		if (value instanceof Class) {
-			return ((Class<?>) value).getName();
-		}
-		if (value.getClass().isArray()) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("[");
-			for (int i = 0; i < Array.getLength(value); i++) {
-				builder.append(i == 0 ? "" : ", ");
-				builder.append(toString(Array.get(value, i)));
-			}
-			builder.append("]");
-			return builder.toString();
-		}
-		return String.valueOf(value);
 	}
 
 	@Override

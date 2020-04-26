@@ -58,6 +58,9 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	@Nullable
 	private volatile Integer hashCode;
 
+	@Nullable
+	private volatile String string;
+
 
 	private SynthesizedMergedAnnotationInvocationHandler(MergedAnnotation<A> annotation, Class<A> type) {
 		Assert.notNull(annotation, "MergedAnnotation must not be null");
@@ -78,7 +81,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return annotationHashCode();
 		}
 		if (ReflectionUtils.isToStringMethod(method)) {
-			return this.annotation.toString();
+			return annotationToString();
 		}
 		if (isAnnotationTypeMethod(method)) {
 			return this.type;
@@ -171,6 +174,44 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		return value.hashCode();
 	}
 
+	private String annotationToString() {
+		String string = this.string;
+		if (string == null) {
+			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append("(");
+			for (int i = 0; i < this.attributes.size(); i++) {
+				Method attribute = this.attributes.get(i);
+				if (i > 0) {
+					builder.append(", ");
+				}
+				builder.append(attribute.getName());
+				builder.append("=");
+				builder.append(toString(getAttributeValue(attribute)));
+			}
+			builder.append(")");
+			string = builder.toString();
+			this.string = string;
+		}
+		return string;
+	}
+
+	private String toString(Object value) {
+		if (value instanceof Class) {
+			return ((Class<?>) value).getName();
+		}
+		if (value.getClass().isArray()) {
+			StringBuilder builder = new StringBuilder("[");
+			for (int i = 0; i < Array.getLength(value); i++) {
+				if (i > 0) {
+					builder.append(", ");
+				}
+				builder.append(toString(Array.get(value, i)));
+			}
+			builder.append("]");
+			return builder.toString();
+		}
+		return String.valueOf(value);
+	}
+
 	private Object getAttributeValue(Method method) {
 		Object value = this.valueCache.computeIfAbsent(method.getName(), attributeName -> {
 			Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
@@ -188,7 +229,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	/**
-	 * Clone the provided array, ensuring that original component type is retained.
+	 * Clone the provided array, ensuring that the original component type is retained.
 	 * @param array the array to clone
 	 */
 	private Object cloneArray(Object array) {
