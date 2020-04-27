@@ -17,13 +17,15 @@
 package org.springframework.core;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
- * Helper class for implementing exception classes which are capable of
- * holding nested exceptions. Necessary because we can't share a base
- * class among different exception types.
+ * Helper class for implementing exception classes which are capable of holding
+ * nested exceptions. Necessary because we can't share a base class among
+ * different exception types.
  *
- * <p>Mainly for use within the framework.
+ * <p>
+ * Mainly for use within the framework.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -41,7 +43,8 @@ public abstract class NestedExceptionUtils {
 	 * @return the full exception message
 	 */
 	@Nullable
-	public static String buildMessage(@Nullable String message, @Nullable Throwable cause) {
+	public static String buildMessage(@Nullable String message,
+			@Nullable Throwable cause) {
 		if (cause == null) {
 			return message;
 		}
@@ -50,7 +53,7 @@ public abstract class NestedExceptionUtils {
 			sb.append(message).append("; ");
 		}
 		sb.append("nested exception is ").append(cause);
-		return sb.toString();
+		return formatMessage(formatMessage(sb.toString(), ":"), ";");
 	}
 
 	/**
@@ -74,10 +77,11 @@ public abstract class NestedExceptionUtils {
 	}
 
 	/**
-	 * Retrieve the most specific cause of the given exception, that is,
-	 * either the innermost cause (root cause) or the exception itself.
-	 * <p>Differs from {@link #getRootCause} in that it falls back
-	 * to the original exception if there is no root cause.
+	 * Retrieve the most specific cause of the given exception, that is, either
+	 * the innermost cause (root cause) or the exception itself.
+	 * <p>
+	 * Differs from {@link #getRootCause} in that it falls back to the original
+	 * exception if there is no root cause.
 	 * @param original the original exception to introspect
 	 * @return the most specific cause (never {@code null})
 	 * @since 4.3.9
@@ -85,6 +89,29 @@ public abstract class NestedExceptionUtils {
 	public static Throwable getMostSpecificCause(Throwable original) {
 		Throwable rootCause = getRootCause(original);
 		return (rootCause != null ? rootCause : original);
+	}
+
+	/**
+	 * This method is used to format the stack trace into multiple lines for
+	 * better readabilitys
+	 * @param msg Raw exception stack trace log generated
+	 * @param splitChar String based on which the message needs to be split
+	 * @return Formatted message which is easily readable without scrolling.
+	 */
+	private static String formatMessage(String msg, String splitChar) {
+		String formattedMessage = msg;
+
+		if (StringUtils.hasLength(formattedMessage)) {
+			int charIndex = formattedMessage.indexOf(splitChar);
+			if (charIndex >= 0) {
+				formattedMessage = formattedMessage.substring(0, charIndex + 1).concat(
+						"\n").concat(
+								formatMessage(formattedMessage.substring(charIndex + 1),
+										splitChar));
+			}
+
+		}
+		return formattedMessage;
 	}
 
 }
