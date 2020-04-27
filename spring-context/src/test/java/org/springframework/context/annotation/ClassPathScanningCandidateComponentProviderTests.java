@@ -301,7 +301,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 	@Test
-	public void testWithAspectAnnotationOnly() throws Exception {
+	public void testWithAspectAnnotationOnly() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Aspect.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
