@@ -10,6 +10,7 @@ dependencies {
 	compile(project(":spring-expression"))
 	compile(project(":spring-web"))
 	compileOnly("javax.servlet:javax.servlet-api")
+	compileOnly("com.google.code.findbugs:findbugs")  // for groovy-templates
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional(project(":spring-oxm"))
 	optional("javax.servlet.jsp:javax.servlet.jsp-api")
