@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '3.0.3') {
+			dependencySet(group: 'org.codehaus.groovy', version: '2.5.11') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'
