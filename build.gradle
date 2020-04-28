@@ -170,7 +170,7 @@ configure(allprojects) { project ->
 				exclude group: "xerces", name: "xercesImpl"
 			}
 
-			dependency("junit:junit:4.12") {
+			dependency("junit:junit:4.13") {
 				exclude group: "org.hamcrest", name: "hamcrest-core"
 			}
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
@@ -365,7 +365,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
-			"https://junit.org/junit4/javadoc/4.12/",
+			"https://junit.org/junit4/javadoc/4.13/",
 			"https://junit.org/junit5/docs/5.6.2/api/"
 	] as String[]
 }
