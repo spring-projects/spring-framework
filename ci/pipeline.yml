@@ -28,6 +28,12 @@ resources:
     username: ((github-username))
     password: ((github-password))
     branch: ((branch))
+- name: every-morning
+  type: time
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: Europe/Vienna
 - name: ci-images-git-repo
   type: git
   icon: github-circle
@@ -200,7 +206,7 @@ jobs:
   public: true
   plan:
   - get: spring-framework-jdk11-ci-image
-  - get: git-repo
+  - get: every-morning
     trigger: true
   - put: repo-status-jdk11-build
     params: { state: "pending", commit: "git-repo" }
@@ -232,7 +238,7 @@ jobs:
   public: true
   plan:
     - get: spring-framework-jdk14-ci-image
-    - get: git-repo
+    - get: every-morning
       trigger: true
     - put: repo-status-jdk14-build
       params: { state: "pending", commit: "git-repo" }
@@ -264,7 +270,7 @@ jobs:
   public: true
   plan:
     - get: spring-framework-jdk15-ci-image
-    - get: git-repo
+    - get: every-morning
       trigger: true
     - put: repo-status-jdk15-build
       params: { state: "pending", commit: "git-repo" }
