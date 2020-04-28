@@ -175,6 +175,10 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
 				publisher.completedBeforeSubscribed = true;
+				// May have already passed the SUBSCRIBED's state's completedBeforeSubscribed check..
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishComplete(publisher);
+				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
@@ -190,6 +194,10 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
 				publisher.completedBeforeSubscribed = true;
+				// May have already passed the SUBSCRIBED's state's completedBeforeSubscribed check..
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishComplete(publisher);
+				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
