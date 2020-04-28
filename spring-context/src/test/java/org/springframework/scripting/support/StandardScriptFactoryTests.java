@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.condition.JRE.JAVA_15;
  * @author Juergen Hoeller
  * @since 4.2
  */
-@DisabledForJreRange(min = JAVA_15)
+@DisabledForJreRange(min = JAVA_15) // Nashorn JavaScript engine removed in Java 15
 public class StandardScriptFactoryTests {
 
 	@Test
