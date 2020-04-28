@@ -30,6 +30,7 @@ resources:
     branch: ((branch))
 - name: every-morning
   type: time
+  icon: alarm
   source:
     start: 8:00 AM
     stop: 9:00 AM
@@ -166,7 +167,11 @@ jobs:
         params: { state: "failure", commit: "git-repo" }
       - put: slack-alert
         params:
-          text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
+          text: >
+            :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
+            [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
+            [<$TEXT_FILE_CONTENT|build scan>]
+          text_file: git-repo/build/build-scan-uri.txt
           silent: true
           icon_emoji: ":concourse:"
           username: concourse-ci
@@ -227,7 +232,11 @@ jobs:
         params: { state: "failure", commit: "git-repo" }
       - put: slack-alert
         params:
-          text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
+          text: >
+            :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
+            [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
+            [<$TEXT_FILE_CONTENT|build scan>]
+          text_file: git-repo/build/build-scan-uri.txt
           silent: true
           icon_emoji: ":concourse:"
           username: concourse-ci
@@ -259,7 +268,11 @@ jobs:
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
-              text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
+              text: >
+                :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
+                [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
+                [<$TEXT_FILE_CONTENT|build scan>]
+              text_file: git-repo/build/build-scan-uri.txt
               silent: true
               icon_emoji: ":concourse:"
               username: concourse-ci
@@ -291,7 +304,11 @@ jobs:
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
-              text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
+              text: >
+                :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
+                [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
+                [<$TEXT_FILE_CONTENT|build scan>]
+              text_file: git-repo/build/build-scan-uri.txt
               silent: true
               icon_emoji: ":concourse:"
               username: concourse-ci
