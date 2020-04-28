@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,8 +37,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -70,7 +71,7 @@ public final class SpringFactoriesLoader {
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
-	private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<ClassLoader, Map<String, Set<String>>> cache = new ConcurrentReferenceHashMap<>();
 
 
 	private SpringFactoriesLoader() {
@@ -83,6 +84,9 @@ public final class SpringFactoriesLoader {
 	 * <p>The returned factories are sorted through {@link AnnotationAwareOrderComparator}.
 	 * <p>If a custom instantiation strategy is required, use {@link #loadFactoryNames}
 	 * to obtain all registered factory names.
+	 * <p>As of Spring Framework 5.3, if duplicate implementation class names are
+	 * discovered for a given factory type, only one instance of the duplicated
+	 * implementation type will be instantiated.
 	 * @param factoryType the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @throws IllegalArgumentException if any factory implementation class cannot
@@ -111,6 +115,9 @@ public final class SpringFactoriesLoader {
 	 * Load the fully qualified class names of factory implementations of the
 	 * given type from {@value #FACTORIES_RESOURCE_LOCATION}, using the given
 	 * class loader.
+	 * <p>As of Spring Framework 5.3, if a particular implementation class name
+	 * is discovered more than once for the given factory type, duplicates will
+	 * be ignored.
 	 * @param factoryType the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
@@ -119,38 +126,45 @@ public final class SpringFactoriesLoader {
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
 		String factoryTypeName = factoryType.getName();
-		return loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
+		Set<String> factoryNames = loadSpringFactories(classLoader).get(factoryTypeName);
+		if (factoryNames == null || factoryNames.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(new ArrayList<>(factoryNames));
 	}
 
-	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
-		MultiValueMap<String, String> result = cache.get(classLoader);
+	private static Map<String, Set<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+		Map<String, Set<String>> result = cache.get(classLoader);
 		if (result != null) {
 			return result;
 		}
 
+		result = new HashMap<>();
 		try {
 			Enumeration<URL> urls = (classLoader != null ?
 					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
-			result = new LinkedMultiValueMap<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
 					String factoryTypeName = ((String) entry.getKey()).trim();
-					for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
-						result.add(factoryTypeName, factoryImplementationName.trim());
+					String[] factoryImplementationNames =
+							StringUtils.commaDelimitedListToStringArray((String) entry.getValue());
+					for (String factoryImplementationName : factoryImplementationNames) {
+						result.computeIfAbsent(factoryTypeName, key -> new LinkedHashSet<String>())
+								.add(factoryImplementationName.trim());
 					}
 				}
 			}
 			cache.put(classLoader, result);
-			return result;
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Unable to load factories from location [" +
 					FACTORIES_RESOURCE_LOCATION + "]", ex);
 		}
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")

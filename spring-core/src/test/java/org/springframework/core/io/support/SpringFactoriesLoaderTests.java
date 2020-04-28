@@ -34,7 +34,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class SpringFactoriesLoaderTests {
 
 	@Test
-	void loadFactoriesInCorrectOrder() {
+	void loadFactoriesWithNoRegisteredImplementations() {
+		List<Integer> factories = SpringFactoriesLoader.loadFactories(Integer.class, null);
+		assertThat(factories).isEmpty();
+	}
+
+	@Test
+	void loadFactoriesInCorrectOrderWithDuplicateRegistrationsPresent() {
 		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, null);
 		assertThat(factories).hasSize(2);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
