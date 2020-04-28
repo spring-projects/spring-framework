@@ -107,16 +107,6 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: jdk15-build
-- name: send-an-email
-  type: email
-  source:
-    smtp:
-      host: ((email-server))
-      port: "25"
-      anonymous: true
-      skip_ssl_validation: true
-    from: ((email-from))
-    to: ((email-to))
 - name: slack-alert
   type: slack-notification
   icon: slack
@@ -168,10 +158,6 @@ jobs:
       do:
       - put: repo-status-build
         params: { state: "failure", commit: "git-repo" }
-      - put: send-an-email
-        params:
-          subject_text: "[spring-framework-ci] Build ${BUILD_ID} failed"
-          body_text: "See build failure: ${ATC_EXTERNAL_URL}"
       - put: slack-alert
         params:
           text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
@@ -233,10 +219,6 @@ jobs:
       do:
       - put: repo-status-jdk11-build
         params: { state: "failure", commit: "git-repo" }
-      - put: send-an-email
-        params:
-          subject_text: "[spring-framework-ci] JDK 11 Build ${BUILD_ID} failed"
-          body_text: "See build failure: ${ATC_EXTERNAL_URL}"
       - put: slack-alert
         params:
           text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
@@ -269,10 +251,6 @@ jobs:
         do:
           - put: repo-status-jdk14-build
             params: { state: "failure", commit: "git-repo" }
-          - put: send-an-email
-            params:
-              subject_text: "[spring-framework-ci] JDK 14 Build ${BUILD_ID} failed"
-              body_text: "See build failure: ${ATC_EXTERNAL_URL}"
           - put: slack-alert
             params:
               text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
@@ -305,10 +283,6 @@ jobs:
         do:
           - put: repo-status-jdk15-build
             params: { state: "failure", commit: "git-repo" }
-          - put: send-an-email
-            params:
-              subject_text: "[spring-framework-ci] JDK 15 Build ${BUILD_ID} failed"
-              body_text: "See build failure: ${ATC_EXTERNAL_URL}"
           - put: slack-alert
             params:
               text: ":concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>"
