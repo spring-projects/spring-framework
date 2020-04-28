@@ -114,6 +114,7 @@ resources:
       host: ((email-server))
       port: "25"
       anonymous: true
+      skip_ssl_validation: true
     from: ((email-from))
     to: ((email-to))
 - name: slack-alert
