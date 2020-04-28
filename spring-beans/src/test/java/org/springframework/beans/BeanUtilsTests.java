@@ -197,7 +197,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithEditable() throws Exception {
+	void copyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
