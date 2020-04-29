@@ -50,10 +50,13 @@ settings.gradle.projectsLoaded {
 			if (settings.gradle.rootProject.hasProperty('customJavaSourceVersion')) {
 				value("Custom Java Source Version", settings.gradle.rootProject.getProperty('customJavaSourceVersion'))
 			}
-			settings.gradle.rootProject.getBuildDir().mkdirs()
-			new File(settings.gradle.rootProject.getBuildDir(), "build-scan-uri.txt").text = "(build scan not generated)"
+			File buildDir = settings.gradle.rootProject.getBuildDir()
+			buildDir.mkdirs()
+			new File(buildDir, "build-scan-uri.txt").text = "(build scan not generated)"
 			buildScanPublished { scan ->
-				new File(settings.gradle.rootProject.getBuildDir(), "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
+				if (buildDir.exists()) {
+					new File(buildDir, "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
+				} 
 			}
 		}
 	}
