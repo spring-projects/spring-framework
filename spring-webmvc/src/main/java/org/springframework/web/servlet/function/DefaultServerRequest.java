@@ -52,6 +52,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -76,6 +77,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final ServletServerHttpRequest serverHttpRequest;
 
+	private final PathContainer pathContainer;
+
 	private final Headers headers;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
@@ -98,6 +101,8 @@ class DefaultServerRequest implements ServerRequest {
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
 		this.attributes = new ServletAttributesMap(servletRequest);
+
+		this.pathContainer = PathContainer.parsePath(path());
 	}
 
 	private static List<MediaType> allSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
@@ -131,6 +136,11 @@ class DefaultServerRequest implements ServerRequest {
 			path = helper.getLookupPathForRequest(servletRequest());
 		}
 		return path;
+	}
+
+	@Override
+	public PathContainer pathContainer() {
+		return this.pathContainer;
 	}
 
 	@Override
