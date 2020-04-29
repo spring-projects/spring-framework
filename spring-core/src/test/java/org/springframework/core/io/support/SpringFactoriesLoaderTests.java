@@ -19,6 +19,8 @@ package org.springframework.core.io.support;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +34,23 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  */
 class SpringFactoriesLoaderTests {
+
+	@BeforeAll
+	static void clearCache() {
+		SpringFactoriesLoader.cache.clear();
+		assertThat(SpringFactoriesLoader.cache).isEmpty();
+	}
+
+	@AfterAll
+	static void checkCache() {
+		assertThat(SpringFactoriesLoader.cache).hasSize(1);
+	}
+
+	@Test
+	void loadFactoryNames() {
+		List<String> factoryNames = SpringFactoriesLoader.loadFactoryNames(DummyFactory.class, null);
+		assertThat(factoryNames).containsExactlyInAnyOrder(MyDummyFactory1.class.getName(), MyDummyFactory2.class.getName());
+	}
 
 	@Test
 	void loadFactoriesWithNoRegisteredImplementations() {

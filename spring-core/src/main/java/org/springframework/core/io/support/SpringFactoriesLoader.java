@@ -70,7 +70,7 @@ public final class SpringFactoriesLoader {
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
-	private static final Map<ClassLoader, Map<String, List<String>>> cache = new ConcurrentReferenceHashMap<>();
+	static final Map<ClassLoader, Map<String, List<String>>> cache = new ConcurrentReferenceHashMap<>();
 
 
 	private SpringFactoriesLoader() {
@@ -124,11 +124,15 @@ public final class SpringFactoriesLoader {
 	 * @see #loadFactories
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
+		ClassLoader classLoaderToUse = classLoader;
+		if (classLoaderToUse == null) {
+			classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
+		}
 		String factoryTypeName = factoryType.getName();
-		return loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
+		return loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());
 	}
 
-	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+	private static Map<String, List<String>> loadSpringFactories(ClassLoader classLoader) {
 		Map<String, List<String>> result = cache.get(classLoader);
 		if (result != null) {
 			return result;
@@ -136,9 +140,7 @@ public final class SpringFactoriesLoader {
 
 		result = new HashMap<>();
 		try {
-			Enumeration<URL> urls = (classLoader != null ?
-					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
-					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
