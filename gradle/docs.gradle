@@ -3,7 +3,7 @@ configurations {
 }
 
 dependencies {
-	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.0.RELEASE")
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.2.RELEASE")
 }
 
 repositories {
