@@ -150,6 +150,8 @@ configure(allprojects) { project ->
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.2"
+			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0'
 
 			dependency "org.jruby:jruby:9.2.11.1"
 			dependency "org.python:jython-standalone:2.7.1"

@@ -312,8 +312,9 @@ request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
 * For the client side, there is a basic `ClientHttpConnector` contract to perform HTTP
 requests with non-blocking I/O and Reactive Streams back pressure, along with adapters for
-https://github.com/reactor/reactor-netty[Reactor Netty] and for the reactive
-https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient].
+https://github.com/reactor/reactor-netty[Reactor Netty], reactive
+https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient]
+and https://hc.apache.org/[Apache HttpComponents].
 The higher level <<web-reactive.adoc#webflux-client, WebClient>> used in applications
 builds on this basic contract.
 * For client and server, <<webflux-codecs, codecs>> for serialization and

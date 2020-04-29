@@ -369,6 +369,33 @@ shows:
 <2> Plug the connector into the `WebClient.Builder`.
 
 
+
+[[webflux-client-builder-http-components]]
+=== HttpComponents
+
+The following example shows how to customize Apache HttpComponents `HttpClient` settings:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
+	clientBuilder.setDefaultRequestConfig(...);
+	CloseableHttpAsyncClient client = clientBuilder.build();
+	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = HttpAsyncClients.custom().apply {
+		setDefaultRequestConfig(...)
+	}.build()
+	val connector = HttpComponentsClientHttpConnector(client)
+	val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
 [[webflux-client-retrieve]]
 == `retrieve()`
 
