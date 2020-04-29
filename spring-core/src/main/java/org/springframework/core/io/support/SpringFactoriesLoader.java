@@ -22,11 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,7 +70,7 @@ public final class SpringFactoriesLoader {
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
-	private static final Map<ClassLoader, Map<String, Set<String>>> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<ClassLoader, Map<String, List<String>>> cache = new ConcurrentReferenceHashMap<>();
 
 
 	private SpringFactoriesLoader() {
@@ -126,15 +125,11 @@ public final class SpringFactoriesLoader {
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
 		String factoryTypeName = factoryType.getName();
-		Set<String> factoryNames = loadSpringFactories(classLoader).get(factoryTypeName);
-		if (factoryNames == null || factoryNames.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableList(new ArrayList<>(factoryNames));
+		return loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());
 	}
 
-	private static Map<String, Set<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
-		Map<String, Set<String>> result = cache.get(classLoader);
+	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+		Map<String, List<String>> result = cache.get(classLoader);
 		if (result != null) {
 			return result;
 		}
@@ -153,11 +148,15 @@ public final class SpringFactoriesLoader {
 					String[] factoryImplementationNames =
 							StringUtils.commaDelimitedListToStringArray((String) entry.getValue());
 					for (String factoryImplementationName : factoryImplementationNames) {
-						result.computeIfAbsent(factoryTypeName, key -> new LinkedHashSet<String>())
+						result.computeIfAbsent(factoryTypeName, key -> new ArrayList<>())
 								.add(factoryImplementationName.trim());
 					}
 				}
 			}
+
+			// Replace all lists with unmodifiable lists containing unique elements
+			result.replaceAll((factoryType, implementations) -> implementations.stream().distinct()
+					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
 			cache.put(classLoader, result);
 		}
 		catch (IOException ex) {
