@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 
+
 /**
  * Common base class for exceptions that contain actual HTTP response data.
  *
@@ -66,6 +67,15 @@ public class RestClientResponseException extends RestClientException {
 		this.responseHeaders = responseHeaders;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
+	}
+
+	public RestClientResponseException(String message, int statusCode, String statusText, @Nullable HttpHeaders responseHeaders, Throwable ex){
+		super(message, ex);
+		this.rawStatusCode = statusCode;
+		this.statusText = statusText;
+		this.responseHeaders = responseHeaders;
+		this.responseBody = new byte[0];
+		this.responseCharset = null;
 	}
 
 
@@ -125,4 +135,33 @@ public class RestClientResponseException extends RestClientException {
 		}
 	}
 
+	/**
+	 * {@link RestClientResponseException} for can not find suitable message converter to extract body.
+	 * @since 5.2.7
+	 */
+	@SuppressWarnings("serial")
+	public static final class MessageConverterNotFound extends RestClientResponseException {
+
+		public MessageConverterNotFound(String message, int statusCode, String statusText, HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+
+			super(message, statusCode, statusText, responseHeaders, responseBody, responseCharset);
+		}
+
+		public MessageConverterNotFound(String message, int statusCode, String statusText, HttpHeaders responseHeaders, Throwable ex) {
+
+			super(message, statusCode, statusText, responseHeaders, ex);
+		}
+	}
+
+	/**
+	 * {@link RestClientResponseException} for exception raised when read body stream to extract body.
+	 * @since 5.2.7
+	 */
+	@SuppressWarnings("serial")
+	public static final class FailedToReadResponseBody extends RestClientResponseException {
+
+		public FailedToReadResponseBody(String message, int statusCode, String statusText, HttpHeaders responseHeaders, Throwable ex) {
+			super(message, statusCode, statusText, responseHeaders, ex);
+		}
+	}
 }

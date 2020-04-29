@@ -145,7 +145,8 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(false);
-		assertThatExceptionOfType(RestClientException.class).isThrownBy(() -> extractor.extractData(response));
+		assertThatExceptionOfType(RestClientResponseException.class).isThrownBy(() -> extractor.extractData(response))
+			.withMessageContaining("Could not find suitable HttpMessageConverter to extract response for response type [class java.lang.String] and content type [text/plain]");
 	}
 
 	@Test
@@ -177,7 +178,7 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(true);
 		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willThrow(IOException.class);
-		assertThatExceptionOfType(RestClientException.class).isThrownBy(() -> extractor.extractData(response))
+		assertThatExceptionOfType(RestClientResponseException.class).isThrownBy(() -> extractor.extractData(response))
 			.withMessageContaining("Error while extracting response for type [class java.lang.String] and content type [text/plain]")
 			.withCauseInstanceOf(IOException.class);
 	}
@@ -189,7 +190,7 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willThrow(HttpMessageNotReadableException.class);
-		assertThatExceptionOfType(RestClientException.class).isThrownBy(() -> extractor.extractData(response))
+		assertThatExceptionOfType(RestClientResponseException.class).isThrownBy(() -> extractor.extractData(response))
 			.withMessageContaining("Error while extracting response for type [class java.lang.String] and content type [text/plain]")
 			.withCauseInstanceOf(HttpMessageNotReadableException.class);
 	}

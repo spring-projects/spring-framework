@@ -17,7 +17,9 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -31,6 +33,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
+
 
 /**
  * Response extractor that uses the given {@linkplain HttpMessageConverter entity converters}
@@ -116,12 +120,24 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 			}
 		}
 		catch (IOException | HttpMessageNotReadableException ex) {
-			throw new RestClientException("Error while extracting response for type [" +
-					this.responseType + "] and content type [" + contentType + "]", ex);
+			throw new RestClientResponseException.FailedToReadResponseBody(
+					"Error while extracting response for type [" + this.responseType + "] and content type [" + contentType + "]",
+					response.getRawStatusCode(), response.getStatusText(), response.getHeaders(), ex);
 		}
 
-		throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found " +
-				"for response type [" + this.responseType + "] and content type [" + contentType + "]");
+		String defaultConverterNotFoundMessage = "Could not find suitable HttpMessageConverter to extract response " +
+				"for response type [" + this.responseType + "] and content type [" + contentType + "]";
+
+		try (InputStream is = responseWrapper.getBody()) {
+			byte[] bytes = StreamUtils.copyToByteArray(is);
+			throw new RestClientResponseException.MessageConverterNotFound(defaultConverterNotFoundMessage,
+					response.getRawStatusCode(),response.getStatusText(), response.getHeaders(), bytes, StandardCharsets.UTF_8);
+		}
+		catch (IOException ex) {
+			throw new RestClientResponseException.MessageConverterNotFound(
+					defaultConverterNotFoundMessage + ". and Error while preserve body. so there are no preserved body contents.",
+					response.getRawStatusCode(), response.getStatusText(), response.getHeaders(), ex);
+		}
 	}
 
 	/**
@@ -141,5 +157,4 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		}
 		return contentType;
 	}
-
 }
