@@ -211,6 +211,7 @@ jobs:
   public: true
   plan:
   - get: spring-framework-jdk11-ci-image
+  - get: git-repo
   - get: every-morning
     trigger: true
   - put: repo-status-jdk11-build
@@ -247,6 +248,7 @@ jobs:
   public: true
   plan:
     - get: spring-framework-jdk14-ci-image
+    - get: git-repo
     - get: every-morning
       trigger: true
     - put: repo-status-jdk14-build
@@ -283,6 +285,7 @@ jobs:
   public: true
   plan:
     - get: spring-framework-jdk15-ci-image
+    - get: git-repo
     - get: every-morning
       trigger: true
     - put: repo-status-jdk15-build
