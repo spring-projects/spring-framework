@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -324,6 +324,8 @@ public class ResolvableType implements Serializable {
 				}
 			}
 			if (ourResolved == null) {
+				// Unresolved type variable, potentially nested -> never insist on exact match
+				exactMatch = false;
 				// Try variable resolution against target type
 				if (other.variableResolver != null) {
 					ResolvableType resolved = other.variableResolver.resolveVariable(variable);
@@ -332,10 +334,6 @@ public class ResolvableType implements Serializable {
 						checkGenerics = false;
 					}
 				}
-			}
-			if (ourResolved == null) {
-				// Unresolved type variable, potentially nested -> never insist on exact match
-				exactMatch = false;
 			}
 		}
 		if (ourResolved == null) {
