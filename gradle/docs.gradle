@@ -145,7 +145,7 @@ asciidoctor {
 	outputDir "$buildDir/docs/ref-docs/"
 	resources {
 		from(sourceDir) {
-			include 'images/*', 'css/**', 'js/**'
+			include 'images/*.png', 'css/**', 'js/**'
 		}
 		from extractDocResources
 	}
