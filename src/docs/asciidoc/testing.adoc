@@ -1826,7 +1826,10 @@ constructor takes precedence over both `@TestConstructor` and the default mode.
 =====
 The default _test constructor autowire mode_ can be changed by setting the
 `spring.test.constructor.autowire.mode` JVM system property to `all`. Alternatively, the
-default mode may be changed via the `SpringProperties` mechanism.
+default mode may be set via the `SpringProperties` mechanism.
+
+As of Spring Framework 5.3, the default mode may also be configured as a
+https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params[JUnit Platform configuration parameter].
 
 If the `spring.test.constructor.autowire.mode` property is not set, test class
 constructors will not be automatically autowired.
