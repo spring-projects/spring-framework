@@ -586,7 +586,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferencesWithSmartWrapping() {
+	void testCircularReferencesWithSmartWrapping() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -603,7 +603,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
+	void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowRawInjectionDespiteWrapping(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
