@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,14 +51,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -522,6 +521,15 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
+	@ParameterizedHttpServerTest // gh-23791
+	public void personCreateViaDefaultMethodWithGenerics(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+		ResponseEntity<String> entity = performPost("/23791", JSON, new Person("Robert"), null, String.class);
+
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getBody()).isEqualTo("Person");
+	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -646,7 +654,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		@GetMapping("/resource")
 		public Resource resource() {
-			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
+			return new ClassPathResource("/org/springframework/web/reactive/spring.png");
 		}
 	}
 
@@ -832,6 +840,19 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return this.persons;
 		}
 
+	}
+
+
+	private interface Controller23791<E> {
+
+		@PostMapping("/23791")
+		default Mono<String> test(@RequestBody Mono<E> body) {
+			return body.map(value -> value.getClass().getSimpleName());
+		}
+	}
+
+	@RestController
+	private static class ConcreteController23791 implements Controller23791<Person> {
 	}
 
 }

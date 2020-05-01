@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,21 +122,13 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	 * charset of the Content-Type response or otherwise as "UTF-8".
 	 */
 	public Mono<String> getBodyAsString() {
-		Charset charset = getCharset();
-		return Flux.from(getBody())
-				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
+		return DataBufferUtils.join(getBody())
+				.map(buffer -> {
+					String s = buffer.toString(getCharset());
+					DataBufferUtils.release(buffer);
+					return s;
 				})
-				.map(buffer -> dumpString(buffer, charset));
-	}
-
-	private static String dumpString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+				.defaultIfEmpty("");
 	}
 
 	private Charset getCharset() {

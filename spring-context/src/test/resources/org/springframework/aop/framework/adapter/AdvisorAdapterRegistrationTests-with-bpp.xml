@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="testBeanTarget" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBeanTarget" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="simpleBeforeAdvice" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceImpl"/>
 
@@ -12,7 +12,7 @@
 	</bean>
    
 	<bean id="testBean" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value>simpleBeforeAdviceAdvisor,testBeanTarget</value></property>
 	</bean>
 

@@ -315,7 +315,7 @@ public abstract class DataBufferUtils {
 	 * {@code Flux} is subscribed to.
 	 * @param source the stream of data buffers to be written
 	 * @param channel the channel to write to
-	 * @param position file position write write is to begin; must be non-negative
+	 * @param position the file position where writing is to begin; must be non-negative
 	 * @return a flux containing the same buffers as in {@code source}, that
 	 * starts the writing process when subscribed to, and that publishes any
 	 * writing errors and the completion signal
@@ -340,13 +340,13 @@ public abstract class DataBufferUtils {
 	/**
 	 * Write the given stream of {@link DataBuffer DataBuffers} to the given
 	 * file {@link Path}. The optional {@code options} parameter specifies
-	 * how the created or opened (defaults to
+	 * how the file is created or opened (defaults to
 	 * {@link StandardOpenOption#CREATE CREATE},
 	 * {@link StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING}, and
 	 * {@link StandardOpenOption#WRITE WRITE}).
 	 * @param source the stream of data buffers to be written
 	 * @param destination the path to the file
-	 * @param options options specifying how the file is opened
+	 * @param options the options specifying how the file is opened
 	 * @return a {@link Mono} that indicates completion or error
 	 * @since 5.2
 	 */
@@ -470,7 +470,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Retain the given data buffer, it it is a {@link PooledDataBuffer}.
+	 * Retain the given data buffer, if it is a {@link PooledDataBuffer}.
 	 * @param dataBuffer the data buffer to retain
 	 * @return the retained buffer
 	 */
@@ -547,13 +547,10 @@ public abstract class DataBufferUtils {
 			return (Mono<DataBuffer>) buffers;
 		}
 
-		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
-
 		return Flux.from(buffers)
 				.collect(() -> new LimitedDataBufferList(maxByteCount), LimitedDataBufferList::add)
 				.filter(list -> !list.isEmpty())
 				.map(list -> list.get(0).factory().join(list))
-				.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 

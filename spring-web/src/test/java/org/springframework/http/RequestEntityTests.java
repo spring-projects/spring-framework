@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +58,7 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriVariablesExpansion() throws URISyntaxException {
-		URI uri = new UriTemplate("https://example.com/{foo}").expand("bar");
+		URI uri = UriComponentsBuilder.fromUriString("https://example.com/{foo}").buildAndExpand("bar").toUri();
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "https://www.{host}.com/{path}";
@@ -66,7 +66,7 @@ public class RequestEntityTests {
 		String path = "foo/bar";
 		URI expected = new URI("https://www.example.com/foo/bar");
 
-		uri = new UriTemplate(url).expand(host, path);
+		uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(host, path).toUri();
 		RequestEntity<?> entity = RequestEntity.get(uri).build();
 		assertThat(entity.getUrl()).isEqualTo(expected);
 
@@ -74,7 +74,7 @@ public class RequestEntityTests {
 		uriVariables.put("host", host);
 		uriVariables.put("path", path);
 
-		uri = new UriTemplate(url).expand(uriVariables);
+		uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).toUri();
 		entity = RequestEntity.get(uri).build();
 		assertThat(entity.getUrl()).isEqualTo(expected);
 	}
@@ -86,8 +86,8 @@ public class RequestEntityTests {
 
 		assertThat(requestEntity).isNotNull();
 		assertThat(requestEntity.getMethod()).isEqualTo(HttpMethod.GET);
-		assertThat(requestEntity.getHeaders().containsKey("Accept")).isTrue();
-		assertThat(requestEntity.getHeaders().getFirst("Accept")).isEqualTo("image/gif, image/jpeg, image/png");
+		assertThat(requestEntity.getHeaders().containsKey(HttpHeaders.ACCEPT)).isTrue();
+		assertThat(requestEntity.getHeaders().getFirst(HttpHeaders.ACCEPT)).isEqualTo("image/gif, image/jpeg, image/png");
 		assertThat(requestEntity.getBody()).isNull();
 	}
 
@@ -114,12 +114,12 @@ public class RequestEntityTests {
 		assertThat(responseEntity.getUrl()).isEqualTo(new URI("https://example.com"));
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-		assertThat(responseHeaders.getFirst("Accept")).isEqualTo("text/plain");
-		assertThat(responseHeaders.getFirst("Accept-Charset")).isEqualTo("utf-8");
-		assertThat(responseHeaders.getFirst("If-Modified-Since")).isEqualTo("Thu, 01 Jan 1970 00:00:12 GMT");
-		assertThat(responseHeaders.getFirst("If-None-Match")).isEqualTo(ifNoneMatch);
-		assertThat(responseHeaders.getFirst("Content-Length")).isEqualTo(String.valueOf(contentLength));
-		assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo(contentType.toString());
+		assertThat(responseHeaders.getFirst(HttpHeaders.ACCEPT)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(responseHeaders.getFirst(HttpHeaders.ACCEPT_CHARSET)).isEqualTo("utf-8");
+		assertThat(responseHeaders.getFirst(HttpHeaders.IF_MODIFIED_SINCE)).isEqualTo("Thu, 01 Jan 1970 00:00:12 GMT");
+		assertThat(responseHeaders.getFirst(HttpHeaders.IF_NONE_MATCH)).isEqualTo(ifNoneMatch);
+		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_LENGTH)).isEqualTo(String.valueOf(contentLength));
+		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType.toString());
 
 		assertThat(responseEntity.getBody()).isNull();
 	}

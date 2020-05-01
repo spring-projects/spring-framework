@@ -124,6 +124,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public Optional<InetSocketAddress> localAddress() {
+		return this.delegate.localAddress();
+	}
+
+	@Override
 	public List<HttpMessageReader<?>> messageReaders() {
 		return this.delegate.messageReaders();
 	}

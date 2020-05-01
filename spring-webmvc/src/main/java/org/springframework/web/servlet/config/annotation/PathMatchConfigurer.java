@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -37,7 +38,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Brian Clozel
  * @since 4.0.3
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * @see RequestMappingHandlerMapping
  * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
  */
 public class PathMatchConfigurer {
@@ -46,10 +47,10 @@ public class PathMatchConfigurer {
 	private Boolean suffixPatternMatch;
 
 	@Nullable
-	private Boolean trailingSlashMatch;
+	private Boolean registeredSuffixPatternMatch;
 
 	@Nullable
-	private Boolean registeredSuffixPatternMatch;
+	private Boolean trailingSlashMatch;
 
 	@Nullable
 	private UrlPathHelper urlPathHelper;
@@ -66,19 +67,15 @@ public class PathMatchConfigurer {
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>By default this is set to {@code true}.
 	 * @see #registeredSuffixPatternMatch
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options. As there is no replacement for this method, for the time
+	 * being it's necessary to set it to {@code false}. In 5.3 when {@code false}
+	 * becomes the default, use of this property will no longer be necessary.
 	 */
+	@Deprecated
 	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
 		this.suffixPatternMatch = suffixPatternMatch;
-		return this;
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
-	 */
-	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
-		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
 
@@ -90,9 +87,23 @@ public class PathMatchConfigurer {
 	 * avoid issues such as when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "false".
 	 * @see WebMvcConfigurer#configureContentNegotiation
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
 	 */
+	@Deprecated
 	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
+		return this;
+	}
+
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 * If enabled a method mapped to "/users" also matches to "/users/".
+	 * <p>The default value is {@code true}.
+	 */
+	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
+		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
 
@@ -137,19 +148,33 @@ public class PathMatchConfigurer {
 	}
 
 
+	/**
+	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
+	 */
 	@Nullable
+	@Deprecated
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
+	}
+
+	/**
+	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
+	 */
+	@Nullable
+	@Deprecated
+	public Boolean isUseRegisteredSuffixPatternMatch() {
+		return this.registeredSuffixPatternMatch;
 	}
 
 	@Nullable
 	public Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
-	}
-
-	@Nullable
-	public Boolean isUseRegisteredSuffixPatternMatch() {
-		return this.registeredSuffixPatternMatch;
 	}
 
 	@Nullable

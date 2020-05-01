@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,13 +152,22 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MultipartHttpMessageReader.MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		if (Part.class.equals(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getReadableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,20 +169,41 @@ public interface RSocketRequester {
 		RSocketRequester.Builder setupMetadata(Object value, @Nullable MimeType mimeType);
 
 		/**
-		 * Provide {@link RSocketStrategies} to use.
-		 * <p>By default this is based on default settings of
-		 * {@link RSocketStrategies.Builder} but may be further customized via
-		 * {@link #rsocketStrategies(Consumer)}.
+		 * Provide the {@link RSocketStrategies} to use.
+		 * <p>This is useful for changing the default settings, yet still allowing
+		 * further customizations via {@link #rsocketStrategies(Consumer)}.
+		 * If not set, defaults are obtained from {@link RSocketStrategies#builder()}.
+		 * @param strategies the strategies to use
 		 */
 		RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies);
 
 		/**
 		 * Customize the {@link RSocketStrategies}.
-		 * <p>By default this starts out as {@link RSocketStrategies#builder()}.
-		 * However if strategies were {@link #rsocketStrategies(RSocketStrategies) set}
-		 * explicitly, then they are {@link RSocketStrategies#mutate() mutated}.
+		 * <p>Allows further customization on {@link RSocketStrategies},
+		 * mutating them if they were {@link #rsocketStrategies(RSocketStrategies) set},
+		 * or starting from {@link RSocketStrategies#builder()} defaults}.
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
+
+		/**
+		 * Callback to configure the {@code RSocketConnector} directly.
+		 * <ul>
+		 * <li>The data and metadata mime types cannot be set directly
+		 * on the {@code RSocketConnector} and will be overridden. Use the
+		 * shortcuts {@link #dataMimeType(MimeType)} and
+		 * {@link #metadataMimeType(MimeType)} on this builder instead.
+		 * <li>The frame decoder also cannot be set directly and instead is set
+		 * to match the configured {@code DataBufferFactory}.
+		 * <li>For the
+		 * {@link io.rsocket.core.RSocketConnector#setupPayload(Payload)
+		 * setupPayload}, consider using methods on this builder to specify the
+		 * route, other metadata, and data as Object values to be encoded.
+		 * <li>To configure client side responding, see
+		 * {@link RSocketMessageHandler#responder(RSocketStrategies, Object...)}.
+		 * </ul>
+		 * @since 5.2.6
+		 */
+		RSocketRequester.Builder rsocketConnector(RSocketConnectorConfigurer configurer);
 
 		/**
 		 * Callback to configure the {@code ClientRSocketFactory} directly.
@@ -200,7 +221,11 @@ public interface RSocketRequester {
 		 * <li>To configure client side responding, see
 		 * {@link RSocketMessageHandler#clientResponder(RSocketStrategies, Object...)}.
 		 * </ul>
+		 * @deprecated as of 5.2.6 following the deprecation of
+		 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
+		 * in RSocket 1.0 RC7. Please, use {@link #rsocketConnector(RSocketConnectorConfigurer)}.
 		 */
+		@Deprecated
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 
 		/**
@@ -238,9 +263,9 @@ public interface RSocketRequester {
 	}
 
 	/**
-	 * Spec for providing input data for an RSocket request and triggering the exchange.
+	 * Spec to declare the input for an RSocket request.
 	 */
-	interface RequestSpec extends MetadataSpec<RequestSpec> {
+	interface RequestSpec extends MetadataSpec<RequestSpec>, RetrieveSpec {
 
 		/**
 		 * Append additional metadata entries through a {@code Consumer}.
@@ -262,7 +287,7 @@ public interface RSocketRequester {
 		 * @param data the Object value for the payload data
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object data);
+		RetrieveSpec data(Object data);
 
 		/**
 		 * Variant of {@link #data(Object)} that also accepts a hint for the
@@ -274,7 +299,7 @@ public interface RSocketRequester {
 		 * @param elementClass the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object producer, Class<?> elementClass);
+		RetrieveSpec data(Object producer, Class<?> elementClass);
 
 		/**
 		 * Variant of {@link #data(Object, Class)} for when the type hint has
@@ -285,7 +310,38 @@ public interface RSocketRequester {
 		 * @param elementTypeRef the type of values to be produced
 		 * @return spec to declare the expected response
 		 */
-		RequestSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+		RetrieveSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+	}
+
+
+	/**
+	 * Spec for providing additional composite metadata entries.
+	 *
+	 * @param <S> a self reference to the spec type
+	 */
+	interface MetadataSpec<S extends MetadataSpec<S>> {
+
+		/**
+		 * Use this to append additional metadata entries when using composite
+		 * metadata. An {@link IllegalArgumentException} is raised if this
+		 * method is used when not using composite metadata.
+		 * The metadata value be a concrete value or any producer of a single
+		 * value that can be adapted to a {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param metadata an Object to be encoded with a suitable
+		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
+		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+		 * @param mimeType the mime type that describes the metadata
+		 */
+		S metadata(Object metadata, MimeType mimeType);
+	}
+
+
+	/**
+	 * Spec to declare the expected output for an RSocket request.
+	 * @since 5.2.2
+	 */
+	interface RetrieveSpec {
 
 		/**
 		 * Perform a {@link RSocket#fireAndForget fireAndForget}.
@@ -328,28 +384,6 @@ public interface RSocketRequester {
 		 * to have a generic type. See {@link ParameterizedTypeReference}.
 		 */
 		<T> Flux<T> retrieveFlux(ParameterizedTypeReference<T> dataTypeRef);
-	}
-
-	/**
-	 * Spec for specifying the metadata.
-	 *
-	 * @param <S> a self reference to the spec type
-	 */
-	interface MetadataSpec<S extends MetadataSpec<S>> {
-
-		/**
-		 * Use this to append additional metadata entries when using composite
-		 * metadata. An {@link IllegalArgumentException} is raised if this
-		 * method is used when not using composite metadata.
-		 * The metadata value be a concrete value or any producer of a single
-		 * value that can be adapted to a {@link Publisher} via
-		 * {@link ReactiveAdapterRegistry}.
-		 * @param metadata an Object to be encoded with a suitable
-		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
-		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
-		 * @param mimeType the mime type that describes the metadata
-		 */
-		S metadata(Object metadata, MimeType mimeType);
 	}
 
 }

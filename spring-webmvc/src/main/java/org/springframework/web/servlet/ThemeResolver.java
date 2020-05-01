@@ -51,15 +51,15 @@ public interface ThemeResolver {
 	/**
 	 * Resolve the current theme name via the given request.
 	 * Should return a default theme as fallback in any case.
-	 * @param request request to be used for resolution
+	 * @param request the request to be used for resolution
 	 * @return the current theme name
 	 */
 	String resolveThemeName(HttpServletRequest request);
 
 	/**
 	 * Set the current theme name to the given one.
-	 * @param request request to be used for theme name modification
-	 * @param response response to be used for theme name modification
+	 * @param request the request to be used for theme name modification
+	 * @param response the response to be used for theme name modification
 	 * @param themeName the new theme name ({@code null} or empty to reset it)
 	 * @throws UnsupportedOperationException if the ThemeResolver implementation
 	 * does not support dynamic changing of the theme

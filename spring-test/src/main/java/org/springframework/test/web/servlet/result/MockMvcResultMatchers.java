@@ -246,7 +246,7 @@ public abstract class MockMvcResultMatchers {
 	 * <p>The XPath expression can be a parameterized string using formatting
 	 * specifiers as defined in {@link String#format(String, Object...)}.
 	 * @param expression the XPath expression, optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathResultMatchers xpath(String expression, Map<String, String> namespaces, Object... args)

@@ -25,6 +25,7 @@ import org.springframework.http.MediaType.*
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 import java.security.Principal
 import java.util.*
 
@@ -153,6 +154,13 @@ class MockMvcExtensionsTests {
 		}
 	}
 
+	@Test
+	fun asyncDispatch() {
+		mockMvc.get("/async").asyncDispatch().andExpect {
+			status { isOk }
+		}
+	}
+
 
 	@RestController
 	private class PersonController {
@@ -166,5 +174,10 @@ class MockMvcExtensionsTests {
 		@PostMapping("/person")
 		@ResponseStatus(HttpStatus.CREATED)
 		fun post(@RequestBody person: Person) {}
+
+		@GetMapping("/async")
+		fun getAsync(): Mono<Person> {
+			return Mono.just(Person("foo"))
+		}
 	}
 }

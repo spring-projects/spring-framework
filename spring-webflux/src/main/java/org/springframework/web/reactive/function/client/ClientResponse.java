@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,11 @@ import org.springframework.web.reactive.function.BodyExtractor;
 *  <li>{@link #toBodilessEntity()}</li>
  * <li>{@link #releaseBody()}</li>
  * </ul>
- * You can use {@code bodyToMono(Void.class)} if no response content is
- * expected. However keep in mind that if the response does have content, the
- * connection will be closed and will not be placed back in the pool.
+ * You can also use {@code bodyToMono(Void.class)} if no response content is
+ * expected. However keep in mind the connection will be closed, instead of
+ * being placed back in the pool, if any content does arrive. This is in
+ * contrast to {@link #releaseBody()} which does consume the full body and
+ * releases any content received.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -195,12 +197,23 @@ public interface ClientResponse {
 	Mono<ResponseEntity<Void>> toBodilessEntity();
 
 	/**
-	 * Creates a {@link WebClientResponseException} based on the status code,
-	 * headers, and body of this response as well as the corresponding request.
-	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
+	 * Create a {@link WebClientResponseException} that contains the response
+	 * status, headers, body, and the originating request.
+	 * @return a {@code Mono} with the created exception
 	 * @since 5.2
 	 */
 	Mono<WebClientResponseException> createException();
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
+	 * itself is based on the value of the {@link ClientRequest#LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} request attribute, further surrounded with "[" and "]".
+	 * @return the log message prefix or an empty String if the
+	 * {@link ClientRequest#LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.2.3
+	 */
+	String logPrefix();
 
 
 	// Static builder methods

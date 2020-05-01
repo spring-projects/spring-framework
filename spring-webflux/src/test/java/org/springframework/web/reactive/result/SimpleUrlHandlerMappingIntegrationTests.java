@@ -33,9 +33,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -43,6 +41,8 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

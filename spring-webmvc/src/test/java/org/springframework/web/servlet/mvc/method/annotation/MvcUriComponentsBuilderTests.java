@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockFilterChain;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +55,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.testfixture.servlet.MockFilterChain;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -435,6 +435,20 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromMappingNameWithPathWithoutLeadingSlash() {
+
+		initWebApplicationContext(PathWithoutLeadingSlashConfig.class);
+
+		this.request.setServerName("example.org");
+		this.request.setServerPort(9999);
+		this.request.setContextPath("/base");
+
+		String mappingName = "PWLSC#getAddressesForCountry";
+		String url = fromMappingName(mappingName).arg(0, "DE;FR").encode().buildAndExpand("_+_");
+		assertThat(url).isEqualTo("/base/people/DE%3BFR");
+	}
+
+	@Test
 	public void fromControllerWithPrefix() {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
@@ -498,6 +512,14 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+	@RequestMapping({"people"})
+	static class PathWithoutLeadingSlashController {
+
+		@RequestMapping("/{country}")
+		HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+			return null;
+		}
+	}
 
 	@RequestMapping({"/persons", "/people"})
 	private class InvalidController {
@@ -618,6 +640,16 @@ public class MvcUriComponentsBuilderTests {
 		@Bean
 		public PersonsAddressesController controller() {
 			return new PersonsAddressesController();
+		}
+	}
+
+
+	@EnableWebMvc
+	static class PathWithoutLeadingSlashConfig implements WebMvcConfigurer {
+
+		@Bean
+		public PathWithoutLeadingSlashController controller() {
+			return new PathWithoutLeadingSlashController();
 		}
 	}
 

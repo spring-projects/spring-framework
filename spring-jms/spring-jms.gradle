@@ -12,5 +12,7 @@ dependencies {
 	optional("javax.resource:javax.resource-api")
 	optional("javax.transaction:javax.transaction-api")
 	optional("com.fasterxml.jackson.core:jackson-databind")
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testImplementation("javax.jms:javax.jms-api")
 }

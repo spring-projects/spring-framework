@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.DuplexConnection;
-import io.rsocket.RSocketFactory;
+import io.rsocket.core.DefaultConnectionSetupPayload;
+import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
@@ -68,7 +69,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	private final MockConnection connection = new MockConnection();
 
-	private final TestRSocketFactoryConfigurer rsocketFactoryConfigurer = new TestRSocketFactoryConfigurer();
+	private final TestRSocketConnectorConfigurer connectorConfigurer = new TestRSocketConnectorConfigurer();
 
 
 	@BeforeEach
@@ -80,32 +81,35 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void rsocketFactoryConfigurerAppliesAtSubscription() {
+	public void rsocketConnectorConfigurerAppliesAtSubscription() {
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
-				.rsocketFactory(this.rsocketFactoryConfigurer)
+				.rsocketConnector(this.connectorConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
 				.connect(this.transport);
 
 		verifyNoInteractions(this.transport);
-		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNull();
+		assertThat(this.connectorConfigurer.connector()).isNull();
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void rsocketFactoryConfigurer() {
-		Consumer<RSocketStrategies.Builder> rsocketStrategiesConfigurer = mock(Consumer.class);
+	@SuppressWarnings({"unchecked", "deprecation"})
+	public void rsocketConnectorConfigurer() {
+		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
+		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
-				.rsocketFactory(this.rsocketFactoryConfigurer)
-				.rsocketStrategies(rsocketStrategiesConfigurer)
+				.rsocketConnector(this.connectorConfigurer)
+				.rsocketFactory(factoryConfigurer)
+				.rsocketStrategies(strategiesConfigurer)
 				.connect(this.transport)
 				.block();
 
-		// RSocketStrategies and RSocketFactory configurers should have been called
+		// RSocketStrategies and RSocketConnector configurers should have been called
 
 		verify(this.transport).connect(anyInt());
-		verify(rsocketStrategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
-		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNotNull();
+		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
+		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
+		assertThat(this.connectorConfigurer.connector()).isNotNull();
 	}
 
 	@Test
@@ -143,7 +147,7 @@ public class DefaultRSocketRequesterBuilderTests {
 				.block();
 
 		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(ConnectionSetupPayload::create)
+				.map(DefaultConnectionSetupPayload::new)
 				.block();
 
 		assertThat(setupPayload.dataMimeType()).isEqualTo("application/json");
@@ -151,22 +155,22 @@ public class DefaultRSocketRequesterBuilderTests {
 	}
 
 	@Test
-	public void mimeTypesCannotBeChangedAtRSocketFactoryLevel() {
+	public void mimeTypesCannotBeChangedAtRSocketConnectorLevel() {
 		MimeType dataMimeType = MimeTypeUtils.APPLICATION_JSON;
 		MimeType metaMimeType = MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
 
 		RSocketRequester requester = RSocketRequester.builder()
 				.metadataMimeType(metaMimeType)
 				.dataMimeType(dataMimeType)
-				.rsocketFactory(factory -> {
-					factory.metadataMimeType("text/plain");
-					factory.dataMimeType("application/xml");
+				.rsocketConnector(connector -> {
+					connector.metadataMimeType("text/plain");
+					connector.dataMimeType("application/xml");
 				})
 				.connect(this.transport)
 				.block();
 
 		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(ConnectionSetupPayload::create)
+				.map(DefaultConnectionSetupPayload::new)
 				.block();
 
 		assertThat(setupPayload.dataMimeType()).isEqualTo(dataMimeType.toString());
@@ -186,7 +190,7 @@ public class DefaultRSocketRequesterBuilderTests {
 				.block();
 
 		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(ConnectionSetupPayload::create)
+				.map(DefaultConnectionSetupPayload::new)
 				.block();
 
 		assertThat(setupPayload.getMetadataUtf8()).isEqualTo("toA");
@@ -210,7 +214,7 @@ public class DefaultRSocketRequesterBuilderTests {
 				.block();
 
 		ConnectionSetupPayload payload = Mono.from(this.connection.sentFrames())
-				.map(ConnectionSetupPayload::create)
+				.map(DefaultConnectionSetupPayload::new)
 				.block();
 
 		MimeType compositeMimeType =
@@ -228,11 +232,11 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@Test
 	public void frameDecoderMatchesDataBufferFactory() throws Exception {
-		testFrameDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
-		testFrameDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
+		testPayloadDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
+		testPayloadDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
 	}
 
-	private void testFrameDecoder(DataBufferFactory bufferFactory, PayloadDecoder frameDecoder)
+	private void testPayloadDecoder(DataBufferFactory bufferFactory, PayloadDecoder payloadDecoder)
 			throws NoSuchFieldException {
 
 		RSocketStrategies strategies = RSocketStrategies.builder()
@@ -241,17 +245,17 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		RSocketRequester.builder()
 				.rsocketStrategies(strategies)
-				.rsocketFactory(this.rsocketFactoryConfigurer)
+				.rsocketConnector(this.connectorConfigurer)
 				.connect(this.transport)
 				.block();
 
-		RSocketFactory.ClientRSocketFactory factory = this.rsocketFactoryConfigurer.rsocketFactory();
-		assertThat(factory).isNotNull();
+		RSocketConnector connector = this.connectorConfigurer.connector();
+		assertThat(connector).isNotNull();
 
-		Field field = RSocketFactory.ClientRSocketFactory.class.getDeclaredField("payloadDecoder");
+		Field field = RSocketConnector.class.getDeclaredField("payloadDecoder");
 		ReflectionUtils.makeAccessible(field);
-		PayloadDecoder decoder = (PayloadDecoder) ReflectionUtils.getField(field, factory);
-		assertThat(decoder).isSameAs(frameDecoder);
+		PayloadDecoder decoder = (PayloadDecoder) ReflectionUtils.getField(field, connector);
+		assertThat(decoder).isSameAs(payloadDecoder);
 	}
 
 
@@ -276,6 +280,11 @@ public class DefaultRSocketRequesterBuilderTests {
 		}
 
 		@Override
+		public ByteBufAllocator alloc() {
+			return ByteBufAllocator.DEFAULT;
+		}
+
+		@Override
 		public Mono<Void> onClose() {
 			return Mono.empty();
 		}
@@ -286,19 +295,17 @@ public class DefaultRSocketRequesterBuilderTests {
 	}
 
 
-	static class TestRSocketFactoryConfigurer implements ClientRSocketFactoryConfigurer {
+	static class TestRSocketConnectorConfigurer implements RSocketConnectorConfigurer {
 
-		private RSocketFactory.ClientRSocketFactory rsocketFactory;
+		private RSocketConnector connector;
 
-
-		RSocketFactory.ClientRSocketFactory rsocketFactory() {
-			return this.rsocketFactory;
+		RSocketConnector connector() {
+			return this.connector;
 		}
 
-
 		@Override
-		public void configure(RSocketFactory.ClientRSocketFactory rsocketFactory) {
-			this.rsocketFactory = rsocketFactory;
+		public void configure(RSocketConnector connector) {
+			this.connector = connector;
 		}
 	}
 
@@ -306,7 +313,6 @@ public class DefaultRSocketRequesterBuilderTests {
 	static class TestJsonDecoder implements Decoder<Object> {
 
 		private final MimeType mimeType;
-
 
 		TestJsonDecoder(MimeType mimeType) {
 			this.mimeType = mimeType;
@@ -344,5 +350,4 @@ public class DefaultRSocketRequesterBuilderTests {
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }

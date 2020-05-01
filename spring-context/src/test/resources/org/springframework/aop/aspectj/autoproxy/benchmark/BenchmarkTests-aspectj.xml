@@ -22,7 +22,7 @@
 		class="org.springframework.aop.aspectj.autoproxy.benchmark.TraceAspect" >
 	</bean>
 	
-	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="adrian" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="adrian" />
 		<property name="age" value="34" />
 	</bean>

@@ -23,8 +23,8 @@ package org.springframework.context.annotation;
 class MyTestBean {
 
 	@Bean
-	public org.springframework.tests.sample.beans.TestBean myTestBean() {
-		return new org.springframework.tests.sample.beans.TestBean();
+	public org.springframework.beans.testfixture.beans.TestBean myTestBean() {
+		return new org.springframework.beans.testfixture.beans.TestBean();
 	}
 
 }

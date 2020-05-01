@@ -26,18 +26,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.AnnotatedBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.TestAnnotation;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.AnnotatedBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.TestAnnotation;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

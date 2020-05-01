@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,8 +200,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	/**
 	 * Set the number of seconds to cache loaded properties files.
 	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever (just like
-	 * {@code java.util.ResourceBundle}).
+	 * <li>Default is "-1", indicating to cache forever (matching the default behavior
+	 * of {@code java.util.ResourceBundle}). Note that this constant follows Spring
+	 * conventions, not {@link java.util.ResourceBundle.Control#getTimeToLive}.
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of seconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp
@@ -224,8 +225,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Set the number of milliseconds to cache loaded properties files.
 	 * Note that it is common to set seconds instead: {@link #setCacheSeconds}.
 	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever (just like
-	 * {@code java.util.ResourceBundle}).
+	 * <li>Default is "-1", indicating to cache forever (matching the default behavior
+	 * of {@code java.util.ResourceBundle}). Note that this constant follows Spring
+	 * conventions, not {@link java.util.ResourceBundle.Control#getTimeToLive}.
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of milliseconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp

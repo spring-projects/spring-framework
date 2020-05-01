@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,10 @@ import org.springframework.util.StringUtils;
  * and captures it as a variable named "spring"</li>
  * </ul>
  *
+ * Notable behavior difference with {@code AntPathMatcher}:<br>
+ * {@code **} and its capturing variant <code>{*spring}</code> cannot be used in the middle of a pattern
+ * string, only at the end: {@code /pages/{**}} is valid, but {@code /pages/{**}/details} is not.
+ *
  * <h3>Examples</h3>
  * <ul>
  * <li>{@code /pages/t?st.html} &mdash; matches {@code /pages/test.html} as well as
@@ -59,8 +63,8 @@ import org.springframework.util.StringUtils;
  * <li><code>/resources/{&#42;path}</code> &mdash; matches all files
  * underneath the {@code /resources/} path and captures their relative path in
  * a variable named "path"; {@code /resources/image.png} will match with
- * "spring" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
- * with "spring" &rarr; "/css/spring.css"</li>
+ * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
+ * with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
  * and assign the value {@code "spring"} to the {@code filename} variable</li>
  * </ul>

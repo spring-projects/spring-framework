@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Simple test to illustrate and verify scope usage.

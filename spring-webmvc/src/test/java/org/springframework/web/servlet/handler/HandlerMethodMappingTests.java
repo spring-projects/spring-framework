@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -37,6 +36,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,7 @@ import org.springframework.util.StringUtils;
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
-
-	static final MediaType TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
-
+	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	/**
 	 * Create a new SseEmitter instance.
@@ -56,7 +53,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * <p>By default not set in which case the default configured in the MVC
 	 * Java Config or the MVC namespace is used, or if that's not set, then the
 	 * timeout depends on the default of the underlying server.
-	 * @param timeout timeout value in milliseconds
+	 * @param timeout the timeout value in milliseconds
 	 * @since 4.2.2
 	 */
 	public SseEmitter(Long timeout) {
@@ -70,7 +67,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(TEXT_EVENTSTREAM);
+			headers.setContentType(MediaType.TEXT_EVENT_STREAM);
 		}
 	}
 

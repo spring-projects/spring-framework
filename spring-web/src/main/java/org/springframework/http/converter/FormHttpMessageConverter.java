@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
-
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
 			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
@@ -301,7 +299,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (MULTIPART_ALL.includes(supportedMediaType)) {
+			if (supportedMediaType.getType().equalsIgnoreCase("multipart")) {
 				// We can't read multipart, so skip this supported media type.
 				continue;
 			}
@@ -369,7 +367,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MULTIPART_ALL.includes(contentType);
+			return contentType.getType().equalsIgnoreCase("multipart");
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -384,7 +382,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private void writeForm(MultiValueMap<String, Object> formData, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		contentType = getMediaType(contentType);
+		contentType = getFormContentType(contentType);
 		outputMessage.getHeaders().setContentType(contentType);
 
 		Charset charset = contentType.getCharset();
@@ -402,15 +400,26 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-	private MediaType getMediaType(@Nullable MediaType mediaType) {
-		if (mediaType == null) {
+	/**
+	 * Return the content type used to write forms, given the preferred content type.
+	 * By default, this method returns the given content type, but adds the
+	 * {@linkplain #setCharset(Charset) charset} if it does not have one.
+	 * If {@code contentType} is {@code null},
+	 * {@code application/x-www-form-urlencoded; charset=UTF-8} is returned.
+	 * <p>Subclasses can override this method to change this behavior.
+	 * @param contentType the preferred content type (can be {@code null})
+	 * @return the content type to be used
+	 * @since 5.2.2
+	 */
+	protected MediaType getFormContentType(@Nullable MediaType contentType) {
+		if (contentType == null) {
 			return DEFAULT_FORM_DATA_MEDIA_TYPE;
 		}
-		else if (mediaType.getCharset() == null) {
-			return new MediaType(mediaType, this.charset);
+		else if (contentType.getCharset() == null) {
+			return new MediaType(contentType, this.charset);
 		}
 		else {
-			return mediaType;
+			return contentType;
 		}
 	}
 

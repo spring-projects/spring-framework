@@ -24,7 +24,7 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
-import org.springframework.mock.web.test.MockHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 
 /**
  * Tests for WebMvc.fn [RouterFunctionDsl].

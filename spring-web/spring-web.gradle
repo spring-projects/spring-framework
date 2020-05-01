@@ -35,6 +35,8 @@ dependencies {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-reactive-httpclient")
+	optional('org.apache.httpcomponents.client5:httpclient5:5.0')
+	optional('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	optional("com.squareup.okhttp3:okhttp")
 	optional("org.apache.httpcomponents:httpclient")
 	optional("org.apache.httpcomponents:httpasyncclient")
@@ -54,6 +56,9 @@ dependencies {
 	optional("org.codehaus.groovy:groovy")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.taglibs:taglibs-standard-jstlel")
 	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
@@ -74,4 +79,10 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 	testRuntime("javax.json:javax.json-api")
 	testRuntime("org.apache.johnzon:johnzon-jsonb")
+	testFixturesApi("javax.servlet:javax.servlet-api")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.apache.taglibs:taglibs-standard-jstlel")
+	testFixturesImplementation("org.assertj:assertj-core")
 }

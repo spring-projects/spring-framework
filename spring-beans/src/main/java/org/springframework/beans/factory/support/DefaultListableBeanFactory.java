@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,6 +164,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Map of bean definition objects, keyed by bean name. */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+
+	/** Map from bean name to merged BeanDefinitionHolder. */
+	private final Map<String, BeanDefinitionHolder> mergedBeanDefinitionHolders = new ConcurrentHashMap<>(256);
 
 	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
 	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
@@ -398,6 +401,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Override
 			public Stream<T> orderedStream() {
 				String[] beanNames = getBeanNamesForTypedStream(requiredType);
+				if (beanNames.length == 0) {
+					return Stream.empty();
+				}
 				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
@@ -791,8 +797,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (mbd.isFactoryMethodUnique && mbd.factoryMethodToIntrospect == null) {
 			new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
 		}
-		return resolver.isAutowireCandidate(
-				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)), descriptor);
+		BeanDefinitionHolder holder = (beanName.equals(beanDefinitionName) ?
+				this.mergedBeanDefinitionHolders.computeIfAbsent(beanName,
+						key -> new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName))) :
+				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)));
+		return resolver.isAutowireCandidate(holder, descriptor);
 	}
 
 	@Override
@@ -816,8 +825,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	protected void clearMergedBeanDefinition(String beanName) {
+		super.clearMergedBeanDefinition(beanName);
+		this.mergedBeanDefinitionHolders.remove(beanName);
+	}
+
+	@Override
 	public void clearMetadataCache() {
 		super.clearMetadataCache();
+		this.mergedBeanDefinitionHolders.clear();
 		clearByTypeCache();
 	}
 
@@ -973,6 +989,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
+		}
+		else if (isConfigurationFrozen()) {
+			clearByTypeCache();
 		}
 	}
 
@@ -1366,9 +1385,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (result instanceof List) {
-				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
-				if (comparator != null) {
-					((List<?>) result).sort(comparator);
+				if (((List<?>) result).size() > 1) {
+					Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
+					if (comparator != null) {
+						((List<?>) result).sort(comparator);
+					}
 				}
 			}
 			return result;

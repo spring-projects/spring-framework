@@ -41,27 +41,23 @@ The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	ExchangeStrategies strategies = ExchangeStrategies.builder()
-			.codecs(configurer -> {
-				// ...
-			})
-			.build();
-
 	WebClient client = WebClient.builder()
-			.exchangeStrategies(strategies)
+			.exchangeStrategies(builder -> {
+					return builder.codecs(codecConfigurer -> {
+						//...
+					});
+			})
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val strategies = ExchangeStrategies.builder()
-			.codecs {
-				// ...
+	val webClient = WebClient.builder()
+			.exchangeStrategies { strategies ->
+				strategies.codecs {
+					//...
+				}
 			}
-			.build()
-
-	val client = WebClient.builder()
-			.exchangeStrategies(strategies)
 			.build()
 ----
 
@@ -93,6 +89,42 @@ modified copy without affecting the original instance, as the following example 
 	// client1 has filterA, filterB
 
 	// client2 has filterA, filterB, filterC, filterD
+----
+
+[[webflux-client-builder-maxinmemorysize]]
+=== MaxInMemorySize
+
+Spring WebFlux configures <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering
+data in-memory in codec to avoid application memory issues. By the default this is
+configured to 256KB and if that's not enough for your use case, you'll see the following:
+
+----
+org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer
+----
+
+You can configure this limit on all default codecs with the following code sample:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(builder ->
+				builder.codecs(codecs ->
+					codecs.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
+				)
+			)
+			.build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val webClient = WebClient.builder()
+		.exchangeStrategies { builder ->
+				builder.codecs {
+					it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
+				}
+		}
+		.build()
 ----
 
 
@@ -337,6 +369,33 @@ shows:
 <2> Plug the connector into the `WebClient.Builder`.
 
 
+
+[[webflux-client-builder-http-components]]
+=== HttpComponents
+
+The following example shows how to customize Apache HttpComponents `HttpClient` settings:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
+	clientBuilder.setDefaultRequestConfig(...);
+	CloseableHttpAsyncClient client = clientBuilder.build();
+	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = HttpAsyncClients.custom().apply {
+		setDefaultRequestConfig(...)
+	}.build()
+	val connector = HttpComponentsClientHttpConnector(client)
+	val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
 [[webflux-client-retrieve]]
 == `retrieve()`
 
@@ -464,17 +523,12 @@ Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error
 
 [CAUTION]
 ====
-When using `exchange()`, you have to make sure that the body is always consumed or released,
-even when an exception occurs (see <<core.adoc#databuffers-using,Using DataBuffer>>).
-Typically, you do this by invoking either `bodyTo*` or `toEntity*` on `ClientResponse`
-to convert the body into an object of the desired type, but
-you can also invoke `releaseBody()` to discard the body contents without consuming it or
-`toBodilessEntity()` to get just the status and headers (while discarding the body).
-
-Finally, there is `bodyToMono(Void.class)`, which should only be used if no response content is
-expected.
-If the response does have content, the connection is closed and is not placed back in the pool,
-because it is not left in a reusable state.
+Unlike `retrieve()`, when using `exchange()`, it is the responsibility of the application
+to consume any response content regardless of the scenario (success, error, unexpected
+data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
+all the available options for consuming the body. Generally prefer using `retrieve()`
+unless you have a good reason for using `exchange()` which does allow to check the
+response status and headers before deciding how to or if to consume the response.
 ====
 
 
@@ -662,7 +716,7 @@ or, in the case of a `Resource`, based on the file extension. If necessary, you 
 explicitly provide the `MediaType` to use for each part through one of the overloaded
 builder `part` methods.
 
-Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
+Once a `MultiValueMap` is prepared, the easiest way to pass it to the `WebClient` is
 through the `body` method, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

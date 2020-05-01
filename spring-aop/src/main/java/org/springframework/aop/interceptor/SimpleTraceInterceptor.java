@@ -73,8 +73,8 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the description
 	 */
 	protected String getInvocationDescription(MethodInvocation invocation) {
-		return "method '" + invocation.getMethod().getName() + "' of class [" +
-				invocation.getThis().getClass().getName() + "]";
+		String className = invocation.getThis().getClass().getName();
+		return "method '" + invocation.getMethod().getName() + "' of class [" + className + "]";
 	}
 
 }

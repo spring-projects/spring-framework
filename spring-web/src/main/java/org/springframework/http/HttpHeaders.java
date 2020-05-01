@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1140,6 +1140,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	public List<String> getIfMatch() {
@@ -1199,6 +1200,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-None-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 */
 	public List<String> getIfNoneMatch() {
 		return getETagValuesAsList(IF_NONE_MATCH);
@@ -1523,9 +1525,26 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Remove the well-known {@code "Content-*"} HTTP headers.
+	 * <p>Such headers should be cleared from the response if the intended
+	 * body can't be written due to errors.
+	 * @since 5.2.3
+	 */
+	public void clearContentHeaders() {
+		this.headers.remove(HttpHeaders.CONTENT_DISPOSITION);
+		this.headers.remove(HttpHeaders.CONTENT_ENCODING);
+		this.headers.remove(HttpHeaders.CONTENT_LANGUAGE);
+		this.headers.remove(HttpHeaders.CONTENT_LENGTH);
+		this.headers.remove(HttpHeaders.CONTENT_LOCATION);
+		this.headers.remove(HttpHeaders.CONTENT_RANGE);
+		this.headers.remove(HttpHeaders.CONTENT_TYPE);
+	}
+
+	/**
 	 * Retrieve a combined result from the field values of the ETag header.
 	 * @param headerName the header name
 	 * @return the combined result
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	protected List<String> getETagValuesAsList(String headerName) {

@@ -177,6 +177,26 @@ public class ClassWriter extends ClassVisitor {
   /** The 'classes' array of the NestMembers attribute, or {@literal null}. */
   private ByteVector nestMemberClasses;
 
+  /** The number_of_classes field of the PermittedSubtypes attribute, or 0. */
+  private int numberOfPermittedSubtypeClasses;
+
+  /** The 'classes' array of the PermittedSubtypes attribute, or {@literal null}. */
+  private ByteVector permittedSubtypeClasses;
+
+  /**
+   * The record components of this class, stored in a linked list of {@link RecordComponentWriter}
+   * linked via their {@link RecordComponentWriter#delegate} field. This field stores the first
+   * element of this list.
+   */
+  private RecordComponentWriter firstRecordComponent;
+
+  /**
+   * The record components of this class, stored in a linked list of {@link RecordComponentWriter}
+   * linked via their {@link RecordComponentWriter#delegate} field. This field stores the last
+   * element of this list.
+   */
+  private RecordComponentWriter lastRecordComponent;
+
   /**
    * The first non standard attribute of this class. The next ones can be accessed with the {@link
    * Attribute#nextAttribute} field. May be {@literal null}.
@@ -234,7 +254,7 @@ public class ClassWriter extends ClassVisitor {
    *     maximum stack size nor the stack frames will be computed for these methods</i>.
    */
   public ClassWriter(final ClassReader classReader, final int flags) {
-    super(Opcodes.ASM7);
+    super(/* latest api = */ Opcodes.ASM7);
     symbolTable = classReader == null ? new SymbolTable(this) : new SymbolTable(this, classReader);
     if ((flags & COMPUTE_FRAMES) != 0) {
       this.compute = MethodWriter.COMPUTE_ALL_FRAMES;
@@ -353,6 +373,16 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
+  public final void visitPermittedSubtypeExperimental(final String permittedSubtype) {
+    if (permittedSubtypeClasses == null) {
+      permittedSubtypeClasses = new ByteVector();
+    }
+    ++numberOfPermittedSubtypeClasses;
+    permittedSubtypeClasses.putShort(symbolTable.addConstantClass(permittedSubtype).index);
+  }
+
+  @Override
   public final void visitInnerClass(
       final String name, final String outerName, final String innerName, final int access) {
     if (innerClasses == null) {
@@ -375,6 +405,20 @@ public class ClassWriter extends ClassVisitor {
     }
     // Else, compare the inner classes entry nameSymbol.info - 1 with the arguments of this method
     // and throw an exception if there is a difference?
+  }
+
+  @Override
+  @SuppressWarnings("deprecation")
+  public final RecordComponentVisitor visitRecordComponentExperimental(
+      final int access, final String name, final String descriptor, final String signature) {
+    RecordComponentWriter recordComponentWriter =
+        new RecordComponentWriter(symbolTable, access, name, descriptor, signature);
+    if (firstRecordComponent == null) {
+      firstRecordComponent = recordComponentWriter;
+    } else {
+      lastRecordComponent.delegate = recordComponentWriter;
+    }
+    return lastRecordComponent = recordComponentWriter;
   }
 
   @Override
@@ -447,6 +491,7 @@ public class ClassWriter extends ClassVisitor {
       size += methodWriter.computeMethodInfoSize();
       methodWriter = (MethodWriter) methodWriter.mv;
     }
+
     // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
     int attributesCount = 0;
     if (innerClasses != null) {
@@ -525,6 +570,24 @@ public class ClassWriter extends ClassVisitor {
       ++attributesCount;
       size += 8 + nestMemberClasses.length;
       symbolTable.addConstantUtf8(Constants.NEST_MEMBERS);
+    }
+    if (permittedSubtypeClasses != null) {
+      ++attributesCount;
+      size += 8 + permittedSubtypeClasses.length;
+      symbolTable.addConstantUtf8(Constants.PERMITTED_SUBTYPES);
+    }
+    int recordComponentCount = 0;
+    int recordSize = 0;
+    if (firstRecordComponent != null) {
+      RecordComponentWriter recordComponentWriter = firstRecordComponent;
+      while (recordComponentWriter != null) {
+        ++recordComponentCount;
+        recordSize += recordComponentWriter.computeRecordComponentInfoSize();
+        recordComponentWriter = (RecordComponentWriter) recordComponentWriter.delegate;
+      }
+      ++attributesCount;
+      size += 8 + recordSize;
+      symbolTable.addConstantUtf8(Constants.RECORD);
     }
     if (firstAttribute != null) {
       attributesCount += firstAttribute.getAttributeCount();
@@ -630,6 +693,24 @@ public class ClassWriter extends ClassVisitor {
           .putShort(numberOfNestMemberClasses)
           .putByteArray(nestMemberClasses.data, 0, nestMemberClasses.length);
     }
+    if (permittedSubtypeClasses != null) {
+      result
+          .putShort(symbolTable.addConstantUtf8(Constants.PERMITTED_SUBTYPES))
+          .putInt(permittedSubtypeClasses.length + 2)
+          .putShort(numberOfPermittedSubtypeClasses)
+          .putByteArray(permittedSubtypeClasses.data, 0, permittedSubtypeClasses.length);
+    }
+    if (firstRecordComponent != null) {
+      result
+          .putShort(symbolTable.addConstantUtf8(Constants.RECORD))
+          .putInt(recordSize + 2)
+          .putShort(recordComponentCount);
+      RecordComponentWriter recordComponentWriter = firstRecordComponent;
+      while (recordComponentWriter != null) {
+        recordComponentWriter.putRecordComponentInfo(result);
+        recordComponentWriter = (RecordComponentWriter) recordComponentWriter.delegate;
+      }
+    }
     if (firstAttribute != null) {
       firstAttribute.putAttributes(symbolTable, result);
     }
@@ -666,6 +747,10 @@ public class ClassWriter extends ClassVisitor {
     nestHostClassIndex = 0;
     numberOfNestMemberClasses = 0;
     nestMemberClasses = null;
+    numberOfPermittedSubtypeClasses = 0;
+    permittedSubtypeClasses = null;
+    firstRecordComponent = null;
+    lastRecordComponent = null;
     firstAttribute = null;
     compute = hasFrames ? MethodWriter.COMPUTE_INSERTED_FRAMES : MethodWriter.COMPUTE_NOTHING;
     new ClassReader(classFile, 0, /* checkClassVersion = */ false)
@@ -693,6 +778,11 @@ public class ClassWriter extends ClassVisitor {
     while (methodWriter != null) {
       methodWriter.collectAttributePrototypes(attributePrototypes);
       methodWriter = (MethodWriter) methodWriter.mv;
+    }
+    RecordComponentWriter recordComponentWriter = firstRecordComponent;
+    while (recordComponentWriter != null) {
+      recordComponentWriter.collectAttributePrototypes(attributePrototypes);
+      recordComponentWriter = (RecordComponentWriter) recordComponentWriter.delegate;
     }
     return attributePrototypes.toArray();
   }
@@ -826,7 +916,7 @@ public class ClassWriter extends ClassVisitor {
    * if the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name name of the invoked method.
+   * @param name the name of the invoked method.
    * @param descriptor field descriptor of the constant type.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.
@@ -847,7 +937,7 @@ public class ClassWriter extends ClassVisitor {
    * the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name name of the invoked method.
+   * @param name the name of the invoked method.
    * @param descriptor descriptor of the invoke method.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.

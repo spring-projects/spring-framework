@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,14 @@ public class MockHttpServletRequestBuilder
 	 * @param vars zero or more URI variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod.name(), UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
+		this(httpMethod.name(), initUri(url, vars));
+	}
+
+	private static URI initUri(String url, Object[] vars) {
+		Assert.notNull(url, "'url' must not be null");
+		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
+				"'url' should start with a path or be a complete HTTP URL: " + url);
+		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
 
 	/**
@@ -289,12 +296,14 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Content-Type' header of the request.
+	 * Set the 'Content-Type' header of the request as a raw String value,
+	 * possibly not even well formed (for testing purposes).
 	 * @param contentType the content type
 	 * @since 4.1.2
 	 */
 	public MockHttpServletRequestBuilder contentType(String contentType) {
-		this.contentType = MediaType.parseMediaType(contentType).toString();
+		Assert.notNull(contentType, "'contentType' must not be null");
+		this.contentType = contentType;
 		return this;
 	}
 
@@ -309,16 +318,14 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Accept' header to the given media type(s).
-	 * @param mediaTypes one or more media types
+	 * Set the 'Accept' header using raw String values, possibly not even well
+	 * formed (for testing purposes).
+	 * @param mediaTypes one or more media types; internally joined as
+	 * comma-separated String
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		List<MediaType> result = new ArrayList<>(mediaTypes.length);
-		for (String mediaType : mediaTypes) {
-			result.add(MediaType.parseMediaType(mediaType));
-		}
-		this.headers.set("Accept", MediaType.toString(result));
+		this.headers.set("Accept", String.join(", ", mediaTypes));
 		return this;
 	}
 
@@ -713,9 +720,14 @@ public class MockHttpServletRequestBuilder
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
 			if (requestContentType != null) {
-				MediaType mediaType = MediaType.parseMediaType(requestContentType);
-				if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
-					addRequestParams(request, parseFormData(mediaType));
+				try {
+					MediaType mediaType = MediaType.parseMediaType(requestContentType);
+					if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+						addRequestParams(request, parseFormData(mediaType));
+					}
+				}
+				catch (Exception ex) {
+					// Must be invalid, ignore..
 				}
 			}
 		}

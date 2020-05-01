@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -38,6 +40,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
+import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -85,6 +88,13 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final ServerWebExchange exchange) {
 		return (info1, info2) -> info1.compareTo(info2, exchange);
+	}
+
+	@Override
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		return super.getHandlerInternal(exchange)
+				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
 
 	/**

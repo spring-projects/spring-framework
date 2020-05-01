@@ -28,10 +28,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

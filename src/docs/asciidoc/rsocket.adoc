@@ -79,7 +79,7 @@ The responder may then return `PAYLOAD` frames with response messages, and in th
 of `REQUEST_CHANNEL` the requester may also send `PAYLOAD` frames with more request
 messages.
 
-When a request involves a stream of messages such as as `Request-Stream` and `Channel`,
+When a request involves a stream of messages such as `Request-Stream` and `Channel`,
 the responder must respect demand signals from the requester. Demand is expressed as a
 number of messages. Initial demand is specified in `REQUEST_STREAM` and
 `REQUEST_CHANNEL` frames. Subsequent demand is signaled via `REQUEST_N` frames.
@@ -287,8 +287,8 @@ can be registered as follows:
 .Java
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
-		.encoders(encoders -> encoders.add(new Jackson2CborEncoder))
-		.decoders(decoders -> decoders.add(new Jackson2CborDecoder))
+		.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+		.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
 		.build();
 
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
@@ -690,8 +690,8 @@ you need to share configuration between a client and a server in the same proces
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.builder()
-				.encoders(encoders -> encoders.add(new Jackson2CborEncoder))
-				.decoders(decoders -> decoders.add(new Jackson2CborDecoder))
+				.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+				.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
 				.routeMatcher(new PathPatternRouteMatcher())
 				.build();
 		}
@@ -781,7 +781,7 @@ use the following method arguments:
 
 | `@DestinationVariable`
 | Value extracted from the route based on variables in the mapping pattern, e.g.
-  `@MessageMapping("find.radar.{id}")`.
+  pass:q[`@MessageMapping("find.radar.{id}")`].
 
 | `@Header`
 | Metadata value registered for extraction as described in <<rsocket-metadata-extractor>>.

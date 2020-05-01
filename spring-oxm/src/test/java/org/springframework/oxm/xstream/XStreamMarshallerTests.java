@@ -56,7 +56,7 @@ import org.xml.sax.ContentHandler;
 import org.xmlunit.builder.Input;
 import org.xmlunit.xpath.JAXPXPathEngine;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.util.xml.StaxUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

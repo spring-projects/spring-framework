@@ -32,7 +32,6 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -41,6 +40,7 @@ import org.springframework.web.reactive.function.server.AbstractRouterFunctionIn
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;

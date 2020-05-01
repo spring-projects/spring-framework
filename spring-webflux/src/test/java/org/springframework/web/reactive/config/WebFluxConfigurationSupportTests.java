@@ -45,7 +45,6 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -75,6 +74,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,7 +87,7 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -350,10 +350,10 @@ public class WebFluxConfigurationSupportTests {
 		@Override
 		protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 			configurer.registerDefaults(false);
-			configurer.customCodecs().decoder(StringDecoder.textPlainOnly());
-			configurer.customCodecs().decoder(new Jaxb2XmlDecoder());
-			configurer.customCodecs().encoder(CharSequenceEncoder.textPlainOnly());
-			configurer.customCodecs().encoder(new Jaxb2XmlEncoder());
+			configurer.customCodecs().register(StringDecoder.textPlainOnly());
+			configurer.customCodecs().register(new Jaxb2XmlDecoder());
+			configurer.customCodecs().register(CharSequenceEncoder.textPlainOnly());
+			configurer.customCodecs().register(new Jaxb2XmlEncoder());
 		}
 	}
 

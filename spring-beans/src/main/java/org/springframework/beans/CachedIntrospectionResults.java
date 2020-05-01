@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.springframework.util.StringUtils;
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
  * information for a Java class. Not intended for direct use by application code.
  *
- * <p>Necessary for own caching of descriptors within the application's
- * ClassLoader, rather than rely on the JDK's system-wide BeanInfo cache
- * (in order to avoid leaks on ClassLoader shutdown).
+ * <p>Necessary for Spring's own caching of bean descriptors within the application
+ * {@link ClassLoader}, rather than relying on the JDK's system-wide {@link BeanInfo}
+ * cache (in order to avoid leaks on individual application shutdown in a shared JVM).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Hence, this class
@@ -163,7 +163,6 @@ public final class CachedIntrospectionResults {
 	 * @return the corresponding CachedIntrospectionResults
 	 * @throws BeansException in case of introspection failure
 	 */
-	@SuppressWarnings("unchecked")
 	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
 		CachedIntrospectionResults results = strongClassCache.get(beanClass);
 		if (results != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,7 +455,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * merged annotation.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values
 	 * are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
@@ -463,7 +463,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get an immutable {@link Map} that contains all the annotation attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	Map<String, Object> asMap(Adapt... adaptations);
@@ -473,17 +473,29 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
 	 * @param factory a map factory
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values
 	 */
 	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
 	/**
-	 * Create a type-safe synthesized version of this annotation that can be
-	 * used directly in code.
+	 * Create a type-safe synthesized version of this merged annotation that can
+	 * be used directly in code.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
-	 * @return a synthesized version of the annotation.
+	 * <p>If this merged annotation was created {@linkplain #from(Annotation) from}
+	 * an annotation instance, that annotation will be returned unmodified if it is
+	 * not <em>synthesizable</em>. An annotation is considered synthesizable if
+	 * one of the following is true.
+	 * <ul>
+	 * <li>The annotation declares attributes annotated with {@link AliasFor @AliasFor}.</li>
+	 * <li>The annotation is a composed annotation that relies on convention-based
+	 * annotation attribute overrides in meta-annotations.</li>
+	 * <li>The annotation declares attributes that are annotations or arrays of
+	 * annotations that are themselves synthesizable.</li>
+	 * </ul>
+	 * @return a synthesized version of the annotation or the original annotation
+	 * unmodified
 	 * @throws NoSuchElementException on a missing annotation
 	 */
 	A synthesize() throws NoSuchElementException;
@@ -493,8 +505,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * on a condition predicate.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
+	 * <p>Consult the documentation for {@link #synthesize()} for an explanation
+	 * of what is considered synthesizable.
 	 * @param condition the test to determine if the annotation can be synthesized
-	 * @return a optional containing the synthesized version of the annotation or
+	 * @return an optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
 	 * @throws NoSuchElementException on a missing annotation
 	 * @see MergedAnnotationPredicates

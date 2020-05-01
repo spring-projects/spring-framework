@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -50,6 +49,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

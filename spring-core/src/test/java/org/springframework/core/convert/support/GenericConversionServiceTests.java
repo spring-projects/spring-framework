@@ -43,8 +43,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link GenericConversionService}.

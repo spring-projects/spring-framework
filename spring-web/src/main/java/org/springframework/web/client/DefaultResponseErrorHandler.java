@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,12 +102,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
 		if (statusCode == null) {
-			String message = getErrorMessage(
-					response.getRawStatusCode(), response.getStatusText(),
-					getResponseBody(response), getCharset(response));
+			byte[] body = getResponseBody(response);
+			String message = getErrorMessage(response.getRawStatusCode(),
+					response.getStatusText(), body, getCharset(response));
 			throw new UnknownHttpStatusCodeException(message,
 					response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), getResponseBody(response), getCharset(response));
+					response.getHeaders(), body, getCharset(response));
 		}
 		handleError(response, statusCode);
 	}

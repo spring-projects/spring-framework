@@ -75,7 +75,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Set a Map with URL paths as keys and {@code VersionStrategy} as values.
 	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
 	 * details, see the {@link AntPathMatcher} javadoc.
-	 * @param map map with URLs as keys and version strategies as values
+	 * @param map a map with URLs as keys and version strategies as values
 	 */
 	public void setStrategyMap(Map<String, VersionStrategy> map) {
 		this.versionStrategyMap.clear();

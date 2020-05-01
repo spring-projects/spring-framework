@@ -102,6 +102,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return this.exchange.getSourceAddress();
 	}
 
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.exchange.getDestinationAddress();
+	}
+
 	@Nullable
 	@Override
 	protected SslInfo initSslInfo() {

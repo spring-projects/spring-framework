@@ -9,7 +9,7 @@ particular architecture, technology, or methodology (although it certainly recom
 some over others). This freedom to pick and choose the architecture, technology, or
 methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web frameworks
-(<<mvc, Spring MVC>> and <<webflux, Spring WebFlux>>) while, at the same time,
+(<<mvc, Spring MVC>> and <<webflux.adoc#webflux, Spring WebFlux>>) while, at the same time,
 supporting integration with a number of popular third-party web frameworks.
 
 

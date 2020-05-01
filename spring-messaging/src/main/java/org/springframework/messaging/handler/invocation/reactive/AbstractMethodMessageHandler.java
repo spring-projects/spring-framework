@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Configure custom return value handlers for handler metohds.
+	 * Configure custom return value handlers for handler methods.
 	 */
 	public void setReturnValueHandlerConfigurer(ReturnValueHandlerConfigurer configurer) {
 		Assert.notNull(configurer, "ReturnValueHandlerConfigurer is required");
@@ -564,14 +564,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
-		}
-
-		public T getMapping() {
-			return this.mapping;
-		}
-
-		public HandlerMethod getHandlerMethod() {
-			return this.handlerMethod;
 		}
 
 		@Override

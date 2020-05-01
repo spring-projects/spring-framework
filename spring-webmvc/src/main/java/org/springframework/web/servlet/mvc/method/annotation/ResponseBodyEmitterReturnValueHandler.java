@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -33,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -60,6 +63,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	private final List<HttpMessageConverter<?>> sseMessageConverters;
+
 	private final ReactiveTypeHandler reactiveHandler;
 
 
@@ -72,6 +77,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
+		this.sseMessageConverters = initSseConverters(messageConverters);
 		this.reactiveHandler = new ReactiveTypeHandler();
 	}
 
@@ -88,7 +94,20 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
+		this.sseMessageConverters = initSseConverters(messageConverters);
 		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager);
+	}
+
+	private static List<HttpMessageConverter<?>> initSseConverters(List<HttpMessageConverter<?>> converters) {
+		for (HttpMessageConverter<?> converter : converters) {
+			if (converter.canWrite(String.class, MediaType.TEXT_PLAIN)) {
+				return converters;
+			}
+		}
+		List<HttpMessageConverter<?>> result = new ArrayList<>(converters.size() + 1);
+		result.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+		result.addAll(converters);
+		return result;
 	}
 
 
@@ -186,7 +205,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		@SuppressWarnings("unchecked")
 		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
-			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
+			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.sseMessageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {
 					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);
 					this.outputMessage.flush();

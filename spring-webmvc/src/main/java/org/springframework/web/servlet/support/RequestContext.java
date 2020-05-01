@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
@@ -563,8 +563,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
 		String url = getContextPath() + relativeUrl;
-		UriTemplate template = new UriTemplate(url);
-		url = template.expand(params).toASCIIString();
+		url = UriComponentsBuilder.fromUriString(url).buildAndExpand(params).encode().toUri().toASCIIString();
 		if (this.response != null) {
 			url = this.response.encodeURL(url);
 		}
@@ -614,7 +613,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
@@ -624,7 +623,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -635,7 +634,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -646,7 +645,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @param htmlEscape if the message should be HTML-escaped
@@ -662,7 +661,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -672,7 +671,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -683,7 +682,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -694,7 +693,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
@@ -731,7 +730,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
@@ -744,7 +743,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -758,7 +757,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -773,7 +772,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -785,7 +784,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -798,7 +797,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code.
 	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
 	 * theme-specific resource paths and not client-visible messages.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -821,7 +820,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the Errors instance for the given bind object, using the "defaultHtmlEscape" setting.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
 	@Nullable
@@ -831,7 +830,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the Errors instance for the given bind object.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */

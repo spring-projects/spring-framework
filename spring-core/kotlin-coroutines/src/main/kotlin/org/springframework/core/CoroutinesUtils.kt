@@ -26,6 +26,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.asFlux
 
 import kotlinx.coroutines.reactor.mono
+import org.reactivestreams.Publisher
 import reactor.core.publisher.Mono
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -51,28 +52,29 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
 		GlobalScope.async(Dispatchers.Unconfined) { source.awaitFirstOrNull() }
 
 /**
- * Invoke a suspending function converting it to [Mono] or [reactor.core.publisher.Flux]
- * if necessary.
+ * Return {@code true} if the method is a suspending function.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+internal fun isSuspendingFunction(method: Method) = method.kotlinFunction!!.isSuspend
+
+/**
+ * Invoke a suspending function and converts it to [Mono] or [reactor.core.publisher.Flux].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
 @Suppress("UNCHECKED_CAST")
-internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Any? {
+internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Publisher<*> {
 	val function = method.kotlinFunction!!
-	return if (function.isSuspend) {
-		val mono = mono(Dispatchers.Unconfined) {
-			function.callSuspend(bean, *args.sliceArray(0..(args.size-2)))
-					.let { if (it == Unit) null else it }
-		}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
-		if (function.returnType.classifier == Flow::class) {
-			mono.flatMapMany { (it as Flow<Any>).asFlux() }
-		}
-		else {
-			mono
-		}
+	val mono = mono(Dispatchers.Unconfined) {
+		function.callSuspend(bean, *args.sliceArray(0..(args.size-2))).let { if (it == Unit) null else it }
+	}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
+	return if (function.returnType.classifier == Flow::class) {
+		mono.flatMapMany { (it as Flow<Any>).asFlux() }
 	}
 	else {
-		function.call(bean, *args)
+		mono
 	}
 }

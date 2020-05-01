@@ -28,8 +28,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.Pet;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.Pet;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 

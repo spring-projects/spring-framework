@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ public class ControllerAdviceBean implements Ordered {
 	 */
 	private final Object beanOrName;
 
+	private final boolean isSingleton;
+
 	/**
 	 * Reference to the resolved bean instance, potentially lazily retrieved
 	 * via the {@code BeanFactory}.
@@ -80,6 +82,7 @@ public class ControllerAdviceBean implements Ordered {
 	public ControllerAdviceBean(Object bean) {
 		Assert.notNull(bean, "Bean must not be null");
 		this.beanOrName = bean;
+		this.isSingleton = true;
 		this.resolvedBean = bean;
 		this.beanType = ClassUtils.getUserClass(bean.getClass());
 		this.beanTypePredicate = createBeanTypePredicate(this.beanType);
@@ -115,6 +118,7 @@ public class ControllerAdviceBean implements Ordered {
 				"] does not contain specified controller advice bean '" + beanName + "'");
 
 		this.beanOrName = beanName;
+		this.isSingleton = beanFactory.isSingleton(beanName);
 		this.beanType = getBeanType(beanName, beanFactory);
 		this.beanTypePredicate = (controllerAdvice != null ? createBeanTypePredicate(controllerAdvice) :
 				createBeanTypePredicate(this.beanType));
@@ -145,7 +149,7 @@ public class ControllerAdviceBean implements Ordered {
 	public int getOrder() {
 		if (this.order == null) {
 			Object resolvedBean = null;
-			if (this.beanOrName instanceof String) {
+			if (this.beanFactory != null && this.beanOrName instanceof String) {
 				String beanName = (String) this.beanOrName;
 				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
 				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);
@@ -188,13 +192,19 @@ public class ControllerAdviceBean implements Ordered {
 	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
 	 * resolving the bean name through the {@link BeanFactory}.
 	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
-	 * will be cached, thereby avoiding repeated lookups in the {@code BeanFactory}.
+	 * will be cached if it is a singleton, thereby avoiding repeated lookups in
+	 * the {@code BeanFactory}.
 	 */
 	public Object resolveBean() {
 		if (this.resolvedBean == null) {
 			// this.beanOrName must be a String representing the bean name if
 			// this.resolvedBean is null.
-			this.resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
+			Object resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
+			// Don't cache non-singletons (e.g., prototypes).
+			if (!this.isSingleton) {
+				return resolvedBean;
+			}
+			this.resolvedBean = resolvedBean;
 		}
 		return this.resolvedBean;
 	}

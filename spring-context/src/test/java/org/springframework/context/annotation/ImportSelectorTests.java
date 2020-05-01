@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -101,13 +102,17 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void correctMetaDataOnIndirectImports() {
-		new AnnotationConfigApplicationContext(IndirectConfig.class);
+	public void correctMetadataOnIndirectImports() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IndirectConfig.class);
 		String indirectImport = IndirectImport.class.getName();
 		assertThat(importFrom.get(ImportSelector1.class)).isEqualTo(indirectImport);
 		assertThat(importFrom.get(ImportSelector2.class)).isEqualTo(indirectImport);
 		assertThat(importFrom.get(DeferredImportSelector1.class)).isEqualTo(indirectImport);
 		assertThat(importFrom.get(DeferredImportSelector2.class)).isEqualTo(indirectImport);
+		assertThat(context.containsBean("a")).isFalse();  // since ImportedSelector1 got filtered
+		assertThat(context.containsBean("b")).isTrue();
+		assertThat(context.containsBean("c")).isTrue();
+		assertThat(context.containsBean("d")).isTrue();
 	}
 
 	@Test
@@ -361,6 +366,12 @@ public class ImportSelectorTests {
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 			return new String[] {IndirectImport.class.getName()};
 		}
+
+		@Override
+		@Nullable
+		public Predicate<String> getExclusionFilter() {
+			return className -> className.endsWith("ImportedSelector1");
+		}
 	}
 
 
@@ -530,6 +541,7 @@ public class ImportSelectorTests {
 					.collect(Collectors.toMap(entry -> entry.getKey().getClassName(),
 							Map.Entry::getValue));
 		}
+
 		private final List<Entry> instanceImports = new ArrayList<>();
 
 		@Override

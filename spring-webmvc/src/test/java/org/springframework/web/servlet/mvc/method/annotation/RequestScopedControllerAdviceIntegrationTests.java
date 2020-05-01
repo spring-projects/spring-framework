@@ -24,12 +24,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -51,7 +51,7 @@ class RequestScopedControllerAdviceIntegrationTests {
 		assertThatCode(context::refresh).doesNotThrowAnyException();
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
-		assertThat(adviceBeans).size().isEqualTo(1);
+		assertThat(adviceBeans).hasSize(1);
 		assertThat(adviceBeans.get(0))//
 				.returns(RequestScopedControllerAdvice.class, ControllerAdviceBean::getBeanType)//
 				.returns(42, ControllerAdviceBean::getOrder);

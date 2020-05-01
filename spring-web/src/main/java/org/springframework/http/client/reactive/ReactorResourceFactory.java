@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -46,12 +47,13 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Nullable
 	private Consumer<HttpResources> globalResourcesConsumer;
 
-	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.elastic("webflux");
-
-	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");
+	@SuppressWarnings("deprecation")
+	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.fixed("webflux", 500);
 
 	@Nullable
 	private ConnectionProvider connectionProvider;
+
+	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");
 
 	@Nullable
 	private LoopResources loopResources;
@@ -59,6 +61,10 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	private boolean manageConnectionProvider = false;
 
 	private boolean manageLoopResources = false;
+
+	private Duration shutdownQuietPeriod = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_QUIET_PERIOD);
+
+	private Duration shutdownTimeout = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_TIMEOUT);
 
 
 	/**
@@ -96,7 +102,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Use this option when you don't want to participate in global resources and
+	 * Use this when you don't want to participate in global resources and
 	 * you want to customize the creation of the managed {@code ConnectionProvider}.
 	 * <p>By default, {@code ConnectionProvider.elastic("http")} is used.
 	 * <p>Note that this option is ignored if {@code userGlobalResources=false} or
@@ -108,19 +114,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Use this option when you don't want to participate in global resources and
-	 * you want to customize the creation of the managed {@code LoopResources}.
-	 * <p>By default, {@code LoopResources.create("reactor-http")} is used.
-	 * <p>Note that this option is ignored if {@code userGlobalResources=false} or
-	 * {@link #setLoopResources(LoopResources)} is set.
-	 * @param supplier the supplier to use
-	 */
-	public void setLoopResourcesSupplier(Supplier<LoopResources> supplier) {
-		this.loopResourcesSupplier = supplier;
-	}
-
-	/**
-	 * Use this option when you want to provide an externally managed
+	 * Use this when you want to provide an externally managed
 	 * {@link ConnectionProvider} instance.
 	 * @param connectionProvider the connection provider to use as is
 	 */
@@ -134,6 +128,18 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	public ConnectionProvider getConnectionProvider() {
 		Assert.state(this.connectionProvider != null, "ConnectionProvider not initialized yet");
 		return this.connectionProvider;
+	}
+
+	/**
+	 * Use this when you don't want to participate in global resources and
+	 * you want to customize the creation of the managed {@code LoopResources}.
+	 * <p>By default, {@code LoopResources.create("reactor-http")} is used.
+	 * <p>Note that this option is ignored if {@code userGlobalResources=false} or
+	 * {@link #setLoopResources(LoopResources)} is set.
+	 * @param supplier the supplier to use
+	 */
+	public void setLoopResourcesSupplier(Supplier<LoopResources> supplier) {
+		this.loopResourcesSupplier = supplier;
 	}
 
 	/**
@@ -151,6 +157,40 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	public LoopResources getLoopResources() {
 		Assert.state(this.loopResources != null, "LoopResources not initialized yet");
 		return this.loopResources;
+	}
+
+	/**
+	 * Configure the amount of time we'll wait before shutting down resources.
+	 * If a task is submitted during the {@code shutdownQuietPeriod}, it is guaranteed
+	 * to be accepted and the {@code shutdownQuietPeriod} will start over.
+	 * <p>By default, this is set to
+	 * {@link LoopResources#DEFAULT_SHUTDOWN_QUIET_PERIOD} which is 2 seconds but
+	 * can also be overridden with the system property
+	 * {@link reactor.netty.ReactorNetty#SHUTDOWN_QUIET_PERIOD
+	 * ReactorNetty.SHUTDOWN_QUIET_PERIOD}.
+	 * @since 5.2.4
+	 * @see #setShutdownTimeout(Duration)
+	 */
+	public void setShutdownQuietPeriod(Duration shutdownQuietPeriod) {
+		Assert.notNull(shutdownQuietPeriod, "shutdownQuietPeriod should not be null");
+		this.shutdownQuietPeriod = shutdownQuietPeriod;
+	}
+
+	/**
+	 * Configure the maximum amount of time to wait until the disposal of the
+	 * underlying resources regardless if a task was submitted during the
+	 * {@code shutdownQuietPeriod}.
+	 * <p>By default, this is set to
+	 * {@link LoopResources#DEFAULT_SHUTDOWN_TIMEOUT} which is 15 seconds but
+	 * can also be overridden with the system property
+	 * {@link reactor.netty.ReactorNetty#SHUTDOWN_TIMEOUT
+	 * ReactorNetty.SHUTDOWN_TIMEOUT}.
+	 * @since 5.2.4
+	 * @see #setShutdownQuietPeriod(Duration)
+	 */
+	public void setShutdownTimeout(Duration shutdownTimeout) {
+		Assert.notNull(shutdownTimeout, "shutdownTimeout should not be null");
+		this.shutdownTimeout = shutdownTimeout;
 	}
 
 
@@ -181,7 +221,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Override
 	public void destroy() {
 		if (this.useGlobalResources) {
-			HttpResources.disposeLoopsAndConnectionsLater().block();
+			HttpResources.disposeLoopsAndConnectionsLater(
+					this.shutdownQuietPeriod, this.shutdownTimeout).block();
 		}
 		else {
 			try {
@@ -197,7 +238,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 			try {
 				LoopResources resources = this.loopResources;
 				if (resources != null && this.manageLoopResources) {
-					resources.disposeLater().block();
+					resources.disposeLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 				}
 			}
 			catch (Throwable ex) {

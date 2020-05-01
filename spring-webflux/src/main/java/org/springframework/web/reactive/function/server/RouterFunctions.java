@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -748,7 +749,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
+	abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
 
 		@Override
 		public String toString() {
@@ -778,8 +779,8 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
-			return this.first.route(request)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next();
 		}
 
 		@Override
@@ -808,9 +809,9 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.first.route(request)
-					.map(this::cast)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request).map(this::cast)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next()
+					.map(this::cast);
 		}
 
 		@SuppressWarnings("unchecked")

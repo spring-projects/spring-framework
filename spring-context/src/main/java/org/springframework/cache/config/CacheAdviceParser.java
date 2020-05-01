@@ -113,11 +113,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -140,11 +136,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -158,11 +150,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 					parserContext.getReaderContext(), new CachePutOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 

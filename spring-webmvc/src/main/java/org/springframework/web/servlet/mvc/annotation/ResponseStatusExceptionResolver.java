@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,8 +115,10 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Template method that handles an {@link ResponseStatusException}.
-	 * <p>The default implementation delegates to {@link #applyStatusAndReason}
-	 * with the status code and reason from the exception.
+	 * <p>The default implementation applies the headers from
+	 * {@link ResponseStatusException#getResponseHeaders()} and delegates to
+	 * {@link #applyStatusAndReason} with the status code and reason from the
+	 * exception.
 	 * @param ex the exception
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -127,6 +129,9 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView resolveResponseStatusException(ResponseStatusException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws Exception {
+
+		ex.getResponseHeaders().forEach((name, values) ->
+				values.forEach(value -> response.addHeader(name, value)));
 
 		int statusCode = ex.getStatus().value();
 		String reason = ex.getReason();

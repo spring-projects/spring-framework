@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,26 @@ import javax.servlet.ServletContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.JRE.JAVA_15;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for pure Javascript templates running on Nashorn engine.
+ * Unit tests for pure JavaScript templates running on Nashorn engine.
  *
  * @author Sebastien Deleuze
  */
+@DisabledForJreRange(min = JAVA_15) // Nashorn JavaScript engine removed in Java 15
 public class NashornScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;

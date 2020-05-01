@@ -24,8 +24,8 @@ import javax.websocket.Session;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.handler.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

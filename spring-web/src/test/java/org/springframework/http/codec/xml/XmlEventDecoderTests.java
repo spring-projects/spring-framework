@@ -26,9 +26,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

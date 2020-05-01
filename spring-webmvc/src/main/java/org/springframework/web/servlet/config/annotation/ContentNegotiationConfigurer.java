@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with
@@ -52,7 +51,8 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  * <tr>
  * <td>{@link #favorPathExtension}</td>
  * <td>true</td>
- * <td>{@link PathExtensionContentNegotiationStrategy}</td>
+ * <td>{@link org.springframework.web.accept.PathExtensionContentNegotiationStrategy
+ * PathExtensionContentNegotiationStrategy}</td>
  * <td>Enabled</td>
  * </tr>
  * <tr>
@@ -129,7 +129,14 @@ public class ContentNegotiationConfigurer {
 	 * <p>By default this is set to {@code true} in which case a request
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+	 * extension config options. As there is no replacement for this method,
+	 * for the time being it's necessary to continue using it in order to set it
+	 * to {@code false}. In 5.3 when {@code false} becomes the default, use of
+	 * this property will no longer be necessary.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer favorPathExtension(boolean favorPathExtension) {
 		this.factory.setFavorPathExtension(favorPathExtension);
 		return this;
@@ -183,7 +190,11 @@ public class ContentNegotiationConfigurer {
 	 * to any media type. Setting this to {@code false} will result in an
 	 * {@code HttpMediaTypeNotAcceptableException} if there is no match.
 	 * <p>By default this is set to {@code true}.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
 		this.factory.setIgnoreUnknownPathExtensions(ignore);
 		return this;

@@ -32,8 +32,8 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;

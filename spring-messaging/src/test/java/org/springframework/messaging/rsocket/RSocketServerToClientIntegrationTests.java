@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
 
-import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
@@ -62,11 +62,9 @@ public class RSocketServerToClientIntegrationTests {
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
 		SocketAcceptor responder = messageHandler.responder();
 
-		server = RSocketFactory.receive()
-				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(responder)
-				.transport(TcpServerTransport.create("localhost", 0))
-				.start()
+		server = RSocketServer.create(responder)
+				.payloadDecoder(PayloadDecoder.ZERO_COPY)
+				.bind(TcpServerTransport.create("localhost", 0))
 				.block();
 	}
 
@@ -99,23 +97,21 @@ public class RSocketServerToClientIntegrationTests {
 
 	private static void connectAndRunTest(String connectionRoute) {
 
-		ServerController serverController = context.getBean(ServerController.class);
-		serverController.reset();
+		context.getBean(ServerController.class).reset();
 
 		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
-		ClientRSocketFactoryConfigurer clientResponderConfigurer =
-				RSocketMessageHandler.clientResponder(strategies, new ClientHandler());
+		SocketAcceptor responder = RSocketMessageHandler.responder(strategies, new ClientHandler());
 
 		RSocketRequester requester = null;
 		try {
 			requester = RSocketRequester.builder()
 					.setupRoute(connectionRoute)
 					.rsocketStrategies(strategies)
-					.rsocketFactory(clientResponderConfigurer)
+					.rsocketConnector(connector -> connector.acceptor(responder))
 					.connectTcp("localhost", server.address().getPort())
 					.block();
 
-			serverController.await(Duration.ofSeconds(5));
+			context.getBean(ServerController.class).await(Duration.ofSeconds(5));
 		}
 		finally {
 			if (requester != null) {

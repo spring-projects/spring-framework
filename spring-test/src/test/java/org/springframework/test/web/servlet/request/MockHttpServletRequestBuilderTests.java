@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for building a {@link MockHttpServletRequest} with
@@ -88,7 +89,8 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(request.getServerName()).isEqualTo("java.sun.com");
 		assertThat(request.getServerPort()).isEqualTo(8080);
 		assertThat(request.getRequestURI()).isEqualTo("/javase/6/docs/api/java/util/BitSet.html");
-		assertThat(request.getRequestURL().toString()).isEqualTo("https://java.sun.com:8080/javase/6/docs/api/java/util/BitSet.html");
+		assertThat(request.getRequestURL().toString())
+				.isEqualTo("https://java.sun.com:8080/javase/6/docs/api/java/util/BitSet.html");
 	}
 
 	@Test
@@ -105,6 +107,12 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getRequestURI()).isEqualTo("/test//currentlyValid/0");
+	}
+
+	@Test // gh-24556
+	public void requestUriWithoutScheme() {
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcRequestBuilders.get("localhost:8080/path"))
+				.withMessage("'url' should start with a path or be a complete HTTP URL: localhost:8080/path");
 	}
 
 	@Test
@@ -337,6 +345,13 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(result.get(1).toString()).isEqualTo("application/xml");
 	}
 
+	@Test // gh-2079
+	public void acceptHeaderWithInvalidValues() {
+		this.builder.accept("any", "any2");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getHeader("Accept")).isEqualTo("any, any2");
+	}
+
 	@Test
 	public void contentType() {
 		this.builder.contentType(MediaType.TEXT_HTML);
@@ -363,6 +378,13 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(contentTypes.get(0)).isEqualTo("text/html");
 	}
 
+	@Test // gh-2079
+	public void contentTypeWithInvalidValue() {
+		this.builder.contentType("any");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getContentType()).isEqualTo("any");
+	}
+
 	@Test  // SPR-11308
 	public void contentTypeViaHeader() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
@@ -370,6 +392,13 @@ public class MockHttpServletRequestBuilderTests {
 		String contentType = request.getContentType();
 
 		assertThat(contentType).isEqualTo("text/html");
+	}
+
+	@Test // gh-2079
+	public void contentTypeViaHeaderWithInvalidValue() {
+		this.builder.header("Content-Type", "yaml");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getContentType()).isEqualTo("yaml");
 	}
 
 	@Test  // SPR-11308

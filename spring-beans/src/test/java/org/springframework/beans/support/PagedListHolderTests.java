@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

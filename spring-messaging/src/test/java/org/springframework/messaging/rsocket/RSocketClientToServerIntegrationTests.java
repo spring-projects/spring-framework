@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
 
-import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.netty.server.CloseableChannel;
@@ -71,12 +71,10 @@ public class RSocketClientToServerIntegrationTests {
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
 		SocketAcceptor responder = messageHandler.responder();
 
-		server = RSocketFactory.receive()
-				.addResponderPlugin(interceptor)
-				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(responder)
-				.transport(TcpServerTransport.create("localhost", 7000))
-				.start()
+		server = RSocketServer.create(responder)
+				.interceptors(registry -> registry.forResponder(interceptor))
+				.payloadDecoder(PayloadDecoder.ZERO_COPY)
+				.bind(TcpServerTransport.create("localhost", 7000))
 				.block();
 
 		requester = RSocketRequester.builder()

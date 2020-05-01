@@ -41,9 +41,8 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +54,8 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -204,7 +205,8 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	private static void verifyContents(Path tempFile, Resource resource) {
 		try {
 			byte[] tempBytes = Files.readAllBytes(tempFile);
-			byte[] resourceBytes = Files.readAllBytes(resource.getFile().toPath());
+			// Use FileCopyUtils since the resource might reside in a JAR instead of in the file system.
+			byte[] resourceBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 			assertThat(tempBytes).isEqualTo(resourceBytes);
 		}
 		catch (IOException ex) {

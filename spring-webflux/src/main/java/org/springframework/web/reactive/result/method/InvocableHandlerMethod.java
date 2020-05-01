@@ -139,7 +139,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				ReflectionUtils.makeAccessible(getBridgedMethod());
 				Method method = getBridgedMethod();
-				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())
+						&& CoroutinesUtils.isSuspendingFunction(method)) {
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
 				else {

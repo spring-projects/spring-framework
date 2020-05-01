@@ -642,15 +642,15 @@ class. This also applies to member functions, in that they need to be marked as 
 
 While Kotlin's JVM-friendly design is generally frictionless with Spring, this specific Kotlin feature
 can prevent the application from starting, if this fact is not taken into consideration. This is because
-Spring beans (such as `@Configuration` annotated classes which by default need to be inherited at runtime for technical
-reasons) are normally proxied by CGLIB. The workaround was to add an `open` keyword on each class and
+Spring beans (such as `@Configuration` annotated classes which by default need to be extended at runtime for technical
+reasons) are normally proxied by CGLIB. The workaround is to add an `open` keyword on each class and
 member function of Spring beans that are proxied by CGLIB, which can
 quickly become painful and is against the Kotlin principle of keeping code concise and predictable.
 
-NOTE: It is also possible to avoid CGLIB proxies on configurations by using `@Configuration(proxyBeanMethods = false)`,
-see {api-spring-framework}/context/annotation/Configuration.html#proxyBeanMethods--[`proxyBeanMethods` Javadoc] for more details.
+NOTE: It is also possible to avoid CGLIB proxies for configuration classes by using `@Configuration(proxyBeanMethods = false)`.
+See {api-spring-framework}/context/annotation/Configuration.html#proxyBeanMethods--[`proxyBeanMethods` Javadoc] for more details.
 
-Fortunately, Kotlin now provides a
+Fortunately, Kotlin provides a
 https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
 plugin (a preconfigured version of the `kotlin-allopen` plugin) that automatically opens classes
 and their member functions for types that are annotated or meta-annotated with one of the following
@@ -661,12 +661,17 @@ annotations:
 * `@Transactional`
 * `@Cacheable`
 
-Meta-annotations support means that types annotated with `@Configuration`, `@Controller`,
+Meta-annotation support means that types annotated with `@Configuration`, `@Controller`,
 `@RestController`, `@Service`, or `@Repository` are automatically opened since these
 annotations are meta-annotated with `@Component`.
 
-https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io] enables it by default, so, in practice,
-you can write your Kotlin beans without any additional `open` keyword, as in Java.
+https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io] enables
+the `kotlin-spring` plugin by default. So, in practice, you can write your Kotlin beans
+without any additional `open` keyword, as in Java.
+
+NOTE: The Kotlin code samples in Spring Framework documentation do not explicitly specify
+`open` on the classes and their member functions. The samples are written for projects
+using the `kotlin-allopen` plugin, since this is the most commonly used setup.
 
 === Using Immutable Class Instances for Persistence
 
@@ -698,7 +703,7 @@ As the following example shows, this allows for easy changes to individual prope
 ----
 
 Common persistence technologies (such as JPA) require a default constructor, preventing this
-kind of design. Fortunately, there is now a workaround for this
+kind of design. Fortunately, there is a workaround for this
 https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["`default constructor hell`"],
 since Kotlin provides a https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[`kotlin-jpa`]
 plugin that generates synthetic no-arg constructor for classes annotated with JPA annotations.
@@ -713,7 +718,7 @@ does not require the `kotlin-noarg` plugin if the module uses Spring Data object
 
 === Injecting Dependencies
 
-Our recommendation is to try and favor constructor injection with `val` read-only (and
+Our recommendation is to try to favor constructor injection with `val` read-only (and
 non-nullable when possible) https://kotlinlang.org/docs/reference/properties.html[properties],
 as the following example shows:
 
@@ -726,8 +731,8 @@ as the following example shows:
 	)
 ----
 
-NOTE: Classes with a single constructor have their parameters automatically autowired,
-that's why there is no need for an explicit `@Autowired constructor` in the example shown
+NOTE: Classes with a single constructor have their parameters automatically autowired.
+That's why there is no need for an explicit `@Autowired constructor` in the example shown
 above.
 
 If you really need to use field injection, you can use the `lateinit var` construct,
@@ -748,18 +753,18 @@ as the following example shows:
 
 === Injecting Configuration Properties
 
-In Java, you can inject configuration properties by using annotations (such as `@Value("${property}")`).
+In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`)].
 However, in Kotlin, `$` is a reserved character that is used for
 https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
 
 Therefore, if you wish to use the `@Value` annotation in Kotlin, you need to escape the `$`
-character by writing `@Value("\${property}")`.
+character by writing pass:q[`@Value("\${property}")`].
 
 NOTE: If you use Spring Boot, you should probably use
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
 instead of `@Value` annotations.
 
-As an alternative, you can customize the properties placeholder prefix by declaring the
+As an alternative, you can customize the property placeholder prefix by declaring the
 following configuration beans:
 
 [source,kotlin,indent=0]
@@ -801,7 +806,7 @@ to specify explicitly the checked exceptions thrown (for example `@Throws(IOExce
 === Annotation Array Attributes
 
 Kotlin annotations are mostly similar to Java annotations, but array attributes (which are
-extensively used in Spring) behave differently. As explained in
+extensively used in Spring) behave differently. As explained in the
 https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation] you can omit
 the `value` attribute name, unlike other attributes, and specify it as a `vararg` parameter.
 
@@ -839,13 +844,13 @@ to be specified with named array attributes).
 An alternative for this specific `method` attribute (the most common one) is to
 use a shortcut annotation, such as `@GetMapping`, `@PostMapping`, and others.
 
-NOTE: Reminder: If the `@RequestMapping` `method` attribute is not specified,
-all HTTP methods will be matched, not only the `GET` one.
+NOTE: If the `@RequestMapping` `method` attribute is not specified, all HTTP methods will
+be matched, not only the `GET` method.
 
 === Testing
 
 This section addresses testing with the combination of Kotlin and Spring Framework.
-The recommended testing framework is https://junit.org/junit5/[JUnit 5], as well as
+The recommended testing framework is https://junit.org/junit5/[JUnit 5] along with
 https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
@@ -856,14 +861,14 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-featu
 As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive, dedicated section>>,
 JUnit 5 allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
-{api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowire = true)`]
+{api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
 to enable autowiring for all parameters.
 
 ====
 [source,kotlin,indent=0]
 ----
 @SpringJUnitConfig(TestConfig::class)
-@TestConstructor(autowire = true)
+@TestConstructor(autowireMode = AutowireMode.ALL)
 class OrderServiceIntegrationTests(val orderService: OrderService,
                                    val customerService: CustomerService) {
 
@@ -876,7 +881,7 @@ class OrderServiceIntegrationTests(val orderService: OrderService,
 
 Kotlin lets you specify meaningful test function names between backticks (```).
 As of JUnit 5, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
-annotation to enable a single instantiation of test classes, which allows the use of `@BeforeAll`
+annotation to enable single instantiation of test classes, which allows the use of `@BeforeAll`
 and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
 
 You can also change the default behavior to `PER_CLASS` thanks to a `junit-platform.properties`
