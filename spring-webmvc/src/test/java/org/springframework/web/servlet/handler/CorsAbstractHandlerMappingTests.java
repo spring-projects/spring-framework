@@ -147,6 +147,22 @@ class CorsAbstractHandlerMappingTests {
 	}
 
 	@Test
+	void actualRequestWithMappedPatternCorsConfiguration() throws Exception {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOriginPattern(".*\\.domain2\\.com");
+		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
+		this.request.setMethod(RequestMethod.GET.name());
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://example.domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(this.request);
+
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
+		assertThat(getRequiredCorsConfiguration(chain, false).getAllowedOriginsPatterns()).containsExactly(".*\\.domain2\\.com");
+	}
+
+	@Test
 	void preflightRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
