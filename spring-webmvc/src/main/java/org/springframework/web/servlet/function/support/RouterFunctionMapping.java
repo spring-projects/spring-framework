@@ -77,9 +77,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * {@link RouterFunction} instances available in the application context.
 	 */
 	public RouterFunctionMapping() {
-		// gh-23236 will ensure the configured parser is used to parse patterns
-		// For now this helps to signal to the DispatcherServlet the need to initialize the RequestPath
-		setPatternParser(new PathPatternParser());
 	}
 
 	/**
@@ -134,6 +131,14 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		}
 		if (CollectionUtils.isEmpty(this.messageConverters)) {
 			initMessageConverters();
+		}
+		if (this.routerFunction != null) {
+			PathPatternParser patternParser = getPatternParser();
+			if (patternParser == null) {
+				patternParser = new PathPatternParser();
+				setPatternParser(patternParser);
+			}
+			RouterFunctions.changeParser(this.routerFunction, patternParser);
 		}
 	}
 
