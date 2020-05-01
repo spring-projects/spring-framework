@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Ruslan Akhundov
  * @since 4.2
  * @see <a href="https://www.w3.org/TR/cors/">CORS spec</a>
  */
@@ -52,6 +54,8 @@ public class CorsConfiguration {
 
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
+	/** Wildcard representing pattern that matches <em>all</em> origins. */
+	public static final String ALL_PATTERN = ".*";
 
 	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
 			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
@@ -62,9 +66,18 @@ public class CorsConfiguration {
 	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
 			Collections.singletonList(ALL));
 
+	private static final List<String> DEFAULT_PERMIT_ALL_PATTERN_STR = Collections.unmodifiableList(
+			Collections.singletonList(ALL_PATTERN));
+
+	private static final List<Pattern> DEFAULT_PERMIT_ALL_PATTERN = Collections.unmodifiableList(
+			Collections.singletonList(Pattern.compile(ALL_PATTERN)));
+
 
 	@Nullable
 	private List<String> allowedOrigins;
+
+	@Nullable
+	private List<Pattern> allowedOriginsPatterns;
 
 	@Nullable
 	private List<String> allowedMethods;
@@ -99,6 +112,7 @@ public class CorsConfiguration {
 	 */
 	public CorsConfiguration(CorsConfiguration other) {
 		this.allowedOrigins = other.allowedOrigins;
+		this.allowedOriginsPatterns = other.allowedOriginsPatterns;
 		this.allowedMethods = other.allowedMethods;
 		this.resolvedMethods = other.resolvedMethods;
 		this.allowedHeaders = other.allowedHeaders;
@@ -138,6 +152,54 @@ public class CorsConfiguration {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
 		this.allowedOrigins.add(origin);
+	}
+
+	/**
+	 * Set the origins patterns to allow, e.g. {@code "*.com"}.
+	 * <p>By default this is not set.
+	 */
+	public CorsConfiguration setAllowedOriginsPatterns(@Nullable List<String> allowedOriginsPatterns) {
+		if (allowedOriginsPatterns == null) {
+			this.allowedOriginsPatterns = null;
+		}
+		else {
+			this.allowedOriginsPatterns = new ArrayList<>(allowedOriginsPatterns.size());
+			for (String pattern : allowedOriginsPatterns) {
+				this.allowedOriginsPatterns.add(Pattern.compile(pattern));
+			}
+		}
+
+		return this;
+	}
+
+	/**
+	 * Return the configured origins patterns to allow, or {@code null} if none.
+	 *
+	 * @see #addAllowedOriginPattern(String)
+	 * @see #setAllowedOriginsPatterns(List)
+	 */
+	@Nullable
+	public List<String> getAllowedOriginsPatterns() {
+		if (this.allowedOriginsPatterns == null) {
+			return null;
+		}
+		if (this.allowedOriginsPatterns == DEFAULT_PERMIT_ALL_PATTERN) {
+			return DEFAULT_PERMIT_ALL_PATTERN_STR;
+		}
+		return this.allowedOriginsPatterns.stream().map(Pattern::toString).collect(Collectors.toList());
+	}
+
+	/**
+	 * Add an origin pattern to allow.
+	 */
+	public void addAllowedOriginPattern(String originPattern) {
+		if (this.allowedOriginsPatterns == null) {
+			this.allowedOriginsPatterns = new ArrayList<>(4);
+		}
+		else if (this.allowedOriginsPatterns == DEFAULT_PERMIT_ALL_PATTERN) {
+			setAllowedOriginsPatterns(DEFAULT_PERMIT_ALL_PATTERN_STR);
+		}
+		this.allowedOriginsPatterns.add(Pattern.compile(originPattern));
 	}
 
 	/**
@@ -393,6 +455,7 @@ public class CorsConfiguration {
 		}
 		CorsConfiguration config = new CorsConfiguration(this);
 		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
+		config.setAllowedOriginsPatterns(combine(getAllowedOriginsPatterns(), other.getAllowedOriginsPatterns()));
 		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
 		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
 		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
@@ -414,14 +477,19 @@ public class CorsConfiguration {
 		if (source == null) {
 			return other;
 		}
-		if (source == DEFAULT_PERMIT_ALL || source == DEFAULT_PERMIT_METHODS) {
+		if (source == DEFAULT_PERMIT_ALL || source == DEFAULT_PERMIT_METHODS
+				|| source == DEFAULT_PERMIT_ALL_PATTERN_STR) {
 			return other;
 		}
-		if (other == DEFAULT_PERMIT_ALL || other == DEFAULT_PERMIT_METHODS) {
+		if (other == DEFAULT_PERMIT_ALL || other == DEFAULT_PERMIT_METHODS
+				|| other == DEFAULT_PERMIT_ALL_PATTERN_STR) {
 			return source;
 		}
 		if (source.contains(ALL) || other.contains(ALL)) {
 			return new ArrayList<>(Collections.singletonList(ALL));
+		}
+		if ( source.contains(ALL_PATTERN) || other.contains(ALL_PATTERN)) {
+			return new ArrayList<>(Collections.singletonList(ALL_PATTERN));
 		}
 		Set<String> combined = new LinkedHashSet<>(source);
 		combined.addAll(other);
@@ -439,21 +507,35 @@ public class CorsConfiguration {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
-		if (ObjectUtils.isEmpty(this.allowedOrigins)) {
-			return null;
-		}
 
-		if (this.allowedOrigins.contains(ALL)) {
-			if (this.allowCredentials != Boolean.TRUE) {
-				return ALL;
+		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
+			if (this.allowedOrigins.contains(ALL)) {
+				if (this.allowCredentials != Boolean.TRUE) {
+					return ALL;
+				}
+				else {
+					return requestOrigin;
+				}
 			}
-			else {
-				return requestOrigin;
+			for (String allowedOrigin : this.allowedOrigins) {
+				if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
+					return requestOrigin;
+				}
 			}
 		}
-		for (String allowedOrigin : this.allowedOrigins) {
-			if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
-				return requestOrigin;
+		if (!ObjectUtils.isEmpty(this.allowedOriginsPatterns)) {
+			for (Pattern allowedOriginsPattern : this.allowedOriginsPatterns) {
+				if (allowedOriginsPattern.pattern().equals(ALL_PATTERN)) {
+					if (this.allowCredentials != Boolean.TRUE) {
+						return ALL;
+					}
+					else {
+						return requestOrigin;
+					}
+				}
+				else if (allowedOriginsPattern.matcher(requestOrigin).matches()) {
+					return requestOrigin;
+				}
 			}
 		}
 
