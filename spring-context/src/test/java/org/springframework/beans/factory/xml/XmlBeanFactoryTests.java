@@ -627,7 +627,7 @@ class XmlBeanFactoryTests {
 	}
 
 	@Test
-	void CircularReferencesWithSmartWrapping() {
+	void circularReferencesWithSmartWrapping() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
