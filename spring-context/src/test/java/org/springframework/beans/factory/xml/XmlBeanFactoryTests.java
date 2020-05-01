@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
@@ -581,6 +583,23 @@ public class XmlBeanFactoryTests {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				xbf.getBean("jenny"))
 			.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+	@Test
+	public void testCircularReferencesWithSmartWrapping() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		xbf.addBeanPostProcessor(new SmartWrappingPostProcessor());
+		ITestBean jenny = (ITestBean) xbf.getBean("jenny");
+		ITestBean david = (ITestBean) xbf.getBean("david");
+		assertThat(AopUtils.isAopProxy(jenny)).isTrue();
+		assertThat(AopUtils.isAopProxy(david)).isTrue();
+		assertThat(jenny.getSpouse()).isSameAs(david);
+		assertThat(david.getSpouse()).isSameAs(jenny);
+		assertThat(AopUtils.isAopProxy(jenny.getSpouse())).isTrue();
+		assertThat(AopUtils.isAopProxy(david.getSpouse())).isTrue();
 	}
 
 	@Test
@@ -1851,6 +1870,38 @@ public class XmlBeanFactoryTests {
 
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			ProxyFactory pf = new ProxyFactory(bean);
+			return pf.getProxy();
+		}
+	}
+
+
+	public static class SmartWrappingPostProcessor implements SmartInstantiationAwareBeanPostProcessor {
+
+		private final Map<String, Object> earlyProxyReferences = new ConcurrentHashMap<>(16);
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
+		}
+
+		@Override
+		public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+			earlyProxyReferences.put(beanName, bean);
+			return  getProxy(bean);
+		}
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			if (bean != null) {
+				if (earlyProxyReferences.remove(beanName) != bean) {
+					return getProxy(bean);
+				}
+			}
+			return bean;
+		}
+
+		private Object getProxy(Object bean) {
 			ProxyFactory pf = new ProxyFactory(bean);
 			return pf.getProxy();
 		}
