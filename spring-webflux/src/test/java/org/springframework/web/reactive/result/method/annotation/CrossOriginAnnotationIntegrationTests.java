@@ -68,6 +68,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		context.register(WebConfig.class);
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://site1.com");
+		props.setProperty("myOriginPattern", ".*\\.com");
 		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		context.register(PropertySourcesPlaceholderConfigurer.class);
 		context.refresh();
@@ -207,6 +208,26 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	}
 
 	@ParameterizedHttpServerTest
+	void customOriginPatternDefinedViaValueAttribute(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<String> entity = performGet("/origin-pattern-value-attribute", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
+		assertThat(entity.getBody()).isEqualTo("pattern-value-attribute");
+	}
+
+	@ParameterizedHttpServerTest
+	void customOriginPatternDefinedViaPlaceholder(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<String> entity = performGet("/origin-pattern-placeholder", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
+		assertThat(entity.getBody()).isEqualTo("pattern-placeholder");
+	}
+
+	@ParameterizedHttpServerTest
 	void classLevel(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
@@ -334,6 +355,18 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		@GetMapping("/origin-placeholder")
 		public String customOriginDefinedViaPlaceholder() {
 			return "placeholder";
+		}
+
+		@CrossOrigin(originsPatterns = ".*\\.com")
+		@GetMapping("/origin-pattern-value-attribute")
+		public String customOriginPatternDefinedViaValueAttribute() {
+			return "pattern-value-attribute";
+		}
+
+		@CrossOrigin(originsPatterns = "${myOriginPattern}")
+		@GetMapping("/origin-pattern-placeholder")
+		public String customOriginPatternDefinedViaPlaceholder() {
+			return "pattern-placeholder";
 		}
 	}
 

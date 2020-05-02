@@ -149,6 +149,37 @@ public class CorsConfigurationTests {
 	}
 
 	@Test
+	public void combinePatternWithDefaultPermitValues() {
+		CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+		CorsConfiguration other = new CorsConfiguration();
+		other.addAllowedOriginPattern(".*\\.com");
+
+		CorsConfiguration combinedConfig = other.combine(config);
+		assertThat(combinedConfig.getAllowedOrigins()).isNull();
+		assertThat(combinedConfig.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.com"));
+
+		combinedConfig = config.combine(other);
+		assertThat(combinedConfig.getAllowedOrigins()).isNull();
+		assertThat(combinedConfig.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.com"));
+	}
+
+	@Test
+	public void combinePatternWithDefaultPermitValuesAndCustomOrigin() {
+		CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+		config.setAllowedOrigins(Arrays.asList("https://domain.com"));
+		CorsConfiguration other = new CorsConfiguration();
+		other.addAllowedOriginPattern(".*\\.com");
+
+		CorsConfiguration combinedConfig = other.combine(config);
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain.com"));
+		assertThat(combinedConfig.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.com"));
+
+		combinedConfig = config.combine(other);
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain.com"));
+		assertThat(combinedConfig.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.com"));
+	}
+
+	@Test
 	public void combineWithAsteriskWildCard() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
@@ -334,4 +365,12 @@ public class CorsConfigurationTests {
 		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList("GET", "HEAD", "POST", "PATCH"));
 	}
 
+	@Test
+	public void permitDefaultDoesntSetOriginWhenPatternPresent() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOriginPattern(".*\\.com");
+		config = config.applyPermitDefaultValues();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.com"));
+	}
 }

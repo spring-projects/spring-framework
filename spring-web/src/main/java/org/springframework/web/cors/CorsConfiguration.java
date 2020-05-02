@@ -413,7 +413,7 @@ public class CorsConfiguration {
 	 * </ul>
 	 */
 	public CorsConfiguration applyPermitDefaultValues() {
-		if (this.allowedOrigins == null) {
+		if (this.allowedOrigins == null && this.allowedOriginsPatterns == null) {
 			this.allowedOrigins = DEFAULT_PERMIT_ALL;
 		}
 		if (this.allowedMethods == null) {
@@ -454,8 +454,13 @@ public class CorsConfiguration {
 			return this;
 		}
 		CorsConfiguration config = new CorsConfiguration(this);
-		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
-		config.setAllowedOriginsPatterns(combine(getAllowedOriginsPatterns(), other.getAllowedOriginsPatterns()));
+		List<String> combinedOrigins = combine(getAllowedOrigins(), other.getAllowedOrigins());
+		List<String> combinedOriginsPatterns = combine(getAllowedOriginsPatterns(), other.getAllowedOriginsPatterns());
+		if (combinedOrigins == DEFAULT_PERMIT_ALL && combinedOriginsPatterns != DEFAULT_PERMIT_ALL_PATTERN_STR) {
+			combinedOrigins = null;
+		}
+		config.setAllowedOrigins(combinedOrigins);
+		config.setAllowedOriginsPatterns(combinedOriginsPatterns);
 		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
 		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
 		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));

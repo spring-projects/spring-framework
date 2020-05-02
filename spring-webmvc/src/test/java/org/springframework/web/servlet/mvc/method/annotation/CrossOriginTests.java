@@ -80,6 +80,7 @@ public class CrossOriginTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://example.com");
+		props.setProperty("myDomainPattern", ".*\\.example\\.com");
 		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		wac.registerSingleton("ppc", PropertySourcesPlaceholderConfigurer.class);
 		wac.refresh();
@@ -185,6 +186,30 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("https://example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@Test
+	public void customOriginPatternDefinedViaValueAttribute() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPattern");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.example\\.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@Test
+	public void customOriginPatternDefinedViaPlaceholder() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPatternPlaceholder");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Arrays.asList(".*\\.example\\.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -394,6 +419,16 @@ public class CrossOriginTests {
 		@CrossOrigin("${myOrigin}")
 		@RequestMapping("/someOrigin")
 		public void customOriginDefinedViaPlaceholder() {
+		}
+
+		@CrossOrigin(originsPatterns = ".*\\.example\\.com")
+		@RequestMapping("/customOriginPattern")
+		public void customOriginPatternDefinedViaValueAttribute() {
+		}
+
+		@CrossOrigin(originsPatterns = "${myDomainPattern}")
+		@RequestMapping("/customOriginPatternPlaceholder")
+		public void customOriginPatternDefinedViaPlaceholder() {
 		}
 	}
 
