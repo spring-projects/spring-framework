@@ -50,7 +50,8 @@ task api(type: Javadoc) {
 	}
 }
 
-dokka {
+//注释文档生成
+/*dokka {
 	dependsOn {
 		tasks.getByName("api")
 	}
@@ -77,7 +78,7 @@ dokka {
 	externalDocumentationLink {
 		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
 	}
-}
+}*/
 
 configurations {
 	docs
@@ -97,7 +98,8 @@ task extractDocResources(type: Sync) {
 	into "$buildDir/asciidoc/build"
 }
 
-asciidoctor {
+//注释文档生成
+/*asciidoctor {
 	sourceDir "$buildDir/asciidoc/build"
 	sources {
 		include '*.adoc'
@@ -128,7 +130,7 @@ asciidoctor {
 			stylesheet: 'spring.css',
 			'spring-version': project.version
 
-}
+}*/
 
 asciidoctor.dependsOn extractDocResources
 
