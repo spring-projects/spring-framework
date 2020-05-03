@@ -1642,7 +1642,7 @@ extracts the name, version, and file extension:
 .Kotlin
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
-	fun handle(@PathVariable name, @PathVariable version: String, @PathVariable ext: String) {
+	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
 		// ...
 	}
 ----
