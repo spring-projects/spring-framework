@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,9 +265,26 @@ class ReactiveAdapterRegistryTests {
 		assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
 	}
 
+	@Test
+	void deferred() {
+		assertThat(getAdapter(CompletableFuture.class).getDescriptor().isDeferred()).isEqualTo(false);
+
+		assertThat(getAdapter(Mono.class).getDescriptor().isDeferred()).isEqualTo(true);
+		assertThat(getAdapter(Flux.class).getDescriptor().isDeferred()).isEqualTo(true);
+
+		assertThat(getAdapter(io.reactivex.Completable.class).getDescriptor().isDeferred()).isEqualTo(true);
+		assertThat(getAdapter(io.reactivex.Single.class).getDescriptor().isDeferred()).isEqualTo(true);
+		assertThat(getAdapter(io.reactivex.Flowable.class).getDescriptor().isDeferred()).isEqualTo(true);
+		assertThat(getAdapter(io.reactivex.Observable.class).getDescriptor().isDeferred()).isEqualTo(true);
+
+		assertThat(getAdapter(Deferred.class).getDescriptor().isDeferred()).isEqualTo(true);
+		assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isEqualTo(true);
+	}
 
 	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
-		return this.registry.getAdapter(reactiveType);
+		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
+		assertThat(adapter).isNotNull();
+		return adapter;
 	}
 
 }

@@ -218,7 +218,7 @@ public class ReactiveAdapterRegistry {
 					source -> source);
 
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(CompletionStage.class, EmptyCompletableFuture::new),
+					ReactiveTypeDescriptor.nonDeferredAsyncValue(CompletionStage.class, EmptyCompletableFuture::new),
 					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
 					source -> Mono.from(source).toFuture()
 			);
