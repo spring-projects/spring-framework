@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
@@ -118,18 +117,13 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
 
 		sockJsSession.delegateConnectionEstablished();
-		try {
-			sockJsSession.delegateMessages(msg1, msg2, msg3);
-			fail("expected exception");
-		}
-		catch (SockJsMessageDeliveryException ex) {
-			assertEquals(Collections.singletonList(msg3), ex.getUndeliveredMessages());
-			verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
-			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
-			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
-			verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
-			verifyNoMoreInteractions(this.webSocketHandler);
-		}
+		sockJsSession.delegateMessages(msg1, msg2, msg3);
+
+		verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
+		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
+		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+		verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
+		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 
 	@Test
