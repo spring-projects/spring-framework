@@ -121,8 +121,20 @@ class CorsAbstractHandlerMappingTests {
 	}
 
 	@PathPatternsParameterizedTest
-	void preflightRequestWithMappedCorsConfig(TestHandlerMapping mapping) throws Exception {
+	void actualRequestWithMappedPatternCorsConfiguration(TestHandlerMapping mapping) throws Exception {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOriginPattern(".*\\.domain2\\.com");
+		mapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
+		MockHttpServletRequest request = getCorsRequest("/foo");
+		HandlerExecutionChain chain = mapping.getHandler(request);
 
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
+		assertThat(mapping.getRequiredCorsConfig().getAllowedOriginsPatterns()).containsExactly(".*\\.domain2\\.com");
+	}
+
+	@PathPatternsParameterizedTest
+	void preflightRequestWithMappedCorsConfig(TestHandlerMapping mapping) throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		mapping.setCorsConfigurations(Collections.singletonMap("/foo", config));

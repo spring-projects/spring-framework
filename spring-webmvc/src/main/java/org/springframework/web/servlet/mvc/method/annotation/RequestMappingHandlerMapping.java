@@ -451,6 +451,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		for (String origin : annotation.origins()) {
 			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
 		}
+		for (String originPatter : annotation.originsPatterns()) {
+			config.addAllowedOriginPattern(resolveCorsAnnotationValue(originPatter));
+		}
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}

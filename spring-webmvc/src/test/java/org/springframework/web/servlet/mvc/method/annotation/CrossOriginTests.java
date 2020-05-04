@@ -72,6 +72,7 @@ class CrossOriginTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://example.com");
+		props.setProperty("myDomainPattern", ".*\\.example\\.com");
 		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		wac.registerSingleton("ppc", PropertySourcesPlaceholderConfigurer.class);
 		wac.refresh();
@@ -194,6 +195,30 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@PathPatternsParameterizedTest
+	public void customOriginPatternViaValueAttribute(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPattern");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@PathPatternsParameterizedTest
+	public void customOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPatternPlaceholder");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -406,6 +431,16 @@ class CrossOriginTests {
 		@CrossOrigin("${myOrigin}")
 		@RequestMapping("/someOrigin")
 		public void customOriginDefinedViaPlaceholder() {
+		}
+
+		@CrossOrigin(originsPatterns = ".*\\.example\\.com")
+		@RequestMapping("/customOriginPattern")
+		public void customOriginPatternDefinedViaValueAttribute() {
+		}
+
+		@CrossOrigin(originsPatterns = "${myDomainPattern}")
+		@RequestMapping("/customOriginPatternPlaceholder")
+		public void customOriginPatternDefinedViaPlaceholder() {
 		}
 	}
 

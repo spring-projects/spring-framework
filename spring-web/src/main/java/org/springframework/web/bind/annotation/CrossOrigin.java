@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.web.cors.CorsConfiguration;
  * @author Russell Allen
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Ruslan Akhundov
  * @since 4.2
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -92,6 +93,23 @@ public @interface CrossOrigin {
 	 */
 	@AliasFor("value")
 	String[] origins() default {};
+
+	/**
+	 * The list of allowed origins patterns that be specific origins, e.g.
+	 * {@code ".*\.domain1\.com"}, or {@code ".*"} for matching all origins.
+	 * <p>A matched origin is listed in the {@code Access-Control-Allow-Origin}
+	 * response header of preflight actual CORS requests.
+	 * <p>By default all origins are allowed.
+	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+	 * if present, in order to reflect the client-originated address.
+	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+	 * central place whether to extract and use, or to discard such headers.
+	 * See the Spring Framework reference for more on this filter.
+	 * @see #value
+	 */
+	String[] originsPatterns() default {};
 
 	/**
 	 * The list of request headers that are permitted in actual requests,
