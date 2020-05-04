@@ -456,7 +456,8 @@ public class CorsConfiguration {
 		CorsConfiguration config = new CorsConfiguration(this);
 		List<String> combinedOrigins = combine(getAllowedOrigins(), other.getAllowedOrigins());
 		List<String> combinedOriginsPatterns = combine(getAllowedOriginsPatterns(), other.getAllowedOriginsPatterns());
-		if (combinedOrigins == DEFAULT_PERMIT_ALL && combinedOriginsPatterns != DEFAULT_PERMIT_ALL_PATTERN_STR) {
+		if (combinedOrigins == DEFAULT_PERMIT_ALL && combinedOriginsPatterns != DEFAULT_PERMIT_ALL_PATTERN_STR
+			&& !CollectionUtils.isEmpty(combinedOriginsPatterns)) {
 			combinedOrigins = null;
 		}
 		config.setAllowedOrigins(combinedOrigins);
