@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.AbstractView;
@@ -87,15 +85,11 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		pathVars.put("booking", 21);
 		pathVars.put("other", "other");
 
-		WebApplicationContext wac =
-			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
-				@Override
-				public void initialize(GenericWebApplicationContext context) {
-					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
-					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
-					context.registerBeanDefinition("viewResolver", beanDef);
-				}
-			}, ViewRenderingController.class);
+		WebApplicationContext wac = initServlet(context -> {
+			RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
+			beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
+			context.registerBeanDefinition("viewResolver", beanDef);
+		}, ViewRenderingController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42;q=1,2/bookings/21-other;q=3;r=R");
 		getServlet().service(request, new MockHttpServletResponse());
@@ -143,22 +137,21 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("test-42-21");
-
-		request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21.html");
-		response = new MockHttpServletResponse();
-		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("test-42-21");
 	}
 
 	@Test
 	public void extension() throws Exception {
-		initServletWithControllers(SimpleUriTemplateController.class);
+		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			mappingDef.getPropertyValues().add("removeSemicolonContent", "false");
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+		}, SimpleUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42;jsessionid=c0o7fszeb1;q=24.xml");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("test-42-24");
-
 	}
 
 	@Test
@@ -264,11 +257,6 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("handle4-page-5");
-
-		request = new MockHttpServletRequest("GET", "/category/page/5.html");
-		response = new MockHttpServletResponse();
-		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("handle4-page-5");
 	}
 
 	@Test
@@ -282,10 +270,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		assertThat(response.getContentAsString()).isEqualTo("test-42-;q=1;q=2-[1, 2]");
 	}
 
-	/*
-	 * See SPR-6640
-	 */
-	@Test
+	@Test // gh-11306
 	public void menuTree() throws Exception {
 		initServletWithControllers(MenuTreeController.class);
 
@@ -295,10 +280,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		assertThat(response.getContentAsString()).isEqualTo("M5");
 	}
 
-	/*
-	 * See SPR-6876
-	 */
-	@Test
+	@Test // gh-11542
 	public void variableNames() throws Exception {
 		initServletWithControllers(VariableNamesController.class);
 
@@ -313,12 +295,13 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		assertThat(response.getContentAsString()).isEqualTo("bar-bar");
 	}
 
-	/*
-	 * See SPR-8543
-	 */
-	@Test
+	@Test // gh-13187
 	public void variableNamesWithUrlExtension() throws Exception {
-		initServletWithControllers(VariableNamesController.class);
+		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+		}, VariableNamesController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo.json");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -326,10 +309,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		assertThat(response.getContentAsString()).isEqualTo("foo-foo");
 	}
 
-	/*
-	 * See SPR-6978
-	 */
-	@Test
+	@Test // gh-11643
 	public void doIt() throws Exception {
 		initServletWithControllers(Spr6978Controller.class);
 

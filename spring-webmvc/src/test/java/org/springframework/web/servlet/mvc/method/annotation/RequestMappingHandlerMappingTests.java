@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useRegisteredSuffixPatternMatch() {
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
+		assertThat(this.handlerMapping.useSuffixPatternMatch()).isFalse();
 		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isFalse();
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
@@ -85,7 +84,7 @@ public class RequestMappingHandlerMappingTests {
 
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
 		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Arrays.asList("json"));
+		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
 	}
 
 	@Test
@@ -117,9 +116,6 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useSuffixPatternMatch() {
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
-
-		this.handlerMapping.setUseSuffixPatternMatch(false);
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isFalse();
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);

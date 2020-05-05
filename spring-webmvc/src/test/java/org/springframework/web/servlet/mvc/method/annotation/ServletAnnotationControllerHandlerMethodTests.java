@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -469,22 +469,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void adaptedHandleMethods() throws Exception {
-		doTestAdaptedHandleMethods(MyAdaptedController.class);
+		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+		}, MyAdaptedController.class);
+		doTestAdaptedHandleMethods();
 	}
 
 	@Test
 	public void adaptedHandleMethods2() throws Exception {
-		doTestAdaptedHandleMethods(MyAdaptedController2.class);
+		initServletWithControllers(MyAdaptedController2.class);
 	}
 
 	@Test
 	public void adaptedHandleMethods3() throws Exception {
-		doTestAdaptedHandleMethods(MyAdaptedController3.class);
+		initServletWithControllers(MyAdaptedController3.class);
+		doTestAdaptedHandleMethods();
 	}
 
-	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
-		initServletWithControllers(controllerClass);
-
+	private void doTestAdaptedHandleMethods() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath1.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.addParameter("param1", "value1");
@@ -727,8 +731,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void relativePathDispatchingController() throws Exception {
-		initServletWithControllers(MyRelativePathDispatchingController.class);
-		getServlet().init(new MockServletConfig());
+		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+		}, MyRelativePathDispatchingController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -753,8 +760,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void relativeMethodPathDispatchingController() throws Exception {
-		initServletWithControllers(MyRelativeMethodPathDispatchingController.class);
-		getServlet().init(new MockServletConfig());
+		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+		}, MyRelativeMethodPathDispatchingController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1674,8 +1684,13 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Test
 	public void responseBodyAsHtml() throws Exception {
 		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 			factoryBean.afterPropertiesSet();
+
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
 			wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1720,8 +1735,13 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Test
 	public void responseBodyAsHtmlWithProducesCondition() throws Exception {
 		initServlet(wac -> {
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 			factoryBean.afterPropertiesSet();
+
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
 			wac.registerBeanDefinition("handlerAdapter", adapterDef);

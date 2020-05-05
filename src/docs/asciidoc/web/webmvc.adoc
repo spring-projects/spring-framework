@@ -1683,11 +1683,11 @@ See <<mvc-config-path-matching>> in the configuration section.
 [[mvc-ann-requestmapping-suffix-pattern-match]]
 ==== Suffix Match
 
-By default, Spring MVC performs `.{asterisk}` suffix pattern matching so that a
-controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-The file extension is then used to interpret the requested content type to use for
-the response (that is, instead of the `Accept` header) -- for example, `/person.pdf`,
-`/person.xml`, and others.
+Starting in 5.3, by default Spring MVC no longer performs `.{asterisk}` suffix pattern
+matching where a controller mapped to `/person` is also implicitly mapped to
+`/person.{asterisk}`. As a consequence path extensions are no longer used to interpret
+the requested content type for the response -- for example, `/person.pdf`, `/person.xml`,
+and so on.
 
 Using file extensions in this way was necessary when browsers used to send `Accept` headers
 that were hard to interpret consistently. At present, that is no longer a necessity and
@@ -1698,28 +1698,16 @@ It can cause ambiguity when overlain with the use of URI variables, path paramet
 URI encoding. Reasoning about URL-based authorization
 and security (see next section for more details) also become more difficult.
 
-To completely disable the use of file extensions, you must set both of the following:
+To completely disable the use of path extensions in versions prior to 5.3, set the following:
 
 * `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching, PathMatchConfigurer>>
 * `favorPathExtension(false)`, see <<mvc-config-content-negotiation, ContentNegotiationConfigurer>>
 
-URL-based content negotiation can still be useful (for example, when typing a URL in a
-browser). To enable that, we recommend a query parameter-based strategy to avoid most of
-the issues that come with file extensions. Alternatively, if you must use file extensions, consider
-restricting them to a list of explicitly registered extensions through the
-`mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
-
-[NOTE]
-====
-Starting in 5.2.4, path extension related options for request mapping in
-{api-spring-framework}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java[RequestMappingHandlerMapping]
-and for content negotiation in
-{api-spring-framework}/org.springframework.web.accept/ContentNegotiationManagerFactoryBean.java[ContentNegotiationManagerFactoryBean]
-are deprecated. See Spring Framework issue
-https://github.com/spring-projects/spring-framework/issues/24179[#24179] and related
-issues for further plans.
-====
-
+Having a way to request content types other than through the `"Accept"` header can still
+be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+to use the query parameter strategy. If you must use file extensions, consider restricting
+them to a list of explicitly registered extensions through the `mediaTypes` property of
+<<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
 
 [[mvc-ann-requestmapping-rfd]]
@@ -5851,7 +5839,6 @@ The following example shows how to customize path matching in Java configuration
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
 				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
 				.setUrlPathHelper(urlPathHelper())
 				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
@@ -5879,7 +5866,6 @@ The following example shows how to customize path matching in Java configuration
 			configurer
 				.setUseSuffixPatternMatch(true)
 				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
 				.setUrlPathHelper(urlPathHelper())
 				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
@@ -5904,7 +5890,6 @@ The following example shows how to achieve the same configuration in XML:
 	<mvc:annotation-driven>
 		<mvc:path-matching
 			trailing-slash="false"
-			registered-suffixes-only="true"
 			path-helper="pathHelper"
 			path-matcher="pathMatcher"/>
 	</mvc:annotation-driven>

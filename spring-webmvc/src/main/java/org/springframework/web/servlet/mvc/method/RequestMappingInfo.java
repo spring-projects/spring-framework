@@ -543,7 +543,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private boolean trailingSlashMatch = true;
 
-		private boolean suffixPatternMatch = true;
+		private boolean suffixPatternMatch = false;
 
 		private boolean registeredSuffixPatternMatch = false;
 
@@ -600,11 +600,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		/**
 		 * Set whether to apply suffix pattern matching in PatternsRequestCondition.
-		 * <p>By default this is set to 'true'.
+		 * <p>By default this is set to 'false'.
 		 * @see #setRegisteredSuffixPatternMatch(boolean)
-		 * @deprecated as of 5.2.4. See class-level note in
-		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options.
+		 * @deprecated as of 5.2.4. See deprecation note on
+		 * {@link RequestMappingHandlerMapping#setUseSuffixPatternMatch(boolean)}.
 		 */
 		@Deprecated
 		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
@@ -613,9 +612,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		/**
 		 * Return whether to apply suffix pattern matching in PatternsRequestCondition.
-		 * @deprecated as of 5.2.4. See class-level note in
-		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options.
+		 * @deprecated as of 5.2.4. See deprecation note on
+		 * {@link RequestMappingHandlerMapping#setUseSuffixPatternMatch(boolean)}.
 		 */
 		@Deprecated
 		public boolean useSuffixPatternMatch() {
@@ -630,8 +628,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * obtain the registered file extensions.
 		 * @deprecated as of 5.2.4. See class-level note in
 		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options; note also that in 5.3 the default for this
-		 * property switches from {@code false} to {@code true}.
+		 * extension config options.
 		 */
 		@Deprecated
 		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {

@@ -69,9 +69,9 @@ public class PathMatchConfigurer {
 	 * @see #registeredSuffixPatternMatch
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options. As there is no replacement for this method, for the time
-	 * being it's necessary to set it to {@code false}. In 5.3 when {@code false}
-	 * becomes the default, use of this property will no longer be necessary.
+	 * config options. As there is no replacement for this method, in 5.2.x it is
+	 * necessary to set it to {@code false}. In 5.3 {@code false} becomes the
+	 * default, and use of this property is longer be necessary.
 	 */
 	@Deprecated
 	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
@@ -150,9 +150,8 @@ public class PathMatchConfigurer {
 
 	/**
 	 * Whether to use registered suffixes for pattern matching.
-	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options.
+	 * @deprecated as of 5.2.4, see deprecation note on
+	 * {@link #setUseSuffixPatternMatch(Boolean)}.
 	 */
 	@Nullable
 	@Deprecated
@@ -162,9 +161,8 @@ public class PathMatchConfigurer {
 
 	/**
 	 * Whether to use registered suffixes for pattern matching.
-	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options.
+	 * @deprecated as of 5.2.4, see deprecation note on
+	 * {@link #setUseRegisteredSuffixPatternMatch(Boolean)}.
 	 */
 	@Nullable
 	@Deprecated
