@@ -16,32 +16,33 @@
 
 package org.springframework.core.codec;
 
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
-import reactor.core.publisher.Flux;
-
-import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Vladislav Kisel
  */
-class ByteBufDecoderTests extends AbstractDecoderTests<ByteBufDecoder> {
+class NettyByteBufDecoderTests extends AbstractDecoderTests<NettyByteBufDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	ByteBufDecoderTests() {
-		super(new ByteBufDecoder());
+	NettyByteBufDecoderTests() {
+		super(new NettyByteBufDecoder());
 	}
 
 	@Override

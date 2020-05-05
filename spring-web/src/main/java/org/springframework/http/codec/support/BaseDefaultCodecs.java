@@ -31,6 +31,8 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.NettyByteBufDecoder;
+import org.springframework.core.codec.NettyByteBufEncoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.CodecConfigurer;
@@ -78,6 +80,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	static final boolean synchronossMultipartPresent;
 
+	static final boolean nettyByteBufPresent;
+
 	static {
 		ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
@@ -86,6 +90,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
 		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
 		synchronossMultipartPresent = ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser", classLoader);
+		nettyByteBufPresent = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
 	}
 
 
@@ -223,6 +228,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(readers, new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		addCodec(readers, new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		addCodec(readers, new DecoderHttpMessageReader<>(new DataBufferDecoder()));
+		if (nettyByteBufPresent) {
+			addCodec(readers, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
+		}
 		addCodec(readers, new ResourceHttpMessageReader(new ResourceDecoder()));
 		addCodec(readers, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 		if (protobufPresent) {
@@ -399,6 +407,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
+		if (nettyByteBufPresent) {
+			writers.add(new EncoderHttpMessageWriter<>(new NettyByteBufEncoder()));
+		}
 		writers.add(new ResourceHttpMessageWriter());
 		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		if (protobufPresent) {

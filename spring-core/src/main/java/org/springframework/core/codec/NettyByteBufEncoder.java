@@ -16,8 +16,12 @@
 
 package org.springframework.core.codec;
 
+import java.util.Map;
+
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -25,9 +29,6 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import reactor.core.publisher.Flux;
-
-import java.util.Map;
 
 /**
  * Encoder for {@link ByteBuf ByteBufs}.
@@ -35,17 +36,17 @@ import java.util.Map;
  * @author Vladislav Kisel
  * @since 5.3
  */
-public class ByteBufEncoder extends AbstractEncoder<ByteBuf> {
+public class NettyByteBufEncoder extends AbstractEncoder<ByteBuf> {
 
-	public ByteBufEncoder() {
+	public NettyByteBufEncoder() {
 		super(MimeTypeUtils.ALL);
 	}
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.toClass();
-		return super.canEncode(elementType, mimeType) && ByteBuf.class.isAssignableFrom(clazz);
+	public boolean canEncode(ResolvableType type, @Nullable MimeType mimeType) {
+		Class<?> clazz = type.toClass();
+		return super.canEncode(type, mimeType) && ByteBuf.class.isAssignableFrom(clazz);
 	}
 
 	@Override
@@ -61,18 +62,16 @@ public class ByteBufEncoder extends AbstractEncoder<ByteBuf> {
 	public DataBuffer encodeValue(ByteBuf byteBuf, DataBufferFactory bufferFactory,
 			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		DataBuffer dataBuffer;
-		if (bufferFactory instanceof NettyDataBufferFactory) {
-			dataBuffer = ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
-		} else {
-			dataBuffer = bufferFactory.wrap(byteBuf.nioBuffer());
-		}
-
 		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			String logPrefix = Hints.getLogPrefix(hints);
-			logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
+			logger.debug(logPrefix + "Writing " + byteBuf.readableBytes() + " bytes");
 		}
-		return dataBuffer;
+		if (bufferFactory instanceof NettyDataBufferFactory) {
+			return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+		}
+		byte[] bytes = new byte[byteBuf.readableBytes()];
+		byteBuf.readBytes(bytes);
+		byteBuf.release();
+		return bufferFactory.wrap(bytes);
 	}
-
 }
