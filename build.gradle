@@ -325,7 +325,7 @@ configure([rootProject] + javaProjects) { project ->
 
 	checkstyle {
 		toolVersion = "8.31"
-		configDir = rootProject.file("src/checkstyle")
+		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
 	dependencies {

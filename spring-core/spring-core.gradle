@@ -21,16 +21,16 @@ configurations {
 }
 
 task cglibRepackJar(type: ShadowJar) {
-	baseName = 'spring-cglib-repack'
-	version = cglibVersion
+	archiveBaseName = 'spring-cglib-repack'
+	archiveVersion = cglibVersion
 	configurations = [project.configurations.cglib]
 	relocate 'net.sf.cglib', 'org.springframework.cglib'
 	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
 task objenesisRepackJar(type: ShadowJar) {
-	baseName = 'spring-objenesis-repack'
-	version = objenesisVersion
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
 	configurations = [project.configurations.objenesis]
 	relocate 'org.objenesis', 'org.springframework.objenesis'
 }
