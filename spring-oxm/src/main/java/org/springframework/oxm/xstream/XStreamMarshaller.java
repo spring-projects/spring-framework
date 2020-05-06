@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Peter Meijer
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLoaderAware, InitializingBean {
@@ -187,7 +188,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	private ClassLoader beanClassLoader = new CompositeClassLoader();
 
 	@Nullable
-	private XStream xstream;
+	private volatile XStream xstream;
 
 
 	/**
@@ -616,12 +617,21 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 * <p><b>NOTE: This method has been marked as final as of Spring 4.0.</b>
 	 * It can be used to access the fully configured XStream for marshalling
 	 * but not configuration purposes anymore.
+	 * <p>As of Spring Framework 5.2.7, creation of the {@link XStream} instance
+	 * returned by this method is thread safe.
 	 */
 	public final XStream getXStream() {
-		if (this.xstream == null) {
-			this.xstream = buildXStream();
+		XStream xs = this.xstream;
+		if (xs == null) {
+			synchronized (this) {
+				xs = this.xstream;
+				if (xs == null) {
+					xs = buildXStream();
+					this.xstream = xs;
+				}
+			}
 		}
-		return this.xstream;
+		return xs;
 	}
 
 
