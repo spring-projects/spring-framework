@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,20 +273,22 @@ public class ContextLoaderTests {
 		MockServletContext sc = new MockServletContext("");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				listener.contextInitialized(event))
-			.withCauseInstanceOf(IOException.class)
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/applicationContext.xml"));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class)
+			.isThrownBy(() -> listener.contextInitialized(event))
+			.havingCause()
+			.isInstanceOf(IOException.class)
+			.withMessageContaining("/WEB-INF/applicationContext.xml");
 	}
 
 	@Test
 	public void testFrameworkServletWithDefaultLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(XmlWebApplicationContext.class);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				servlet.init(new MockServletConfig(new MockServletContext(""), "test")))
-			.withCauseInstanceOf(IOException.class)
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/test-servlet.xml"));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class)
+			.isThrownBy(() -> servlet.init(new MockServletConfig(new MockServletContext(""), "test")))
+			.havingCause()
+			.isInstanceOf(IOException.class)
+			.withMessageContaining("/WEB-INF/test-servlet.xml");
 	}
 
 	@Test

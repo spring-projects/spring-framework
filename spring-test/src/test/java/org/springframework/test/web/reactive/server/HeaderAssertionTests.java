@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,10 +154,10 @@ public class HeaderAssertionTests {
 		assertions.contentTypeCompatibleWith(MediaType.parseMediaType("application/*"));
 
 		// MediaTypes not compatible
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.contentTypeCompatibleWith(MediaType.TEXT_XML))
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
-					"'Content-Type'=[application/xml] is not compatible with [text/xml]"));
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> assertions.contentTypeCompatibleWith(MediaType.TEXT_XML))
+			.havingCause()
+			.withMessage("Response header 'Content-Type'=[application/xml] is not compatible with [text/xml]");
 	}
 
 	@Test

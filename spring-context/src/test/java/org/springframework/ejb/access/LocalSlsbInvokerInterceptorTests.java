@@ -72,9 +72,9 @@ public class LocalSlsbInvokerInterceptorTests {
 		// default resourceRef=false should cause this to fail, as java:/comp/env will not
 		// automatically be added
 		si.setJndiTemplate(jt);
-		assertThatExceptionOfType(NamingException.class).isThrownBy(
-				si::afterPropertiesSet)
-			.satisfies(ex -> assertThat(ex).isSameAs(nex));
+		assertThatExceptionOfType(NamingException.class)
+			.isThrownBy(si::afterPropertiesSet)
+			.isSameAs(nex);
 	}
 
 	@Test
@@ -132,9 +132,9 @@ public class LocalSlsbInvokerInterceptorTests {
 		pf.addAdvice(si);
 		LocalInterfaceWithBusinessMethods target = (LocalInterfaceWithBusinessMethods) pf.getProxy();
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(
-				target::targetMethod)
-			.satisfies(ex -> assertThat(ex).isSameAs(expected));
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(target::targetMethod)
+			.isSameAs(expected);
 
 		verify(mockContext).close();
 	}

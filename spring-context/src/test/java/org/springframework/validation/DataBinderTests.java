@@ -1887,9 +1887,10 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[256]", "");
-		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				binder.bind(mpvs))
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
+		assertThatExceptionOfType(InvalidPropertyException.class)
+			.isThrownBy(() -> binder.bind(mpvs))
+			.havingRootCause()
+			.isInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
@@ -1913,9 +1914,10 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[16]", "");
-		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				binder.bind(mpvs))
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
+		assertThatExceptionOfType(InvalidPropertyException.class)
+			.isThrownBy(() -> binder.bind(mpvs))
+			.havingRootCause()
+			.isInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
