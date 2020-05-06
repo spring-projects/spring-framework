@@ -16,11 +16,14 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -39,6 +42,7 @@ import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.KeyDataPair;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import org.springframework.beans.Mergeable;
@@ -46,6 +50,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.SmartRequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -115,8 +120,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		UriComponents uriComponents = uriComponents();
 		String path = uriComponents.getPath();
 
-		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
-				servletContext, httpMethod, (path != null ? path : ""));
+		MockHttpServletRequest request =
+				new HtmlUnitMockHttpServletRequest(servletContext, httpMethod, (path != null ? path : ""));
+
 		parent(request, this.parentBuilder);
 		String host = uriComponents.getHost();
 		request.setServerName(host != null ? host : "");  // needs to be first for additional headers
@@ -365,7 +371,15 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			request.addParameter(param.getName(), param.getValue());
+			if (param instanceof KeyDataPair) {
+				KeyDataPair pair = (KeyDataPair) param;
+				MockPart part = new MockPart(pair.getName(), pair.getFile().getName(), readAllBytes(pair.getFile()));
+				part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
+				request.addPart(part);
+			}
+			else {
+				request.addParameter(param.getName(), param.getValue());
+			}
 		}
 	}
 
@@ -374,6 +388,15 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			return URLDecoder.decode(value, "UTF-8");
 		}
 		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	private byte[] readAllBytes(File file) {
+		try {
+			return Files.readAllBytes(file.toPath());
+		}
+		catch (IOException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}
