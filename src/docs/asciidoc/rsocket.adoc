@@ -178,7 +178,7 @@ symmetrically, to make requests from clients and to make requests from servers.
 
 To obtain an `RSocketRequester` on the client side requires connecting to a server along with
 preparing and sending the initial RSocket `SETUP` frame. `RSocketRequester` provides a
-builder for that. Internally uses RSocket Java's `RSocketFactory`.
+builder for that. Internally it builds on `io.rsocket.core.RSocketConnector`.
 
 This is the most basic way to connect with default settings:
 
@@ -331,16 +331,17 @@ infrastructure that's used on a server, but registered programmatically as follo
 		.routeMatcher(new PathPatternRouteMatcher())  // <1>
 		.build();
 
-	ClientHandler handler = new ClientHandler(); // <2>
+	SocketAcceptor responder =
+		RSocketMessageHandler.responder(strategies, new ClientHandler()); // <2>
 
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(RSocketMessageHandler.clientResponder(strategies, handler)) // <3>
+		.rsocketConnector(connector -> connector.acceptor(responder)) // <3>
 		.connectTcp("localhost", 7000);
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
     route matching.
-<2> Create responder that contains `@MessageMaping` or `@ConnectMapping` methods.
-<3> Use static factory method in `RSocketMessageHandler` to register one or more responders.
+<2> Create a responder from a class with `@MessageMaping` and/or `@ConnectMapping` methods.
+<3> Register the responder.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -351,16 +352,17 @@ infrastructure that's used on a server, but registered programmatically as follo
 			.routeMatcher(PathPatternRouteMatcher())  // <1>
 			.build()
 
-	val handler = ClientHandler() // <2>
+	val responder =
+		RSocketMessageHandler.responder(strategies, new ClientHandler()); // <2>
 
 	val requester = RSocketRequester.builder()
-			.rsocketFactory(RSocketMessageHandler.clientResponder(strategies, handler)) // <3>
+			.rsocketConnector { it.acceptor(responder) } // <3>
 			.connectTcpAndAwait("localhost", 7000)
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
 route matching.
-<2> Create responder that contains `@MessageMaping` or `@ConnectMapping` methods.
-<3> Use static factory method in `RSocketMessageHandler` to register one or more responders.
+<2> Create a responder from a class with `@MessageMaping` and/or `@ConnectMapping` methods.
+<3> Register the responder.
 
 Note the above is only a shortcut designed for programmatic registration of client
 responders. For alternative scenarios, where client responders are in Spring configuration,
@@ -373,7 +375,7 @@ you can still declare `RSocketMessageHandler` as a Spring bean and then apply as
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
 
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(factory -> factory.acceptor(handler.responder()))
+		.rsocketConnector(connector -> connector.acceptor(handler.responder()))
 		.connectTcp("localhost", 7000);
 ----
 
@@ -387,7 +389,7 @@ you can still declare `RSocketMessageHandler` as a Spring bean and then apply as
 	val handler = context.getBean<RSocketMessageHandler>()
 
 	val requester = RSocketRequester.builder()
-			.rsocketFactory { it.acceptor(handler.responder()) }
+			.rsocketConnector { it.acceptor(handler.responder()) }
 			.connectTcpAndAwait("localhost", 7000)
 ----
 
@@ -404,15 +406,15 @@ See also <<rsocket-annot-responders>>, for more on the programming model.
 ==== Advanced
 
 `RSocketRequesterBuilder` provides a callback to expose the underlying
-`ClientRSocketFactory` from RSocket Java for further configuration options for
-keepalive intervals, session resumption, interceptors, and more. You can configure options
+`io.rsocket.core.RSocketConnector` for further configuration options for keepalive
+intervals, session resumption, interceptors, and more. You can configure options
 at that level as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(factory -> {
+		.rsocketConnector(connector -> {
 			// ...
 		})
 		.connectTcp("localhost", 7000);
@@ -424,7 +426,7 @@ at that level as follows:
 	import org.springframework.messaging.rsocket.connectTcpAndAwait
 
 	val requester = RSocketRequester.builder()
-			.rsocketFactory {
+			.rsocketConnector {
 				//...
 			}.connectTcpAndAwait("localhost", 7000)
 ----
@@ -636,10 +638,8 @@ Then start an RSocket server through the Java RSocket API and plug the
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
 
 	CloseableChannel server =
-		RSocketFactory.receive()
-			.acceptor(handler.responder())
-			.transport(TcpServerTransport.create("localhost", 7000))
-			.start()
+		RSocketServer.create(handler.responder())
+			.bind(TcpServerTransport.create("localhost", 7000))
 			.block();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -650,10 +650,9 @@ Then start an RSocket server through the Java RSocket API and plug the
 	val context: ApplicationContext = ...
 	val handler = context.getBean<RSocketMessageHandler>()
 
-	val server = RSocketFactory.receive()
-			.acceptor(handler.responder())
-			.transport(TcpServerTransport.create("localhost", 7000))
-			.start().awaitFirst()
+	val server = RSocketServer.create(handler.responder())
+			.bind(TcpServerTransport.create("localhost", 7000))
+			.awaitFirst()
 ----
 
 `RSocketMessageHandler` supports
