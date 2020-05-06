@@ -120,8 +120,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		UriComponents uriComponents = uriComponents();
 		String path = uriComponents.getPath();
 
-		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
-				servletContext, httpMethod, (path != null ? path : ""));
+		MockHttpServletRequest request =
+				new HtmlUnitMockHttpServletRequest(servletContext, httpMethod, (path != null ? path : ""));
+
 		parent(request, this.parentBuilder);
 		String host = uriComponents.getHost();
 		request.setServerName(host != null ? host : "");  // needs to be first for additional headers
@@ -371,10 +372,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
 			if (param instanceof KeyDataPair) {
-				KeyDataPair fileParam = (KeyDataPair) param;
-				File file = fileParam.getFile();
-				MockPart part = new MockPart(fileParam.getName(), file.getName(), readAllBytes(file));
-				part.getHeaders().setContentType(MediaType.valueOf(fileParam.getMimeType()));
+				KeyDataPair pair = (KeyDataPair) param;
+				MockPart part = new MockPart(pair.getName(), pair.getFile().getName(), readAllBytes(pair.getFile()));
+				part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
 				request.addPart(part);
 			}
 			else {

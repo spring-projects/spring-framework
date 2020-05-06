@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -423,11 +422,13 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getParameter("name2")).isEqualTo("value2");
 	}
 
-	@Test
+	@Test // gh-24926
 	public void buildRequestParameterMapViaWebRequestDotSetFileToUploadAsParameter() throws Exception {
-		File fileToUpload = new ClassPathResource("org/springframework/test/web/htmlunit/test.txt").getFile();
-		webRequest.setRequestParameters(Arrays.asList(new KeyDataPair(
-				"key", fileToUpload, "test.txt", MimeType.TEXT_PLAIN, StandardCharsets.UTF_8)));
+
+		webRequest.setRequestParameters(Collections.singletonList(
+				new KeyDataPair("key",
+						new ClassPathResource("org/springframework/test/web/htmlunit/test.txt").getFile(),
+						"test.txt", MimeType.TEXT_PLAIN, StandardCharsets.UTF_8)));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
